@@ -1,0 +1,89 @@
+---
+title: 고정 리스트 조회
+sidebarTitle: 고정 리스트 조회
+keywords: ["고정 리스트 조회 빠른 시작", "고정 리스트 조회", "고정 리스트 빠른 시작", "리스트 조회 빠른 시작"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<Note>
+  **참고:** 이 가이드는 [빠른 시작 개요](/ko/x-api/lists/pinned-lists#getting-started-with-the-pinned-list-endpoint-group)에 나와 있는 필수 준비 단계를 모두 완료했음을 전제로 합니다.
+</Note>
+
+<div id="steps-to-build-a-pinned-list-lookup-request">
+  ### 고정 리스트 조회 요청을 구성하는 단계
+</div>
+
+**1단계: Postman에서 List endpoint 컬렉션 선택**
+
+Postman에 X API v2 컬렉션을 로드한 후 “List” 폴더로 이동하여, “Pinned Lists” 폴더를 선택한 다음 &quot;User&#39;s pinned Lists&quot;를 선택합니다.
+ 
+
+**2단계: 사용자 식별 및 지정**
+
+사용자의 고정 리스트를 가져오려면 요청에서 해당 사용자의 ID를 지정해야 합니다. 사용자 ID는 인증 중인 사용자의 ID와 일치해야 하며, 이는 요청을 인증할 때 해당 사용자 ID와 연결된 액세스 토큰을 전달해야 함을 의미합니다. 이 예제에서는 본인의 사용자 ID를 지정할 수 있습니다. ID는 다음 두 가지 방법으로 찾을 수 있습니다:
+
+1. [users lookup](/ko/x-api/users/lookup/introduction) by username endpoint를 사용하여 username을 전달하면 `id` 필드를 받을 수 있습니다.
+2. 액세스 토큰을 확인하면, 그 안의 숫자 부분이 자신의 사용자 ID입니다.
+
+Postman에서 &quot;Params&quot; 탭으로 이동하여 `id` 파라미터의 &quot;Value&quot; 열에 이 사용자 ID를 입력합니다.
+
+|         |                      |
+| :------ | :------------------- |
+| **Key** | **Value**            |
+| `id`    | 2244994945 (user ID) |
+
+**3단계: 조회할 필드 식별 및 지정**
+
+3단계까지 완료한 후 &quot;Send&quot; 버튼을 클릭하면, 응답에서 기본 [List object](/ko/x-api/fundamentals/data-dictionary#list) 필드인 `id`와 `name`을 받게 됩니다.
+
+`id`와 `name` 외에 추가 필드를 받고 싶다면, 요청에서 [`field`](/ko/x-api/fundamentals/fields) 및/또는 [`expansion`](/ko/x-api/fundamentals/expansions) 파라미터로 해당 필드를 지정해야 합니다.
+
+이 연습에서는 서로 다른 오브젝트에서 세 가지 추가 필드 집합을 요청하겠습니다:
+
+* 기본 List object에서 추가 `follower_count` 필드
+* expansion 파라미터를 사용한 전체 [user object](/ko/x-api/fundamentals/data-dictionary#user)
+* 연관된 user object에서 추가 `tweet.created_at` 필드
+
+Postman에서 &quot;Params&quot; 탭으로 이동하여 &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다:
+
+|             |                    |                                                                               |
+| :---------- | :----------------- | :---------------------------------------------------------------------------- |
+| Key         | Value              | Returned fields                                                               |
+| list.fields | follower&#95;count | `follower_count`                                                              |
+| expansions  | owner&#95;id       | `includes.users.id,  <br/>includes.users.name,  <br/>includes.users.username` |
+| user.fields | created&#95;at     | `includes.users.created_at`                                                   |
+
+이제 “Send” 버튼 옆에 다음과 유사한 URL이 표시되어야 합니다:
+
+`https://api.x.com/2/users/2244994945/pinned_lists?expansions=owner_id&list.fields=follower_count&user.fields=created_at`
+
+**4단계: 요청 전송 및 응답 검토**
+
+모든 설정을 마쳤다면 &quot;Send&quot; 버튼을 클릭하여 요청을 전송하고, 다음 예시 응답과 유사한 응답을 받게 됩니다:
+
+```
+{
+  "data": [
+    {
+      "follower_count": 0,
+      "id": "1454155907651158017",
+      "name": "test list",
+      "owner_id": "2244994945"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "username": "TwitterDev",
+        "id": "2244994945",
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "name": "Twitter Dev"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 1
+  }
+}
+```

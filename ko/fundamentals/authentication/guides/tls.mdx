@@ -1,0 +1,40 @@
+---
+title: TLS를 사용한 X API 연결
+sidebarTitle: TLS
+keywords: ["TLS", "SSL", "HTTPS", "보안 연결", "TLS 연결", "암호화된 연결", "API 보안"]
+---
+
+import { Button } from "/snippets/ko/button.mdx";
+
+X API 엔드포인트에 액세스하려면 TLS 연결이 필요합니다. TLS를 통해 통신하면 공용 인터넷을 통해 전송되는 동안 사용자와 X API 사이의 정보를 보호하여 사용자의 프라이버시와 보안을 유지할 수 있습니다. X API에 연결하려면 TLS 1.2 버전을 사용해야 합니다.
+
+
+<div id="verification">
+  ## 검증
+</div>
+
+<div id="use-an-up-to-date-root-store">
+  ### 최신 루트 스토어 사용
+</div>
+
+애플리케이션 또는 라이브러리가 X 인증서를 검증할 때는 신뢰할 수 있고 최신 상태의 루트 스토어를 사용하는 것이 중요합니다. 가능한 경우, 운영 체제에서 제공하는 루트 스토어를 사용하는 것이 가장 간단한 방법일 수 있습니다. 또는 [Mozilla (NSS) root store](https://www.mozilla.org/en-US/about/governance/policies/security-group/certs/)는 공개적이고 투명한 방식으로 잘 관리되고 있습니다. cURL은 또한 [이 스토어의 PEM 형식 버전](https://curl.haxx.se/docs/caextract.html)을 제공합니다.
+
+현재 X는 대부분의 인증서를 [DigiCert High Assurance EV Root CA](https://www.digicert.com/digicert-root-certificates.htm)에서 발급받고 있지만, 이는 X 관련 인증서 전체에 해당하지 않으며 앞으로도 항상 이렇게 유지된다는 보장은 없습니다. 따라서 현재 사용 중인 DigiCert 루트 인증서만을 신뢰하도록 설정할 경우, 향후 앱에 문제가 발생할 수 있습니다.
+
+<div id="check-crls-and-the-ocsp-status">
+  ### CRL 및 OCSP 상태 확인[](#check-crls-and-the-ocsp-status "Permalink to this headline")
+</div>
+
+많은 애플리케이션은 반환된 인증서에 대해 인증서 폐기 목록(Certificate Revocation List, CRL)을 확인하지 않거나, 해당 작업을 운영 체제에 맡깁니다. 애플리케이션 또는 TLS 라이브러리가 X의 인증서를 수락하기 전에 CRL 및 OCSP(Online Certificate Status Protocol) 검증을 반드시 수행하도록 설정되어 있는지 확인하세요.
+
+<div id="cdns">
+  ### CDNs[](#cdns "이 표제에 대한 퍼머링크")
+</div>
+
+미디어가 포함된 트윗을 표시할 때는 이미지 표시용 HTTPS URL인 `media_url_https` 속성을 사용하세요. 앞으로는 API 엔드포인트에서 제공되는 모든 URL이 HTTPS 경로를 제공하게 됩니다.
+
+<div id="provide-an-indication-of-security-status">
+  ## 보안 상태를 표시하세요
+</div>
+
+가능하다면 애플리케이션과 X 간의 현재 보안 상태를 사용자에게 표시해야 합니다. 일부 웹 브라우저는 자물쇠 아이콘으로 이를 나타내고, 다른 브라우저는 설명 문구로 현재 연결 상태를 표시합니다.

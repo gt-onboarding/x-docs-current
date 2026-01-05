@@ -1,0 +1,133 @@
+---
+title: v1 到 v2
+sidebarTitle: v1 到 v2
+keywords: ["v1.1 到 v2 迁移", "列表查询迁移", "迁移列表查询", "Standard v1.1 到 v2 列表查询", "v1 到 v2 列表查询", "迁移指南"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="list-lookup-standard-v11-compared-to-x-api-v2">
+  ### 列表查找：标准 v1.1 与 X API v2 的对比
+</div>
+
+如果你一直在使用标准 v1.1 的 [GET lists/show](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-show) 和 [GET lists/ownerships](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-ownerships) 端点，本指南旨在帮助你了解标准 v1.1 与 X API v2 列表查找端点之间的异同。
+
+* **相同点**
+  * 身份验证方法
+  * 速率限制
+* **不同点**
+  * 端点 URL
+  * 应用和项目要求
+  * 每个请求可返回的数据对象数量限制
+  * 响应数据格式
+  * 请求参数
+
+<div id="similarities">
+  #### 相似之处
+</div>
+
+**身份验证**
+
+这两个版本的端点都支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 和 [仅应用](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 两种方式。因此，如果你之前使用的是某个标准 v1.1 List 查询端点，那么在迁移到 X API v2 版本时，可以继续使用相同的身份验证方式。
+
+取决于你所选用的身份验证库/软件包，仅应用身份验证通常是最容易上手的方式，并且只需通过一个简单的请求头即可完成设置。要了解如何生成仅应用访问令牌，请参阅[此仅应用指南](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)。
+
+**速率限制**
+
+|     |     |
+| :--- | :--- |
+| **Standard v1.1** | **X API v2** |
+| /1.1/lists/show.json<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 75 次请求<br /><br />使用仅应用时，每 15 分钟窗口内 75 次请求 | /2/lists/:id<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 75 次请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟窗口内 75 次请求 |
+| /1.1/lists/ownerships.json<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 15 次请求<br /><br />使用仅应用时，每 15 分钟窗口内 15 次请求 | /2/users/:id/owned&#95;lists<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 15 次请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟窗口内 15 次请求<br /><br />使用仅应用时，每 15 分钟窗口内 15 次请求 |
+
+<div id="differences">
+  #### 差异
+</div>
+
+**Endpoint URL**
+
+* 标准 v1.1 endpoint：
+  * GET https://api.x.com/1.1/lists/show.json
+    （查询指定列表）
+  * GET https://api.x.com/1.1/lists/ownerships.json
+    （查询指定用户拥有的列表）
+* X API v2 endpoint：
+  * GET https://api.x.com/2/lists/:id
+    （查询指定列表）
+
+  * GET https://api.x.com/2/users/:id/owned&#95;lists
+    （查询指定用户拥有的列表）
+
+**应用和项目要求**
+
+在对你的请求进行认证时，X API v2 endpoint 要求你使用与某个 [Project](/zh/resources/fundamentals/projects) 关联的 [developer App](/zh/resources/fundamentals/developer-apps) 的凭证。所有 X API v1.1 endpoint 则可以使用来自独立应用或与项目关联的应用的凭证。
+
+**每个请求的数据对象上限**
+
+标准 v1.1 /lists/ownerships endpoint 每个请求最多可返回 1000 个列表。新的 v2 endpoint 每个请求最多可返回 100 个列表。默认情况下，会返回 100 个用户对象；如需更改结果数量，你需要传递查询参数 max&#95;results=，其值在 1–100 之间；然后可以在下一次请求中，将响应载荷中返回的 next&#95;token 作为 pagination&#95;token 查询参数传入。
+
+**响应数据格式**
+
+标准 v1.1 与 X API v2 版本的 endpoint 之间最大的差异之一，是你如何选择在载荷中返回哪些字段。
+
+对于标准 endpoint，你默认会收到许多响应字段，然后可以选择使用参数来指定哪些附加字段或字段集合应在载荷中返回。
+
+X API v2 版本默认只返回 List 的 id 和 name 字段。要请求任何额外的字段或对象，你需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数。从此 endpoint 请求的任何 List 字段都会返回在主 List 对象中。任何扩展的帖子或用户对象及其字段都会在响应中的 includes 对象中返回。然后你可以通过匹配用户对象和扩展帖子对象中的 ID，将任何扩展对象关联回 List 对象。 
+
+下面是可能的 List 字段和扩展字段示例：
+
+* created&#95;at
+
+* follower&#95;count
+
+* member&#95;count
+
+* owner&#95;id
+
+* description
+
+* private
+
+|     |     |
+| :--- | :--- |
+| **Endpoint** | **扩展字段** |
+| /2/lists/:id | owner&#95;id |
+| /2/users/:id/owned&#95;lists | owner&#95;id |
+
+我们鼓励你在各自的指南中进一步了解这些新参数，或阅读我们关于[如何使用 fields 和 expansions](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 的指南。 
+
+我们还整理了[数据格式迁移指南](/zh/x-api/migrate/data-format-migration)，可帮助你将标准 v1.1 字段映射到新的 v2 字段。该指南还会为你提供在 v2 请求中需要传递哪些特定的扩展和字段参数，以返回特定字段。 
+
+除了请求某些字段方式的变更之外，X API v2 还为 API 返回的对象（包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象）引入了新的 JSON 设计。
+
+* 在 JSON 根级别，标准 endpoint 在 statuses 数组中返回帖子对象，而 X API v2 在 data 数组中返回帖子对象。 
+
+* X API v2 JSON 不再使用“statuses”来指代被转发和被引用的状态，而是改为指代被转发和被引用的帖子。许多传统和已弃用字段（例如 contributors 和 user.translator&#95;type）将被移除。 
+
+* X API v2 不再同时使用 favorites（在帖子对象中）和 favourites（在用户对象中），而是统一使用术语 like。 
+
+* X 采用约定：没有取值的 JSON 值（例如 null）不会写入载荷。只有在具有非 null 值时，帖子和用户属性才会包含在内。
+
+**请求参数**
+
+以下标准 v1.1 请求参数在 X API v2 中有对应项：
+
+**按 ID 查询列表**
+
+|     |     |
+| :--- | :--- |
+| **标准 v1.1** | **X API v2** |
+| list&#95;id | id  |
+| slug | 无对应项 |
+| owner&#95;screen&#95;name | 无对应项 |
+| owner&#95;id | 通过 expansions/fields 参数请求 |
+
+**查询用户拥有的列表**
+
+|     |     |
+| :--- | :--- |
+| **标准 v1.1** | **X API v2** |
+| user&#95;id | id  |
+| screen&#95;name | 无对应字段 |
+| count | max&#95;results |
+| cursor | pagination&#95;token |

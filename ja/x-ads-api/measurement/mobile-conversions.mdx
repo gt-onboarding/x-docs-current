@@ -1,0 +1,897 @@
+---
+title: モバイルコンバージョン
+keywords: ["モバイルコンバージョン", "モバイルコンバージョントラッキング", "アプリコンバージョン", "モバイルアプリトラッキング", "コンバージョントラッキング"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="mact-overview">
+  ## MACT の概要
+</div>
+
+X の[モバイルアプリプロモーション](https://biz.x.com/mobile-app-promotion)計測機能により、広告主は、インストールやその他のアプリ内コンバージョンの促進を目的として X 上で実施する広告キャンペーンの成果をトラッキングできます。X のモバイル計測パートナーは、広告主が X 上でプロモーションしているアプリから、どのコンバージョンを計測対象とするかを管理できるようにします。広告主がトラッキングしたいイベントの種類と計測ウィンドウを設定すると、モバイル計測パートナーはそれらのイベントをすべて X に送信し、ユーザーのコンバージョンにつながったキャンペーンやクリエイティブを示すアトリビューションデータを即座に受け取ります。
+
+<div id="conversion-events">
+  ### コンバージョンイベント
+</div>
+
+[コンバージョンイベント](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/conversion-event) を X に送信してアトリビューションデータを取得するためには、パートナーはモバイルアプリ ID、コンバージョンのタイプとタイムスタンプに加えて、広告 ID / デバイス ID をハッシュ化した値を送信する必要があります。これらのデータを提供することで、X のプラットフォーム上でコンバージョンイベントが記録され、該当する場合にはアトリビューションも返されます。さらに、広告主は購入金額、商品の ID、登録方法といったコンバージョンイベントに関する追加メタデータを任意で提供することもできます。
+
+<div id="api-reference">
+  ## API リファレンス
+</div>
+
+<div id="conversion-events">
+  ### コンバージョンイベント
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="post-conversion_event">
+  #### POST conversion&#95;event
+</div>
+
+モバイル計測のコンバージョンイベントを記録します。レスポンスには、X または X Audience Platform (TAP) のアトリビューションが示されます。
+
+これは [GET conversion&#95;attribution](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/conversion-attribution#get-conversion-attribution) エンドポイントに関連します。
+
+レスポンスでは、X、TAP、またはいずれのアトリビューションもない、いずれかの結果が返されます。`twitter_attribution` ノードは常に含まれ、X のアトリビューションがない場合は、その値は `null` になります（以下のレスポンス例を参照してください）。TAP のアトリビューションが付与される場合は、`tpn_attribution` ノードが含まれ、適切に値が設定されます。詳細については [TAP overview](https://developer.x.com/en/docs/x-ads-api/measurement/overview/twitter-audience-platform) を参照してください。
+
+各コンバージョンイベントに関連付けるメタデータを設定するために使用できる、いくつかの任意のパラメータがあります。これらのメタデータは、アトリビューションの計算には影響しません。
+
+##### リソースURL
+
+`https://ads-api.x.com/12/conversion_event`
+
+<div id="parameters">
+  ##### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| app&#95;id  <br />*required* | 対応するアプリストアでの一意の識別子。<br /><br />Type: int, string<br /><br />Example: `333903271`, `com.vine.android` |
+| conversion&#95;time  <br />*required* | コンバージョンイベントの時刻（ミリ秒付きの ISO-8601 タイムスタンプ形式）。<br /><br />Type: string<br /><br />Example: `2014-05-22T02:38:28.103Z` |
+| conversion&#95;type  <br />*required* | コンバージョンイベントの種類。<br /><br />Type: enum<br /><br />Possible values: `PURCHASE`, `SIGN_UP`, `INSTALL`, `RE_ENGAGE`, `UPDATE`, `TUTORIAL_COMPLETE`, `RESERVATION`, `ADD_TO_CART`, `ADD_TO_WISHLIST`, `LOGIN`, `CHECKOUT_INITIATED`, `SEARCH`, `LEVEL_ACHIEVED`, `ACHIEVEMENT_UNLOCKED`, `CONTENT_VIEW`, `SHARE`, `INVITE`, `ADDED_PAYMENT_INFO`, `SPENT_CREDITS`, `RATED` |
+| hashed&#95;device&#95;id  <br />*required* | HMAC&#95;SHA-256 でハッシュ化された IDFA または AdID。<br /><br />Type: string<br /><br />Example: `ABCD1234XYZ` |
+| os&#95;type  <br />*required* | アプリの OS の種類。<br /><br />Type: enum<br /><br />Possible values: `IOS`, `ANDROID` |
+| click&#95;window  <br />*optional* | このイベントに対するクリック計測期間（日数）。<br /><br />Type: int<br /><br />**Note**: `click_window` は view&#95;through&#95;window 以上である必要があります。<br /><br />Default: `14`  <br />Possible values: `1`, `7`, `14`, `30` |
+| device&#95;ip&#95;address  <br />*optional* | コンバージョンイベント発生時のデバイスの IPv4 または IPv6 アドレス。<br /><br />Type: string<br /><br />Example: `192.133.78.1` |
+| level  <br />*optional* | このイベントに関連付けられたレベル。<br /><br />Type: int<br /><br />Example: `2` |
+| non&#95;twitter&#95;engagement&#95;time  <br />*optional* | コンバージョン前の直近の、Twitter 以外でのエンゲージメントの時刻。<br /><br />Type: string<br /><br />Example: `2014-05-22T02:38:28.103Z` |
+| non&#95;twitter&#95;engagement&#95;type  <br />*optional* | コンバージョンイベント前の、Twitter 以外でのエンゲージメントの種類。<br /><br />Type: enum<br /><br />Possible values: `CLICK`, `VIEW` |
+| number&#95;items  <br />*optional* | このイベントに関連付けられたアイテム数。<br /><br />Type: int<br /><br />Example: `2` |
+| price&#95;currency  <br />*optional* | このイベントに関連付けられた通貨を示す ISO 4217 コード。<br /><br />Type: String<br /><br />Examples: `EUR`,`USD`,`JPY` |
+| price&#95;micro  <br />*optional* | このイベントに関連付けられた価格（金額）をマイクロ単位で表します。<br /><br />Type: int<br /><br />Example: `123450000` |
+| user&#95;payment&#95;info  <br />*optional* | このイベントに関連するアプリに、ユーザーの支払い情報が保存されているかどうかを示すブール値。<br /><br />Type: bool<br /><br />Possible values: `true` or `false` |
+| view&#95;through&#95;window  <br />*optional* | このイベントに対するビュースルー計測期間（日数）。<br /><br />**Note**:<br /><br />`click_window` は view&#95;through&#95;window 以上である必要があります。<br /><br />Type: int<br /><br />Default: `1`  <br />Possible values: `0`, `1`, `7`, `14`, `30` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`https://ads-api.x.com/12/conversion_event?app_id=333903271&os_type=IOS&hashed_device_id=ABCD1234XYZ&conversion_type=INSTALL&conversion_time=2013-04-16T07:00:00.123Z&click_window=14&view_through_window=1`
+
+##### レスポンス例
+
+```json
+    {
+      "data": {
+        "conversion_value_micro": 0,
+        "view_through_window": 1,
+        "tpn_attribution": null,
+        "conversion_time": "2017-01-21T01:14:00.602Z",
+        "click_window": 30,
+        "limit_ad_tracking": false,
+        "event_metadata": null,
+        "non_twitter_engagement_type": null,
+        "conversion_type": "INSTALL",
+        "partner_client_id": "com.appname contact id",
+        "app_id": "com.appname",
+        "hashed_device_id": "lke1GZa3AseB343ZcCQq7svfHzLfuSqyYnE+Rf49MOI=",
+        "twitter_attribution": {
+          "country_code": "US",
+          "engagement_time": "2017-01-21T01:13:00.602Z",
+          "engagement_type": "CLICK",
+          "attribution_type": "PROMOTED",
+          "promoted_properties": {
+            "campaign_id": "4ns44",
+            "line_item_id": "3x44d",
+            "publisher_app_id": "333903271"
+            "account_id":"18ce11e3egb",
+            "line_item_objective": "APP_INSTALLS",
+            "campaign_name": null
+          },
+          "tweet_id": "11434635565377600"
+        },
+        "os_type": "ANDROID",
+        "non_twitter_engagement_time": null
+      },
+      "request": {
+        "params": {
+          "version_number": "1",
+          "app_id": "com.appname",
+          "conversion_type": "INSTALL",
+          "os_type": "ANDROID",
+          "hashed_device_id": "lke1GZa3AseB343ZcCQq7svfHzLfuSqyYnE+Rf49MOI=",
+          "conversion_time": "2017-01-21T01:14:00.602Z",
+          "click_window": "30",
+          "view_through_window": "1",
+          "limit_ad_tracking": "false"
+        }
+      }
+    }
+```
+
+<div id="app-event-tags">
+  ### アプリイベントタグ
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idapp_event_tags">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;tags
+</div>
+
+現在のアカウントに関連付けられている一部またはすべてのアプリイベントタグの詳細を取得します。
+
+これらは、Mobile App Conversion Tracking において、各コンバージョンタイプごとに設定されるコンバージョンウィンドウを定義します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで一般的に必須パラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;event&#95;tag&#95;ids  <br />*optional* | 識別子のカンマ区切りリストを指定することで、レスポンスを目的のアプリイベントタグのみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `jhp` |
+| count  <br />*optional* | 各リクエストごとに取得するレコード数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | 次のページの結果を取得するためのカーソルを指定します。詳細については [Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| sort&#95;by  <br />*optional* | サポートされている属性で、昇順または降順にソートします。詳細については [Sorting](/ja/x-ads-api/fundamentals/sorting) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| with&#95;deleted  <br />*optional* | リクエストに削除済みの結果を含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+| with&#95;total&#95;count  <br />*optional* | レスポンスに `total_count` 属性を含めます。<br /><br />**Note**: このパラメーターと `cursor` は同時に指定できません。<br /><br />**Note**: `total_count` を含むリクエストには、現在 15 分あたり 200 に設定されている、より低いレート制限が適用されます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags?app_event_tag_ids=jhp`
+
+##### レスポンス例
+
+```json
+    {
+      "request": {
+        "params": {
+          "app_event_tag_ids": [
+            "jhp"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "provider_app_event_name": null,
+          "app_store_identifier": "co.vine.android",
+          "post_view_attribution_window": 1,
+          "deep_link_scheme": "vine://",
+          "id": "jhp",
+          "retargeting_enabled": true,
+          "conversion_type": "INSTALL",
+          "created_at": "2016-12-08T07:49:58Z",
+          "post_engagement_attribution_window": 14,
+          "provider_app_event_id": null,
+          "last_tracked_at": "2021-05-22T17:00:04Z",
+          "status": "TRACKING",
+          "updated_at": "2016-12-08T23:07:54Z",
+          "os_type": "ANDROID",
+          "deleted": false
+        }
+      ]
+    }
+```
+
+<div id="get-accountsaccount_idapp_event_tagsapp_event_tag_id">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;tags/:app&#95;event&#95;tag&#95;id
+</div>
+
+現在のアカウントに関連付けられている特定の app event tag を取得します。
+
+これらは、Mobile App Conversion Tracking において、コンバージョンタイプごとに設定されたコンバージョンウィンドウを定義します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags/:app_event_tag_id`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 利用するアカウントの識別子です。リソースパスに含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;event&#95;tag&#95;id  <br />*required* | リクエスト内で操作対象となる app event tag を指定します。<br /><br />Type: string<br /><br />Example: `jhp` |
+| with&#95;deleted  <br />*optional* | 削除済みの結果もレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+#### リクエスト例
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags/jhp`
+
+#### レスポンス例
+
+```json
+    {
+      "request": {
+        "params": {
+          "app_event_tag_id": "jhp",
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "data": {
+        "provider_app_event_name": null,
+        "app_store_identifier": "co.vine.android",
+        "post_view_attribution_window": 1,
+        "deep_link_scheme": "vine://",
+        "id": "jhp",
+        "retargeting_enabled": true,
+        "conversion_type": "INSTALL",
+        "created_at": "2016-12-08T07:49:58Z",
+        "post_engagement_attribution_window": 14,
+        "provider_app_event_id": null,
+        "last_tracked_at": "2021-05-22T17:00:04Z",
+        "status": "TRACKING",
+        "updated_at": "2016-12-08T23:07:54Z",
+        "os_type": "ANDROID",
+        "deleted": false
+      }
+    }
+```
+
+<div id="post-accountsaccount_idapp_event_tags">
+  #### POST accounts/:account&#95;id/app&#95;event&#95;tags
+</div>
+
+現在のアカウントに紐づく新しいアプリイベントタグを作成します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで、通常は必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;store&#95;identifier  <br />*required* | アプリストアの識別子です。<br /><br />Type: string<br /><br />Example: `com.twitter.android` |
+| conversion&#95;type  <br />*required* | コンバージョンイベントの種類です。<br /><br />Type: enum<br /><br />Possible values: `ACHIEVEMENT_UNLOCKED`, `ADDED_PAYMENT_INFO`, `ADD_TO_CART`, `ADD_TO_WISHLIST`, `CHECKOUT_INITIATED`, `CONTENT_VIEW`, `INSTALL`, `INVITE`, `LEVEL_ACHIEVED`, `LOGIN`, `PURCHASE`, `RATED`, `RESERVATION`, `RE_ENGAGE`, `SEARCH`, `SHARE`, `SIGN_UP`, `SPENT_CREDITS`, `TUTORIAL_COMPLETE`, `UPDATE` |
+| os&#95;type  <br />*required* | アプリの OS の種類です。<br /><br />Type: enum<br /><br />Possible values: `IOS`, `ANDROID` |
+| provider&#95;app&#95;event&#95;id  <br />*required* | プロバイダーのサイト上のコンバージョンタグの ID です。<br /><br />Type: string<br /><br />Example: `provider_tag_j5394` |
+| provider&#95;app&#95;event&#95;name  <br />*required* | プロバイダーのサイト上のコンバージョンタグの名前です。<br /><br />Type: string<br /><br />Example: `provider_name_a4382` |
+| deep&#95;link&#95;scheme  <br />*optional* | このタグに関連付けられたアプリのディープリンク URI を指定します。<br /><br />Type: string<br /><br />Example: `twitter://` |
+| post&#95;engagement&#95;attribution&#95;window  <br />*optional* | これらのイベントに対するポストエンゲージメント用のアトリビューションウィンドウです。<br /><br />Type: int<br /><br />Default: 30  <br />Possible values: `1`, `7`, `14`, `30` |
+| post&#95;view&#95;attribution&#95;window  <br />*optional* | これらのイベントに対するポストビュー用のアトリビューションウィンドウです。<br /><br />Type: int<br /><br />Default: 1  <br />Possible values: `0`, `1`, `7`, `14`, `30` |
+| retargeting&#95;enabled  <br />*optional* | このアプリイベントタグに対してリターゲティングを有効にするかどうかを指定します。<br /><br />Type: boolean<br /><br />Default: true  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags?app_store_identifier=com.twitter.android&os_type=ANDROID&conversion_type=PURCHASE&provider_app_event_id=abc123&provider_app_event_name=test-tag`
+
+<div id="example-response">
+  ##### レスポンスの例
+</div>
+
+```json
+    {
+      "data": {
+        "provider_app_event_name": "test-tag",
+        "app_store_identifier": "com.twitter.android",
+        "post_view_attribution_window": 1,
+        "deep_link_scheme": "https://",
+        "id": "3p3t",
+        "retargeting_enabled": true,
+        "conversion_type": "PURCHASE",
+        "created_at": "2017-09-06T06:58:22Z",
+        "post_engagement_attribution_window": 30,
+        "provider_app_event_id": "abc123",
+        "updated_at": "2017-09-06T06:58:22Z",
+        "os_type": "ANDROID",
+        "deleted": false
+      },
+      "request": {
+        "params": {
+          "provider_app_event_name": "test-tag",
+          "app_store_identifier": "com.twitter.android",
+          "account_id": "18ce54d4x5t",
+          "conversion_type": "PURCHASE",
+          "provider_app_event_id": "abc123",
+          "os_type": "ANDROID"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idapp_event_tagsid">
+  #### DELETE accounts/:account&#95;id/app&#95;event&#95;tags/:id
+</div>
+
+現在のアカウントに属する指定されたアプリイベントタグを削除します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags/:id`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| id  <br />*required* | このリクエストで操作する App Event Tag（アプリイベントタグ）への参照です。<br /><br />Type: string<br /><br />Example: `jhp` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags/jhp`
+
+##### レスポンス例
+
+```json
+    {
+      "data": {
+        "provider_app_event_name": null,
+        "app_store_identifier": "co.vine.android",
+        "post_view_attribution_window": 1,
+        "deep_link_scheme": "vine://",
+        "id": "jhp",
+        "retargeting_enabled": true,
+        "conversion_type": "INSTALL",
+        "created_at": "2016-12-08T07:49:58Z",
+        "post_engagement_attribution_window": 14,
+        "provider_app_event_id": null,
+        "last_tracked_at": "2021-05-22T17:00:04Z",
+        "status": "TRACKING",
+        "updated_at": "2017-08-30T05:44:57Z",
+        "os_type": "ANDROID",
+        "deleted": true
+      },
+      "request": {
+        "params": {
+          "id": "jhp",
+          "account_id": "5gvk9h"
+        }
+      }
+    }
+```
+
+<div id="app-lists">
+  ### アプリリスト
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idapp_lists">
+  #### GET accounts/:account&#95;id/app&#95;lists
+</div>
+
+現在のアカウントに関連付けられているアプリリストの一部またはすべての詳細を取得します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists`
+
+#### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | レバレッジアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;list&#95;ids  <br />*optional* | カンマ区切りの識別子リストを指定することで、レスポンスを指定したアプリリストのみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `wm7x` |
+| count  <br />*optional* | 各リクエストで取得を試みるレコード数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | 次のページの結果を取得するためのカーソルを指定します。詳細については、[Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| sort&#95;by  <br />*optional* | サポートされている属性を基準に、昇順または降順でソートします。詳細については、[Sorting](/ja/x-ads-api/fundamentals/sorting) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| with&#95;deleted  <br />*optional* | 削除済みの結果をリクエストに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+| with&#95;total&#95;count  <br />*optional* | レスポンスに `total_count` 属性を含めます。<br /><br />**注**: このパラメータと `cursor` は排他的です。<br /><br />**注**: `total_count` を含むリクエストには、より低いレート制限が適用され、現在は 15 分あたり 200 に設定されています。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists?app_list_ids=wm7x`
+
+##### レスポンス例
+
+```json
+    {
+      "request": {
+        "params": {
+          "app_list_ids": [
+            "wm7x"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "id": "wm7x",
+          "name": "foo @ 14026528192426843"
+        }
+      ]
+    }
+```
+
+<div id="get-accountsaccount_idapp_listsapp_list_id">
+  #### GET accounts/:account&#95;id/app&#95;lists/:app&#95;list&#95;id
+</div>
+
+現在のアカウントに紐づく特定のアプリリストを取得します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists/:app_list_id`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*必須* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで原則必須のパラメーターです。指定したアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;list&#95;id  <br />*必須* | リクエストで操作対象となる app リストへの参照です。<br /><br />Type: string<br /><br />Example: `28ukf` |
+| with&#95;deleted  <br />*任意* | 削除済みの結果をレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists/28ukf`
+
+##### レスポンス例
+
+```json
+    {
+      "data": {
+        "name": "twitter @ 262689209670784",
+        "id": "28ukf",
+        "created_at": "2017-08-17T17:07:42Z",
+        "updated_at": "2017-08-17T17:07:42Z",
+        "deleted": false,
+        "apps": [
+          {
+            "app_store_identifier": "com.twitter.android",
+            "os_type": "Android"
+          }
+        ]
+      },
+      "request": {
+        "params": {
+          "app_list_id": "28ukf",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="post-accountsaccount_idapp_lists">
+  #### POST accounts/:account&#95;id/app&#95;lists
+</div>
+
+現在のアカウントに関連付けられた `app_list` を作成します。
+
+現在、`account_id` 1 つあたり `app_list` オブジェクトは 100 個、`app_list` 1 つあたりのアプリは 500 個までという上限があります。
+
+##### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで基本的に必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;store&#95;identifiers  <br />*required* | `app_list` に含めるアプリストア識別子です。<br /><br />Type: string<br /><br />Example: `com.twitter.android` |
+| name  <br />*required* | `app_list` に割り当てる名前です。<br /><br />Type: string<br /><br />Example: `My First App List` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists?name=app list&app_store_identifiers=com.twitter.android`
+
+##### レスポンス例
+
+```json
+    {
+      "data": {
+        "name": "app list",
+        "id": "2a4um",
+        "created_at": "2017-09-06T07:17:26Z",
+        "updated_at": "2017-09-06T07:17:26Z",
+        "deleted": false,
+        "apps": [
+          {
+            "app_store_identifier": "com.twitter.android",
+            "os_type": "Android"
+          }
+        ]
+      },
+      "request": {
+        "params": {
+          "app_store_identifiers": [
+            "com.twitter.android"
+          ],
+          "name": "app list",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idapp_listsapp_list_id">
+  #### DELETE accounts/:account&#95;id/app&#95;lists/:app&#95;list&#95;id
+</div>
+
+現在のアカウントに紐付いている指定のアプリリストを削除します。
+
+##### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists/:app_list_id`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | レバレッジド・アカウントを表す識別子です。リソースパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;list&#95;id  <br />*required* | リクエスト内で操作対象となるアプリリストを参照する識別子です。<br /><br />Type: string<br /><br />Example: `28ukf` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists/28ukf`
+
+##### レスポンス例
+
+```json
+    {
+      "data": {
+        "name": "twitter @ 262689209670784",
+        "id": "28ukf",
+        "created_at": "2017-08-17T17:07:42Z",
+        "updated_at": "2017-09-12T22:20:33Z",
+        "deleted": true,
+        "apps": [
+          {
+            "app_store_identifier": "com.twitter.android",
+            "os_type": "Android"
+          }
+        ]
+      },
+      "request": {
+        "params": {
+          "app_list_id": "28ukf",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="app-event-provider-configurations">
+  ### アプリイベントプロバイダー設定
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+[ ❯]()
+
+<div id="get-accountsaccount_idapp_event_provider_configurations">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations[¶](#get-accounts-account-id-app-event-provider-configurations "Permalink to this headline")
+</div>
+
+現在のアカウントに関連付けられている、一部またはすべてのアプリイベントプロバイダー設定（Mobile Application Conversion Tracking の中核となる設定）の詳細を取得します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで、通常は必須パラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| count  <br />*optional* | 各リクエストで取得するレコード件数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| ids  <br />*optional* | カンマ区切りの識別子リストを指定することで、レスポンスを必要な構成のみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `25n` |
+| sort&#95;by  <br />*optional* | サポートされている属性で、昇順または降順にソートします。詳細は [Sorting](/ja/x-ads-api/fundamentals/sorting) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| with&#95;deleted  <br />*optional* | 削除済みの結果をレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+| with&#95;total&#95;count  <br />*optional* | `total_count` レスポンス属性を含めます。<br /><br />**Note**: このパラメーターと `cursor` は同時には使用できません。<br /><br />**Note**: `total_count` を含むリクエストには、現在 15 分あたり 200 に設定されている、より厳しいレート制限が適用されます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations?ids=25n`
+
+##### レスポンス例
+
+```json
+    {
+      "data": [
+        {
+          "provider_name": "Answers powered by Fabric",
+          "id": "25n",
+          "provider_advertiser_id": "54ac2766f0de9e1f7a00001a",
+          "created_at": "2016-12-08T07:49:58Z",
+          "provider_advertiser_identifier": "54ac2766f0de9e1f7a00001a",
+          "updated_at": "2017-05-12T21:37:15Z",
+          "deleted": false
+        }
+      ],
+      "next_cursor": null,
+      "request": {
+        "params": {
+          "ids": [
+            "25n"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="get-accountsaccount_idapp_event_provider_configurationsid">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations/:id
+</div>
+
+現在のアカウントに関連付けられている、Mobile Application Conversion Tracking のコア構成であるイベントプロバイダー構成のうち、指定した ID のものを取得します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations/:id`
+
+<div id="parameters">
+  ##### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| id  <br />*required* | リクエスト内で操作対象となる app event provider configuration を参照する識別子です。<br /><br />Type: string<br /><br />Example: `25n` |
+| with&#95;deleted  <br />*optional* | リクエストに削除済みの結果を含めるかどうかを指定します。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations/25n`
+
+<div id="example-response">
+  ##### レスポンスの例
+</div>
+
+```json
+    {
+      "data_type": "app_event_provider_configuration",
+      "data": {
+        "provider_name": "API McTestface",
+        "id": "25n",
+        "provider_advertiser_id": "123",
+        "created_at": "2017-03-24T22:24:56Z",
+        "provider_advertiser_identifier": "123",
+        "updated_at": "2017-03-24T22:24:56Z",
+        "deleted": false
+      },
+      "request": {
+        "params": {
+          "id": "25n",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="post-accountsaccount_idapp_event_provider_configurations">
+  ##### POST accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations
+</div>
+
+現在のアカウントに紐づく新しいアプリイベントプロバイダー設定を作成します。1 つの広告アカウントに関連付けられる MACT プロバイダーは 1 つだけです。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations`
+
+##### パラメーター
+
+| 名前 | 説明 |
+| :--- | :--- |
+| account&#95;id  <br />*required* | レバレッジアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />型: string<br /><br />例: `18ce54d4x5t` |
+| provider&#95;advertiser&#95;id  <br />*required* | プロバイダーサイト上の広告主の識別子です。<br /><br />型: string<br /><br />例: `client1` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations?provider_advertiser_id=client1`
+
+<div id="example-response">
+  ##### レスポンスの例
+</div>
+
+```json
+    {
+      "data": {
+        "provider_name": "InternalTestProvider",
+        "id": "e5g",
+        "provider_advertiser_id": "client1",
+        "created_at": "2017-08-30T05:40:07Z",
+        "provider_advertiser_identifier": "client1",
+        "updated_at": "2017-09-06T06:39:03Z",
+        "deleted": false
+      },
+      "request": {
+        "params": {
+          "provider_advertiser_id": "client1",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idapp_event_provider_configurationsid">
+  #### DELETE accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations/:id[¶]
+</div>
+
+現在のアカウントに属する指定されたアプリイベントプロバイダー設定を削除します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations/:id`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| id  <br />*required* | このリクエストで操作する app event provider configuration を参照する識別子です。<br /><br />Type: string<br /><br />Example: `e5g` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations/e5g`
+
+##### レスポンス例
+
+```json
+    {
+      "data": {
+        "provider_name": "InternalTestProvider",
+        "id": "e5g",
+        "provider_advertiser_id": "client1",
+        "created_at": "2017-08-30T05:40:07Z",
+        "provider_advertiser_identifier": "client1",
+        "updated_at": "2017-08-30T05:40:26Z",
+        "deleted": true
+      },
+      "request": {
+        "params": {
+          "id": "e5g",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="conversion-attribution">
+  ### コンバージョンアトリビューション
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-conversion_attribution">
+  #### GET conversion&#95;attribution
+</div>
+
+コンバージョンイベントを書き込むことなく、コンバージョンアトリビューションを確認するために X にクエリを送信します。レスポンスには X のアトリビューション結果が示されます。
+
+これは [POST conversion&#95;event](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/conversion-event#post-conversion-event) エンドポイントに関連します。
+
+レスポンスでは、X、TAP、またはアトリビューションなしのいずれかがアトリビューションとして示されます。`twitter_attribution` ノードは常に存在し、X アトリビューションがない場合は値が `null` となり、アトリビューションがある場合は以下の例のレスポンスに示すように値が設定されます。TAP アトリビューションが付与される場合は、`tpn_attribution` ノードが存在し、適切な値が設定されます。詳細については [TAP overview](https://developer.x.com/en/docs/twitter-ads-api/measurement/twitter-audience-platform/overview) を参照してください。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/conversion_attribution`
+
+##### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| app&#95;id  <br />*required* | 対応するアプリストア上での一意の識別子。<br /><br />Type: int, string<br /><br />Example: `333903271`, `com.vine.android` |
+| conversion&#95;time  <br />*required* | コンバージョンイベントが発生した時刻。ミリ秒付きの ISO-8601 タイムスタンプ形式。<br /><br />Type: string<br /><br />Example: `2014-05-22T02:38:28.103Z` |
+| conversion&#95;type  <br />*required* | コンバージョンイベントの種類。<br /><br />Type: enum<br /><br />Possible values: `ACHIEVEMENT_UNLOCKED`, `ADDED_PAYMENT_INFO`, `ADD_TO_CART`, `ADD_TO_WISHLIST`, `CHECKOUT_INITIATED`, `CONTENT_VIEW`, `INSTALL`, `INVITE`, `LEVEL_ACHIEVED`, `LOGIN`, `PURCHASE`, `RATED`, `RESERVATION`, `RE_ENGAGE`, `SEARCH`, `SHARE`, `SIGN_UP`, `SPENT_CREDITS`, `TUTORIAL_COMPLETE`, `UPDATE` |
+| hashed&#95;device&#95;id  <br />*required* | HMAC&#95;SHA-256 でハッシュ化された IDFA または AdID。<br /><br />Type: string<br /><br />Example: `ABCD1234XYZ` |
+| os&#95;type  <br />*required* | アプリの OS タイプ。<br /><br />Type: enum<br /><br />Possible values: `IOS`, `ANDROID` |
+| click&#95;window  <br />*optional* | このイベントのクリック計測期間（日数単位）。<br /><br />Type: int<br /><br />Default: `14`  <br />Possible values: `1`, `7`, `14`, `30` |
+| extra&#95;device&#95;ids  <br />*optional* | `hashed_device_id` に渡されたデバイス ID を SHA1 でハッシュし、その結果をさらに SHA256 でハッシュした値と、その他のハッシュ化されたデバイス ID。<br /><br />Type: string<br /><br />Example: `ABCD1234XYZ`, `DCBA4321XYZ` |
+| non&#95;twitter&#95;engagement&#95;time  <br />*optional* | コンバージョン前の、最後の X 以外でのエンゲージメントの時刻。<br /><br />Type: string<br /><br />Example: `2014-05-22T02:38:28.103Z` |
+| non&#95;twitter&#95;engagement&#95;type  <br />*optional* | コンバージョンイベント前の X 以外でのエンゲージメントの種類。<br /><br />Type: enum<br /><br />Possible values: `CLICK`, `VIEW` |
+| view&#95;through&#95;window  <br />*optional* | このイベントのビュースルー計測期間（日数単位）。<br /><br />Type: int<br /><br />Default: `1`  <br />Possible values: `0`, `1`, `7`, `14`, `30` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/conversion_attribution?app_id=333903271&os_type=IOS&hashed_device_id=ABCD1234XYZ&conversion_type=INSTALL&conversion_time=2013-04-16T07:00:00.123Z&click_window=14&view_through_window=0`
+
+##### レスポンス例
+
+```json
+    {
+      data:{
+        "app_id":"333903271",
+        "os_type":"IOS",
+        "hashed_device_id":"ABCD1234XYZ",
+        "conversion_type":"INSTALL",
+        "partner_client_id":"123abc",
+        "conversion_time":"2013-04-16T07:00:00.123Z",
+        "click_window":14,
+        "view_through_window":0,
+        "extra_device_ids":null,
+        "twitter_attribution":{
+          "engagement_type":"VIEW",
+          "engagement_time":"2013-04-16T07:00:00.123Z",
+          "country_code":"US",
+          "tweet_id":"383034667764441088",
+          "attribution_type":"PROMOTED",
+          "promoted_properties":{
+            "campaign_id”: “54a21",
+            "campaign_name":"Vine_Contest",
+            "line_item_id":"23ab2d4"
+          }
+        }
+      },
+      "data_type":"conversion_attribution",
+      "request":{
+        "params":{
+          "app_id":"333903271",
+          "os_type":"IOS",
+          "hashed_device_id":"ABCD1234XYZ",
+          "conversion_time":"2013-04-16T07:00:00.123Z",
+          "conversion_type":"INSTALL",
+          "click_window":14,
+          "view_through_window":0
+        }
+      }
+    }
+```

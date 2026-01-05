@@ -1,0 +1,61 @@
+---
+title: 管理转推
+sidebarTitle: 管理转推
+keywords: ["管理转推迁移", "v1.1 到 v2 管理转推", "迁移管理转推", "Standard 到 v2 转推", "转推迁移"]
+---
+
+<div id="manage-retweets-standard-v11-compared-to-x-api-v2">
+  ### 管理转发：标准版 v1.1 与 X API v2 对比
+</div>
+
+如果你一直在使用标准版 v1.1 的 [POST statuses/retweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-retweet-id) 和 [POST statuses/unretweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-unretweet-id) 端点，本指南旨在帮助你了解标准版端点与 X API v2 转发端点之间的异同。
+
+* **相似之处**
+  * 身份验证
+* **差异之处**
+  * 端点 URL 与 HTTP 方法
+  * 请求限制
+  * 应用和项目要求
+  * 请求参数
+
+<div id="similarities">
+  #### 相似之处
+</div>
+
+**身份验证**
+
+标准 v1.1 和 X API v2 的管理转发（Retweets）端点（[POST statuses/retweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-retweet-id) 和 [POST statuses/unretweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-unretweet-id)）都使用 [OAuth 1.0a 用户上下文](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication)。因此，如果你之前使用的是标准 v1.1 中的某个转发查找端点，那么在迁移到 X API v2 版本时，可以继续使用相同的身份验证方式。 
+
+<div id="differences">
+  #### 差异
+</div>
+
+**端点 URL 和 HTTP 方法**
+
+* Standard v1.1 端点:
+  * https://api.x.com/1.1/statuses/retweet/:id.json
+    (转发一条帖子。返回嵌入转发详情的原始帖子)
+  * https://api.x.com/1.1/statuses/unretweet/:id.json
+    (撤销转发。返回嵌入转发详情的原始帖子)
+* X API v2 端点:
+  * https://api.x.com/2/tweets/:id/retweets
+    (转发指定的帖子)
+  * https://api.x.com/2/users/:id/retweets/:source&#95;tweet&#95;id
+    (撤销对指定帖子的转发)
+
+**应用和项目要求**
+
+X API v2 端点要求您在对请求进行身份验证时使用与[项目](/zh/resources/fundamentals/projects)关联的[开发者应用](/zh/resources/fundamentals/developer-apps)的凭据。所有 X API v1.1 端点可以使用独立应用或与项目关联的应用的凭据。
+
+**请求参数**
+
+以下 standard v1.1 请求参数接受两个请求查询参数(user&#95;id 或 screen&#95;name)。X API v2 仅接受数字用户 ID,且必须作为端点路径的一部分传递。
+
+| Standard v1.1 | X API v2 |
+| :--- | :--- |
+| **id** | **id** |
+| **includes&#95;entities** | 无等效项 |
+
+请注意,Standard v1.1 参数作为查询参数传递,而 X API v2 参数在 POST 端点中作为请求体参数传递,在 DELETE 端点中作为路径参数传递。
+
+此外,使用 standard v1.1 端点时不需要转发帖子的用户 id,因为通过 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)传递的[访问令牌](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)会推断出哪个用户正在发起转发/撤销转发操作。 

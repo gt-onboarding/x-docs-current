@@ -1,0 +1,194 @@
+---
+title: いいねのルックアップ
+sidebarTitle: いいねのルックアップ
+keywords: ["いいねのルックアップ", "いいねのクイックスタート", "いいねの取得", "いいねのチュートリアル", "いいねのガイド", "いいねの例"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-likes-lookup-endpoint">
+  ### Likes lookup エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して Likes lookup エンドポイントに最初のリクエストを送信する手順を説明します。
+
+さまざまな言語で記述されたサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+ 
+
+<div id="prerequisites">
+  #### 前提条件
+</div>
+
+このガイドを完了するには、[キーとトークン](/ja/resources/fundamentals/authentication) のセットが必要です。これは、次の手順に従って生成できます。
+
+1. [開発者アカウントを申請](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+
+2. developer portal で[プロジェクト](/ja/resources/fundamentals/projects)と、関連付けられた[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成してください。
+
+3. アプリの「Keys and tokens」ページにアクセスし、API Keys、Access Tokens、Bearer Token をパスワードマネージャーに保存してください。
+
+<div id="steps-to-build-a-likes-lookup-request">
+  #### Likes lookup リクエストを構築する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントへのリクエストには、さまざまなツール、コード例、ライブラリを利用できますが、ここでは手順を簡略化するために Postman を使用します。
+
+X API v2 の Postman コレクションを自分の環境に読み込むには、次のボタンをクリックしてください。
+
+[![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/m1_vnext/carat.svg)<br />X API v2 を Postman に追加](https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400)
+
+Postman に X API v2 コレクションを読み込んだら、&quot;Likes&quot; フォルダに移動し、&quot;Liking users&quot; を選択します。 
+ 
+
+**ステップ 2: リクエストを認証する**
+
+このエンドポイントへのリクエストを正常に行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0) 認証のいずれかを使用する必要があります。これを行うには、&quot;X API v2&quot; という名前の環境を選択し、Initial value と Current value の両方のフィールドに次の変数を追加して、Postman に以下のキーとトークンを設定してください。
+
+* consumer&#95;key には API Key
+* consumer&#95;secret には API Key Secret
+* access&#95;token には Access Token
+* token&#95;secret には Access Token Secret
+   
+
+**ステップ 3: ポストを指定する**
+
+このエンドポイントでは、Likes を取得したいポストの Tweet ID を指定する必要があります。対象のポストを X 上で開き、URL の末尾にある数値コードを取得することで、そのポストの ID を確認できます。例えば、次の URL の Tweet ID は 1354143047324299264 です。
+
+https://x.com/TwitterDev/status/1354143047324299264
+
+Postman で &quot;Params&quot; タブに移動し、tweet&#95;id パス変数（セクションの一番下）の &quot;Value&quot; 列にこの ID を入力します。このとき、前後にスペースを含めないようにしてください。 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | Likes を取得したいポストの Tweet ID |
+
+**ステップ 4: 取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に &quot;Send&quot; ボタンをクリックすると、レスポンスにはデフォルトの [user object](/ja/x-api/fundamentals/data-dictionary#user) のフィールドである id、name、username が返されます。
+
+id、name、username 以外の追加フィールドを受け取りたい場合は、リクエストで [fields](/ja/x-api/fundamentals/fields) および / または [expansions](/ja/x-api/fundamentals/expansions) パラメータを指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 種類の追加フィールドセットをリクエストします。
+
+1. プライマリのユーザーオブジェクトにおける追加の user.created&#95;at フィールド。
+2. 返されるユーザーに関連付けられたピン留めポストオブジェクトのデフォルトフィールド: id と text。
+3. 関連するポストオブジェクトにおける追加の tweet.created&#95;at フィールド。
+
+Postman で &quot;Params&quot; タブに移動し、&quot;Query Params&quot; テーブルに次のキーと値のペアを追加します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | user.created&#95;at |
+| expansions | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at | tweet.created&#95;at |
+
+&quot;Send&quot; ボタンの横に次の URL が表示されているはずです。
+
+`https://api.x.com/2/tweets/1354143047324299264/liking_users?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**ステップ 5: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、&quot;Send&quot; ボタンをクリックすると、次のサンプルレスポンスに類似したレスポンスが返されます。
+
+```
+{
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "現在、600人以上のフォロワーを持つすべてのユーザーがスペースをホストできます。\n\n私たちが学んだことに基づくと、これらのアカウントは既存のオーディエンスがあるため、ホスティングで良い体験をする可能性が高いです。スペースを作成する機能をすべての人に提供する前に、いくつかのことに焦点を当てています。🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+}
+```
+
+**ステップ6：ユーザーが「いいね」したポストを取得する**
+
+ユーザーが「いいね」したポストを取得するリクエストを送信したい場合もあるでしょう。Likes lookup エンドポイントを使用すると、ユーザーが「いいね」したポストに関する情報を取得できます。これを行うには、&quot;Likes&quot; フォルダーに移動し、&quot;Liked Tweets&quot; を選択します。 
+
+このエンドポイントでは、「いいね」したポストを取得したいユーザーの User ID を指定する必要があります。この情報を取得するには、[user lookup](/ja/x-api/users/lookup/introduction) エンドポイントを使用できます。
+
+Postman で、&quot;Params&quot; タブに移動し、このユーザー名をセクションの一番下にある id パス変数の &quot;Value&quot; 列に入力します。その際、ユーザー名の前後にスペースを含めないようにしてください。 
+
+|                 |                               |
+| :-------------- | :---------------------------- |
+| **Key**         | **Value**                     |
+| id              | 「いいね」したポストを取得したいユーザーの User ID |
+| max&#95;results | 5                             |
+
+これで、&quot;Send&quot; ボタンの横に表示される URL が、TwitterDev ではなくあなたの ID を含む、同様の形式になっていることが確認できます。
+ 
+
+`https://api.x.com/2/users/2244994945/liked_tweets?max_results=5`
+
+すべての設定が完了したら、&quot;Send&quot; ボタンを押すと、次の例と同様のレスポンスが返ってきます。
+
+```
+{
+  "data": [
+    {
+      "id": "1362449997430542337",
+      "text": "Honored to be the first developer to be featured in @TwitterDev's love fest 🥰♥️😍 https://t.co/g8TsPoZsij"
+    },
+    {
+      "id": "1365416026435854338",
+      "text": "We're so happy for our Official Partner @Brandwatch and their big news. https://t.co/3DwWBNSq0o https://t.co/bDUGbgPkKO"
+    },
+    {
+      "id": "1296487407475462144",
+      "text": "@TwitterDevのこの機能をチェックして、進化する#publichealth危機を理解するためにソーシャルメディアデータをどのように活用しているかについて詳しく学んでください https://t.co/sIFLXRSvEX。"
+    },
+    {
+      "id": "1294346980072624128",
+      "text": "I awake from five years of slumber https://t.co/OEPVyAFcfB"
+    },
+    {
+      "id": "1283153843367206912",
+      "text": "@wongmjane Wish we could tell you more, but I’m only a teapot 👀"
+    }
+  ],
+  "meta": {
+        "next_token": "7140dibdnow9c7btw4539n0vybdnx19ylpayqf16fjt4l",
+    	  "result_count": 5
+  }
+}
+```

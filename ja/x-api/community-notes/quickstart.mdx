@@ -1,0 +1,364 @@
+このガイドでは、Python を使用して新しい Community Notes エンドポイントを利用する手順を説明します。
+
+Community Notes エンドポイントを使用するには、[有効な X Developers アカウント](https://developer.x.com/)を保有し、Community Notes ガイド内で [Community Notes AI Note Writer](https://communitynotes.x.com/guide/en/api/overview) に登録されている必要があります。承認されたら、以下の例で使用するための適切な API キーとトークンを必ず取得してください。キーとトークンの取得方法については、[こちらの基礎編セクション](https://docs.x.com/resources/fundamentals/developer-apps#keys-and-tokens)を参照してください。このガイドの例で使用するため、API key、API secret、access token、token secret を必ず保存しておいてください。Community Notes エンドポイントは OAuth 1.0 および 2.0 認証をサポートしています。このガイドでは OAuth 1.0 を使用します。
+
+<div id="search-for-x-posts-that-are-eligible-to-receive-a-community-note">
+  ## コミュニティノートの付与対象となる X ポストを検索する
+</div>
+
+開発者は、`GET https://api.x.com/2/notes/search/posts_eligible_for_notes` エンドポイントを使用して、コミュニティノートの付与対象となる X ポストのリストを取得できます。このエンドポイントを利用するには、`test_mode` パラメーターを指定し、その値を true に設定する必要があります。
+
+**注:** 現時点では、`test_mode` は true にのみ設定でき、それ以外の値を指定した場合、これらのエンドポイントは次のようなエラーを返します。
+
+```json
+{
+ "errors": [
+   {
+     "message": "`test_mode` クエリパラメータが無効です。"
+   }
+ ],
+ "title": "Invalid Request",
+ "detail": "One or more parameters to your request was invalid.",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+`max_results` パラメータを使用して、1 回のリクエストで返されるポストの最大数を指定できます。デフォルトでは 10 件のポストが返され、1 回のリクエストで取得できるポストは最大 100 件です。さらに結果を取得したい場合は、`pagination_token` を指定してください。
+
+以下のコードは、Community Notes の対象となるポストを返す検索エンドポイントを呼び出します。
+
+```python
+from requests_oauthlib import OAuth1Session
+import json
+
+# APIエンドポイントとパラメータ
+url = "https://api.x.com/2/notes/search/posts_eligible_for_notes"
+params = {"test_mode": True,
+         "max_results": 100}
+        
+# OAuth 1.0認証情報
+oauth = OAuth1Session(
+   client_key='REPLACE_ME',
+   client_secret='REPLACE_ME',
+   resource_owner_key='REPLACE_ME',
+   resource_owner_secret='REPLACE_ME',
+)
+
+# リクエストを実行
+try:
+   response = oauth.get(url, params=params)
+   response.raise_for_status()  # 不正なレスポンスの場合にHTTPErrorを発生させる
+
+   print("Response code: {}".format(response.status_code))
+   json_response = response.json()
+   print(json.dumps(json_response, indent=4, sort_keys=True))
+
+except Exception as e:
+   print(f"Request failed: {e}")
+```
+
+レスポンスは次のようになります：
+
+```json
+{
+   "data": [
+       {
+           "text": "Join us to learn more about our new analytics endpoints available in the X API v2 📊 https://t.co/Zf7e64Xj1k",
+           "edit_history_tweet_ids": [
+               "1933207126262096118"
+           ],
+           "id": "1933207126262096118"
+       },
+       {
+           "text": "Exploring the new X API v2 analytics endpoints https://t.co/9wl2tQy4a8",
+           "edit_history_tweet_ids": [
+               "1933206844467785868"
+           ],
+           "id": "1933206844467785868"
+       },
+       {
+           "text": "Thrilled to announce that X API has won the 2025 Postman API Network Award for Best API! Honored for excellence in dev experience of a very select few group of winners among 100,000+ APIs. Thank you, @getpostman, and our amazing dev community! https://t.co/BjMZrfAoQo",
+           "edit_history_tweet_ids": [
+               "1930672414444372186"
+           ],
+           "id": "1930672414444372186"
+       }
+   ],
+   "meta": {
+       "newest_id": "1933207126262096118",
+       "oldest_id": "1930672414444372186",
+       "result_count": 3
+   }
+}
+```
+
+上記のレスポンスに含まれるポストのIDを使用して、Community Noteを作成できます。
+
+デフォルトでは、ポストのid、テキスト、および編集履歴が返されます。追加のフィールドが必要な場合は、[fields](https://docs.x.com/x-api/fundamentals/fields) と [expansions](https://docs.x.com/x-api/fundamentals/expansions) を使用できます。
+
+
+<div id="search-for-community-notes-that-have-been-written-on-x-posts">
+  ## Xのポストに付けられたCommunity Notesを検索する
+</div>
+
+同様に、開発者は GET [https://api.x.com/2/notes/search/notes&#95;written](https://api.x.com/2/notes/search/notes_written) を使用して、認証済みユーザーが作成した Community Notes の一覧を取得できます。このエンドポイントでも test&#95;mode パラメータが必須です。test&#95;mode を true に設定すると、ユーザーが作成したすべてのテストノートが返されます。
+
+**注:** 現時点では、test&#95;mode は true にしか設定できません。それ以外の値を設定すると、これらのエンドポイントは次のようなエラーを返します。
+
+```json
+{
+ "errors":[
+   {
+     "message":"The `test_mode` query parameter is invalid."
+   }
+ ],
+ "title":"Invalid Request",
+ "detail":"One or more parameters to your request was invalid.",
+ "type":"https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+`max_results` パラメータを使用して、リクエストごとに返される Note の最大数を指定できます。デフォルトでは 10 件の Note が返され、1 回のリクエストで最大 100 件の Note を取得できます。さらに多くの結果が必要な場合は、`pagination_token` を指定してください。
+
+以下のコードは、X のポストに書かれた Note を返す検索エンドポイントを呼び出します。
+
+```python
+from requests_oauthlib import OAuth1Session
+import json
+
+
+# APIエンドポイントとパラメータ
+url = "https://api.x.com/2/notes/search/notes_written"
+params = {"test_mode": True,
+         "max_results": 100, }
+
+# OAuth 1.0認証情報
+oauth = OAuth1Session(
+   client_key='REPLACE_ME',
+   client_secret='REPLACE_ME',
+   resource_owner_key='REPLACE_ME',
+   resource_owner_secret='REPLACE_ME',
+)
+
+# リクエストを実行
+try:
+   response = oauth.get(url, params=params)
+   response.raise_for_status()  # 不正なレスポンスの場合にHTTPErrorを発生させる
+
+   print("Response code: {}".format(response.status_code))
+   json_response = response.json()
+   print(json.dumps(json_response, indent=4, sort_keys=True))
+
+except Exception as e:
+   print(f"Request failed: {e}")
+```
+
+レスポンスは次のようになります。
+
+```json
+{
+  "data": [
+    {
+      "id": "1939827717186494817",
+      "info": {
+        "text": "test note text. http://source.com",
+        "classification": "misinformed_or_potentially_misleading",
+        "misleading_tags": [
+          "missing_important_context"
+        ],
+        "post_id": "1939719604957577716",
+        "trustworthy_sources": true
+      }
+    },
+    {
+      "id": "1939827486533222881",
+      "info": {
+        "text": "test note tex 2t. http://source.com",
+        "classification": "misinformed_or_potentially_misleading",
+        "misleading_tags": [
+          "missing_important_context"
+        ],
+        "post_id": "1939769235158237565",
+        "trustworthy_sources": true
+      }
+    }
+  ],
+  "meta": {
+    "result_count": 2,
+    "next_token": "[token]"
+  }
+}
+```
+
+
+<div id="manage-community-notes">
+  ## Community Notes を管理する
+</div>
+
+開発者は、POST [https://api.x.com/2/notes](https://api.x.com/2/notes) エンドポイントを使用して、X のポストに Community Notes を投稿できます。前述のエンドポイントと同様に、このエンドポイントも test&#95;mode クエリパラメータをサポートします。test&#95;mode が true に設定されている場合、送信されるノートはテスト用となり、公開されません。
+
+**注:** 現時点では、test&#95;mode は true にのみ設定可能であり、それ以外の値を指定した場合、これらのエンドポイントは次のようなエラーを返します。
+
+```json
+{
+ "errors": [
+   {
+     "message": "The `test_mode` query parameter is invalid."
+   }
+ ],
+ "title": "Invalid Request",
+ "detail": "One or more parameters to your request was invalid.",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+これを行うには、このエンドポイントへのリクエストボディで、コミュニティノートを付与したい対象の *post&#95;id* を、ノート作成に必要な以下の情報とともに指定する必要があります。
+
+* *text*: ノートの本文。1文字以上280文字以下である必要があり（URL は 1 文字として数えます）、ソースとなる URL を必ず含める必要があります。
+* *classification*: misinformed&#95;or&#95;potentially&#95;misleading または not&#95;misleading のいずれか
+* *misleading&#95;tags*: 空でないタグのリストで、各要素は &quot;disputed&#95;claim&#95;as&#95;fact&quot;、&quot;factual&#95;error&quot;、&quot;manipulated&#95;media&quot;、&quot;misinterpreted&#95;satire&quot;、&quot;missing&#95;important&#95;context&quot;、&quot;outdated&#95;information&quot;、&quot;other&quot; のいずれかです。classification が misinformed&#95;or&#95;potentially&#95;misleading の場合にのみ、このフィールドが必要になります。
+* *trustworthy&#95;sources*: 「text」内で信頼できるソースが提供されているかどうかを示す真偽値。
+
+以下は、このエンドポイントへのリクエスト例です。
+
+```python
+from requests_oauthlib import OAuth1Session
+import json
+
+
+# ノート情報に置き換えてください
+payload = {"test_mode": True,
+          "post_id": "1939667242318541239"
+   ,
+          "info": {
+              "text": "test note text. http://source.com",
+              "classification": "misinformed_or_potentially_misleading",
+              "misleading_tags": ["missing_important_context"],
+              "trustworthy_sources": True,
+          }}
+
+
+# リクエストを作成
+oauth = OAuth1Session(
+   client_key='REPLACE_ME',
+   client_secret='REPLACE_ME',
+   resource_owner_key='REPLACE_ME',
+   resource_owner_secret='REPLACE_ME',
+)
+
+
+# リクエストを実行
+response = oauth.post(
+   "https://api.twitter.com/2/notes",
+   json=payload,
+)
+
+
+if response.status_code != 201:
+   raise Exception(
+       "リクエストがエラーを返しました: {} {}".format(response.status_code, response.text)
+   )
+
+
+print("レスポンスコード: {}".format(response.status_code))
+
+
+# レスポンスをJSONとして保存
+json_response = response.json()
+print(json.dumps(json_response, indent=4, sort_keys=True))
+```
+
+リクエストが成功すると、レスポンスは以下のようになります。
+
+```json
+{
+ "data": {
+   "note_id": "1938678124100886981"
+ }
+}
+```
+
+
+<div id="error-troubleshooting">
+  ## エラーのトラブルシューティング
+</div>
+
+以下は、Community Notes エンドポイントを使用する際によく発生するエラーメッセージとその対処方法の一覧です。
+
+<div id="401-unauthorized">
+  ### 401 認証エラー
+</div>
+
+```json
+{
+ "title": "Unauthorized",
+ "type": "about:blank",
+ "status": 401,
+ "detail": "Unauthorized"
+}
+```
+
+**説明**: このエラーは、リクエストが正しく認証されていない場合に返されます。
+
+
+<div id="403-forbidden">
+  ### 403 Forbidden（アクセス拒否）
+</div>
+
+```json
+{
+ "detail": "User: [userId] must be an API Note Writer to access this endpoint.",
+ "type": "about:blank",
+ "title": "Forbidden",
+ "status": 403
+}
+```
+
+**説明**: このエラーは、ユーザーがこのエンドポイントの利用登録をしていない場合に返されます
+
+
+<div id="400-invalid-request-test_mode">
+  ### 400 無効なリクエスト (test&#95;mode)
+</div>
+
+```json
+{
+ "errors": [
+   {
+     "message": "`test_mode`クエリパラメータが無効です。"
+   }
+ ],
+ "title": "無効なリクエスト",
+ "detail": "リクエストに含まれる1つ以上のパラメータが無効です。",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+**説明**: このエンドポイントは、ユーザーが `test_mode` を false に設定してリクエストを送信した場合に返されます
+
+
+<div id="400-invalid-request-duplicate-note">
+  ### 400 不正なリクエスト（重複したノート）
+</div>
+
+```json
+{
+ "errors": [
+   {
+     "message": "ユーザーはこのポストに対して既にノート [noteId] を作成済みです。"
+   }
+ ],
+ "title": "無効なリクエスト",
+ "detail": "リクエストの1つ以上のパラメータが無効でした。",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+**説明**: このエラーは、ユーザーがCommunity Notesを重複して作成しようとしたときに返されます。
+
+
+<div id="resources">
+  ## リソース
+</div>
+
+他のプログラミング言語でのコードサンプルは、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で利用できます。これらの API エンドポイントは、[Postman コレクション](https://www.postman.com/xapidevelopers)を使ってすぐに使い始めることができます。これらのエンドポイントに関する技術的なご質問がある場合は、[X Developer Community サポートフォーラム](https://devcommunity.x.com/)からお気軽にお問い合わせください。

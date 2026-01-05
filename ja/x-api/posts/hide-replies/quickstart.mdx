@@ -1,0 +1,86 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["返信を非表示にする クイックスタート", "返信を非表示にする チュートリアル", "返信を非表示にする ガイド", "返信のモデレーション", "返信モデレーション クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-hide-replies-endpoint">
+  ## hide replies エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して hide replies エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+各種プログラミング言語でのコードスニペットを確認したい場合は、[hide replies API Reference ページ](/ja/x-api/posts/hide-replies#put-2-tweets-id-hidden) を参照してください。 
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストを認証するための [キーとトークン](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-put-tweetsidhidden-request">
+  ### PUT /tweets/:id/hidden リクエストを構築する手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ 1: ツールまたはライブラリを用意する
+</div>
+
+このエンドポイントにリクエストを送信するために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 のコレクションを読み込んだら、「hide replies」エンドポイントに移動します。
+
+<div id="step-two-authenticate-your-request">
+  #### ステップ2：リクエストを認証する
+</div>
+
+X API へ適切にリクエストを送信するには、自分に権限があることを確認する必要があります。このエンドポイントでそれを行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使ってリクエストを認証する必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+Postman にキーとトークン、具体的には API Key、API Secret Key、OAuth 1.0a user Access Token、OAuth 1.0a user Access Token Secret を追加する必要があります。これは、Postman の右上隅で「X API v2」という名前の環境を選択し、「initial value」と「current value」フィールド（環境ドロップダウンの横にある目のアイコンをクリック）にキーとトークンを追加することで行えます。
+
+正しく設定されていれば、これらの変数はリクエストの Authorization タブに自動的に読み込まれます。
+ 
+
+<div id="step-three-find-a-post-id-to-hide">
+  #### ステップ3：非表示にするポストのIDを見つける
+</div>
+
+hide replies エンドポイントは、認可されたユーザーに代わって返信を非表示または再表示できます。この例では、あなたのユーザープロフィールに関連付けられたアクセストークンを使用しているため、あなたが開始した会話に参加しているユーザーからの返信を非表示にできます。同様に、あなたのアプリを認可した別のユーザーに対応するアクセストークンを使用している場合、そのアカウントが開始したあらゆる会話への返信を管理できます。
+
+友人にポストへ返信してもらう（hide replies のテスト中であることを伝えてください）か、テスト用アカウントから自分の任意のポストに返信してください。その返信をクリックし、URL のうち数値の部分をコピーします。これが非表示にするポストIDになります。
+
+ここでは、次のポストを見てみます。このポストの ID は `1232720193182412800` です。
+
+`https://x.com/TwitterDev/status/1232720193182412800`
+
+<div id="step-four-hide-the-post">
+  #### ステップ4：ポストを非表示にする
+</div>
+
+Postman で Hide replies フォルダーを開き、Hide a reply を選択します。Params タブで、`id` フィールドの横に Post ID を貼り付けます（URL 内の `:id` を置き換える必要はありません）。「Send」をクリックすると、成功レスポンスが返されます。
+
+`{"hidden":true}`
+
+<div id="step-five-unhide-the-post">
+  #### ステップ5：ポストの非表示を解除する
+</div>
+
+非表示にしたポストは、X アプリ内の別のタブに移動されます。Postman でポストの非表示を解除するには、Hide replies フォルダーを開き、Unhide a reply を選択します。Params タブで、前のステップで使用したのと同じポスト ID を `id` フィールドに貼り付けます。&quot;Send&quot; をクリックすると、成功を示すレスポンスが表示されます。
+
+`{"hidden":false}`
+
+`hidden` フィールドは、そのポストが非表示かどうかのステータスを表します。ステータスが `true` の場合はポストが非表示であり、`false` の場合はポストが非表示ではないことを意味します。

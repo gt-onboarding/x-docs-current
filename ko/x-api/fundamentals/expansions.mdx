@@ -1,0 +1,198 @@
+---
+title: 확장(Expansions)
+keywords: ["expansions", "expand objects", "object expansion", "nested objects", "related objects", "expand users", "expand media", "expand tweets"]
+---
+
+`expansions`를 사용하면 개발자는 페이로드에 포함된 참조 객체를 확장할 수 있습니다. 확장이 가능한 객체는 id로 참조됩니다. 예를 들어, [Posts lookup](/ko/x-api/posts/lookup/introduction) 페이로드에 포함된 `referenced_tweets.id` 및 `author_id` 필드는 전체 객체로 확장될 수 있습니다. 해당 게시물을 작성한 사용자와 관련된 필드나, 그 게시물에 포함된 미디어, 설문조사(poll), 또는 장소(place)와 관련된 필드를 요청하려면, 관련된 `expansions` 쿼리 파라미터를 요청에 함께 전달해야 하며, 그러면 응답에서 해당 데이터를 받을 수 있습니다. 현재 Posts, Users, Lists, Spaces, Direct Message 이벤트 객체를 반환하는 v2 엔드포인트는 모두 `expansions`를 지원합니다(아래 예시 참고).
+
+요청에 `expansions`를 포함하면, 동일한 응답 내에 해당 확장된 객체의 기본 필드가 함께 포함됩니다. 이를 통해 별도의 요청 없이 한 번의 응답으로 더 많은 데이터를 반환할 수 있습니다. 확장된 객체와 관련된 추가 [fields](/ko/x-api/fundamentals/fields)를 요청하려면, 해당 확장된 객체에 연관된 fields 파라미터와, 응답에서 받고자 하는 필드들의 쉼표로 구분된 목록을 함께 포함하면 됩니다. 필드는 쿼리에서 요청한 순서와 항상 동일한 순서로 반환되지는 않을 수 있다는 점에 유의하세요.
+
+아래 Post 페이로드에는 확장할 수 있는 연관 객체에 대한 참조 id가 포함되어 있습니다. 여기에는 게시물을 작성한 사용자의 `author_id`, *referenced* Post의 `id`, 그리고 미디어 첨부에 대한 `media_key`가 포함됩니다.
+
+```json
+{
+    "data": {
+        "attachments": {
+            "media_keys": ["16_1211797899316740096"]
+        },
+        "author_id": "2244994945",
+        "id": "1212092628029698048",
+        "referenced_tweets": [
+            {
+                "type": "replied_to",
+                "id": "1212092627178287104"
+            }
+        ],
+        "text": "우리는 API의 최고의 미래 버전이 여러분과 함께 구축하는 것에서 나올 것이라고 믿습니다. Twitter 플랫폼에서 구축하는 모든 분들과 함께하는 또 다른 멋진 한 해를 기원합니다. 새해에도 여러분과 계속 함께 일하기를 기대합니다. https://t.co/yvxdK6aOo2"
+    }
+}
+```
+
+<div id="available-expansions-for-post-payloads">
+  ### 게시물 페이로드에 사용할 수 있는 expansions
+</div>
+
+| Expansion                      | Description                                                                        |
+|:--------------------------------|:------------------------------------------------------------------------------------|
+| `author_id`                    | 게시물 작성자를 나타내는 user 객체를 반환합니다                                |
+| `referenced_tweets.id`         | 이 게시물이 참조하는 게시물 객체를 반환합니다(리트윗, 인용 트윗 또는 답글인 경우) |
+| `edit_history_tweet_ids`       | 게시물의 편집 이력에 포함된 게시물 객체들을 반환합니다                         |
+| `in_reply_to_user_id`          | 현재 요청한 게시물이 답글인 원 게시물 작성자를 나타내는 user 객체를 반환합니다 |
+| `attachments.media_keys`       | 게시물에 포함된 이미지, 동영상, GIF를 나타내는 미디어 객체를 반환합니다   |
+| `attachments.poll_ids`         | 게시물에 포함된 투표의 메타데이터를 담고 있는 poll 객체를 반환합니다         |
+| `geo.place_id`                 | 게시물에 태그된 위치의 메타데이터를 담고 있는 place 객체를 반환합니다      |
+| `entities.mentions.username`   | 게시물에서 멘션된 사용자를 나타내는 user 객체를 반환합니다                   |
+| `referenced_tweets.id.author_id` | 참조된 게시물의 작성자를 나타내는 user 객체를 반환합니다                     |
+
+<div id="available-expansion-for-user-payloads">
+  ### 사용자 페이로드에 사용할 수 있는 Expansion
+</div>
+
+| Expansion          | Description                                               |
+|:--------------------|:-----------------------------------------------------------|
+| `pinned_tweet_id`  | 사용자 프로필 상단에 고정된 게시물을 나타내는 Post 객체를 반환합니다 |
+
+<div id="available-expansions-for-direct-message-event-payloads">
+  ### 다이렉트 메시지 이벤트 페이로드에서 사용 가능한 expansions
+</div>
+
+| Expansion                | Description                                                              |
+|:--------------------------|:--------------------------------------------------------------------------|
+| `attachments.media_keys` | 다이렉트 메시지에 첨부된 미디어 객체를 반환합니다             |
+| `referenced_tweets.id`   | 다이렉트 메시지에서 참조된 게시물 객체를 반환합니다            |
+| `sender_id`              | 다이렉트 메시지 작성자이자 대화에 참가자를 초대한 사용자를 나타내는 User 객체를 반환합니다 |
+| `participant_ids`        | 대화에 참여했거나 나간 참가자를 나타내는 User 객체를 반환합니다 |
+
+<div id="available-expansions-for-spaces-payloads">
+  ### Spaces 페이로드에서 사용 가능한 expansions
+</div>
+
+| Expansion          | Description                                               |
+|:--------------------|:-----------------------------------------------------------|
+| `invited_user_ids` | 초대된 계정을 나타내는 User 객체를 반환합니다 |
+| `speaker_ids`      | Space에서 발언한 계정을 나타내는 User 객체를 반환합니다 |
+| `creator_id`       | Space를 생성한 계정을 나타내는 User 객체를 반환합니다 |
+| `host_ids`         | 호스트로 설정된 계정을 나타내는 User 객체를 반환합니다 |
+| `topics_ids`       | 생성자가 설정한 토픽 설명을 반환합니다 |
+
+<div id="available-expansion-for-lists-payloads">
+  ### 리스트 페이로드에서 사용 가능한 Expansion
+</div>
+
+| Expansion   | Description                                                    |
+|:-------------|:----------------------------------------------------------------|
+| `owner_id`  | 해당 리스트를 생성하고 관리하는 계정을 나타내는 User 객체를 반환합니다 |
+
+<div id="expanding-the-media-object">
+  ## Media 오브젝트 확장
+</div>
+
+다음 요청에서는 기본 게시물 필드와 함께 반환되도록 `geo.place_id` 확장을 요청합니다:
+
+**요청 예시**
+
+```
+{`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+```
+
+**응답 예시**
+
+```
+{`{
+  "data": {
+      "geo": {
+          "place_id": "01a9a39529b27f36"
+      },
+      "id": "ID",
+      "text": "Test"
+  },
+  "includes": {
+      "places": [
+          {
+              "full_name": "Manhattan, NY",
+              "id": "01a9a39529b27f36"
+          }
+      ]
+  }
+}`}
+
+```
+
+<div id="expanding-the-poll-object">
+  ## Poll 객체 확장하기
+</div>
+
+다음 요청에서는 기본 게시물 필드와 함께 포함되도록 `attachments.poll_ids` 확장을 요청합니다.
+
+**샘플 요청**
+
+<CodeBlock language="bash">
+  {`curl 'https://api.x.com/2/tweets/1199786642791452673?expansions=attachments.poll_ids' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+</CodeBlock>
+
+**샘플 응답**
+
+```
+{`{
+  "data": {
+      "attachments": {
+          "poll_ids": ["1199786642468413448"]
+      },
+      "id": "1199786642791452673",
+      "text": "C#"
+  },
+  "includes": {
+      "polls": [
+          {
+              "id": "1199786642468413448",
+              "options": [
+                  {
+                      "position": 1,
+                      "label": ""C 샤프"",
+                      "votes": 795
+                  },
+                  {
+                      "position": 2,
+                      "label": "“C Hashtag”",
+                      "votes": 156
+                  }
+              ]
+          }
+      ]
+  }
+}`}
+```
+
+<div id="expanding-the-place-object">
+  ## Place 객체 확장하기
+</div>
+
+다음 요청에서는 기본 게시물 필드와 함께 `geo.place_id` expansions를 포함하도록 요청합니다:
+
+**샘플 요청**
+
+<CodeBlock language="bash">
+  {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+</CodeBlock>
+
+**샘플 응답**
+
+```s
+{`{
+  "data": {
+      "geo": {
+          "place_id": "01a9a39529b27f36"
+      },
+      "id": "ID",
+      "text": "Test"
+  },
+  "includes": {
+      "places": [
+          {
+              "full_name": "Manhattan, NY",
+              "id": "01a9a39529b27f36"
+          }
+      ]
+  }
+}`}
+```

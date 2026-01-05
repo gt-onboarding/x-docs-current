@@ -1,0 +1,67 @@
+---
+title: 連携ガイド
+sidebarTitle: 連携ガイド
+keywords: ["ブックマーク連携", "ブックマークガイド", "ブックマーク連携ガイド", "ブックマーク実装", "ブックマーク設定"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+このページでは、manage Bookmarks エンドポイントをシステムに統合する際に把握しておくべき、ツールおよび重要な概念について説明します。内容は、次のセクションに分かれています。
+
+* [便利なツール](/ja/x-api/users/blocks/integrate#helpful-tools)
+* 重要な概念
+  * [認証](/ja/x-api/users/blocks/integrate#authentication)
+  * [developer portal、プロジェクト、アプリ](/ja/x-api/users/blocks/integrate#developer-portal-projects-and-developer-apps)
+  * [レート制限](/ja/x-api/users/blocks/integrate#rate-limits)
+
+<div id="helpful-tools">
+  ### 便利なツール
+</div>
+
+このエンドポイントを統合するうえで役立つ主要な概念を説明する前に、まず次のツールに慣れておくことをおすすめします。
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman は、エンドポイントのテストに利用できる便利なツールです。各 Postman リクエストには、利用可能な内容をすばやく把握できるよう、すべてのパスパラメータやボディパラメータが含まれています。Postman コレクションの詳細については、[&quot;Using Postman&quot;](/ja/tutorials/postman-getting-started) ページをご覧ください。 
+
+<div id="code-samples">
+  #### コードサンプル
+</div>
+
+お好みのプログラミング言語でこのエンドポイントを使い始めるためのコードが必要ですか？[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で、出発点として利用できるコードサンプルをいくつか公開しています。
+
+<div id="third-party-libraries">
+  #### サードパーティライブラリ
+</div>
+
+コミュニティ提供の [サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview) を活用して、スムーズに開発を始めましょう。v2 エンドポイントに対応したライブラリは、適切なバージョンタグを確認することで見つけられます。
+
+<div id="key-concepts">
+  ### 基本概念
+</div>
+
+<div id="authentication">
+  #### 認証
+</div>
+
+すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使ってリクエストの認証を行う必要があります。 
+
+これらのエンドポイントでは、[OAuth 2.0 Authorization Code Flow with PKCE](/ja/resources/fundamentals/authentication/oauth-2-0/authorization-code) の利用が必須です。これは、リクエストを正常に行うために、キーとユーザーのアクセストークンのセットを使用しなければならないことを意味します。アクセストークンは、あなたが代理でリクエストを行うユーザーに関連付けられている必要があります。他のユーザーのアクセストークンのセットを生成したい場合は、そのユーザーが [Authorize URL](/ja/resources/fundamentals/authentication#authorize-url) を使用して、あなたのアプリを承認（認証）する必要があります。
+
+OAuth 2.0 の利用は難しい場合があることに注意してください。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) もしくは Postman のようなツールを使用して、リクエストを正しく認証することをおすすめします。
+
+<div id="developer-portal-projects-and-developer-apps">
+  #### developer portal、プロジェクト、開発者アプリ
+</div>
+
+X API v2 のエンドポイントで使用できる認証情報一式を取得するには、[開発者アカウント](/ja/resources/fundamentals/developer-portal)を保有し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を設定し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。その後、開発者アプリ内で自分のキーとトークンを確認できます。 
+
+<div id="rate-limits">
+  #### レート制限
+</div>
+
+毎日、何千人もの開発者が X API に対してリクエストを送信しています。これら膨大な数のリクエストを管理するために、各エンドポイントには[レート制限](/ja/resources/fundamentals/rate-limits)が設定されており、あなたのアプリ、または認証済みユーザーに代わって送信できるリクエスト数が制限されています。 
+
+これらのエンドポイントにはユーザーレベルのレート制限が適用されます。つまり、あなたがリクエストを送信する対象である認証済みユーザーは、どの開発者アプリからであっても、そのエンドポイントを呼び出せる回数が一定数に制限されます。GET メソッドには 15 分あたり 180 リクエストというユーザーレート制限があります。Bookmarks lookup エンドポイントの GET メソッドでは、直近のブックマーク済みポストを最大 800 件取得できます。さらに、POST と DELETE メソッドには、15 分あたり 50 リクエストというユーザーレート制限があります。 

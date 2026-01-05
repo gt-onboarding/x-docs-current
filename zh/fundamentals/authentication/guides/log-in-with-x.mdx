@@ -1,0 +1,247 @@
+---
+title: 使用 X 登录
+keywords: ["使用 X 登录", "通过 X 登录", "X 登录", "OAuth 登录", "社交登录", "X 身份验证", "登录集成"]
+---
+
+import { Button } from "/snippets/zh/button.mdx";
+
+使用“Log in with X”（也称为“Sign in with X”），在你的网站或应用中添加一个按钮，使 X 用户只需一键即可享有注册用户账号的各项功能。该功能适用于网站、iOS、移动端和桌面应用程序。
+
+<div id="features">
+  ## 功能特性
+</div>
+
+* 易于使用——你的网站新访客首次登录只需点击两个按钮。
+* X 集成——“使用 X 登录”流程可以代表你的用户授予对 X API 的访问权限。
+* 基于 OAuth——大量客户端库和示例代码都兼容 Log in with X API。
+
+<div id="available-for">
+  ## 适用对象
+</div>
+
+* 浏览器 - 如果你的用户可以使用浏览器，你就可以集成 Log in with X。了解浏览器登录流程。
+* 移动设备 - 任何可联网的移动设备都可以使用 Log in with X。了解移动端登录流程。
+
+<div id="implementing-log-in-with-x">
+  ## 实现 Log in with X
+</div>
+
+浏览器和移动网页环境中的 Log in with X 实现基于 OAuth。本页演示在登录流程中获取访问令牌所需的请求。
+
+要使用 “Log in with X” 流程，请前往你的 [X 应用设置](/zh/resources/fundamentals/developer-apps)，并确保已启用 *“Allow this app to be used to Sign in with X?”* 选项。
+
+本页假定你已经了解如何使用 OAuth 1.0a 协议对请求进行签名。如果你想了解如何对请求进行签名，请阅读 [Authorizing a request](/zh/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request) 页面。
+
+如果你想验证本页中请求的签名，所使用的 consumer secret 为：L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg。该值仅用于测试目的，不能用于真实请求。
+
+通过获取 request token、重定向用户以及将 request token 转换为 access token，实现 Log in with X 的三个步骤如下所列。
+
+<Tabs>
+  <Tab title="步骤 1">
+    ### 步骤 1：获取请求令牌
+
+    要启动登录流程，你的 [X 应用](/zh/resources/fundamentals/developer-apps) 必须通过向 [POST oauth/request&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-request-token) 发送已签名消息来获取请求令牌。此请求中唯一的特有参数是 oauth&#95;callback，它必须是你希望用户在完成步骤 2 后被重定向到的 URL 进行 URL 编码后的结果。其余参数由 OAuth 签名过程添加。
+
+    <Note>
+      **注意：** 你在使用 [POST oauth/request&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-request-token) 端点时使用的任何 [callback URL](/zh/resources/fundamentals/developer-apps#callback-urls) 都必须先在 [开发者门户](/zh/resources/fundamentals/developer-portal) 中的 [X 应用设置](/zh/resources/fundamentals/developer-apps) 里注册。
+    </Note>
+
+    <Frame>
+      <img src="/images/auth-4.png.twimg.1920.png" alt="" />
+    </Frame>
+
+    **示例请求（Authorization 头已换行显示）：**
+
+    ```
+    POST /oauth/request_token HTTP/1.1
+    User-Agent: themattharris' HTTP Client
+    Host: api.x.com
+    Accept: */*
+    Authorization:
+            OAuth oauth_callback="http%3A%2F%2Flocalhost%2Fsign-in-with-twitter%2F",
+                  oauth_consumer_key="cChZNFj6T5R0TigYB9yd1w",
+                  oauth_nonce="ea9ec8429b68d6b77cd5600adbbb0456",
+                  oauth_signature="F1Li3tvehgcraF8DMJ7OyxO4w9Y%3D",
+                  oauth_signature_method="HMAC-SHA1",
+                  oauth_timestamp="1318467427",
+                  oauth_version="1.0"
+    ```
+
+    你的应用应检查响应的 HTTP 状态码。任何非 200 的状态码都表示失败。响应正文将包含 oauth&#95;token、oauth&#95;token&#95;secret 和 oauth&#95;callback&#95;confirmed 参数。你的应用应验证 oauth&#95;callback&#95;confirmed 是否为 true，并将另外两个值保存用于后续步骤。
+
+    **示例响应（响应正文已折行显示）：**
+
+    ```
+    HTTP/1.1 200 OK
+    Date: Thu, 13 Oct 2011 00:57:06 GMT
+    Status: 200 OK
+    Content-Type: text/html; charset=utf-8
+    Content-Length: 146
+    Pragma: no-cache
+    Expires: Tue, 31 Mar 1981 05:00:00 GMT
+    Cache-Control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+    Vary: Accept-Encoding
+    Server: tfe
+
+    oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0&
+    oauth_token_secret=veNRnAWe6inFuo8o2u8SLLZLjolYDmDP7SzL0YfYI&
+    oauth_callback_confirmed=true
+
+    ```
+  </Tab>
+
+  <Tab title="步骤 2">
+    ### 步骤 2：重定向用户
+
+    下一步是将用户引导到 X，以便他们可以完成相应的流程，如下方的“浏览器登录流程”中所述。将用户重定向到 [GET oauth/authenticate](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authenticate)，并将第 1 步中获得的请求 token 作为 oauth&#95;token 参数传递。
+
+    网站实现这一点的最顺畅方式，是在对原始“登录”请求的响应中返回一个 HTTP 302 重定向。移动端和桌面应用应打开一个新的浏览器窗口，或通过嵌入式 Web 视图跳转到该 URL。
+
+    **用于重定向的示例 URL：**
+
+    [https://api.x.com/oauth/authenticate?oauth&#95;token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0](https://api.x.com/oauth/authenticate?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0)
+
+    登录端点会根据用户的状态，表现为以下三种情况之一：
+
+    1. **已登录且已授权**：如果用户已在 x.com 上登录，并且已经授权调用的应用，则会立即完成认证并被重定向回回调 URL，且带有一个有效的 OAuth 请求 token。对 x.com 的这次重定向对用户来说几乎是不可察觉的。
+    2. **已登录但未授权**：如果用户已登录 x.com，但尚未授权调用的应用，则会显示一个提示，请求与该应用共享访问权限。在接受授权请求后，用户会被重定向到回调 URL，并带有一个有效的 OAuth 请求 token。
+    3. **未登录**：如果用户尚未在 x.com 上登录，则会在同一页面被提示输入其凭据，并授予应用访问其信息的权限。一旦登录成功，用户将被重定向回回调 URL，且带有一个有效的 OAuth 请求 token。
+
+    在成功完成认证后，你的 callback&#95;url 会收到一个包含 oauth&#95;token 和 oauth&#95;verifier 参数的请求。你的应用应验证该 token 是否与第 1 步中收到的请求 token 匹配。
+
+    **来自客户端重定向的请求（查询字符串参数已包裹）：**
+
+    ```
+    GET /sign-in-with-twitter/?
+            oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0&
+            oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY HTTP/1.1
+    Host: localhost
+    User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.5 (KHTML, like Gecko) Chrome/16.0.891.1 Safari/535.5
+    Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+    Referer: http://localhost/sign-in-with-twitter/
+    Accept-Encoding: gzip,deflate,sdch
+    Accept-Language: en-US,en;q=0.8
+    Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3
+    ```
+  </Tab>
+
+  <Tab title="第 3 步">
+    ### 步骤 3：将 request token 转换为 access token
+
+    要将 request token 转换为可用的 access token，你的应用必须向 [POST oauth/access&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-access-token) 端点发起请求，其中包含在步骤 2 中获取的 oauth&#95;verifier 值。request token 也会通过头部中的 oauth&#95;token 字段传递，不过这部分会在签名过程中自动添加。
+
+    **示例请求（Authorization 头部已换行展示）：**
+
+    ```
+    POST /oauth/access_token HTTP/1.1
+    User-Agent: themattharris' HTTP Client
+    Host: api.x.com
+    Accept: */*
+    Authorization: OAuth oauth_consumer_key="cChZNFj6T5R0TigYB9yd1w",
+                          oauth_nonce="a9900fe68e2573b27a37f10fbad6a755",
+                          oauth_signature="39cipBtIOHEEnybAR4sATQTpl2I%3D",
+                          oauth_signature_method="HMAC-SHA1",
+                          oauth_timestamp="1318467427",
+                          oauth_token="NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0",
+                          oauth_version="1.0"
+    Content-Length: 57
+    Content-Type: application/x-www-form-urlencoded
+
+    oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY
+    ```
+
+    成功的响应包含 oauth&#95;token 和 oauth&#95;token&#95;secret 参数。应当将该 token 和 token secret 存储起来，并在今后向 X API 发起经过认证的请求时使用。要确定用户身份，请使用 [GET account/verify&#95;credentials](https://dev.x.com/rest/reference/get/account/verify_credentials)。
+
+    **示例响应（响应正文已折行显示）：**
+
+    ```
+    HTTP/1.1 200 OK
+    Date: Thu, 13 Oct 2011 00:57:08 GMT
+    Status: 200 OK
+    Content-Type: text/html; charset=utf-8
+    Content-Length: 157
+    Pragma: no-cache
+    Expires: Tue, 31 Mar 1981 05:00:00 GMT
+    Cache-Control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+    Vary: Accept-Encoding
+    Server: tfe
+
+    oauth_token=7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4&
+    oauth_token_secret=PbKfYqSryyeKDWz4ebtY3o5ogNLG11WJuZBc9fQrQo
+    ```
+  </Tab>
+</Tabs>
+
+<Tabs>
+  <Tab title="其他资源">
+    ### 使用 X 登录相关资源
+
+    #### 客户端库
+
+    [X libraries](/zh/resources/tools-and-libraries) 中列出的客户端库将帮助你实现 “Log in with X” 功能。请按前面步骤所述使用 `/oauth/authenticate` 端点。
+
+    #### 品牌工具包
+
+    X 希望你的应用使用官方的 [X Brand Toolkit](https://about.x.com/en/who-we-are/brand-toolkit) 以保持一致的品牌形象。请保存这些素材，并在创建 “Login with X” 按钮时使用它们。
+  </Tab>
+
+  <Tab title="浏览器登录流程">
+    浏览器登录流程适用于能够打开或嵌入网页浏览器的网站和应用。概括来说：
+
+    * 应用显示一个 “Sign in with X” 链接或按钮。
+    * 用户点击登录按钮。
+    * 当前网页浏览器会被重定向到 X（或者打开一个新的浏览器并跳转到 X）。
+    * 如有需要，用户在 X 上完成登录和授权步骤。
+    * X 重定向回由应用控制的 URL，并传递用户的授权信息。
+
+    X 会跟踪授权情况，因此，对于已经在 X.com 登录且已授权该应用的用户，不会显示任何界面——他们会被自动重定向回应用。
+
+    ### 桌面端流程
+
+    <Frame>
+      <img src="/images/browser_111.png" alt="" />
+    </Frame>
+
+    为了演示这些流程，可以假设上图中的网站（“The greatest website ever created”）已经实现了此 API，正如其首页上的 Sign in with X 按钮所示。
+
+    当用户点击 Sign in 按钮时，他们看到的页面取决于是否已登录，以及是否已允许应用访问其账号。
+
+    当用户已登录 x.com 但尚未授予访问权限时，会显示请求的权限列表，以及 Sign In 和 Cancel 按钮。
+
+    当用户尚未登录 x.com 时，会显示用于输入用户名和密码的输入框。请注意，即使用户已向应用授予访问权限，权限列表仍会显示。
+
+    <Frame>
+      <img src="/images/browser_2.png" alt="" />
+    </Frame>
+
+    <Frame>
+      <img src="/images/browser_3.png" alt="" />
+    </Frame>
+
+    <Frame>
+      <img src="/images/browser_4.png" alt="" />
+    </Frame>
+
+    在用户输入有效凭据（如有需要）并点击 “Sign In” 之后，X 会将用户重定向回启动登录流程的网站。
+
+    如果用户已经在 x.com 登录并已授予该网站访问权限，则会立即发生此重定向。
+  </Tab>
+
+  <Tab title="移动端登录流程">
+    移动网页浏览器的 UI 流程与浏览器登录流程完全相同，但针对移动浏览器进行了优化。
+
+    下图为已登录、未登录以及重定向界面的截图：
+
+    <Frame>
+      <img src="/images/authorize-login-screenshot.png" alt="" />
+    </Frame>
+
+    <Frame>
+      <img src="/images/authorize-logged-in" alt="" />
+    </Frame>
+
+    <Frame>
+      <img src="/images/redirect-application.png" alt="" />
+    </Frame>
+  </Tab>
+</Tabs>

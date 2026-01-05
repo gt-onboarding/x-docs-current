@@ -1,0 +1,100 @@
+---
+title: v1에서 v2로
+sidebarTitle: v1에서 v2로
+keywords: ["v1.1에서 v2로 마이그레이션", "user lookup 마이그레이션", "user lookup 마이그레이션하기", "standard에서 v2 user lookup으로", "v1에서 v2 user lookup으로", "마이그레이션 가이드"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="standard-v11-compared-to-x-api-v2">
+  ### Standard v1.1과 X API v2 비교
+</div>
+
+standard v1.1의 `GET users/show` 및 `GET users/lookup`을 사용해 오셨다면, 이 가이드는 standard v1.1과 X API v2의 users 조회 엔드포인트 간 유사점과 차이점을 이해하는 데 도움이 되도록 작성되었습니다.
+
+* **유사점**
+  * OAuth 1.0a 사용자 컨텍스트
+  * 요청당 조회 가능한 사용자 수 제한
+* **차이점**
+  * 엔드포인트 URL
+  * 앱 및 프로젝트 요구사항
+  * 응답 데이터 형식
+  * 요청 매개변수
+
+<div id="similarities">
+  #### 유사점
+</div>
+
+**OAuth 1.0a 사용자 컨텍스트 인증 방식**
+
+표준 엔드포인트는 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2)를 지원하는 반면, 새로운 X API v2 users lookup 엔드포인트는 OAuth 1.0a 사용자 컨텍스트와 [앱 전용](/ko/resources/fundamentals/authentication#oauth-2-0) 방식을 모두 지원합니다. 따라서 이전에 표준 v1.1 users lookup 엔드포인트 중 하나를 사용하고 있었다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다. 
+
+사용하는 인증 라이브러리/패키지에 따라 다를 수 있지만, 앱 전용 인증은 시작하기에 가장 간편한 방법일 가능성이 높으며, 간단한 요청 헤더만 설정하면 사용할 수 있습니다. 앱 전용 액세스 토큰을 생성하는 방법은 [이 앱 전용 가이드](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)를 참조하세요. 
+
+**요청당 사용자 수 제한**
+
+표준 v1.1 GET users/lookup 엔드포인트에서는 요청당 최대 100명의 사용자를 지정할 수 있습니다. 이는 GET /users 및 GET /users/by 엔드포인트에도 동일하게 적용됩니다. 100명의 사용자를 모두 지정하려면 ids(GET /users) 파라미터 또는 username(GET /users/by) 파라미터를 쿼리 파라미터로 전달하고, 사용자 ID/사용자 이름 목록을 쉼표로 구분한 목록으로 포함해야 합니다. 
+ 
+
+<div id="differences">
+  #### 차이점
+</div>
+
+**엔드포인트 URL**
+
+* Standard v1.1 엔드포인트:
+  * https://api.x.com/1.1/users/show (단일 ID 또는 username 조회)
+  * https://api.x.com/1.1/users/lookup (다중 ID 또는 username 조회)
+* X API v2 엔드포인트:
+  * https://api.x.com/2/users (다중 ID 조회)
+  * https://api.x.com/2/users/:id (단일 ID 조회)
+  * https://api.x.com/2/users/by (다중 username 조회)
+  * https://api.x.com/2/users/by/username/:username (단일 username 조회)
+
+**앱 및 프로젝트 요건**
+
+X API v2 엔드포인트를 사용하려면, 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps) 이(가) [Project](/ko/resources/fundamentals/projects) 와 연결되어 있는 자격 증명을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 독립 실행형 앱 또는 프로젝트와 연결된 앱의 자격 증명을 사용할 수 있습니다. 
+
+**응답 데이터 형식**
+
+Standard v1.1과 X API v2 엔드포인트 버전 간의 가장 큰 차이점 중 하나는 페이로드에 어떤 필드를 반환할지 선택하는 방식입니다.
+
+Standard 엔드포인트의 경우, 응답 필드의 상당수가 기본적으로 제공되며, 이후 매개변수를 사용하여 어떤 필드 또는 필드 집합을 페이로드에 반환할지 지정할 수 있습니다.
+
+X API v2 버전은 기본적으로 user id, name, username 필드만 제공합니다. 추가 필드나 객체를 요청하려면 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 매개변수를 사용해야 합니다. 이 엔드포인트에서 요청한 모든 user 필드는 기본 user 객체에 포함되어 반환됩니다. 확장된 Post 객체와 해당 필드는 응답의 includes 객체 내에 포함되어 반환됩니다. 그런 다음 user 객체와 확장된 Post 객체에 모두 포함된 ID를 매칭하여, 확장된 객체를 다시 user 객체와 연결할 수 있습니다. 
+
+이러한 새 매개변수에 대해 더 자세히 알아보려면 각 가이드를 참고하거나, [fields 및 expansions 사용 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에 대한 가이드를 읽어 보시기 바랍니다. 
+
+또한 standard v1.1 필드를 새로운 v2 필드에 매핑하는 데 도움이 되는 [데이터 형식 마이그레이션 가이드](/ko/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)도 제공하고 있습니다. 이 가이드는 특정 필드를 반환하기 위해 v2 요청에 함께 전달해야 하는 expansion 및 field 매개변수를 구체적으로 안내합니다. 
+ 
+
+특정 필드를 요청하는 방식의 변경에 더해, X API v2는 API가 반환하는 객체(예: [Post](/ko/x-api/fundamentals/data-dictionary#tweet) 및 [user](/ko/x-api/fundamentals/data-dictionary#user) 객체)에 대해 새로운 JSON 디자인도 도입하고 있습니다.
+
+* JSON 루트 레벨에서 standard 엔드포인트는 Post 객체를 statuses 배열로 반환하는 반면, X API v2는 data 배열로 반환합니다. 
+* 리트윗 및 인용을 &quot;statuses&quot;로 지칭하는 대신, X API v2 JSON은 리트윗 및 인용 트윗으로 지칭합니다. contributors 및 user.translator&#95;type 과 같은 많은 레거시 및 사용 중단 예정 필드는 제거됩니다. 
+* Post 객체의 favorites 와 user 객체의 favourites 를 모두 사용하는 대신, X API v2는 like라는 용어를 사용합니다. 
+* X는 값이 없는 JSON 값(예: null)을 페이로드에 기록하지 않는 컨벤션을 채택하고 있습니다. Post 및 user 속성은 null이 아닌 값을 가진 경우에만 포함됩니다. 
+   
+
+또한 다음을 포함하여 [Post 객체](/ko/x-api/fundamentals/data-dictionary#tweet)에 새로운 필드 집합을 도입했습니다:
+
+* [conversation&#95;id](/ko/x-api/fundamentals/conversation-id) 필드
+* context 및 entities를 포함하는 두 개의 새로운 [annotations](/ko/x-api/fundamentals/post-annotations) 필드
+* 여러 개의 새로운 [metrics](/ko/x-api/fundamentals/metrics) 필드 
+* 특정 Post에 누가 답글을 달 수 있는지 표시하는 새로운 reply&#95;setting 필드
+
+**요청 매개변수**
+
+다음 standard v1.1 요청 매개변수는 X API v2에서의 해당 항목은 다음과 같습니다:
+
+|     |     |
+| :--- | :--- |
+| **Standard** | **X API v2** |
+| user&#95;id | ids |
+| screen&#95;name | username |
+
+또한 X API v2에서 지원되지 **않는** standard users lookup 요청 매개변수 집합이 있습니다:
+
+| Standard | Comment |
+| :--- | :--- |
+| include&#95;entities | 이 파라미터는 게시물 페이로드에서 entities 노드를 제거하는 데 사용됩니다. 추가적인 fields 및 expansions 기능으로 대체되었습니다. |

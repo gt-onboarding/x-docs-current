@@ -1,0 +1,103 @@
+---
+title: Guía de integración
+sidebarTitle: Guía de integración
+keywords: ["integración para gestión de publicaciones", "integración para creación de publicaciones", "integración para publicar publicaciones", "guía para gestión de publicaciones", "configuración para crear publicaciones"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+Esta página contiene información sobre diversas herramientas y conceptos clave que debes tener en cuenta al integrar los endpoints de gestión de Publicaciones en tu sistema. Hemos dividido la página en varias secciones:
+
+* [Herramientas útiles](#helpful)
+* Conceptos clave
+* [Autenticación](#authentication)
+* [Developer portal, Proyectos y Aplicaciones](#portal)
+* [Límites de frecuencia](#limits)
+* [Etiquetas de origen](#source)[](#source)[](#source)
+* [Configuración del perfil](#settings)
+* [Agregar contenido multimedia a una Publicación](#media)
+
+<div id="helpful-tools">
+  ## Herramientas útiles
+</div>
+
+Antes de profundizar en algunos conceptos clave que te ayudarán a integrar este endpoint, te recomendamos que te familiarices con:
+
+<div id="postman">
+  ### Postman
+</div>
+
+Postman es una excelente herramienta que puedes utilizar para probar un endpoint. Cada solicitud de Postman incluye todos los parámetros de ruta y de cuerpo para ayudarte a comprender rápidamente qué opciones tienes disponibles. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra página [&quot;Uso de Postman&quot;](/es/tutorials/postman-getting-started). 
+ 
+
+<div id="code-samples">
+  ### Ejemplos de código
+</div>
+
+¿Te interesa configurar este endpoint usando código en tu lenguaje de programación preferido? Tenemos varios ejemplos de código disponibles que puedes usar como punto de partida en nuestra [página de GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+ 
+
+<div id="third-party-libraries">
+  ### Bibliotecas de terceros
+</div>
+
+Aprovecha una de las [bibliotecas de terceros](/es/x-api/tools-and-libraries/overview) de nuestras comunidades para empezar. Puedes encontrar una biblioteca que funcione con los endpoints de la v2 buscando la etiqueta de versión adecuada.
+ 
+
+<div id="key-concepts">
+  ## Conceptos clave
+</div>
+
+<div id="authentication">
+  ### Autenticación
+</div>
+
+Todos los endpoints de X API v2 requieren que autentiques tus solicitudes con un conjunto de credenciales, también conocidas como claves y tokens. 
+
+Estos endpoints en particular requieren el uso de [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), lo que significa que debes usar un conjunto de claves de API y tokens de acceso de usuario para realizar una solicitud correcta. Los tokens de acceso deben estar asociados con el usuario en cuyo nombre estás realizando la solicitud. Si deseas generar un conjunto de tokens de acceso para otro usuario, ese usuario debe autorizar o autenticar tu App usando el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
+
+Ten en cuenta que OAuth 1.0a puede ser difícil de usar. Si no estás familiarizado con este método de autenticación, te recomendamos que uses una [biblioteca](/es/x-api/tools-and-libraries/overview), una herramienta como Postman o OAuth 2.0 para autenticar tus solicitudes.
+
+[OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) permite un mayor control sobre el ámbito de una aplicación y flujos de autorización en múltiples dispositivos. OAuth 2.0 te permite elegir ámbitos específicos y granulares que te otorgan permisos concretos en nombre de un usuario. 
+
+Para habilitar OAuth 2.0 en tu App, debes activarlo en la configuración de autenticación de tu App, que se encuentra en la sección **App settings** del portal para desarrolladores.
+
+<div id="developer-portal-projects-and-developer-apps">
+  ### Portal para desarrolladores, Proyectos y aplicaciones de desarrollador
+</div>
+
+Para obtener un conjunto de credenciales de autenticación que funcionen con los endpoints de X API v2, debes tener una [cuenta de desarrollador](/es/resources/fundamentals/developer-portal), configurar un [Proyecto](/es/resources/fundamentals/projects) dentro de esa cuenta y crear una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) dentro de ese Proyecto. Luego podrás encontrar tus claves y tokens dentro de tu aplicación de desarrollador. 
+ 
+
+<div id="rate-limits">
+  ### Límites de frecuencia
+</div>
+
+Cada día, muchos miles de desarrolladores realizan solicitudes a la X API. Para ayudar a gestionar el gran volumen de estas solicitudes, se aplican [límites de frecuencia](https://developer.x.com/x-api/fundamentals/rate-limits) a cada endpoint, lo que limita la cantidad de solicitudes que puedes realizar en nombre de tu aplicación o en nombre de un usuario autenticado.
+
+Estos endpoints tienen límites de frecuencia a nivel de usuario, lo que significa que el usuario autenticado en cuyo nombre estás realizando la solicitud solo puede llamar al endpoint un número determinado de veces a través de cualquier aplicación de desarrollador. Existe un límite de frecuencia de usuario de 200 solicitudes cada 15 minutos para el método POST. El método DELETE tiene un límite de frecuencia de 50 solicitudes cada 15 minutos. Además, hay un límite de [300 solicitudes cada 3 horas](https://blog.x.com/developer/en_us/topics/tools/2018/new-developer-requirements-to-protect-our-platform), incluidas las Publicaciones creadas ya sea mediante manage Posts o manage Retweets.
+ 
+
+<div id="source-labels">
+  ### Etiquetas de origen
+</div>
+
+El nombre de tu Aplicación y la URL de tu sitio web se mostrarán como la [etiqueta de origen](https://help.x.com/en/using-twitter/how-to-tweet#source-labels) dentro de los metadatos de cualquier Publicación creada de manera programática por tu aplicación. Si cambias el caso de uso de una Aplicación de X, asegúrate de actualizar el caso de uso en estos ajustes para garantizar que sigues cumpliendo con los [Developer Terms](https://developer.x.com/content/developer-twitter/en/developer-terms/agreement-and-policy).
+ 
+
+<div id="profile-settings">
+  ### Configuración del perfil
+</div>
+
+Solo puedes añadir una ubicación a las Publicaciones si tienes la geolocalización habilitada en la configuración de tu perfil. Si no tienes la geolocalización habilitada, todavía puedes añadir un parámetro de ubicación en el cuerpo de tu solicitud, pero no se adjuntará a tu Publicación. Lo mismo sucede al etiquetar usuarios en imágenes. Si el usuario al que estás etiquetando no tiene habilitado el etiquetado de fotos, su nombre no aparecerá en la lista de usuarios etiquetados aunque la Publicación se haya creado correctamente. 
+ 
+
+<div id="adding-media-to-a-post">
+  ### Agregar contenido multimedia a una Publicación
+</div>
+
+Actualmente, no hay una forma de cargar contenido multimedia por completo usando la v2 de la X API. Sin embargo, puedes adjuntar a una Publicación contenido multimedia que ya haya sido cargado previamente. Puedes usar ids de contenido multimedia que ya hayan sido [cargados usando el endpoint de contenido multimedia de la v1](https://developer.x.com/en/docs/twitter-api/v1/media/upload-media/api-reference/post-media-upload) o [X Media Studio](https://media.x.com/en/articles/products/2018/media-studio). Estos media ids deben pertenecer a tu cuenta o a la de un usuario autenticado.
+
+**Próximos pasos**
+
+[Referencia de la API](/es/x-api/posts/manage-tweets#manage-tweets-api-reference-index)

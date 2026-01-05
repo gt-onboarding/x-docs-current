@@ -1,0 +1,133 @@
+---
+title: API oEmbed
+description: "La API oEmbed devuelve HTML de inserción sencillo en un formato compatible con [oEmbed](http://oembed.com/)."
+mode: wide
+keywords: ["oEmbed", "oEmbed API", "embed API", "embed tweets", "embed content", "oEmbed format", "embed HTML"]
+---
+
+Puedes usar la API oEmbed para obtener de forma programática contenido insertado, como [Publicaciones](https://developer.x.com/en/docs/twitter-for-websites/embedded-tweets/overview) y [cronologías](https://developer.x.com/en/docs/twitter-for-websites/timelines/overview). 
+
+La respuesta de la API oEmbed será un fragmento de HTML que se reconocerá automáticamente cuando se [incluya el JavaScript de widgets de X en la página](https://developer.x.com/web/javascript/loading).
+
+Ten en cuenta que se recomienda usar la API para realizar tareas a gran escala, y te aconsejamos usar nuestra potente herramienta [publish.x.com](https://publish.x.com/#) para insertar contenido.
+
+<Tabs>
+  <Tab title="Cronologías incrustadas">
+    El fragmento de HTML devuelto se reconocerá automáticamente como una [cronología incrustada](https://developer.x.com/en/docs/twitter-for-websites/timelines/overview) cuando se incluya [el JavaScript de widgets de X en la página](https://developer.x.com/web/javascript/loading).
+
+    El endpoint oEmbed permite personalizar la apariencia final de una cronología incrustada configurando las propiedades correspondientes en el marcado HTML, que será interpretado por el JavaScript de X incluido de forma predeterminada en la respuesta HTML. El formato del marcado devuelto puede cambiar con el tiempo a medida que X agrega nuevas funciones o ajusta su representación de la cronología.
+
+    Devuelve, para una cronología de X especificada por la URL de la cronología, un JSON compatible con [oEmbed](https://oembed.com/). Se admiten cronologías de usuario y de lista. El marcado de la cronología está pensado para almacenarse en caché en tus servidores durante un máximo del tiempo de vida de caché recomendado, especificado por la propiedad cache&#95;age.
+
+    ## URL del recurso
+
+    *[https://publish.x.com/oembed](https://publish.x.com/oembed)*
+
+    ## Información del recurso
+
+    |                          |      |
+    | :----------------------- | :--- |
+    | Formatos de respuesta    | JSON |
+    | ¿Requiere autenticación? | No   |
+    | Límite de frecuencia     | No   |
+
+    ## Parámetros
+
+    | Nombre          | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ejemplo                                                                                                                                                        |
+    | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | **url**         | La URL de la cronología de X que se va a incrustar                                                                                                                                                                                                                                                                                                                                                                                                                     | *   [https://x.com/TwitterDev](https://x.com/TwitterDev)<br /> *[https://x.com/TwitterDev/lists/national-parks](https://x.com/TwitterDev/lists/national-parks) |
+    | limit           | Muestra hasta N elementos, donde N es un valor entre 1 y 20, inclusive                                                                                                                                                                                                                                                                                                                                                                                                 | 6                                                                                                                                                              |
+    | maxwidth        | Establece el ancho máximo del widget. Debe estar entre 180 y 1200, inclusive                                                                                                                                                                                                                                                                                                                                                                                           | 300                                                                                                                                                            |
+    | maxheight       | Establece la altura máxima del widget. Debe ser mayor que 200                                                                                                                                                                                                                                                                                                                                                                                                          | 400                                                                                                                                                            |
+    | omit&#95;script | No incluir un elemento script en la respuesta                                                                                                                                                                                                                                                                                                                                                                                                                          | 1                                                                                                                                                              |
+    | lang            | Un [código de idioma](/es/en/docs/twitter-for-websites/twitter-for-websites-supported-languages/overview "Twitter language code") de X admitido                                                                                                                                                                                                                                                                                                                           | es                                                                                                                                                             |
+    | theme           | Cuando se establece en dark, la cronología se muestra con texto claro sobre un fondo oscuro                                                                                                                                                                                                                                                                                                                                                                            | dark                                                                                                                                                           |
+    | chrome          | Elimina un componente de visualización de la cronología con tokens separados por espacios<br /><br />*   noheader - oculta el encabezado<br />*   nofooter - oculta el pie de página, si es visible<br />*   noborders - quita todos los bordes: alrededor del widget, entre publicaciones y dentro de una publicación<br />*   noscrollbar- recorta y oculta la barra de desplazamiento de la cronología, si es visible<br />*   transparent- quita el color de fondo | noheader%20nofooter                                                                                                                                            |
+    | aria&#95;polite | Establece un [nivel de cortesía ARIA de región viva](https://www.w3.org/TR/wai-aria/states_and_properties#aria-live) de tipo assertive para las publicaciones añadidas a una cronología                                                                                                                                                                                                                                                                                | assertive                                                                                                                                                      |
+    | dnt             | Cuando se establece en `true`, la cronología y su página incrustada en tu sitio no se utilizan con fines que incluyan [sugerencias personalizadas](https://support.x.com/articles/20169421) y [anuncios personalizados](https://support.x.com/articles/20170405)                                                                                                                                                                                                       | true                                                                                                                                                           |
+
+    ## Ejemplos de solicitudes
+
+    ```bash
+    curl --request GET --url 'https://publish.x.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F507185938620219395'
+    twurl -H publish.x.com "/oembed?url=https://x.com/Interior/status/463440424141459456"
+    ```
+
+    ## Ejemplo de respuesta
+
+    ```json
+
+    {
+      "url": "https://x.com/TwitterDev",
+      "title": "",
+      "html": "<a class=\"twitter-timeline\" href=\"https://x.com/TwitterDev\">Tweets by TwitterDev</a>\n<script async src=\"//platform.x.com/widgets.js\" charset=\"utf-8\"></script>",
+      "width": null,
+      "height": null,
+      "type": "rich",
+      "cache_age": "3153600000",
+      "provider_name": "Twitter",
+      "provider_url": "https://x.com",
+      "version": "1.0"
+    }
+    ```
+  </Tab>
+
+  <Tab title="Publicaciones incrustadas">
+    El fragmento HTML devuelto se reconocerá automáticamente como una [Publicación incrustada](https://developer.x.com/web/embedded-tweets) cuando [se incluya el JavaScript del widget de X en la página](https://developer.x.com/web/javascript/loading).
+
+    El endpoint oEmbed permite personalizar la apariencia final de una Publicación incrustada configurando las propiedades correspondientes en el marcado HTML que será interpretado por el JavaScript de X incluido con la respuesta HTML de forma predeterminada. El formato del marcado devuelto puede cambiar con el tiempo a medida que X añade nuevas funcionalidades o ajusta su representación de Publicaciones.
+
+    El marcado de respaldo de la Publicación debe almacenarse en caché en sus servidores durante el tiempo de vida de caché sugerido especificado por la propiedad `cache_age`.
+
+    ## URL del recurso
+
+    *[https://publish.x.com/oembed](https://publish.x.com/oembed)*
+
+    ## Información del recurso
+
+    |                              |      |
+    | :--------------------------- | :--- |
+    | Formatos de respuesta        | JSON |
+    | ¿Requiere autenticación?     | No   |
+    | ¿Tiene límite de frecuencia? | No   |
+
+    ## Parámetros
+
+    | Nombre                                                                                                                               | Valor predeterminado | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+    | :----------------------------------------------------------------------------------------------------------------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+    | `url` obligatorio  <br />String                                                                                                      |                      | La URL de la Publicación que se va a insertar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+    | `maxwidth`  <br />Int `[220..550]`                                                                                                   | `325`                | El ancho máximo, en píxeles enteros, de una Publicación renderizada. Un valor que se proporcione por debajo o por encima del intervalo permitido se devolverá como el ancho mínimo o máximo admitido, respectivamente; el valor de ancho ajustado se reflejará en la propiedad `width` devuelta. Ten en cuenta que X no admite el parámetro `maxheight` de oEmbed. Las Publicaciones son fundamentalmente texto y, por lo tanto, tienen una altura impredecible que no se puede escalar como una imagen o un vídeo. En relación con esto, la respuesta de oEmbed no proporcionará un valor para `height`. Las implementaciones que necesiten alturas consistentes para las Publicaciones deberían utilizar los parámetros `hide_thread` y `hide_media` que se indican a continuación. |
+    | `hide_media`  <br />Boolean, String o Int                                                                                            | `false`              | Cuando se establece en `true`, `"t"` o `1`, los enlaces de una Publicación no se convierten en vistas previas de fotos, vídeos ni enlaces.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+    | `hide_thread`  <br />Boolean, String o Int                                                                                           | `false`              | Cuando se configura en `true`, `"t"` o `1`, no se mostrará una versión contraída de la Publicación anterior en el hilo de conversación si la Publicación solicitada es una respuesta a otra Publicación.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+    | `omit_script`  <br />Boolean, String o Int                                                                                           | `false`              | Cuando se establece en `true`, `"t"` o `1`, no se incluirá el elemento `<script>` encargado de cargar `widgets.js`. Tus páginas web deben incluir su propia referencia a `widgets.js` para usarla en todos los widgets de X, incluidos los [Embedded Tweets](https://developer.x.com/web/embedded-tweets).                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+    | `align`  <br />Enum `{left,right,center,none}`                                                                                       | `none`               | Especifica si la Publicación incrustada debe alinearse a la izquierda, a la derecha o al centro de la página con respecto al elemento padre.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+    | `lang`  <br />Enum([Idioma](https://developer.x.com/en/docs/twitter-for-websites/twitter-for-websites-supported-languages/overview)) | `en`                 | La solicitud devolvió HTML y una Publicación renderizada en el [idioma de X compatible con las Publicaciones incrustadas](https://developer.x.com/web/overview/languages) especificado.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+    | `theme`  <br />Enum `{light, dark}`                                                                                                  | `light`              | Cuando se configura en `dark`, la Publicación se muestra con texto claro sobre un fondo oscuro.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+    | `dnt`  <br />Booleano                                                                                                                | `false`              | Si se establece en `true`, la Publicación y su página incrustada en tu sitio no se utilizan con fines que incluyan [sugerencias personalizadas](https://support.x.com/articles/20169421) y [anuncios personalizados](https://support.x.com/articles/20170405).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+
+    ## Solicitudes de ejemplo
+
+    ```bash
+    curl --request GET --url 'https://publish.x.com/oembed?url=https%3A%2F%2Ftwitter.com%2Ftwiterdev'
+    twurl -H publish.x.com "/oembed?url=https://x.com/TwitterDev"
+    ```
+
+    ## Ejemplo de respuesta
+
+    ```json
+    {
+      "url": "https:\/\/twitter.com\/Interior\/status\/463440424141459456",
+      "author_name": "US Department of the Interior",
+      "author_url": "https:\/\/twitter.com\/Interior",
+      "html": "<blockquote class=\"twitter-tweet\"><p lang=\"en\" dir=\"ltr\">Sunsets don&#39;t get much better than this one over <a href=\"https:\/\/twitter.com\/GrandTetonNPS?ref_src=twsrc%5Etfw\">@GrandTetonNPS<\/a>. <a href=\"https:\/\/twitter.com\/hashtag\/nature?src=hash&amp;ref_src=twsrc%5Etfw\">#nature<\/a> <a href=\"https:\/\/twitter.com\/hashtag\/sunset?src=hash&amp;ref_src=twsrc%5Etfw\">#sunset<\/a> <a href=\"http:\/\/t.co\/YuKy2rcjyU\">pic.x.com\/YuKy2rcjyU<\/a><\/p>&mdash; US Department of the Interior (@Interior) <a href=\"https:\/\/twitter.com\/Interior\/status\/463440424141459456?ref_src=twsrc%5Etfw\">May 5, 2014<\/a><\/blockquote>\n<script async src=\"https:\/\/platform.x.com\/widgets.js\" charset=\"utf-8\"><\/script>\n",
+      "width": 550,
+      "height": null,
+      "type": "rich",
+      "cache_age": "3153600000",
+      "provider_name": "X",
+      "provider_url": "https:\/\/twitter.com",
+      "version": "1.0"
+    }
+    ```
+  </Tab>
+</Tabs>

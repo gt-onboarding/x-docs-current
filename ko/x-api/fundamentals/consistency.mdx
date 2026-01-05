@@ -1,0 +1,120 @@
+---
+title: 일관성
+keywords: ["일관성", "API 일관성", "일관된 API", "일관된 엔드포인트", "API 설계", "엔드포인트 일관성"]
+---
+
+<div id="consistency-across-the-x-api-v2-endpoints">
+  ## X API v2 엔드포인트 전반의 일관성
+</div>
+
+새로운 X API v2의 주요 특징 중 하나는 엔드포인트 전반에 걸친 일관성입니다. 이는 API에서 반환되는 객체, 기능, 동작 방식이 유사한 엔드포인트 간에 동일하게 유지된다는 것을 의미합니다.
+
+모든 엔드포인트에서 다음 요소들은 동일합니다:
+
+<div id="path-naming">
+  ### 경로 명명
+</div>
+
+경로 명명에는 항상 엔드포인트 [버전](/ko/x-api/fundamentals/versioning)이 포함되며, 그 뒤에 **리소스**가 옵니다. 그다음으로는 앞에서 언급한 리소스와 연관된 **ID**, 어떤 데이터를 반환할지 결정하는 데 도움이 되는 **선택 동사**(예: `search` 또는 `sample`), 데이터가 어떻게 전달될지 결정하는 데 도움이 되는 **전달 동사**(예: `stream`), 또는 기본 리소스와 **관계**를 갖는 다른 리소스(예: `/user/12/tweets`)가 경로에 포함될 수 있습니다. 마지막으로, 엔드포인트에서 쿼리 매개변수를 지원하는 경우 끝에 **쿼리 매개변수**를 추가할 수 있습니다.
+
+다음은 이러한 경로 및 쿼리 항목을 어떻게 구성할 수 있는지에 대한 몇 가지 예시입니다:
+
+`/version/resource/id?param1=value&param2=value /version/resource/delivery/selection?param1=value&param2=value`
+
+실제 요청 예시는 다음과 같습니다:
+
+`/2/tweets/1067094924124872705?expansions=attachments.media_keys&tweet.fields=author_id /2/users/2244994945?user.fields=created_at,description /2/tweets/search/stream /2/tweets/search/recent?query=snow`
+
+<div id="json-schema">
+  ### JSON 스키마
+</div>
+
+요청에 대한 응답은 [JSON Schema](http://json-schema.org/)를 사용해 정의됩니다. 이는 요청에 대한 응답이 일관되게 객체 집합을 배열 형태로 반환하며, 각 요소가 id를 가진다는 것을 의미합니다. 응답은 id를 키로 사용하는 맵을 반환하지 않습니다.
+
+<div id="response-object-and-parameters">
+  ### 응답 객체 및 파라미터
+</div>
+
+각 객체 타입에 대한 모든 엔드포인트에서는 기본적으로 동일한 객체가 반환됩니다.
+
+* `id` 값은 항상 문자열입니다.
+* 파라미터와 응답 필드는 일관되게 미국식 영어 철자를 사용합니다.
+* 값이 없으면 필드는 비어 있거나 아예 반환되지 않습니다.
+* `entities` 객체에는 게시물 텍스트에서 추출된 엔티티만 포함됩니다. 여기에는 `urls`, `hashtags`, `mentions`, `cashtags`가 포함됩니다.
+* `media_keys` 및 `poll_ids` 필드를 포함한 모든 카드 관련 정보는 `attachments` 객체로 반환됩니다.
+
+다음은 [단일 게시물 조회](/ko/x-api/posts/post-lookup-by-post-id) 엔드포인트의 예시 응답 객체입니다([tweet.fields](/ko/x-api/fundamentals/data-dictionary#tweet) 파라미터를 `author_id`, `entities`로 설정한 경우):
+
+```json
+{
+   "data": {
+       "id": "1278747501642657792",
+       "text": "Twitter의 Developer Labs가 출시된 지 1년이 되었습니다.\n\n#TwitterAPI의 차세대 버전을 구축하는 과정에서(곧 출시 예정), 그동안 배우고 변경한 내용을 확인하세요. https://t.co/WvjuEWCa6G",
+       "author_id": "2244994945",
+       "entities": {
+           "urls": [
+               {
+                   "start": 188,
+                   "end": 211,
+                   "url": "https://t.co/WvjuEWCa6G",
+                   "expanded_url": "https://blog.x.com/developer/en_us/topics/tools/2020/a-year-with-twitter-developer-labs.html",
+                   "display_url": "blog.x.com/developer/en_u…",
+                   "images": [
+                       {
+                           "url": "https://pbs.twimg.com/news_img/1278747527043362816/7HQRkQeV?format=jpg&name=orig",
+                           "width": 1600,
+                           "height": 600
+                       },
+                       {
+                           "url": "https://pbs.twimg.com/news_img/1278747527043362816/7HQRkQeV?format=jpg&name=150x150",
+                           "width": 150,
+                           "height": 150
+                       }
+                   ],
+                   "status": 200,
+                   "title": "Twitter Developer Labs와 함께한 1년: 배우고 변경한 내용",
+                   "description": "Labs는 무엇이 효과적이고 무엇이 그렇지 않은지, 여러분이 무엇을 선호하고 무엇을 선호하지 않는지 이해하는 데 매우 유용했습니다.",
+                   "unwound_url": "https://blog.x.com/developer/en_us/topics/tools/2020/a-year-with-twitter-developer-labs.html"
+               }
+           ],
+           "hashtags": [
+               {
+                   "start": 106,
+                   "end": 117,
+                   "tag": "TwitterAPI"
+               }
+           ]
+       }
+   }
+}
+```
+
+<div id="authentication">
+  ### 인증
+</div>
+
+모든 X API v2 엔드포인트에는 인증이 필요합니다. 그중 상당수는 [OAuth 2.0 Bearer Token](/ko/resources/fundamentals/authentication#oauth-2-0) 방식을 지원하며, 요청을 성공적으로 수행하려면 엔드포인트에 대한 요청과 함께 Bearer Token을 제공해야 합니다.
+
+다른 사용자를 대신하여 데이터를 생성, 변경 또는 조회하기 위해 인가가 필요한 엔드포인트의 경우 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication)를 사용하십시오. 이는 [개발자 앱](/ko/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)의 [API keys and tokens](/ko/resources/fundamentals/authentication#api-key-and-secret)뿐만 아니라, 요청을 수행하려는 대상 사용자를 위해 생성한 [Access Tokens](/ko/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) 일련을 함께 제공해야 함을 의미합니다. [3-legged OAuth 플로우](/ko/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)를 사용하면 Access Tokens를 얻을 수 있습니다. 이 Authorization 헤더를 자동으로 생성해 주는 [도구나 라이브러리](/ko/x-api/tools-and-libraries/overview)를 사용하십시오.
+
+인증에 대한 자세한 내용은 [인증](/ko/resources/fundamentals/authentication) 관련 문서에서 확인할 수 있습니다.
+
+***
+
+<div id="fields">
+  ### Fields
+</div>
+
+각 엔드포인트에서 반환되는 오브젝트는 필요한 정보만 담은 축약 형태로 제공됩니다. 개발자가 API 응답을 더 세밀하게 제어할 수 있도록, 원하는 필드를 지정해 요청할 때 [`fields`](/ko/x-api/fundamentals/fields) 매개변수를 사용합니다. 필드는 엔드포인트 전반에 걸쳐 일관성을 유지합니다. Post 오브젝트는 Post 오브젝트가 반환되는 모든 엔드포인트에서 동일한 필드를 반환합니다. 동일한 필드 집합은 유사한 엔드포인트 전반에서 쿼리할 수 있습니다.
+
+예를 들어, 동일한 Post 필드는 [Posts lookup](/ko/x-api/posts/lookup/introduction)과 [Users lookup](/ko/x-api/users/lookup/introduction)에서 확장된 고정 Post(pinned Post)에 대해 쿼리할 수 있습니다.
+
+***
+
+<div id="expansions">
+  ### Expansions
+</div>
+
+적절한 경우, [expansions](/ko/x-api/fundamentals/expansions)는 모든 중첩 id 필드(예: `author_id`와 같은 `*_id`라는 이름의 모든 필드)에 대해 사용할 수 있습니다. `expansions`는 또한 현재 객체의 최상위 식별자가 아닌 id를 가지는 모든 필드에 대해서도 사용할 수 있습니다. 예를 들어, [Posts lookup](/ko/x-api/posts/lookup/introduction)에서 게시물(Post)은 필드 `id`를 최상위 식별자로 가지는 현재 객체입니다. `author_id` 또는 `referenced_tweets.id` 필드는 이러한 값을 쉼표로 구분하여 `expansions` 파라미터에 추가하면, 완전한 사용자 객체나 게시물(Post) 객체로 확장하여 가져올 수 있습니다.
+
+이러한 필드와 관련하여 발견하신 [불일치 사항을 보고](https://twitterdevfeedback.uservoice.com/)해 주시기 바랍니다.

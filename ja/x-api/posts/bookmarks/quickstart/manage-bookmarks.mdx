@@ -1,0 +1,120 @@
+---
+title: ブックマークの管理
+sidebarTitle: ブックマークの管理
+keywords: ["ブックマークの管理 クイックスタート", "ブックマーク クイックスタート", "ブックマーク チュートリアル", "ブックマーク ガイド", "ブックマーク クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-bookmarks-endpoints">
+  ## Bookmarks 管理エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して、Bookmarks 管理エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、GitHub の [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) リポジトリをご覧ください。 
+
+<Note>
+  **前提条件**
+
+  このガイドを実施するには、リクエストを認証するための一連の [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access) し、承認を得ます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページにアクセスし、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-manage-bookmarks-request">
+  ### ブックマーク管理リクエストを構築する手順
+</div>
+
+**ステップ1：ツールまたはライブラリを用意する**
+
+このエンドポイントへのリクエストを実行するために使用できるツール、コード例、ライブラリはいくつかありますが、ここではプロセスを簡略化するために Postman を使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Bookmarks」フォルダーに移動し、「Create a Bookmark」を選択します。
+
+**ステップ2：リクエストを認証する**
+
+このエンドポイントへのリクエストを正常に実行するには、[OAuth 2.0 Authorization Code Flow with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) を使用する必要があります。Postman 内でアクセストークンを生成できます。 
+
+「Authorization」というタブに移動し、「OAuth 2.0」を選択します。
+
+このタブで、必ず次の手順に従ってください。
+
+1. トークンに名前を付ける
+
+2. Grant Type として Authorization Code (with PKCE) を選択する
+
+3. パラメーターを更新する：
+
+   **Callback URL** - [https://www.example.com](https://www.example.com/)
+
+   これは、Developer Portal の認証設定ページで設定したコールバック URL と一致している必要があります。
+
+   **Auth URL** - [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize)
+
+   **Access Token URL** - [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token)
+
+   **Client ID** - Developer Portal から OAuth 2.0 Client ID をコピー＆ペーストします
+
+   **Client Secret **- Developer Portal から OAuth 2.0 Client Secret をコピー＆ペーストします。これは、confidential client タイプのアプリを使用している場合にのみ必要です。
+
+4. scope を次の値に更新する：post.read users.read bookmark.write
+
+5. state フィールドに「State」と入力する
+
+6. 「Generate Token」と書かれている箇所をクリックする
+
+7. 保存アイコンを押して、フォルダーの変更内容を保存する
+
+X にログインしていないというメッセージが表示される場合があります。このエラーが発生した場合は、Postman 内で、ポストを代行して実行しようとしている X アカウントにログインする必要があります。
+
+**ステップ3：ユーザーを指定する**
+
+このエンドポイントでは、レスポンスでフォロワーを取得したいユーザーの ID を指定する必要があります。たとえば、@XDevelopers のユーザー ID は `2244994945` です。
+
+Postman で「Params」タブに移動し、自身または認証済みユーザーの ID を id パラメーターの値として入力します。
+
+|    |     |              |
+| :- | :-- | :----------- |
+|    | Key | Value        |
+|    | id  | `2244994945` |
+
+**ステップ4：ブックマークしたいポストを指定する**
+
+「Body」タブに移動し、ブックマークに保存したいポストの Post ID が設定されていることを確認します。JSON ペイロードは次の例と同様の形式になります。
+
+```
+      {"tweet_id": "1460323737035677698"}
+```
+
+**ステップ5：リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら「Send」ボタンをクリックします。すると、次のサンプルレスポンスと同様の内容のレスポンスが返されます。
+
+```
+{
+   "data": {
+       "bookmarked": true
+   }
+}
+```
+
+ポストを削除するには、Postman に読み込んだ X API v2 コレクションの「Bookmarks」フォルダ内にある「Remove a Bookmark」リクエストを選択します。まず、リクエストを代行して送信するユーザーのユーザー ID を「`id`」列の値として指定します。このエンドポイントでは、削除したいポストの ID も指定する必要があります。次に、「Params」タブで、削除したいポストの ID を「`tweet_id`」列の値として入力します。 
+
+削除リクエストが成功すると、次の例のようなレスポンスが返されます。
+
+```
+{
+   "data": {
+       "bookmarked": false
+   }
+}
+```

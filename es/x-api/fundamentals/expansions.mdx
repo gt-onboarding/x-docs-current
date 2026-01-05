@@ -1,0 +1,198 @@
+---
+title: Expansiones
+keywords: ["expansions", "expandir objetos", "expansión de objetos", "objetos anidados", "objetos relacionados", "expandir usuarios", "expandir contenido multimedia", "expandir tweets"]
+---
+
+Con las expansiones, los desarrolladores pueden ampliar los objetos referenciados en el payload. Los objetos disponibles para expansión se referencian mediante su id. Por ejemplo, los campos `referenced_tweets.id` y `author_id` devueltos en el payload de [Posts lookup](/es/x-api/posts/lookup/introduction) se pueden expandir en objetos completos. Si deseas solicitar campos relacionados con el usuario que publicó esa Publicación, o con el contenido multimedia, la encuesta o el lugar que se incluyeron en esa Publicación, deberás incluir el parámetro de consulta de expansión correspondiente en tu solicitud para recibir esos datos en tu respuesta. Actualmente, los endpoints de la v2 que devuelven objetos de Publicaciones, Usuarios, Listas, Spaces y eventos de Mensajes Directos son compatibles con expansiones (consulta los ejemplos a continuación).
+
+Al incluir una expansión en tu solicitud, incluiremos los campos predeterminados de ese objeto expandido dentro de la misma respuesta. Esto ayuda a devolver datos adicionales en la misma respuesta sin necesidad de solicitudes separadas. Si deseas solicitar [campos](/es/x-api/fundamentals/fields) adicionales relacionados con el objeto expandido, puedes incluir el parámetro de campos asociado con ese objeto expandido, junto con una lista separada por comas de los campos que deseas recibir en tu respuesta. Ten en cuenta que los campos no siempre se devuelven en el mismo orden en que se solicitaron en la consulta.
+
+El payload de la Publicación que se muestra a continuación contiene id de referencia para objetos complementarios que podemos ampliar mediante expansiones, incluido el `author_id` de quien publicó la Publicación, el `id` de una Publicación *referenciada* y una `media_key` para un archivo adjunto de contenido multimedia.
+
+```json
+{
+    "data": {
+        "attachments": {
+            "media_keys": ["16_1211797899316740096"]
+        },
+        "author_id": "2244994945",
+        "id": "1212092628029698048",
+        "referenced_tweets": [
+            {
+                "type": "replied_to",
+                "id": "1212092627178287104"
+            }
+        ],
+        "text": "Creemos que la mejor versión futura de nuestra API surgirá de construirla CONTIGO. Un brindis por otro gran año con todos los que desarrollan en la plataforma de Twitter. Estamos ansiosos por seguir trabajando contigo en el nuevo año. https://t.co/yvxdK6aOo2"
+    }
+}
+```
+
+<div id="available-expansions-for-post-payloads">
+  ### Expansiones disponibles para cargas útiles de Publicaciones
+</div>
+
+| Expansión                      | Descripción                                                                        |
+|:--------------------------------|:------------------------------------------------------------------------------------|
+| `author_id`                    | Devuelve un objeto de usuario que representa al autor de la Publicación           |
+| `referenced_tweets.id`         | Devuelve un objeto de Publicación a la que hace referencia esta Publicación (ya sea como un Retweet, una Publicación citada o una respuesta) |
+| `edit_history_tweet_ids`       | Devuelve objetos de Publicación que forman parte del historial de edición de una Publicación |
+| `in_reply_to_user_id`          | Devuelve un objeto de usuario que representa al autor de la Publicación a la que responde la Publicación solicitada |
+| `attachments.media_keys`       | Devuelve un objeto de contenido multimedia que representa las imágenes, videos y GIF incluidos en la Publicación  |
+| `attachments.poll_ids`         | Devuelve un objeto de encuesta que contiene metadatos de la encuesta incluida en la Publicación |
+| `geo.place_id`                 | Devuelve un objeto de lugar que contiene metadatos de la ubicación etiquetada en la Publicación |
+| `entities.mentions.username`   | Devuelve un objeto de usuario del usuario mencionado en la Publicación        |
+| `referenced_tweets.id.author_id` | Devuelve un objeto de usuario del autor de la Publicación referenciada       |
+
+<div id="available-expansion-for-user-payloads">
+  ### Expansión disponible para cargas útiles de usuario
+</div>
+
+| Expansión          | Descripción                                               |
+|:--------------------|:-----------------------------------------------------------|
+| `pinned_tweet_id`  | Devuelve un objeto Post que representa la publicación fijada en la parte superior del perfil del usuario |
+
+<div id="available-expansions-for-direct-message-event-payloads">
+  ### Expansiones disponibles para cargas útiles de eventos de Mensajes Directos
+</div>
+
+| Expansion                | Description                                                              |
+|:--------------------------|:--------------------------------------------------------------------------|
+| `attachments.media_keys` | Devuelve un objeto de contenido multimedia que se adjuntó a un Mensaje Directo             |
+| `referenced_tweets.id`   | Devuelve un objeto Publicación al que se hizo referencia en un Mensaje Directo            |
+| `sender_id`              | Devuelve un objeto de usuario que representa al autor de un Mensaje Directo y que invitó a un participante a unirse a una conversación |
+| `participant_ids`        | Devuelve un objeto de usuario que representa a un participante que se unió o abandonó una conversación |
+
+<div id="available-expansions-for-spaces-payloads">
+  ### Expansiones disponibles para cargas útiles de Spaces
+</div>
+
+| Expansión          | Descripción                                               |
+|:--------------------|:-----------------------------------------------------------|
+| `invited_user_ids` | Devuelve objetos User que representan las cuentas que fueron invitadas |
+| `speaker_ids`      | Devuelve objetos User que representan las cuentas que hablaron durante un Space |
+| `creator_id`       | Devuelve un objeto User que representa la cuenta que creó el Space |
+| `host_ids`         | Devuelve objetos User que representan las cuentas que se establecieron como anfitriones |
+| `topics_ids`       | Devuelve descripciones de temas que fueron definidos por el creador |
+
+<div id="available-expansion-for-lists-payloads">
+  ### Expansión disponible para cargas útiles de List
+</div>
+
+| Expansión   | Descripción                                                    |
+|:-------------|:----------------------------------------------------------------|
+| `owner_id`  | Devuelve un objeto User que representa la cuenta que creó y mantiene la List |
+
+<div id="expanding-the-media-object">
+  ## Ampliación del objeto de contenido multimedia
+</div>
+
+En la siguiente solicitud, pedimos la expansión `geo.place_id` para incluirla junto con los campos predeterminados de la Publicación:
+
+**Solicitud de ejemplo**
+
+```
+{`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+```
+
+**Ejemplo de respuesta**
+
+```
+{`{
+  "data": {
+      "geo": {
+          "place_id": "01a9a39529b27f36"
+      },
+      "id": "ID",
+      "text": "Test"
+  },
+  "includes": {
+      "places": [
+          {
+              "full_name": "Manhattan, NY",
+              "id": "01a9a39529b27f36"
+          }
+      ]
+  }
+}`}
+
+```
+
+<div id="expanding-the-poll-object">
+  ## Ampliar el objeto Poll
+</div>
+
+En la siguiente solicitud, solicitamos la expansión `attachments.poll_ids` para incluirla además de los campos predeterminados de la Publicación:
+
+**Solicitud de ejemplo**
+
+<CodeBlock language="bash">
+  {`curl 'https://api.x.com/2/tweets/1199786642791452673?expansions=attachments.poll_ids' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+</CodeBlock>
+
+**Respuesta de ejemplo**
+
+```
+{`{
+  "data": {
+      "attachments": {
+          "poll_ids": ["1199786642468413448"]
+      },
+      "id": "1199786642791452673",
+      "text": "C#"
+  },
+  "includes": {
+      "polls": [
+          {
+              "id": "1199786642468413448",
+              "options": [
+                  {
+                      "position": 1,
+                      "label": "“C Sharp”",
+                      "votes": 795
+                  },
+                  {
+                      "position": 2,
+                      "label": "“C Hashtag”",
+                      "votes": 156
+                  }
+              ]
+          }
+      ]
+  }
+}`}
+```
+
+<div id="expanding-the-place-object">
+  ## Ampliación del objeto Place
+</div>
+
+En la siguiente solicitud, solicitamos la expansión `geo.place_id` para incluirla junto con los campos predeterminados de la Publicación:
+
+**Solicitud de ejemplo**
+
+<CodeBlock language="bash">
+  {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+</CodeBlock>
+
+**Respuesta de ejemplo**
+
+```s
+{`{
+  "data": {
+      "geo": {
+          "place_id": "01a9a39529b27f36"
+      },
+      "id": "ID",
+      "text": "Test"
+  },
+  "includes": {
+      "places": [
+          {
+              "full_name": "Manhattan, NY",
+              "id": "01a9a39529b27f36"
+          }
+      ]
+  }
+}`}
+```

@@ -1,0 +1,103 @@
+---
+title: Consulta de cuentas silenciadas
+sidebarTitle: Consulta de cuentas silenciadas
+keywords: ["migración de consulta de cuentas silenciadas", "consulta de cuentas silenciadas de v1.1 a v2", "migrar consulta de cuentas silenciadas", "estándar a v2 cuentas silenciadas", "migración de cuentas silenciadas"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="mutes-lookup-standard-v11-compared-to-x-api-v2">
+  ### Búsqueda de cuentas silenciadas: v1.1 estándar en comparación con X API v2
+</div>
+
+Si has estado utilizando los endpoints estándar de la v1.1 [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-ids) y [GET mutes/users/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-list), el objetivo de esta guía es ayudarte a entender las similitudes y diferencias entre los endpoints de búsqueda de cuentas silenciadas de la v1.1 estándar y de X API v2.
+
+* **Similitudes**
+  * Autenticación
+* **Diferencias**
+  * URL de los endpoints
+
+  * Límites de usuarios por solicitud
+
+  * Requisitos de Aplicación y Proyecto
+
+  * Formatos de datos de respuesta
+
+  * Parámetros de solicitud
+
+<div id="similarities">
+  #### Similitudes
+</div>
+
+**Autenticación**
+
+Tanto los endpoints de consulta de cuentas silenciadas de la v1.1 estándar como los de X API v2 utilizan [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication#oauth-1-0a-2). Por lo tanto, si antes utilizabas uno de los endpoints de consulta de cuentas silenciadas de la v1.1 estándar, puedes seguir usando el mismo método de autenticación si migras a la versión de X API v2. 
+
+<div id="differences">
+  #### Diferencias
+</div>
+
+**URLs de endpoints**
+
+* Endpoints estándar v1.1:
+  * GET https://api.x.com/1.1/mutes/users/ids.json
+    (lista de IDs de usuarios que el usuario especificado silenció)
+  * GET https://api.x.com/1.1/mutes/users/lists.json
+    (lista de usuarios que están silenciados por el usuario especificado)
+* Endpoint de X API v2:
+  * GET https://api.x.com/2/users/:id/muting
+    (lista de usuarios que están silenciados por el usuario con el ID especificado)
+     
+
+**Límites de usuarios por solicitud**
+
+Los endpoints estándar v1.1 permiten devolver hasta 5000 usuarios por solicitud. Los nuevos endpoints v2 permiten devolver hasta 1000 usuarios por solicitud. Para devolver los 1000 usuarios completos, deberás pasar max&#95;results=1000 como parámetro de consulta; luego puedes pasar el next&#95;token devuelto en la carga de respuesta al parámetro de consulta pagination&#95;token en tu siguiente solicitud.
+ 
+
+**Requisitos de Aplicación y Proyecto**
+
+Los endpoints de X API v2 requieren que utilices credenciales de una [developer App](/es/resources/fundamentals/developer-apps) que esté asociada con un [Project](/es/resources/fundamentals/developer-apps) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de Apps independientes o de Apps asociadas con un proyecto.
+
+**Formato de datos de la respuesta**
+
+Una de las mayores diferencias entre las versiones de endpoints estándar v1.1 y X API v2 es cómo seleccionas qué campos se devuelven en tu carga.
+
+Para los endpoints estándar, recibes muchos de los campos de respuesta de forma predeterminada y luego tienes la opción de usar parámetros para identificar qué campos o conjuntos de campos deben devolverse en la carga.
+
+La versión de X API v2 solo entrega de forma predeterminada los campos user id, name y username. Para solicitar cualquier campo u objeto adicional, deberás usar los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions). Cualquier campo de usuario que solicites desde este endpoint se devolverá en el objeto de usuario principal. Cualquier objeto de Publicación expandido y sus campos se devolverán en un objeto includes dentro de tu respuesta. Luego puedes hacer coincidir cualquier objeto expandido con el objeto de usuario haciendo coincidir los id presentes tanto en el usuario como en el objeto de Publicación expandido. 
+
+Te recomendamos leer más sobre estos nuevos parámetros en sus guías respectivas o leyendo nuestra guía sobre [cómo usar fields y expansions](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions). 
+
+También hemos preparado una [guía de migración de formato de datos](/es/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2), que puede ayudarte a mapear campos estándar v1.1 a los campos más recientes de v2. Esta guía también te proporcionará el parámetro específico de expansión y de campo que deberás pasar con tu solicitud v2 para devolver campos específicos. 
+ 
+
+Además de los cambios en cómo solicitas ciertos campos, X API v2 también está introduciendo nuevos diseños JSON para los objetos devueltos por las APIs, incluidos los objetos de [Post](/es/x-api/fundamentals/data-dictionary#tweet) y [user](/es/x-api/fundamentals/data-dictionary#user).
+
+* En el nivel raíz de JSON, los endpoints estándar devuelven objetos de Publicación en un arreglo statuses, mientras que X API v2 devuelve un arreglo data. 
+* En lugar de hacer referencia a &quot;statuses&quot; Retweeted y Quoted, el JSON de X API v2 hace referencia a Publicaciones Retweeted y Quoted. Muchos campos heredados y obsoletos, como contributors y user.translator&#95;type, se están eliminando. 
+* En lugar de usar tanto favorites (en el objeto de Publicación) como favourites (en el objeto de usuario), X API v2 usa el término like. 
+* X está adoptando la convención de que los valores JSON sin valor (por ejemplo, null) no se escriben en la carga. Los atributos de Publicación y usuario solo se incluyen si tienen valores no nulos. 
+   
+
+También hemos introducido un nuevo conjunto de campos en el [Post object](/es/x-api/fundamentals/data-dictionary#tweet), incluidos los siguientes:
+
+* Un campo [conversation&#95;id](/es/x-api/fundamentals/conversation-id)
+* Dos nuevos campos de [annotations](/es/x-api/fundamentals/post-annotations), incluidos context y entities
+* Varios campos nuevos de [métricas](/es/x-api/fundamentals/metrics) 
+* Un nuevo campo reply&#95;setting, que te muestra quién puede responder a una Publicación determinada
+
+**Parámetros de solicitud**
+
+Los siguientes parámetros de solicitud estándar v1.1 tienen equivalentes en X API v2:
+
+| **Standard** | **X API v2** |
+| :--- | :--- |
+| stringify&#95;ids | Sin equivalente |
+| cursor | pagination&#95;token |
+| skip&#95;status | Sin equivalente |
+
+También hay un conjunto de parámetros estándar de solicitud de consulta de silenciamientos de v1.1 que **no** son compatibles con X API v2:
+
+| Standard | Comentario |
+| :--- | :--- |
+| include&#95;entities | Este parámetro se usa para eliminar el nodo entities de la carga útil de la Publicación. Se ha reemplazado por la funcionalidad aditiva de campos y expansiones. |

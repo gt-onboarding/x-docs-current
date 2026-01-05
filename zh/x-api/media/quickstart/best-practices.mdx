@@ -1,0 +1,121 @@
+---
+title: 最佳实践
+sidebarTitle: 最佳实践
+keywords: ["媒体上传最佳实践", "上传媒体", "媒体最佳实践", "图片上传", "视频上传", "媒体上传指南"]
+---
+
+在使用 [`POST /2/media/upload`](/zh/x-api/media/media-upload) 端点时，有几个重要概念需要了解。使用 OAuth 上传媒体可能会有些棘手，因此我们在此列出了一些需要牢记的要点，并提供了一个可运行示例，演示如何使用该端点。
+
+<div id="keep-in-mind">
+  ## 请注意
+</div>
+
+* 在一条帖子中，你最多可以附加 4 张照片、1 个动画 GIF 或 1 个视频。
+* 传入的图片应为原始二进制数据或其 base64 二进制编码；只要正确设置了 Content-Type（不确定时可使用：`application/octet-stream`），则无需对内容进行其他编码或转义。
+* 在发布 base64 编码图片时，请务必在消息体中图片所在的部分设置 “Content-Transfer-Encoding: base64”。
+* 多部分消息的分界线必须单独占一行，并以 CRLF 结束。
+* 若要查看如何使用此端点发起 POST 请求的示例，我们建议使用 [xurl](https://github.com/xdevplatform/xurl) 进行测试。同时也可以查看可用的 [X Libraries](/zh/resources/tools-and-libraries)。
+* 对于 JavaScript 和其他无法精确表示长整型整数的语言，请使用 API 响应中提供的 `media_id_string`。
+
+<div id="media-categories">
+  ## 媒体类别
+</div>
+
+媒体类别（Media Category）参数定义要上传的媒体文件的使用场景，并可能影响针对媒体上传所施加的文件大小限制或其他约束。在上传媒体时使用正确的媒体类别非常重要，以避免在后续使用该媒体时出现问题。它是在上传流程中于 INIT 请求中传递的一个可选值。如果未指定媒体类别，则会根据内容类型，默认认为上传的媒体是用于帖子（`tweet_image`、`tweet_video` 或 `tweet_gif`）的媒体。
+
+最常见的媒体类别如下：
+
+* `tweet_image`
+* `tweet_video`
+* `tweet_gif`
+* `dm_image`
+* `dm_video`
+* `dm_gif`
+* `subtitles`
+
+如果你是 Ads API 合作伙伴，请参阅[这些文档](/zh/x-ads-api/creatives#promoted-video)，了解关于推广视频推荐媒体类别的更多信息。
+
+<div id="image-specifications-and-recommendations">
+  ## 图像规范和建议
+</div>
+
+图像文件必须满足以下所有条件：
+
+* **支持的图像媒体类型**：`JPG`、`PNG`、`GIF`、`WEBP`
+* **图像大小**：`≤ 5 MB`
+* **动画 GIF 大小**：`≤ 15 MB`
+
+上述文件大小上限由媒体上传端点强制执行。除此之外，在调用带有 `media_id` 的帖子创建端点（或类似端点）时，还会应用与特定产品实体相关的单独文件大小上限。文件大小上限和其他约束可能会根据 `media_category` 参数而变化。
+
+<div id="animated-gif-recommendations">
+  ## GIF 动图建议
+</div>
+
+即使 GIF 符合文件大小限制，在创建帖子时也可能上传失败。请遵循以下限制条件，以提高上传成功率。
+
+* **分辨率**：`<= 1280x1080`（`width` x `height`）
+* **帧数**：`<= 350`
+* **像素总数**：`<= 3 亿`（`width` * `height` * `num_frames`）
+* **文件大小**：`<= 15MB`
+
+要处理更大的 GIF，请使用带有 `media_category` 参数的 [分块上传](/zh/x-api/media/quickstart/media-upload-chunked) 端点。这样可以让服务器异步处理 GIF 文件，这是处理大文件的必要前提。传入 `media_category=tweet_gif`，以为包含 GIF 动图的帖子启用异步上传行为。
+
+<div id="video-specifications-and-recommendations">
+  ## 视频规格和建议
+</div>
+
+请使用异步方式上传媒体。
+
+<div id="recommended">
+  ### 推荐设置
+</div>
+
+* **视频编码格式**: `H264 High Profile`
+* **帧率**: `30 FPS`, `60 FPS`
+* **视频分辨率**: `1280x720`（横屏）、`720x1280`（竖屏）、`720x720`（正方形）。已订阅用户可以上传 1080p 视频并获得 1080p 播放效果，未订阅用户可以上传 720p 视频并获得 720p 播放效果。
+* **最低视频码率**: `5,000 kbps`
+* **最低音频码率**: `128 kbps`
+* **音频编码格式**: `AAC LC`
+* **纵横比**: `16:9`（横屏或竖屏）、`1:1`（正方形）
+
+<div id="advanced">
+  ### 高级
+</div>
+
+* **帧率**：必须不超过 `60 FPS`
+* **分辨率**：必须介于 `32x32` 和 `1280x1024` 之间
+* **文件大小**：不得超过 `512 MB`
+* **时长**：必须介于 `0.5 秒` 和 `140 秒` 之间
+* **纵横比**：必须介于 `1:3` 和 `3:1` 之间
+* **[像素纵横比](https://en.wikipedia.org/wiki/Pixel_aspect_ratio)**：必须为 `1:1`
+* **像素格式**：仅支持 [YUV](https://en.wikipedia.org/wiki/YUV) 4:2:0
+* 音频必须为 [`AAC` 低复杂度（Low Complexity）配置文件](https://en.wikipedia.org/wiki/Advanced_Audio_Coding#Modular_encoding)（不支持高效 `AAC`）
+* 音频必须为 `mono` 或 `stereo`，不支持 5.1 或更高声道
+* 不得包含 [`open GOP`](https://en.wikipedia.org/wiki/Group_of_pictures)
+* 必须使用 [`progressive scan`](https://en.wikipedia.org/wiki/Progressive_scan)
+
+<div id="additional-information">
+  ### 其他信息
+</div>
+
+在下表中，每一行表示一个上传建议配置，而非硬性要求。所有上传的媒体都会经过处理，以便在多个平台上实现优化呈现。
+
+| Orientation | Width | Height | Video Bitrate | Audio Bitrate |
+| :--- | :--- | :--- | :--- | :--- |
+| 横向 | 1280 | 720 | 2048K | 128K |
+| 横向 | 640 | 360 | 768K | 64K |
+| 横向 | 320 | 180 | 256K | 64K |
+| 竖向 | 720 | 1280 | 2048K | 128K |
+| 竖向 | 360 | 640 | 768K | 64K |
+| 竖向 | 180 | 320 | 256K | 64K |
+| 正方形 | 720 | 720 | 2048K | 128K |
+| 正方形 | 480 | 480 | 768K | 64K |
+| 正方形 | 240 | 240 | 256K | 32K |
+
+有关如何上传媒体的示例，请参阅[分块媒体上传文档](/zh/x-api/media/quickstart/media-upload-chunked)。
+
+<div id="troubleshooting">
+  ### 疑难解答
+</div>
+
+如果在使用 Media API 时遇到问题，可以前往开发者论坛浏览 [Media API 分类](https://devcommunity.x.com/c/x-api/media-apis) 来查找答案。

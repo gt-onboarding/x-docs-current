@@ -1,0 +1,95 @@
+---
+title: Administrar silenciamientos
+sidebarTitle: Administrar silenciamientos
+keywords: ["guía rápida para administrar silenciamientos", "guía rápida para silenciar usuarios", "tutorial para administrar silenciamientos", "guía para silenciar", "guía rápida de silenciamientos"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-manage-mutes-endpoints">
+  ## Introducción a los endpoints de gestión de silencios
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud a los endpoints de gestión de silencios usando [Postman](/es/tutorials/postman-getting-started).
+
+Si deseas ver código de ejemplo en distintos lenguajes de programación, visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+
+<Note>
+  **Requisitos previos**
+
+  Para completar esta guía, necesitarás contar con un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y recibe la aprobación.
+  * Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Navega a la página “Keys and tokens” de tu App para generar las credenciales requeridas. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-build-a-manage-mutes-request">
+  ### Pasos para crear una solicitud para administrar silenciamientos
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### Paso uno: comience con una herramienta o biblioteca
+</div>
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puede usar para realizar una solicitud a este endpoint, pero aquí usaremos la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de X API v2 para Postman en su entorno, haga clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tenga la colección de X API v2 cargada en Postman, navegue hasta la carpeta “Mutes” y seleccione la solicitud “Mute a user’s ID”.
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### Paso dos: Autenticar tu solicitud
+</div>
+
+Para realizar correctamente una solicitud a la X API, debes verificar que tienes permiso. Para hacerlo con este endpoint, debes autenticar tu solicitud usando ya sea [OAuth 1.0a User Context](/es/resources/fundamentals/authentication) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+
+En este ejemplo, vamos a usar OAuth 1.0a User Context.
+
+Debes agregar tus claves y tokens – específicamente tu API Key, API Secret Key, OAuth 1.0a user Access Token y OAuth 1.0a user Access Token Secret – a Postman. Puedes hacer esto seleccionando el entorno llamado “X API v2” en la esquina superior derecha de Postman y agregando tus claves y tokens a los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el icono con forma de ojo junto al menú desplegable del entorno).
+
+Estas variables se rellenarán automáticamente en la pestaña de autorización de la solicitud si lo has hecho correctamente.
+ 
+
+<div id="step-three-specify-who-is-going-to-mute-whom">
+  #### Paso tres: especificar quién va a silenciar a quién
+</div>
+
+Los endpoints de gestión de silencios requieren dos IDs: uno para el usuario (el usuario que desea silenciar o dejar de silenciar a otro usuario) y el usuario de destino (el usuario que será silenciado o dejado de silenciar). El ID del usuario debe corresponder al ID del usuario que se autentica, lo que significa que debes pasar los Tokens de acceso asociados con el ID de usuario al autenticar tu solicitud. En este caso, puedes especificar el ID que pertenece a tu propio usuario. Puedes encontrar tu ID de dos maneras:
+
+1. Usando el endpoint de [búsqueda de usuarios](/es/x-api/users/lookup/introduction) por nombre de usuario, puedes pasar un nombre de usuario y recibir el campo id. 
+2. Si revisas tu Token de acceso, verás que la parte numérica es tu ID de usuario.
+    
+
+El ID de destino puede ser cualquier ID de usuario válido. En Postman, ve a la pestaña &quot;Params&quot; e introduce tu ID en la columna &quot;Value&quot; de la variable de ruta `id`. Ve a la pestaña &quot;Body&quot; e introduce el ID del usuario que deseas silenciar como valor del parámetro target&#95;user&#95;id. Asegúrate de no incluir espacios antes o después de ningún ID.
+
+|     |     |
+| :--- | :--- |
+| **Clave** | **Valor** |
+| `id` | ID del usuario autenticado |
+| target&#95;user&#95;id | el ID del usuario que deseas silenciar |
+
+<div id="step-four-make-your-request-and-review-your-response">
+  #### Paso cuatro: Realiza tu solicitud y revisa tu respuesta
+</div>
+
+Una vez que tengas todo configurado, haz clic en el botón «Send» y recibirás una respuesta similar a la siguiente respuesta de ejemplo:
+
+```
+      { "data": { "muting": true } }
+```
+
+Si recibes un &quot;muting&quot;: true, entonces el id está silenciando correctamente al target&#95;user&#95;id
+
+Para dejar de silenciar al mismo usuario, puedes usar la solicitud titulada “Unmute a user ID”, que también se encuentra en la carpeta “Mutes” de la colección de X API v2 cargada en Postman. El source&#95;user&#95;id debe ser tu ID de usuario y el target&#95;user&#95;id debe ser el ID de usuario que quieres dejar de silenciar. No tendrás que añadir esto como un cuerpo JSON, así que debes asegurarte de agregar los parámetros de consulta necesarios para source&#95;user&#95;id y target&#95;user&#95;id.
+
+Si el proceso para dejar de silenciar se completa correctamente, recibirás una respuesta similar al siguiente ejemplo:
+
+```
+      { "data": { "muting": false } }
+```

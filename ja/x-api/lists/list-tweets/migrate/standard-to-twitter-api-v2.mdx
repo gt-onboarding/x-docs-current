@@ -1,0 +1,120 @@
+---
+title: v1 から v2 へ
+sidebarTitle: v1 から v2 へ
+keywords: ["v1.1 から v2 への移行", "リストポストの移行", "リストポストを移行する", "Standard v1.1 から v2 のリストポストへの移行", "v1 から v2 のリストポスト", "移行ガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="list-posts-lookup-standard-v11-compared-to-x-api-v2">
+  ### リストのポスト取得: Standard v1.1 と X API v2 の比較
+</div>
+
+Standard v1.1 の [GET lists/statuses](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-statuses) エンドポイントを使用している場合、このガイドでは、Standard v1.1 と X API v2 の各エンドポイントの共通点と相違点を理解できるように説明します。
+
+* **共通点**
+  * 認証方法
+  * レート制限
+* **相違点**
+  * エンドポイント URL
+  * アプリおよびプロジェクトの要件
+  * リクエストごとのデータオブジェクト数の上限
+  * レスポンスデータの形式
+  * リクエストパラメータ
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**認証**
+
+両方のエンドポイントバージョンは [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-2-0) をサポートしています。そのため、以前に標準 v1.1 の List Posts ルックアップエンドポイントのいずれかを使用していた場合、X API v2 版に移行しても、同じ認証方法を引き続き利用できます。
+
+使用する認証ライブラリ／パッケージによっては、App only 認証が最も手軽な利用開始方法であり、シンプルなリクエストヘッダーで設定できます。App only アクセストークンの生成方法については、[この App only ガイド](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)を参照してください。
+
+**レート制限**
+
+|     |     |
+| :--- | :--- |
+| **Standard v1.1** | **X API v2** |
+| /1.1/lists/statuses.json<br /><br />OAuth 1.0a User Context で 15 分間あたり 900 件のリクエスト<br /><br />App only で 15 分間あたり 900 件のリクエスト | /2/lists/:id/tweets<br /><br />OAuth 1.0a User Context で 15 分間あたり 900 件のリクエスト<br /><br />OAuth 2.0 Authorization Code with PKCE で 15 分間あたり 900 件のリクエスト<br /><br />App only で 15 分間あたり 900 件のリクエスト |
+
+<div id="differences">
+  #### 相違点
+</div>
+
+**エンドポイント URL**
+
+* Standard v1.1 エンドポイント:
+  * GET https://api.x.com/1.1/lists/statuses.json
+    （指定したリストからポストを取得）
+* X API v2 エンドポイント:
+  * GET https://api.x.com/2/lists/:id/tweets
+    （指定したリストからポストを取得）
+
+**アプリとプロジェクトの要件**
+
+X API v2 のエンドポイントでは、リクエストを認証する際に、[developer App](/ja/resources/fundamentals/developer-apps) とそれに紐づいた [Project](/ja/resources/fundamentals/projects) の認証情報を使用する必要があります。すべての X API v1.1 エンドポイントでは、スタンドアロンのアプリ、またはプロジェクトに紐づいたアプリのいずれの認証情報も使用できます。
+
+**1 リクエストあたりのデータオブジェクト数の制限**
+
+標準 v1.1 の /lists/statuses エンドポイントでは、1 リクエストあたり最大 5000 件のポストを返すことができます。新しい v2 エンドポイントでは、1 リクエストあたり最大 100 件のポストを返すことができます。デフォルトでは 100 個のユーザーオブジェクトが返されます。結果数を変更するには、1〜100 の数値を指定したクエリパラメータ max&#95;results= を渡す必要があります。その後、レスポンスペイロードで返される next&#95;token を、次のリクエストのクエリパラメータ pagination&#95;token に渡します。
+
+**レスポンスデータ形式**
+
+標準 v1.1 と X API v2 のエンドポイントバージョンの最大の違いの 1 つは、ペイロードで返すフィールドをどのように選択するかです。
+
+標準エンドポイントでは、多くのレスポンスフィールドがデフォルトで返され、追加でどのフィールドまたはフィールドセットをペイロードに返すかを指定するためのパラメータをオプションで使用できます。
+
+X API v2 では、デフォルトで返されるのはポストの id と text フィールドのみです。追加のフィールドやオブジェクトをリクエストするには、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) パラメータを使用する必要があります。このエンドポイントからリクエストしたポストのフィールドは、すべてプライマリのポストオブジェクト内で返されます。展開されたオブジェクトのフィールドは、レスポンス内の includes オブジェクトで返されます。その後、プライマリオブジェクトと展開されたオブジェクトの ID を照合することで、展開されたオブジェクトをプライマリのポストオブジェクトに対応づけることができます。 
+
+以下は、指定可能なポストのフィールドおよび expansions の例です。
+
+* attachments
+
+* author&#95;id
+
+* context&#95;annotations
+
+* created&#95;at
+
+* geo
+
+* lang
+
+|     |     |
+| :--- | :--- |
+| **Endpoint** | **Expansion** |
+| /2/lists/:id/tweets | author&#95;id |
+
+これらの新しいパラメータの詳細については、それぞれのガイド、もしくは [fields と expansions の使用方法](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) に関するガイドを参照することをお勧めします。 
+
+また、標準 v1.1 のフィールドを新しい v2 のフィールドにマッピングするのに役立つ [データ形式マイグレーションガイド](/ja/x-api/migrate/data-format-migration) も用意しています。このガイドでは、特定のフィールドを返すために v2 のリクエストで指定する必要がある、具体的な expansion および field パラメータも示しています。 
+
+特定のフィールドのリクエスト方法の変更に加えて、X API v2 では API によって返されるオブジェクト（[Post](/ja/x-api/fundamentals/data-dictionary#tweet) や [user](/ja/x-api/fundamentals/data-dictionary#user) オブジェクトなど）の新しい JSON デザインも導入されています。
+
+* JSON のルートレベルでは、標準エンドポイントはポストオブジェクトを **statuses** 配列で返す一方、X API v2 は **data** 配列で返します。 
+
+* リツイートおよび引用された「statuses」を参照する代わりに、X API v2 の JSON ではリツイートされたポストおよび引用ポストを参照します。**contributors** や **user.translator&#95;type** など、多くのレガシーおよび非推奨フィールドは削除されています。 
+
+* Post オブジェクトでの **favorites**、user オブジェクトでの **favourites** の両方を使用する代わりに、X API v2 では **like** という用語を使用します。
+
+* X では、値が存在しない JSON 値（たとえば **null**）はペイロードに書き込まないという慣例を採用しています。ポストおよびユーザーの属性は、null 以外の値がある場合にのみ含まれます。
+   
+
+**リクエストパラメータ**
+
+次の標準 v1.1 のリクエストパラメータには、X API v2 での対応があります。
+
+|     |     |
+| :--- | :--- |
+| Standard v1.1 | X API v2 |
+| list&#95;id | id  |
+| slug | 対応するものはありません |
+| owner&#95;screen&#95;name | 対応するものはありません |
+| owner&#95;id | expansions パラメータで author&#95;id を値として指定してリクエスト |
+| since&#95;id | 対応するものはありません |
+| max&#95;id | 対応するものはありません |
+| include&#95;entities | entities を値とする tweet.fields パラメータでリクエスト |
+| include&#95;rts | 対応するものはありません |
+| count | max&#95;results |

@@ -1,0 +1,209 @@
+---
+title: Códigos de respuesta y errores
+sidebarTitle: Códigos de respuesta
+keywords: ["códigos de respuesta", "códigos de error", "códigos de estado HTTP", "errores de API", "gestión de errores", "depuración", "mensajes de error", "códigos de estado"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+La X API proporciona los siguientes códigos de respuesta y de error para ayudarte a comprender y depurar en el momento. Usa la guía de depuración y el índice de errores que aparecen a continuación para obtener contexto adicional.
+
+Las respuestas satisfactorias se indican con un código HTTP de la serie 200 y una carga útil basada en JSON que contiene los objetos solicitados, creados, modificados o eliminados, junto con una expresión de la interpretación que hace el servidor de tu solicitud.
+
+Las respuestas de error se devuelven con un código HTTP que no pertenece a la serie 200. Los distintos códigos de error indican diferentes motivos del error. La X API intenta devolver los [códigos de estado HTTP](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) apropiados para cada solicitud.
+
+<div id="x-api-v2-http-status-codes">
+  ## Códigos de estado HTTP de X API v2
+</div>
+
+| Code | Texto                 | Descripción                                                                                                                                                                                                                                                                               | Sugerencias para la resolución de problemas                                                                                                                                                                                                                                                      |
+| :--- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 200  | OK                    | ¡La solicitud se realizó correctamente!                                                                                                                                                                                                                                                   |                                                                                                                                                                                                                                                                                                  |
+| 400  | Bad Request           | La solicitud no es válida o no se puede procesar. Un mensaje de error adjunto proporcionará más detalles. Las solicitudes sin autenticación o con parámetros de consulta no válidos se consideran inválidas y devolverán esta respuesta.                                                  | Verifica detenidamente el formato de tu consulta JSON. Por ejemplo, si tu regla contiene comillas dobles asociadas con un operador de coincidencia exacta u otro operador, es posible que debas escaparlas usando una barra invertida para distinguirlas de la estructura del formato JSON.      |
+| 401  | Unauthorized          | Hubo un problema al autenticar tu solicitud. Esto puede deberse a credenciales de autenticación faltantes o incorrectas. También se puede devolver en otras circunstancias no definidas.                                                                                                  | Verifica que estés usando el [método de autenticación](https://docs.x.com/resources/fundamentals/authentication/overview) correcto y que tus credenciales sean correctas.                                                                                                                        |
+| 403  | Forbidden             | La solicitud se ha entendido, pero se ha rechazado o no se permite el acceso. Un mensaje de error adjunto explicará el motivo.                                                                                                                                                            | Verifica que tu cuenta de desarrollador incluya acceso al endpoint que estás intentando usar. Es posible que también necesites que tu App se incluya en una allowlist (por ejemplo, Engagement API o Ads API) o registrarte para obtener acceso.                                                 |
+| 404  | Not Found             | El URI solicitado no es válido o el recurso solicitado, como un usuario, no existe.                                                                                                                                                                                                       | Verifica que estés usando parámetros válidos y el URI correcto para el endpoint que estás usando.                                                                                                                                                                                                |
+| 409  | Connection Exception  | Se devuelve cuando se intenta conectar a un flujo filtrado que no tiene reglas.                                                                                                                                                                                                           | Verifica que hayas creado al menos una regla en el flujo al que te estás conectando. El flujo filtrado solo devolverá Publicaciones que coincidan con una regla activa. Si no hay reglas, el flujo no devolverá ninguna Publicación.                                                             |
+| 429  | Too Many Requests     | Se devuelve cuando no se puede procesar una solicitud porque se han agotado el [límite de frecuencia](/es/resources/fundamentals/rate-limits) o el [límite de Publicaciones](/es/x-api/fundamentals/post-cap) de la App. Consulta [Límites de frecuencia](/es/resources/fundamentals/rate-limits). | Verifica la cantidad de solicitudes por intervalo de tiempo permitidas con el endpoint que estás usando. Espera a que el intervalo de tiempo se restablezca. Espacia tus solicitudes para asegurarte de no alcanzar los límites de frecuencia o actualiza al siguiente plan de datos disponible. |
+| 500  | Internal Server Error | Algo ha fallado. Normalmente es un error temporal, por ejemplo, en una situación de alta carga o si un endpoint está teniendo problemas de forma temporal.                                                                                                                                | Consulta la [página de estado](/es/status) de X API o el [foro de la comunidad de desarrolladores](https://devcommunity.x.com/) por si otras personas están experimentando problemas similares, o simplemente espera e inténtalo de nuevo más tarde.                                                |
+| 501  | Unimplemented         | X API no admite este endpoint y no puede procesar la solicitud.                                                                                                                                                                                                                           |                                                                                                                                                                                                                                                                                                  |
+| 503  | Service Unavailable   | Los servidores de X están activos, pero sobrecargados de solicitudes. Inténtalo de nuevo más tarde.                                                                                                                                                                                       | Consulta la [página de estado](/es/status) de X API o el [foro de la comunidad de desarrolladores](https://devcommunity.x.com/) por si otras personas están experimentando problemas similares, o simplemente espera e inténtalo de nuevo más tarde.                                                |
+
+Cuando se produce un error durante una solicitud, se devuelve información detallada sobre el error en el cuerpo de la respuesta para ayudar a diagnosticar el problema. Un campo `type`, que es un URI, indica la naturaleza del problema, mientras que los campos adicionales proporcionan detalles sobre el problema. Los campos `type`, `title` y `detail` siempre se devolverán en estos cuerpos de respuesta (consulta la tabla a continuación). Cualquier campo adicional, como en el ejemplo siguiente, variará según el tipo de error.
+
+```json
+{
+  "client_id": "101010101",
+  "required_enrollment": "Standard Basic",
+  "registration_url": "https://developer.twitter.com/en/account",
+  "title": "Cliente prohibido",
+  "detail": "Esta solicitud debe realizarse con una cuenta de desarrollador aprobada que esté registrada en el endpoint solicitado. Obtenga más información en nuestra documentación.",
+  "reason": "client-not-enrolled",
+  "type": "https://api.x.com/2/problems/client-forbidden"
+}
+```
+
+<div id="partial-errors">
+  ## Errores parciales
+</div>
+
+En algunos casos, puedes encontrarte con los errores detallados anteriormente en una respuesta que devolvió un código de estado 200. En esos casos, el endpoint está diseñado para devolver los datos que pueda, a la vez que proporciona errores detallados sobre aquello que no pudo devolver.
+
+Por ejemplo, el [endpoint de consulta de Publicaciones](/es/x-api/posts/lookup/introduction) permite que una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps#overview) de X solicite más de un ID. Si algunas de esas Publicaciones están disponibles, pero una de ellas ha sido eliminada, las Publicaciones disponibles se devolverían en el campo data de la respuesta. Se devolvería un campo adicional errors en el payload para indicar qué Publicación(es) solicitada(s) no se pudieron devolver. Se utiliza el mismo formato que en los errores de solicitud completa para facilitar el diagnóstico de problemas.
+
+<div id="error-information">
+  ### Información sobre errores
+</div>
+
+Cada tipo de problema indica la naturaleza del problema encontrado. También puedes encontrar una lista completa de los problemas que puedes encontrar en nuestra [especificación de la API](https://api.x.com/2/openapi.json).
+
+La X API intenta devolver los [códigos de estado HTTP](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes) apropiados para cada solicitud.
+
+| Título | Tipo | Descripción |
+| :--- | :--- | :--- |
+| Problema genérico | `about:blank` | Un problema genérico sin información adicional más allá de la proporcionada por el código de estado HTTP. |
+| Problema de solicitud no válida | `https://api.X.com/2/problems/invalid-request` | Un problema que indica que esta solicitud no es válida. Si tu solicitud incluye un cuerpo de la solicitud POST, asegúrate de que el contenido sea JSON válido y cumpla con la [especificación OpenAPI](https://api.x.com/2/openapi.json). |
+| Problema de recurso no encontrado | `https://api.X.com/2/problems/resource-not-found` | Un problema que indica que una determinada Publicación, usuario, etc. no existe. |
+| Problema de recurso no autorizado | `https://api.X.com/2/problems/not-authorized-for-resource` | Un problema que indica que no tienes permiso para ver una Publicación, usuario, etc. en particular. |
+| Problema de cliente prohibido | `https://api.X.com/2/problems/client-forbidden` | Un problema que indica que tu cliente tiene prohibido hacer esta solicitud. |
+| Problema de recurso no permitido | `https://api.X.com/2/problems/disallowed-resource` | Un problema que indica que el recurso solicitado infringe las directrices de esta API. |
+| Problema de autenticación no admitida | `https://api.X.com/2/problems/unsupported-authentication` | Un problema que indica que el método de autenticación utilizado no está admitido. |
+| Problema de límite de uso | `https://api.X.com/2/problems/usage-capped` | Un problema que indica que se ha superado un límite de uso. |
+| Problema de excepción de conexión | `https://api.X.com/2/problems/streaming-connection` | Un problema que indica que hay algo mal con la conexión. |
+| Problema de cliente desconectado | `https://api.X.com/2/problems/client-disconnected` | Tu cliente se ha desconectado. |
+| Problema de desconexión operativa | `https://api.X.com/2/problems/operational-disconnect` | Te han desconectado por motivos operativos. |
+| Problema de límite de reglas | `https://api.X.com/2/problems/rule-cap` | Has superado el número máximo de reglas. |
+| Problema de longitud de regla | `https://api.X.com/2/problems/rule-length` | Has superado el número máximo de caracteres permitidos en tu consulta o regla según tu nivel de acceso. Consulta los [niveles de acceso](/es/x-api/getting-started/about-x-api#x-api-access-levels-and-versions). |
+| Problema de reglas no válidas | `https://api.X.com/2/problems/invalid-rules` | La regla que has enviado no es válida. |
+| Problema de reglas duplicadas | `https://api.X.com/2/problems/duplicate-rules` | La regla que has enviado es un duplicado. |
+
+<div id="troubleshooting-tips">
+  ## Consejos para la resolución de problemas
+</div>
+
+<Accordion title="Depurar tu código">
+  Al crear una aplicación, es normal encontrarse con errores o problemas inesperados de vez en cuando. A continuación se muestran algunos consejos sobre cómo puedes depurar tu código:
+
+  Comienza dividiendo el problema en partes más pequeñas para identificar dónde se encuentra. Por ejemplo, si estás integrando un endpoint REST o de streaming, el problema podría estar en cualquiera de los siguientes elementos:
+
+  * El endpoint requiere una [autenticación](/es/resources/fundamentals/authentication/overview) adecuada.
+  * El endpoint requiere parámetros y encabezados válidos. Cualquier regla de filtrado se construye utilizando los operadores correctos y la [sintaxis](/es/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries) adecuada.
+  * El URI del endpoint debe ser correcto y, en el caso de los endpoints REST, se debe usar el método HTTP correcto.
+  * Los datos o el recurso al que intentas acceder no están disponibles para ti (por ejemplo, los datos privados solo están disponibles para usuarios autenticados).
+  * Tu paquete de datos actual te da acceso solo a determinados endpoints y a límites de frecuencia específicos. Consulta tu [portal para desarrolladores](https://developer.x.com/en/portal/products) para obtener más detalles.
+  * Tu código usa una biblioteca de terceros para integrar el endpoint en tu código.
+  * Tu código necesita procesar correctamente la respuesta del endpoint.
+
+  Lee el mensaje de error correspondiente. Esto debería darte una buena indicación de cuál es el problema. Usa las tablas de la [sección de códigos de error y respuesta](#x-api-http-status-codes) para obtener consejos de resolución de problemas específicos para cada código de error.
+
+  Para endpoints REST, puedes usar un cliente REST como [Postman](https://www.postman.com/) o [Insomnia](https://insomnia.rest/) para validar los pasos (1) a (5) anteriores (revisa nuestra guía [&quot;Introducción a Postman&quot;](/es/tutorials/postman-getting-started)). Si la solicitud con el cliente REST devuelve un código de estado de éxito 200, puedes asumir que el problema está en tu código o en la biblioteca que estás usando, y no en la solicitud al endpoint en sí.
+
+  Para endpoints de streaming, puedes usar cURL (una herramienta de línea de comandos para obtener o enviar solicitudes usando la sintaxis de URL) para verificar si el problema está en la solicitud al endpoint (pasos (1) a (5) anteriores) o en tu propio código (pasos (6) a (7) anteriores).
+</Accordion>
+
+<Accordion title="Problemas de autenticación">
+  * Verifica que estás utilizando el [método de autenticación](/es/resources/fundamentals/authentication/overview) adecuado requerido para el endpoint. Puedes identificarlo en la página de referencia de la API del endpoint.
+  * Verifica que tus credenciales de autenticación sean correctas. Puedes consultar o regenerar las claves y tokens de tu App en la [sección Apps](https://developer.x.com/en/portal/projects-and-apps) de tu panel para desarrolladores (en “Details”).
+  * Verifica que has [autorizado correctamente tu solicitud OAuth 1.0a](/es/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request) con `oauth_nonce`, `oauth_signature` y `oauth_timestamp` para tu solicitud.
+  * Si el problema persiste, considera usar una biblioteca OAuth, un cliente REST como [Postman](https://www.postman.com/) o [Insomnia](https://insomnia.rest/), o [xurl](https://github.com/xdevplatform/xurl).
+
+  Revisa nuestra [guía sobre autenticación](/es/resources/fundamentals/authentication/overview) para obtener información adicional sobre todos los puntos anteriores.
+</Accordion>
+
+<Accordion title="Problemas con límites de frecuencia y límites de Publicaciones">
+  Un error 429 puede producirse si alcanzas un límite de frecuencia para un endpoint determinado o si alcanzas un límite de Publicaciones.
+
+  Si se devuelve el error específico “Too many requests”, alcanzaste el límite de frecuencia del endpoint. En otras palabras, has superado la cantidad máxima de solicitudes permitidas para un endpoint por un período de tiempo específico.
+
+  Ten en cuenta que los límites de frecuencia se establecen a nivel de Aplicación y a nivel de usuario.
+
+  * El **nivel de X App** indica la cantidad de solicitudes permitidas cuando se usa OAuth 2.0 solo para la aplicación, donde los límites de frecuencia se determinan globalmente para la Aplicación completa. Por ejemplo, si un método permite 15 solicitudes por ventana de límite de frecuencia, entonces te permite realizar 15 solicitudes por ventana en nombre de tu X App. Este límite se considera completamente por separado del límite a nivel de usuario. Lee más en nuestra guía sobre [OAuth 2.0 App-Only](/es/resources/fundamentals/authentication/oauth-2-0/application-only).
+  * El **nivel de contexto de usuario** indica la cantidad de solicitudes que se pueden realizar por Token de acceso de usuario cuando se usa Contexto de usuario de OAuth 1.0a u OAuth 2.0 Authorization Code with PKCE. Por ejemplo, si un método permite 15 solicitudes por ventana de límite de frecuencia, entonces permite 15 solicitudes por ventana y por Token de acceso de usuario. Lee más en nuestra guía sobre cómo obtener los Tokens de acceso de un usuario con [OAuth 1.0a](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) y [OAuth 2.0](/es/resources/fundamentals/authentication/oauth-2-0/user-access-token).
+
+  Comienza comprobando los límites de frecuencia del endpoint que estás utilizando. Puedes encontrar esta información en la página de referencia de la API del endpoint y en el nuevo panel del portal para desarrolladores.
+
+  Revisa nuestra documentación para obtener información adicional sobre los límites de frecuencia, incluyendo cómo usar los encabezados HTTP para hacer un seguimiento de en qué punto se encuentra tu Aplicación respecto a un límite de frecuencia concreto, cómo recuperarte de un código de error 429 por límite de frecuencia y consejos para evitar que se apliquen límites de frecuencia desde el principio:
+
+  * [Límites de frecuencia para endpoints v2](/es/x-api/fundamentals/rate-limits)
+
+  Si has recibido el error específico &quot;Usage cap exceeded: Monthly product cap&quot;, significa que has alcanzado el límite de Publicaciones para tu nivel de acceso. En nuestra página de documentación encontrarás muchos detalles sobre cuáles son estos [límites de Publicaciones](/es/x-api/fundamentals/post-cap).
+</Accordion>
+
+<Accordion title="Problemas de Publicaciones faltantes">
+  Sigue los pasos a continuación si esperabas que se devolviera una Publicación, pero el endpoint no la devolvió.
+
+  * Revisa tu regla para asegurarte de que estás utilizando los [operadores](/es/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators) y la [sintaxis](/es/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries) correctos. Divide la regla en cláusulas más pequeñas para asegurarte de que estás utilizando la sintaxis adecuada.
+  * Si la cuenta desde la que se envió la Publicación estaba [protegida](https://help.twitter.com/en/safety-and-security/public-and-protected-tweets) en el momento en que se creó la Publicación, la Publicación no se devolverá, incluso si la cuenta es pública en el momento de la solicitud al endpoint. Normalmente puedes comprobar esto usando la [Búsqueda avanzada de X](https://x.com/search-advanced): si una Publicación no aparece usando la funcionalidad de Búsqueda avanzada de X, debes asumir que no será devuelta por el endpoint.
+
+  Los siguientes pasos se aplican solo a endpoints de streaming:
+
+  * ¿Estabas conectado al stream cuando se envió la Publicación? Recuerda que la marca de tiempo entregada en el objeto de la Publicación indica la hora en UTC. Si sufriste una desconexión cuando se envió la Publicación, revisa las [funciones de recuperación y redundancia](/es/x-api/posts/filtered-stream/integrate/recovery-and-redundancy-features#recovery-and-redundancy) disponibles para rellenar cualquier dato que se haya perdido.
+  * ¿Tu regla estaba configurada cuando se envió la Publicación? Recuerda que la marca de tiempo entregada en el objeto de la Publicación indica la hora en UTC.
+</Accordion>
+
+<Accordion title="Problemas de desconexión por búfer completo">
+  Es posible que veas uno de los siguientes errores cuando tu flujo no mantiene el ritmo de la velocidad a la que entregamos datos y tu Aplicación no consume los datos del flujo con suficiente rapidez:
+
+  ```
+  This stream has been disconnected because your client was unable to keep up with us.
+  ```
+
+  ```
+  This stream has been disconnected for operational reasons.
+  ```
+
+  Permitimos que la entrega se retrase durante un período de tiempo y contamos con un búfer temporal de almacenamiento intermedio para cada flujo de nuestro lado; pero si no logras ponerte al día, iniciamos una desconexión para permitirte reconectarte en el momento actual. Ten en cuenta que esto puede provocar pérdida de datos (para los datos que estén dentro del búfer en el momento de la desconexión por búfer completo).
+
+  Esto puede ocurrir en torno a grandes picos de datos. En general, recomendamos usar un proceso de búfer para consumir datos rápidamente que esté separado del proceso de procesamiento.
+
+  Si eres un cliente Enterprise que usa endpoints v1.1, puedes encontrar más información sobre cómo optimizar tu Aplicación para evitar desconexiones como esta en nuestros artículos sobre [conexión](/es/x-api/enterprise-gnip-2.0/powertrack-api#disconnections-explained) y sobre cómo consumir datos de streaming [aquí](https://developer.x.com/en/docs/tutorials/consuming-streaming-data) y [aquí](/es/x-api/enterprise-gnip-2.0/powertrack-api#planning-for-high-volume-social-data-events).
+
+  Hay una variedad de herramientas disponibles para recuperar Publicaciones perdidas debido a una desconexión, incluidas las que se enumeran a continuación. Ten en cuenta que las siguientes herramientas solo están disponibles con endpoints v1.1 en el nivel de acceso Enterprise.
+
+  * [**Conexiones redundantes**](/es/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - Con múltiples conexiones, consume el flujo desde varios servidores para evitar perder datos cuando uno se desconecte.
+  * [**Replay**](/es/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - Recupera datos de los últimos 5 días usando un flujo separado.
+  * [**Backfill**](/es/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - Reconéctate dentro de 5 minutos y comienza desde donde lo dejaste.
+  * **Historical PowerTrack** - Recupera datos de todo el archivo de X.
+</Accordion>
+
+<div id="get-help">
+  ## Obtén ayuda
+</div>
+
+El foro de la comunidad de X está disponible para que hagas preguntas técnicas sobre la plataforma de desarrolladores de X. Es un foro de debates donde encontrarás preguntas de otros desarrolladores e información técnica sobre una variedad de temas relacionados con el uso de la X API.
+
+Te animamos a unirte a la conversación respondiendo preguntas y participando en las conversaciones de nuestro foro. El personal de X también está allí para brindar ayuda.
+
+<Button href="https://devcommunity.x.com/">
+  Foro de la comunidad de X
+</Button>
+
+<div id="before-you-post-a-question">
+  ### Antes de publicar una pregunta
+</div>
+
+* Busca en la documentación para desarrolladores de X información relacionada con tu problema
+* Busca en el foro de la comunidad si hay preguntas similares de otros desarrolladores
+* Revisa las normas del foro de la comunidad
+
+<div id="when-you-post-a-question-make-sure-to-include-the-following-information">
+  ### Cuando publiques una pregunta, asegúrate de incluir la siguiente información
+</div>
+
+* Una descripción del problema
+* La llamada a la API que se está realizando (incluyendo encabezados, si es posible)
+* La respuesta devuelta por X (incluidos los mensajes de error)
+* Qué esperabas recibir en su lugar
+* Lista de pasos que seguiste para solucionar el problema
+* Lista de pasos necesarios para reproducir el problema
+* Si corresponde, el período de tiempo durante el cual ocurrió el problema
+* Si corresponde, el App ID, Post ID, etc.
+* Cualquier fragmento de código o captura de pantalla relevante
+
+Incluye solo un tema/pregunta por publicación.
+
+Si tienes solicitudes de nuevas funcionalidades o comentarios, envíalos a través del [Formulario de comentarios de la plataforma para desarrolladores de X](https://t.co/devfeedback).
+
+Para problemas relacionados con las Políticas, como la suspensión de una App, contacta con el [soporte de Políticas](https://help.twitter.com/forms/platform).
+
+Para problemas relacionados con X, como el inicio de sesión y el soporte de cuentas, utiliza el [Centro de ayuda de X](https://help.twitter.com/en/contact-us).

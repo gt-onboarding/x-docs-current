@@ -1,0 +1,130 @@
+---
+title: v1에서 v2로
+sidebarTitle: v1에서 v2로
+keywords: ["v1.1에서 v2로 마이그레이션", "filtered stream 마이그레이션", "filtered stream 마이그레이션 수행", "Standard v1.1에서 v2 filtered stream으로", "v1에서 v2 filtered stream으로 마이그레이션", "마이그레이션 가이드"]
+---
+
+<div id="standard-v11-compared-to-x-api-v2">
+  ### Standard v1.1과 X API v2 비교
+</div>
+
+v1.1 [statuses/filter](https://developer.x.com/en/docs/x-api/v1/tweets/filter-realtime/api-reference/post-statuses-filter) 엔드포인트를 사용해 왔다면, 이 가이드는 Standard v1.1 필터링 스트림 엔드포인트와 X API v2 필터링 스트림 엔드포인트 간의 유사점과 차이점을 이해하는 데 도움이 됩니다.
+
+* **유사점**
+  * 요청 매개변수와 연산자
+  * 게시물 수정 이력 및 메타데이터 지원
+* **차이점**
+  * 엔드포인트 URL
+  * 앱 및 프로젝트 필요 조건
+  * 인증 방식
+  * 규칙 허용량 및 지속적인 스트림 연결
+  * 응답 데이터 형식
+  * 요청 매개변수
+  * 복구 및 중복(레던던시) 기능 제공 여부
+  * 쿼리 연산자
+
+<div id="similarities">
+  #### 유사점
+</div>
+
+**요청 매개변수와 연산자**
+
+표준 v1.1 `statuses/filter` 엔드포인트에는 스트림을 필터링하기 위해 요청과 함께 전달할 수 있는 몇 가지 매개변수가 있습니다. v2 필터링 스트림에서는 대신 불리언 논리로 서로 연결할 수 있는 [연산자(operators)](/ko/x-api/posts/filtered-stream#building-rules-for-filtered-stream) 집합을 사용하여 원하는 게시물을 필터링합니다. 사용 가능한 연산자 중에는 기존 표준 v1.1 매개변수를 직접 대체하는 것도 있습니다. 
+
+다음 표준 v1.1 요청 매개변수는 X API v2에서 이에 상응하는 연산자가 있습니다:
+ 
+
+| **Standard** | **X API v2** |
+| :--- | :--- |
+| follow - 스트림에 게시물을 전달할 사용자를 나타내는 사용자 id의 쉼표로 구분된 목록입니다. | 특정 사용자와 관련된 게시물을 찾는 데 도움이 되는 여러 연산자:<br /><br />* @<br />* from:<br />* to:<br />* 등 |
+| track - 스트림에 어떤 게시물을 전달할지 결정하는 데 사용되는 구문(문구)의 쉼표로 구분된 목록입니다. | 특정 키워드와 관련된 게시물을 찾는 데 도움이 되는 여러 연산자:<br /><br />* keyword<br />* &quot;exact phrase match&quot;<br />* #<br />* 등 |
+
+**게시물 수정 이력 및 메타데이터 지원**
+
+두 버전 모두 수정 이력을 설명하는 메타데이터를 제공합니다. 자세한 내용은 [filtered stream API 참고 문서](/ko/x-api/posts/filtered-stream#api-reference-index)와 [게시물 수정 기본 사항 페이지](/ko/x-api/fundamentals/edit-posts)를 참고하세요. 
+
+<div id="differences">
+  #### 차이점
+</div>
+
+**엔드포인트 URL**
+
+* Standard v1.1 엔드포인트:
+  * https://stream.x.com/1.1/statuses/filter.json
+* X API v2 엔드포인트:
+  * https://api.x.com/2/tweets/search/stream
+  * https://api.x.com/2/tweets/search/stream/rule
+
+**앱 및 프로젝트 요구 사항**
+
+X API v2 엔드포인트에서는 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps)의 자격 증명이 [Project](/ko/resources/fundamentals/projects)와 연결되어 있어야 합니다. 모든 X API v1.1 엔드포인트는 독립형 앱 또는 Project와 연결된 앱의 자격 증명을 사용할 수 있습니다.
+
+**인증 방식**
+
+Standard 엔드포인트는 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication)를 지원하는 반면, X API v2 필터링 스트림 엔드포인트는 [OAuth 2.0 앱 전용(App-Only)](/ko/resources/fundamentals/authentication#oauth-2-0) 방식(애플리케이션 전용 인증이라고도 함)을 지원합니다. X API v2 버전으로 요청을 보내려면 앱 액세스 토큰을 사용해 요청을 인증해야 합니다.
+
+developer portal에서 Project와 앱을 생성할 때 발급되었던 앱 액세스 토큰을 더 이상 보유하고 있지 않은 경우, developer portal에서 앱의 “Keys and tokens” 페이지로 이동해 새 토큰을 생성할 수 있습니다. 프로그래밍 방식으로 앱 액세스 토큰을 생성하려면 이 [OAuth 2.0 App-Only 가이드](/ko/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)를 참조하세요. 
+
+**규칙 수와 지속적인 스트림**
+
+Standard v1.1 엔드포인트는 스트리밍 연결을 필터링하기 위한 단일 규칙만 지원합니다. 규칙을 변경하려면 스트림 연결을 끊고, 수정된 필터링 규칙을 파라미터로 포함한 새 요청을 제출해야 합니다. 
+
+X API v2 필터링 스트림 엔드포인트는 하나의 스트림에 여러 규칙을 적용할 수 있으며, 스트림 연결을 유지한 채 스트림에 대한 규칙을 추가하거나 제거할 수 있습니다. 
+
+**응답 데이터 형식**
+
+Standard v1.1과 X API v2 엔드포인트 버전 간 가장 큰 차이점 중 하나는 페이로드에 어떤 필드를 반환할지 선택하는 방식입니다.
+
+Standard 엔드포인트의 경우, 기본적으로 많은 응답 필드를 제공하고 이후 파라미터를 사용하여 페이로드에 어떤 필드 또는 필드 집합을 반환할지 지정할 수 있습니다.
+
+X API v2 버전은 기본적으로 게시물 id 및 text 필드만 제공합니다. 추가 필드나 객체를 요청하려면 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 파라미터를 사용해야 합니다. 이 엔드포인트에서 요청한 모든 게시물 필드는 기본 게시물 객체에 포함되어 반환됩니다. 확장된 사용자, 미디어, 투표(poll) 또는 장소(place) 객체 및 필드는 응답 내 includes 객체에 포함되어 반환됩니다. 이후 게시물 객체와 확장 객체 양쪽에 있는 ID를 일치시켜, 확장된 객체를 게시물 객체와 다시 연결할 수 있습니다. 
+
+이 새로운 파라미터에 대해서는 각각의 가이드 또는 [fields 및 expansions 사용 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에 대한 가이드를 읽어보실 것을 권장합니다. 
+
+또한 standard v1.1 필드를 최신 v2 필드에 매핑하는 데 도움이 되는 [데이터 형식 마이그레이션 가이드](/ko/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)를 제공하고 있습니다. 이 가이드는 특정 필드를 반환하기 위해 v2 요청에 포함해야 하는 expansions 및 field 파라미터도 구체적으로 안내합니다. 
+ 
+
+특정 필드를 요청하는 방식의 변경 외에도, X API v2는 API가 반환하는 객체(게시물 및 [user](/ko/x-api/fundamentals/data-dictionary#user) 객체 포함)에 대해 새로운 JSON 설계를 도입하고 있습니다.
+
+* JSON 루트 레벨에서, standard 엔드포인트는 게시물 객체를 statuses 배열로 반환하는 반면, X API v2는 data 배열로 반환합니다. 
+* Retweeted 및 Quoted &quot;statuses&quot;를 참조하는 대신, X API v2 JSON은 Retweeted 및 Quoted 트윗을 참조합니다. contributors, user.translator&#95;type과 같은 많은 레거시 및 사용 중단 예정 필드는 제거되고 있습니다. 
+* 게시물 객체의 favorites, user 객체의 favourites를 모두 사용하는 대신, X API v2는 like라는 용어를 사용합니다. 
+* X는 값이 없는 JSON 값(예: null)은 페이로드에 기록하지 않는 규칙을 채택하고 있습니다. 게시물 및 user 속성은 null이 아닌 값을 가진 경우에만 포함됩니다. 
+   
+
+또한 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet)에 다음과 같은 새로운 필드 집합을 도입했습니다:
+
+* [conversation&#95;id](/ko/x-api/fundamentals/conversation-id) 필드
+* context와 entities를 포함하는 두 개의 새로운 [annotations](/ko/x-api/fundamentals/post-annotations) 필드
+* 여러 개의 새로운 [metrics](/ko/x-api/fundamentals/metrics) 필드
+* 특정 게시물에 대해 누가 답글을 달 수 있는지를 보여 주는 새로운 reply&#95;setting 필드
+
+**요청 매개변수**
+
+또한 X API v2에서는 지원되지 **않는** 표준 필터링 스트림 요청 매개변수들이 있습니다:
+
+| 표준 v1.1 매개변수 | 세부 정보 |
+| :--- | :--- |
+| locations - 쉼표로 구분된 longitude,latitude 쌍 목록으로, 게시물을 필터링할 경계 상자 집합을 지정합니다. | X API v2용 위치 기반 연산자는 아직 출시되지 않았습니다. |
+| Delimited | v1.1 엔드포인트에서는 이를 문자열 길이로 설정하면 스트림에서 status가 구분되어, 클라이언트가 status 메시지 끝에 도달하기 전까지 몇 바이트를 읽어야 하는지 알 수 있습니다.<br /><br />이 기능은 X API v2에서는 제공되지 않습니다. |
+| Stall&#95;warnings | v1.1 엔드포인트에서는 이 매개변수를 true로 설정하면 클라이언트가 연결 끊김 위험에 처했을 때 주기적으로 메시지가 전달됩니다.<br /><br />X API v2에서는 일정 간격으로 새 줄이 전송되면서 정체(stall) 경고가 기본적으로 전송됩니다. |
+
+**복구 및 중복 기능의 가용성**
+
+X API v2 버전의 필터링 스트림은 복구 및 중복 기능을 도입하여, 스트리밍 가동 시간을 최대화하고 5분 이내의 연결 끊김으로 인해 누락되었을 수 있는 게시물을 복구할 수 있도록 돕습니다.
+
+중복 연결을 사용하면 특정 스트림에 최대 두 번까지 연결할 수 있으므로, 연결 중 하나가 실패하더라도 항상 스트림에 대한 연결을 유지하는 데 도움이 됩니다. 
+
+backfill&#95;minutes 매개변수를 사용하면 최대 5분 동안 누락된 데이터를 복구할 수 있습니다. 
+
+이 두 기능은 모두 [Academic Research access](/ko/x-api/getting-started/about-x-api)를 통해서만 사용할 수 있습니다. 이 기능에 대한 자세한 내용은 [recovery and redundancy features](/ko/x-api/posts/filtered-stream#filtered-stream-recovery-and-redundancy-features) 통합 가이드를 참조하세요. 
+
+**새로운 쿼리 연산자**
+
+X API v2는 두 가지 새로운 기능을 지원하기 위해 새로운 연산자를 도입합니다: 
+
+* **[Conversation IDs](/ko/x-api/fundamentals/conversation-id)** - X에서 대화가 진행됨에 따라, 해당 대화에 속한 게시물을 표시하기 위해 conversation ID가 제공됩니다. 대화에 포함된 모든 게시물의 conversation&#95;id는 해당 대화를 시작한 게시물의 게시물 ID(Post ID)로 설정됩니다. 
+  * conversation&#95;id:
+* **[X Annotations](/ko/x-api/fundamentals/post-annotations)** 는 게시물에 대한 컨텍스트 정보를 제공하며, entity 및 context annotation을 포함합니다. 엔터티는 사람, 장소, 제품, 조직으로 구성됩니다. 컨텍스트는 식별된 엔터티가 속한 도메인 또는 토픽입니다. 예를 들어, 게시물에 언급된 사람은 운동선수, 배우, 정치인인지 여부를 나타내는 컨텍스트를 가질 수 있습니다.  
+  * context: - 관심 있는 컨텍스트로 annotation이 적용된 게시물과 일치합니다. 
+  * entity: - 관심 있는 엔터티로 annotation이 적용된 게시물과 일치합니다. 

@@ -1,0 +1,183 @@
+---
+title: 新しい順
+sidebarTitle: 新しい順
+keywords: ["ホームタイムライン", "新しい順", "ホームタイムライン クイックスタート", "タイムライン クイックスタート", "ホームタイムライン チュートリアル"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-reverse-chronological-home-timeline">
+  ## 逆時系列ホームタイムラインの開始方法
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して、指定した一連のフィールドを含むタイムライン系エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。 
+
+<Note>
+  **前提条件**
+
+  このガイドを完了するには、リクエストを認証するための一連の [キーとトークン](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal で [Project](/ja/resources/fundamentals/projects) と、関連付けられた [developer App](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+**逆時系列ホームタイムラインのリクエストを構築する手順**
+
+*この例では、ユーザー Post タイムライン（ID 指定）エンドポイントへのリクエストを行いますが、このクイックスタートで学んだ内容は、ユーザーのメンションタイムラインへのリクエストにも適用できます。*
+
+**ステップ 1: ツールまたはライブラリを選択する**
+
+このエンドポイントにリクエストを送信するために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman を使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Timelines」フォルダに移動し、「Reverse chronological home timeline」リクエストを探します。
+
+**ステップ 2: リクエストを認証する**
+
+X API に対して正しくリクエストを行うには、権限があることを確認する必要があります。このエンドポイントでそれを行うには、[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) または [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) のいずれかの認証方式でリクエストを認証する必要があります。 
+
+Postman にキーとトークンを追加する必要があります。Postman の右上で「X API v2」という名前の環境を選択し、「initial value」と「current value」のフィールドにキーとトークンを追加します（環境ドロップダウン横の目のアイコンをクリックして編集します）。
+
+正しく設定されていれば、これらの変数はリクエストの Authorization タブに自動的に反映されます。
+
+**ステップ 3: ホームタイムラインを取得したいユーザーを特定して指定する**
+
+リクエスト内で、最近のポストを取得したいユーザーを指定する必要があります。この例では、1 つのユーザー ID を指定します。
+
+ユーザー ID は、アカウントのハンドルを表す数値で、アカウントのプロフィール URL から確認できます。たとえば、次のアカウントのユーザー名は `XDevelopers` です。
+
+`https://x.com/XDevelopers`
+
+このユーザー名をユーザー ID に変換するには、[users lookup endpoint](/ja/x-api/users/lookup/introduction) にユーザー名を指定して呼び出し、ペイロード内の数値のユーザー ID を確認します。@XDevelopers の場合、ユーザー ID は 2244994945 です。
+
+Postman で「Params」タブに移動し、このユーザー ID を `id` パラメータの「Value」列に入力します。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**ステップ 4: 取得したいフィールドを特定して指定する**
+
+ステップ 3 の後で「Send」ボタンをクリックすると、レスポンスにはデフォルトの [Post object](/ja/x-api/fundamentals/data-dictionary#tweet) のフィールドである `id`、`text`、`edit_history_tweet_ids` が含まれます。
+
+追加のフィールドを受け取りたい場合は、[field](/ja/x-api/fundamentals/fields) パラメータおよび/または [expansion](/ja/x-api/fundamentals/expansions) パラメータで、それらのフィールドをリクエスト内に指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 種類の追加のフィールドセットをリクエストします。
+
+1. プライマリのユーザーオブジェクトに含まれる追加の `tweet.created_at` フィールド。
+
+2. 返されるポストの作成者に対応するユーザーオブジェクトのデフォルトフィールド：`id`、`name`、`username`
+
+3. 関連するユーザーオブジェクトに含まれる追加の `user.created_at` フィールド。
+    
+
+Postman で「Params」タブを開き、「Query Params」テーブルに次のキーと値のペアを追加します:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields（返されるフィールド）** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `created_at` | `includes.users.created_at` |
+| max&#95;results | 5   |     |
+
+これで、「Send」ボタンの横に次の URL が表示されているはずです:
+
+`https://api.x.com/2/users/:id/timelines/reverse_chronological?tweet.fields=created_at&expansions=author_id&user.fields=created_at&max_results=5`
+
+<Info>
+  **ご注意ください:**
+
+  Postman では、URL フィールド内のパスパラメータ :id は、`id` パラメータフィールドに入力した値に自動的には更新されません。そのため、上記の URL には 2244994945 ではなく `:id` が含まれています。
+</Info>
+
+**ステップ 5: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次のレスポンスが返ってきます。
+
+```{
+	"data": [
+		{
+			"created_at": "2022-05-12T17:00:00.000Z",
+			"text": "本日、Twitter APIを使用して開発する開発者による開発者のための技術ビデオシリーズ「Devs in the Details」がローンチされました。🚀\n\nこの初回エピソードでは、@jessicagarsonが@FactualCatの構築方法を紹介します #WelcomeToOurTechTalk\n⬇️\n\nhttps://t.co/nGa8JTQVBJ",
+			"author_id": "2244994945",
+			"id": "1524796546306478083"
+		},
+		{
+			"created_at": "2022-05-11T19:16:40.000Z",
+			"text": "📢 Join @jessicagarson @alanbenlee and @i_am_daniele tomorrow, May 12  | 5:30 ET / 2:30pm PT as they discuss the future of bots https://t.co/sQ2bIO1fz6",
+			"author_id": "2244994945",
+			"id": "1524468552404668416"
+		},
+		{
+			"created_at": "2022-05-09T20:12:01.000Z",
+			"text": "Do you make bots with the Twitter API? 🤖\n\nJoin @jessicagarson @alanbenlee and @iamdaniele on Thursday, May 12  | 5:30 ET / 2:30pm PT as they discuss the future of bots and answer any questions you might have. 🎙📆⬇️\n\nhttps://t.co/2uVt7hCcdG",
+			"author_id": "2244994945",
+			"id": "1523757705436958720"
+		},
+		{
+			"created_at": "2022-05-06T18:19:54.000Z",
+			"text": "If you’d like to apply, or would like to nominate someone else for the program, please feel free to fill out the following form:\n\nhttps://t.co/LUuWj24HLu",
+			"author_id": "2244994945",
+			"id": "1522642324781633536"
+		},
+		{
+			"created_at": "2022-05-06T18:19:53.000Z",
+			"text": "We’ve gone into more detail on each Insider in our forum post. \n\nJoin us in congratulating the new additions! 🥳\n\nhttps://t.co/0r5maYEjPJ",
+			"author_id": "2244994945",
+			"id": "1522642323535847424"
+		}
+	],
+	"includes": {
+		"users": [
+			{
+				"created_at": "2013-12-14T04:35:55.000Z",
+				"name": "Twitter Dev",
+				"username": "TwitterDev",
+				"id": "2244994945"
+			}
+		]
+	},
+	"meta": {
+		"result_count": 5,
+		"newest_id": "1524796546306478083",
+		"oldest_id": "1522642323535847424",
+		"next_token": "7140dibdnow9c7btw421dyz6jism75z99gyxd8egarsc4"
+	}
+}
+```
+
+**ステップ6: 結果をページネーションする**
+
+前のレスポンスの一番下には、次のフィールドを含む meta オブジェクトがあります。
+
+* oldest&#95;id
+* newest&#95;id
+* results&#95;count
+* next&#95;token
+* previous&#95;token
+
+ステップ4では、max&#95;results の値として 5 を指定しました。これは、各ページに最大 5 件の結果しか含まれないことを意味します。追加のページのデータにアクセスするには、直前の結果に含まれる next&#95;token フィールドの値を取得し、その文字列を Postman の params ページで pagination&#95;token パラメータの値として設定し、その他はすべて同じに保ちます。 
+
+|                    |                               |
+| :----------------- | :---------------------------- |
+| **キー**             | **値**                         |
+| `pagination_token` | t3buvdr5pujq9g7bggsnf3ep2ha28 |
+
+これらの設定が完了したら、再度「Send」をクリックすると、次のページの結果を受け取ることができます。 
+
+この概念についてさらに詳しく説明するために、[ページネーション](/ja/x-api/fundamentals/pagination)に関するガイドを用意しています。
+
+**次のステップ**
+[API リファレンスを参照してリクエストをカスタマイズする](/ja/x-api/posts/timelines#api-reference-index)
+
+[コミュニティに助けを求める](https://devcommunity.x.com "コミュニティに助けを求める")

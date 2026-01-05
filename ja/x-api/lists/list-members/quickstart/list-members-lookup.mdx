@@ -1,0 +1,161 @@
+---
+title: リストメンバー取得
+sidebarTitle: リストメンバー取得
+keywords: ["リストメンバー取得クイックスタート", "リストメンバー取得", "リストメンバーの取得クイックスタート", "リストメンバーシップ取得"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<Note>
+  **注意:** 本ガイドは、[クイックスタート概要](/ja/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group) に記載されている前提条件をすでに満たしていることを想定しています。
+</Note>
+
+<div id="steps-to-build-a-list-members-lookup-request">
+  ### リストメンバー照会リクエストを構築する手順
+</div>
+
+**ステップ 1：Postman で List エンドポイントコレクションを選択する**
+
+Postman に X API v2 コレクションを読み込んだら、「List」フォルダに移動し、「List members」フォルダを選択してから「Members lookup」を選択します。
+ 
+
+**ステップ 2：メンバーを取得したいリストを特定して指定する**
+
+メンバーを取得したいリストを指定する必要があります。x.com にアクセスしてリストをクリックし、URL を確認することで List ID を見つけることができます。たとえば、次の URL の List ID は 84839422 です。
+
+https://x.com/i/lists/84839422
+
+対象 ID には任意の有効な List ID を指定できます。Postman で「Params」タブに移動し、id パス変数の「Value」列に ID を入力します。ID の前後にスペースが入らないように注意してください。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 84839422 (List ID) |
+
+**ステップ 3：取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に「Send」ボタンをクリックすると、レスポンスにはデフォルトの [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user)のフィールドである id、name、username が含まれます。
+
+id、name、username 以外の追加フィールドを取得したい場合は、[field](/ja/x-api/fundamentals/fields) パラメーターや [expansion](/ja/x-api/fundamentals/expansions) パラメーターを使って、リクエスト内でそれらのフィールドを指定する必要があります。
+
+この演習では、異なるオブジェクトから次の 3 つの追加フィールドセットをリクエストします。
+
+* プライマリの user オブジェクトにおける追加の user.created&#95;at フィールド
+* expansion パラメーターを使用した完全な [Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet)
+* 関連する Post オブジェクトにおける追加の tweet.created&#95;at フィールド
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | `created_at` |
+| expansions | pinned&#95;tweet&#95;id | `includes.tweets.id,  <br/>includes.tweets.text  <br/>` |
+| tweet.fields | created&#95;at | `includes.tweets.created_at` |
+
+「Send」ボタンの横に、次のような URL が表示されているはずです。
+
+`https://api.x.com/2/lists/84839422/members?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**ステップ 4：リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンを押すと、次のサンプルレスポンスと同様のレスポンスが返されます。
+
+```
+{
+  "data": [
+    {
+      "pinned_tweet_id": "1353789891348475905",
+      "id": "1319036828964454402",
+      "created_at": "2020-10-21T22:04:47.000Z",
+      "name": "Birdwatch",
+      "username": "birdwatch"
+    },
+    {
+      "id": "1244731491088809984",
+      "created_at": "2020-03-30T21:02:29.000Z",
+      "name": "Twitter Thailand",
+      "username": "TwitterThailand"
+    },
+    {
+      "id": "1194267639100723200",
+      "created_at": "2019-11-12T14:56:22.000Z",
+      "name": "Twitter Retweets",
+      "username": "TwitterRetweets"
+    },
+    {
+      "id": "1168976680867762177",
+      "created_at": "2019-09-03T19:59:02.000Z",
+      "name": "Twitter Able",
+      "username": "TwitterAble"
+    },
+    {
+      "pinned_tweet_id": "1451239134798942208",
+      "id": "1065249714214457345",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "name": "Spaces",
+      "username": "TwitterSpaces"
+    },
+    {
+      "id": "1049385226424786944",
+      "created_at": "2018-10-08T19:45:09.000Z",
+      "name": "Twitter Miami",
+      "username": "TwitterMiami"
+    },
+    {
+      "pinned_tweet_id": "1438533888498876420",
+      "id": "1004367799588880384",
+      "created_at": "2018-06-06T14:21:58.000Z",
+      "name": "Twitter México",
+      "username": "TwitterMexico"
+    },
+    {
+      "pinned_tweet_id": "1370178223846297602",
+      "id": "773578328498372608",
+      "created_at": "2016-09-07T17:47:00.000Z",
+      "name": "Twitter Together",
+      "username": "TwitterTogether"
+    },
+    {
+      "id": "766296039036948480",
+      "created_at": "2016-08-18T15:29:47.000Z",
+      "name": "Moments MENA",
+      "username": "momentsmena"
+    },
+    {
+      "id": "738118487122419712",
+      "created_at": "2016-06-01T21:22:15.000Z",
+      "name": "Twitter Asians",
+      "username": "TwitterAsians"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-01-25T19:40:36.000Z",
+        "id": "1353789891348475905",
+        "text": "誤情報への対処に向けた新しいコミュニティ主導のアプローチの構築にご協力いただけませんか？ぜひご参加ください — Birdwatchに登録しましょう！ \n\nhttps://t.co/FSsqNznPy1"
+      },
+      {
+        "created_at": "2021-10-21T17:29:07.000Z",
+        "id": "1451239134798942208",
+        "text": "その時が来ました -- iOSとAndroidのすべてのユーザーがSpaceをホストできる機能の提供を開始しました\n\n初めてホストする方は、ようこそ！使い方のおさらいはこちら https://t.co/cLH8z0bocy"
+      },
+      {
+        "created_at": "2021-09-16T16:03:00.000Z",
+        "id": "1438533888498876420",
+        "text": "Algunos le dicen amor, pero yo le digo:\n\n‌    ∧＿∧　 \n（｡･ω･｡)つ━☆・*\n⊂     　ノ 　　　・゜+.\n　しーＪ　　　°。+ *´¨)\n　　　　　 　　　☆ RECALENTADO ☆ \n#VivaMéxico"
+      },
+      {
+        "created_at": "2021-03-12T01:01:59.000Z",
+        "id": "1370178223846297602",
+        "text": "それでも、私たちは飛び続ける\n\n... 2020年に何度打ちのめされても、私たちは立ち上がり、共感、機敏性、革新性、リーダーシップで応えてきました。\n\n詳細は2020年インクルージョン&amp;ダイバーシティ年次報告書をご覧ください #UntilWeAllBelong"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 10,
+    "next_token": "5349804505549807616"
+  }
+}
+```

@@ -1,0 +1,140 @@
+---
+title: 简介
+sidebarTitle: 简介
+keywords: ["社区搜索", "搜索社区", "查找社区", "社区检索", "发现社区", "社区搜索 API"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+此端点允许你根据关键字搜索和发现 Communities。
+
+该端点将一个或多个关键字作为查询条件。默认情况下，请求会返回与指定查询匹配的公开和封闭 Communities。
+
+<Note>
+  **账号设置**
+
+  若要访问这些端点，你需要：
+
+  * 一个已获批准的 [开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * 使用位于某个 [项目](/zh/resources/fundamentals/projects) 中的 [开发者应用](/zh/resources/fundamentals/developer-apps) 所提供的密钥和令牌进行认证。 
+
+  在我们的 [入门指南](/zh/x-api/getting-started/getting-access) 中进一步了解如何获取对 X API v2 端点的访问权限。
+</Note>
+
+**开始使用**
+
+<div id="authentication">
+  ### 身份验证
+</div>
+
+你可以使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)、[OAuth 2.0 应用仅模式](https://developer.x.com(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)，或 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 来为此端点进行身份验证。
+ 
+
+<div id="making-a-request">
+  ### 发起请求
+</div>
+
+你可以按如下所示调用 Search Communities 端点：
+
+```
+      curl --location 'https://api.x.com/2/communities/search?query=anime' --header 'Authorization: ••••••'
+```
+
+如果请求成功，您将看到如下所示的 JSON 响应：
+
+```
+{
+   "data": [
+       {
+           "access": "Public",
+           "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+           "join_policy": "Open",
+           "name": "Anime Community"
+       },
+       {
+           "access": "Public",
+           "description": "Join and text about anime 🥰",
+           "join_policy": "Open",
+           "name": "Anime World 🌸"
+       },
+       {
+           "access": "Public",
+           "description": "For all anime lovers and creators!",
+           "join_policy": "Open",
+           "name": "Anime"
+       },
+   ],
+   "meta": {
+       "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+   }
+}
+```
+
+<div id="community-fields">
+  ### 社区字段
+</div>
+
+你可以通过指定社区字段来获取与某个社区相关的更多数据。
+
+可用的社区字段包括：
+
+| 字段值 | 类型 | 描述 |     |
+| :--- | :--- | :--- | :--- |
+| created&#95;at | date (ISO 8601) | 社区的创建时间。 |     |
+| id  | string | 社区的唯一标识符。 |     |
+| name | string | 社区的名称。 |     |
+| description | string | 社区描述的文本（如果已提供）。 |     |
+| access | string | 社区的访问级别。  <br />  <br />可以是以下之一：<br /><br />* `Public`<br />* `Closed` |     |
+| join&#95;policy | string | 社区的加入策略。  <br />  <br />可以是以下之一：<br /><br />* `Open`<br />* `RestrictedJoinRequestsDisabled`<br />* `RestrictedJoinRequestsRequireAdminApproval`<br />* `RestrictedJoinRequestsRequireModeratorApproval`<br />* `SuperFollowRequired` |     |
+| member&#95;count | integer | 已加入该社区的成员数量。 |     |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+例如，调用 Search Communities 端点时可以像下面这样指定额外的 community 字段：
+
+```
+      curl --location 'https://api.x.com/2/communities/search?query=anime&community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: ••••••'
+```
+
+**示例响应**
+
+如果请求成功，将会返回如下所示的 JSON 响应：
+
+```
+{
+   "data": [
+       {
+           "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI=",
+           "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 39915,
+           "name": "Anime Community",
+           "created_at": "2024-02-17T06:58:50.000Z"
+       },
+       {
+           "id": "Q29tbXVuaXR5OjE1MDY3OTM5NTMxMDYwNDI4OTE=",
+           "description": "Join and text about anime 🥰",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 26019,
+           "name": "Anime World 🌸",
+           "created_at": "2022-03-24T00:44:07.000Z"
+       },
+       {
+           "id": "Q29tbXVuaXR5OjE0OTY3NzYyMTU5Mzk1MzQ4NDk=",
+           "description": "For all anime lovers and creators!",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 5612,
+           "name": "Anime",
+           "created_at": "2022-02-24T09:17:13.000Z"
+       }
+   ],
+   "meta": {
+       "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+   }
+}
+```

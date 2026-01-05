@@ -1,0 +1,115 @@
+---
+title: 빠른 시작
+sidebarTitle: 빠른 시작
+keywords: ["Spaces 검색 빠른 시작", "Spaces 검색 빠른 시작", "Spaces 검색 튜토리얼", "Spaces 검색 가이드"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-search-spaces-endpoint">
+  ## search Spaces 엔드포인트 사용 시작하기
+</div>
+
+이 빠른 시작 가이드는 Postman을 사용하여 지정한 필드 집합과 함께 search Spaces 엔드포인트에 첫 요청을 보내는 방법을 안내합니다.
+
+여러 프로그래밍 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code GitHub repository](https://github.com/xdevplatform/Twitter-API-v2-sample-code)를 방문하세요.
+
+<Note>
+  **사전 준비 사항**
+
+  이 가이드를 완료하려면 요청을 인증하기 위한 [keys and tokens](/ko/resources/fundamentals/authentication) 세트가 필요합니다. 다음 단계를 따라 이러한 키와 토큰을 생성할 수 있습니다:
+
+  * [개발자 계정](https://developer.x.com/en/apply-for-access)에 가입하고 승인을 받습니다.
+  * developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성합니다.
+  * App의 “Keys and tokens” 페이지로 이동하여 필요한 자격 증명을 생성합니다. 생성한 모든 자격 증명은 안전한 위치에 보관하세요.
+</Note>
+
+<div id="steps-to-build-a-search-spaces-request">
+  ### Spaces 검색 요청을 빌드하는 단계
+</div>
+
+**1단계: 도구 또는 라이브러리 선택하기**
+
+이 엔드포인트에 요청을 보내기 위해 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 과정을 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 불러오려면 다음 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 불러온 후, Spaces 폴더로 이동하여 &quot;Search Spaces&quot; 요청을 찾습니다.
+ 
+
+**2단계: 요청 인증하기**
+
+X API에 올바르게 요청을 보내려면 권한이 있는지를 검증해야 합니다. 이를 위해 이 엔드포인트는 [OAuth 2.0 App-Only](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 또는 [OAuth 2.0 Authorization Code with PKCE](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 인증 방식을 사용해 요청을 인증할 것을 요구합니다.
+
+단순화를 위해 이 예제에서는 OAuth 2.0 App-Only를 사용하겠지만, 비공개 [메트릭](/ko/x-api/fundamentals/metrics)이나 비공개 사용자의 Spaces를 요청하려면 다른 인증 방식 중 하나를 사용해야 합니다. 
+
+OAuth 2.0 App-Only를 사용하려면, 특히 [App Access Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) (App-only Bearer Token이라고도 함)을 포함한 키와 토큰을 Postman에 추가해야 합니다. 이를 위해 Postman 오른쪽 상단에서 “X API v2”라는 이름의 환경을 선택한 다음, 환경 드롭다운 옆의 눈 아이콘을 클릭하여 &quot;initial value&quot; 및 &quot;current value&quot; 필드에 키와 토큰을 추가합니다.
+
+올바르게 설정했다면, 이 변수들은 요청의 Authorization 탭에 자동으로 반영됩니다.
+ 
+
+**3단계: 검색 쿼리 생성하기**
+
+이 엔드포인트는 검색 쿼리로 텍스트를 받습니다. 다른 검색 엔드포인트와 달리 연산자, 그룹화, 논리 연산자는 지원하지 않습니다. 이 예제에서는 단순한 쿼리로 “hello”를 사용하겠습니다.
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 후, id 매개변수의 &quot;Value&quot; 열에 이 사용자 ID를 입력합니다.
+
+|         |           |
+| :------ | :-------- |
+| **Key** | **Value** |
+| query   | hello     |
+
+**4단계: 가져오고 싶은 필드 식별 및 지정하기**
+
+3단계를 완료한 후 &quot;Send&quot; 버튼을 클릭하면, 응답으로 Spaces의 ID와 상태를 받게 되며, 이것이 기본적으로 반환되는 유일한 Space 객체 필드입니다.
+
+추가 필드를 받고 싶다면, 요청에서 space.fields 또는 expansions 매개변수로 해당 필드를 명시해야 합니다.
+
+이 예제에서는 서로 다른 오브젝트에서 세 가지 추가 필드 세트를 요청하겠습니다.
+
+* 기본 Spaces 객체의 추가 title 필드
+* 지정된 creator ID에 대한 전체 user 객체
+* 연결된 user 객체의 추가 user.created&#95;at 필드
+
+Postman에서 “Params” 탭으로 이동한 후, “Query Params” 테이블에 다음 key:value 쌍을 추가합니다:
+
+|              |                |                                                                 |
+| :----------- | :------------- | :-------------------------------------------------------------- |
+| **Key**      | **Value**      | **Returned fields**                                             |
+| space.fields | title          | creator&#95;id                                                  |
+| expansions   | creator&#95;id | includes.users.id, includes.users.name, includes.users.username |
+| user.fields  | created&#95;at | includes.users.created&#95;at                                   |
+
+이제 “Send” 버튼 옆에 다음 URL이 표시되는 것을 확인할 수 있습니다:
+
+[https://api.x.com/2/spaces/search?query=hello&amp;space.fields=creator&#95;id&amp;expansions=creator&#95;id&amp;user.fields=created&#95;at](https://api.x.com/2/spaces/search?query=hello\&space.fields=creator\\_id\&expansions=creator\\_id\&user.fields=created_at)
+
+**5단계: 요청 보내기 및 응답 검토하기**
+
+모든 설정이 완료되면 “Send” 버튼을 클릭하여 다음과 같은 응답을 받습니다:
+
+```{
+   "data": [
+    {
+        "creator_id": "2244994945",
+        "id": "1zqKVXPQhvZJB",
+        "title": "Hello world 👋",
+        "state": "Running"
+   },
+   "includes": {
+       "users": [
+           {
+               "created_at": "2013-12-14T04:35:55.000Z",
+               "name": "Twitter Dev",
+               "id": "2244994945",
+               "username": "TwitterDev"
+           }
+       ]
+   }
+]
+}
+```

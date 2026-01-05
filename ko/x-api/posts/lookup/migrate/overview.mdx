@@ -1,0 +1,180 @@
+---
+title: 개요
+sidebarTitle: 개요
+keywords: ["게시물 조회 마이그레이션", "조회로 마이그레이션", "v1.1에서 v2로 조회 마이그레이션", "조회 마이그레이션 가이드", "조회 엔드포인트 마이그레이션"]
+---
+
+<div id="comparing-x-apis-posts-lookup-endpoints">
+  ## X API의 게시물 조회 엔드포인트 비교
+</div>
+
+v2 게시물 조회 엔드포인트는 기존 v1.1의 표준 [GET statuses/lookup](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) 및 [GET statuses/show](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-show-id) 엔드포인트를 대체합니다. 이 가이드는 이러한 이전 버전에서 X API v2로 마이그레이션하려는 개발자를 위한 것입니다.
+
+***
+
+<div id="endpoint-comparison-table">
+  ## 엔드포인트 비교 표
+</div>
+
+| 설명 | Standard v1.1 | X API v2 |
+|:-------------|:---------------|:----------|
+| **지원되는 HTTP 메서드** | `GET` | `GET` |
+| **호스트 도메인** | `https://api.x.com` | `https://api.x.com` |
+| **엔드포인트 경로** | `/1.1/statuses/show.json`, `/1.1/statuses/lookup.json` | `/2/tweets` |
+| **[인증](resources/fundamentals/authentication)** | OAuth 1.0a 사용자 컨텍스트 | OAuth 1.0a 사용자 컨텍스트, OAuth 2.0 앱 전용(App-Only), OAuth 2.0 Authorization Code with PKCE |
+| **게시물 [JSON 형식](/ko/x-api/fundamentals/data-dictionary)** | Standard v1.1 형식 | [X API v2 형식](/ko/x-api/fundamentals/data-dictionary), `fields` 및 `expansions` 파라미터에 의해 결정됨 (v1.1과 하위 호환되지 않음) |
+| **특정 [fields](/ko/x-api/fundamentals/data-dictionary) 선택을 지원** |  | ✔ |
+| **[annotations](/ko/x-api/fundamentals/post-annotations) 필드 지원** |  | ✔ |
+| **새로운 [metrics](/ko/x-api/fundamentals/metrics) 필드 지원** |  | ✔ |
+| **`conversation_id` 필드 지원** |  | ✔ |
+| **게시물 수정 이력 제공** | ✔ | ✔ |
+| **[Project](resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)의 자격 증명 필요** |  | ✔ |
+
+***
+
+<div id="standard-v11-compared-to-x-api-v2">
+  ## Standard v1.1과 X API v2 비교
+</div>
+
+표준 v1.1 `GET statuses/show` 및 `GET statuses/lookup`를 사용해 오셨다면, 이 가이드는 표준 엔드포인트와 X API v2 게시물 조회 엔드포인트 간의 공통점과 차이점을 이해하는 데 도움이 됩니다.
+
+[X API v1.1 데이터 형식](/ko/x-api/fundamentals/data-dictionary)과 [X API v2 형식](/ko/x-api/fundamentals/data-dictionary)의 차이를 빠르게 확인하는 데 도움이 되는 [시각적 데이터 형식 마이그레이션 도구](/ko/x-api/migrate/data-format-migration)도 참고하실 수 있습니다.
+
+* **유사점**
+  * OAuth 1.0a 사용자 컨텍스트
+  * 요청당 게시물 수 제한
+  * 게시물 편집 이력 및 메타데이터 지원
+
+* **차이점**
+  * 엔드포인트 URL
+  * 앱 및 프로젝트 요구 사항
+  * 응답 데이터 형식
+  * 요청 파라미터
+
+<div id="similarities">
+  ### 공통점
+</div>
+
+<div id="oauth-10a-user-context-authentication-method">
+  #### OAuth 1.0a 사용자 컨텍스트 인증 방식
+</div>
+
+표준 엔드포인트는 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication)를 지원하며, 새 X API v2 게시물 조회 엔드포인트는 OAuth 1.0a 사용자 컨텍스트와 [OAuth 2.0 앱 전용(App-Only)](/ko/resources/fundamentals/authentication)을 모두 지원합니다. 따라서 이전에 표준 v1.1 게시물 조회 엔드포인트 중 하나를 사용했다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다.
+
+앱 전용(App-Only) 인증은 시작하기에 가장 간편한 방법일 가능성이 높습니다. 앱 액세스 토큰을 생성하는 방법을 알아보려면 [이 OAuth 2.0 앱 전용(App-Only) 가이드](/ko/resources/fundamentals/authentication)를 참조하세요.
+
+<div id="posts-per-request-limits">
+  #### 요청당 게시물 수 제한
+</div>
+
+v1.1 [GET statuses/lookup](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) 엔드포인트에서는 요청당 최대 100개의 게시물을 지정할 수 있습니다. 이는 GET /tweets 엔드포인트에도 동일하게 적용됩니다. 100개의 게시물을 모두 지정하려면 `ids` 파라미터를 쿼리 파라미터로 사용하고, 쉼표로 구분된 [게시물 ID](/ko/resources/fundamentals/x-ids) 목록을 전달하세요.
+
+**게시물 편집 이력 및 메타데이터 지원**
+
+두 버전 모두 게시물의 편집 이력을 설명하는 메타데이터를 제공합니다. 자세한 내용은 게시물 조회 API 참고 문서와 [게시물 편집 기본 사항 페이지](/ko/x-api/fundamentals/edit-posts)를 참고하세요.
+
+<div id="differences">
+  ### 차이점
+</div>
+
+<div id="endpoint-urls">
+  #### 엔드포인트 URL
+</div>
+
+* **표준 v1.1 엔드포인트:**
+  * `https://api.x.com/1.1/statuses/show`
+  * `https://api.x.com/1.1/statuses/lookup`
+
+* **X API v2 엔드포인트:**
+  * `https://api.x.com/2/tweets`
+  * `https://api.x.com/2/tweets/:id`
+
+<div id="app-and-project-requirements">
+  #### 앱 및 프로젝트 요구 사항
+</div>
+
+X API v2 엔드포인트는 인증을 위해 [프로젝트](/ko/resources/fundamentals/projects)에 연결된 [개발자 앱](/ko/resources/fundamentals/developer-apps)의 자격 증명이 필요합니다. X API v1.1 엔드포인트는 독립 실행형 앱 또는 프로젝트에 연결된 앱의 자격 증명을 사용할 수 있습니다.
+
+<div id="response-data-format">
+  #### 응답 데이터 형식
+</div>
+
+표준 v1.1과 X API v2 엔드포인트 버전 간의 중요한 차이점 중 하나는 페이로드에서 필드를 선택하는 방식입니다.
+
+표준 엔드포인트의 경우, 많은 응답 필드가 기본적으로 포함되며, 필요한 경우 파라미터를 사용해 추가 필드를 지정할 수 있습니다.
+
+반면 X API v2는 기본적으로 게시물 `id`와 `text` 필드만 제공합니다. 추가 필드와 객체를 받으려면 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 파라미터를 사용해야 합니다. 확장된 필드는 응답 내 `includes` 객체에 반환되며, ID를 매칭하여 기본 게시물 객체와 연결할 수 있습니다.
+
+fields 및 expansions 사용 방법에 대해서는 [fields 및 expansions 사용 방법 가이드](/ko/x-api/fundamentals/data-dictionary)를 참고하세요. [데이터 형식 마이그레이션 가이드](/ko/x-api/fundamentals/fields)는 표준 v1.1 필드를 새로운 v2 필드에 매핑해 줍니다.
+
+또한 X API v2는 게시물 및 [user](/ko/x-api/fundamentals/fields) 객체를 포함한 여러 객체에 대해 새로운 JSON 설계를 도입합니다:
+
+* 표준 엔드포인트는 게시물 객체를 `statuses` 배열로 반환하는 반면, X API v2는 `data` 배열을 사용합니다.
+* X API v2에서는 리트윗 및 인용 트윗과 관련된 새로운 용어 체계가 &quot;statuses&quot;라는 용어를 대체합니다.
+* `like`와 같은 새로운 용어가 `favorites` 및 `favourites`와 같은 용어를 대체합니다.
+* 값이 없는 속성(예: `null`)은 X API v2 페이로드에 포함되지 않습니다.
+
+X API v2의 게시물 객체에는 다음과 같은 새로운 필드가 포함됩니다:
+
+* `conversation_id`
+* 두 개의 새로운 [annotations](/ko/x-api/fundamentals/post-annotations) 필드 (`context` 및 `entities`)
+* 새로운 [metrics](/ko/x-api/fundamentals/metrics) 필드
+* 특정 게시물에 누가 답글을 달 수 있는지를 나타내는 `reply_setting` 필드
+
+<div id="request-parameters">
+  #### 요청 파라미터
+</div>
+
+다음 표준 v1.1 요청 파라미터는 X API v2에서 상응하는 파라미터가 있습니다:
+
+| Standard | X API v2 |
+|:----------|:----------|
+| `id`     | `ids`    |
+
+일부 표준 v1.1 파라미터는 X API v2에서 **지원되지 않습니다**:
+
+| Standard            | Comment                                                                                                                      |
+|:---------------------|:------------------------------------------------------------------------------------------------------------------------------|
+| `tweet_mode`        | 필드 및 expansions 기능으로 대체되었습니다.                                                                                 |
+| `trim_user`         | 필드와 expansions로 대체되었습니다. 사용자 데이터에는 `author_id` expansion과 `user.fields`를 사용하세요.                 |
+| `include_my_retweet`| 인증된 사용자가 리트윗한 게시물에 대해 원본 게시물의 ID를 제공합니다.                                                     |
+| `include_entities`  | 페이로드에 포함되는 엔티티를 제어하기 위해 필드와 expansions를 사용하세요.                                                |
+| `include_ext_alt_text` | alt 텍스트가 있는 경우 미디어 엔티티에 `ext_alt_text` 필드를 추가합니다.                                              |
+| `include_card_uri`  | 광고 카드가 첨부된 경우 `card_uri`를 추가합니다.                                                                           |
+| `map`               | v1.1에서 필드가 null 처리되는 것과 달리, X API v2에서는 사용 불가한 게시물에 대해 게시물 ID와 오류 메시지를 반환합니다.   |
+
+<div id="curl-requests">
+  ### CURL Requests
+</div>
+
+다음 cURL 요청은 표준 v1.1 엔드포인트와 해당하는 v2 엔드포인트를 보여줍니다. 헤더의 `ACCESS_TOKEN`을 앱의 액세스 토큰으로 교체하세요. v2 엔드포인트의 경우, 토큰은 [Project](/ko/resources/fundamentals/projects) 내의 [developer App](/ko/resources/fundamentals/developer-apps/overview)에 속해야 합니다.
+
+v1.1의 응답 페이로드는 v2와 다릅니다. v2에서는 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 매개변수를 사용해 다양한 필드를 요청할 수 있습니다.
+
+**표준 v1.1 `GET statuses/lookup` 및 v2 `GET /tweets` 엔드포인트**
+
+```bash
+curl --request GET \
+  --url 'https://api.x.com/1.1/statuses/lookup.json?id=1460323737035677698%2C1460323743339741184' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+```
+  curl --request GET \
+  --url 'https://api.x.com/2/tweets?ids=1460323737035677698%2C1460323743339741184&tweet.fields=created_at&expansions=author_id&user.fields=created_at' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+**표준 v1.1 `GET statuses/show/:id` 및 v2 `GET /tweets/:id` 엔드포인트**
+
+```
+curl --request GET \
+  --url 'https://api.x.com/1.1/statuses/show.json?id=1460323737035677698' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+```
+curl --request GET \
+  --url 'https://api.x.com/2/tweets/1460323737035677698?tweet.fields=created_at&expansions=author_id&user.fields=created_at' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```

@@ -1,0 +1,87 @@
+---
+title: Introducción
+sidebarTitle: Introducción
+description: "La X API v2 ofrece tres endpoints de cronologías: la cronología de inicio en orden cronológico inverso, la cronología de Publicaciones de usuario y la cronología de menciones de usuario. Consulta a continuación más detalles."
+keywords: ["cronologías", "cronología de inicio", "cronología de usuario", "cronología de menciones", "cronología de Publicaciones", "cronológico inverso", "API de cronologías"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+Estos tres endpoints de cronologías admiten Publicaciones editadas. Estos endpoints siempre devolverán la edición más reciente, junto con el historial de ediciones. Cualquier Publicación recopilada después de su ventana de edición de 30 minutos representará su versión final. Los metadatos de edición incluyen un array de id de todas las Publicaciones en su historial. Para las Publicaciones sin historial de edición, este array contendrá un único id. Para las Publicaciones que hayan sido editadas, este array contiene múltiples id, ordenados de forma ascendente, lo que refleja el orden de las ediciones, con la versión más reciente en la última posición del array. Para obtener más información sobre cómo funcionan las ediciones de Publicaciones, consulta la página [Aspectos fundamentales de la edición de Publicaciones](/es/x-api/fundamentals/edit-posts).
+
+<div id="reverse-chronological-home-timeline">
+  ## Cronología de inicio en orden cronológico inverso
+</div>
+
+Este endpoint te permite recuperar las Publicaciones, reposts y respuestas más recientes publicadas por el usuario autenticado y las cuentas que sigue. 
+
+Dado que estás realizando solicitudes en nombre de un usuario, debes autenticar estos endpoints usando un [flujo de código de autorización de OAuth 2.0 con PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) o [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication). Este endpoint tiene un límite de 180 solicitudes por usuario por cada ventana de 15 minutos. Este endpoint puede devolver todas las Publicaciones creadas en la cronología durante los últimos 7 días, así como las 800 más recientes, independientemente de su fecha de creación.
+
+<div id="user-post-timeline">
+  ## Cronología de Publicaciones de usuario
+</div>
+
+El endpoint de la cronología de Publicaciones de usuario proporciona acceso a las Publicaciones publicadas por una cuenta específica de X. Recuperar las Publicaciones de un usuario te permite crear experiencias como mostrar una cronología en una interfaz de usuario, analizar las Publicaciones de un usuario para comprender mejor su contenido o crear flujos de trabajo de interacción con sus Publicaciones de forma programática. Este endpoint te da acceso a las Publicaciones, Retweets, respuestas y Publicaciones citadas más recientes de una sola cuenta de X, de forma similar a lo que se ve en la cronología del perfil de un usuario.
+
+Aquí tienes una cronología de usuario para @XDevelopers:
+
+El endpoint de la cronología de Publicaciones de usuario es un endpoint REST que recibe un único parámetro de ruta para indicar el usuario deseado (por ID de usuario). El endpoint puede devolver las 3.200 Publicaciones, Retweets, respuestas y Publicaciones citadas más recientes publicadas por el usuario.
+
+Las Publicaciones se entregan en orden cronológico inverso, comenzando por la más reciente. Los resultados se [paginan](/es/x-api/fundamentals/pagination) hasta 100 Publicaciones por página. Se proporcionan tokens de paginación para recorrer grandes conjuntos de Publicaciones. Los IDs de Publicación de las Publicaciones más reciente y más antigua incluidas en la página dada también se proporcionan como metadatos, lo cual también se puede usar para sondear cronologías en busca de Publicaciones recientes. La cronología de Publicaciones de usuario también permite especificar los parámetros start&#95;time y end&#95;time para recibir Publicaciones que se hayan creado dentro de un determinado intervalo de tiempo.
+
+El endpoint de la cronología de Publicaciones de usuario admite los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions), y devuelve el [nuevo formato de datos JSON](/es/x-api/fundamentals/data-dictionary).
+
+Para realizar correctamente una solicitud a este endpoint, tendrás que autorizar tu solicitud con los métodos de autenticación [OAuth 1.0a User Context](/es/resources/fundamentals/authentication), [OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) u [OAuth 2.0 App-Only](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token). Debes usar OAuth 1.0a User Context u OAuth 2.0 Authorization Code with PKCE cuando solicites métricas no públicas, métricas promocionadas o la cronología de un usuario protegido.
+
+El endpoint de la cronología de Publicaciones de usuario está diseñado para admitir dos patrones de uso comunes:
+
+* &quot;Obtener las Publicaciones históricas de un usuario&quot;: solicitudes realizadas a la cronología de Publicaciones de usuario para recibir Publicaciones creadas por el usuario de interés en orden cronológico dentro de un intervalo de tiempo reciente específico. El intervalo de tiempo se puede establecer usando start&#95;time y end&#95;time y paginando a través de todos los resultados. En algunos casos, se puede recuperar todo el historial de Publicaciones de un usuario si el usuario solo ha creado hasta 3.200 Publicaciones en su cuenta. Las Publicaciones incluidas dependerán de si son públicas y de la autenticación que se use para las solicitudes.
+
+* &quot;Sondear nuevas Publicaciones&quot;: solicitudes realizadas de forma continua a la cronología de Publicaciones de usuario para recuperar nuevas Publicaciones creadas por un usuario específico. El último ID de Publicación recibido se puede establecer como parámetro para cualquier nueva solicitud desde la última Publicación.
+
+<div id="user-mention-timeline">
+  ## Cronología de menciones de usuario
+</div>
+
+El endpoint de cronología de menciones de usuario te permite solicitar Publicaciones que mencionan a un usuario específico de X, por ejemplo, si una cuenta de X mencionó a @XDevelopers dentro de una Publicación. Esto también incluirá respuestas a Publicaciones del usuario solicitado. Recuperar las menciones de un usuario te permite crear experiencias como descubrir rápidamente quién está respondiendo a las Publicaciones de un usuario, quién lo está mencionando o crear flujos de trabajo de interacción con sus Publicaciones de forma programática. El endpoint te permite solicitar las menciones y respuestas más recientes de un único usuario, de forma similar a lo que puede verse en las [notificaciones de menciones](https://x.com/notifications/mentions) de un usuario en X.
+
+La cronología de menciones de usuario es un endpoint REST que recibe un solo parámetro de ruta para indicar el usuario deseado (por ID de usuario). El endpoint puede devolver las 800 menciones más recientes de ese usuario.
+
+Las Publicaciones se entregan en orden cronológico inverso, comenzando por la más reciente. Los resultados están [paginados](/es/x-api/fundamentals/pagination) en hasta 100 Publicaciones por página. Se proporcionan tokens de paginación para avanzar por conjuntos grandes de Publicaciones. Los IDs de Publicación de las Publicaciones más nueva y más antigua incluidas en la página indicada también se proporcionan como metadatos, lo que también puede utilizarse para consultar cronologías en busca de Publicaciones recientes o para navegar por la cronología de forma similar al endpoint de v1.1 [mentions&#95;timeline](https://developer.x.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-mentions_timeline). El endpoint también ofrece la posibilidad de especificar los parámetros start&#95;time y end&#95;time para recibir Publicaciones que se crearon dentro de una determinada ventana de tiempo. 
+
+Para realizar correctamente una solicitud a este endpoint, deberás autorizar tu solicitud con los métodos de autenticación [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), [OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) o [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only). Debes usar Contexto de usuario de OAuth 1.0a o OAuth 2.0 Authorization Code with PKCE cuando solicites métricas no públicas, métricas promocionadas o la cronología de un usuario protegido.
+
+El endpoint de cronología de menciones de usuario admite parámetros de [campos](/es/x-api/fundamentals/fields) y [expansiones](/es/x-api/fundamentals/expansions), y devuelve el [nuevo formato de datos JSON](/es/x-api/fundamentals/data-dictionary).
+
+<Info>
+  **Configuración de la cuenta**
+
+  Para acceder a estos endpoints, necesitarás:
+
+  * Una [cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info) aprobada.
+  * Autenticarte usando las claves y tokens de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que se encuentre dentro de un [Proyecto](/es/resources/fundamentals/projects). 
+
+  Obtén más información sobre cómo obtener acceso a los endpoints de X API v2 en nuestra [guía de primeros pasos](/es/x-api/getting-started/getting-access).
+</Info>
+
+<div className="flex space-x-2">
+  <Button href="/es/x-api/posts/timelines/quickstart/reverse-chron-quickstart">
+    Inicio rápido
+  </Button>
+
+  <Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+    Ejecutar en Postman
+  </Button>
+
+  <Button href="https://developer.x.com/apitools/api?endpoint=%2F2%2Fusers%2F%7Bid%7D%2Ftweets&method=get">
+    Probar con API Explorer
+  </Button>
+</div>
+
+**Recursos de apoyo**
+
+[Aprende a usar Postman para hacer solicitudes](/es/tutorials/postman-getting-started)
+
+[Solucionar un error](https://developer.x.com/en/support/x-api)
+
+[Visita la página de referencia de la API para este endpoint]((/x-api/posts/tweets-lookup#curl-requests &quot;Visit the API reference page for this endpoint&quot;)

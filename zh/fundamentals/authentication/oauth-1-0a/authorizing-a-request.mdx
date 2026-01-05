@@ -1,0 +1,150 @@
+---
+title: 请求授权
+sidebarTitle: 请求授权
+keywords: ["authorize request", "OAuth authorization", "request authorization", "OAuth 1.0a authorization", "authorize API request"]
+---
+
+import { Button } from "/snippets/zh/button.mdx";
+
+<div id="authorizing-a-request">
+  ### 为请求授权
+</div>
+
+本文档旨在向你展示如何修改 HTTP 请求，以便向 X API 发送授权请求。
+
+所有 X 的 API 都基于 HTTP 协议。这意味着，你编写的任何使用 X API 的软件，都会向 X 的服务器发送一系列结构化消息。例如，一个将文本“**Hello Ladies + Gentlemen, a signed OAuth request!**”作为一条帖子发布的请求大致如下所示：
+
+```
+POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
+Accept: */*
+Connection: close
+User-Agent: OAuth gem v0.4.4
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 76
+Host: api.x.com
+
+status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
+```
+
+任何 HTTP 库都应该能够相对轻松地生成并发送上述请求。然而，由于无法得知以下信息，上述请求被视为无效：
+
+1. 哪个应用正在发出该请求
+2. 该请求代表哪位用户发布内容
+3. 该用户是否已授予该应用代表其发布内容的授权
+4. 请求在传输过程中是否被第三方篡改
+
+为了让应用能够提供这些信息，X 的 API 依赖于 [OAuth 1.0a 协议](http://tools.ietf.org/html/rfc5849)。简单来说，X 的实现要求所有需要授权的请求都包含一个额外的 HTTP Authorization 请求头，其中包含足够的信息来回答上述问题。上面的 HTTP 请求在加入这个请求头后，形式如下（通常 Authorization 请求头需要写在一行，这里为了便于阅读进行了换行处理）：
+
+```
+POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
+Accept: */*
+Connection: close
+User-Agent: OAuth gem v0.4.4
+Content-Type: application/x-www-form-urlencoded
+Authorization:
+OAuth oauth\_consumer\_key="xvz1evFS4wEEPTGEFPHBog",
+oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg",
+oauth_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D",
+oauth\_signature\_method="HMAC-SHA1",
+oauth_timestamp="1318622958",
+oauth_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb",
+oauth_version="1.0"
+Content-Length: 76
+Host: api.x.com
+
+status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
+```
+
+创建此请求时，它会被 X API 视为有效请求。
+
+如果这个签名过程看起来超出了你的集成能力范围，可以考虑使用 [Web Intents](https://dev.x.com/web/intents)，它在与 X API 交互时不需要使用 OAuth。
+ 
+
+**收集参数**
+
+你应该能够看到 header 中包含 7 个键值对，这些键都以字符串 “oauth&#95;” 开头。对于任意一次 X API 请求，收集这 7 个值并创建类似的 header，即可为该请求指定授权。每个值的生成方式如下所述：
+
+**Consumer key**
+
+oauth&#95;consumer&#95;key 用于标识是哪一个应用在发起请求。前往 [开发者门户](/zh/resources/fundamentals/developer-portal) 中你的 [X app](/zh/resources/fundamentals/developer-apps) 的设置页面获取这个值。
+
+|                            |                        |
+| :------------------------- | :--------------------- |
+| oauth&#95;consumer&#95;key | xvz1evFS4wEEPTGEFPHBog |
+
+**Nonce**
+
+oauth&#95;nonce 参数是你的应用应为每一次唯一请求生成的唯一令牌。X 会利用这个值来判断某个请求是否被多次提交。此请求中的值是通过对 32 字节的随机数据进行 base64 编码，并去除所有非单词字符生成的，但任何能够产生较为随机的字母数字字符串的方法在这里都可以接受。
+
+|                 |                                            |
+| :-------------- | :----------------------------------------- |
+| oauth&#95;nonce | kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg |
+
+**Signature**
+
+`oauth_signature` 参数包含一个值，该值是通过将所有其他请求参数和两个密钥值传入签名算法生成的。签名的目的在于让 X 能够验证请求在传输过程中未被修改、验证发出请求的应用，以及验证该应用是否有权与用户的账户进行交互。
+
+针对本次请求计算 `oauth_signature` 的过程在 [创建签名](/zh/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature) 中进行了说明。
+
+|     |     |
+| :--- | :--- |
+| oauth&#95;signature | tnnArxj06cWHq44gCs1OSKk/jLY= |
+
+**Signature method**
+
+X 使用的 `oauth_signature_method` 为 HMAC-SHA1。对于发送到 X API 的任何已授权请求，都应使用该值。
+
+|     |     |
+| :--- | :--- |
+| oauth&#95;signature&#95;method | HMAC-SHA1 |
+
+**Timestamp**
+
+`oauth_timestamp` 参数表示请求的创建时间。该值应为生成请求时自 Unix 纪元以来的秒数，大多数编程语言都可以轻松生成此值。X 会拒绝创建时间过早的请求，因此务必确保用于生成请求的计算机时钟与 NTP 保持同步。
+
+|     |     |
+| :--- | :--- |
+| oauth&#95;timestamp | 1318622958 |
+
+**Token**
+
+`oauth_token` 参数通常表示用户授权你的应用共享其账户访问权限。有少数认证请求不会传递此值，或者该值是另一种形式的令牌，但这些情况在 [获取访问令牌](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) 中有详细说明。对于大多数通用请求，你会使用所谓的 **访问令牌（access token）**。
+
+你可以在 [开发者门户](/zh/resources/fundamentals/developer-portal) 中的 [X 应用](/zh/resources/fundamentals/developer-apps) 设置页面，为你的账户生成一个有效的 [访问令牌（access token）](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)。
+
+|     |     |
+| :--- | :--- |
+| oauth&#95;token | 370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb |
+
+**Version**
+
+发送到 X API 的任何请求，其 `oauth_version` 参数都应始终为 1.0。
+
+|     |     |
+| :--- | :--- |
+| oauth&#95;version | 1.0 |
+
+<div id="building-the-header-string">
+  #### 构建 header 字符串
+</div>
+
+要构建 header 字符串，可以把它想象成向一个名为 DST 的字符串写入内容。
+
+1. 将字符串 “OAuth ”（包括末尾的空格）追加到 DST。
+2. 对于上面列出的 7 个参数中的每个键/值对：
+   1. 将键[进行百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)并将结果追加到 DST。
+   2. 将等号字符 ‘=’ 追加到 DST。
+   3. 将双引号 ‘”’ 追加到 DST。
+   4. 将值[进行百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)并将结果追加到 DST。
+   5. 将双引号 ‘”’ 追加到 DST。
+   6. 如果仍有剩余的键/值对，则将逗号 ‘,’ 和空格 ‘ ’ 追加到 DST。
+
+在构建此字符串时，要特别注意对各个值进行百分号编码。例如，oauth&#95;signature 的值 tnnArxj06cWHq44gCs1OSKk/jLY= 必须编码为 tnnArxj06cWHq44gCs1OSKk%2FjLY%3D。
+
+对上面收集到的参数执行上述步骤后，将得到如下字符串：
+
+```
+OAuth oauth\_consumer\_key="xvz1evFS4wEEPTGEFPHBog", oauth\_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", oauth\_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", oauth\_signature\_method="HMAC-SHA1", oauth\_timestamp="1318622958", oauth\_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", oauth_version="1.0"
+```
+
+将此值设置为该请求的 Authorization 头。

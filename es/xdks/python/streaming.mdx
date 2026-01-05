@@ -1,0 +1,123 @@
+---
+title: Transmisión
+sidebarTitle: Transmisión
+---
+
+La X API admite datos en tiempo real a través de endpoints como el [Filtered Stream Endpoint](https://docs.x.com/x-api/posts/filtered-stream/introduction), que entregan las Publicaciones coincidentes a medida que se publican. Esto requiere establecer una conexión HTTP persistente.
+
+<div id="setup-and-basic-streaming">
+  ## Configuración y streaming básicos
+</div>
+
+<div id="synchronous">
+  ### Síncrono
+</div>
+
+```python
+from xdk import Client
+# Inicializar el cliente
+client = Client(bearer_token="your_bearer_token")
+# Transmitir publicaciones (asegúrate de configurar las reglas primero)
+for post_response in client.stream.posts():
+    data = post_response.model_dump() if hasattr(post_response, 'model_dump') else dict(post_response)
+    if 'data' in data and data['data']:
+        tweet = data['data']
+        post_text = tweet.get('text', '') if isinstance(tweet, dict) else (tweet.text if hasattr(tweet, 'text') else '')
+        print(f"Post: {post_text}")
+```
+
+
+<div id="async">
+  ### Asíncrono
+</div>
+
+```python
+import asyncio
+from asyncio import Queue
+import threading
+from xdk import Client
+async def stream_posts_async(client: Client):
+    queue = Queue()
+    loop = asyncio.get_event_loop()
+    stop = threading.Event()
+    def run_stream():
+        for post in client.stream.posts():
+            if stop.is_set():
+                break
+            asyncio.run_coroutine_threadsafe(queue.put(post), loop)
+        asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+    threading.Thread(target=run_stream, daemon=True).start()
+    while True:
+        post = await queue.get()
+        if post is None:
+            break
+        data = post.model_dump()
+        if 'data' in data and data['data']:
+            print(f"Publicación: {data['data'].get('text', '')}")
+    stop.set()
+async def main():
+    client = Client(bearer_token="your_bearer_token")
+    await stream_posts_async(client)
+asyncio.run(main())
+```
+
+
+<div id="rule-management">
+  ## Gestión de reglas
+</div>
+
+Las reglas definen filtros para los datos específicos que quieres obtener (por ejemplo, palabras clave, usuarios, etc.). Puedes obtener más información sobre cómo crear reglas en [esta guía](https://docs.x.com/x-api/posts/filtered-stream/integrate/build-a-rule).
+**Agregar reglas**:
+
+```python
+from xdk.stream.models import UpdateRulesRequest
+# Añadir una regla
+add_rules = {
+    "add": [
+        {"value": "from:xdevelopers", "tag": "official_updates"}
+    ]
+}
+request_body = UpdateRulesRequest(**add_rules)
+response = client.stream.update_rules(body=request_body)
+```
+
+**Eliminar reglas**:
+
+```python
+from xdk.stream.models import UpdateRulesRequest
+delete_rules = {
+    "delete": {
+        "ids": ["rule_id_1", "rule_id_2"]
+    }
+}
+request_body = UpdateRulesRequest(**delete_rules)
+response = client.stream.update_rules(body=request_body)
+```
+
+**Lista de reglas**:
+
+```python
+# get_rules devuelve un Iterator, así que itera sobre este
+for page in client.stream.get_rules():
+    if page.data:
+        for rule in page.data:
+            # Accede a los atributos de la regla - Los modelos Pydantic admiten acceso tanto por atributo como por diccionario
+            rule_id = rule.id if hasattr(rule, 'id') else rule.get('id', '')
+            rule_value = rule.value if hasattr(rule, 'value') else rule.get('value', '')
+            rule_tag = rule.tag if hasattr(rule, 'tag') else rule.get('tag', '')
+            print(f"ID: {rule_id}, Value: {rule_value}, Tag: {rule_tag}")
+    break  # Elimina el break para obtener todas las páginas
+```
+
+Para ver la sintaxis completa de las reglas, consulta la [documentación de reglas de streaming de X](https://developer.x.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule).
+
+
+<div id="troubleshooting">
+  ## Solución de problemas
+</div>
+
+- **403 Forbidden**: Autenticación no válida o permisos insuficientes.
+- **420 Enhance Your Calm**: Límite de frecuencia alcanzado; espera y vuelve a intentarlo.
+- **No Data**: Revisa las reglas con `get_rules()`; asegúrate de que existan Publicaciones coincidentes.
+Para ver ejemplos de código detallados con Python XDK, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).
+Para más ejemplos y la referencia de la API, revisa los *docstrings* en línea (por ejemplo, `help(client.tweets.search_recent)`) o las *stubs* generadas en el código fuente. Envía tus comentarios a través del [repositorio de GitHub](https://github.com/xdevplatform/xdk/tree/main/xdk/python).

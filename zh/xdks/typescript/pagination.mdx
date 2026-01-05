@@ -1,0 +1,175 @@
+---
+title: "分页"
+sidebarTitle: "分页"
+---
+
+SDK 提供了通用的分页器工具，可用于任何返回分页响应的 endpoint。方法返回的是普通响应；你需要用分页器对其进行封装。
+
+<div id="basic-pagination">
+  ### 基本分页
+</div>
+
+<CodeGroup dropdown>
+
+```typescript quick-start.ts theme={null}
+import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform/xdk';
+
+const client: Client = new Client({ bearerToken: 'your-bearer-token' });
+
+// 使用正确的类型包装任意列表端点
+const followers: UserPaginator = new UserPaginator(
+  async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
+    const res = await client.users.getFollowers('<userId>', {
+      maxResults: 100,
+      paginationToken: token,
+      userFields: ['id','name','username'],
+    });
+    return { 
+      data: res.data ?? [], 
+      meta: res.meta, 
+      includes: res.includes, 
+      errors: res.errors 
+    };
+  }
+);
+```
+
+```javascript quick-start.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+import { UserPaginator } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const followers = new UserPaginator(async (token) => {
+  const res = await client.users.getFollowers('<userId>', {
+    maxResults: 100,
+    paginationToken: token,
+    userFields: ['id','name','username'],
+  });
+  return { data: res.data ?? [], meta: res.meta, includes: res.includes, errors: res.errors };
+});
+```
+
+</CodeGroup>
+
+<div id="manual-paging">
+  ### 手动分页
+</div>
+
+<CodeGroup>
+
+```typescript manual.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+await followers.fetchNext();          // 第一页
+while (!followers.done) {
+  await followers.fetchNext();        // 后续页
+}
+
+const userCount: number = followers.users.length;  // 所有已获取的用户
+const firstUser: Schemas.User | undefined = followers.users[0];
+const nextToken: string | undefined = followers.meta?.next_token;
+```
+
+```javascript manual.js theme={null}
+await followers.fetchNext();
+while (!followers.done) await followers.fetchNext();
+console.log(followers.items.length);
+```
+
+</CodeGroup>
+
+<div id="async-iteration">
+  ### 异步迭代
+</div>
+
+<CodeGroup>
+
+```typescript async.ts theme={null}
+import { Schemas } from '@xdevplatform/xdk';
+
+for await (const user of followers) {
+  const typedUser: Schemas.User = user;
+  console.log(typedUser.username);  // 完整的类型安全访问
+}
+```
+
+```javascript async.js theme={null}
+for await (const user of followers) {
+  console.log(user.username);
+}
+```
+
+</CodeGroup>
+
+<div id="next-page-as-a-new-instance">
+  ### 将下一页作为一个新的实例
+</div>
+
+<CodeGroup>
+
+```typescript next.ts theme={null}
+import { UserPaginator } from '@xdevplatform/xdk';
+
+await followers.fetchNext();
+if (!followers.done) {
+  const page2: UserPaginator = await followers.next(); // 从下一页开始的独立分页器实例
+  await page2.fetchNext();
+  console.log(page2.users.length);  // 第二页中的条目
+}
+```
+
+```javascript next.js theme={null}
+await followers.fetchNext();
+if (!followers.done) {
+  const page2 = await followers.next();
+  await page2.fetchNext();
+}
+```
+
+</CodeGroup>
+
+<div id="error-handling-and-rate-limits">
+  ### 错误处理和速率限制
+</div>
+
+<CodeGroup>
+
+```typescript errors.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+try {
+  for await (const item of followers) {
+    const user: Schemas.User = item;
+    // 处理用户...
+  }
+} catch (err: unknown) {
+  if (followers.rateLimited) {
+    console.error('Rate limited, backoff required');
+    // 执行退避 / 稍后重试
+  } else {
+    console.error('Pagination error:', err);
+    throw err;
+  }
+}
+```
+
+```javascript errors.js theme={null}
+try {
+  for await (const item of followers) {
+    // ...
+  }
+} catch (err) {
+  if (followers.rateLimited) {
+    // 执行退避 / 稍后重试
+  } else {
+    throw err;
+  }
+}
+```
+
+</CodeGroup>
+
+<Info>
+如需查看使用 JavaScript/TypeScript XDK 的详细代码示例，请访问我们的 [代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/javascript)。
+</Info>

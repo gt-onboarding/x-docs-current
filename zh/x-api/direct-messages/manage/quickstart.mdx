@@ -1,0 +1,152 @@
+---
+title: 快速入门
+sidebarTitle: 快速入门
+keywords: ["管理私信快速入门", "管理 DM 快速入门", "发送私信快速入门", "私信管理快速入门"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-manage-direct-message-endpoints">
+  ## 开始使用 Direct Message 管理端点
+</div>
+
+本快速入门指南将帮助你使用 Postman（一款用于管理和发起 HTTP 请求的工具）向 Direct Message 管理端点发出你的第一个请求。若要了解更多关于我们 Postman 集合的信息，请访问我们的 [使用 Postman](/zh/tutorials/postman-getting-started) 指南。
+
+如果你想查看基于 Python 的示例，请访问我们的 [X API v2 示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。此外，官方的 [X 开发者平台软件开发工具包 (SDKs)](/zh/x-api/tools-and-libraries/sdks) 将会更新以支持这些 Direct Message 端点。
+
+<Note>
+  **前提条件**
+
+  要完成本指南，你需要一组用于对请求进行认证的 [密钥和令牌](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审核。
+  * 在开发者门户中创建一个 [项目](/zh/resources/fundamentals/projects) 以及一个关联的 [开发者应用](/zh/resources/fundamentals/developer-apps)。
+  * 前往你的 App 的 “Keys and tokens” 页面以生成所需的凭证。请确保将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-building-manage-direct-message-requests">
+  ### 构建管理私信请求的步骤
+</div>
+
+在本示例中，我们会在一次请求中创建一个新的群组会话，并向其中添加首条消息。随后，我们再向已创建的会话添加第二条消息。
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### 第一步：从工具或库开始
+</div>
+
+要开始使用用于管理私信（Direct Message）的 endpoints，我们将使用 Postman 工具来简化流程。我们会使用一个由 XDev 编写的 X API v2 示例请求集合，来探索六个用于创建新私信以及列出私信会话事件的 endpoints。
+
+虽然该集合的大部分内容已预填，但仍有一些细节需要你根据为发起这些 API 请求而创建的 X 应用来填写。首先，让我们加载/更新这个集合。
+
+要将 X API v2 的 Postman 集合加载到你的环境中，请点击下方按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 后，导航到 “Manage Direct Messages” 文件夹。此文件夹的 Authorization 选项卡在可能的情况下已预填，你可以更新少量设置以填入你的 X 应用的身份验证详情。该文件夹还包含三个用于创建新私信的 endpoints。请注意，还有一个 &quot;Direct Message lookup&quot; 文件夹，其中包含三个可用的 endpoints，用于检索私信会话事件，包括发送和接收消息，以及会话参与者加入和离开时的事件。 
+
+由于创建群组会话是 X API v2 的一个重要新功能，本示例将重点展示这一点。我们将使用 &quot;New group DM and conversation&quot; 示例，并用该请求来创建一个私信群组会话。
+
+下一步是对该 endpoint 进行身份验证。
+
+**第二步：为请求进行身份验证**
+
+要正确向 X API 发出请求，你需要确认自己具有相应的权限。为了成功向此 endpoint 发出请求，我们将使用 [OAuth 2.0 Authorization Code Flow with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)。你可以在 Postman 中生成一个访问令牌。 
+
+使用 Postman 时，你可以在文件夹级别或请求级别设置身份验证方式。在这里，我们将在文件夹级别配置身份验证详情。
+
+导航到 &quot;Manage Direct Messages&quot; 文件夹，选择 &quot;Authorization&quot; 选项卡，确认 Type 被设置为 “OAuth 2.0”，并且 &quot;Add auth data to&quot; 被设置为 &quot;Request Headers&quot;。在 &quot;Current Token&quot; 部分，确保 &quot;header Prefix&quot; 被设置为 Bearer。  
+
+要配置并生成一个新令牌：
+
+1. 创建一个 Token Name，例如 &quot;Manage DMs&quot;。
+
+2. 确认 **Grant Type** 被设置为 Authorization Code (with PKCE)。
+
+3. 设置你的 **Callback URL**。你需要将 Callback URL 更新为与在 [v2 Dev Portal](https://developer.x.com/en/portal/dashboard) 中与你的应用关联的 Callback URL 完全一致。对于本示例中使用的 X 应用，Callback URL 设置为 [*https://www.example.com*](https://www.example.com/)。（注意，由于必须完全匹配，[*https://example.com*](https://example.com) 将无法使用。） 
+
+4. 确认 **Auth URL** 设置为 [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize)。
+
+5. 确认 **Access Token URL** 设置为 [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token)。\
+   **Client ID** - 从开发者门户复制并粘贴 OAuth 2.0 client ID。\
+   **Client Secret** - 只有在你使用的 App 类型是机密客户端（confidential client）时才需要。如果是这种情况，请从开发者门户复制并粘贴 OAuth 2.0 Client Secret。 
+
+6. 确认 **Scope** 被设置为 dm.read、dm.write、tweet.read 和 users.read。
+
+7. 确认 **State** 被设置为 “state”。
+
+8. 确认 **Client Authentication** 被设置为 Send as Basic Auth header。
+
+9. 点击 **Get New Access Token**，然后在 “Sign-in with X” 流程中点击 &quot;Authorize app&quot;。
+
+10. 点击 &quot;Proceed&quot; 按钮，然后点击 &quot;Use Token&quot; 以生成一个令牌。 
+
+11. 点击 &quot;Save&quot; 按钮以保存这些配置信息。
+
+你可能会收到一条提示，表示你尚未登录 X。如果出现此错误，你需要在 Postman 中登录你希望代表其发帖的 X 账号。
+
+现在已经在文件夹级别配置好了这些 OAuth 2.0 相关设置，前往每个示例的 &quot;Authorization&quot; 选项卡，并确认它们的 Type 已设置为 &quot;Inherit auth from parent&quot;。
+
+请注意，此访问令牌很快会过期，你需要点击 &quot;Get New Access Token&quot; 按钮重新生成它。点击该按钮会触发 &quot;Sign-in with X&quot; 流程，并生成一个新的令牌用于发起请求。
+
+<div id="step-three-specify-the-direct-message-conversation-participants-and-message-contents">
+  #### 步骤三：指定私信会话参与者和消息内容
+</div>
+
+导航到 “Body” 选项卡并修改示例 JSON 对象。将 `participant_ids` 属性设置为你想要发送私信的账户。
+
+`{
+   "message": {"text": "Hello to just you two, this is a new group conversation."},
+   "participant_ids": ["944480690","906948460078698496"],
+   "conversation_type": "Group"
+}`
+
+<div id="step-four-make-your-request-and-review-the-response">
+  #### 步骤四：发出请求并查看响应
+</div>
+
+在完成所有设置后，点击 “Send” 按钮，你将会收到与下面示例响应类似的返回结果。请注意，如果你的访问令牌在创建之后已经过期，你可以返回到该文件夹的 Authorization 选项卡，并点击 “Get New Access Token” 来生成一个新的访问令牌。
+
+```
+{
+   "data": {
+       "dm_conversation_id": "1582103724607971328",
+       "dm_event_id": "1582103724607971332"
+   }
+}
+```
+
+如果返回的响应数据对象中包含 dm&#95;conversation&#95;id 和 dm&#95;event&#95;id，则说明你已成功创建了一个新的私信会话。要开始查询与此会话关联的事件，请前往 Direct Message 查找快速入门指南。
+
+<div id="step-five-add-another-message-to-that-group-conversation">
+  #### 步骤五：向该群组会话再添加一条消息
+</div>
+
+现在选择 “Add DM to conversation” 示例，并选择 “Params” 选项卡。在 “Path Variables” 下，将 dm&#95;conversation&#95;id 更新为你在上面创建的会话 ID。
+
+|                            |                     |
+| :------------------------- | :------------------ |
+| **Key**                    | **Value**           |
+| dm&#95;conversation&#95;id | 1582103724607971328 |
+
+使用此会话 ID，请求路径将变为：[https://api.x.com/2/dm&#95;conversations/1582103724607971328/messages](https://api.x.com/2/dm_conversations/1582103724607971328/messages)
+
+同时，在 “Body” 选项卡中更新请求 JSON，包含你想发送的消息文本：
+
+```
+{
+   "text": "Adding a new message to our group conversation..."
+}
+```
+
+完成所有设置后，点击 “Send” 按钮，您将收到类似于以下示例的响应：
+
+```
+{
+   "data": {
+       "dm_conversation_id": "1582103724607971328",
+       "dm_event_id": "1582106224379559940"
+   }
+}
+```

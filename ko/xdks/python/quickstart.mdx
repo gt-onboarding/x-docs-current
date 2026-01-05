@@ -1,0 +1,70 @@
+---
+title: 빠른 시작
+sidebarTitle: 빠른 시작
+---
+
+이 예제에서는 Bearer Token 인증을 사용하여 XDK를 통해 게시물을 빠르게 검색하는 방법을 보여줍니다.
+
+<div id="step-1-install-the-sdk">
+  ## 1단계: SDK 설치
+</div>
+
+```bash
+pip install xdk
+```
+
+<div id="step-2-get-your-bearer-token">
+  ## 2단계: Bearer Token 발급받기
+</div>
+
+1. [X Developer Portal](https://developer.x.com/en/portal/dashboard)에 로그인합니다.
+2. 앱을 새로 만들거나 기존 앱을 선택합니다.
+3. &quot;Keys and Tokens&quot;에서 Bearer Token(앱 전용 인증)을 생성합니다.
+
+<div id="step-3-write-and-run-your-first-script">
+  ## 3단계: 첫 번째 스크립트 작성 및 실행
+</div>
+
+`quickstart.py` 파일을 만듭니다.
+
+```python
+# Client 가져오기
+from xdk import Client
+# 실제 Bearer Token으로 교체
+client = Client(bearer_token="YOUR_BEARER_TOKEN_HERE")
+# "api"를 언급하는 최근 게시물 가져오기
+# search_recent는 Iterator를 반환하므로 반복 처리
+for page in client.posts.search_recent(query="api", max_results=10):
+    if page.data and len(page.data) > 0:
+        # 첫 번째 게시물 접근 - Pydantic 모델은 속성 및 딕셔너리 접근 모두 지원
+        first_post = page.data[0]
+        post_text = first_post.text if hasattr(first_post, 'text') else first_post.get('text', '')
+        print(f"Latest Post: {post_text}")
+        break
+    else:
+        print("No Posts found.")
+        break
+```
+
+실행해 보세요:
+
+```bash
+python quickstart.py
+```
+
+**예상 출력 결과**:
+
+```
+Latest Post: XDK Python SDK의 흥미로운 업데이트!
+```
+
+**문제 해결**: 401 오류가 발생하면 Bearer Token을 다시 확인하세요. 요청 한도(429)로 인한 오류가 발생한 경우, 잠시 기다렸다가 다시 시도하세요.
+
+<div id="next-steps">
+  ## 다음 단계
+</div>
+
+* [Authentication](/ko/xdks/python/authentication)을(를) 살펴보고 Bearer Token(앱 전용) 인증, PKCE를 사용하는 OAuth 2.0(사용자 컨텍스트), OAuth 1.0a(레거시 사용자 컨텍스트)를 활용하는 방법을 이해하세요.
+* 여러 번 API를 호출하지 않고도 대량의 결과를 받고 싶은 사용 사례를 위해 [Pagination](/ko/xdks/python/pagination)에 대해 학습하세요.
+* 실시간 데이터로 작업하는 방법을 알아보기 위해 [Streaming](/ko/xdks/python/streaming)을(를) 자세히 살펴보세요.
+  Python XDK를 사용하는 자세한 코드 예제는 [code samples GitHub repo](https://github.com/xdevplatform/samples/tree/main/python)를 확인하세요.

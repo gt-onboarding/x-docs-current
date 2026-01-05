@@ -1,0 +1,202 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["filtered stream クイックスタート", "ストリーミング クイックスタート", "filtered stream チュートリアル", "ストリーム ガイド", "ストリーミング サンプル"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-filtered-stream-endpoints">
+  ## filtered stream エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、cURL リクエストを使用して filtered stream エンドポイントグループに最初のリクエストを送信する方法を説明します。cURL は、最小限の設定でリクエストを実行できるコマンドラインツールです。
+
+他の言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub リポジトリをご覧ください。
+
+<Note>
+  **前提条件**
+
+  このガイドを完了するには、リクエストを認証するための一連の [キーとトークン](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [developer App](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-filtered-stream-request-using-curl">
+  ### cURL を使用して filtered stream リクエストを構築する手順
+</div>
+
+**ステップ 1：ルールを作成する**
+
+ルールは、ストリームに配信されるポストを決定するために、ブール演算と括弧を使って組み合わせる 1 つ以上の異なる[オペレーター](/ja/x-api/posts/filtered-stream#building-rules-for-filtered-stream)で構成されます。このガイドでは、キーワード「cat」と画像の両方を含むポストを見つけるようにストリームをフィルタリングします。ルールは次のとおりです。
+
+```cat has:images
+```
+
+**ステップ 2: ルールにタグを追加する**
+
+ストリームには複数のルールを同時に追加できます。ストリーミング接続を開始すると、これらのいずれかのルールにマッチしたポストは、同じストリーミング接続で受信されます。どのポストがどのルールにマッチしたかを判別できるようにするため、ルール作成リクエストにタグを指定できます。そのルールにマッチした各ポストには、そのポストのペイロード内に、どのルールにマッチしたかを示す tag フィールドが含まれるようになります。このルールには、次のタグを割り当てます：
+
+```cats with images
+```
+
+**ステップ3：ルールをストリームに追加する**
+
+このエンドポイントでは、リクエストと一緒に、ルールとそのタグを含む `application/json` のボディを渡す必要があります。また、このルールをストリームに追加しようとしているため、ルールの値とタグを `add` オブジェクトの中に含めていることにも留意してください。JSON ボディは次のようになります。
+
+```json
+{
+  "add": [
+    {
+      "value": "cat has:images",
+      "tag": "画像付きの猫"
+    }
+  ]
+}
+```
+
+この JSON ボディの準備が整ったので、これを cURL リクエストに追加できます。リクエストは次のようになります。ただし、このリクエストはまだ完成していないため、後の手順に進むまで送信しないでください。
+
+```json
+curl -X POST 'https://api.x.com/2/tweets/search/stream/rules' \
+-H "Content-type: application/json" \
+-H "Authorization: Bearer $APP_ACCESS_TOKEN" -d \
+'{
+  "add": [
+    {"value": "cat has:images", "tag": "cats with images"}
+  ]
+}'`
+```
+
+**ステップ4：リクエストを認証する**
+
+filtered stream rules エンドポイントでは [OAuth 2.0 アプリ専用フロー認証](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) が必要なため、ステップ3の cURL コマンド内の $APP&#95;ACCESS&#95;TOKEN を、事前準備の手順で生成した [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) に置き換える必要があります。 
+
+**ステップ5：ルールをストリームに追加する**
+
+次のステップでは、cURL リクエストを実行してルールをストリームに追加します。cURL コマンドをコマンドラインインターフェイスにコピーして貼り付け、「Enter」キーを押してください。 
+
+cURL リクエストが成功すると、value、tag、および id（ルールの一意の識別子として機能します）に関するデータを含むレスポンスが返されます。レスポンスは次のようになります。
+
+```json
+{
+  "data": [
+    {
+      "value": "cat has:images",
+      "tag": "画像付きの猫",
+      "id": "1273026480692322304"
+    }
+  ],
+  "meta": {
+    "sent": "2020-06-16T22:55:39.356Z",
+    "summary": {
+      "created": 1,
+      "not_created": 0,
+      "valid": 1,
+      "invalid": 0
+    }
+  }
+}
+```
+
+ルールが正しく追加されたことを確認するには、再度 $APP&#95;ACCESS&#95;TOKEN を自分のトークンに置き換え、以下の GET リクエストを rules エンドポイントに送信します。このリクエストにより、ストリームに追加されたすべてのルールの一覧が返されます。
+
+```bash
+curl -X GET 'https://api.x.com/2/tweets/search/stream/rules' \
+-H "Authorization: Bearer $APP_ACCESS_TOKEN"
+```
+
+cURL リクエストが成功すると、次のようなレスポンスが返されます。
+
+```json
+{
+	"data": [{
+		"id": "1273028376882589696",
+		"value": "cat has:images",
+		"tag": "cats with images"
+	}],
+	"meta": {
+		"sent": "2020-06-16T23:14:06.498Z"
+	}
+}
+```
+
+**ステップ6：取得したいフィールドを特定して指定する**
+
+ステップ5を終えた後にストリームに接続すると、レスポンス内でデフォルトの [Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) のフィールドである id、text、edit&#95;history&#95;tweet&#95;ids を受け取ります。これら以外の追加のフィールドを受け取りたい場合は、リクエスト内で [field](/ja/x-api/fundamentals/fields) パラメータおよび／または [expansion](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドを指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 通りのフィールドセットをリクエストします。
+
+1. 主となる Post オブジェクトに対する追加フィールド tweet.created&#95;at。
+2. 返されるポストの投稿者に対応する [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user) のデフォルトフィールド: id、name、username
+3. 関連する user オブジェクトに対する追加フィールド user.created&#95;at
+    
+
+これらのフィールドをリクエストするには、リクエスト内で次の内容を渡す必要があります。
+
+|              |                |                                                                 |
+| :----------- | :------------- | :-------------------------------------------------------------- |
+| Key          | Value          | Returned fields                                                 |
+| tweet.fields | created&#95;at | tweets.created&#95;at                                           |
+| expansions   | author&#95;id  | includes.users.id, includes.users.name, includes.users.username |
+| user.fields  | created&#95;at | includes.users.created&#95;at                                   |
+
+これで、この内容を踏まえてストリームに接続するためのリクエスト URL を組み立てることができます。次のようになります。
+
+```bash
+https://api.x.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at
+```
+
+**ステップ 7: ストリームに接続してレスポンスを確認する**
+
+ルールを設定し、取得したいフィールドを指定したので、設定したルールにマッチする Post オブジェクトを配信するストリームに接続する準備が整いました。ステップ 6 で取得した URL をリクエストに追加すると、cURL コマンドは次のようになります。
+
+```bash
+curl -X GET -H "Authorization: Bearer $APP_ACCESS_TOKEN" "https://api.x.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at"
+```
+
+もう一度お伝えすると、このリクエストは OAuth 2.0 アプリ専用フローで認証する必要があるため、コマンドラインツールにコピー＆ペーストする前に、必ず $APP&#95;ACCESS&#95;TOKEN をご自身の認証情報に置き換えてください。
+
+filtered stream に接続すると、設定したルールに一致するポストを、次の JSON フォーマットで受信し始めます。
+
+```json
+{
+  "data": [
+    {
+      "author_id": "2244994945",
+      "created_at": "2022-09-14T19:00:55.000Z",
+      "id": "1228393702244134912",
+      "edit_history_tweet_ids": ["1228393702244134912"],
+      "text": "開発者はバレンタインカードに何を書いたでしょうか？\n  \nwhile(true) {\n    I = Love(You);  \n}"
+    },
+    {
+      "author_id": "2244994945",
+      "created_at": "2022-09-12T17:09:56.000Z",
+      "id": "1227640996038684673",
+       "edit_history_tweet_ids": ["1227640996038684673"],
+      "text": "Doctors: Googling stuff online does not make you a doctor\n\nDevelopers: https://t.co/mrju5ypPkb"
+    },
+    {
+      "author_id": "2244994945",
+      "created_at": "2022-09-27T20:26:41.000Z",
+      "id": "1199786642791452673",
+      "edit_history_tweet_ids": ["1199786642791452673"],
+      "text": "C#"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "name": "Twitter Dev",
+        "username": "TwitterDev"
+      }
+    ]
+  }
+}
+```
+
+接続を終了するには、Mac でも Windows でも、コマンドラインツール上で Ctrl+C を押して接続を切断するか、ウィンドウを閉じてください。

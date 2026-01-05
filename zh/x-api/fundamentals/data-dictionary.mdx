@@ -1,0 +1,2724 @@
+---
+title: "X API v2 数据字典"
+keywords: ["数据字典", "对象模型", "帖子对象", "用户对象", "API 对象", "数据结构", "JSON 模式", "API 响应", "帖子字段", "用户字段"]
+---
+
+<div id="object-model">
+  ## 对象模型
+</div>
+
+<div id="tweet">
+  ### 帖子
+</div>
+
+帖子是构成 Twitter 上一切内容的基本单元。Tweet 对象包含一长串顶层字段，例如 `id`、`text` 和 `created_at`。Tweet 对象也是多个子对象的“父”对象，包括 `user`、`media`、`poll` 和 `place`。在请求 Tweet 对象上的这些顶层字段时，请使用字段参数 `tweet.fields`。
+
+可以在 user 资源中找到并展开 Tweet 对象。与所请求 Tweet 相关的其他 Tweet 也可以在 Tweet 资源中找到并展开。该对象可以在 user 资源中通过 `?expansions=pinned_tweet_id`，或在 Tweet 资源中通过 `?expansions=referenced_tweets.id` 进行扩展，以仅使用默认字段获取该对象。在请求更多字段以完善该对象时，请将此扩展与字段参数 `tweet.fields` 结合使用。
+
+| 字段                                               | 数据类型            | 说明                                                                                              | 使用方式                           |
+| :----------------------------------------------- | :-------------- | :---------------------------------------------------------------------------------------------- | :----------------------------- |
+| **id（默认）**                                       | 字符串             | 所请求的帖子的唯一标识符。                                                                                   | 可用于以编程方式检索特定帖子。                |
+| **text（默认）**                                     | 字符串             | 帖子的实际 UTF-8 文本。有关有效字符的详细信息，请参见 [twitter-text](https://github.com/twitter/twitter-text/)。        | 关键词提取和情感分析/分类。                 |
+| **edit&#95;history&#95;tweet&#95;ids (default)** | 对象              | 用于标识帖子所有版本的唯一标识符。对于没有编辑记录的帖子，将只有一个 ID；对于有编辑历史的帖子，将会有多个 ID。                                      | 使用这些信息查找帖子的编辑历史记录。             |
+| **article**                                      | 对象              | 包含此帖子中关联 Article 的元数据。                                                                          | 可用于获取 Article 的文本和实体。          |
+| **attachments**                                  | 对象              | 指定此帖子所包含的附件类型（如有）。                                                                              | 用于了解通过所请求扩展字段返回的对象。            |
+| **author&#95;id**                                | 字符串             | 发布此帖子的用户的唯一标识符。                                                                                 | 用于补全 User 对象，以及在同行评审时共享数据集。    |
+| **card&#95;uri**                                 | 字符串             | 此帖子中所包含 Card 的 URI。                                                                             |                                |
+| **community&#95;id**                             | 字符串             | 该帖子所属 Community 的唯一标识符。                                                                         |                                |
+| **context&#95;annotations**                      | 数组              | 包含与该帖子相关的上下文标注。                                                                                 | 实体识别/提取、主题分析。                  |
+| **conversation&#95;id**                          | 字符串             | 会话中原始帖子的帖子 ID（包括对该帖子的直接回复及其后续回复）。                                                               | 使用该字段可以根据任意一条帖子还原整段会话。         |
+| **created&#95;at**                               | 日期（ISO 8601 格式） | 帖子创建时间。                                                                                         | 可用于时间序列分析，并了解帖子创建时间。           |
+| **display&#95;text&#95;range**                   | 数组              | 一个数组，包含要显示文本片段的起始和结束索引。                                                                         | 对于较长帖子，可用于确定默认会显示文本的哪一部分。      |
+| **edit&#95;controls**                            | 对象              | 表示该帖子距离编辑截止还剩多长时间，以及剩余的可编辑次数。                                                                   | 用于判断帖子是否符合编辑条件。                |
+| **entities**                                     | 对象              | 从帖子文本中解析出的实体。请参阅 Twitter 对象中的 entities。                                                         | 提供有关话题标签、URL、提及等的更多信息。         |
+| **geo**                                          | 对象              | 表示带地理标记帖子的位置。                                                                                   | 使用此字段获取带地理标签帖子的位置信息。           |
+| **in&#95;reply&#95;to&#95;user&#95;id**          | 字符串             | 如果当前帖子是回复，则此字段将包含原始帖子的作者 ID。                                                                    | 用于判断该帖子是否为对另一条帖子的回复。           |
+| **lang**                                         | 字符串             | 帖子所用的语言（如果已被 Twitter 识别）。                                                                       | 按帖子所用语言进行分类。                   |
+| **non&#95;public&#95;metrics**                   | 对象              | 在发送请求时该帖子产生的非公开互动指标。需要用户上下文身份验证。                                                                | 用于确定该帖子产生的总展示次数。               |
+| **note&#95;tweet**                               | object          | 包含长篇帖子（&gt;280 个字符）的完整文本。                                                                       | 获取帖子全文。                        |
+| **organic&#95;metrics**                          | 对象              | 在请求发出时，该帖子在自然（非付费）环境中所追踪到的互动指标。需要用户上下文身份验证。                                                     | 用于衡量该帖子的自然互动情况。                |
+| **possibly&#95;sensitive**                       | 布尔值             | 指示该内容是否可能被识别为敏感内容。                                                                              | 研究某类内容的传播情况。                   |
+| **promoted&#95;metrics**                         | 对象              | 在请求发出时，在推广场景下跟踪的该帖子的互动指标。需要用户上下文身份验证。                                                           | 衡量帖子在推广期间的互动情况。                |
+| **public&#95;metrics**                           | 对象              | 请求发出时该帖子的公开互动指标。                                                                                | 衡量帖子的互动表现。                     |
+| **referenced&#95;tweets**                        | 数组              | 此帖子所涉及的其他帖子列表，例如其转发、引用或回复的帖子。                                                                   | 用于理解转发等帖子的对话关系。                |
+| **reply&#95;settings**                           | 字符串             | 显示谁可以回复给定的帖子。可选值为 &quot;everyone&quot;、&quot;mentioned&#95;users&quot; 和 &quot;followers&quot;。 | 用于确定该帖子的会话回复设置。                |
+| **withheld**                                     | 对象              | 包含有关[受限制内容](https://help.x.com/en/rules-and-policies/tweet-withheld-by-country)的屏蔽详情。           |                                |
+| **scopes**                                       | 对象              | 包含该帖子的可见性范围详细信息。                                                                                | 表明谁可以查看该帖子。仅对推广帖子返回。           |
+| **media&#95;metadata**                           | 数组              | 包含帖子所附媒体的元数据。                                                                                   | 获取更多元数据，例如帖子中媒体附件的 `alt_text`。 |
+
+**检索帖子对象**
+
+**示例请求**
+
+在下面的请求中，我们在 [Tweets lookup](/zh/resources/fundamentals/rate-limits) 端点上请求该帖子的字段。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 [Bearer Token](/zh/resources/fundamentals/authentication)。
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1212092628029698048&tweet.fields=attachments,author_id,context_annotations,created_at,entities,geo,id,in_reply_to_user_id,lang,possibly_sensitive,public_metrics,referenced_tweets,text,withheld&expansions=referenced_tweets.id' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+**响应示例**
+
+```
+{
+  "data": [
+    {
+      "text": "We believe the best future version of our API will come from building it with YOU. Here’s to another great year with everyone who builds on the Twitter platform. We can’t wait to continue working with you in the new year. https://t.co/yvxdK6aOo2",
+      "edit_history_tweet_ids": [
+        "1212092628029698048"
+      ],
+      "lang": "en",
+      "in_reply_to_user_id": "2244994945",
+      "entities": {
+        "urls": [
+          {
+            "start": 222,
+            "end": 245,
+            "url": "https://t.co/yvxdK6aOo2",
+            "expanded_url": "https://x.com/LovesNandos/status/1211797914437259264/photo/1",
+            "display_url": "pic.x.com/yvxdK6aOo2",
+            "media_key": "16_1211797899316740096"
+          }
+        ],
+        "annotations": [
+          {
+            "start": 42,
+            "end": 44,
+            "probability": 0.5359,
+            "type": "Other",
+            "normalized_text": "API"
+          },
+          {
+            "start": 144,
+            "end": 150,
+            "probability": 0.9832,
+            "type": "Other",
+            "normalized_text": "Twitter"
+          }
+        ]
+      },
+      "author_id": "2244994945",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1212092627178287104"
+        }
+      ],
+      "id": "1212092628029698048",
+      "public_metrics": {
+        "retweet_count": 7,
+        "reply_count": 3,
+        "like_count": 38,
+        "quote_count": 1
+      },
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "29",
+            "name": "Events [Entity Service]",
+            "description": "Real world events. "
+          },
+          "entity": {
+            "id": "1186637514896920576",
+            "name": " New Years Eve"
+          }
+        },
+        {
+          "domain": {
+            "id": "29",
+            "name": "Events [Entity Service]",
+            "description": "Real world events. "
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "Catch fireworks and other celebrations as people across the globe enter the new year.\nPhoto via @GettyImages "
+          }
+        },
+        {
+          "domain": {
+            "id": "119",
+            "name": "Holiday",
+            "description": "Holidays like Christmas or Halloween"
+          },
+          "entity": {
+            "id": "1186637514896920576",
+            "name": " New Years Eve"
+          }
+        },
+        {
+          "domain": {
+            "id": "119",
+            "name": "Holiday",
+            "description": "Holidays like Christmas or Halloween"
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "Catch fireworks and other celebrations as people across the globe enter the new year.\nPhoto via @GettyImages "
+          }
+        },
+        {
+          "domain": {
+            "id": "30",
+            "name": "Entities [Entity Service]",
+            "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "Brands and Companies"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "131",
+            "name": "Unified Twitter Taxonomy",
+            "description": "A taxonomy of user interests. "
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "131",
+            "name": "Unified Twitter Taxonomy",
+            "description": "A taxonomy of user interests. "
+          },
+          "entity": {
+            "id": "847868745150119936",
+            "name": "Family & relationships",
+            "description": "Hobbies and interests"
+          }
+        },
+        {
+          "domain": {
+            "id": "131",
+            "name": "Unified Twitter Taxonomy",
+            "description": "A taxonomy of user interests. "
+          },
+          "entity": {
+            "id": "1196446161223028736",
+            "name": "Social media"
+          }
+        },
+        {
+          "domain": {
+            "id": "29",
+            "name": "Events [Entity Service]",
+            "description": "Real world events. "
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "Catch fireworks and other celebrations as people across the globe enter the new year.\nPhoto via @GettyImages "
+          }
+        },
+        {
+          "domain": {
+            "id": "119",
+            "name": "Holiday",
+            "description": "Holidays like Christmas or Halloween"
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "Catch fireworks and other celebrations as people across the globe enter the new year.\nPhoto via @GettyImages "
+          }
+        }
+      ],
+      "created_at": "2019-12-31T19:26:16.000Z",
+      "attachments": {
+        "media_keys": [
+          "16_1211797899316740096"
+        ]
+      },
+      "possibly_sensitive": false
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "text": "These launches would not be possible without the feedback you provided along the way, so THANK YOU to everyone who has contributed your time and ideas. Have more feedback? Let us know ⬇️ https://t.co/Vxp4UKnuJ9",
+        "edit_history_tweet_ids": [
+          "1212092627178287104"
+        ],
+        "lang": "en",
+        "in_reply_to_user_id": "2244994945",
+        "entities": {
+          "urls": [
+            {
+              "start": 187,
+              "end": 210,
+              "url": "https://t.co/Vxp4UKnuJ9",
+              "expanded_url": "https://twitterdevfeedback.uservoice.com/forums/921790-twitter-developer-labs",
+              "display_url": "twitterdevfeedback.uservoice.com/forums/921790-…",
+              "status": 200,
+              "title": "Updates on our feedback channels",
+              "description": "我们公开构建开发者平台,采纳您的意见和反馈。在过去的一年里,直接听取您和您应用用户的意见帮助我们构建了满足您帮助我们识别的用例的开发者产品。我们希望将此作为我们构建产品的方式,展望未来,我们正在整合我们的反馈渠道。在您所在的地方与您会面 从今天起,我们将停用 UserVoice 反馈渠道,转而更频繁地与您直接互动...",
+              "unwound_url": "https://devcommunity.x.com/t/updates-on-our-feedback-channels/169706"
+            }
+          ]
+        },
+        "author_id": "2244994945",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1212092626247110657"
+          }
+        ],
+        "id": "1212092627178287104",
+        "public_metrics": {
+          "retweet_count": 2,
+          "reply_count": 1,
+          "like_count": 19,
+          "quote_count": 0
+        },
+        "created_at": "2019-12-31T19:26:16.000Z",
+        "possibly_sensitive": false
+      }
+    ]
+  }
+```
+
+<div id="user">
+  ### User
+</div>
+
+user 对象包含 Twitter 用户账户元数据，用于描述被引用的用户。user 对象是在 [users lookup](/zh/x-api/users/lookup/introduction) 端点中返回的主要对象。在调用该端点时，如需请求额外的用户字段，只需使用字段参数 `user.fields`。
+
+user 对象也可以作为子对象出现在帖子对象中，并在其中被展开。该对象可通过 `?expansions=author_id` 或 `?expansions=in_reply_to_user_id` 进行扩展，以获取仅包含默认字段的精简版对象。若要请求额外字段以完善该对象，请在使用扩展的同时配合字段参数 `user.fields`。
+ 
+
+| 字段名                              | 类型            | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 使用方式                                                                                                                                                    |
+| :------------------------------- | :------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id（默认）                           | 字符串           | 该用户的唯一标识符。<br /><br />`"id": "2244994945"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 使用此字段以编程方式获取特定 Twitter 用户的信息。                                                                                                                           |
+| name（默认）                         | string        | 用户在其个人资料中设置的名称。不一定是真实姓名或人名。通常上限为 50 个字符，但可能会发生变化。<br /><br />`"name": "Twitter Dev"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |                                                                                                                                                         |
+| 用户名（默认）                          | 字符串           | 用于标识此用户的 Twitter 屏幕名、handle 或别名。用户名具有唯一性，但可以更改。通常最长为 15 个字符，但某些历史账号可能存在更长的名称。<br /><br />`"username": "TwitterDev"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                         |
+| affiliation                      | 对象            | 包含用户从属信息的详细内容。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 可用于获取用户的关联身份徽章。                                                                                                                                         |
+| confirmed&#95;email              | 字符串           | 已认证用户已确认的电子邮件地址。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |                                                                                                                                                         |
+| connection&#95;status            | 数组            | 提供一个列表，用于表示认证用户与被查询用户之间的关系，例如正在关注、被关注、已发送关注请求、已收到关注请求、屏蔽、静音<br /><br />&quot;connection&#95;status&quot;: [  <br />           &quot;follow&#95;request&#95;received&quot;,  <br />           &quot;follow&#95;request&#95;sent&quot;,  <br />           &quot;blocking&quot;,  <br />           &quot;followed&#95;by&quot;,  <br />           &quot;following&quot;,  <br />           &quot;muting&quot;  <br />]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 可用于判断认证用户与被查询用户之间的关系状态。                                                                                                                                 |
+| created&#95;at                   | 日期 (ISO 8601) | 用户账户在 Twitter 上创建的 UTC 日期时间。<br /><br />`"created_at": "2013-12-14T04:35:55.000Z"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 可用于判断某个用户在 Twitter 上已使用多长时间                                                                                                                             |
+| description                      | 字符串           | 该用户的个人简介文本（也称为 bio），如果用户有填写的话。<br /><br />`"description": "The voice of the X Dev team and your official source for updates, news, and events, related to the X API."`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |                                                                                                                                                         |
+| entities                         | 对象            | 包含用户描述（description）中具有特殊含义的文本的详细信息。<br /><br />`"entities": {  <br/>       "url": {  <br/>           "urls": [  <br/>               {  <br/>                   "start": 0,  <br/>                   "end": 23,  <br/>                   "url": "https://t.co/3ZX3TNiZCY",  <br/>                   "expanded_url": "/content/developer-twitter/en/community",  <br/>                   "display_url": "developer.x.com/en/community"  <br/>               }  <br/>           ]  <br/>       },  <br/>       "description": {  <br/>           "urls": [  <br/>               {  <br/>                   "start": 0,  <br/>                   "end": 23,  <br/>                   "url": "https://t.co/3ZX3TNiZCY",  <br/>                   "expanded_url": "/content/developer-twitter/en/community",  <br/>                   "display_url": "developer.x.com/en/community"  <br/>               },  <br/>           "hashtags": [  <br/>               {  <br/>                   "start": 23,  <br/>                   "end": 30,  <br/>                   "tag": "DevRel"  <br/>               },  <br/>               {  <br/>                   "start": 113,  <br/>                   "end": 130,  <br/>                   "tag": "BlackLivesMatter"  <br/>               },  <br/>           "mentions": [  <br/>               {  <br/>                   "start": 0,  <br/>                   "end": 10,  <br/>                   "tag": "TwitterDev"  <br/>               },  <br/>           "cashtags": [  <br/>               {  <br/>                   "start": 12,  <br/>                   "end": 16,  <br/>                   "tag": "twtr"  <br/>               }  <br/>           ]  <br/>       }  <br/>   }` | 实体是 JSON 对象，用于提供与该描述关联的 hashtags、URLs、用户提及和 cashtags 的附加信息。请参阅相应的实体以获取更多详情。<br /><br />所有用户的 ******start****** 索引都是包含端，而所有用户的 ******end****** 索引都是不包含端。 |
+| is&#95;identity&#95;verified     | 布尔值           | 指示该用户是否已通过身份验证。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |                                                                                                                                                         |
+| 位置                               | 字符串           | 如果用户提供了位置信息，则为其在个人资料中指定的位置。由于这是一个自由格式的值，它可能并不代表一个有效的位置，但在使用位置条件进行搜索时，可能会以模糊匹配的方式进行评估。<br /><br />`"location": "127.0.0.1"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |                                                                                                                                                         |
+| most&#95;recent&#95;tweet&#95;id | string        | 该用户最近发布的帖子的唯一标识符。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 用来确定该用户最近发布的帖子。                                                                                                                                         |
+| parody                           | 布尔型           | 指示该用户账号是否被标注为 Parody 标签。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                                                                                                                                         |
+| pinned&#95;tweet&#95;id          | 字符串           | 该用户置顶帖子的唯一标识符。<br /><br />`"pinned_tweet_id": "1255542774432063488"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 用于确定置顶在用户个人主页顶部的帖子。也可用于推断用户使用的语言。                                                                                                                       |
+| profile&#95;banner&#95;url       | 字符串           | 此用户的个人资料横幅 URL，与该用户个人资料页中显示的一致。<br /><br />`"profile_banner_url": "https://pbs.twimg.com/profile_banners/1716450569358098432/1721022977"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 可用于下载该用户的个人资料横幅图像。                                                                                                                                      |
+| profile&#95;image&#95;url        | 字符串           | 此用户头像图片的 URL，显示在该用户的个人资料页面上。<br /><br />`"profile_image_url": "https://pbs.twimg.com/profile_images/1267175364003901441/tBZNFAgA_normal.jpg"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 可用于下载该用户的头像。                                                                                                                                            |
+| protected                        | boolean       | 指示该用户是否已选择将其帖子设为受保护（换句话说，该用户的帖子是否为私密）。<br /><br />`"protected": false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |                                                                                                                                                         |
+| public&#95;metrics               | 对象            | 包含该用户账号活动的详细指标。<br /><br />`"public_metrics": {             "followers_count": 507902,             "following_count": 1863,             "tweet_count": 3561,             "listed_count": 1550         }`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 可用于衡量 Twitter 用户的触达范围或影响力、量化其兴趣范围，以及评估其在 Twitter 上的参与程度。                                                                                                |
+| receives&#95;your&#95;dm         | boolean       | 指示该用户是否会收到已认证用户发送的私信（DM）。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |                                                                                                                                                         |
+| subscription                     | 对象            | 包含该用户是否已订阅经过身份验证用户的详细信息。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                                                                                                                                         |
+| subscription&#95;type            | 字符串           | 一个字符串，表示已认证用户所拥有的 X Premium 订阅类型。示例：`None`、`Basic`、`Premium`、`PremiumPlus`。如果该用户不是已认证用户，则始终返回 `None`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |                                                                                                                                                         |
+| url                              | 字符串           | 用户个人资料中指定的 URL（如果有）。<br /><br />`"url": "https://t.co/3ZX3TNiZCY"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Twitter 用户在其个人资料中填写的 URL。它可能是主页，但不一定是。                                                                                                                  |
+| verified                         | 布尔值           | 表示该用户是否为已认证的 Twitter 用户。<br /><br />`"verified": true`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 指示该 Twitter 用户的账号是否已通过认证。已认证账号可让他人知晓，一个具有公众关注度的账号是真实可信的。                                                                                                |
+| verified&#95;followers&#95;count | string        | 表示某用户已认证粉丝数量的字符串。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |                                                                                                                                                         |
+| verified&#95;type                | 字符串           | 表示用户认证类型的字符串。例如：&quot;blue&quot;、&quot;business&quot;、&quot;government&quot;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |                                                                                                                                                         |
+| withheld                         | 对象            | 包含[被屏蔽内容](https://help.x.com/en/rules-and-policies/tweet-withheld-by-country)的屏蔽详情（如适用）。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                                                                                                                                         |
+
+**检索用户对象**
+
+**示例请求**
+
+在以下请求中，我们通过 [users lookup](/zh/x-api/users/lookup/introduction) 端点请求该用户的字段。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 [Bearer Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)。
+
+```{
+  curl --request GET 'https://api.x.com/2/users?
+  ids=2244994945&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,url,username,verified,withheld&expansions=pinned_tweet_id'
+  --header 'Authorization: Bearer $BEARER_TOKEN'
+  }
+```
+
+**响应示例**
+
+```{
+    "data": [
+        {
+            "id": "2244994945",
+            "name": "Twitter Dev",
+            "username": "TwitterDev",
+            "location": "127.0.0.1",
+            "entities": {
+                "url": {
+                    "urls": [
+                        {
+                            "start": 0,
+                            "end": 23,
+                            "url": "https://t.co/3ZX3TNiZCY",
+                            "expanded_url": "/content/developer-twitter/en/community",
+                            "display_url": "developer.x.com/en/community"
+                        }
+                    ]
+                },
+                "description": {
+                    "hashtags": [
+                        {
+                            "start": 23,
+                            "end": 30,
+                            "tag": "DevRel"
+                        },
+                        {
+                            "start": 113,
+                            "end": 130,
+                            "tag": "BlackLivesMatter"
+                        }
+                    ]
+                }
+            },
+            "verified": true,
+            "description": "The voice of Twitter's #DevRel team, and your official source for updates, news, & events about Twitter's API. \n\n#BlackLivesMatter",
+            "url": "https://t.co/3ZX3TNiZCY",
+            "profile_image_url": "https://pbs.twimg.com/profile_images/1267175364003901441/tBZNFAgA_normal.jpg",
+            "protected": false,
+            "pinned_tweet_id": "1255542774432063488",
+            "created_at": "2013-12-14T04:35:55.000Z"
+        }
+    ],
+    "includes": {
+        "tweets": [
+            {
+                "id": "1255542774432063488",
+                "text": "在这个前所未有的时期,X 上发生的事情可以帮助全世界更好地理解和应对疫情。\n\n我们正在推出免费的 COVID-19 流式端点,以便合格的开发者和研究人员能够实时研究公共对话。https://t.co/BPqMcQzhId"
+            }
+        ]
+    }
+}
+```
+
+<div id="space">
+  ### Space
+</div>
+
+Space 通过实时音频对话实现表达与互动。Space 数据字典包含关于 Space 的相关元数据；所有细节都会实时更新。
+
+User 对象可以在 user 资源中获取并进行扩展。通过在 `expansions` 查询参数中添加至少一个 `host_ids`、`creator_id`、`speaker_ids`、`mentioned_user_ids`，即可对这些对象进行扩展。
+
+与帖子不同，Space 是临时的，在结束后或被创建者取消后将无法再访问。当你的应用处理 Space 数据时，你需要返回最新的信息，并且必须移除平台上已不再可用的数据。[Spaces lookup endpoints](/zh/x-api/spaces/lookup/introduction) 可以帮助你确保尊重用户的期望和意图。
+
+| Field Value          | Type            | Description                                                                                                 | How it can be used                                      |
+| :-------------------- | :--------------- | :----------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| id (default)         | string          | 所请求 Space 的唯一标识符。<br />`"id": "1zqKVXPQhvZJB"`                                    | 唯一标识响应中返回的 Space。     |
+| state (default)      | string          | 指示 Space 是已开始、即将开始还是已结束。<br />`"state": "live"`                          | 过滤实时或已排期的 Space。                        |
+| created&#95;at           | date (ISO 8601) | 此 Space 的创建时间。<br />`"created_at": "2021-07-04T23:12:08.000Z"`                                  | 了解 Space 的创建时间并按时间排序。   |
+| creator&#95;id             | string           | Space 创建者的唯一标识符。<br />`"creator_id": "2244994945"`                           |             |
+| ended&#95;at             | date (ISO 8601) | Space 结束的时间（如适用）。<br />`"ended_at": "2021-07-04T00:11:44.000Z"`                       | 确定实时 Space 的结束时间以计算持续时长。 |
+| host&#95;ids             | array           | Space 主持人的唯一标识符。<br />`"host_ids": ["2244994945", "6253282"]`                           | 展开 User 对象，分析参与度。             |
+| lang                 | string          | Space 的语言（如已检测到）。<br />`"lang": "en"`                                                       | 按语言对 Space 进行分类。                            |
+| is&#95;ticketed          | boolean         | 指示该 Space 是否为需要购票的 Space。<br />`"is_ticketed": false`                                            | 突出显示潜在感兴趣的内容。                          |
+| invited&#95;user&#95;ids     | array           | 被邀请作为发言者的用户 ID 列表。<br />`"invited_user_ids": ["2244994945", "6253282"]`                    | 展开 User 对象，分析参与度。             |
+| participant&#95;count    | integer         | Space 中的用户数量，包括主持人和发言者。<br />`"participant_count": 420`                   | 了解参与度并生成报告。                  |
+| subscriber&#95;count     | integer         | 为 Space 设置提醒的用户数量。<br />`"subscriber_count": 36`                                | 了解活动关注度。                              |
+| scheduled&#95;start      | date (ISO 8601) | Space 计划开始时间。<br />`"scheduled_start": "2021-07-14T08:00:00.000Z"`                       | 集成到日历通知中。                  |
+| speaker&#95;ids          | array           | 在任意时间点发言过的用户列表。<br />`"speaker_ids": ["2244994945", "6253282"]`                         | 展开 User 对象，分析参与度。             |
+| started&#95;at           | date (ISO 8601) | Space 实际开始时间。<br />`"started_at": "2021-07-14T08:00:12.000Z"`                                 | 确定 Space 的开始时间。                             |
+| title                | string          | Space 的标题。<br />`"title": "Say hello to the Space data object!"`                                     | 理解关键词、话题标签和提及。                |
+| topic&#95;ids            | array           | 由 Space 创建者选择的主题 ID。<br />`"topic_ids": ["2244994945", "6253282"]`                    | 理解关键词、话题标签和提及。                |
+| updated&#95;at           | date (ISO 8601) | Space 元数据的最后更新时间。<br />`"updated_at": "2021-07-11T14:44:44.000Z"`                                | 保持信息为最新状态。                            |
+
+**获取 Space 对象**
+
+**示例请求**
+
+在以下请求中，我们通过 [Spaces lookup endpoint](/zh/x-api/spaces/lookup/introduction) 来请求该 Space 的字段。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 [Bearer Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)。
+
+```bash
+curl "https://api.x.com/2/spaces/1DXxyRYNejbKM?space.fields=created_at,creator_id,created_athost_ids,lang,is_ticketed,invited_user_ids,participant_count,scheduled_start,speaker_ids,started_at,state,title,updated_at&expansions=creator_id,host_ids,invited_user_ids,speaker_ids" --header "Authorization: Bearer $BEARER_TOKEN"
+```
+
+** 示例响应 **
+
+```
+{
+  "data": {
+    "id": "1zqKVXPQhvZJB",
+    "state": "live",
+    "created_at": "2021-07-04T23:12:08.000Z",
+    "host_ids": [
+      "2244994945",
+      "6253282"
+    ],
+    "lang": "en",
+    "is_ticketed": false,
+    "invited_user_ids": [
+      "2244994945",
+      "6253282"
+    ],
+    "participant_count": 420,
+    "scheduled_start": "2021-07-14T08:00:00.000Z",
+    "speaker_ids": [
+      "2244994945",
+      "6253282"
+    ],
+    "started_at": "2021-07-14T08:00:12.000Z",
+    "title": "Say hello to the Space data object!",
+    "updated_at": "2021-07-11T14:44:44.000Z"
+  },
+  "includes": {
+    "users": [
+      {
+        "id": "2244994945",
+        "name": "Twitter Dev",
+        "username": "TwitterDev"
+      },
+      {
+        "id": "6253282",
+        "name": "Twitter API",
+        "username": "TwitterAPI"
+      }
+    ]
+  }
+}
+```
+
+<div id="list">
+  ### 列表
+</div>
+
+List 对象包含描述所引用列表的 [Twitter Lists](https://help.x.com/en/using-twitter/twitter-lists) 元数据。List 对象是 List 查询端点返回的主要对象。当在此端点上请求额外的 List 字段时，只需使用字段参数 `list.fields`。
+
+List 对象不会作为其他数据对象的子对象出现。不过，可以在用户资源中查找并展开 user 对象。通过在 `expansions` 查询参数中添加 `owner_id`，即可将这些对象用于扩展。在请求附加字段以完善主 List 对象时，将此扩展与字段参数 `list.fields` 一起使用，并通过 `user.fields` 来补全扩展对象。
+
+| 字段值                | 类型              | 描述                                                                                                                        | 用途                            |
+| :----------------- | :-------------- | :------------------------------------------------------------------------------------------------------------------------ | :---------------------------- |
+| id (default)       | string          | 此 List 的唯一标识符。<br />`"id": "2244994945"`                                                                                  | 使用此字段以编程方式检索特定列表的信息。          |
+| name (default)     | string          | 创建 List 时定义的名称。<br />`"name": "Twitter Lists"`                                                                            |                               |
+| created&#95;at     | date (ISO 8601) | 创建该 List 时的 UTC 日期时间。<br />`"created_at": "2013-12-14T04:35:55.000Z"`                                                     | 用于确定某个列表在 Twitter 上存在了多长时间。   |
+| description        | string          | 用于向用户说明该 List 的简要描述。<br />`"description": "People that are active members of the Bay area cycling community on Twitter."` |                               |
+| follower&#95;count | integer         | 显示有多少用户关注此 List。<br />`"follower_count": 198`                                                                             |                               |
+| member&#95;count   | integer         | 显示有多少成员属于此 List。<br />`"member_count": 60`                                                                                |                               |
+| private            | boolean         | 指示该 List 是否为私密。<br />`"private": false`                                                                                   |                               |
+| owner&#95;id       | string          | 此 List 所有者的唯一标识符。<br />`"owner_id": "1255542774432063488"`                                                                | 可用于确定该用户是否拥有其他列表，并展开 User 对象。 |
+
+**检索 User 对象**
+
+**示例请求**
+
+在下面的请求中，我们在 [通过 ID 查询 List](/zh/x-api/lists/list-lookup/introduction) 端点上请求该用户的字段。将 `$BEARER_TOKEN` 替换为你生成的 [Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
+
+```bash
+curl --request GET 'https://api.x.com/2/lists/1355797419175383040?list.fields=created_at,description,private,follower_count,member_count,owner_id&expansions=owner_id' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+** 示例响应**
+
+```
+{
+  "data": {
+    "name": "Twitter Comms",
+    "member_count": 60,
+    "id": "1355797419175383040",
+    "private": false,
+    "description": "",
+    "follower_count": 198,
+    "owner_id": "257366942",
+    "created_at": "2021-01-31T08:37:48.000Z"
+  },
+  "includes": {
+    "users": [
+      {
+        "created_at": "2011-02-25T07:51:26.000Z",
+        "name": "Ashleigh Hay 🤸🏼‍♀️",
+        "id": "257366942",
+        "username": "shleighhay",
+        "verified": false
+      }
+    ]
+  }
+}
+```
+
+<div id="media">
+  ### 媒体
+</div>
+
+媒体是指附加在帖子上的任何图片、GIF 或视频。`media` 对象不是任何端点上的主对象，但可以在 `Tweet` 对象中找到并展开。通过使用 `?expansions=attachments.media_keys` 可以对该对象进行扩展，以获取仅包含默认字段的精简对象。在请求额外字段以补全该对象时，将该扩展与字段参数 `media.fields` 搭配使用。
+
+| Field value                | Type    | Description                                                                                                        | How it can be used                                        |
+|:----------------------------|:---------|:--------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| media&#95;key (default)       | string  | 已展开媒体内容的唯一标识符。<br /> ` "media_key": "13_1263145212760805376"`                 | 可用于以编程方式检索该媒体            |
+| type (default)             | string  | 内容类型（animated&#95;gif、photo、video）。<br /> ` "type": "video"`                                        | 将媒体归类为照片、GIF 或视频            |
+| url                        | string  | 指向 X 上媒体文件的直接 URL。                                                                        | 返回带有照片 URL 字段的 `media` 对象       |
+| duration&#95;ms                | integer | 当 type 为 video 时可用。视频的时长（毫秒）。<br /> ` "duration_ms": 46947`               |                                                          |
+| height                     | integer | 此内容的像素高度。<br /> ` "height": 1080`                                                        |                                                          |
+| non&#95;public&#95;metrics         | object  | 在发起请求时媒体内容的非公开互动指标。需要用户上下文身份验证。<br /> ` "non_public_metrics": { "playback_0_count": 1561, "playback_100_count": 116, "playback_25_count": 559, "playback_50_count": 305, "playback_75_count": 183,}` | 用于确定视频互动情况：有多少用户分别播放到了视频的每个四分位。 |
+| organic&#95;metrics            | object  | 在发起请求时，媒体内容在自然流量场景下追踪到的互动指标。需要用户上下文身份验证。<br /> ` "organic_metrics": { "playback_0_count": 1561, "playback_100_count": 116, "playback_25_count": 559, "playback_50_count": 305, "playback_75_count": 183, "view_count": 629}` | 用于确定媒体的自然互动情况。                      |
+| preview&#95;image&#95;url          | string  | 此内容的静态占位预览图 URL。<br /> ` "preview_image_url": "https://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg"` |                                                          |
+| promoted&#95;metrics           | object  | 在发起请求时，媒体内容在投放推广场景下追踪到的互动指标。需要用户上下文身份验证。<br /> ` "promoted_metrics": { "playback_0_count": 259, "playback_100_count": 15, "playback_25_count": 113, "playback_50_count": 57, "playback_75_count": 25, "view_count": 124}` | 用于确定帖子在被推广时的媒体互动情况。  |
+| public&#95;metrics             | object  | 在发起请求时媒体内容的公开互动指标。<br /> ` "public_metrics": { "view_count": 6865141}` | 用于确定附加在帖子上的视频的总观看次数。 |
+| width                      | integer | 此内容的像素宽度。<br /> ` "width": 1920`                                                          |                                                          |
+| alt&#95;text                   | string  | 用于提升和支持可访问性的图片描述。最长可达 1000 个字符。目前替代文本只能添加到图片中。<br /> ` "alt_text": "Rugged hills along the Na Pali coast on the island of Kauai"` | 可用于在用户视力受损时，为图片提供文字描述。 |
+| variants                   | array   | 每个媒体对象可能具有多个显示或播放变体，具有不同的分辨率或格式。<br /> ` "variants": [{ "bit_rate": 632000, "content_type": "video/mp4", "url": "https://video.twimg.com/ext_tw_video/1527322141724532740/pu/vid/320x568/lnBaR2hCqE-R_90a.mp4?tag=12"}]` |                                                          |
+
+**检索 media 对象**
+
+**示例请求**
+
+在以下请求中，我们在 [Tweet lookup](/zh/x-api/posts/lookup/introduction) 端点中请求附加到该帖子的媒体对象的字段。由于媒体是帖子对象的子对象，因此必须使用 `attachment.media_keys` 扩展。请务必将 `$BEARER_TOKEN` 替换为你生成的 [Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1263145271946551300&expansions=attachments.media_keys&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,alt_text' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+```
+{
+  "data": [
+    {
+      "text": "测试，测试...\n\n一种与您想要的人进行对话的新方式。我们从全球一小部分开始，所以请留意👀看它的实际效果。https://t.co/pV53mvjAVT",
+      "id": "1263145271946551300",
+      "attachments": {
+        "media_keys": [
+          "13_1263145212760805376"
+        ]
+      }
+    }
+  ],
+  "includes": {
+    "media": [
+      {
+        "duration_ms": 46947,
+        "type": "video",
+        "height": 1080,
+        "media_key": "13_1263145212760805376",
+        "public_metrics": {
+          "view_count": 6909260
+        },
+        "preview_image_url": "https://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg",
+        "width": 1920
+      }
+    ]
+  }
+}
+```
+
+<div id="poll">
+  ### 投票
+</div>
+
+包含在帖子中的投票不是任何端点上的主对象，但可以在帖子对象中找到并展开。可以通过 `?expansions=attachments.poll_ids` 扩展该对象，以获取仅包含默认字段的精简对象。在请求附加字段以补全该对象时，请将此扩展与字段参数 `poll.fields` 一起使用。
+
+| Field value          | Type            | Description                                                                                                                       |
+| :------------------- | :-------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| id (default)         | string          | 已扩展投票的唯一标识符。                                                                                                                      |
+|                      |                 | `{"id": "1199786642791452673"}`                                                                                                   |
+| options (default)    | array           | 包含描述相关投票中每个选项的对象。                                                                                                                 |
+|                      |                 | `{"options": [ { "position": 1, "label": "“C Sharp”", "votes": 795 }, { "position": 2, "label": "“C Hashtag”", "votes": 156 } ]}` |
+| duration&#95;minutes | integer         | 指定此投票的总持续时间。                                                                                                                      |
+|                      |                 | `{"duration_minutes": 1440}`                                                                                                      |
+| end&#95;datetime     | date (ISO 8601) | 指定此投票的结束日期和时间。                                                                                                                    |
+|                      |                 | `{"end_datetime": "2019-11-28T20:26:41.000Z"}`                                                                                    |
+| voting&#95;status    | string          | 指示此投票当前是否仍处于活动状态并且可以接收投票，或者投票是否已经结束。                                                                                              |
+|                      |                 | `{"voting_status": "closed"}`                                                                                                     |
+
+**检索投票对象**
+
+**示例请求**
+
+在以下请求中，我们在 [Tweets lookup](/zh/x-api/posts/lookup/introduction) 端点上请求与帖子关联的投票对象的字段。由于投票是帖子的子对象，因此需要使用 `attachments.poll_id` 扩展。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 [Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1199786642791452673&expansions=attachments.poll_ids&poll.fields=duration_minutes,end_datetime,id,options,voting_status' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+**示例响应**
+
+```
+{
+  "data": [
+    {
+      "text": "C#",
+      "id": "1199786642791452673",
+      "attachments": {
+        "poll_ids": [
+          "1199786642468413448"
+        ]
+      }
+    }
+  ],
+  "includes": {
+    "polls": [
+      {
+        "id": "1199786642468413448",
+        "voting_status": "已关闭",
+        "duration_minutes": 1440,
+        "options": [
+          {
+            "position": 1,
+            "label": "“C Sharp”",
+            "votes": 795
+          },
+          {
+            "position": 2,
+            "label": "“C Hashtag”",
+            "votes": 156
+          }
+        ],
+        "end_datetime": "2019-11-28T20:26:41.000Z"
+      }
+    ]
+  }
+}
+```
+
+<div id="place">
+  ### Place
+</div>
+
+在任何端点中，帖子上被标记的地点都不是主对象，但可以在帖子资源中找到并展开。该对象可以通过 `?expansions=geo.place_id` 进行扩展，以获取仅包含默认字段的精简对象。当你需要请求额外字段以补全该对象时，请将扩展与字段参数 `place.fields` 搭配使用。
+
+| Field value             | Type   | Description                            | How it can be used |
+| :---------------------- | :----- | :------------------------------------- | :----------------- |
+| full&#95;name (default) | string | 更长、更详细的地点名称。                           | 按特定地点名称对帖子进行分类     |
+|                         |        | `"full_name": "Manhattan, NY"`         |                    |
+| id (default)            | string | 被扩展地点的唯一标识符，如果这是帖子中标记的兴趣点。             | 使用此值以编程方式检索该地点     |
+|                         |        | `"id": "01a9a39529b27f36"`             |                    |
+| contained&#95;within    | array  | 返回包含所引用地点的已知地点的标识符。                    |                    |
+| country                 | string | 此地点所属国家的全称。                            | 按国家名称对帖子进行分类       |
+|                         |        | `"country": "United States"`           |                    |
+| country&#95;code        | string | 此地点所属国家的 ISO Alpha-2 国家代码。             | 按国家代码对帖子进行分类       |
+|                         |        | `"country_code": "US"`                 |                    |
+| geo                     | object | 以 GeoJSON 格式包含地点详细信息。                  |                    |
+|                         |        | `json                                |                    |
+|                         |        | &quot;geo&quot;:                       |                    |
+|                         |        | &quot;type&quot;: &quot;Feature&quot;, |                    |
+|                         |        | &quot;bbox&quot;: [                    |                    |
+|                         |        | -74.026675,                            |                    |
+|                         |        | 40.683935,                             |                    |
+|                         |        | -73.910408,                            |                    |
+|                         |        | 40.877483                              |                    |
+|                         |        | ],                                     |                    |
+|                         |        | &quot;properties&quot;: {}             |                    |
+|                         |        | &#125;                                 |                    |
+|                         |        | `                                    |                    |
+| name                    | string | 此地点的短名称。                               | 按特定地点名称对帖子进行分类     |
+|                         |        | `"name": "Manhattan"`                  |                    |
+| place&#95;type          | string | 指定此地点信息所表示的具体类型，例如城市名称或兴趣点。            | 按特定地点类型对帖子进行分类     |
+|                         |        | `"place_type": "city"`                 |                    |
+
+**检索 place 对象**
+
+**示例请求**
+
+在以下请求中，我们在 [Tweets lookup](/zh/x-api/posts/lookup/introduction) 端点上请求附加到帖子的 place 对象的字段。由于 place 是帖子的子对象，因此需要使用 `geo.place_id` 扩展。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 [Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1136048014974423040&expansions=geo.place_id&place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+**示例响应**
+
+```
+{
+  "data": [
+    {
+      "text": "We're sharing a live demo of the new Twitter Developer Labs program, led by a member of our DevRel team, @jessicagarson #TapIntoTwitter https://t.co/ghv7f4dW5M",
+      "id": "1136048014974423040",
+      "geo": {
+        "place_id": "01a9a39529b27f36"
+      }
+    }
+  ],
+  "includes": {
+    "places": [
+      {
+        "geo": {
+          "type": "Feature",
+          "bbox": [
+            -74.026675,
+            40.683935,
+            -73.910408,
+            40.877483
+          ],
+          "properties": {}
+        },
+        "country_code": "US",
+        "name": "Manhattan",
+        "id": "01a9a39529b27f36",
+        "place_type": "city",
+        "country": "United States",
+        "full_name": "Manhattan, NY"
+      }
+    ]
+  }
+}
+```
+
+<div id="direct-message-events">
+  ### 私信事件
+</div>
+
+私信（Direct Message，DM）会话是由一系列事件构成的。X API v2 目前支持三种事件类型：MessageCreate、ParticipantsJoin 和 ParticipantsLeave。
+
+DM 事件对象由 [私信查找](/zh/x-api/direct-messages/lookup/introduction) 端点返回；当通过 [管理私信](/zh/x-api/direct-messages/lookup/introduction) 端点成功创建私信时，会生成一个 MessageCreate 事件。
+
+在请求 DM 事件时，默认会包含三个事件对象属性（字段）：id、event&#95;type 和 text。要获取更多事件字段，请使用 [fields](/zh/x-api/fundamentals/fields) 参数 dm&#95;event.fields 来选择其他字段。其他可用的事件字段包括：dm&#95;conversation&#95;id、created&#95;at、sender&#95;id、attachments、participant&#95;ids 和 referenced&#95;tweets。
+
+其中有若干字段会提供与该私信事件相关的其他 X 对象的 ID：
+
+* sender&#95;id - 发送消息的账号 ID，或在群组会话中邀请参与者的账号 ID
+* participant&#95;ids - 账号 ID 的数组。对于 ParticipantsJoin 和 ParticipantsLeave 事件，此数组将只包含一个创建该事件的账号 ID
+* attachments - 提供发送方上传到 X 的内容的媒体 ID
+* referenced&#95;tweets - 如果在 text 字段中发现帖子（Tweet）URL，则响应中会包含该帖子的 ID
+
+可以使用 sender&#95;id、participant&#95;ids、referenced&#95;tweets.id 和 attachments.media&#95;keys 的 [expansions](/zh/x-api/fundamentals/expansions) 扩展字段来展开这些 X 对象 ID。
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **Field value** | **Type** | **Description** | **How it can be used** |
+| id (default) | string | 事件的唯一标识符。<br /><br />&quot;id&quot;: &quot;1050118621198921728&quot; | 用于以编程方式检索特定会话事件（可通过 v1.1 端点获取）。 |
+| event&#95;type (default) | string | 描述事件类型。目前支持三种类型： <br /><br />* MessageCreate<br />    <br />* ParticipantsJoin<br />    <br />* ParticipantsLeave<br />    <br /><br />&quot;event&#95;type&quot;: &quot;MessageCreate&quot; | 在检索会话历史时，用于了解消息是在何时创建的；对于群组会话，用于了解参与者在何时加入和离开。所有 GET 方法都支持使用 event&#95;type= 查询参数对特定事件类型进行过滤。 |
+| text (default) | string | 私信的实际 UTF-8 文本。 <br /><br />&quot;text&quot;: &quot;Hello, just you!&quot; | 在聊天机器人场景中，可用于分析消息内容并确定自动回复。也可用于构建会话搜索功能。 |
+| entities          | object | 从私信文本中解析出的实体。                                       | 提供有关话题标签、URL、提及等的附加信息。 |
+| sender&#95;id | string | 创建该事件的用户 ID。要在响应中展开此对象，请将 sender&#95;id 作为 expansion 包含在请求中，并使用 user.fields 查询参数来指定感兴趣的 User 对象属性。<br /><br />&quot;sender&#95;id&quot;: &quot;906948460078698496&quot; | 检索创建 MessageCreate 或 ParticipantsJoin 事件的 User 对象。 |
+| participant&#95;ids | array (of strings) | 加入或离开群组会话的参与者 ID。在创建新的群组会话时也会使用。要在响应中展开此对象，请将 participant&#95;ids 作为 expansion 包含在请求中，并使用 user.fields 查询参数来指定感兴趣的 User 对象属性。<br /><br />&quot;participant&#95;ids&quot;: [<br /><br />     &quot;906948460078698496&quot;<br /><br />] | 用于检索加入和离开群组会话的参与者的 User 对象。 |
+| dm&#95;conversation&#95;id | string | 该事件所属会话的唯一标识符。<br /><br />&quot;dm&#95;conversation&#95;id&quot;: &quot;1584988213961031680&quot; | 用于以编程方式从某个会话中检索事件，并向该会话添加私信。 |
+| created&#95;at | date (ISO 8601) | 帖子的创建时间（UTC）。<br /><br />&quot;created&#95;at&quot;: &quot;2019-06-04T23:12:08.000Z&quot; | 此字段可用于了解私信的创建时间，或会话参与者加入或离开的时间。 |
+| referenced&#95;tweets | array | 私信文本中提及的任何帖子的 ID。要在响应中展开此对象，请将 referenced&#95;tweets.id 作为 expansion 包含在请求中，并使用 tweet.fields 查询参数来指定感兴趣的 Tweet 对象属性。<br /><br />&quot;referenced&#95;tweets&quot;: [<br /><br />    <br /><br />&quot;id&quot;: &quot;1578868150510456833&quot;<br /><br />    <br /><br />] | 当私信引用某条帖子时，可以使用这些 ID 来查找该帖子的详细信息。 |
+| attachments | object | 对于附带媒体的私信，提供已上传内容（照片、视频或 GIF）的 media key。要在响应中展开此对象，请将 attachments.media&#95;keys 作为 expansion 包含在请求中，并使用 media.fields 查询参数来指定感兴趣的 media 对象属性。目前仅支持一个附件。 <br /><br />&quot;attachments&quot;: <br /><br />    &quot;media&#95;keys&quot;: [<br /><br />        &quot;3&#95;1136048009270239232&quot;<br /><br />    ]<br /><br /> | 用于了解附加在私信上的媒体对象。 |
+
+**检索私信事件对象**
+
+**示例请求**
+
+在此示例中，我们将构建一个请求，用于检索与一对一会话关联的事件。该请求将返回基础的私信事件字段，以及引用帖子及其作者的附加字段。我们来构建一个查询，请求以下内容：
+
+* 基础事件属性，例如其创建时间以及所属的会话（dm&#95;conversation）。
+* 发送私信一方的账号 ID 和描述。
+* 任何被引用帖子的文本以及其发布时间。
+* 任何被引用帖子的作者账号 ID 和描述。
+
+要返回这些属性，你的请求查询应包含以下内容：
+
+`?dm_event.fields=id,sender_id,text,created_at,dm_conversation_id&expansions=sender_id,referenced_tweets.id&tweet.fields=created_at,text,author_id&user.fields=description`
+
+```bash
+      curl --request GET 'https://api.x.com/2/dm_conversations/with/:participant_id/dm_events?tweet.fields=created_at,text,author_id&user.fields=description&expansions=sender_id,participant_ids,referenced_tweets.id&dm_event.fields=id,sender_id,text,participant_ids,created_at,'
+    --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+请务必将 $BEARER&#95;TOKEN 替换为你生成的 [Bearer Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)。
+
+**示例响应**
+
+```
+      {
+	"data": [{
+			"id": "1585047616894574596",
+			"sender_id": "944480690",
+			"text": "Hello, just you!",
+			"created_at": "2022-10-25T23:16:15.000Z",
+			"event_type": "MessageCreate",
+			"dm_conversation_id": "944480690-906948460078698496"
+		},
+		{
+			"id": "1581048670673260549",
+			"sender_id": "944480690",
+			"text": "Simple Tweet link: https://t.co/IYFbRIdXHg",
+			"referenced_tweets": [{
+				"id": "1578900353814519810"
+			}],
+			"created_at": "2022-10-14T22:25:52.000Z",
+			"event_type": "MessageCreate",
+			"dm_conversation_id": "944480690-906948460078698496"
+		},
+		{
+			"id": "1580705121553420292",
+			"sender_id": "944480690",
+			"text": "Adding a new 1-to-1 Direct Message.",
+			"created_at": "2022-10-13T23:40:43.000Z",
+			"event_type": "MessageCreate",
+			"dm_conversation_id": "944480690-906948460078698496"
+		}
+	],
+	"includes": {
+		"users": [{
+				"name": "API Demos",
+				"description": "Hosting TwitterDev integrations... @TwitterDev #DevRel",
+				"id": "944480690",
+				"username": "FloodSocial"
+			},
+			{
+				"name": "the SnowBot",
+				"description": "Home of the @TwitterDev SnowBot... Serving snow reports, snow photos, and snow research links... Chatbot is currently being remodeled for Twitter APIv2.",
+				"id": "906948460078698496",
+				"username": "SnowBotDev"
+			}
+		],
+		"tweets": [{
+				"text": "有点遗憾没有祝大家科罗拉多新水年快乐……\n\n祝我所有科罗拉多的朋友和同事们，无论新老……水年快乐\n\n愿这是一个丰沛的水年，但也不要太丰沛……",
+				"id": "1578900353814519810",
+				"created_at": "2022-10-09T00:09:13.000Z",
+				"author_id": "944480690",
+				"edit_history_tweet_ids": [
+					"1578900353814519810"
+				]
+			}
+		]
+	},
+	"meta": {
+		"result_count": 3,
+		"next_token": "18LAA581J5II7LA00C00ZZZZ",
+		"previous_token": "1BLC45G1H8CAL5DG0G00ZZZZ"
+	}
+}
+```
+
+<div id="community">
+  ### Community（社区）
+</div>
+
+Community 是 X 用户用于交流、分享，并更贴近其最关心讨论话题的专属空间。
+
+Community 中的帖子在 X 上任何人都可以看到，但只有该 Community 内的成员才能参与互动和讨论。
+
+Community 对象包含与该 Community 相关的元数据。
+
+| Field value      | Type            | Description                                        |    |
+| :--------------- | :-------------- | :------------------------------------------------- | :- |
+| created&#95;at   | date (ISO 8601) | Community 的创建时间。                                   |    |
+| id               | string          | Community 的唯一标识符。                                  |    |
+| name             | string          | Community 的名称。                                     |    |
+| description      | string          | Community 的描述文本（如果已提供）。                            |    |
+| access           | string          | Community 的访问级别。<br /><br /> 可以是以下之一：              |    |
+|                  |                 | - `Public`                                         |    |
+|                  |                 | - `Closed`                                         |    |
+| join&#95;policy  | string          | Community 的加入策略。<br /><br /> 可以是以下之一：              |    |
+|                  |                 | - `Open`                                           |    |
+|                  |                 | - `RestrictedJoinRequestsDisabled`                 |    |
+|                  |                 | - `RestrictedJoinRequestsRequireAdminApproval`     |    |
+|                  |                 | - `RestrictedJoinRequestsRequireModeratorApproval` |    |
+|                  |                 | - `SuperFollowRequired`                            |    |
+| member&#95;count | integer         | 已加入该 Community 的成员数量。                              |    |
+
+**Retrieving Community objects**
+
+**示例请求**
+
+在以下请求中，我们在基于给定关键字搜索 Community 列表的同时，请求特定字段。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 [Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
+
+```bash
+curl --location 'https://api.x.com/2/communities/search?query=anime&amp;community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: $BEARER_TOKEN'
+```
+
+**响应示例**
+
+```
+{
+  "data": [
+    {
+      "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI=",
+      "description": "欢迎来到动漫社区！动漫爱好者在这里聚集，分享他们最喜欢的节目并讨论一切与动漫相关的内容。",
+      "join_policy": "Open",
+      "access": "Public",
+      "member_count": 39915,
+      "name": "Anime Community",
+      "created_at": "2024-02-17T06:58:50.000Z"
+    },
+    {
+      "id": "Q29tbXVuaXR5OjE1MDY3OTM5NTMxMDYwNDI4OTE=",
+      "description": "Join and text about anime 🥰",
+      "join_policy": "Open",
+      "access": "Public",
+      "member_count": 26019,
+      "name": "Anime World 🌸",
+      "created_at": "2022-03-24T00:44:07.000Z"
+    },
+    {
+      "id": "Q29tbXVuaXR5OjE0OTY3NzYyMTU5Mzk1MzQ4NDk=",
+      "description": "For all anime lovers and creators!",
+      "join_policy": "Open",
+      "access": "Public",
+      "member_count": 5612,
+      "name": "Anime",
+      "created_at": "2022-02-24T09:17:13.000Z"
+    }
+  ],
+  "meta": {
+    "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+  }
+}
+```
+
+<div id="how-to-use-fields-and-expansions">
+  ## 如何使用 fields 和 expansions
+</div>
+
+默认情况下，当在请求中未使用 [fields](/zh/x-api/fundamentals/fields) 或 [expansions](/zh/x-api/fundamentals/expansions) 参数时，X API v2 数据对象仅包含少量默认字段。本文将向你展示如何在请求中使用 `fields` 和 `expansions` 查询参数，从而在响应中获取更多对象和字段。
+
+在本指南中，我们将以下面这张帖子的截图为例，请求其中的多个字段。
+ 
+
+![该图片是一张由 @X 发布的帖子的截图。你可以看到帖子文本、用户名、发布时间（日期和时间）、来源以及公开指标。截图中还包含一个视频。](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/ScreenShotDataDictionaryGuide.png.twimg.1920.png)
+
+如你在截图中所见，与该帖子相关的可见信息有多项内容，包括帖子作者、帖子指标、创建时间戳、视频以及视频观看次数。此外，还有若干在截图中不可见、但仍可通过请求获取的数据。
+
+当你向 API 发出请求时，默认的响应非常简单，只包含默认的帖子字段（id 和 text）。你还只会收到所使用端点返回的主对象，而不会收到与该主对象相关联的其他数据对象。
+
+这种简洁性，再加上 fields 和 expansions 参数，使你能够根据具体用例，只请求你所需要的字段。 
+ 
+
+<div id="requesting-additional-fields-and-objects">
+  #### 请求额外的字段和对象。
+</div>
+
+首先,我们将使用帖子 ID 和 [GET /tweets 端点](/zh/x-api/posts/lookup/introduction)请求一个[帖子对象](/zh/x-api/fundamentals/data-dictionary#tweet)。
+
+请求：
+
+```bash
+curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969' \
+  --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+响应：
+
+```
+{
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "不要错过关于您帖子的讨论。\n\n现在在 iOS 上，您可以在一处查看所有带评论的转帖。https://t.co/oanjZfzC6y"
+        }
+    ]
+}
+```
+
+以下分步指南将向您展示如何获取屏幕截图中显示的附加数据。
+
+1. 通过使用我们的[对象模型](/zh/x-api/fundamentals/data-dictionary#tweet)，或查阅各端点的 API 参考页面中的字段列表，来确定你想要额外请求的字段。
+
+   在本例中，我们将请求以下额外字段：
+   attachments、author&#95;id、created&#95;at、public&#95;metrics。
+
+2. 使用上述字段构建 `tweet.fields` 查询参数，将它们作为以逗号分隔的列表值传入：
+   `?tweet.fields=attachments,author_id,created_at,public_metrics`
+
+3. 将该查询参数添加到你之前发送的 GET /tweets 请求中。
+
+请求：
+
+`curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969&tweet.fields=attachments,author_id,created_at,public_metrics' \   --header 'Authorization: Bearer $BEARER_TOKEN'`
+
+响应：
+
+```
+{
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "不要错过关于您帖子的讨论。\n\n现在在 iOS 上,您可以在一处查看所有带评论的转发。https://t.co/oanjZfzC6y",
+            "author_id": "783214",
+            "public_metrics": {
+                "retweet_count": 5219,
+                "reply_count": 1828,
+                "like_count": 17141,
+                "quote_count": 3255
+            },
+            "attachments": {
+                "media_keys": [
+                    "13_1260294804770041858"
+                ]
+            },
+            "created_at": "2020-05-12T19:44:51.000Z"
+        }
+    ]
+}
+```
+
+4. 接下来,我们将请求帖子中包含的视频相关字段。为此,我们将使用 `expansions` 参数,值设为 `attachments.media_keys`,并将其添加到请求中。
+
+?expansions=attachments.media&#95;keys
+
+请求：
+
+```bash
+curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969&tweet.fields=attachments,author_id,created_at,public_metrics&expansions=attachments.media_keys' \
+  --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+响应,媒体对象在 includes 对象中表示:
+
+```
+{
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "不要错过关于您帖子的讨论。\n\n现在在 iOS 上,您可以在一处查看所有带评论的转发。https://t.co/oanjZfzC6y",
+            "public_metrics": {
+                "retweet_count": 5219,
+                "reply_count": 1828,
+                "like_count": 17141,
+                "quote_count": 3255
+            },
+            "created_at": "2020-05-12T19:44:51.000Z",
+            "attachments": {
+                "media_keys": [
+                    "13_1260294804770041858"
+                ]
+            },
+            "author_id": "783214"
+        }
+    ],
+    "includes": {
+        "media": [
+            {
+                "media_key": "13_1260294804770041858",
+                "type": "video"
+            }
+        ]
+    }
+}
+```
+
+5. 最后,我们将请求视频的观看次数和时长。这些不是默认字段,因此需要明确请求。在请求中使用 `media.fields` 参数,传入以逗号分隔的值:`public_metrics` 和 `duration_ms`。
+
+?media.fields=public&#95;metrics,duration&#95;ms
+
+请求：
+ 
+
+`curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969&tweet.fields=attachments,author_id,created_at,public_metrics&expansions=attachments.media_keys&media.fields=duration_ms,public_metrics' --header 'Authorization: Bearer $BEARER_TOKEN'`
+
+响应中现在包含了帖子截图中可见的所有数据：
+
+```
+  {
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "不要错过关于你推文的推文。\n\n现在在iOS上，你可以在一个地方看到所有带评论的转推。https://t.co/oanjZfzC6y",
+            "author_id": "783214",
+            "public_metrics": {
+                "retweet_count": 5219,
+                "reply_count": 1828,
+                "like_count": 17141,
+                "quote_count": 3255
+            },
+            "created_at": "2020-05-12T19:44:51.000Z",
+            "attachments": {
+                "media_keys": [
+                    "13_1260294804770041858"
+                ]
+            }
+        }
+    ],
+    "includes": {
+        "media": [
+            {
+                "duration_ms": 36503,
+                "media_key": "13_1260294804770041858",
+                "public_metrics": {
+                    "view_count": 1534703
+                },
+                "type": "video"
+            }
+        ]
+    }
+}
+```
+
+在本示例中，我们一共包含了以下参数：
+
+* ids=1260294888811347969
+* tweet.fields=attachments,author&#95;id,created&#95;at,public&#95;metrics
+* expansions=attachments.media&#95;keys
+* media.fields=public&#95;metrics,duration&#95;ms
+   
+
+将这些参数组合在一起后，完整的查询字符串如下所示：
+
+```
+?ids=1260294888811347969&tweet.fields=attachments,author\_id,created\_at,public\_metrics&expansions=attachments.media\_keys&media.fields=public\_metrics,duration\_ms
+```
+
+<div id="x-api-v2-example-payloads">
+  ## X API v2 示例载荷
+</div>
+
+<div id="tweet">
+  ### 帖子
+</div>
+
+```json
+{
+  "data": [
+    {
+      "conversation_id": "1304102743196356610",
+      "id": "1307025659294674945",
+      "possibly_sensitive": false,
+      "public_metrics": {
+        "retweet_count": 11,
+        "reply_count": 2,
+        "like_count": 70,
+        "quote_count": 1
+      },
+      "entities": {
+        "urls": [
+          {
+            "start": 74,
+            "end": 97,
+            "url": "https://t.co/oeF3ZHeKQQ",
+            "expanded_url": "https://dev.to/twitterdev/understanding-the-new-tweet-payload-in-the-twitter-api-v2-1fg5",
+            "display_url": "dev.to/twitterdev/und…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1317156296982867969/2uLfv-Bh?format=jpg&name=orig",
+                "width": 1128,
+                "height": 600
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1317156296982867969/2uLfv-Bh?format=jpg&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Understanding the new Tweet payload in the X API v2",
+            "description": "X recently announced the new X API v2, rebuilt from the ground up to deliver new features...",
+            "unwound_url": "https://dev.to/twitterdev/understanding-the-new-tweet-payload-in-the-twitter-api-v2-1fg5"
+          }
+        ]
+      },
+      "text": "Here’s an article that highlights the updates in the new Tweet payload v2 https://t.co/oeF3ZHeKQQ",
+      "in_reply_to_user_id": "2244994945",
+      "created_at": "2020-09-18T18:36:15.000Z",
+      "author_id": "2244994945",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1304102743196356610"
+        }
+      ],
+      "lang": "en",
+      "source": "Twitter Web App"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "id": "2244994945",
+        "verified": true,
+        "location": "127.0.0.1",
+        "description": "The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.",
+        "pinned_tweet_id": "1293593516040269825",
+        "username": "TwitterDev",
+        "public_metrics": {
+          "followers_count": 513961,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "name": "Twitter Dev",
+        "url": "https://t.co/3ZX3TNiZCY",
+        "protected": false
+      }
+    ],
+    "tweets": [
+      {
+        "conversation_id": "1304102743196356610",
+        "id": "1304102743196356610",
+        "possibly_sensitive": false,
+        "public_metrics": {
+          "retweet_count": 31,
+          "reply_count": 12,
+          "like_count": 104,
+          "quote_count": 4
+        },
+        "entities": {
+          "mentions": [
+            {
+              "start": 146,
+              "end": 158,
+              "username": "suhemparack"
+            }
+          ],
+          "urls": [
+            {
+              "start": 237,
+              "end": 260,
+              "url": "https://t.co/CjneyMpgCq",
+              "expanded_url": "https://x.com/TwitterDev/status/1304102743196356610/video/1",
+              "display_url": "pic.x.com/CjneyMpgCq"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 8,
+              "end": 19,
+              "tag": "TwitterAPI"
+            }
+          ]
+        },
+        "attachments": {
+          "media_keys": [
+            "13_1303848070984024065"
+          ]
+        },
+        "text": "新的 #TwitterAPI 对帖子有效负载进行了一些改进。您可能想知道——主要区别是什么?🧐\n\n在此视频中,@SuhemParack 对比了 v1.1 帖子有效负载与使用我们 v2 端点时的内容。https://t.co/CjneyMpgCq",
+        "created_at": "2020-09-10T17:01:37.000Z",
+        "author_id": "2244994945",
+        "lang": "en",
+        "source": "Twitter Media Studio"
+      }
+    ]
+  }
+}
+```
+
+<div id="tweet-reply">
+  ### 帖子回复
+</div>
+
+```json
+{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1296887091901718529",
+      "text": "了解 @PennMedCDH 如何使用 Twitter 数据来理解 COVID-19 健康危机 📊\n\nhttps://t.co/1tdA8uDWes",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1296887091901718529"
+        }
+      ],
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 30,
+            "end": 36,
+            "probability": 0.6318,
+            "type": "Product",
+            "normalized_text": "Twitter"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 8,
+            "end": 19,
+            "username": "PennMedCDH"
+          }
+        ],
+        "urls": [
+          {
+            "start": 87,
+            "end": 110,
+            "url": "https://t.co/1tdA8uDWes",
+            "expanded_url": "https://developer.x.com/en/use-cases/success-stories/penn",
+            "display_url": "developer.x.com/en/use-cases/s…",
+            "status": 200,
+            "title": "宾夕法尼亚大学医学院数字健康中心",
+            "description": "宾夕法尼亚大学医学院数字健康中心创建了一个 COVID-19 Twitter 地图,其中包含详细展示情绪、报告症状、各州数据细分以及 COVID-19 疫情边界数据的图表。此外,他们的 Penn Med With You 计划使用来自 Twitter 的汇总区域信息为其网站和短信服务提供支持。该服务利用这些信息传播相关且及时的资源。",
+            "unwound_url": "https://developer.x.com/en/use-cases/success-stories/penn"
+          }
+        ]
+      },
+      "id": "1296887316556980230",
+      "public_metrics": {
+        "retweet_count": 9,
+        "reply_count": 3,
+        "like_count": 26,
+        "quote_count": 2
+      },
+      "author_id": "2244994945",
+      "in_reply_to_user_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "品牌类别",
+            "description": "品牌垂直领域内的类别,用于缩小品牌范围"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "服务"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "品牌",
+            "description": "品牌和公司"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "123",
+            "name": "持续新闻报道",
+            "description": "持续新闻报道,例如"英国脱欧""
+          },
+          "entity": {
+            "id": "1220701888179359745",
+            "name": "COVID-19"
+          }
+        }
+      ],
+      "source": "Twitter 网页应用",
+      "created_at": "2020-08-21T19:10:05.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "#TwitterDev 团队的声音,也是您获取与 #TwitterAPI 相关的更新、新闻和活动的官方来源。",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter 开发者",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      },
+      {
+        "created_at": "2013-07-23T16:58:03.000Z",
+        "id": "1615654896",
+        "protected": false,
+        "username": "PennMedCDH",
+        "verified": false,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/7eS9RuwIb9",
+                "expanded_url": "http://centerfordigitalhealth.upenn.edu/",
+                "display_url": "centerfordigitalhealth.upenn.edu"
+              }
+            ]
+          },
+          "description": {
+            "mentions": [
+              {
+                "start": 0,
+                "end": 13,
+                "username": "PennMedicine"
+              }
+            ]
+          }
+        },
+        "description": "@PennMedicine 的数字健康中心通过研究数字健康技术在医疗保健领域的进步所带来的影响来推进科学发展。",
+        "public_metrics": {
+          "followers_count": 1348,
+          "following_count": 455,
+          "tweet_count": 1288,
+          "listed_count": 92
+        },
+        "location": "Philadelphia, PA",
+        "name": "宾大医学院 CDH",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1067488849725726723/MoO3FQ44_normal.jpg",
+        "url": "https://t.co/7eS9RuwIb9"
+      }
+    ],
+    "tweets": [
+      {
+        "lang": "en",
+        "conversation_id": "1296887091901718529",
+        "text": "@RainaMerchant 博士及其在宾夕法尼亚大学医学院 CDH 的团队正在帮助构建医疗保健的未来。\n\n该团队以多种不同方式使用来自社交数据的洞察——从揭示风险因素到阐明公众情绪。🔎",
+        "possibly_sensitive": false,
+        "entities": {
+          "annotations": [
+            {
+              "start": 39,
+              "end": 55,
+              "probability": 0.8274,
+              "type": "Organization",
+              "normalized_text": "Penn Medicine CDH"
+            }
+          ],
+          "mentions": [
+            {
+              "start": 4,
+              "end": 18,
+              "username": "RainaMerchant"
+            }
+          ]
+        },
+        "id": "1296887091901718529",
+        "public_metrics": {
+          "retweet_count": 9,
+          "reply_count": 7,
+          "like_count": 32,
+          "quote_count": 0
+        },
+        "author_id": "2244994945",
+        "source": "Twitter 网页应用",
+        "created_at": "2020-08-21T19:09:12.000Z"
+      }
+    ]
+  }
+}
+```
+
+<div id="extended-tweet">
+  ### 扩展帖子
+</div>
+
+```json
+{
+  "data": [
+    {
+      "conversation_id": "1296121314218897408",
+      "id": "1296121314218897408",
+      "possibly_sensitive": false,
+      "public_metrics": {
+        "retweet_count": 54,
+        "reply_count": 9,
+        "like_count": 172,
+        "quote_count": 23
+      },
+      "entities": {
+        "urls": [
+          {
+            "start": 192,
+            "end": 215,
+            "url": "https://t.co/khXhTurm9x",
+            "expanded_url": "https://devcommunity.x.com/t/hide-replies-now-available-in-the-new-twitter-api/140996",
+            "display_url": "devcommunity.com/t/hide-replies…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1296121315514957825/3CI24hSI?format=png&name=orig",
+                "width": 400,
+                "height": 400
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1296121315514957825/3CI24hSI?format=png&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Hide replies now available in the new Twitter API",
+            "description": "今天,我们很高兴地宣布新 Twitter API 中隐藏回复端点正式发布。隐藏回复端点允许您构建工具,帮助用户隐藏或取消隐藏对其帖子的回复。用户管理回复的原因有很多,包括减少对辱骂性、干扰性、误导性评论的关注,或使对话更具吸引力。通过此端点,您可以构建工具,帮助 X 用户更快、更便捷地隐藏或取消隐藏回复...",
+            "unwound_url": "https://devcommunity.x.com/t/hide-replies-now-available-in-the-new-twitter-api/140996"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 178,
+            "end": 189,
+            "tag": "TwitterAPI"
+          }
+        ]
+      },
+      "text": "The hide replies endpoint is launching today! \n\nDevelopers can hide replies to Tweets - a crucial way developers can help improve the health of the public conversation using the #TwitterAPI.\n\nhttps://t.co/khXhTurm9x",
+      "created_at": "2020-08-19T16:26:16.000Z",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "Top level interests and hobbies groupings, like Food or Travel"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "Technology",
+            "description": "Technology and computing"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "Computer programming",
+            "description": "Computer programming"
+          }
+        }
+      ],
+      "author_id": "2244994945",
+      "lang": "en",
+      "source": "Twitter Web App"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "id": "2244994945",
+        "verified": true,
+        "location": "127.0.0.1",
+        "description": "The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.",
+        "pinned_tweet_id": "1293593516040269825",
+        "username": "TwitterDev",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "name": "Twitter Dev",
+        "url": "https://t.co/3ZX3TNiZCY",
+        "protected": false
+      }
+    ]
+  }
+}
+```
+
+<div id="tweet-with-media">
+  ### 包含媒体的帖子
+</div>
+
+```json
+{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1293593516040269825",
+      "text": "It’s finally here! 🥁 Say hello to the new #TwitterAPI.\n\nWe’re rebuilding the X API v2 from the ground up to better serve our developer community. And today’s launch is only the beginning.\n\nhttps://t.co/32VrwpGaJw https://t.co/KaFSbjWUA8",
+      "attachments": {
+        "media_keys": [
+          "7_1293565706408038401"
+        ]
+      },
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 78,
+            "end": 88,
+            "probability": 0.4381,
+            "type": "Product",
+            "normalized_text": "X API"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 42,
+            "end": 53,
+            "tag": "TwitterAPI"
+          }
+        ],
+        "urls": [
+          {
+            "start": 195,
+            "end": 218,
+            "url": "https://t.co/32VrwpGaJw",
+            "expanded_url": "https://blog.x.com/developer/en_us/topics/tools/2020/introducing_new_twitter_api.html",
+            "display_url": "blog.x.com/developer/en_u…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1336475659279818754/_cmRh7QE?format=jpg&name=orig",
+                "width": 1200,
+                "height": 627
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1336475659279818754/_cmRh7QE?format=jpg&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Introducing a new and improved X API",
+            "description": "Introducing the new X API - rebuilt from the ground up to deliver new features faster so developers can help the world connect to the public conversation happening on Twitter.",
+            "unwound_url": "https://blog.x.com/developer/en_us/topics/tools/2020/introducing_new_twitter_api.html"
+          },
+          {
+            "start": 219,
+            "end": 242,
+            "url": "https://t.co/KaFSbjWUA8",
+            "expanded_url": "https://x.com/TwitterDev/status/1293593516040269825/video/1",
+            "display_url": "pic.x.com/KaFSbjWUA8"
+          }
+        ]
+      },
+      "id": "1293593516040269825",
+      "public_metrics": {
+        "retweet_count": 958,
+        "reply_count": 171,
+        "like_count": 2848,
+        "quote_count": 333
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "Brands and Companies"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "Top level interests and hobbies groupings, like Food or Travel"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "Technology",
+            "description": "Technology and computing"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "Computer programming",
+            "description": "Computer programming"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "created_at": "2020-08-12T17:01:42.000Z"
+    }
+  ],
+  "includes": {
+    "media": [
+      {
+        "height": 720,
+        "duration_ms": 34875,
+        "media_key": "7_1293565706408038401",
+        "type": "video",
+        "preview_image_url": "https://pbs.twimg.com/ext_tw_video_thumb/1293565706408038401/pu/img/66P2dvbU4a02jYbV.jpg",
+        "public_metrics": {
+          "view_count": 279438
+        },
+        "width": 1280
+      }
+    ],
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      }
+    ]
+  }
+}`
+
+
+### Retweet
+
+      `{
+  "data": [
+    {
+      "public_metrics": {
+        "retweet_count": 19,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0
+      },
+      "conversation_id": "1229851574555508737",
+      "id": "1229851574555508737",
+      "entities": {
+        "annotations": [
+          {
+            "start": 28,
+            "end": 38,
+            "probability": 0.261,
+            "type": "Product",
+            "normalized_text": "Alexa Skill"
+          },
+          {
+            "start": 44,
+            "end": 50,
+            "probability": 0.7332,
+            "type": "Product",
+            "normalized_text": "Twitter"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 15,
+            "username": "suhemparack"
+          }
+        ]
+      },
+      "text": "RT @suhemparack: I built an Alexa Skill for Twitter using APL that allows you to view Tweets and Trends on the echo show!\n\nCheck it out her…",
+      "created_at": "2020-02-18T19:33:59.000Z",
+      "possibly_sensitive": false,
+      "author_id": "2244994945",
+      "referenced_tweets": [
+        {
+          "type": "retweeted",
+          "id": "1229843515603144704"
+        }
+      ],
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "品牌和公司"
+          },
+          "entity": {
+            "id": "10026792024",
+            "name": "Amazon"
+          }
+        },
+        {
+          "domain": {
+            "id": "48",
+            "name": "Product",
+            "description": "品牌创建的产品。示例：Ford Explorer、Apple iPhone。"
+          },
+          "entity": {
+            "id": "968221983803494400",
+            "name": "Amazon - Alexa",
+            "description": "Alexa"
+          }
+        },
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "品牌垂直领域内的类别，用于缩小品牌范围"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "品牌和公司"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "lang": "en"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "username": "TwitterDev",
+        "name": "Twitter Dev",
+        "location": "127.0.0.1",
+        "url": "https://t.co/3ZX3TNiZCY",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "id": "2244994945",
+        "description": "#TwitterDev 团队的官方声音，是您获取与 #TwitterAPI 相关的更新、新闻和活动的官方来源。",
+        "verified": true,
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "pinned_tweet_id": "1293593516040269825",
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "protected": false
+      },
+      {
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1230703695051935747/TbQKe91L_normal.jpg",
+        "username": "suhemparack",
+        "name": "Suhem Parack",
+        "location": "Seattle, WA",
+        "url": "https://t.co/8IkCzClPCz",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/8IkCzClPCz",
+                "expanded_url": "https://developer.x.com",
+                "display_url": "developer.x.com"
+              }
+            ]
+          },
+          "description": {
+            "mentions": [
+              {
+                "start": 42,
+                "end": 50,
+                "username": "Twitter"
+              }
+            ]
+          }
+        },
+        "id": "857699969263964161",
+        "description": "@Twitter 学术研究开发者关系。欢迎与我讨论使用 Twitter 数据进行研究。曾任职：Amazon Alexa。观点仅代表个人",
+        "verified": false,
+        "public_metrics": {
+          "followers_count": 738,
+          "following_count": 512,
+          "tweet_count": 460,
+          "listed_count": 12
+        },
+        "pinned_tweet_id": "1296498078233571329",
+        "created_at": "2017-04-27T20:56:22.000Z",
+        "protected": false
+      }
+    ],
+    "tweets": [
+      {
+        "public_metrics": {
+          "retweet_count": 19,
+          "reply_count": 1,
+          "like_count": 71,
+          "quote_count": 6
+        },
+        "conversation_id": "1229843515603144704",
+        "id": "1229843515603144704",
+        "entities": {
+          "annotations": [
+            {
+              "start": 11,
+              "end": 21,
+              "probability": 0.3342,
+              "type": "Product",
+              "normalized_text": "Alexa Skill"
+            },
+            {
+              "start": 27,
+              "end": 33,
+              "probability": 0.6727,
+              "type": "Product",
+              "normalized_text": "Twitter"
+            }
+          ],
+          "urls": [
+            {
+              "start": 127,
+              "end": 150,
+              "url": "https://t.co/l5J8wq748G",
+              "expanded_url": "https://dev.to/twitterdev/building-an-alexa-skill-for-twitter-using-alexa-presentation-language-1aj0",
+              "display_url": "dev.to/twitterdev/bui…",
+              "status": 200,
+              "unwound_url": "https://dev.to/twitterdev/building-an-alexa-skill-for-twitter-using-alexa-presentation-language-1aj0"
+            }
+          ]
+        },
+        "text": "I built an Alexa Skill for Twitter using APL that allows you to view Tweets and Trends on the echo show!\n\nCheck it out here 👇\n\nhttps://t.co/l5J8wq748G",
+        "created_at": "2020-02-18T19:01:58.000Z",
+        "possibly_sensitive": false,
+        "author_id": "857699969263964161",
+        "context_annotations": [
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "品牌和公司"
+            },
+            "entity": {
+              "id": "10026792024",
+              "name": "Amazon"
+            }
+          },
+          {
+            "domain": {
+              "id": "48",
+              "name": "Product",
+              "description": "品牌创建的产品。示例：Ford Explorer、Apple iPhone。"
+            },
+            "entity": {
+              "id": "968221983803494400",
+              "name": "Amazon - Alexa",
+              "description": "Alexa"
+            }
+          },
+          {
+            "domain": {
+              "id": "46",
+              "name": "Brand Category",
+              "description": "品牌垂直领域内的类别，用于缩小品牌范围"
+            },
+            "entity": {
+              "id": "781974596752842752",
+              "name": "Services"
+            }
+          },
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "品牌和公司"
+            },
+            "entity": {
+              "id": "10045225402",
+              "name": "Twitter"
+            }
+          }
+        ],
+        "source": "Twitter Web App",
+        "lang": "en"
+      }
+    ]
+  }
+}`
+
+
+### Quote Tweet
+
+      `{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1328399838128467969",
+      "text": "按计划,下方引用的 Labs v2 端点现已停用。如果您对 X API v2 有任何疑问或需要帮助,请在论坛中告知我们!https://t.co/JaxttUMmjX",
+      "referenced_tweets": [
+        {
+          "type": "quoted",
+          "id": "1327011423252144128"
+        }
+      ],
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 151,
+            "end": 157,
+            "probability": 0.8115,
+            "type": "Product",
+            "normalized_text": "Twitter"
+          }
+        ],
+        "urls": [
+          {
+            "start": 167,
+            "end": 190,
+            "url": "https://t.co/JaxttUMmjX",
+            "expanded_url": "https://x.com/TwitterDev/status/1327011423252144128",
+            "display_url": "twitter.com/TwitterDev/sta…"
+          }
+        ]
+      },
+      "id": "1328399838128467969",
+      "public_metrics": {
+        "retweet_count": 7,
+        "reply_count": 4,
+        "like_count": 29,
+        "quote_count": 1
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "品牌垂直领域内用于缩小品牌范围的类别"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "服务"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "品牌和公司"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "顶级兴趣和爱好分组,如美食或旅行"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "技术",
+            "description": "技术与计算"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "兴趣和爱好实体的分组,如新奇美食或旅行目的地"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "计算机编程",
+            "description": "计算机编程"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "created_at": "2020-11-16T18:09:36.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "#TwitterDev 团队的官方声音,也是您获取 #TwitterAPI 相关更新、新闻和活动的官方来源。",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      }
+    ],
+    "tweets": [
+      {
+        "lang": "en",
+        "conversation_id": "1327011423252144128",
+        "text": "👋 友情提醒:Twitter Developer Labs v2 的隐藏回复和最近搜索功能将于下周一(11 月 16 日)停用!我们建议您迁移到 v2 #TwitterAPI 中现已提供的新隐藏回复和最近搜索端点。详情:https://t.co/r6z6CI7kEy",
+        "possibly_sensitive": false,
+        "entities": {
+          "annotations": [
+            {
+              "start": 26,
+              "end": 50,
+              "probability": 0.4387,
+              "type": "Product",
+              "normalized_text": "Twitter Developer Labs v2"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 228,
+              "end": 239,
+              "tag": "TwitterAPI"
+            }
+          ],
+          "urls": [
+            {
+              "start": 250,
+              "end": 273,
+              "url": "https://t.co/r6z6CI7kEy",
+              "expanded_url": "https://devcommunity.x.com/t/retiring-labs-v2-recent-search-and-hide-replies/145795",
+              "display_url": "devcommunity.com/t/retiring-lab…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1327011425240313856/PkurOyu1?format=jpg&name=orig",
+                  "width": 1200,
+                  "height": 630
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1327011425240313856/PkurOyu1?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "停用 Labs v2 最近搜索和隐藏回复功能",
+              "description": "正如我们在早期访问和隐藏回复公告中所述,以下 Twitter Developer Labs v2 端点将于 11 月 16 日停用。Labs v2 最近搜索 Labs v2 隐藏回复 如果调用这些端点,它们将返回 HTTP 410 状态且不返回任何数据。根据您对 Labs 的反馈,我们已将相应功能整合到 X API v2 中。您可以通过以下链接找到相关文档。如果您尚未注册 v2 访问权限,请点击此处注册...",
+              "unwound_url": "https://devcommunity.x.com/t/retiring-labs-v2-recent-search-and-hide-replies/145795"
+            }
+          ]
+        },
+        "id": "1327011423252144128",
+        "public_metrics": {
+          "retweet_count": 8,
+          "reply_count": 2,
+          "like_count": 33,
+          "quote_count": 4
+        },
+        "author_id": "2244994945",
+        "context_annotations": [
+          {
+            "domain": {
+              "id": "46",
+              "name": "Brand Category",
+              "description": "品牌垂直领域内用于缩小品牌范围的类别"
+            },
+            "entity": {
+              "id": "781974596752842752",
+              "name": "服务"
+            }
+          },
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "品牌和公司"
+            },
+            "entity": {
+              "id": "10045225402",
+              "name": "Twitter"
+            }
+          },
+          {
+            "domain": {
+              "id": "65",
+              "name": "Interests and Hobbies Vertical",
+              "description": "顶级兴趣和爱好分组,如美食或旅行"
+            },
+            "entity": {
+              "id": "848920371311001600",
+              "name": "Technology",
+              "description": "Technology and computing"
+            }
+          },
+          {
+            "domain": {
+              "id": "66",
+              "name": "Interests and Hobbies Category",
+              "description": "兴趣和爱好实体的分组,如新奇美食或旅行目的地"
+            },
+            "entity": {
+              "id": "848921413196984320",
+              "name": "Computer programming",
+              "description": "Computer programming"
+            }
+          }
+        ],
+        "source": "Twitter Web App",
+        "created_at": "2020-11-12T22:12:32.000Z"
+      }
+    ]
+  }
+}
+```
+
+<div id="retweeted-quote-tweet">
+  ### 被转发的引用帖子
+</div>
+
+```
+{
+    "data": [
+    {
+      "lang": "zh",
+      "conversation_id": "1225470895902412800",
+      "text": "RT @AureliaSpecker: 📣 如果你喜欢我去年11月写的伦敦通勤教程,可以看看使用新版本重构的版本…",
+      "referenced_tweets": [
+        {
+          "type": "retweeted",
+          "id": "1224709550214873090"
+        }
+      ],
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 42,
+            "end": 47,
+            "probability": 0.6999,
+            "type": "Place",
+            "normalized_text": "London"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 18,
+            "username": "AureliaSpecker"
+          }
+        ]
+      },
+      "id": "1225470895902412800",
+      "public_metrics": {
+        "retweet_count": 12,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "品牌垂直类别中用于缩小品牌范围的分类"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "服务"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "品牌和公司"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "顶级兴趣和爱好分组,例如美食或旅行"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "Technology",
+            "description": "技术与计算"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "兴趣和爱好实体的分组,例如新奇美食或旅游目的地"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "Computer programming",
+            "description": "计算机编程"
+          }
+        }
+      ],
+      "source": "Twitter for iPhone",
+      "created_at": "2020-02-06T17:26:44.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "#TwitterDev 团队的官方账号,为您提供与 #TwitterAPI 相关的更新、新闻和活动信息。",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      },
+      {
+        "created_at": "2013-01-18T23:45:43.000Z",
+        "id": "1102321381",
+        "protected": false,
+        "username": "AureliaSpecker",
+        "verified": false,
+        "entities": {
+          "description": {
+            "mentions": [
+              {
+                "start": 7,
+                "end": 17,
+                "username": "TwitterUK"
+              },
+              {
+                "start": 86,
+                "end": 95,
+                "username": "_dormrod"
+              }
+            ]
+          }
+        },
+        "description": "devrel @TwitterUK • 在伦敦的瑞士人 • 室内植物爱好者 • @_dormrod 的私人理发师",
+        "pinned_tweet_id": "1253069421322567681",
+        "public_metrics": {
+          "followers_count": 1036,
+          "following_count": 1330,
+          "tweet_count": 855,
+          "listed_count": 26
+        },
+        "location": "London, UK",
+        "name": "Aurelia Specker",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1137517534104772608/8FBYgc6G_normal.jpg",
+        "url": ""
+      }
+    ],
+    "tweets": [
+      {
+        "lang": "zh",
+        "conversation_id": "1224709550214873090",
+        "text": "📣 如果你喜欢我去年11月写的伦敦通勤教程,可以看看使用 Twitter 新搜索端点的重构版本 🚇 https://t.co/87XIPZmZBJ\n\n#DEVcommunity #Pythontutorial @TwitterDev @TwitterAPI https://t.co/dXrJYvn3hY",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1195000047089389573"
+          }
+        ],
+        "possibly_sensitive": false,
+        "entities": {
+          "annotations": [
+            {
+              "start": 22,
+              "end": 27,
+              "probability": 0.7075,
+              "type": "Place",
+              "normalized_text": "London"
+            },
+            {
+              "start": 120,
+              "end": 126,
+              "probability": 0.7355,
+              "type": "Product",
+              "normalized_text": "Twitter"
+            }
+          ],
+          "mentions": [
+            {
+              "start": 206,
+              "end": 217,
+              "username": "TwitterDev"
+            },
+            {
+              "start": 218,
+              "end": 229,
+              "username": "TwitterAPI"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 176,
+              "end": 189,
+              "tag": "DEVcommunity"
+            },
+            {
+              "start": 190,
+              "end": 205,
+              "tag": "Pythontutorial"
+            }
+          ],
+          "urls": [
+            {
+              "start": 151,
+              "end": 174,
+              "url": "https://t.co/87XIPZmZBJ",
+              "expanded_url": "https://bit.ly/2OrnrCC",
+              "display_url": "bit.ly/2OrnrCC",
+              "status": 200,
+              "unwound_url": "https://dev.to/twitterdev/migrate-to-twitter-s-newly-released-labs-recent-search-endpoint-3npe"
+            },
+            {
+              "start": 230,
+              "end": 253,
+              "url": "https://t.co/dXrJYvn3hY",
+              "expanded_url": "https://x.com/AureliaSpecker/status/1195000047089389573",
+              "display_url": "twitter.com/AureliaSpecker…"
+            }
+          ]
+        },
+        "id": "1224709550214873090",
+        "public_metrics": {
+          "retweet_count": 12,
+          "reply_count": 0,
+          "like_count": 43,
+          "quote_count": 2
+        },
+        "author_id": "1102321381",
+        "context_annotations": [
+          {
+            "domain": {
+              "id": "46",
+              "name": "Brand Category",
+              "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+            },
+            "entity": {
+              "id": "781974596752842752",
+              "name": "Services"
+            }
+          },
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "Brands and Companies"
+            },
+            "entity": {
+              "id": "10045225402",
+              "name": "Twitter"
+            }
+          },
+          {
+            "domain": {
+              "id": "65",
+              "name": "Interests and Hobbies Vertical",
+              "description": "Top level interests and hobbies groupings, like Food or Travel"
+            },
+            "entity": {
+              "id": "848920371311001600",
+              "name": "Technology",
+              "description": "Technology and computing"
+            }
+          },
+          {
+            "domain": {
+              "id": "66",
+              "name": "兴趣和爱好类别",
+              "description": "兴趣和爱好实体的分组,例如新奇食品或目的地"
+            },
+            "entity": {
+              "id": "848921413196984320",
+              "name": "Computer programming",
+              "description": "Computer programming"
+            }
+          }
+        ],
+        "source": "Twitter Web App",
+        "created_at": "2020-02-04T15:01:25.000Z"
+      }
+    ]
+  }
+}
+```

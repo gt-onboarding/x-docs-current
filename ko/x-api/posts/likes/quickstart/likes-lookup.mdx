@@ -1,0 +1,194 @@
+---
+title: 좋아요 조회
+sidebarTitle: 좋아요 조회
+keywords: ["좋아요 조회", "좋아요 빠른 시작", "좋아요 가져오기", "좋아요 튜토리얼", "좋아요 가이드", "좋아요 예제"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-likes-lookup-endpoint">
+  ### Likes 조회 엔드포인트 사용 시작하기
+</div>
+
+이 빠른 시작 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용하여 Likes 조회 엔드포인트에 첫 번째 요청을 보내는 방법을 안내합니다.
+
+여러 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 리포지토리를 방문하세요.
+ 
+
+<div id="prerequisites">
+  #### 사전 준비 사항
+</div>
+
+이 가이드를 완료하려면 [키와 토큰](/ko/resources/fundamentals/authentication) 세트가 필요합니다. 다음 단계를 따라 생성할 수 있습니다:
+
+1. [개발자 계정 신청](https://developer.x.com/en/apply-for-access)을 완료하고 승인을 받습니다.
+
+2. developer portal에서 [프로젝트](/ko/resources/fundamentals/projects)와 연결된 [개발자 앱](/ko/resources/fundamentals/developer-apps)을 생성합니다.
+
+3. 앱의 &quot;Keys and tokens&quot; 페이지로 이동하여 API 키, 액세스 토큰, Bearer Token을 비밀번호 관리자에 저장합니다.
+
+<div id="steps-to-build-a-likes-lookup-request">
+  #### 좋아요 조회 요청을 구성하는 단계
+</div>
+
+**1단계: 도구 또는 라이브러리 선택**
+
+이 엔드포인트에 요청을 보내기 위해 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 과정을 단순화하기 위해 Postman을 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 로드하려면 다음 버튼을 클릭하세요.
+
+[![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/m1_vnext/carat.svg)<br />X API v2를 Postman에 추가](https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400)
+
+Postman에 X API v2 컬렉션을 로드한 후, &quot;Likes&quot; 폴더로 이동하여 &quot;Liking users&quot;를 선택합니다. 
+ 
+
+**2단계: 요청 인증**
+
+이 엔드포인트에 대한 요청을 성공적으로 수행하려면 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 또는 [OAuth 2.0 Bearer Token](/ko/resources/fundamentals/authentication#oauth-2-0) 인증을 사용해야 합니다. 이를 위해 Postman에서 &quot;X API v2&quot;라는 이름의 환경을 선택한 뒤, Initial value 및 Current value 필드에 다음 변수를 추가해야 합니다.
+
+* consumer&#95;key: 자신의 API Key
+* consumer&#95;secret: 자신의 API Key Secret
+* access&#95;token: 자신의 Access Token
+* token&#95;secret: 자신의 Access Token Secret
+   
+
+**3단계: 트윗 지정**
+
+이 엔드포인트를 사용할 때는 좋아요를 누른 사용자를 조회할 트윗 ID를 지정해야 합니다. 해당 트윗으로 Twitter에서 이동한 후 URL 끝에 있는 숫자 코드를 가져오면 트윗의 ID를 확인할 수 있습니다. 예를 들어, 다음 URL의 트윗 ID는 1354143047324299264입니다.
+
+https://x.com/TwitterDev/status/1354143047324299264
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 후, tweet&#95;id 경로 변수(하단 섹션)의 &quot;Value&quot; 열에 이 ID 값을 입력하고, 값 앞뒤에 공백이 포함되지 않도록 합니다. 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 좋아요를 누른 사용자를 조회하려는 트윗 ID |
+
+**4단계: 조회할 필드 식별 및 지정**
+
+3단계 이후 &quot;Send&quot; 버튼을 클릭하면, 응답에서 기본 [user object](/ko/x-api/fundamentals/data-dictionary#user) 필드인 id, name, username이 반환됩니다.
+
+id, name, username 외에 추가 필드를 받으려면, 요청에 [fields](/ko/x-api/fundamentals/fields) 및/또는 [expansions](/ko/x-api/fundamentals/expansions) 파라미터를 사용해 해당 필드를 지정해야 합니다.
+
+이 연습에서는 서로 다른 오브젝트에서 세 개의 추가 필드 집합을 요청하겠습니다.
+
+1. 기본 user 오브젝트에서 추가 user.created&#95;at 필드
+2. 반환된 사용자에 대한 연결된 고정 트윗(pinned Tweet) 오브젝트의 기본 필드: id 및 text
+3. 연결된 트윗 오브젝트의 추가 tweet.created&#95;at 필드
+
+Postman에서 &quot;Params&quot; 탭으로 이동하여 &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | user.created&#95;at |
+| expansions | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at | tweet.created&#95;at |
+
+이제 &quot;Send&quot; 버튼 옆에 다음 URL이 표시되는 것을 볼 수 있습니다.
+
+`https://api.x.com/2/tweets/1354143047324299264/liking_users?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**5단계: 요청 보내기 및 응답 검토**
+
+모든 설정을 마쳤다면, &quot;Send&quot; 버튼을 클릭하면 다음 예시 응답과 유사한 응답을 받게 됩니다.
+
+```
+{
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "이제 600명 이상의 팔로워를 보유한 모든 사용자가 Space를 호스팅할 수 있습니다.\n\n우리가 배운 바에 따르면, 이러한 계정은 기존 청중이 있기 때문에 호스팅에 좋은 경험을 할 가능성이 높습니다. 모든 사람에게 Space 생성 기능을 제공하기 전에 몇 가지 사항에 집중하고 있습니다. 🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+}
+```
+
+**6단계: 사용자가 좋아요한 트윗 가져오기**
+
+사용자가 좋아요한 트윗을 조회하는 요청도 만들어 볼 수 있습니다. Likes lookup endpoint를 사용하면 사용자가 좋아요한 트윗에 대한 정보를 가져올 수 있습니다. 이를 위해 &quot;Likes&quot; 폴더로 이동한 다음 &quot;Liked Tweets&quot;를 선택합니다. 
+
+이 endpoint에서는 좋아요한 트윗을 조회하려는 User ID를 지정해야 합니다. 이 정보는 [user lookup](/ko/x-api/users/lookup/introduction) endpoint를 사용해 가져올 수 있습니다.
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 후, id path variable(해당 섹션의 하단)에 있는 &quot;Value&quot; 열에 이 username을 입력합니다. 이때 username 앞뒤에 공백이 포함되지 않도록 주의하세요. 
+
+|                 |                       |
+| :-------------- | :-------------------- |
+| **Key**         | **Value**             |
+| id              | 좋아요한 트윗을 조회하려는 사용자 ID |
+| max&#95;results | 5                     |
+
+이제 &quot;Send&quot; 버튼 옆에서 TwitterDev 대신 여러분의 ID가 포함된 비슷한 URL을 확인할 수 있습니다:
+ 
+
+`https://api.x.com/2/users/2244994945/liked_tweets?max_results=5`
+
+모든 설정이 완료되면 &quot;Send&quot; 버튼을 눌러 주세요. 그러면 아래 예시 응답과 유사한 응답을 받게 됩니다:
+
+```
+{
+  "data": [
+    {
+      "id": "1362449997430542337",
+      "text": "Honored to be the first developer to be featured in @TwitterDev's love fest 🥰♥️😍 https://t.co/g8TsPoZsij"
+    },
+    {
+      "id": "1365416026435854338",
+      "text": "We're so happy for our Official Partner @Brandwatch and their big news. https://t.co/3DwWBNSq0o https://t.co/bDUGbgPkKO"
+    },
+    {
+      "id": "1296487407475462144",
+      "text": "@TwitterDev의 이 기능을 확인하여 진화하는 #publichealth 위기를 이해하기 위해 소셜 미디어 데이터를 어떻게 마이닝하고 있는지 자세히 알아보세요 https://t.co/sIFLXRSvEX."
+    },
+    {
+      "id": "1294346980072624128",
+      "text": "I awake from five years of slumber https://t.co/OEPVyAFcfB"
+    },
+    {
+      "id": "1283153843367206912",
+      "text": "@wongmjane Wish we could tell you more, but I’m only a teapot 👀"
+    }
+  ],
+  "meta": {
+        "next_token": "7140dibdnow9c7btw4539n0vybdnx19ylpayqf16fjt4l",
+    	  "result_count": 5
+  }
+}
+```

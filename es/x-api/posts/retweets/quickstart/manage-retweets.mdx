@@ -1,0 +1,105 @@
+---
+title: Gestionar Retweets
+sidebarTitle: Gestionar Retweets
+keywords: ["gestionar retweets", "hacer Retweet de Publicaciones", "eliminar Retweet", "guía rápida de Retweet", "tutorial de Retweet", "guía de Retweet"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-manage-retweets-endpoints">
+  ### Introducción al uso de los endpoints para gestionar Retweets
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud a los endpoints para gestionar Retweets usando Postman.
+
+Si deseas ver código de ejemplo en distintos lenguajes de programación, visita nuestro repositorio de [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) en GitHub. 
+
+<div id="prerequisites">
+  #### Requisitos previos
+</div>
+
+Para completar esta guía, necesitarás tener un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+* [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y obtener la aprobación.
+* Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+* Dirígete a la página “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en una ubicación segura.
+
+<div id="steps-to-build-a-manage-retweets-request">
+  #### Pasos para crear una solicitud de administración de Retweets
+</div>
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para hacer una solicitud a este endpoint, pero aquí vamos a usar la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta &quot;Retweets&quot; y selecciona &quot;Retweet a Post&quot;.
+ 
+
+**Paso dos: Autentica tu solicitud**
+
+Para hacer correctamente una solicitud a X API, debes verificar que tienes permiso. Para hacerlo con este endpoint, debes autenticar tu solicitud usando [OAuth 1.0a User Context](/es/resources/fundamentals/authentication) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+
+En este ejemplo, vamos a usar OAuth 1.0a User Context.
+
+Debes agregar tus claves y tokens, específicamente tu API Key, API Secret Key, OAuth 1.0a user Access Token y OAuth 1.0a user Access Token Secret, a Postman. Puedes hacerlo seleccionando el entorno llamado &quot;X API v2&quot; en la esquina superior derecha de Postman y agregando tus claves y tokens a los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el ícono de ojo junto al menú desplegable de entorno).
+
+Estas variables se incluirán automáticamente en la pestaña de autorización de la solicitud si lo has hecho correctamente.
+
+**Paso tres: Especifica qué Publicación vas a Retuitear**
+
+Los endpoints de administración de Retweets requieren dos id: uno para el usuario que desea hacer un Retweet o deshacer un Retweet y el id de la Publicación.
+
+El id del usuario debe corresponder al id del usuario que se está autenticando, lo que significa que debes pasar los [Access Tokens](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) asociados con ese id de usuario al autenticar tu solicitud. En este caso, puedes especificar el id que pertenece a tu propio usuario. Puedes encontrar tu id de dos maneras:
+
+1. Usando el endpoint [user lookup by username](/es/x-api/users/user-lookup-by-username), puedes pasar un nombre de usuario y recibir el campo id. 
+2. Mirando tu Access Token, verás que la parte numérica es tu id de usuario.
+    
+
+También debes especificar una Publicación que quieras Retuitear. Puedes encontrar el id de la Publicación navegando a X.com, haciendo clic en una Publicación y luego mirando la URL. Por ejemplo, el id de la Publicación de la siguiente URL es 1228393702244134912.
+
+[https://x.com/TwitterDev/status/1228393702244134912](https://x.com/TwitterDev/status/1228393702244134912)
+
+En Postman, navega a la pestaña &quot;Params&quot; e introduce tu id en la columna &quot;Value&quot; de la variable de ruta id, y luego introduce el id de la Publicación que deseas Retuitear como valor para el parámetro tweet&#95;id. Asegúrate de no incluir espacios antes o después de ningún id.
+
+|              |                                                 |
+| :----------- | :---------------------------------------------- |
+| **Key**      | **Value**                                       |
+| `id`         | (tu id de usuario)                              |
+| tweet&#95;id | (el id de la Publicación que quieres Retuitear) |
+
+Si haces clic en el botón &quot;Send&quot;, recibirás un objeto de respuesta que contiene el estado de la relación:
+
+* Si recibes &quot;retweeted&quot;: true, entonces el id está Retuiteando correctamente el tweet&#95;id.
+   
+
+**Paso cuatro: Haz tu solicitud y revisa tu respuesta**
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás la siguiente respuesta:
+
+```
+{
+    "data": {
+        "retweeted": true
+    }
+}
+```
+
+Si recibes un `"retweeted": true` significa que se ha hecho correctamente Retweet de la `tweet_id`.
+
+Si deseas deshacer un Retweet del mismo usuario, puedes usar la solicitud titulada “Undo a Retweet”, que también se encuentra en la carpeta “Retweets” de la colección de X API v2 cargada en Postman. El `id` debe ser tu ID de usuario y `source_tweet_id` debe ser el ID de la Publicación de la que quieres deshacer el Retweet. No tendrás que añadir esto como cuerpo JSON, por lo que deberás asegurarte de añadir los parámetros de consulta requeridos para `id` y `source_tweet_id`. 
+
+Si se deshace un Retweet correctamente, recibirás una respuesta similar al siguiente ejemplo:
+
+```
+{
+  "data": {
+    "retweeted": false
+  }
+}
+```

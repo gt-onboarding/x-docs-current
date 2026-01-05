@@ -1,0 +1,195 @@
+---
+title: 集成指南
+sidebarTitle: 集成指南
+keywords: ["私信集成", "DM 集成", "私信查询集成", "私信集成指南", "DM 配置"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+Direct Messages v2 端点将会话和会话事件引入为核心 X API 对象，并区分 1 对 1 和群组会话。1 对 1 会话始终只有两个且仅有两个参与者，而群组会话可以包含两个或更多参与者，且成员关系可以变更。   
+
+本页介绍了在将 Direct Messages 查询端点集成到你的系统时，需要了解的一些工具和关键概念。我们将本页内容分为两个部分：
+
+* 关键概念
+  * [Direct Message 会话](#direct-message-conversations)
+  * [v1.1 和 v2 之间共享的会话和事件 ID](#shared-conversation-and-event-ids)
+  * [Direct Message 事件字段和扩展字段](#direct-message-event-fields-and-expansions)
+  * [会话事件类型](#conversation-event-types)
+  * [身份验证](#authentication)
+  * [开发者门户、项目和应用](#developer-portal-projects-and-apps)
+  * [速率限制](#rate-limits)
+  * [分页](#pagination)
+* [实用工具](#helpful-tools)
+
+<div id="key-concepts">
+  ### 关键概念
+</div>
+
+<div id="direct-message-conversations">
+  ### 私信会话
+</div>
+
+所有私信都会归属于某个私信会话。这些会话可以是一对一会话，也可以是群组会话。本次发布提供了用于创建私信以及检索与私信会话关联事件所需的基础端点。所有会话都有唯一的 dm&#95;conversation&#95;id，而组成该会话的所有事件都有唯一的 dm&#95;event&#95;id。  
+
+私信查询端点提供了用于检索与会话关联事件的方法。这些 GET 端点用于检索构成某个会话的消息；对于群组会话，还可以用来了解是谁加入和离开了群组会话。
+
+本次私信查询功能的初始版本包含三个 GET 方法：
+
+* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - 检索与一对一会话关联的私信事件。:participant&#95;id 路径参数是与发出此请求的已认证用户进行会话的账户的数字 User ID。  
+
+* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - 检索与特定会话 ID 关联的私信事件，由 :dm&#95;conversation&#95;id 路径参数指定。支持一对一和群组会话的 ID。  
+
+* **GET /2/dm&#95;events** - 检索与已认证用户关联的私信事件，包括一对一和群组会话。可获取最多可追溯至 30 天前的事件。  
+
+这些 GET 端点都支持通过事件类型检索 dm&#95;events，可使用请求中的 event&#95;types 查询参数。目前支持三种会话事件类型：
+
+* **MessageCreate** - 在创建新的私信时生成。此事件对象可以包含消息的时间和文本，发送该消息的账户 ID，以及会话和事件的 ID。 
+
+* **ParticipantsJoin** - 在新参与者加入群组会话时生成。此 dm&#95;event 对象包括加入者的 ID，以及 created&#95;at 时间和“邀请”事件的 sender&#95;id。 
+
+* **ParticipantsLeave** - 在某个参与者离开会话时生成。此事件对象包括离开者的 ID，以及该事件发生的时间。 
+
+如需更多信息，请参阅 [Direct Messages 查询 API 参考](/zh/x-api/direct-messages/get-dm-events-for-a-dm-conversation)。
+
+<div id="shared-conversation-and-event-ids-across-v11-and-v2">
+  ### 在 v1.1 和 v2 之间共享的会话和事件 ID
+</div>
+
+一个重要的概念是，会话和事件 ID 在 X 平台的 v1.1 和 v2 版本之间是共享的。这意味着这两个版本可以配合使用。例如，Direct Messages v1.1 端点提供返回单个事件和删除事件的方法，而这些方法在 v2 中尚不可用。由于 ID 在 v1.1 和 v2 之间是通用的，你可以基于 v2 提供的 ID 发起 v1.1 请求，或者引用在 X 应用中会话 URL 所显示的会话 ID。  
+
+<div id="direct-message-event-fields-and-expansions">
+  ### 私信事件字段和扩展字段
+</div>
+
+X API v2 允许用户使用一组称为字段和扩展字段的工具，精准选择希望从 API 返回的具体数据。比如，私信查询类端点支持以下 `dm_events` 字段：
+
+* `id`、`event_type` 和 `text` 是 MessageCreate 事件的默认字段。 
+
+* `id`、`event_type` 和 `participant_ids` 是 ParticipantsJoin 和 ParticipantsLeave 事件的默认字段。
+
+* `dm_conversation_id` 和 `created_at` 对所有事件都可用。
+
+* `attachments` 和 `referenced_tweets` 对 MessageCreate 事件可用。 
+
+* `sender_id` 对 MessageCreate 和 ParticipantsJoin 事件可用。 
+
+* `participant_ids` 对 ParticipantsJoin 和 ParticipantsLeave 事件可用。 
+
+此外，私信查询类端点还支持以下[扩展字段](/zh/x-api/fundamentals/expansions)：
+
+* `sender_id` - 用于展开与发送消息或邀请他人加入会话的用户相关联的 User 对象。 
+
+* `referenced_tweets.id` - 如果私信文本包含指向某条帖子的链接，则用于展开对应的 Post 对象。 
+
+* `attachments.media_keys` - 如果私信中包含媒体附件，则用于展开对应的 Media 对象。 
+
+* `participant_ids` - 用于展开与加入或离开群组会话的用户相关联的 User 对象。
+
+由于扩展字段会包含 Post、User 和 Media 对象，你还可以使用 `tweet.fields`、`user.fields` 和 `media.fields` 查询参数。更多信息请参阅我们的[字段和扩展字段使用方法](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)指南。
+
+<div id="conversation-event-types">
+  ### 会话事件类型
+</div>
+
+下面是 Direct Message 中 MessageCreate、ParticipantsJoin 和 ParticipantsLeave 事件类型的示例 JSON 对象。 
+
+可用的 dm&#95;event 对象字段：id、text、event&#95;type、dm&#95;conversation&#95;id、created&#95;at、sender&#95;id、attachments、referenced&#95;tweets、participant&#95;ids。请参阅 Fields and Expansion 部分，了解在请求中选择这些字段的更多详情。 
+
+MessageCreate 事件示例： 
+
+在指定了所有 dm&#95;event 字段的情况下，下面是一个纯文本 Direct Message 的响应： 
+
+`{
+    "text": "Hi everyone.",
+    "sender_id": "944480690",
+    "dm_conversation_id": "1578398451921985538",
+    "id": "1582838499983564806",
+    "event_type": "MessageCreate",
+    "created_at": "2022-10-19T20:58:00.000Z"
+}`
+
+ParticipantsJoin 事件示例：
+
+在指定了所有 dm&#95;event 字段的情况下，下面是一个参与者加入会话时的响应：
+
+`{
+    "participant_ids": [
+        "944480690"
+    ],
+    "sender_id": "17200003",
+    "dm_conversation_id": "1578398451921985538",
+    "id": "1582835469712138240",
+    "event_type": "ParticipantsJoin",
+    "created_at": "2022-10-19T20:45:58.000Z"
+}`
+
+ParticipantsLeave 事件示例：
+
+在指定了所有 dm&#95;event 字段的情况下，下面是一个参与者离开会话时的响应：
+
+`{
+    "participant_ids": [
+        "944480690"
+    ],
+    "dm_conversation_id": "1578398451921985538",
+    "id": "1582838535115067392",
+    "event_type": "ParticipantsLeave",
+    "created_at": "2022-10-19T20:58:09.000Z"
+    }`
+
+<div id="authentication">
+  ### 身份验证
+</div>
+
+所有 X API v2 端点都要求你使用一组凭证（也称为密钥和令牌）对请求进行身份验证。所有私信（Direct Messages）都是私密的，需要用户授权才能访问。 
+
+这些私信端点需要使用 [OAuth 2.0 Authorization Flow with PKCE](/zh/x-api/posts/manage-tweets) 或 [1.0a User Context](/zh/resources/fundamentals/authentication)，也就是说，你必须使用一组 API 密钥和用户访问令牌来发起成功的请求。访问令牌必须与你代表其发起请求的用户关联。如果你想为另一位用户生成一组访问令牌，他们必须通过 [三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) 授权或验证你的应用。
+
+请注意，基于用户上下文的 OAuth 可能比较难使用。如果你不熟悉这种身份验证方法，我们建议使用一个 [库](/zh/x-api/tools-and-libraries/overview) 或类似 Postman 的工具来正确地为你的请求进行身份验证。 
+
+[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 允许对应用的作用域（scope）以及跨多设备的授权流程进行更精细的控制。OAuth 2.0 允许你选择特定的细粒度作用域，为你所代表的用户授予特定权限。用于查询私信的端点需要以下作用域：dm.read、post.read、user.read
+
+要在你的应用中启用 OAuth 2.0，你必须在开发者门户中该应用设置部分的身份验证设置里将其启用。
+
+<div id="developer-portal-projects-and-developer-apps">
+  ### 开发者门户、项目和开发者应用
+</div>
+
+要获取可用于 X API v2 端点的一组身份验证凭证，您必须先拥有一个已获批准的开发者账号，在该账号下设置一个项目，并在该项目中创建一个开发者应用。随后，您可以在该开发者应用中找到密钥和令牌。 
+
+<div id="rate-limits">
+  ### 速率限制
+</div>
+
+每天有成千上万的开发者向 X API 发起请求。为了管理庞大的请求量，我们在每个 endpoint 上都设置了速率限制，从而限制你代表你的应用或代表已认证用户所能发起的请求数量。 
+
+Direct Message 查询类 endpoint 在用户级别实施速率限制，这意味着你代表其发起请求的已认证用户，在与你的 X 应用配合使用时，只能发起一定数量的请求。对于 GET 方法，用户级别的速率限制为每 15 分钟 300 次请求。这些速率限制在各个 GET endpoint 之间共享。 
+
+<div id="pagination">
+  ### 分页
+</div>
+
+这些端点使用分页机制，以便快速返回响应。当结果数量多于单个响应中可返回的数量（最多 100 个事件）时，你需要使用分页。使用 `max_results` 参数来指定每页返回多少结果，使用 `pagination_token` 参数来获取下一页的结果。你可以在我们的[分页指南](/zh/x-api/fundamentals/pagination)中了解更多信息。
+
+**实用工具**
+
+以下是一些在使用 Direct Messages 查询端点时，我们建议你参考的实用工具： 
+
+****Postman****
+
+Postman 是一款非常适合用来测试端点的工具。每个 Postman 请求都包含所有路径和请求体参数，帮助你快速了解可用的内容。要进一步了解我们的 Postman 集合，请访问我们的 [Using Postman](/zh/tutorials/postman-getting-started) 页面。 
+
+****代码示例****
+
+用于 v2 Direct Messages 端点的 Python 示例代码，可在我们的 [X API v2 示例代码 GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 代码库中找到。&quot;Manage-Direct-Messages&quot; 文件夹包含 POST 方法的示例，而 &quot;Direct-Messages-lookup&quot; 文件夹包含 GET 方法的示例。
+
+****XDev 软件开发工具包 (SDK)****
+
+这些[库](/zh/x-api/tools-and-libraries/overview)正在针对 v2 Direct Messages 端点进行更新，很快即可使用：
+
+* [X API Java SDK](https://github.com/xdevplatform/twitter-api-java-sdk) - X API v2 的官方 Java SDK
+* [X API TypeScript/JavaScript SDK](https://github.com/xdevplatform/twitter-api-typescript-sdk) - X API v2 的官方 TS/JS SDK
+
+**第三方库**
+
+我们的社区正在开发数量不断增长的[第三方库](/zh/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2)。这些库旨在帮助你快速上手，并且预期有多款库即将支持 v2 Direct Messages 端点。你可以通过查看合适的版本标签来找到适用于 v2 端点的库。

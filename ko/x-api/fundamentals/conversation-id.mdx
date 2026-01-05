@@ -1,0 +1,196 @@
+---
+title: 대화 ID
+keywords: ["대화 ID", "대화 스레드", "답글 스레드", "스레드 추적", "대화 추적", "답글 체인", "스레드 재구성"]
+---
+
+<div id="conversation-threads-using-the-x-api">
+  ### X API를 사용한 대화 스레드
+</div>
+
+X에서 대화가 어떻게 전개되는지 살펴보면, 하나의 게시물이 여러 개의 대화 스레드를 촉발할 수 있으며, 더 많은 사람들이 참여할수록 각 스레드는 길이와 복잡성이 증가할 수 있습니다. 게시물 간의 관계를 파악하고 대화 스레드를 이해하는 기능은 X API v2의 페이로드 및 검색 기능에 포함되어 있습니다. 어떤 게시물에 대한 답글(Reply)로 게시물이 작성되거나, 그 답글에 다시 답글이 달리는 경우, 이제 각 답글에는 `conversation_id`가 정의되며, 이 값은 해당 대화를 시작한 원본 게시물의 게시물 ID와 일치합니다.
+
+특정 게시물에 대한 답글과, 그 답글에 대한 답글은 모두 하나의 원본 게시물에서 시작된 동일한 대화에 포함됩니다. 답글 스레드가 얼마나 많이 만들어지든, 이들은 모두 대화를 촉발한 원본 게시물과 동일한 `conversation_id`를 공유합니다. X API v2를 사용하면 전체 대화 스레드를 조회하고 재구성할 수 있으므로, 어떤 이야기가 오가고 있는지, 그리고 대화와 아이디어가 어떻게 발전하는지 파악할 수 있습니다.
+
+<div id="example-conversation-thread">
+  #### 대화 스레드 예시
+</div>
+
+아래는 서로 다른 다섯 명이 참여한 대화 스레드의 예시로, 답글에 달린 답글 하나를 포함합니다.
+
+```json
+{
+  "data": [
+    {
+      "conversation_id": "1279944223114900000",
+      "in_reply_to_user_id": "1102323333",
+      "author_id": "63044444",
+      "created_at": "2020-07-06T15:58:10.000Z",
+      "id": "1280169177479744444",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1280155225706433333"
+        }
+      ],
+      "text": "@ThirdPerson333 @OriginalPerson000 Reply to the third reply!"
+    },
+    {
+      "conversation_id": "1279944223114900000",
+      "in_reply_to_user_id": "3001960000",
+      "author_id": "1102323333",
+      "created_at": "2020-07-06T15:02:44.000Z",
+      "id": "1280155225706433333",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1279944223114900000"
+        }
+      ],
+      "text": "@OriginalPerson000 Third reply"
+    },
+    {
+      "conversation_id": "1279944223114900000",
+      "in_reply_to_user_id": "3001960000",
+      "author_id": "199562222",
+      "created_at": "2020-07-06T15:02:36.000Z",
+      "id": "1280155190306340864",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1279944223114900000"
+        }
+      ],
+      "text": "@OriginalPerson000 Second Reply"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "name": "Original person",
+        "id": "3001960000",
+        "username": "OriginalPerson000"
+      },
+      {
+        "name": "First person",
+        "id": "179201111",
+        "username": "FirstPerson111"
+      }
+    ]
+  },
+  "meta": {
+    "newest_id": "1280169177479744444",
+    "oldest_id": "1279945722494811111",
+    "result_count": 4
+  }
+}
+```
+
+`tweet.fields` 파라미터로 `conversation_id` 가져오기
+v2 엔드포인트에서 반환되는 모든 게시물에 대한 `conversation_id`를 요청하려면 요청 파라미터에 tweet.fields=conversation&#95;id 필드를 추가합니다. conversation&#95;id 필드는 항상 해당 대화 답글 스레드에서 원본 게시물의 게시물 id입니다. 이전 답글 스레드에서 파생된 답글 스레드를 포함해, 동일한 답글 스레드에 속한 모든 게시물은 동일한 conversation&#95;id를 갖습니다.
+
+<div id="request-with-conversation_id-parameter">
+  ### `conversation_id` 매개변수를 사용하는 요청
+</div>
+
+```
+curl --request GET \
+  --url 'https://api.x.com/2/tweets?ids=1225917697675886593&tweet.fields=author_id,conversation_id,created_at,in_reply_to_user_id,referenced_tweets&expansions=author_id,in_reply_to_user_id,referenced_tweets.id&user.fields=name,username' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+<div id="response">
+  ### 응답
+</div>
+
+```
+{
+  "data": [
+    {
+      "id": "1225917697675886593",
+      "text": "@TwitterEng *ahem* https://t.co/aroJHt2zQ1",
+      "created_at": "2020-02-07T23:02:10.000Z",
+      "author_id": "2244994945",
+      "in_reply_to_user_id": "6844292",
+      "conversation_id": "1225912275971657728",
+      "referenced_tweets": [
+        {
+          "type": "quoted",
+          "id": "1200517737669378053"
+        },
+        {
+          "type": "replied_to",
+          "id": "1225912275971657728"
+        }
+      ]
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "username": "TwitterDev",
+        "name": "Twitter Dev",
+        "id": "2244994945"
+      },
+      {
+        "username": "TwitterEng",
+        "name": "Twitter Engineering",
+        "id": "6844292"
+      }
+    ],
+    "tweets": [
+      {
+        "id": "1200517737669378053",
+        "text": "|￣￣￣￣￣￣￣￣￣￣￣|\n             don't push            \n             to prod on            \n               Fridays                  \n|＿＿＿＿＿＿＿＿＿＿＿| \n(\\__/)",
+        "created_at": "2019-11-29T20:51:47.000Z",
+        "author_id": "2244994945",
+        "conversation_id": "1200517737669378053"
+      }
+    ]
+  }
+}
+```
+
+<div id="using-conversation_id-as-a-filter-operator">
+  ### `conversation_id`를 필터 연산자로 사용하기
+</div>
+
+`conversation_id`는 최근 검색에서 검색 쿼리 매개변수로 사용하거나, [filtered stream](/ko/x-api/posts/filtered-stream/introduction)을 위한 규칙 내 연산자로 사용할 수 있습니다. 이렇게 하면 전체 게시물 대화 스레드를 filtered stream을 통해 실시간으로 받거나, [search Tweets](/ko/x-api/posts/search/introduction)를 통해 최신순(내림차순)으로 조회할 수 있습니다. 또한 이 연산자를 [Posts counts](/ko/x-api/posts/counts/introduction)와 함께 사용하면 해당 대화에 포함된 게시물 개수를 가져올 수 있습니다.
+
+<div id="request-to-query-by-conversation_id">
+  ## `conversation_id`로 조회하는 요청
+</div>
+
+```
+curl --request GET \
+  --url 'https://api.x.com/2/tweets/search/recent?query=conversation_id:1279940000004973111&tweet.fields=in_reply_to_user_id,author_id,created_at,conversation_id' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+<div id="response">
+  ### 응답
+</div>
+
+*참고: 검색된 게시물 결과는 최신순으로 정렬됩니다.*
+
+```
+{
+  "data": [
+    {
+      "id": "1280169000000704333",
+      "text": "@attributeisland @iterationjoe What beautiful creatures! Happy #seaturtleweek",
+      "conversation_id": "1279940000004973111",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 7,
+        "quote_count": 0
+      }
+    }
+  ],
+  "meta": {
+    "newest_id": "1280169000000704333",
+    "oldest_id": "1279940000004973111",
+    "result_count": 5
+  }
+}
+```

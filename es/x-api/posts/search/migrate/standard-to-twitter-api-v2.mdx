@@ -1,0 +1,199 @@
+---
+title: de v1 a v2
+sidebarTitle: de v1 a v2
+keywords: ["migración de v1.1 a v2", "migración de búsqueda", "migrar búsqueda", "búsqueda estándar a v2", "búsqueda de v1 a v2", "guía de migración"]
+---
+
+<div id="standard-v11-compared-to-x-api-v2">
+  ### v1.1 estándar en comparación con X API v2
+</div>
+
+Si has estado trabajando con la búsqueda v1.1 [search/posts](/es/x-api/posts/search/introduction), el objetivo de esta guía es ayudarte a comprender las similitudes y diferencias entre el endpoint estándar de búsqueda de Publicaciones y el endpoint de búsqueda de Publicaciones de X API v2.
+
+* **Similitudes**
+  * Contexto de usuario de OAuth 1.0a y OAuth 2.0 solo para la aplicación
+  * Compatibilidad con el historial de edición de Publicaciones y metadatos
+* **Diferencias**
+  * URLs de endpoints
+
+  * Requisitos de Aplicación y Proyecto
+
+  * Formato de los datos de respuesta
+
+  * Parámetros de solicitud
+
+  * Nuevos operadores de consulta
+
+  * Precedencia de los operadores AND/OR 
+
+<div id="similarities">
+  #### Similitudes
+</div>
+
+**Autenticación con Contexto de usuario de OAuth 1.0a y OAuth 2.0 solo para la aplicación**
+
+El endpoint de búsqueda/publicaciones de v1.1 y el endpoint de búsqueda reciente de X API v2 admiten tanto [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication) como [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#oauth-2-0). 
+
+Por lo tanto, si antes utilizabas el endpoint de búsqueda estándar de v1.1, puedes seguir usando el mismo método de autenticación si migras a la versión de X API v2. 
+
+Según la biblioteca o paquete de autenticación que elijas, la autenticación solo para la aplicación probablemente sea la forma más sencilla de comenzar y se puede configurar con un encabezado de solicitud sencillo. Para aprender a generar un Token de acceso de la aplicación, consulta esta [guía de OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only). 
+
+Si quieres aprovechar la posibilidad de obtener métricas privadas o de publicidad con el endpoint de X API v2, deberás usar Contexto de usuario de OAuth 1.0a y pasar los tokens de acceso de usuario correspondientes al usuario que publicó la Publicación para la que quieres obtener métricas. 
+
+**Compatibilidad con el historial de edición de la Publicación y metadatos**
+
+Ambas versiones proporcionan metadatos que describen cualquier historial de edición. Consulta las [referencias de la API de búsqueda](/es/x-api/posts/recent-search) y la [página de conceptos básicos sobre ediciones de Publicaciones](/es/x-api/fundamentals/edit-posts) para más detalles. 
+
+<div id="differences">
+  #### Diferencias
+</div>
+
+**URLs de endpoints**
+
+* Endpoints estándar v1.1:
+  * https://api.x.com/1.1/search/tweets
+
+* Endpoint de X API v2:
+  * https://api.x.com/2/tweets/search/recent
+     
+
+**Requisitos de Aplicación y Proyecto**
+
+Los endpoints de X API v2 requieren que utilices credenciales de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que esté asociada a un [Proyecto](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de Aplicaciones independientes o Aplicaciones asociadas con un Proyecto. 
+
+**Formato de los datos de respuesta**
+
+Una de las diferencias más grandes entre las versiones de endpoints estándar v1.1 y X API v2 es cómo seleccionas qué campos se devuelven en tu payload.
+
+En los endpoints estándar, recibes muchos de los campos de respuesta de forma predeterminada y, además, tienes la opción de usar parámetros para indicar qué campos o conjuntos de campos deben devolverse en el payload.
+
+La versión de X API v2 solo entrega de forma predeterminada los campos id y text de la Publicación. Para solicitar campos u objetos adicionales, deberás usar los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions). Cualquier campo de Publicación que solicites desde estos endpoints se devolverá en el objeto principal de la Publicación. Cualquier objeto y campo expandido de usuario, contenido multimedia, encuesta o lugar se devolverá en un objeto includes dentro de tu respuesta. Luego puedes asociar cualquier objeto expandido con el objeto de la Publicación haciendo coincidir los ID que se encuentran tanto en la Publicación como en el objeto expandido. 
+
+Te recomendamos leer más sobre estos nuevos parámetros en sus respectivas guías o consultando nuestra guía sobre [cómo usar fields y expansions](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions). 
+
+También hemos preparado una [guía de migración de formato de datos](/es/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2), que puede ayudarte a mapear los campos estándar de v1.1 a los campos más recientes de v2. Esta guía también te proporcionará el parámetro específico de expansión y de campo que deberás pasar con tu solicitud v2 para devolver campos específicos. 
+ 
+
+Además de los cambios en cómo solicitas ciertos campos, X API v2 también está introduciendo nuevos diseños JSON para los objetos devueltos por las APIs, incluidos los objetos de [Publicación](/es/x-api/fundamentals/data-dictionary#tweet) y de [usuario](/es/x-api/fundamentals/data-dictionary#user).
+
+* En el nivel raíz de JSON, los endpoints estándar devuelven objetos de Publicación en un array statuses, mientras que X API v2 devuelve un array data. 
+* En lugar de hacer referencia a &quot;statuses&quot; Retweeted y Quoted, el JSON de X API v2 hace referencia a Publicaciones retuiteadas y citadas. Muchos campos heredados y obsoletos, como contributors y user.translator&#95;type, se están eliminando. 
+* En lugar de usar tanto favorites (en el objeto de Publicación) como favourites (en el objeto de usuario), X API v2 usa el término like. 
+* X está adoptando la convención de que los valores JSON sin valor (por ejemplo, null) no se escriben en el payload. Los atributos de Publicación y de usuario solo se incluyen si tienen valores distintos de null. 
+   
+
+También incorporamos un nuevo conjunto de campos al [objeto de Publicación](/es/x-api/fundamentals/data-dictionary#tweet), incluidos los siguientes:
+
+* Un campo [conversation&#95;id](/es/x-api/fundamentals/conversation-id)
+* Dos nuevos campos de [annotations](/es/x-api/fundamentals/post-annotations), que incluyen context y entities
+* Varios campos nuevos de [metrics](/es/x-api/fundamentals/metrics) 
+* Un nuevo campo reply&#95;setting, que te muestra quién puede responder a una Publicación determinada
+
+<div id="request-parameters">
+  #### Parámetros de solicitud
+</div>
+
+Los siguientes parámetros de solicitud estándar de v1.1 tienen equivalentes en X API v2:
+
+| Búsqueda estándar v1.1 | Search Posts v2 |
+| :--- | :--- |
+| q   | query |
+|     | start&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+| until (YYYY-MM-DD) | end&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+| since&#95;id | since&#95;id |
+| max&#95;id | until&#95;id |
+| count | max&#95;results |
+| La respuesta incluye search&#95;metadata.next&#95;results | next&#95;token |
+
+También hay un conjunto de parámetros estándar de solicitud de búsqueda de Posts que **no** son compatibles con X API v2:
+
+| **Parámetro estándar v1.1** | **Detalles** |
+| :--- | :--- |
+| geocode | Search Posts en el nivel de Basic Access no admite operadores de geolocalización. |
+| locale | Con la búsqueda estándar, se utilizaba para especificar el idioma de la consulta, pero nunca se implementó completamente. |
+| lang | Los endpoints de Search Posts proporcionan un operador de consulta lang para hacer coincidencias con idiomas de interés. |
+| include&#95;entities | Las entidades de la Publicación siempre se incluyen. |
+| result&#95;type | Los endpoints de Search Posts devuelven todas las Publicaciones que coinciden, independientemente del nivel de interacción. |
+| extended | X API v2 está diseñada desde cero para admitir Publicaciones de hasta 280 caracteres. Con v2, no existe el concepto de Publicaciones &quot;extendidas&quot;. |
+
+A continuación, se muestra un ejemplo de solicitud que ilustra la diferencia entre una solicitud estándar y una solicitud de Search Posts:
+
+|     |     |
+| :--- | :--- |
+| **Estándar v1.1** | **X API v2** |
+| https://api.x.com/1.1/search/tweets.json?q=snow&amp;count=50 | https://api.x.com/2/tweets/search/recent?query=snow&amp;max&#95;results=50 |
+
+Ambas solicitudes devolverán las 50 Publicaciones más recientes que contienen la palabra clave snow. La solicitud de v2 devolverá los campos predeterminados id y text de las Publicaciones coincidentes. A continuación, se muestra un ejemplo de cómo especificar campos adicionales de Publicaciones y de usuario para incluir en la carga útil JSON:
+
+|     |
+| :--- |
+| **X API v2** |
+| https://api.x.com/2/tweets/search/recent?query=snow&amp;max&#95;results=50&amp;tweet.fields=id,created&#95;at,author&#95;id,text,source,entities,attachments&amp;user.fields=id,name,username,description |
+
+**Nuevos operadores de consulta**
+
+Search Posts introduce nuevos operadores para admitir dos funciones nuevas de X API v2: 
+
+* **[Conversation IDs](/es/x-api/fundamentals/conversation-id)** - A medida que se desarrollan las conversaciones en X, estará disponible un Conversation ID para marcar las Publicaciones que forman parte de la conversación. Todas las Publicaciones de la conversación tendrán su conversation&#95;id establecido en el ID de la Publicación que la inició. 
+  * `conversation_id:`
+* **[X Annotations](/es/x-api/fundamentals/post-annotations)** proporcionan información contextual sobre las Publicaciones e incluyen anotaciones de entidad y de contexto. Las entidades se componen de personas, lugares, productos y organizaciones. Los contextos son dominios o temas de los que forman parte las entidades que aparecen. Por ejemplo, las personas mencionadas en una Publicación pueden tener un contexto que indica si son atletas, actores o políticos.  
+  * context: coincide con las Publicaciones que han sido anotadas con un contexto de interés. 
+  * entity: coincide con las Publicaciones que han sido anotadas con una entidad de interés. 
+
+     
+
+<div id="and-or-operator-precedence">
+  #### Precedencia de los operadores AND / OR
+</div>
+
+El elemento básico para crear consultas de búsqueda es el uso de agrupaciones lógicas OR y AND. La API de búsqueda estándar aplica los OR antes que los AND, mientras que los endpoints de Search Posts (así como las versiones premium y Enterprise) aplican los AND antes que los OR. Esta diferencia es fundamental al traducir consultas entre ambas. 
+
+Por ejemplo, con la búsqueda estándar, si quisieras encontrar Publicaciones con la palabra clave ‘storm’ que mencionen la palabra ‘colorado’ o el hashtag #COwx, podrías hacerlo con la siguiente consulta de búsqueda:
+
+storm #COwx OR colorado
+
+Con la precedencia de operadores de Search Posts, los AND se aplican antes que los OR. Así que la consulta anterior es equivalente a: 
+
+(storm #COwx) OR colorado
+
+Sin embargo, la regla anterior haría coincidir cualquier Publicación que mencione ‘Colorado’, independientemente de que la Publicación mencione ‘storm’ o el hashtag #COwx. Además, también haría coincidir Publicaciones que mencionen tanto la palabra clave ‘storm’ como el hashtag #COwx. 
+
+Para que la consulta se comporte como se pretendía originalmente, las cláusulas OR deben agruparse. La traducción de la consulta estándar original a Search Posts sería:
+
+storm (#COwx OR colorado)
+
+Estas dos reglas tienen un comportamiento de coincidencia muy diferente. Para el mes de octubre de 2019, la regla original hace coincidir más de 1.175.000 Publicaciones, mientras que la regla traducida correctamente hace coincidir alrededor de 5.600 Publicaciones. Presta atención a tus AND y OR, y usa paréntesis cuando sea necesario. 
+
+<div id="curl-requests">
+  #### Solicitudes cURL
+</div>
+
+**La siguiente sección muestra solicitudes cURL para el endpoint estándar de v1.1 y su endpoint equivalente en v2.**
+
+Las solicitudes se realizan usando [OAuth 2.0 solo para la aplicación]([https://developer.x.com(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)](https://developer.x.com\(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token\)). Para poder ejecutar las siguientes solicitudes cURL, deberás reemplazar ACCESS&#95;TOKEN en el encabezado de autorización con el Token de acceso de tu aplicación. Para los endpoints de v2, el Token de acceso de tu aplicación debe pertenecer a una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps/overview) dentro de un [Proyecto](/es/resources/fundamentals/projects/overview). 
+
+La carga útil de la respuesta que devuelve el endpoint de v1.1 será diferente de la que devuelve el endpoint de v2. Con v2, la respuesta incluirá los campos predeterminados, así como cualquier otro campo solicitado con los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions). Puedes usar estos parámetros para solicitar que se devuelva un conjunto diferente de campos.
+
+**Endpoints estándar de v1.1 [GET search/tweets](https://developer.x.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets) y de v2 [GET tweets/search/recent](/es/x-api/posts/recent-search)**
+
+```bash
+      curl --request GET \
+  --url 'https://api.x.com/1.1/search/tweets.json?q=from%3ATwitterDev%20-is%3Aretweet&count=100' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+```bash
+      curl --request GET \
+  --url 'https://api.x.com/2/tweets/search/recent?query=from%3ATwitterDev%20-is%3Aretweet&tweet.fields=created_at%2Cconversation_id%2Centities&max_results=100' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+**Próximos pasos**
+
+[Consulta nuestra guía de inicio rápido para la búsqueda reciente en X API v2](/es/x-api/posts/search/quickstart/recent-search)
+
+[Revisa la referencia de la API de búsqueda reciente](/es/x-api/posts/recent-search)
+
+[Consulta código de ejemplo para estos endpoints](https://github.com/xdevplatform/Twitter-API-v2-sample-code "Consulta código de ejemplo para estos endpoints")
+
+[Guía paso a paso para hacer tu primera solicitud a la búsqueda reciente](/es/x-api/getting-started/make-your-first-request "Guía paso a paso para hacer tu primera solicitud a la búsqueda reciente")

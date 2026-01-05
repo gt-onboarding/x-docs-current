@@ -1,0 +1,98 @@
+---
+title: Inicio rápido
+sidebarTitle: Inicio rápido
+keywords: ["inicio rápido de seguimientos", "inicio rápido para seguir", "inicio rápido para gestionar seguimientos", "tutorial para seguir", "guía para seguir", "inicio rápido de relaciones de seguimiento"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-manage-follows-endpoints">
+  ## Introducción a los endpoints para gestionar las relaciones de seguimiento
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud a los endpoints para gestionar las relaciones de seguimiento usando [Postman](/es/tutorials/postman-getting-started).
+
+Si quieres ver código de ejemplo en distintos lenguajes, visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code). 
+
+<Note>
+  ### Requisitos previos
+
+  Para completar esta guía, necesitarás un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y obtén la aprobación.
+  * Crea un [Project](/es/resources/fundamentals/projects) y una [developer App](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Ve a la página “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-build-a-manage-follows-request">
+  ### Pasos para crear una solicitud de manage follows
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### Paso uno: Comienza con una herramienta o biblioteca
+</div>
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para realizar una solicitud a este endpoint, pero aquí vamos a usar la herramienta Postman para simplificar el proceso.
+
+Para cargar en tu entorno la colección de X API v2 para Postman, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta “Follows” y selecciona “Follow a user ID”.
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### Paso dos: Autenticar tu solicitud
+</div>
+
+Para realizar correctamente una solicitud a la X API, debes verificar que tienes permiso de acceso. Para hacerlo con este endpoint, debes autenticar tu solicitud usando [OAuth 1.0a User Context](/es/resources/fundamentals/authentication) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+
+En este ejemplo, vamos a usar el contexto de usuario de OAuth 1.0a.
+
+Debes añadir tus claves y tokens (específicamente tu `API Key`, `API Secret Key`, `OAuth 1.0a user Access Token` y `OAuth 1.0a user Access Token Secret`) a Postman. Puedes hacerlo seleccionando el entorno llamado “X API v2” en la esquina superior derecha de Postman y añadiendo tus claves y tokens a los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el icono del ojo junto al menú desplegable de entornos).
+
+Estas variables se rellenarán automáticamente en la pestaña de autorización de la solicitud si has hecho esto correctamente.
+ 
+
+<div id="step-three-specify-who-is-going-to-follow-whom">
+  #### Paso tres: Especificar quién va a seguir a quién
+</div>
+
+Los endpoints para gestionar follows aceptan dos IDs: uno para el usuario de origen (el usuario que desea seguir o dejar de seguir a otro usuario) y otro para el usuario de destino (el usuario que será seguido o dejado de seguir). El ID del usuario de origen debe corresponder al user ID del usuario que se está autenticando. En este caso, puedes especificar el ID que pertenece a tu propio usuario. Puedes encontrar tu ID de dos maneras:
+
+1. Usando el endpoint [user lookup by username](/es/x-api/users/user-lookup-by-id), puedes pasar un nombre de usuario y recibir el campo id. 
+2. Si consultas tu Token de acceso, verás que la parte numérica es tu user ID.
+    
+
+El ID de destino puede ser cualquier user ID válido. Por ejemplo, el user ID de @XDevelopers es 2244994945.
+
+En Postman, ve a la pestaña &quot;Params&quot; e introduce tu ID en la columna &quot;Value&quot; de la variable de ruta id. Ve a la pestaña &quot;Body&quot; y añade 2244994945 (el user ID de @XDevelopers) como valor para el parámetro target&#95;user&#95;id. Asegúrate de no incluir espacios antes o después de ningún ID.
+
+|     |     |
+| :--- | :--- |
+| **Clave** | **Valor** |
+| `id` | (tu user ID) |
+| target&#95;user&#95;id | 2244994945 |
+
+Si haces clic en el botón &quot;Send&quot;, recibirás un objeto de respuesta que contiene el estado de la relación:
+
+* Si recibes un &quot;following&quot;: true, significa que el id está siguiendo correctamente al target&#95;user&#95;id.
+* Si recibes un &quot;pending&quot;: true, entonces el target&#95;user&#95;id está protegido y debe aceptar tu solicitud de seguimiento.
+
+####
+
+Paso cuatro: realiza la solicitud y revisa la respuesta
+
+Una vez que tengas todo configurado, haz clic en el botón «Send» y recibirás la siguiente respuesta:
+
+```{
+    "data": {
+        "following": true,
+        "pending_follow": false
+    }
+}
+```
+
+De manera similar, si estuvieras intentando dejar de seguir a un usuario, usarías la solicitud &quot;Unfollow a user ID&quot; dentro de la misma colección de Postman. Sin embargo, los parámetros source&#95;user&#95;id y target&#95;user&#95;id se deben pasar como variables de ruta utilizando el endpoint unfollow.

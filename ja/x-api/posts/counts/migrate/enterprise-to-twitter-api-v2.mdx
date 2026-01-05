@@ -1,0 +1,142 @@
+---
+title: v1 から v2 へ (Enterprise)
+sidebarTitle: v1 から v2 へ (Enterprise)
+keywords: ["Enterprise から v2 への件数移行", "Enterprise 件数の移行", "GNIP から v2 への件数移行", "Enterprise 件数移行", "Enterprise 件数を移行する"]
+---
+
+<div id="enterprise-compared-to-x-api-v2">
+  ### Enterprise と X API v2 の比較
+</div>
+
+**類似点**
+
+* 粒度
+* ページネーション
+* タイムゾーン
+
+**相違点**
+
+* エンドポイント URL
+* アプリおよびプロジェクトの要件
+* 利用可能な時間範囲
+* レスポンスデータの形式
+* HTTP メソッド
+* リクエストの時刻形式
+* リクエストパラメータ
+* フィルタリング演算子
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**粒度**
+
+返されるデータの粒度を選択するためのパラメータ名は異なります（Enterprise 版では `bucket`、v2 版では `granularity`）が、そのパラメータに指定できる値とデフォルトの動作は同じです。
+
+* `day`
+* `hour` (default)
+* `minute`
+
+**ページネーション**
+
+v2 には追加のページネーション機能（`since_id` と `until_id` を使用してポスト ID によるナビゲーションを可能にする新しいページネーションパラメータ）がありますが、Enterprise と v2 のどちらでも、時間を使ったページネーションが可能です（Enterprise では `fromDate` と `toDate`、v2 では `start_time` と `end_time`）。
+
+Enterprise 版を使用している場合は、ページネーションには `next` パラメータを使用し、次ページを取得するためのトークンフィールドは `next` という名前で、レスポンスのルートレベルに含まれます。
+
+v2 を使用している場合は、ページネーションには `next_token` または `pagination_token` パラメータのいずれかを使用でき、次ページを取得するためのトークンはレスポンス内の `meta.next_token` に含まれます。
+ 
+
+**タイムゾーン**
+
+ページネーションのセクションで述べたように、Enterprise と v2 のどちらでも、時間を使って異なるページのデータを取得できます。どちらの場合も、これらのパラメータを使用する際のタイムゾーンとしては UTC を使用します。
+
+<div id="differences">
+  #### 違い
+</div>
+
+**エンドポイント URL**
+
+* Enterprise エンドポイント:
+  * 30 day - `http://gnip-api.x.com/search/30day/accounts/:account_name/:label/counts.json`
+  * Full-archive - `http://gnip-api.x.com/search/fullarchive/accounts/:account_name/:label/counts.json`
+* X API v2 エンドポイント
+  * Recent (7 day) - `https://api.x.com/2/tweets/counts/recent`
+  * Full-archive - `https://api.x.com/2/tweets/counts/all`
+
+**アプリとプロジェクトの要件**
+
+X API v2 のエンドポイントでは、リクエストを認証する際に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) と、それに関連付けられた [プロジェクト](/ja/resources/fundamentals/developer-apps) の認証情報を使用する必要があります。X API v1.1 のすべてのエンドポイントでは、スタンドアロンのアプリからの認証情報、またはプロジェクトに関連付けられたアプリの認証情報を使用できます。
+ 
+
+**利用可能な期間**
+
+Enterprise API と X API v2 の両方で、ポストの全アーカイブに対するポストボリュームデータを取得できるエンドポイントを提供しています。
+
+ただし、X API v2 には Enterprise API のような 30 日間用のエンドポイントはありません。その代わりに、前述の全アーカイブ用エンドポイント、または [v2 Search Posts エンドポイント](/ja/x-api/posts/search/introduction) と整合する 7 日間用エンドポイントを提供しています。
+ 
+
+**レスポンスデータ形式**
+
+Enterprise と X API v2 から受け取るデータ形式には、いくつかの細かな違いがあります。
+
+* Enterprise のカウントデータは `results` オブジェクト内にありますが、v2 のカウントデータは `data` オブジェクト内にあります。
+* Enterprise のカウントフィールドは `timePeriod`（開始時間）と `count` ですが、v2 では期間を `start` フィールドと `end` フィールドに分割しています（Enterprise とは異なる日時フォーマットを使用しており、「リクエスト時刻形式」で説明されています）。また、count フィールドの名前は `tweet_count` に変更されています。
+* Enterprise のメタデータには、ルートレベルに `totalCount`、`next`、`requestParameters` オブジェクトが含まれます。一方 v2 には `requestParameters` オブジェクトは含まれず、次の項目をルートレベルに存在する `meta` オブジェクト内に移動し名称変更しています: `total_tweet_count` と `next_token`。
+   
+
+**HTTP メソッド**
+
+Enterprise バージョンの API では、JSON ボディを伴う POST HTTP メソッド、またはクエリ文字列を伴う GET HTTP メソッドのいずれかでリクエストを送信できます。
+
+v2 では、クエリ文字列を伴う GET HTTP メソッドのみが使用可能です。
+ 
+
+**リクエスト時刻形式**
+
+Enterprise バージョンのこのエンドポイントでは、ページネーションパラメータと `timePeriod` レスポンスフィールドの両方で、次の日時フォーマットを使用します: `YYYYMMDDHHmm`
+
+v2 エンドポイントでは、ページネーションパラメータと `start` および `end` レスポンスフィールドの両方で、ISO 8601/RFC 3339 の日時フォーマットを使用します: `YYYY-MM-DDTHH:mm:ssZ`
+
+**リクエストパラメータ**
+
+以下は、Enterprise と X API v2 のリクエストパラメータの一覧表です。
+
+| Enterprise | Search Posts v2 |
+| :--- | :--- |
+| query | query |
+| bucket | granularity |
+| fromDate (YYMMDDHHmm) | start&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+| toDate (YYMMDDHHmm) | end&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+|     | since&#95;id |
+|     | until&#95;id |
+| next | next&#95;token and pagination&#95;token |
+
+**フィルタリング演算子**
+
+Enterprise と X API v2 の演算子はほとんど同じですが、一部の演算子の利用可否や、X API v2 でのみ導入された新しい演算子に違いがあります。
+
+X API v2、Enterprise、さらには Premium で利用可能な演算子の一覧表については、[Post counts migration landing page](/ja/x-api/posts/counts/migrate/overview) を参照してください。
+
+<div id="api-reference-index">
+  ## APIリファレンス索引
+</div>
+
+完全なAPIリファレンスを表示するには、以下のエンドポイントを選択してください。
+
+<div id="recent-post-counts">
+  ### 直近のポスト件数
+</div>
+
+|     |     |
+| :--- | :--- |
+| **過去7日間でクエリに一致するポストの件数を取得する** | `[GET /2/tweets/counts/recent](/x-api/posts/tweet-counts#api-reference-index/get-tweets-counts-recent)` |
+
+<div id="full-archive-post-counts">
+  ### 全アーカイブのポスト件数
+</div>
+
+[Pro および Enterprise アクセス](/ja/x-api/getting-started/about-x-api)をお持ちの方のみご利用いただけます
+
+|     |     |
+| :--- | :--- |
+| **クエリに一致するポストの件数を取得する** | `[GET /2/tweets/counts/all](/x-api/posts/tweet-counts#api-reference-index/get-tweets-counts-all)` |

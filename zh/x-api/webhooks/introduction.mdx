@@ -1,0 +1,398 @@
+---
+title: V2 Webhooks API
+sidebarTitle: 简介
+keywords: ["webhooks", "webhook API", "webhook 事件", "实时 webhook", "webhook 通知", "webhook 订阅", "webhook 管理"]
+---
+
+<div id="overview">
+  ## 概览
+</div>
+
+V2 Webhooks API 使开发者能够通过基于 webhook 的 JSON 消息，从 X 账号接收实时事件通知。这些 API 允许你注册和管理 webhook，开发用于处理事件的应用程序，并通过质询-响应检查（CRC）和签名头部来确保通信的安全性。
+
+<div id="feature-summary">
+  ## 功能概览
+</div>
+
+| 方案层级 | 价格 | Webhook 数量 |
+| :---: | :---: | :---: |
+| Self-Serve Pro | $5000/月 | 1 |
+| Enterprise | [联系销售](/zh/resources/enterprise/forms/enterprise-api-interest#enterprise-access-form) | 5+ |
+
+<div id="products-that-support-webhooks">
+  ## 支持 Webhook 的产品
+</div>
+
+以下产品目前支持通过 webhook 发送事件通知：
+
+* [Account Activity API (AAA)](/zh/x-api/account-activity/introduction)
+* [Filtered Stream](/zh/x-api/webhooks/stream/introduction)
+
+<div id="manage-webhooks">
+  ## 管理 Webhook
+</div>
+
+Account Activity API 会在每当与订阅了你服务的 X 账号相关的事件发生时，通过 Webhook 向你发送 JSON 消息。X 会将这些活动投递到你注册的 Webhook。在接下来的步骤中，你将学习如何管理 Webhook 和已订阅用户。
+
+你将学习如何注册、查看和移除 Webhook 以及已订阅用户。我们将使用简单的 cURL 命令向各个 API endpoint 发起请求。cURL 是一个使用 URL 语法来发送或获取请求的命令行工具。
+
+在你开始在事件消费者应用中接收 Webhook 事件之前，有若干细节需要注意。如下所述，你需要创建一个 X 应用、获取 Account Activity API 访问权限，并开发一个用于消费 Webhook 事件的 Web 应用。 
+
+<div id="1-develop-a-webhook-consumer-app">
+  ### 1. 开发 Webhook 消费者应用
+</div>
+
+为了注册一个与你的 X 应用关联的新 webhook，你需要开发、部署并托管一个 Web 应用，用于接收 X webhook 事件并响应我们的安全请求。
+
+*在开始之前，我们建议先查看我们的[示例应用](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master)\！*
+
+* 创建一个具有可通过公网访问的 HTTPS URL 的 Web 应用，它将作为 webhook 端点来接收事件。 
+  * URI 的*路径*完全由你决定。下面这个示例是有效的：[https://mydomain.com/service/listen](https://mydomain.com/service/listen)
+  * 如果你要从多个来源接收 webhook，一个常见的模式是：[https://mydomain.com/webhook/twitter](https://mydomain.com/webhook/twitter)
+  * 注意，指定的 URL 不能包含端口号（[https://mydomain.com:5000/NoWorkie](https://mydomain.com:5000/NoWorkie)）。
+* 第一步是编写代码来接收 X 的 Challenge Response Check (CRC) GET 请求，并返回格式正确的 JSON 响应。 
+* 注册你的 webhook URL。你需要向 /2/webhooks 端点发送一个 POST 请求，并在 JSON 正文中包含该 URL。当你发出这个请求时，X 会向你的 Web 应用发送 CRC 请求。
+* 当 webhook 成功注册后，响应中会包含一个 webhook id。后续在调用支持 webhook 的产品时需要使用这个 webhook id。 
+* X 会向你注册的 URL 发送包含事件的 POST 请求。这些事件将以 JSON 编码。示例 webhook JSON 载荷见[此处](/zh/x-api/account-activity/introduction#account-activity-data-object-structure)。
+
+<div id="optional-use-xurl-for-testing">
+  #### 可选：使用 xurl 进行测试
+</div>
+
+为了测试，xurl 工具现在支持临时 webhook！从 GitHub 安装最新版本的 [`xurl` 项目](https://github.com/xdevplatform/xurl)，配置好授权信息，然后运行：
+
+```
+xurl webhook start
+```
+
+这将生成一个临时公开的 webhook URL，自动处理所有 CRC 检查，并记录所有传入的订阅事件。这是在部署前验证你配置的非常好的一种方式。示例输出：
+
+```
+Starting webhook server with ngrok...
+Enter your ngrok authtoken (leave empty to try NGROK_AUTHTOKEN env var):
+
+Attempting to use NGROK_AUTHTOKEN environment variable for ngrok authentication.
+Configuring ngrok to forward to local port: 8080
+Ngrok tunnel established!
+  Forwarding URL: https://<your-ngrok-subdomain>.ngrok-free.app -> localhost:8080
+
+Use this URL for your X API webhook registration: https://<your-ngrok-subdomain>.ngrok-free.app/webhook
+
+Starting local HTTP server to handle requests from ngrok tunnel (forwarded from https://<your-ngrok-subdomain>.ngrok-free.app)...
+```
+
+**重要说明**
+
+* 在注册你的 webhook URL 时，你的 Web 应用需要使用应用的 consumer secret 来执行 CRC 校验的加密计算。
+
+* 所有传入的私信（Direct Message）都会通过 webhooks 递送。所有通过 [POST /2/dm&#95;conversations/with/:participant&#95;id/messages](/zh/x-api/direct-messages/send-a-new-message-to-a-user) 发送的私信也会通过 webhooks 递送。这样你的 Web 应用就可以获知通过其他客户端发送的私信。
+
+* 如果你有多个 Web 应用共享同一个 webhook URL，并且同一个用户被映射到每个应用，那么同一事件会被多次发送到你的 webhook（每个 Web 应用一次）。
+
+* 在某些情况下，你的 webhook 可能会收到重复的事件。你的 webhook 应用应能够容忍这种情况，并按事件 ID 进行去重。
+
+* 参见示例代码：
+
+  * [Account Activity API Setup](https://github.com/m-rosinsky/XWebhookTest)，一个使用 Account Activity API Enterprise 等级的 Node Web 应用，用于展示 webhook 事件。
+
+<div id="2-securing-webhooks">
+  ### 2. 保障 Webhook 安全
+</div>
+
+X 基于 webhook 的 API 提供两种方法，用于确认你的 webhook 服务器的安全性：
+
+1. 挑战-响应检查使 X 能够确认接收 webhook 事件的 Web 应用的所有权。
+2. 每个 POST 请求中的签名请求头使你能够确认传入的 webhook 确实来自 X。
+
+有关实现要求，请参阅 CRC 检查部分。
+
+<div id="3-the-webhooks-api">
+  ### 3. Webhooks API
+</div>
+
+Webhooks 通过 Webhook Management API 进行管理。所有端点都需要使用 OAuth2 应用仅限（App-only）模式的 Bearer Token 进行认证。
+
+<div id="adding-a-webhook">
+  #### [添加 webhook](/zh/x-api/webhooks/create-webhook-config)
+</div>
+
+**POST /2/webhooks**
+
+**描述：**
+
+创建一个 webhook 配置。您可公开访问的 `https` 回调 URL 必须在 JSON 正文中传递。
+接下来在给定的应用上下文中注册一个新的 webhook URL。
+
+**认证：**
+
+OAuth2 仅应用 Bearer Token
+
+* **Bearer token** `<BEARER_TOKEN>`，例如：`AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+**参数（JSON Body）：**
+
+```
+{
+    "url": "<your publicly accessible https callback url>"
+}
+```
+
+* **URL** `<URL>` 例如：`https://yourdomain.com/webhooks/twitter/`
+
+**请求** 在根据需要修改以下内容后，将下面的 cURL 请求复制到你的命令行中执行：
+
+````
+  ```
+  curl --request POST --url 'https://api.twitter.com/2/webhooks?url=<URL>' --header 'authorization: Bearer <BEARER_TOKEN>'
+  --data '{
+"url": "https://yourdomain.com/webhooks/twitter"
+          }'
+  ```
+````
+
+**响应：**
+
+**成功（200 OK）**
+
+成功的响应表示 webhook 已创建，且初始 CRC 检查已通过。
+
+```
+{
+  "data": {
+    "id": "<webhook_id>",
+    "url": "<your callback url>",
+    "valid": true,
+    "created_at": "YYYY-mm-DDTHH:MM:ss.000Z"
+  }
+}
+```
+
+**失败（400 Bad Request）**
+
+失败时会返回一个标准错误对象。
+
+```
+{
+    "errors": [
+      {
+        "message": "<Reason>: <Details>"
+      }
+    ],
+    "title": "Invalid Request",
+    "detail": "One or more parameters to your request was invalid.",
+    "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+常见的失败原因包括：
+
+| Reason                 | Description                          |
+| :--------------------- | :----------------------------------- |
+| `CrcValidationFailed`  | 回调 URL 未能正确响应 CRC 检查（例如超时或响应内容不正确）。  |
+| `UrlValidationFailed`  | 提供的回调 URL 不符合要求（例如不是 `https`，或格式无效）。 |
+| `DuplicateUrlFailed`   | 您的应用已经为该回调 URL 注册了一个 webhook。        |
+| `WebhookLimitExceeded` | 您的应用已达到允许的 webhook 配置数量上限。           |
+
+<div id="viewing-a-webhook">
+  #### [查看 webhook](/zh/x-api/webhooks/get-a-list-of-webhook-configs-associated-with-a-client-app)
+</div>
+
+**GET /2/webhooks**
+
+**Description：** 检索与你的应用（开发者账号）关联的所有 webhook 配置。
+
+**Authentication：**
+
+OAuth2 应用专用 Bearer Token
+
+* **Bearer token** `<BEARER_TOKEN>`，例如 `AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+* **URL** `<URL>`，例如 `https://yourdomain.com/webhooks/twitter/`
+
+**Request：** 运行以下命令，以检索指定应用已注册的所有 webhook URL 及其状态。
+
+在完成对以下内容的修改后，将下面的 cURL 请求复制到命令行中运行：
+
+````
+  ```
+  curl --request GET --url 'https://api.twitter.com/2/webhooks' --header 'authorization: Bearer <BEARER_TOKEN>'
+  ```
+````
+
+**成功（200 OK）**
+
+返回 webhook 配置列表。如果未配置任何 webhook，则列表为空。
+
+*示例（已配置一个 webhook）：*
+
+```
+{
+  "data": [
+    {
+      "created_at": "YYYY-mm-DDTHH:MM:ss.000Z",
+      "id": "<webhook_id>",
+      "url": "<callback url>",
+      "valid": true
+    }
+  ],
+  "meta": {
+    "result_count": 1
+  }
+}
+```
+
+*示例（尚未配置任何 webhook）：*
+
+```
+{
+  "data": [],
+  "meta": {
+    "result_count": 0
+  }
+}
+```
+
+<div id="removing-a-webhook">
+  #### [Removing a webhook](/zh/x-api/webhooks/delete-webhook-config)
+</div>
+
+DELETE /2/webhooks/:webhook&#95;id
+
+**Description:** 使用特定的 `webhook_id` 删除一个 webhook 配置。该 ID 可以从 `POST /2/webhooks` 的创建响应或 `GET /2/webhooks` 的列表响应中获取。
+
+**Authentication:**
+
+仅应用级 OAuth2 Bearer Token
+
+* **Bearer token** `<BEARER_TOKEN>`，例如：`AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+**Path Parameters:**
+
+| Parameter    | Description        |
+| :----------- | :----------------- |
+| `webhook_id` | 要删除的 webhook 的 ID。 |
+
+**Request:** 运行以下命令，以从指定应用的配置中移除该 webhook。
+
+在根据需要进行以下更改后，将下面的 cURL 请求复制到你的命令行中运行：
+
+````
+  ```
+  curl --request DELETE --url 'https://api.twitter.com/2/webhooks/:WEBHOOK_ID' --header 'authorization: Bearer <BEARER_TOKEN>'
+  ```
+
+  **响应：**
+````
+
+**成功（200 OK）**
+
+如果删除成功，将返回一个 JSON 响应，其中 &quot;deleted&quot; 字段的值为 true。
+
+*示例（成功删除 webhook）：*
+
+```
+{
+  "data": {
+    "deleted": true
+  }
+}
+```
+
+**失败（400 Bad Request）**
+
+| 原因                 | 说明                              |
+| :----------------- | :------------------------------ |
+| `WebhookIdInvalid` | 提供的 `webhook_id` 不存在，或未与您的应用关联。 |
+
+<div id="validate-and-reenable-webhook">
+  #### [验证并重新启用 webhook](/zh/x-api/webhooks/webhook-crc-check)
+</div>
+
+**PUT /2/webhooks/:webhook&#95;id**
+
+**说明：** 对给定 webhook 的 URL 触发 Challenge Response Check（CRC）。如果检查成功，将返回 200，并通过将其状态设置为 `valid` 来重新启用该 webhook。
+
+**认证：**
+
+OAuth2 应用专用 Bearer Token
+
+* **Bearer token** `<BEARER_TOKEN>`，例如 `AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+**路径参数：**
+
+| Parameter    | Description        |
+| :----------- | :----------------- |
+| `webhook_id` | 要验证的 webhook 的 ID。 |
+
+**请求：** 运行以下命令，使用所提供应用的配置来验证该 webhook。
+
+在进行如下更改后，将以下 cURL 请求复制到你的命令行中执行：
+
+````
+  ```
+  curl --request PUT --url 'https://api.twitter.com/2/webhooks/:WEBHOOK_ID' --header 'authorization: Bearer <BEARER_TOKEN>'
+  ```
+
+  **响应：**
+````
+
+**成功（200 OK）**
+
+200 OK 响应表示 CRC 检查请求已*启动*。它**不**保证 CRC 检查已经通过。响应中的 `valid` 字段反映的是检查尝试*之后*的状态。如果 CRC 检查成功，webhook 的状态将被更新为有效。你可以使用 `GET /2/webhooks` 来查看当前状态。
+
+```
+{
+  "data": {
+    "valid": true // 表示 CRC 检查尝试完成后的状态
+  }
+}
+```
+
+**失败（400 Bad Request）**
+
+| 原因                    | 描述                              |
+| :-------------------- | :------------------------------ |
+| `WebhookIdInvalid`    | 提供的 `webhook_id` 未找到，或未与您的应用关联。 |
+| `CrcValidationFailed` | 回调 URL 未能对 CRC 校验请求作出正确响应。      |
+
+<div id="4-the-crc-check">
+  ### 4. CRC 检查
+</div>
+
+Challenge Response Check（CRC，质询响应检查）是 X 用来验证你提供的回调 URL 是否有效，以及你是否对其具有控制权的机制。
+
+**CRC 触发的时机：**
+
+* 初次注册 webhook 时（`POST /2/webhooks`）
+* 由 X 每小时发起一次验证
+* 通过 `PUT /2/webhooks/:id` 手动触发
+
+示例：
+
+```
+GET https://your-webhook-url.com/webhook?crc_token=challenge_string
+```
+
+示例 JSON 响应体：
+
+```
+{
+  "response_token": "sha256=<base64编码的HMAC哈希值>"
+}
+```
+
+**如何生成响应：**
+
+* 使用 crc&#95;token 作为消息内容
+* 使用应用的 **consumer secret** 作为密钥
+* 生成 HMAC-SHA-256 散列值
+* 对结果进行 Base64 编码
+
+<div id="sample-apps">
+  ## 示例应用
+</div>
+
+* [简单 webhook 服务器](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py)
+  * 一个独立的 Python 脚本，演示如何响应 CRC 校验并接收 POST 事件。
+* [Account Activity API 示例仪表板](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master)
+  * 一个使用 [bun.sh](https://bun.sh) 构建的 Web 应用程序，可让你直接在应用中管理 webhooks、订阅，并接收实时事件。

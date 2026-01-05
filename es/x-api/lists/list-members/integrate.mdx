@@ -1,0 +1,118 @@
+---
+title: "Guía de integración"
+sidebarTitle: "Guía de integración"
+keywords: ["integración de miembros de la lista", "guía de miembros de la lista", "configuración de miembros de la lista", "integración de membresía de la lista", "guía de integración de miembros de la lista"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="integration-guide">
+  ## Guía de integración
+</div>
+
+Esta página contiene información sobre varias herramientas y conceptos críticos que debes conocer a la hora de integrar los endpoints de miembros de List en tu sistema. Hemos dividido la página en varias secciones:
+
+* [Herramientas útiles](#helpful)
+* Conceptos clave
+* [Autenticación](#authentication)
+* [portal para desarrolladores, Proyectos y Aplicaciones](#portal)
+* [Límites de frecuencia](#limits)
+* [Campos y expansiones](#fields)
+* [Paginación](#pagination)
+
+<div id="helpful-tools">
+  ### Herramientas útiles
+</div>
+
+Antes de profundizar en algunos conceptos clave que te serán de ayuda para integrar este endpoint, te recomendamos familiarizarte con:
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman es una excelente herramienta que puedes usar para probar un endpoint. Cada solicitud de Postman incluye todos los parámetros de ruta y de cuerpo para ayudarte a comprender rápidamente qué tienes disponible. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra página [&quot;Uso de Postman&quot;](/es/tutorials/postman-getting-started). 
+
+<div id="code-samples">
+  #### Ejemplos de código
+</div>
+
+¿Te interesa configurar este endpoint con código en tu lenguaje de programación preferido? Tenemos varios ejemplos de código disponibles que puedes usar como punto de partida en nuestra [página de GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+
+<div id="third-party-libraries">
+  #### Bibliotecas de terceros
+</div>
+
+Aprovecha una de las [bibliotecas de terceros](/es/x-api/tools-and-libraries/overview) de nuestra comunidad para comenzar. Puedes encontrar una biblioteca que funcione con los endpoints de v2 buscando la etiqueta de versión correspondiente.
+
+<div id="key-concepts">
+  ### Conceptos clave
+</div>
+
+<div id="authentication">
+  #### Autenticación
+</div>
+
+Todos los endpoints de X API v2 requieren que autentiques tus solicitudes con un conjunto de credenciales, también conocidas como claves y tokens. Puedes usar Contexto de usuario de OAuth 1.0a, OAuth 2.0 Authorization Code with PKCE o solo aplicación para autenticar tus solicitudes para los endpoints de **lookup** de Listas. Sin embargo, debes autenticarte con Contexto de usuario de OAuth 1.0a o OAuth 2.0 para los endpoints de **manage** de Listas. 
+
+Con [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), debes usar un conjunto de claves de API y tokens de acceso de usuario para realizar una solicitud correcta. Los tokens de acceso deben estar asociados con el usuario en cuyo nombre estás realizando la solicitud. Si quieres generar un conjunto de tokens de acceso para otro usuario, ese usuario debe autorizar tu aplicación usando el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
+
+Ten en cuenta que OAuth 1.0a puede ser difícil de usar. Si no estás familiarizado con este método de autenticación, te recomendamos que utilices una [biblioteca](/es/x-api/tools-and-libraries/overview), uses una herramienta como Postman o uses OAuth 2.0 o solo aplicación para autenticar tus solicitudes.
+
+[OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) permite un mayor control sobre el alcance de una aplicación y sobre los flujos de autorización en múltiples dispositivos. OAuth 2.0 te permite elegir ámbitos específicos y granulares que te dan permisos concretos en nombre de un usuario. 
+
+Para habilitar OAuth 2.0 en tu aplicación, debes activarlo en la configuración de autenticación de tu aplicación, que se encuentra en la sección de configuración de la aplicación en el portal para desarrolladores.
+
+[Solo aplicación](/es/resources/fundamentals/authentication#oauth-2-0) solo requiere que envíes un [token de acceso de solo aplicación](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) con tu solicitud. Puedes generar un token de acceso de solo aplicación directamente dentro de una aplicación de desarrollador o generar uno usando el endpoint [POST oauth2/token](/es/resources/fundamentals/authentication#post-oauth2-token).
+
+[Solo aplicación](/es/resources/fundamentals/authentication#oauth-2-0) solo requiere que envíes un [token de acceso de solo aplicación](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) con tu solicitud. Puedes generar un token de acceso de solo aplicación directamente dentro de una aplicación de desarrollador o generar uno usando el endpoint [POST oauth2/token](/es/resources/fundamentals/authentication#post-oauth2-token).
+
+<div id="developer-portal-projects-and-developer-apps">
+  #### Portal para desarrolladores, Proyectos y aplicaciones de desarrollador
+</div>
+
+Para obtener un conjunto de credenciales de autenticación que funcionen con los endpoints de X API v2, debes [registrarte para obtener una cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info), configurar un [Proyecto](/es/resources/fundamentals/projects) dentro de esa cuenta y crear una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) dentro de ese Proyecto. Luego podrás encontrar tus claves y tokens dentro de tu aplicación de desarrollador.
+ 
+
+<div id="rate-limits">
+  #### Límites de frecuencia
+</div>
+
+Cada día, muchos miles de desarrolladores realizan solicitudes a la X API. Para ayudar a gestionar el enorme volumen de estas solicitudes, se aplican [límites de frecuencia](/es/x-api/fundamentals/rate-limits) a cada endpoint, que limitan la cantidad de solicitudes que puedes realizar en nombre de tu aplicación o en nombre de un usuario autenticado. 
+
+Los endpoints de consulta (GET) tienen límites de frecuencia tanto a nivel de App como a nivel de usuario, mientras que los endpoints de gestión (POST/DELETE) están limitados a nivel de usuario. El límite de frecuencia de la App significa que tú, como desarrollador, solo puedes realizar una cierta cantidad de solicitudes a este endpoint durante un período de tiempo determinado desde cualquier App determinada (definido por el uso de la API Key y la API Secret Key, o del Token de acceso solo de la App). El límite de frecuencia de usuario significa que el usuario autenticado en cuyo nombre estás realizando la solicitud solo puede realizar una consulta de Lista una cierta cantidad de veces en cualquier aplicación de desarrollador.
+
+La siguiente tabla muestra los límites de frecuencia para cada endpoint.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Endpoint** | **Método HTTP** | **Límite de frecuencia** |
+| /2/lists/:id/members | GET | 900 solicitudes por 15 minutos |
+| /2/users/:id/list&#95;memberships | GET | 75 solicitudes por 15 minutos |
+| /2/lists/:id/members | POST | 300 solicitudes por 15 minutos |
+| /2/lists/:id/members/:user&#95;id | DELETE | 300 solicitudes por 15 minutos |
+
+<div id="fields-and-expansions">
+  #### Campos y expansiones
+</div>
+
+El endpoint GET de X API v2 permite a los usuarios seleccionar exactamente qué datos quieren que devuelva la API utilizando un conjunto de herramientas llamado `fields` y `expansions`. El parámetro `expansions` permite expandir los objetos referenciados en el payload. Por ejemplo, al consultar los miembros de una Lista puedes obtener las siguientes [expansions](/es/x-api/fundamentals/expansions):
+
+* `pinned_tweet_id`
+
+El parámetro `fields` te permite seleccionar exactamente qué [fields](/es/x-api/fundamentals/fields) dentro de los distintos objetos de datos quieres recibir. La consulta de miembros de una Lista devuelve principalmente objetos de usuario. De forma predeterminada, el objeto de usuario devuelve los campos id, name y username. Para recibir campos adicionales como `user.created_at` o `user.description`, tendrás que solicitar específicamente esos campos usando el parámetro user.fields. 
+
+Hemos añadido una guía sobre cómo usar [fields and expansions](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions).
+
+ La siguiente tabla muestra los campos y expansiones disponibles para cada endpoint de consulta:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Endpoint** | **Campos** | **Expansiones** |
+| /2/lists/:id/members | `user.fields`<br /><br />`tweet.fields` | `pinned_tweet_id` |
+| /2/users/:id/list&#95;memberships | list.fields<br /><br />user.fields | owner&#95;id |
+
+<div id="pagination">
+  #### Paginación
+</div>
+
+Buscar membresías o miembros puede devolver muchos datos. Para garantizar que devolvemos resultados coherentes y de alto rendimiento en cualquier momento, usamos paginación. La paginación es una característica de los endpoints de X API v2 que devuelven más resultados de los que se pueden incluir en una única respuesta. Cuando eso sucede, los datos se devuelven en una serie de «páginas». Obtén más información sobre cómo [paginar los resultados.](/es/x-api/fundamentals/pagination)

@@ -1,0 +1,143 @@
+---
+title: "简介"
+sidebarTitle: "简介"
+keywords: ["活动 API","X Activity API","活动事件","资料更新","用户活动","实时事件","活动流"]
+---
+
+X Activity API (XAA) 端点组允许开发者接入 X 平台上发生的各类活动事件。
+
+开发者可以订阅感兴趣的事件，例如 `ProfileBioUpdate`、`ProfilePictureUpdate` 等，并按目标用户 ID 进行筛选。与该用户 ID 匹配的事件将以亚秒级延迟投递到你的应用。
+
+<Warning>
+  X Activity API 目前处于公开测试阶段（open beta）。在公开测试期间，可能会出现缺陷、向后不兼容的变更或尚未完备的功能。
+
+  你的反馈极其宝贵——请通过我们的[开发者社区论坛](https://devcommunity.x.com/)报告问题。
+</Warning>
+
+<div id="delivery-mechanisms">
+  ## 传递机制
+</div>
+
+X Activity API 目前支持以下传递机制将事件发送到你的应用：
+
+* 持久 HTTP 流
+* [Webhook](/zh/x-api/webhooks/introduction)
+
+<div id="supported-event-types">
+  ## 支持的事件类型
+</div>
+
+目前，X Activity API 支持以下事件类型，并按类别进行归类：
+
+<div id="profile-events">
+  ### 个人资料事件
+</div>
+
+当用户更新其个人资料信息时，会触发以下事件。
+
+| Event Name                   | Description                                         | Filters   |
+| ---------------------------- | --------------------------------------------------- | --------- |
+| `profile.update.bio`           | 当用户更新其个人简介时触发         | `user_id` |
+| `profile.update.profile_picture`       | 当用户更新其头像时触发     | `user_id` |
+| `profile.update.banner_picture`        | 当用户更新其个人资料横幅图片时触发      | `user_id` |
+| `profile.update.geo`           | 当用户更新其个人资料位置时触发    | `user_id` |
+| `profile.update.url`           | 当用户更新其个人网站 URL 时触发 | `user_id` |
+| `profile.update.screenname`    | 当用户更新其显示名称时触发        | `user_id` |
+| `profile.update.verified_badge` | 当用户更新其认证标记时触发      | `user_id` |
+
+<div id="follow-events">
+  ### 关注事件
+</div>
+
+当用户关注或取消关注另一位用户时，会触发关注事件。
+
+| 事件名称 | 描述                           | 过滤条件   |
+| ---------- | ------------------------------------- | --------- |
+| `follow.follow`  | 当用户关注另一位用户时触发 | `user_id` |
+| `follow.unfollow`  | 当用户取消关注另一位用户时触发 | `user_id` |
+
+<Note>
+  **仅限 Enterprise：** 目前只有部分 Enterprise 和合作伙伴级别账号可以使用关注事件。
+</Note>
+
+<div id="news-events">
+  ### 新闻事件
+</div>
+
+新闻事件提供由 Grok 策划的新闻主题和头条的最新动态。
+
+| Event Name | Description                     | Filters   |
+| ---------- | ------------------------------- | --------- |
+| `news.new` | 由 Grok 新策划的新闻和头条      | `keyword` |
+
+<Note>
+  **仅限 Enterprise：** 新闻事件目前仅向部分 Enterprise 和合作伙伴等级账号开放。
+</Note>
+
+在未来的版本中，XAA 将扩展以支持更多事件类型，包括社交互动、内容参与度、变现功能等。我们会在有新的事件类型可用时持续更新我们的文档。
+
+<Note>
+  **注意：** XAA 不会投递帖子内容。若需要实时帖子投递，请参阅我们的 [Filtered Stream](/zh/x-api/posts/filtered-stream/introduction) 端点，它允许开发者过滤并实时流式获取帖子。
+</Note>
+
+<div id="event-privacy-and-authentication">
+  ## 事件隐私和身份验证
+</div>
+
+X Activity API 将**公开事件**和**私密事件**区分开来，其行为与 X 应用中的表现保持一致，详见下文。
+
+<div id="public-events">
+  ### 公开事件
+</div>
+
+公开事件是指公开用户账号以公开方式执行、且对所有 X 用户可见的活动。这些事件对 X 平台上的所有用户可见，且无需用户通过 OAuth 认证即可查看。
+
+**当前的公开事件：**
+
+* 个人资料更新（简介、头像、封面图、位置、URL、用户名变更）
+
+对于这些公开事件，你可以在过滤器中指定用户 ID 来创建订阅，并通过 XAA 接收这些事件。
+
+<div id="private-events">
+  ### 私有事件
+</div>
+
+私有事件是指需要用户通过 OAuth 认证明确授权的活动。用户必须通过 X 完成身份验证，并向开发者应用明确授权后，才能访问这些事件。
+
+**私有事件的认证要求：**
+
+* 用户必须通过 OAuth 2.0 对你的应用完成身份验证
+* 你的应用必须获取相应的 OAuth scope（权限范围）
+* 用户必须明确授予你的应用访问这些事件的权限
+* 只能为已授权你的应用的用户创建私有事件订阅
+
+<div id="subscription-limits">
+  ## 订阅限制
+</div>
+
+X Activity API 会根据你的账号等级设置不同的订阅限制：
+
+| Package Tier | Maximum Subscriptions |
+| ------------ | --------------------- |
+| Free         | 不可用                |
+| Basic        | 50                    |
+| Pro          | 2500                  |
+| Enterprise   | 50,000                |
+| Partner      | 100,000               |
+
+<Note>
+  **账号设置**
+
+  要访问这些端点，你需要：
+
+  * 一个已获批准的[开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * 使用所属[项目](/zh/resources/fundamentals/projects)中的[开发者应用](/zh/resources/fundamentals/developer-apps)的密钥和令牌进行身份验证。
+
+  在我们的[入门指南](/zh/x-api/getting-started/getting-access)中了解更多关于获取 X API v2 端点访问权限的信息。
+</Note>
+
+<div className="flex">
+  <Button href="/zh/x-api/posts/filtered-stream/quickstart">
+    快速开始
+  </Button>
+</div>

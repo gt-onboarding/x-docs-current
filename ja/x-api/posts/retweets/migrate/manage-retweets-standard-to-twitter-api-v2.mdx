@@ -1,0 +1,61 @@
+---
+title: リツイートの管理
+sidebarTitle: リツイートの管理
+keywords: ["リツイート管理 マイグレーション", "v1.1 から v2 へのリツイート管理", "リツイート管理のマイグレーション", "Standard から v2 へのリツイート", "リツイート マイグレーション"]
+---
+
+<div id="manage-retweets-standard-v11-compared-to-x-api-v2">
+  ### リツイートの管理: standard v1.1 と X API v2 の比較
+</div>
+
+standard v1.1 の [POST statuses/retweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-retweet-id) および [POST statuses/unretweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-unretweet-id) エンドポイントを利用している場合、本ガイドの目的は、standard v1.1 と X API v2 のリツイート用エンドポイントの共通点と相違点を理解するのに役立ててもらうことです。
+
+* **類似点**
+  * 認証
+* **相違点**
+  * エンドポイント URL と HTTP メソッド
+  * リクエストの制限事項
+  * アプリおよびプロジェクトの要件
+  * リクエストパラメータ
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**認証**
+
+標準 v1.1 と X API v2 の両方で、リツイートを管理するエンドポイント（[POST statuses/retweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-retweet-id) および [POST statuses/unretweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-unretweet-id)）は、[OAuth 1.0a User Context](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication) を使用します。したがって、以前に標準 v1.1 のリツイートのルックアップ用エンドポイントのいずれかを使用していた場合、X API v2 版に移行しても同じ認証方法を引き続き使用できます。 
+
+<div id="differences">
+  #### 違い
+</div>
+
+**エンドポイントURLとHTTPメソッド**
+
+* Standard v1.1エンドポイント:
+  * https://api.x.com/1.1/statuses/retweet/:id.json
+    (ポストをリポストします。リポスト詳細が埋め込まれた元のポストを返します)
+  * https://api.x.com/1.1/statuses/unretweet/:id.json
+    (リポストを取り消します。リポスト詳細が埋め込まれた元のポストを返します)
+* X API v2エンドポイント:
+  * https://api.x.com/2/tweets/:id/retweets
+    (指定されたポストをリポストします)
+  * https://api.x.com/2/users/:id/retweets/:source&#95;tweet&#95;id
+    (指定されたポストのリポストを取り消します)
+
+**アプリとプロジェクトの要件**
+
+X API v2エンドポイントでは、リクエストの認証時に[プロジェクト](/ja/resources/fundamentals/projects)に関連付けられた[開発者アプリ](/ja/resources/fundamentals/developer-apps)の認証情報を使用する必要があります。X API v1.1エンドポイントは、スタンドアロンアプリまたはプロジェクトに関連付けられたアプリの認証情報を使用できます。
+
+**リクエストパラメータ**
+
+Standard v1.1のリクエストパラメータは2つのクエリパラメータ(user&#95;idまたはscreen&#95;name)を受け入れていました。X API v2は数値のユーザーIDのみを受け入れ、エンドポイントパスの一部として渡す必要があります。
+
+| Standard v1.1 | X API v2 |
+| :--- | :--- |
+| **id** | **id** |
+| **includes&#95;entities** | 同等のものなし |
+
+Standard v1.1パラメータはクエリパラメータとして渡されますが、X API v2パラメータはPOSTエンドポイントの場合はボディパラメータとして、DELETEエンドポイントの場合はパスパラメータとして渡されることに注意してください。
+
+また、Standard v1.1エンドポイントを使用する場合、ポストをリポストするユーザーのidは不要です。これは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)で渡される[アクセストークン](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)によって、どのユーザーがリポストを開始/リポストを取り消しているかが判別されるためです。 

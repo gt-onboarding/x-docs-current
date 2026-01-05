@@ -1,0 +1,124 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["Spaces ルックアップ クイックスタート", "Spaces 取得 クイックスタート", "Spaces ルックアップ チュートリアル", "Spaces クイックスタート ガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-spaces-lookup-endpoints">
+  ## Spaces lookup エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、Postman を使用して、指定したフィールドのセットを含めて Spaces lookup エンドポイントのいずれかに最初のリクエストを送信する方法を説明します。
+
+さまざまなプログラミング言語でのサンプルコードを確認したい場合は、[X API v2 sample code GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code) リポジトリをご覧ください。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストの認証に使用する一式の [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成してください。
+  * アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成してください。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-spaces-lookup-request">
+  #### Spaces ルックアップリクエストを構築する手順
+</div>
+
+*この例では、作成者 ID によるユーザー Spaces ルックアップエンドポイントへのリクエストを行いますが、このクイックスタートで学ぶ内容は、他のルックアップリクエストにも同様に適用できます。*
+
+**ステップ 1: ツールまたはライブラリを選択する**
+
+このエンドポイントへのリクエストを行うために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、Spaces フォルダに移動し、「Lookup Spaces created by one or more users」リクエストを見つけてください。
+ 
+
+**ステップ 2: リクエストを認証する**
+
+X API へ適切にリクエストを行うには、自分に権限があることを確認する必要があります。そのために、このエンドポイントでは [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 認証方式のいずれかでリクエストを認証する必要があります。
+
+ここでは簡単のため、このリクエストには OAuth 2.0 App-Only を使用しますが、プライベートな[メトリクス](/ja/x-api/fundamentals/metrics)や非公開アカウントの Spaces をリクエストしたい場合は、別の認証方式のいずれかを使用する必要があります。 
+
+OAuth 2.0 App-Only を利用するには、キーとトークン、具体的には [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（App-only Bearer Token とも呼ばれます）を Postman に追加する必要があります。これを行うには、Postman の右上隅で「X API v2」という名前の環境を選択し、「initial value」と「current value」フィールドにキーとトークンを追加します（環境ドロップダウン横の目のアイコンをクリックします）。
+
+正しく設定できていれば、これらの変数はリクエストの Authorization タブに自動的に反映されます。
+ 
+
+**ステップ 3: ポストを取得したいユーザーを特定して指定する**
+
+リクエスト内で、ライブまたは今後予定されている Spaces を取得したいユーザーを指定する必要があります。この例では、単一のユーザー ID を渡します。
+
+ユーザー ID は、アカウントのプロフィール URL から取得できる、アカウントハンドルを表す数値です。たとえば、次のアカウントのユーザー名は XDevelopers です。
+
+https://x.com/XDevelopers
+
+このユーザー名をユーザー ID に変換するには、ユーザー名を指定して user lookup エンドポイントを使用し、ペイロード内で数値のユーザー ID を探す必要があります。@XDevelopers の場合、ユーザー ID は 2244994945 です。
+
+Postman で「Params」タブに移動し、このユーザー ID を id パラメータの「Value」列に入力します。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| id  | 2244994945 |
+
+**ステップ 4: 取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に「Send」ボタンをクリックすると、レスポンスには id が返されます。これは、デフォルトで返される唯一の [Space オブジェクト](/ja/x-api/fundamentals/data-dictionary#space)のフィールドです。
+
+追加のフィールドを受け取りたい場合は、space.fields または expansions パラメータを使って、リクエスト内でそれらを指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 つの追加フィールドセットをリクエストします。
+
+* プライマリ Spaces オブジェクト内の追加の title フィールド
+* 指定した creator ID の完全な [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user)
+* 関連する user オブジェクト内の追加の user.created&#95;at フィールド
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| space.fields | title | creator&#95;id |
+| expansions | creator&#95;id | includes.users.id, includes.users.name, includes.users.username |
+| user.fields | created&#95;at | includes.users.created&#95;at |
+
+「Send」ボタンの横に次の URL が表示されているはずです。
+
+[https://api.x.com/2/spaces/by/creator&#95;ids?user&#95;ids=2244994945&amp;space.fields=creator&#95;id&amp;expansions=creator&#95;id&amp;user.fields=created&#95;at](https://api.x.com/2/spaces/by/creator\\_ids?user\\_ids=2244994945\&space.fields=creator\\_id\&expansions=creator\\_id\&user.fields=created_at)
+
+**ステップ5: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンをクリックして、次のようなレスポンスを受け取ります。
+
+```
+{
+   "data": [
+    {
+        "creator_id": "2244994945",
+        "id": "1zqKVXPQhvZJB",
+        "title": "Hello world 👋",
+        "state": "Running"
+   },
+   "includes": {
+       "users": [
+           {
+               "created_at": "2013-12-14T04:35:55.000Z",
+               "name": "Twitter Dev",
+               "id": "2244994945",
+               "username": "TwitterDev"
+           }
+       ]
+   }
+]
+}
+```

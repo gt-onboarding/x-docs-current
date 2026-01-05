@@ -1,0 +1,117 @@
+---
+title: 통합 가이드
+sidebarTitle: 통합 가이드
+keywords: ["게시물 조회 통합", "조회 통합 가이드", "조회 구현", "조회 설정", "트윗 조회 통합"]
+---
+
+import { Button } from "/snippets/ko/button.mdx"
+
+이 페이지에는 게시물 조회 엔드포인트를 시스템에 통합하는 데 도움이 되는 여러 도구와 핵심 개념에 대한 정보가 포함되어 있습니다. 이 페이지는 다음과 같은 몇 개의 섹션으로 구성됩니다:
+
+* [유용한 도구](#helpful)
+* 핵심 개념
+  * [인증](#authentication)
+  * [developer portal, 프로젝트 및 앱](#portal)
+  * [요청 한도](#limits)
+  * [필드 및 expansions](#fields)
+  * [게시물 편집](#edits)
+  * [예외 케이스](#edge)
+
+<div id="helpful-tools">
+  ## 유용한 도구
+</div>
+
+핵심 개념을 살펴보기 전에, 먼저 다음 도구에 익숙해질 것을 권장합니다.
+
+**Postman**\
+Postman은 엔드포인트를 테스트해 보고, 제공되는 기능과 옵션을 이해할 수 있도록 모든 path 및 body 파라미터를 확인하는 데 유용한 도구입니다. 자세한 내용은 [Postman 시작 가이드](/ko/tutorials/postman-getting-started)를 확인하세요.
+
+**Code samples**\
+선호하는 프로그래밍 언어에 대한 코드 샘플은 [GitHub 페이지](https://github.com/xdevplatform/Twitter-API-v2-sample-code)에서 확인할 수 있습니다.
+
+**Third-party libraries**\
+v2 엔드포인트와 호환되는 커뮤니티에서 개발한 [서드파티 라이브러리](/ko/resources/tools-and-libraries)를 활용하세요.
+
+<div id="key-concepts">
+  ## 핵심 개념
+</div>
+
+<div id="authentication">
+  ### 인증
+</div>
+
+모든 X API v2 엔드포인트는 인증된 요청이 필요합니다. 다음 중 하나의 방식으로 인증할 수 있습니다:
+
+* API 키, 액세스 토큰, 그리고 추가 매개변수를 사용하여 [Authorization 헤더를 생성](/ko/resources/fundamentals/authentication#authorizing-a-request)하는 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication)
+* 요청에 [App 액세스 토큰](/ko/resources/fundamentals/authentication)을 포함해 전달하는 [OAuth 2.0 앱 전용(App-Only)](/ko/resources/fundamentals/authentication#oauth-2-0)
+* 앱 범위와 다중 디바이스 인증을 더 세밀하게 제어할 수 있는 [OAuth 2.0 Authorization Code with PKCE](/ko/resources/fundamentals/authentication)
+
+<Note>
+  OAuth 1.0a는 구현이 까다로울 수 있습니다. 익숙하지 않다면 요청 시 [라이브러리](/ko/resources/tools-and-libraries)나 OAuth 2.0 사용을 고려하세요. 비공개 메트릭이나 게시물 데이터에 접근하려면 OAuth 1.0a 사용자 컨텍스트 또는 OAuth 2.0 Authorization Code with PKCE를 사용해야 합니다.
+</Note>
+
+<Tip>
+  **참고**
+
+  > 다음 필드를 요청하는 경우, OAuth 1.0a 사용자 컨텍스트 또는 OAuth 2.0 Authorization Code가 필요합니다:
+  >
+  > * `tweet.fields.non_public_metrics`
+  > * `tweet.fields.promoted_metrics`
+  > * `tweet.fields.organic_metrics`
+  > * `media.fields.non_public_metrics`
+  > * `media.fields.promoted_metrics`
+  > * `media.fields.organic_metrics`
+</Tip>
+
+<div id="developer-portal-projects-and-apps">
+  ### developer portal, 프로젝트 및 앱
+</div>
+
+X API v2용 자격 증명을 얻으려면 다음이 필요합니다.
+
+1. 승인된 [개발자 계정](/ko/resources/fundamentals/developer-portal)
+2. 해당 개발자 계정 내의 [프로젝트](/ko/resources/fundamentals/projects)
+3. 해당 프로젝트 내의 [개발자 앱](/ko/resources/fundamentals/developer-apps)으로, 여기에서 키와 토큰을 확인할 수 있습니다.
+
+<div id="rate-limits">
+  ### 요청 한도
+</div>
+
+X API 요청에는 요청량 관리를 위한 [요청 한도](/ko/resources/fundamentals/rate-limits)가 적용됩니다. 한도는 앱 및 사용자 수준 모두에 적용됩니다:
+
+* **App 수준**: 어떤 앱이든 일정 기간 동안 발생시킬 수 있는 요청 수를 제한합니다.
+* **사용자 수준**: 인증된 사용자가 개발자 앱 전반에서 게시물 조회를 수행할 수 있는 빈도를 제한합니다.
+
+<div id="fields-and-expansions">
+  ### 필드와 expansions
+</div>
+
+X API v2에서는 `fields` 및 `expansions`를 사용하여 특정 데이터 필드를 선택할 수 있습니다:
+
+* **Expansions**: 관련 객체를 추가로 조회할 수 있습니다. 지원되는 expansions에는 다음이 포함됩니다:
+  * `edit_history_tweet_ids`
+  * `attachments.poll_ids`
+  * `attachments.media_keys`
+  * `author_id`
+  * `entities.mentions.username`
+  * `geo.place_id`
+  * `in_reply_to_user_id`
+  * `referenced_tweets.id`
+  * `referenced_tweets.id.author_id`
+
+* **Fields**: 객체에서 어떤 데이터 필드를 반환할지 지정해 추가 데이터를 받을 수 있습니다. 게시물 객체의 기본값은 `id`, `text`, `edit_history_tweet_ids`입니다. `tweet.created_at` 및 `tweet.entities`와 같은 다른 옵션은 명시적으로 요청해야 합니다.
+
+자세한 내용은 [X API v2 데이터 사전](/ko/x-api/fundamentals/data-dictionary)의 fields 및 expansions 가이드를 참고하세요.
+
+<div id="post-edits">
+  ### 게시물 편집
+</div>
+
+요건을 충족하는 게시물은 발행 후 30분 이내에 최대 다섯 번까지 편집할 수 있습니다. Posts 조회 엔드포인트는 항상 최신 버전의 게시물을 반환합니다. 준 실시간 사용 사례에서는 이 시간 제한을 염두에 두어야 합니다. 자세한 내용은 [게시물 편집 기본 개념](/ko/x-api/fundamentals/edit-posts)을 참고하세요.
+
+<div id="edge-cases">
+  ### 예외적인 경우
+</div>
+
+* **Promoted 메트릭**: 프로모션되지 않은 게시물에 대해 Promoted 메트릭을 요청하면 빈 응답이 반환됩니다.
+* **잘린 텍스트**: 리트윗의 경우 게시물 텍스트가 잘립니다. 전체 텍스트를 가져오려면 참조된 게시물을 확장(expand)하십시오.

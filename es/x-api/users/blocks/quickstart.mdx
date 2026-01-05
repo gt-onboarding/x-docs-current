@@ -1,0 +1,167 @@
+---
+title: Inicio rápido
+sidebarTitle: Inicio rápido
+keywords: ["inicio rápido de bloqueos", "inicio rápido para bloquear usuarios", "tutorial de bloqueos", "guía de bloqueos", "guía de inicio rápido de bloqueos"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-blocks-lookup-endpoint">
+  ## Introducción al endpoint de consulta de bloqueos
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud al endpoint de consulta de bloqueos usando [Postman](/es/tutorials/postman-getting-started).
+
+Si quieres ver código de ejemplo en diferentes lenguajes de programación, visita nuestro repositorio de [código de ejemplo de X API v2](https://github.com/xdevplatform/Twitter-API-v2-sample-code) en GitHub.
+
+<Note>
+  ### Requisitos previos
+
+  Para completar esta guía, necesitarás contar con un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y espera la aprobación.
+  * Crea un [Project](/es/resources/fundamentals/projects) y una [developer App](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Ve a la página de “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-build-a-blocks-lookup-request">
+  ### Pasos para crear una solicitud de consulta de bloqueos
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### Paso uno: comienza con una herramienta o biblioteca
+</div>
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para realizar una solicitud a este endpoint, pero aquí usaremos la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, dirígete a la carpeta &quot;Blocks&quot; y selecciona &quot;Blocks Lookup&quot;.
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### Paso dos: autentica tu solicitud
+</div>
+
+Para realizar correctamente una solicitud a la X API, necesitas verificar que tienes permiso. Para hacerlo con este endpoint, debes autenticar tu solicitud usando ya sea [OAuth 1.0a User Context](/es/resources/fundamentals/authentication) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+
+En este ejemplo, vamos a usar OAuth 1.0a User Context.
+
+Debes añadir tus claves y tokens —específicamente tu API Key, API Secret Key, OAuth 1.0a user Access Token y OAuth 1.0a user Access Token Secret— a Postman. Puedes hacer esto seleccionando el entorno llamado “X API v2” en la esquina superior derecha de Postman y añadiendo tus claves y tokens a los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el icono del ojo junto al menú desplegable del entorno).
+
+Estas variables se insertarán automáticamente en la pestaña de autorización de la solicitud si has realizado este paso correctamente.
+ 
+
+<div id="step-three-specify-a-user">
+  #### Paso tres: Especificar un usuario
+</div>
+
+Con este endpoint, debes especificar tu ID de usuario o el ID de usuario de un usuario autenticado para ver a quién has bloqueado.
+
+En Postman, ve a la pestaña &quot;Params&quot; y escribe este nombre de usuario en la columna &quot;Value&quot; de la variable de ruta id (en la parte inferior de la sección), asegurándote de no incluir espacios antes ni después de los nombres de usuario.
+ 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | (tu ID de usuario) |
+| max&#95;results | 5   |
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### Paso cuatro: Identificar y especificar qué campos quieres obtener
+</div>
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás en tu respuesta los campos predeterminados del [objeto de usuario](/es/x-api/fundamentals/data-dictionary#user): id, name y username.
+
+Si quieres recibir campos adicionales además de id, name y username, tendrás que especificar esos campos en tu solicitud con los parámetros [fields](/es/x-api/fundamentals/fields) y/o [expansions](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de diferentes objetos:
+
+1. El campo adicional user.created&#95;at en los objetos de usuario primarios.
+2. Los campos predeterminados del objeto de Publicación fijada asociada para los usuarios devueltos: id y text.
+3. El campo adicional tweet.created&#95;at en los objetos de Publicación asociados.
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave:valor a la tabla &quot;Query Params&quot;:
+
+|              |                         |                                |
+| :----------- | :---------------------- | :----------------------------- |
+| **Key**      | **Value**               | **Returned fields**            |
+| user.fields  | created&#95;at          | user.created&#95;at            |
+| expansions   | pinned&#95;tweet&#95;id | tweet.id, tweet.text           |
+| tweet.fields | created&#95;at          | includes.tweets.created&#95;at |
+
+Ahora deberías ver una URL similar con tu propia id de usuario en lugar de la URL de TwitterDev junto al botón &quot;Send&quot;:
+
+```
+      https://api.x.com/2/users/2244994945/blocking?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at
+```
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### Paso cinco: Realiza tu solicitud y revisa tu respuesta
+</div>
+
+Una vez que tengas todo configurado, haz clic en el botón «Send» y recibirás una respuesta similar a la del siguiente ejemplo:
+
+```
+    {
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "ahora, todos los que tengan 600 o más seguidores pueden organizar un Space.\n\nbasándonos en lo que hemos aprendido, es probable que estas cuentas tengan una buena experiencia como anfitriones debido a su audiencia existente. antes de llevar la capacidad de crear un Space a todos, nos estamos enfocando en algunas cosas. 🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+```
+
+<div id="step-six-paginate-through-your-results">
+  #### Paso seis: pagina tus resultados
+</div>
+
+Es posible que notes que hay un objeto meta ubicado en la parte inferior de la respuesta. Si recibiste un next&#95;token, esto indica que hay otra página de resultados que puedes recuperar. Para obtener la siguiente página de resultados, deberás tomar el valor del campo next&#95;token y agregarlo a la solicitud como el valor de un parámetro pagination&#95;token adicional.
+ 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| pagination&#95;token | 1D3PU6DRII9HEZZZ |
+
+Si envías la solicitud después de agregar este parámetro adicional, los siguientes cinco resultados se devolverán en la siguiente carga útil de datos, ya que especificamos max&#95;results como 5 en el paso tres. Puedes seguir repitiendo este proceso hasta que se hayan devuelto todos los resultados, pero también puedes usar el parámetro max&#95;results para solicitar hasta 1000 usuarios por solicitud, de modo que no tengas que paginar tantas veces los resultados.

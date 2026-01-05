@@ -1,0 +1,119 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["リスト参照クイックスタート", "リスト取得クイックスタート", "リスト参照チュートリアル", "リスト情報クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-list-lookup-endpoint">
+  ## List lookup エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、Postman を使って List lookup エンドポイントへ最初のリクエストを送信する手順を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+**注:** この例では、*List lookup by ID* エンドポイントへのリクエストを行いますが、このクイックスタートで学んだ内容は、他の種類の lookup リクエストにも同様に適用できます。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストの認証に使用する [キーとトークン](/ja/resources/fundamentals/authentication) 一式が必要です。これらのキーとトークンは、次の手順に従うことで生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access)し、承認を受けます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) を作成し、関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成します。生成した認証情報はすべて安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-list-lookup-request">
+  ### List lookup リクエストを構築する手順
+</div>
+
+**ステップ 1：ツールまたはライブラリを選択する**
+
+このエンドポイントへのリクエストを行うために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、「List」フォルダに移動し、「List lookup」フォルダを選択してから、「List by ID」を選択します。
+ 
+
+**ステップ 2：リクエストを認証する**
+
+X API へのリクエストを正しく行うには、自分に権限があることを確認する必要があります。このエンドポイントでそれを行うには、[App only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)、または [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) のいずれかの認証方法でリクエストを認証する必要があります。
+
+ここでは簡単のために、このリクエストでは App only を使用しますが、非公開の[メトリクス](/ja/x-api/fundamentals/metrics) やリストを取得したい場合は、他のいずれかの認証方法を使用する必要があります。 
+
+App only を利用するには、Postman で「X API v2」という名前の環境（Postman の右上）を選択し、「initial value」および「current value」フィールド（環境ドロップダウンの横の目のアイコンをクリック）に、キーとトークン（特に [App only Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)）を追加する必要があります。
+
+正しく設定できていれば、これらの変数はリクエストの Authorization タブに自動的に取り込まれます。
+ 
+
+**ステップ 3：取得したい List を特定して指定する**
+
+リクエストの中で、取得したい List を指定する必要があります。List ID は、x.com でリストをクリックし、そのときの URL を確認することで見つけることができます。たとえば、次の URL の List ID は 84839422 です。
+
+https://x.com/i/lists/84839422
+
+対象の ID は、有効な任意の List ID にすることができます。Postman で「Params」タブに移動し、id パス変数の「Value」列に自分の ID を入力します。ID の前後にスペースを含めないように注意してください。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| id  | 84839422 (List ID) |
+
+**ステップ 4：取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に「Send」ボタンをクリックすると、レスポンスとしてデフォルトの [List object](/ja/x-api/fundamentals/data-dictionary#list) のフィールド（id, name）が返されます。
+
+追加のフィールドを取得したい場合は、list.fields および/または [expansions](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドをリクエスト内で指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 つの追加フィールドセットをリクエストします。
+
+* プライマリの List オブジェクトにある追加フィールド created&#95;at
+
+* expansions パラメータを使用した、完全な [user object](/ja/x-api/fundamentals/data-dictionary#user)
+
+* 関連する user オブジェクトにある追加フィールド user.created&#95;at
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| list.fields | created&#95;at | created&#95;at |
+| expansions | owner&#95;id | includes.users.id,  <br />includes.users.name,  <br />includes.users.username |
+| user.fields | created&#95;at | includes.users.created&#95;at |
+
+これで、「Send」ボタンの横に次のような URL が表示されているはずです。
+
+`https://api.x.com/2/lists/84839422?list.fields=owner_id&expansions=owner_id&user.fields=created_at`
+
+**ステップ 5：リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次のサンプルレスポンスと同様のレスポンスが返されます。
+
+```
+{
+  "data": {
+    "id": "84839422",
+    "name": "Official Twitter Accounts",
+    "owner_id": "783214"
+  },
+  "includes": {
+    "users": [
+      {
+        "name": "Twitter",
+        "created_at": "2007-02-20T14:35:54.000Z",
+        "username": "Twitter",
+        "id": "783214"
+      }
+    ]
+  }
+}
+```

@@ -1,0 +1,117 @@
+---
+title: ブックマークの取得
+sidebarTitle: ブックマークの取得
+keywords: ["ブックマーク取得 クイックスタート", "ブックマーク取得 クイックスタート", "ブックマーク取得 チュートリアル", "ブックマーク取得 ガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-bookmarks-lookup-endpoint">
+  ### Bookmarks ルックアップエンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して Bookmarks ルックアップエンドポイントに対する最初のリクエストを送信する方法を説明します。
+
+さまざまなプログラミング言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+<div id="prerequisites">
+  #### 前提条件
+</div>
+
+このガイドを完了するには、リクエストを認証するための [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+* [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+* developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+* アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報を安全な場所に保存してください。
+
+<div id="steps-to-build-a-bookmarks-lookup-request">
+  #### ブックマーク参照リクエストを構築する手順
+</div>
+
+**ステップ1：ツールまたはライブラリの準備**
+
+このエンドポイントにリクエストを送信するには、いくつかのツール、コード例、ライブラリを利用できますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションをご利用の環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Bookmarks」フォルダに移動し、「Bookmarks lookup」を選択します。
+
+**ステップ2：リクエストを認証する**
+
+このエンドポイントへのリクエストを成功させるには、[OAuth 2.0 Authorization Code Flow with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) を使用する必要があります。Postman 内でアクセストークンを生成できます。 
+
+「Authorization」というタブに移動し、「OAuth 2.0」を選択します。
+
+このタブで、次の手順に従ってください。
+
+1. トークンに名前を付ける
+
+2. Grant Type として Authorization Code (with PKCE) を選択する
+
+3. パラメータを更新する：
+
+   **Callback URL** - [https://www.example.com](https://www.example.com/)
+
+   これは developer portal の認証設定ページで設定したコールバック URL と一致している必要があります。
+
+   **Auth URL** - [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize)
+
+   **Access Token URL** - [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token)
+
+   **Client ID** - developer portal から OAuth 2.0 client ID をコピー＆ペースト
+
+   **Client Secret** - developer portal から OAuth 2.0 client secret をコピー＆ペーストします。機密クライアントである種類のアプリを使用している場合にのみ必要です。
+
+4. scope を次の値で更新する: post.read users.read bookmark.read
+
+5. state フィールドに「State」と入力する
+
+6. 「Generate Token」と表示されている箇所をクリックする
+
+7. フォルダの変更内容を保存するために保存アイコンを押す
+
+X にログインしていないというメッセージが表示される場合があります。このエラーが表示された場合は、Postman 内で、代理でポストしようとしている X アカウントにログインする必要があります。
+
+**ステップ3：ユーザーを指定する**
+
+このエンドポイントでは、レスポンスでフォロワーを取得したいユーザーのユーザー ID を指定する必要があります。たとえば、@XDevelopers のユーザー ID は 2244994945 です。Postman で「Params」タブに移動し、自分自身または認証済みユーザーの ID を `id` パラメータの値として入力します。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**ステップ4：リクエストを送信しレスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンを押すと、次のサンプルレスポンスと同様のレスポンスを受け取ります。
+
+```
+{
+   "data": [
+       {
+           "id": "1501258597237342208",
+           "text": "🗣 X APIを使用したプロジェクトを構築し、コミュニティと共有したいとお考えですか?ぜひお聞かせください。プロジェクトを私たちと共有してください!"
+       },
+       {
+           "id": "1501258542258348032",
+           "text": "🧰🛠 これは、開発者のイノベーションがTwitterをより良い場所にする方法の一つです。開発者コミュニティによって構築されたすぐに使えるツールは、Twitter Toolboxでご覧いただけます ⬇️ https://t.co/rK0X30JSYU"
+       },
+       {
+           "id": "1501257716941000709",
+           "text": "📣本日は重要な日です! \n@Jigsawと提携し、この新しいツールをリリースしました。このコラボレーションにより、NGOや非営利団体は、サービスを提供するコミュニティのニーズや好みに対応し、Twitterで人々の安全を守るツールを構築できます。詳細はこちら ⬇️ https://t.co/MmznmgxoWT"
+       },
+       {
+           "id": "1501686770810900485",
+           "text": "明日、タイムラインのカスタマイズと開発者にとってどのように機能するかについての継続的な会話にご参加ください。来週予定されているSpacesにもご期待ください。👀 https://t.co/P4JTc14mdC"
+       },
+       {
+           "id": "1501596763194593285",
+           "text": "開発者のイノベーションは、危機的状況においても常に重要です。人々をつなぎ、安全を守り、世界と情報を共有するツールを構築している場合は、私たちがサポートします。このポストに返信して、アプリについて詳しくお聞かせください。"
+       }
+   ]
+}
+```

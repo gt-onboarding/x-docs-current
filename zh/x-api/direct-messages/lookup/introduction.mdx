@@ -1,0 +1,52 @@
+---
+title: 介绍
+sidebarTitle: 介绍
+keywords: ["私信查询", "DM 查询", "获取私信", "私信查找", "DM API", "消息查询"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+本次私信查询功能的初始版本提供了三个 GET 方法：
+
+* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - 获取与一对一会话关联的私信事件。:participant&#95;id 路径参数是与发起本次请求的已认证用户进行会话的那个账号的用户 id。 
+* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - 获取与特定会话 ID 关联的私信事件，该会话 ID 由 :dm&#95;conversation&#95;id 路径参数指定。 
+* **GET /2/dm&#95;events** - 获取与某个用户关联的私信事件，包括一对一和群组会话。最多可获取追溯 30 天内的事件。  
+
+请注意，私信事件 ID 在 v1.1 和 v2（以及 X App）之间是通用的，因此 v1.1 中用于列出单个事件的方法可以与这些新的 v2 端点配合使用。另请注意，Enterprise 和 Premium Account Activity API 支持 v2 一对一消息，但目前尚不支持群组会话。   
+
+在本次发布中，支持三种事件类型，这些端点也支持用于按事件类型进行过滤的查询参数：
+
+* **MessageCreate** - 已创建一条消息。 
+* **ParticipantsJoin** - 有新参与者加入会话。 
+* **ParticipantsLeave** - 有参与者离开会话。 
+
+针对这些 GET 方法，每个用户的速率限制为每 15 分钟 300 次请求。该速率限制在这些 GET 端点之间共享。
+
+由于你是代表某个用户调用 Direct Message v2 端点，因此必须使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 或 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 进行认证，并使用与已授权你的 X App 的用户关联的访问令牌。要使用 OAuth 1.0a 生成这些访问令牌，可以使用 [3-legged OAuth flow](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)。要使用 OAuth 2.0 生成用户访问令牌，可以使用 [Authorization Code with PKCE grant flow](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)。
+
+**账号设置**
+
+要访问这些端点，你需要：
+
+* 一个已获批准的 [开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+* 使用位于某个 [项目](/zh/resources/fundamentals/projects) 中的 [开发者应用](/zh/resources/fundamentals/developer-apps) 的密钥和令牌进行认证。 
+
+在我们的 [入门指南](/zh/x-api/getting-started/getting-access) 中了解更多关于如何获取 X API v2 端点访问权限的信息。
+
+<div className="flex space-x-2">
+  <Button href="/zh/x-api/direct-messages/lookup/quickstart">
+    快速开始
+  </Button>
+
+  <Button href="https://github.com/xdevplatform/Twitter-API-v2-sample-code">
+    示例代码
+  </Button>
+
+  <Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+    在 Postman 中运行
+  </Button>
+
+  <Button href="https://developer.x.com/apitools/api?endpoint=/2/tweets&method=get">
+    使用 API Explorer 试用
+  </Button>
+</div>

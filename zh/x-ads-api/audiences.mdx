@@ -1,0 +1,2089 @@
+---
+title: 受众
+keywords: ["自定义受众", "定向受众", "受众定向", "受众管理", "广告定向", "Audience API"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+## 自定义受众
+
+<div id="overview">
+  ### 概览
+</div>
+
+合作伙伴有多种方式创建[自定义受众](https://business.x.com/en/targeting/tailored-audiences.html)。
+
+* [受众 API（CRM）](#crm)
+* [网页](#web)
+* [移动端](#mobile)
+* [灵活受众](#flexible)
+
+请注意，你无法在定向中排除相似自定义受众。此外，你也不能在同一个广告明细项（广告组）中同时定向一个自定义受众和一个自定义受众的相似受众。
+
+**受众管理**
+
+受众可以通过受众合作伙伴和 Ads API 合作伙伴进行管理。我们在 API 中提供了一系列端点，用于访问和维护自定义受众。
+
+对于自定义受众信息，我们提供两个端点：
+
+* [GET accounts/:account&#95;id/custom&#95;audiences](/zh/x-ads-api/audiences)
+* [GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id](/zh/x-ads-api/audiences)
+
+有关如何上传和管理受众的更多详细信息，请参阅[受众 API 指南](/zh/x-ads-api/audiences)。
+
+**处理时间**
+
+一般来说，受众变更会以批处理方式进行，每 6–8 小时运行一次。在受众变更处理期间，正在更新的现有受众不会受到影响。我们不建议在这一时间范围内针对同一受众进行超过一次的新增操作和一次的移除操作。
+
+**定向**
+
+只有当某个受众至少匹配到 100 名在过去 90 天内活跃于 X 自有及运营客户端的用户时，该受众才能被用于定向。[GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id](/zh/x-ads-api/audiences) 会指明某个受众是否由于匹配用户过少而无法用于定向。
+
+**受众 API（CRM）**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/crm_0.png" alt="image2" />
+</Frame>
+
+受众合作伙伴或 API 合作伙伴提供一组经过哈希处理的标识符，X 进行匹配并生成可用于在 X 上购买媒体投放的受众分段。合作伙伴可以使用[受众 API](/zh/x-ads-api/audiences)来创建这些受众。
+
+**工作原理**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/crm_1.png" alt="image3" />
+</Frame>
+
+**网页**
+
+在与 MPP 受众合作伙伴合作时，我们提供标准的 cookie 匹配流程，以识别可用于在 X 上投放媒体的目标分段。此外，广告主可以设置一个 [X Web Event Tag](/zh/x-ads-api/measurement/web-conversions#web-event-tags)，以收集网站用户数据并创建相应的自定义受众。
+
+**设置步骤**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/screen_shot_2013-11-26-cookie-usage.png" alt="image0" />
+</Frame>
+
+![]()
+
+**工作原理**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/tailored_audience_web.png" alt="image1" />
+</Frame>
+
+**移动端**
+
+有关详细信息，请参阅[关于来自移动应用的自定义受众的博文](https://blog.x.com/2014/introducing-tailored-audiences-from-mobile-apps)。
+
+**灵活受众**
+
+[灵活受众](/zh/x-ads-api/audiences)使广告主能够基于现有自定义受众或现有自定义受众的子集来构建并保存受众组合。可以根据互动的新近度和频率来定向自定义受众成员的子集。
+
+**自定义受众的受限使用案例**
+
+[阅读更多关于限制的说明](https://developer.x.com/en/developer-terms/more-on-restricted-use-cases "Read more about restrictions")
+
+<div id="audiences-faq">
+  ### 受众常见问题解答[](#real-time-tailored-audiences "此标题的固定链接")
+</div>
+
+**问：我们推送了大量数据，为什么受众规模仍然显示为 TOO&#95;SMALL？**
+
+答：目前数据会被实时加入到受众中，但用于计算并提供受众规模的处理任务只会在一段时间之后运行。正确的受众规模应在数小时后显示在 UI 中。
+
+**问：我们已经完成发送受众数据，并等待了 24 小时或更久，但仍然无法投放到该受众——下一步该怎么做？**
+
+答：请确认以下事项：
+
+* 传递的用户 ID 是否正确且格式未损坏。
+* 传递的受众名称是否正确，并且与之前的成员更新相匹配。
+* 请确认 POST 命令的响应是否正常。
+* 请确认 ID Sync 像素是否已按要求正确实现，并且如 ID Sync 流程所述，有足够多的用户访问了相关站点以完成用户映射。未被映射的用户即使出现在成员更新中，也不会被转换为可定向用户。
+
+如果以上全部已确认无误且工作正常，请联系 X 产品联系人，并尽可能详细地提供信息（参见 [Guide to Partner Inbounds](/zh/x-ads-api/introduction) 了解推荐的信息示例）。
+
+**问：我们可以调用该 endpoint 多少次，以及应该使用什么算法？**
+
+答：我们强烈建议只用增量变更来调用我们的系统，切勿重复发送完整的受众成员列表。系统已经过测试，具备足够的吞吐量来处理全球最大网站之一的增量数据更新。首次上传受众时应谨慎控制节奏，预期首次上传将需要相当长的时间才能完成。
+
+**问：受众用于定向时的最小规模是多少？**
+
+* 受众的最小规模为 100 名用户（匹配后）。如果匹配到的受众少于 500 名用户，则该受众在 X Ads UI 中将不可用于定向。
+
+**问：处理受众文件需要多长时间？受众文件在 X 用户界面中可用需要多长时间？**
+
+* 通常处理受众文件需要 4–6 小时，但这取决于文件大小。文件一旦处理完成，这些受众就会在 X Ads UI 中可用。
+
+**问：匹配率是如何计算的？**
+
+* 匹配率 = 90 天内活跃的 X 用户数 / 提供的用户数
+
+**问：我们如何测试一个受众文件是否正常工作？**
+
+* 你可以提供一个测试受众文件，并使用“keltonlynn”作为广告主 handle。之后我们可以验证该文件是否能够被正确摄取并加载到 X 界面中。
+
+**问：什么是合作伙伴用户标识符（`p_user_id`）？**
+
+* 这是你们公司用于唯一标识每位客户的标识符。
+
+**问：什么是标准 ID？**
+
+* 它可以是电子邮件地址、设备 ID、X @handle 或 ID。
+
+**问：如何获取 HMAC Key？**
+
+* 我们会通过加密电子邮件提供该密钥。请将你的公共 PGP 密钥发送到 [mpp-inquiry@x.com](mailto:mpp-inquiry%x.com)，我们会先给你发送一封测试邮件以验证一切正常。验证通过后，我们会将 HMAC Key 发送给你。
+
+**问：如何使用提供的 HMAC Key 验证哈希过程是否成功？**
+
+* X 会提供一个测试文件（包含示例电子邮件地址、设备 ID 等）以及一个对应的哈希结果文件，你可以据此比对验证自己的结果。
+
+**问：完整数据匹配文件是否有大小限制？**
+
+* 不，完整数据匹配文件没有大小限制。
+
+**问：处理完整数据匹配文件需要多长时间？**
+
+* 一旦 X 收到该文件，处理大约需要 1 天时间。
+
+<div id="crm">
+  ### 客户关系管理（CRM）
+</div>
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/crm_0.png" alt="image0" />
+</Frame>
+
+本文档说明 Custom Audiences CRM 合作伙伴的集成细节，包括文件格式和数据交换流程。
+
+**摘要**
+
+Company 将代表某个客户向 X 提供一份经过哈希处理的常见用户标识符列表（例如电子邮件地址）或合作伙伴用户 ID，以便执行匿名匹配并生成用于定向的 X 用户 ID 列表。这些用于定向的细分人群将关联到广告主在 ads.x.com 广告系列设置中、由文件名指定的特定 @handle。
+
+来自 Company 的所有文件都将通过 IronBox（www.golockbox.com）上的安全包传输给 X，使用的是 X 授予 Company 的专用账户。X 将提供对 IronBox 的访问权限。IronBox API 的文档可在 [https://secure.goironcloud.com/Docs/Help/](https://secure.goironcloud.com/Docs/Help/) 查阅。
+
+<div id="partner-id-matching-requirements">
+  #### 合作方 ID 匹配要求
+</div>
+
+如果公司使用自身的标准 ID 系统来跟踪用户（即不使用电子邮件地址、设备 id、X 用户 ID 等常见用户标识符），则推荐采用以下流程。
+
+**1. 全量数据匹配**
+
+初始阶段，公司将通过单个文件向 X 提供包含所有用户记录的完整列表，这些记录中包含与 X 共享的唯一通用用户标识符，以执行一次全量数据匹配，并由 X 生成并存储合作方 ID（`p_user_id`）到 X ID（`tw_id`）的映射。此操作将每 2–3 个月定期执行一次，以确保正确维护。匹配完成后，X 将通过电子邮件向公司分享基于该文件的基线匹配率。
+
+该文件的格式应为：
+
+名称约定：FullDataMatch.[CompanyName].txt
+
+哈希算法：HMAC&#95;SHA-256
+
+格式：
+
+第 1 列：通用用户标识符的 HMAC 哈希值
+
+第 2 列：合作方用户 ID（对每个用户唯一，但在文件中可重复出现）
+
+列分隔符（CSV）：使用逗号分隔哈希后的通用用户标识符和合作方 ID
+
+按行分隔的值
+
+* 示例：如果用户记录 A 的合作方用户 ID 为 1，通用用户标识符为 1、2 和 3：
+
+|     |     |
+| :--- | :--- |
+| 通用用户标识符 1 | p&#95;user&#95;1 |
+| 通用用户标识符 2 | p&#95;user&#95;1 |
+| 通用用户标识符 3 | p&#95;user&#95;1 |
+
+* 有关通用用户标识符的哈希指引，请参见下方“哈希说明”部分
+
+**2. 自定义细分列表**
+
+公司将以 `p_user_id` 列表的形式提供用户列表，用于为客户在 X 上创建自定义受众以进行定向投放。
+
+* 按行分隔的值
+* `p_user_id`
+* （与上文 1. 全量数据匹配部分中提供的内容相同。如果在全量数据匹配中提供的值是哈希后的，则公司将在受众文件中提供相同的哈希值；如果提供的值未哈希，则公司将提供未哈希的值。）
+* 仅包含合作方用户 ID 列，不需要包含通用用户标识符
+* 每行一个 `p_user_id`，无需额外分隔符或列
+
+<div id="standard-matching-requirements">
+  #### 标准匹配要求
+</div>
+
+如果公司没有使用统一的标准 ID 来映射所有客户用户标识符，建议采用以下流程。
+
+**自定义分群列表**
+
+公司将代表其客户，直接向 X 提供经过哈希处理的通用用户标识符列表，用于创建自定义受众。
+
+此文件的格式应为：
+
+* 行分隔的值（每行一个值）
+* 通用用户标识符的哈希值（例如电子邮件地址）
+* 遵循下文所述的文件命名规范
+* 遵循下文“哈希处理说明”中关于电子邮件地址的哈希处理指引
+
+<div id="custom-segment-list-file-naming-operations">
+  #### 自定义分段列表文件命名与操作
+</div>
+
+文件的操作将由其文件名决定，可用操作及通用文件命名规范如下：audiencename&#95;partnername.handle.operation.filetype
+
+* audiencename：自定义受众的名称。此字段是在 ads.x.com 广告系列设置界面中选择受众时显示的名称，例如 brand&#95;loyalty&#95;card&#95;holders。
+* partnername：代表广告主上传数据的公司的名称，例如 company&#95;name。
+* handle：将拥有自定义受众访问权限的 X 账号（@handle），例如 @pepsi、@dietpepsi
+* operation：new、add、remove、removeall、replace（详见下文）
+* ：标准 Unix 纪元时间（秒），用于确保上传的每个受众文件都是唯一的
+* filetype：文件应为 *.txt 文本格式
+
+<div id="creating-and-updating-audiences">
+  #### 创建和更新受众
+</div>
+
+使用单个文件创建一个新受众，例如：loyalty&#95;card&#95;holders&#95;partnername.pepsi.new.txt
+
+Add - 将某个列表中的匹配项添加到现有受众，例如：loyalty&#95;card&#95;holders&#95;partnername.pepsi.add..txt
+
+Remove - 从现有受众中移除某个列表中的匹配项，例如：loyalty&#95;card&#95;holders&#95;partnername.pepsi.remove..txt
+
+Remove All - 将定期更新的累积列表中产生的匹配项，从该客户的所有受众中移除（即客户的选择退出列表 Opt Out List）。例如：partnername.pepsi.removeall.txt
+
+* 这可用于存放从该广告主处选择退出的用户的完整列表。
+* X 仅以此文件中提供的最新列表为准，并会在提供并处理该文件时，对所有已匹配上的现有及未来受众生效。
+
+Replace - 移除一个现有受众，并用一个新的受众列表替换它。例如：loyalty&#95;card&#95;holders&#95;partnername.pepsi.replace..txt
+
+Overall Company Opt-Out - 公司将提供一个累积的选择退出（Opt-Out）文件，用于移除根据公司选择退出政策已选择退出的用户。
+
+X 仅以此公司选择退出文件中提供的最新列表为准，并会在提供并处理该文件时，对所有已匹配上的现有及未来受众中的 X 用户生效。公司选择退出文件的格式如下：例如：partnername.removeall.txt
+
+Delete - 从当前受众列表中移除一个现有受众，例如：loyalty&#95;card&#95;holders&#95;partnername.pepsi.delete.txt
+
+<div id="hashing-directions">
+  #### 哈希指引
+</div>
+
+X 将通过 PGP 安全地共享一个经过 Base64 编码的生产密钥，用于对常见用户标识符（如电子邮件地址）进行哈希计算。公司应对该密钥进行 Base64 解码，以生成一个 32 字节的密钥，用于执行哈希。
+
+示例 Base64 编码密钥：
+
+BrQvOg+dACBUmKjRiNxZgJLh6zydjS0ZOv80FelTNzM=
+
+示例 Base64 解码密钥：
+
+/:� TшY
+
+规范化处理：公司将在对常见用户标识符进行哈希前执行基本规范化处理（设备 ID 除外，参见“设备 ID 规范化”部分）。
+
+<div id="e-mail-normalization">
+  #### 电子邮件规范化
+</div>
+
+即去除前后空格，并将电子邮件地址全部转换为小写。
+
+例如：原始电子邮件地址：testemail&#95;Organisational&#95;baseball+884`@`It92I6Ev2B`.`Com
+
+规范化后：testemail&#95;organisational&#95;baseball+884`@`it92i6ev2b`.`com
+
+哈希值：74d9584eded0ad1e5572a1c1849f3716751d371d6117a6155dad5363f4b4fbec
+
+注意：编码后的 HMAC 和密钥的字符数可能会根据输入和编码方式而变化，因此具体字符数并不固定。
+
+<div id="device-id-normalization">
+  #### 设备 ID 规范化
+</div>
+
+我们对设备 ID 的哈希有一致的要求：使用 SHA-256 哈希算法以及我们提供给数据合作伙伴的通用盐值。我们会像处理电子邮件地址一样去除空格，但不会对 IDFA/Android ID 进行小写转换，必须使用 IDFA/Android ID 的原始格式。
+
+下面是 iOS 和 Android 设备 ID 在哈希前的原始格式示例：
+
+iOS IDFA：DD99CFF7-6186-4602-9DF2-ED3FD0B2D431
+
+Android ID：b5bf2122961b3595
+
+哈希后的 iOS IDFA：134fb8cd95c7fd42e2793f469a447198ca5f990968db2dbadad70e723ed9750b
+
+哈希后的 Android ID：130dddff1939f229476f50bc8adab8fcb7e3525b0e9604fe8effc15e68cee4a4
+
+<div id="x-user-id-normalization">
+  #### X 用户 ID 规范化
+</div>
+
+X ID 仍将进行哈希处理，因为用于数据分组的数据——例如由 @handles 构成的 Customer List——即使不是个人可识别信息（PII），对广告主来说也仍然是私有的。对于 X ID 的哈希计算，我们仍采用相同要求：使用 SHA-256 哈希算法，以及我们提供给数据合作伙伴的通用盐值。应从 X ID/`@`username 中移除空格，但 User ID 不需要进行规范化。为实现规范化，应将 @username 转为小写。同时，@ 符号本身不应作为 username 的一部分包含在内。
+
+原始 ID 格式如下：
+
+* User ID: 27674040
+* @username: testusername
+
+哈希后的 User ID: bf6b57d4e861e83bea8bbed2b800b251a64c95468ee6e8cb07c3368c9ed45e85
+
+哈希后的 @username: 12201ae78ad1afa907c7112d17f498154ffb0bf9ea523f5390e072a06d7d9812
+
+<div id="id-sync-integration">
+  ### ID 同步集成
+</div>
+
+通过 `p_id` 发送数据的合作伙伴必须执行 ID 同步流程，以生成广告主或合作伙伴用户 id 与 X 用户 id 之间的映射。这使广告主能够在 X 上直接定向触达其自有用户细分。合作伙伴在发送成员更新时，还必须将参数 `user_identifier_type` 的值设置为 `TALIST_PARTNER_USER_ID` 或 `TAWEB_PARTNER_USER_ID`。
+
+* **仅限 Web**：可以通过在广告主站点上放置像素代码来完成，具体方式如下所述。
+* **列表**：可以使用 [CRM](/zh/x-ads-api/audiences#crm) 页面中描述的任意方法来完成。
+
+<div id="pixel-url">
+  #### 像素 URL
+</div>
+
+|     |
+| :--- |
+| **基本 URL** |
+| [https://analytics.x.com/i/adsct](https://analytics.x.com/i/adsct) |
+
+<div id="pixel-parameters">
+  #### Pixel 参数
+</div>
+
+|     |     |
+| :--- | :--- |
+| **参数** | **说明** |
+| `p_id` | X 分配给你的合作方 id |
+| `p_user_id` | 用户在合作方系统中的 id |
+
+<div id="id-sync-pixel">
+  #### ID 同步像素：
+</div>
+
+以合作伙伴 id 111 和 `p_user_id` abc 为例，构造出的像素如下：
+
+```json
+    <pre class="brush: xml">
+    <img height="1" width="1" src="https://analytics.x.com/i/adsct?p_id=111&p_user_id=abc" style="display:none" />
+    </pre>
+```
+
+**选择退出文件的配置与发送**
+
+合作伙伴应向 X 提供一份用户列表，列出据合作伙伴所知已选择退出定向广告投放的用户。文件应按以下格式发送：
+
+|                   |                                     |                 |                                                                                                                                                                                                                            |
+| :---------------- | :---------------------------------- | :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Column Number** | **Column Name**                     | **Column Type** | **Description**                                                                                                                                                                                                            |
+| 1                 | Partner ID                          | string          | “partner id” 是 X 提供给合作伙伴、用于唯一标识每个合作伙伴的 ID。                                                                                                                                                                                 |
+| 2                 | The user’s id in the partner system | string          | `p_user_id` 是合作伙伴用于标识用户的唯一 ID。包含这些选择退出用户的文件应使用 [TON upload](/zh/x-ads-api/audiences) 端点上传，已上传数据的路径应发送到此处的 Global Opt Out 端点：[PUT accounts/:account&#95;id/custom&#95;audiences/global&#95;opt&#95;out](/zh/x-ads-api/audiences)。 |
+
+**发送成员更新**
+
+如我们的端点文档中所述，通过 [POST custom&#95;audience&#95;memberships](/zh/x-ads-api/audiences) 端点传递用户时，你应传递一个 customer ID（客户 ID），以启用基于 cookie 的匹配。使用 `p_id` 发送数据的合作伙伴**必须**将 `user_identifier_type` 设置为 `TALIST_PARTNER_USER_ID` 或 `TAWEB_PARTNER_USER_ID`。
+
+其他所有步骤将与[实时受众 API 集成指南](/zh/x-ads-api/audiences)中列出的步骤保持一致。
+
+<div id="custom-audiences-user-data">
+  ### 自定义受众用户数据
+</div>
+
+本文档概述了 [自定义受众]/x-ads-api/audiences 用户数据的格式。
+
+**数据标准化**
+
+**设备 ID**：
+
+* IDFA - 使用带连字符的小写格式；例如：`4b61639e-47cc-4056-a16a-c8217e029462`
+* AdID - 需要与设备上的原始格式一致，不要全部大写，保留连字符；例如：`2f5f5391-3e45-4d02-b645-4575a08f86e`
+* Android id - 需要与设备上的原始格式一致，不要全部大写，且不包含连字符或空格；例如：`af3802a465767e36`
+
+**电子邮件地址**：
+
+* 使用小写，去除前后空格；例如：`support@x.com`
+
+**X 用户名**：
+
+* 不包含 @，使用小写，并去除前后空格；例如：`jack`
+
+**X 用户 ID**：
+
+* 标准整数；例如：`143567`
+
+**数据哈希**
+
+每一行数据都必须使用 `SHA256` 进行哈希，且不得使用盐值（salt）。另外，最终输出的哈希值必须为小写。例如：49e0be2aeccfb51a8dee4c945c8a70a9ac500cf6f5cb08112575f74db9b1470d，**而不是**49E0BE2AECCFB51A8DEE4C945C8A70A9AC500CF6F5CB08112575F74DB9B1470D
+
+```
+# hasing user @AdsAPI using python
+import hashlib
+hashlib.sha256("adsapi".encode()).hexdigest()
+
+#output
+49e0be2aeccfb51a8dee4c945c8a70a9ac500cf6f5cb08112575f74db9b1470d
+```
+
+更多与哈希相关的代码示例可在 [github.com/xdevplatform/ads-platform-tools](https://github.com/xdevplatform/ads-platform-tools) 找到。
+
+<div id="custom-audiences-web">
+  ### 自定义受众：Web
+</div>
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/info.png" alt="info.png" />
+</Frame>
+
+**信息**
+
+合作伙伴会代表广告主发送一组 ID（`p_user_ids`）用于定向。此操作通过 ID 同步（ID Sync）流程完成，该流程会构建 `p_user_ids` 与 X 用户 ID 之间的映射。然后使用该映射生成可用于定向的 X 用户 ID 列表。这些自定义受众将在广告主特定的 @handle 下可用，具体由 ads.x.com 上“Custom Audiences Web”广告系列设置中的标签指定。
+
+X 将提供一个可部署在合作伙伴标签和站点上的安全像素代码，用于将这些 ID（`p_user_ids`）与 X 用户 ID 进行匹配。ID Sync 流程完成后，合作伙伴将创建定向文件，并通过一个 HTTPS 端点提供给 X。X 会定期获取并导入这些定向文件，然后在 X 界面中提供使用。
+
+**X 安全像素**
+
+X 安全像素的形式如下：
+
+[https://analytics.x.com/i/adsct?p&#95;user&#95;id=xyz&amp;p&#95;id=123](https://analytics.x.com/i/adsct?p\\_user\\_id=xyz\&p_id=123)
+
+**`p_user_id`** - xyz 表示由合作伙伴提供的合作伙伴用户 ID
+
+**`p_id`** - 123 表示合作伙伴的唯一 ID（由 X 提供）
+
+**合作伙伴 HTTPS 端点和定向用户文件**
+
+合作伙伴需要向 X 提供一个 HTTPS 端点以及用于定期获取并导入定向文件的凭证（用户名/密码）。示例 HTTPS 端点形式如下：
+
+```
+https://<partnerdomain>/twitter/partner_targeting_%Y-%M-%D.tsv.gz
+```
+
+%Y - 年格式代码 (YYYY)
+
+%M - 月格式代码 (MM)
+
+%D - 日格式代码 (DD)
+
+传输的数据将包含以下文件：
+
+1. Partner Targeting User File
+2. Targeting Conversion File
+
+所有文件均为 TSV 格式，其中每一行中的各个字段之间以制表符分隔。有效的字段值本身绝不会包含制表符。
+
+**允许的 X IP 范围：**
+
+以下是可被授权访问 Partner Endpoint 的 IP 段范围。
+
+* 199.16.156.0/22
+* 199.59.148.0/22
+
+**Partner Targeting User File：**
+
+| **Column Number** | **Column Name**   | **Column Type** | **Description**                                                                                                                             |
+| :---------------- | :---------------- | :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1                 | partner id        | string          | “partner id” 是 X 提供给 Partner 的 ID，用于唯一标识每个 Partner。                                                                                         |
+| 2                 | advertiser id     | string          | “advertiser id” 是广告主的 @handle。                                                                                                              |
+| 3                 | p&#95;user&#95;id | string          | “p&#95;user&#95;id” 是 Partner 用来标识用户的唯一 ID。                                                                                                 |
+| 3                 | confidence score  | integer         | “confidence score”（置信度评分）为可选字段。我们建议的取值范围为 0–100。如果用例是重定向，则 confidence score 为 “100” 表示该用户是被直接重定向的。0–99 之间的任何评分都表示对相似受众的置信度水平。               |
+| 4                 | segment label     | string          | “segment label”（分群标签）为可选字段。Partner 可以使用 “segment label” 来指定例如产品类别等信息。我们建议使用此 “segment label”，因为它是在 ads.x.com UI 中 Custom Audiences 的人类可读名称。 |
+
+**说明：**
+
+每次我们收到新的 Partner Targeting File 时，除非另有约定，我们都期望该文件是 Partner 推荐我们投放目标用户的完整列表，而不是增量列表。我们会与每个 Partner 协商此 Partner Targeting File 的交付频率。如果在预期时间内没有收到 Partner Targeting File，我们将继续使用上一版本，并设定预先定义的过期时间。
+
+<div id="audience-api-integration">
+  ## Audience API 集成
+</div>
+
+### 概述
+
+Audience API 作为 Ads API [v4](/zh/x-ads-api/introduction) 的一部分推出，对旧版 Audiences 端点进行了多项改进。这个新端点由全新的 Audience 处理后端提供支持，在稳定性、健壮性和可靠性方面都有显著提升。本指南旨在重点说明 Audience API 与传统 Audience 上传和管理流程之间的差异。 
+
+你可以在 [Audience API](/zh/x-ads-api/audiences) 参考文档页面查看详细说明。 
+
+**注意**：所有 Audience 用户数据在上传前都必须进行 SHA-256 哈希处理。关于更多细节、可接受的用户标识符类型以及数据规范化要求，请参阅 [user data](/zh/x-ads-api/audiences) 页面。
+
+**Audience 功能变更**
+
+自 v4 起，Custom Audience 引入了以下变更，一旦 Ads API v3 下线，任何被弃用的端点都将不再可用：
+
+* **已弃用** TON Upload：
+  * GET accounts/:account&#95;id/custom&#95;audience&#95;changes
+  * GET accounts/:account&#95;id/custom&#95;audience&#95;changes/:custom&#95;audience&#95;change&#95;id
+  * POST accounts/:account&#95;id/custom&#95;audience&#95;changes
+  * PUT accounts/:account&#95;id/custom&#95;audiences/global&#95;opt&#95;out
+* **已弃用** Real Time Audiences：
+  * POST custom&#95;audience&#95;memberships
+* Custom Audience：
+  * `list_type` 参数将从所有 [Custom Audience](/zh/x-ads-api/audiences) 端点的请求和响应中移除。该参数之前用于标识 Audience 的用户标识符类型（例如 email、X User ID 等），但现在 Audience 能够针对同一个 Audience 接受多种用户标识符，因此该参数已不再需要。
+* 通用：
+  * Audience 回溯窗口已更新为匹配过去 90 天内活跃的用户（此前为 30 天）
+  * 受众可被定向投放所需的最小匹配用户数已降低为 100 个用户（此前为 500 个用户）
+
+<Note>
+  **先决条件**
+
+  * Ads API 访问权限
+  * 若要访问 Audience 端点，你需要被加入 allowlist。请填写此表单，并在最初接受时间早于 2018-08-01 的情况下，接受新的 [X Ads Products and Services Agreement](/zh/x-ads-api/introduction)
+</Note>
+
+**Audience 上传流程**
+
+下表列出了旧版与新版 Audience 创建流程之间的主要差异，更多详细信息将在后文进一步说明：
+
+| 流程步骤 | Audience API | （已弃用）TON Upload |
+| :--- | :--- | :--- |
+| 创建空白 Audience | 可通过 [POST custom&#95;audience endpoint]/x-ads-api/audiences 创建 | 可通过 [POST custom&#95;audience endpoint]/x-ads-api/audiences 创建 |
+| 添加新用户 | 使用 `operation_type` 为 `Update` 搭配 [Audience endpoint](/zh/x-ads-api/audiences) | 使用 `operation` 为 `ADD` 搭配 [POST custom&#95;audience&#95;changes](/zh/x-ads-api/audiences) 端点 |
+| 移除用户 | 使用 `operation_type` 为 `Delete` 搭配 [Audience endpoint](/zh/x-ads-api/audiences) | 使用 `operation` 为 `REMOVE` 搭配 [POST custom&#95;audience&#95;changes](/zh/x-ads-api/audiences) 端点 |
+| 为用户设置退出（Opt-out） | 使用 `operation_type` 为 `Delete` 搭配 [Audience endpoint](/zh/x-ads-api/audiences)，并提供该用户所属的相应 `custom_audience_id` | 使用 [Global opt-out endpoint](/zh/x-ads-api/audiences) |
+
+**注意** 任何通过 TON Upload 路径进行更新或退出操作的 Audience，都必须先通过 [TON Upload](/zh/x-ads-api/audiences) 端点上传相应列表，并使用 [custom&#95;audience&#95;changes](/zh/x-ads-api/audiences) 端点将其关联到某个 Audience。
+
+**速率限制**
+
+Audience API 端点的速率限制为每个账号每 1 分钟 1500 次调用。单个 payload 中可发送的用户数量没有限制。对 payload 的唯一约束为：
+
+1. 操作总数：最多 2500 个操作
+
+2. 最大 payload 大小：5,000,000 字节
+
+**Audience 用户管理**
+
+要创建一个新的 Audience，需要完成以下步骤。
+
+<div id="create-a-new-custom-audience">
+  ### 创建新的自定义受众
+</div>
+
+使用 [POST custom&#95;audience]/x-ads-api/audiences 端点创建一个新的自定义受众“空壳”（shell），并获取相应的自定义受众 `id`。如果是从头开始创建受众，此步骤是必需的。如果要更新现有受众，请跳到下一节。
+
+<div id="add-users-to-an-audience">
+  ### 将用户添加到受众
+</div>
+
+使用 [POST accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/users](/zh/x-ads-api/audiences)，提供自定义受众的 `id`，并参考如下示例请求体：
+
+POST [https://ads-api.x.com/11/accounts/18ce54d4x5t/custom&#95;audiences/1nmth/users](https://ads-api.x.com/11/accounts/18ce54d4x5t/custom_audiences/1nmth/users)
+
+```
+    # 所有值都必须经过哈希处理,此示例中使用的未哈希值仅用于说明目的
+    [
+      {
+        "operation_type": "Update",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "email": [
+                "abc@x.com"
+              ],
+              "handle": [
+                "x",
+                "adsapi"
+              ]
+            },
+            {
+              "email": [
+                "edf@x.com"
+              ],
+              "twitter_id": [
+                "121291606",
+                "17874544"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+要将用户添加到 Audience，请将 `operation_type` 设为 `Update`。新的 Audience 接口允许为同一用户传入多个用户键。JSON 对象数组中的每个对象都对应一个用户。根据上面的示例载荷，请求会向 Audience 添加两个用户，一个包含 `email` 和 `handle`，另一个包含 `email` 和 `twitter_id`。
+
+<div id="remove-users-from-an-audience">
+  #### 从受众中移除用户
+</div>
+
+与上文添加用户的流程类似，也可以通过如下请求将用户从受众中移除：
+
+POST [https://ads-api.x.com/11/accounts/18ce54d4x5t/custom&#95;audiences/1nmth/users](https://ads-api.x.com/11/accounts/18ce54d4x5t/custom_audiences/1nmth/users)
+
+```
+    # 所有值都必须经过哈希处理，此示例中使用的未哈希值仅用于说明目的
+    [
+      {
+        "operation_type": "Delete",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "email": [
+                "abc@x.com"
+              ],
+              "twitter_id": [
+                "783214",
+                "1225933934"
+              ]
+            },
+            {
+              "email": [
+                "edf@x.com"
+              ],
+              "twitter_id": [
+                "121291606",
+                "17874544"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+`operation_type` 必须设置为 `Delete`，系统会根据在将用户添加到受众时所使用的任意键来匹配用户。比如，如果某个用户是通过 `email` 和 `twitter_id` 添加到受众中的，那么之后可以使用这些键中的任意一个来移除该用户，即可以使用 `email` 或 `twitter_id`，或两者同时使用。
+
+此外，在同一个请求中既可以向受众添加用户，也可以从受众中移除用户。该 endpoint 支持在单个请求中使用多个 `operation_type`。
+
+<div id="opt-out-users">
+  #### 选择退出的用户
+</div>
+
+随着全局选择退出端点被弃用，合作伙伴必须对已从任意受众中选择退出的用户执行 `Delete` 操作。可以通过以下几种方式实现：
+
+1. 跟踪每个用户属于哪些受众，并从各个受众中分别移除这些用户。
+2. 将该用户从与某个 Ads 账户关联的**所有**受众中移除。
+
+**通用最佳实践**
+
+* 我们强烈建议以接近实时的小批量方式调用此端点，以避免出现处理时间更长的突增队列，从而整体上减少对我们系统的不必要负载。这样也可以确保这些用户更快可用于广告系列定向。
+* 一次成功的 API 调用会返回 `success_count` 和 `total_count`，对应请求中接收到的 `user` 对象的数量。
+* 此端点具有原子性，也就是说，要么整个请求全部成功；如果出现任何错误，则整个请求都会失败。出现错误响应时，建议 API 使用方先修复错误，然后携带完整负载重试该请求。 
+* 如果调用失败，建议合作伙伴在重试时使用[指数退避](https://en.wikipedia.org/wiki/Exponential_backoff)策略。例如，第一次失败后立即重试，第二次失败后在 1 分钟后重试，第三次连续失败后在 5 分钟后重试，依此类推。
+
+<div id="api-reference">
+  ## API 参考
+</div>
+
+<div id="keyword-insights">
+  ### 关键词分析
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-insightskeywordssearch">
+  #### GET insights/keywords/search[](#get-insights-keywords-search "此标题的永久链接")
+</div>
+
+给定一组关键词，获取其关联的帖子量以及一组 30 个相关关键词。帖子量只对应输入的关键词，不包括相关关键词。
+
+允许的最大时间范围（`end_time` - `start_time`）为 7 天。
+
+请注意，结果限定为单一地理区域（国家）。
+
+**资源 URL[](#resource-url "此标题的永久链接")**
+
+`https://ads-api.x.com/12/insights/keywords/search`
+
+**参数[](#parameters "此标题的永久链接")**
+
+| Name                                    | Description                                                                                                                                                                                                           |
+| :-------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| granularity  <br />*required*           | 指定由 `start_time` 和 `end_time` 表示的时间范围内返回数据的粒度。例如，当设置为 `HOUR` 时，将为 `start_time` 和 `end_time` 之间的每个小时提供一个数据点。<br /><br />Type: enum<br /><br />Possible values: `DAY`, `HOUR`                                           |
+| keywords  <br />*required*              | 以逗号分隔的关键词字符串，用于缩小搜索范围。所有关键词之间使用 OR 逻辑进行组合。<br /><br />**注意**：最多可使用 10 个关键词（`keywords` 与 `negative_keywords` 的总和）。<br /><br />Type: string<br /><br />Example: `developers`                                            |
+| start&#95;time  <br />*required*        | 将检索到的数据限定在 `start_time` 与 `end_time` 之间的时间窗口内。使用 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 格式表示。<br /><br />Type: string<br /><br />Example: `2017-07-10T00:00:00Z`                                          |
+| end&#95;time  <br />*optional*          | 将检索到的数据限定在 `start_time` 与 `end_time` 之间的时间窗口内。使用 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 格式表示。<br /><br />**注意**：默认为当前时间。<br /><br />Type: string<br /><br />Example: `2017-07-11T00:00:00Z`               |
+| location  <br />*optional*              | 从 [GET targeting&#95;criteria/locations](/zh/x-ads-api/campaign-management#get-targeting-criteria-locations) 端点获取的定位值，用于根据账户用户所在位置来缩小结果范围。请注意，目前仅支持国家级位置。<br /><br />Type: string<br /><br />Example: `0ce8b9a7b2742f7e` |
+| negative&#95;keywords  <br />*optional* | 以逗号分隔的要排除的关键词字符串。所有排除关键词之间使用 OR 逻辑进行组合。<br /><br />**注意**：最多可使用 10 个关键词（`keywords` 与 `negative_keywords` 的总和）。<br /><br />Type: string<br /><br />Example: `rain`                                                     |
+
+**示例请求[](#example-request "此标题的永久链接")**
+
+```json
+GET https://ads-api.x.com/12/insights/keywords/search?end_time=2018-02-02&granularity=DAY&keywords=developers&start_time=2018-02-01
+```
+
+**示例响应[](#example-response "此标题的永久链接")***
+
+```
+    {
+      "request": {
+        "params": {
+          "start_time": "2018-02-01T00:00:00Z",
+          "end_time": "2018-02-02T00:00:00Z",
+          "granularity": "DAY",
+          "keywords": [
+            "developers"
+          ]
+        }
+      },
+      "data": {
+        "related_keywords": [
+          "dev",
+          "developer",
+          "coders",
+          "mysql",
+          "devs",
+          "#technology",
+          "#developers",
+          "security",
+          "programmers",
+          "#tech",
+          "javascript",
+          "#iot",
+          "#bigdata",
+          "cloud",
+          "devops",
+          "php",
+          "developer",
+          "programmer",
+          "engineer",
+          "big data",
+          "agile",
+          "app",
+          "programming",
+          "ios",
+          "maker",
+          "startups",
+          "developer's",
+          "java",
+          "#devops",
+          "startup"
+        ],
+        "tweet_volume": [
+          15707
+        ]
+      }
+    }
+```
+
+<div id="tailored-audience-permissions">
+  ### 自定义受众权限
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/369a02c0adc626ff6a06#?env%5BTwitter%20Ads%20API%5D=W3sia2V5IjoiYWNjb3VudF9pZCIsInZhbHVlIjoieW91cl9hZHNfYWNjb3VudF9pZCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidmVyc2lvbiIsInZhbHVlIjoiNSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfa2V5IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX2tleSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfc2VjcmV0IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX3NlY3JldCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiYWNjZXNzX3Rva2VuIiwidmFsdWUiOiJ5b3VyX2FjY2Vzc190b2tlbiIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidG9rZW5fc2VjcmV0IiwidmFsdWUiOiJ5b3VyX3Rva2VuX3NlY3JldCIsImVuYWJsZWQiOnRydWV9XQ==">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idtailored_audiencestailored_audience_idpermissions">
+  #### GET accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions[](#get-accounts-account-id-tailored-audiences-tailored-audience-id-permissions "Permalink to this headline")
+</div>
+
+检索与指定定向受众关联的部分或全部权限的详细信息。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/5/accounts/:account_id/tailored_audiences/:tailored_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                           | Description                                                                                                                                                                                                                           |
+| :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id  <br />*required*                               | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已通过身份验证的用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                                        |
+| tailored&#95;audience&#95;id  <br />*required*                 | 你在本次请求中要操作的定向受众的引用。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                                               |
+| count  <br />*optional*                                        | 指定每个请求尝试检索的记录数量。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000`                                                                                                                                          |
+| cursor  <br />*optional*                                       | 指定用于获取下一页结果的游标。有关更多信息，请参阅 [Pagination](/zh/x-ads-api/introduction)。<br /><br />Type: string<br /><br />Example: `8x7v00oow`                                                                                                              |
+| granted&#95;account&#95;ids  <br />*optional*                  | 通过指定用逗号分隔的标识符列表，将响应限定为所需的账户。最多可提供 200 个 ID。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                                 |
+| sort&#95;by  <br />*optional*                                  | 按支持的属性以升序或降序排序。有关更多信息，请参阅 [Sorting](/zh/x-ads-api/introduction)。<br /><br />Type: string<br /><br />Example: `created_at-asc`                                                                                                            |
+| tailored&#95;audience&#95;permission&#95;ids  <br />*optional* | 通过指定用逗号分隔的标识符列表，将响应限定为所需的定向受众权限。最多可提供 200 个 ID。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                                      |
+| with&#95;total&#95;count  <br />*optional*                     | 在响应中包含 `total_count` 属性。<br /><br />**注意**：此参数与 `cursor` 互斥，不可同时使用。<br /><br />**注意**：包含 `total_count` 的请求将具有更低的速率限制，目前设置为每 15 分钟 200 次。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/5/accounts/18ce54d4x5t/tailored_audiences/1nmth/permissions`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "tailored_audience_id": "1nmth"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "tailored_audience_id": "1nmth",
+          "permission_level": "READ_ONLY",
+          "id": "ri",
+          "created_at": "2017-06-08T23:17:59Z",
+          "granted_account_id": "18ce54aymz3",
+          "updated_at": "2017-06-08T23:17:59Z",
+          "deleted": false
+        }
+      ]
+    }
+
+```
+
+<div id="post-accountsaccount_idtailored_audiencestailored_audience_idpermissions">
+  #### POST accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions[](#post-accounts-account-id-tailored-audiences-tailored-audience-id-permissions "Permalink to this headline")
+</div>
+
+创建一个新的权限对象，允许将指定受众与给定账号共享。
+
+**注意**：为定向受众创建或修改权限要求该受众必须由尝试修改权限的账号拥有。你可以通过查看某个受众响应中的 `is_owner` 响应属性来检查该定向受众的归属。
+
+**注意**：受众只能在同一企业下的广告账号之间共享，或者在拥有该受众的广告账号具备 `SHARE_AUDIENCE_OUTSIDE_BUSINESS` 账号功能的情况下进行共享。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/5/accounts/:account_id/tailored_audiences/:tailored_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                           | Description                                                                                                                                                                                   |
+| :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*               | 要使用的账号标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 外所有 Advertiser API 请求所必需的参数。指定的账号必须与已通过身份验证的用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| granted&#95;account&#95;id  <br />*required*   | 你希望为其授予该定向受众权限的账号。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                  |
+| permission&#95;level  <br />*required*         | `granted_account_id` 应该拥有的对该定向受众的访问类型。<br /><br />Type: enum<br /><br />Possible values: `READ_ONLY`, `READ_WRITE`                                                                            |
+| tailored&#95;audience&#95;id  <br />*required* | 请求中要操作的定向受众的标识符。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                          |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`POST https://ads-api.x.com/5/accounts/18ce54d4x5t/tailored_audiences/2906h/permissions?granted_account_id=18ce54aymz3&permission_level=READ_ONLY`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "granted_account_id": "18ce54aymz3",
+          "permission_level": "READ_ONLY",
+          "tailored_audience_id": "2906h"
+        }
+      },
+      "data": {
+        "tailored_audience_id": "2906h",
+        "permission_level": "READ_ONLY",
+        "id": "14m",
+        "created_at": "2017-09-12T23:49:34Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-09-12T23:49:34Z",
+        "deleted": false
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idtailored_audiencestailored_audience_idpermissionstailored_audience_permission_id">
+  #### DELETE accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions/:tailored&#95;audience&#95;permission&#95;id[](#delete-accounts-account-id-tailored-audiences-tailored-audience-id-permissions-tailored-audience-permission-id "Permalink to this headline")
+</div>
+
+撤销指定的 Tailored Audience 共享权限。
+
+**注意**：创建或修改某个 Tailored Audience 的权限，要求该 Audience 必须由尝试修改权限的账户所拥有。你可以通过查看给定 Audience 响应中的 `is_owner` 响应属性来检查该 Tailored Audience 的所有权。
+
+撤销后，我们保证被授予的账户（`granted_account_id`）将无法在未来的广告活动中定向该 Audience。现有的广告活动会继续使用已共享的 Audiences；广告活动不会停止，且该 Audience 不会从广告活动中移除。在撤销 Audience 共享权限之后，无法复制此广告活动。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/5/accounts/:account_id/tailored_audiences/:tailored_audience_id/permissions/:tailored_audience_permission_id`
+
+**参数[](#parameters "Permalink to this headline")**
+
+| Name                                                          | Description                                                                                                                                                                            |
+| :------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                              | 所使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 以外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| tailored&#95;audience&#95;id  <br />*required*                | 你在请求中要操作的 Tailored Audience 的 ID。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                  |
+| tailored&#95;audience&#95;permission&#95;id  <br />*required* | 你在请求中要操作的 Tailored Audience 权限的 ID。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                   |
+
+**请求示例[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/5/accounts/18ce54d4x5t/tailored_audiences/1nmth/permissions/ri`
+
+**响应示例[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "tailored_audience_permission_id": "ri",
+          "tailored_audience_id": "1nmth"
+        }
+      },
+      "data": {
+        "tailored_audience_id": "1nmth",
+        "permission_level": "READ_ONLY",
+        "id": "ri",
+        "created_at": "2017-06-08T23:17:59Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-08-30T18:29:35Z",
+        "deleted": true
+      }
+    }
+```
+
+<div id="targeted-audiences">
+  ### 目标受众
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idcustom_audiencescustom_audience_idtargeted">
+  #### GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/targeted[](#get-accounts-account-id-custom-audiences-custom-audience-id-targeted "指向此标题的固定链接")
+</div>
+
+获取针对指定 `custom_audience_id` 的活动或全部广告单元和广告系列列表
+
+| Name                                         | Description                                                                                                                                                                               |
+| :------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | 在请求中正在使用的自定义受众的引用。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                    |
+| with&#95;active  <br />*optional*            | 当为 `false` 时，会包含 `servable=false` 状态的广告单元。<br /><br />Type: boolean<br /><br />Default: `true`  <br />Possible values: `true`, `false`                                                    |
+| cursor  <br />*optional*                     | 指定一个游标以获取下一页结果。更多信息参见 [Pagination](/zh/x-ads-api/introduction)。  <br />  <br />Type: string  <br />  <br />Example: `8x7v00oow`                                                              |
+
+**示例请求[](#example-request "指向此标题的固定链接")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h/targeted`
+
+**示例响应[](#example-response "指向此标题的固定链接")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_id": "2906h",
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "campaign_id": "59hod",
+          "campaign_name": "test-campaign",
+          "line_items": [
+            {
+              "id": "5gzog",
+              "name": "test-line-item",
+              "servable": true
+            }
+          ]
+        },
+        {
+          "campaign_id": "arja7",
+          "campaign_name": "Untitled campaign",
+          "line_items": [
+            {
+              "id": "bjw1q",
+              "name": null,
+              "servable": true
+            }
+          ]
+        }
+      ]
+    }
+```
+
+<div id="custom-audiences-users">
+  ### 自定义受众用户
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="post-accountsaccount_idcustom_audiencescustom_audience_idusers">
+  #### POST accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/users[](#post-accounts-account-id-custom-audiences-custom-audience-id-users "Permalink to this headline")
+</div>
+
+此端点允许合作伙伴为给定的 `custom_audience_id` 添加、更新和移除用户。该端点也支持为每个用户提供多种用户标识符类型。
+
+请求中 `users` 字段中提供的所有数据，**除** `partner_user_id` 外，必须使用 `SHA256` 进行哈希处理，并进行[规范化](/zh/x-ads-api/audiences#twitter-user-id-normalization)。
+
+**批量请求**
+
+* 当前的最大批量大小为 `2500`（**仅针对该端点**）。批量大小由每个请求中的操作数量（`Update`/`Delete`）决定。例如，在一个数组中包含超过 2500 个操作对象（`{"operation_type": "Update/Delete", [..] }`）会导致错误。
+* 此端点可接受的最大请求 POST 正文大小为 `5,000,000` 字节。
+* 此端点的速率限制为每 1 分钟窗口 1500 次。
+* 所有参数都在请求正文中发送，并且必须使用 `Content-Type` 为 `application/json`。
+* 批量请求作为一个整体成功或失败，对于错误和成功的所有 API 响应都会保留与初始请求相同的条目顺序。
+
+**批量响应**
+
+Ads API 返回的响应包含两个字段：`success_count` 和 `total_count`。这两个值必须始终相等，它们表示后端已处理的请求记录数。如果请求正文中发送的记录数 **不** 等于 `success_count` 和 `total_count`，应视为错误情况，需要重试。
+
+**批量错误**
+
+* 请求级错误（例如，超过最大批量大小）会在响应中的 `errors` 对象下返回。
+* 条目级错误（例如，缺少必需参数）会在响应中的 `operation_errors` 对象下返回。
+* `operation_errors` 中错误的索引对应输入条目中的索引，并附带相应的错误信息。
+
+<div id="resource-url">
+  #### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/users`
+
+<div id="parameters">
+  #### 参数[](#parameters "Permalink to this headline")
+</div>
+
+| 名称 | 描述 |
+| :--- | :--- |
+| operation&#95;type  <br />*必填* | 在每个 `users` 组上执行的操作类型。<br /><br />类型: enum（枚举）<br /><br />可能的取值: `Update`, `Delete` |
+| params  <br />*必填* | 一个 JSON 对象，包含 `users` 数组以及 `effective_at` 和 `expires_at` 时间戳。<br /><br />类型: JSON |
+| users  <br />*必填* | 一个由 JSON 对象组成的数组，包含单个用户的所有参数。<br /><br />类型: JSON |
+| effective&#95;at  <br />*可选* | 自定义受众关联关系生效的 UTC 时间。以 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 格式表示。默认为当前日期和时间。<br /><br />类型: string<br /><br />示例: `2017-07-05T07:00:00Z` |
+| expires&#95;at  <br />*可选* | 自定义受众关联关系过期的 UTC 时间。指定时间必须晚于 `effective_at` 的值。以 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 格式表示。默认为从请求时间戳起算的 13 个月后。<br /><br />类型: string<br /><br />示例: `2017-07-05T07:00:00Z` |
+
+鉴于对 `users` 对象采用多键（multi-key）方式，下面对该对象的每个元素进行说明：
+
+| 名称 | 描述 |
+| :--- | :--- |
+| email  <br />*可选* | 用户的电子邮件地址。<br /><br />类型: Array[String] |
+| device&#95;id  <br />*可选* | IDFA/AdID/Android ID。<br /><br />类型: Array[String] |
+| handle  <br />*可选* | 用户所属的 @handle。<br /><br />类型: Array[String] |
+| twitter&#95;id  <br />*可选* | 用户所属的 X ID。<br /><br />类型: Array[String] |
+| phone&#95;number  <br />*可选* | 用户的电话号码。<br /><br />类型: Array[String] |
+| partner&#95;user&#95;id  <br />*可选* | 用户在合作方系统中的 ID。<br /><br />类型: Array[String] |
+
+<div id="example-request">
+  #### 示例请求[](#example-request "此标题的固定链接")
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/1nmth/users`
+
+```
+    [
+      {
+        "operation_type": "Update",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "email": [
+                "4798b8bbdcf6f2a52e527f46a3d7a7c9aefb541afda03af79c74809ecc6376f3"
+              ],
+              "handle": [
+                "7352f353c460e74c7ae226952d04f8aa307b12329c5512ec8cb6f1a0f8f9b2cb",
+                "49e0be2aeccfb51a8dee4c945c8a70a9ac500cf6f5cb08112575f74db9b1470d"
+              ]
+            },
+            {
+              "email": [
+                "5bf13d5ad4200407c5bc8b9bb578e425d05ef936fd488e3799a9d0806669223c"
+              ],
+              "twitter_id": [
+                "34d56c7159a7eea941f359653029410f813f65a1d2d13ecc5ccbdd5a8cb755cf",
+                "00e7b76c9739dec57f4c4a20ec021a20ffcf26bd00f519b17ea00f0ed6048f85"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operation_type": "Delete",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "device_id": [
+                "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+              ],
+              "email": [
+                "4798b8bbdcf6f2a52e527f46a3d7a7c9aefb541afda03af79c74809ecc6376f3"
+              ],
+              "handle": [
+                "461222f5dd690a20651c3d19848015cb0369db3f8e937571ffb775de70750847"
+              ],
+              "twitter_id": [
+                "c623c7e163984493b46c547088542e95d0aaa529bc52bbecce3ff91eb6b7843b"
+              ]
+            },
+            {
+              "email": [
+                "5bf13d5ad4200407c5bc8b9bb578e425d05ef936fd488e3799a9d0806669223c"
+              ],
+              "twitter_id": [
+                "858cdc7f313f84a3f3c48e9a6323307c1ef1bb7439b8e3623e140454b0fd8fa5",
+                "bb074e154657b91d99bd1bb3757409149670e8ae7a0fe9136fae29a26a7881c8"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+<div id="example-response">
+  #### 示例响应[](#example-response "固定链接到此标题")
+</div>
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_id": "1nmth"
+        }
+      },
+      "data": {
+        "success_count": 4,
+        "total_count": 4
+      }
+    }
+```
+
+<div id="tailored-audience-permissions">
+  ### 自定义受众权限
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/369a02c0adc626ff6a06#?env%5BTwitter%20Ads%20API%5D=W3sia2V5IjoiYWNjb3VudF9pZCIsInZhbHVlIjoieW91cl9hZHNfYWNjb3VudF9pZCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidmVyc2lvbiIsInZhbHVlIjoiNSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfa2V5IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX2tleSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfc2VjcmV0IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX3NlY3JldCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiYWNjZXNzX3Rva2VuIiwidmFsdWUiOiJ5b3VyX2FjY2Vzc190b2tlbiIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidG9rZW5fc2VjcmV0IiwidmFsdWUiOiJ5b3VyX3Rva2VuX3NlY3JldCIsImVuYWJsZWQiOnRydWV9XQ==">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idcustom_audiencescustom_audience_idpermissions">
+  #### GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/permissions[](#get-accounts-account-id-custom-audiences-custom-audience-id-permissions "Permalink to this headline")
+</div>
+
+获取与指定自定义受众关联的部分或全部权限的详细信息。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                         | Description                                                                                                                                                                                                                          |
+| :----------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                             | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 以外所有 Advertiser API 请求所需的必填参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                                           |
+| custom&#95;audience&#95;id  <br />*required*                 | 你在请求中所操作的自定义受众的引用。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                                               |
+| count  <br />*optional*                                      | 指定每个独立请求尝试检索的记录数量。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000`                                                                                                                                       |
+| cursor  <br />*optional*                                     | 指定用于获取下一页结果的游标。更多信息请参阅 [Pagination](/zh/x-ads-api/introduction)。<br /><br />Type: string<br /><br />Example: `8x7v00oow`                                                                                                                |
+| granted&#95;account&#95;ids  <br />*optional*                | 通过指定以逗号分隔的标识符列表，仅返回所需的账户。最多可提供 200 个 ID。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                                   |
+| sort&#95;by  <br />*optional*                                | 按受支持的属性进行升序或降序排序。更多信息请参阅 [Sorting](/zh/x-ads-api/fundamentals/sorting)。<br /><br />Type: string<br /><br />Example: `created_at-asc`                                                                                                    |
+| custom&#95;audience&#95;permission&#95;ids  <br />*optional* | 通过指定以逗号分隔的标识符列表，仅返回所需的自定义受众权限。最多可提供 200 个 ID。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                                       |
+| with&#95;total&#95;count  <br />*optional*                   | 在响应中包含 `total_count` 属性。<br /><br />**Note**: 此参数与 `cursor` 互斥。<br /><br />**Note**: 包含 `total_count` 的请求将具有较低的速率限制，目前设置为每 15 分钟 200 次。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/1nmth/permissions`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_id": "1nmth"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "custom_audience_id": "1nmth",
+          "permission_level": "READ_ONLY",
+          "id": "ri",
+          "created_at": "2017-06-08T23:17:59Z",
+          "granted_account_id": "18ce54aymz3",
+          "updated_at": "2017-06-08T23:17:59Z",
+          "deleted": false
+        }
+      ]
+    }
+```
+
+<div id="post-accountsaccount_idcustom_audiencescustom_audience_idpermissions">
+  #### POST accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/permissions[](#post-accounts-account-id-custom-audiences-custom-audience-id-permissions "Permalink to this headline")
+</div>
+
+创建一个新的权限对象，允许将指定受众共享给指定账户。
+
+**注意**：为自定义受众创建或修改权限时，要求该受众必须由尝试修改权限的账户所拥有。你可以通过查看给定受众响应中的 `is_owner` 响应属性来检查自定义受众的所有权。
+
+**注意**：受众只能在同一业务主体下的广告账户之间共享，或者当拥有该受众的广告账户具有 `SHARE_AUDIENCE_OUTSIDE_BUSINESS` 账户功能时才可跨业务共享。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                                      |
+| :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 用于执行操作的账户标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与经过身份验证的用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| granted&#95;account&#95;id  <br />*required* | 你希望为其授予自定义受众权限的账户。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                     |
+| permission&#95;level  <br />*required*       | `granted_account_id` 应该拥有的自定义受众访问级别。<br /><br />Type: enum<br /><br />Possible values: `READ_ONLY`, `READ_WRITE`                                                                                 |
+| custom&#95;audience&#95;id  <br />*required* | 在该请求中你正在操作的自定义受众的引用。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                         |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+```
+POST https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h/permissions?granted_account_id=18ce54aymz3&permission_level=READ_ONLY
+```
+
+**示例响应[](#example-response "指向此标题的固定链接")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "granted_account_id": "18ce54aymz3",
+          "permission_level": "READ_ONLY",
+          "custom_audience_id": "2906h"
+        }
+      },
+      "data": {
+        "custom_audience_id": "2906h",
+        "permission_level": "READ_ONLY",
+        "id": "14m",
+        "created_at": "2017-09-12T23:49:34Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-09-12T23:49:34Z",
+        "deleted": false
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idcustom_audiencescustom_audience_idpermissionscustom_audience_permission_id">
+  #### DELETE accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/permissions/:custom&#95;audience&#95;permission&#95;id[](#delete-accounts-account-id-custom-audiences-custom-audience-id-permissions-custom-audience-permission-id "Permalink to this headline")
+</div>
+
+撤销指定的自定义受众共享权限。
+
+**注意**：创建或修改自定义受众的权限时，要求该受众必须由尝试修改权限的账户所拥有。你可以通过查看给定受众返回结果中的 `is_owner` 响应属性来检查自定义受众的所有权。
+
+权限被撤销后，我们保证被授权的账户（`granted_account_id`）将无法在未来的推广活动中定向该受众。现有推广活动会继续使用已共享的受众；推广活动不会停止，该受众也不会从推广活动中移除。在受众共享权限被撤销之后，无法复制该推广活动。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/permissions/:custom_audience_permission_id`
+
+**参数[](#parameters "Permalink to this headline")**
+
+| Name                                                        | Description                                                                                                                                                                               |
+| :---------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                            | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 以外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required*                | 你在请求中要操作的自定义受众。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                       |
+| custom&#95;audience&#95;permission&#95;id  <br />*required* | 你在请求中要操作的自定义受众权限。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                        |
+
+**示例请求[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/1nmth/permissions/ri`
+
+**示例响应[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_permission_id": "ri",
+          "custom_audience_id": "1nmth"
+        }
+      },
+      "data": {
+        "custom_audience_id": "1nmth",
+        "permission_level": "READ_ONLY",
+        "id": "ri",
+        "created_at": "2017-06-08T23:17:59Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-08-30T18:29:35Z",
+        "deleted": true
+      }
+    }
+```
+
+<div id="custom-audiences">
+  ### 自定义受众
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idcustom_audiences">
+  #### GET accounts/:account&#95;id/custom&#95;audiences[](#get-accounts-account-id-custom-audiences "Permalink to this headline")
+</div>
+
+检索与当前账户关联的部分或全部自定义受众的详细信息。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                          | Description                                                                                                                                                                                                                            |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*              | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                                              |
+| count  <br />*optional*                       | 指定在每个独立请求中尝试检索的记录数量。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000`                                                                                                                                       |
+| cursor  <br />*optional*                      | 指定用于获取下一页结果的游标。有关更多信息，参见 [Pagination](/zh/x-ads-api/introduction)。<br /><br />Type: string<br /><br />Example: `8x7v00oow`                                                                                                                |
+| permission&#95;scope  <br />*optional*        | 允许将响应过滤为你拥有的列表或已与你共享的列表。默认情况下，如果不指定此参数，你只会看到自己拥有的受众。<br /><br />Type: enum<br /><br />Default: `OWNER`  <br />Possible values: `OWNER`, `SHARED`                                                                                       |
+| q  <br />*optional*                           | 一个可选查询，用于按 `name` 字段限定资源范围。<br /><br />**Note**: 这将执行不区分大小写的前缀匹配。<br /><br />Type: string<br /><br />Min, Max length: `1`, `255`                                                                                                       |
+| sort&#95;by  <br />*optional*                 | 按受支持的属性以升序或降序排序。有关更多信息，参见 [Sorting](/zh/x-ads-api/fundamentals/sorting)。<br /><br />Type: string<br /><br />Example: `created_at-asc`                                                                                                     |
+| custom&#95;audience&#95;ids  <br />*optional* | 通过指定用逗号分隔的标识符列表，将响应限定为所需的自定义受众。最多可提供 200 个 ID。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                     |
+| with&#95;deleted  <br />*optional*            | 在请求中包含已删除的结果。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false`                                                                                                                             |
+| with&#95;total&#95;count  <br />*optional*    | 在响应中包含 `total_count` 属性。<br /><br />**Note**: 此参数与 `cursor` 互斥。<br /><br />**Note**: 包含 `total_count` 的请求将具有较低的速率限制，目前设置为每 15 分钟 200 次请求。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences?custom_audience_ids=1nmth`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "custom_audience_ids": [
+            "1nmth"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "targetable": true,
+          "name": "twurl-using-subshell-for-file",
+          "targetable_types": [
+            "CRM",
+            "EXCLUDED_CRM"
+          ],
+          "audience_type": "CRM",
+          "description": null,
+          "permission_level": "READ_WRITE",
+          "owner_account_id": "18ce54d4x5t",
+          "id": "1nmth",
+          "reasons_not_targetable": [],
+          "created_at": "2017-01-08T08:19:58Z",
+          "updated_at": "2017-01-08T16:21:13Z",
+          "partner_source": "OTHER",
+          "deleted": false,
+          "audience_size": 1470
+        }
+      ]
+    }
+```
+
+<div id="get-accountsaccount_idcustom_audiencescustom_audience_id">
+  #### GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id[](#get-accounts-account-id-custom-audiences-custom-audience-id "Permalink to this headline")
+</div>
+
+检索与当前账户关联的特定自定义受众（Custom Audiences）。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                               |
+| :------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | 你在请求中操作的自定义受众。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                        |
+| with&#95;deleted  <br />*optional*           | 在请求结果中包含已删除的对象。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false`                                                                              |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "custom_audience_id": "2906h",
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "data": {
+        "targetable": false,
+        "name": "developers",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "owner_account_id": "18ce54d4x5t",
+        "id": "2906h",
+        "reasons_not_targetable": [],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-22T23:34:26Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": 140321
+      }
+    }
+```
+
+<div id="post-accountsaccount_idcustom_audiences">
+  #### POST accounts/:account&#95;id/custom&#95;audiences[](#post-accounts-account-id-custom-audiences "Permalink to this headline")
+</div>
+
+创建一个与当前账户关联的新占位符自定义受众（Custom Audience）。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                             | Description                                                                                                                                                                                    |
+| :------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required* | 所使用账户的标识符。出现在资源路径中，通常在除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外的所有 Advertiser API 请求中都是必需参数。指定的账户必须与已通过身份验证的用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| name  <br />*required*           | 此受众的显示名称。必须使用唯一的名称，否则将导致错误。<br /><br />Type: string<br /><br />Example: `ads api users`                                                                                                        |
+| description  <br />*optional*    | 此受众的描述。<br /><br />Type: string<br /><br />Example: `Ads API 的所有用户集合`                                                                                                                          |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences?name=developers`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "developers",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "owner_account_id": "18ce54d4x5t",
+        "id": "2906h",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-22T23:34:26Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": null
+      },
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "name": "developers"
+        }
+      }
+    }
+```
+
+<div id="put-accountsaccount_idcustom_audiencescustom_audience_id">
+  #### PUT accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id[](#put-accounts-account-id-custom-audiences-custom-audience-id "Permalink to this headline")
+</div>
+
+更新当前账户下的指定自定义受众（Custom Audience）。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                              |
+| :------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | 你在请求中要操作的自定义受众（Custom Audience）的引用。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                  |
+| name  <br />*optional*                       | 此受众的显示名称。必须使用唯一的名称值，否则将导致错误。<br /><br />Type: string<br /><br />Example: `ads api users`                                                                                                 |
+| description  <br />*optional*                | 此受众的描述。<br /><br />Type: string<br /><br />Example: `Collection of all users of the Ads API`（所有 Ads API 用户的集合）                                                                           |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h?name=developers_changed`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "developers_changed",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "is_owner": true,
+        "id": "2906h",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-22T23:34:26Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": null
+      },
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "name": "developers_changed"
+        }
+      }
+    }
+```
+
+<div id="post-batchaccountsaccount_idcustom_audiences">
+  #### POST batch/accounts/:account&#95;id/custom&#95;audiences[](#post-batch-accounts-account-id-custom-audiences "此标题的永久链接")
+</div>
+
+允许批量创建自定义受众。有关受众的信息，请参阅 [Custom Audiences 概览](/zh/x-ads-api/audiences) 页面。
+
+**注意：** 此批量接口目前处于**封闭测试**阶段，仅对部分广告主开放。在此测试期间，只能创建基于移动自定义受众的 Flexible Audiences。
+
+**批量请求**
+
+* 当前最大批处理大小为 10。
+* 所有参数都在请求正文中发送，并且需要将 `Content-Type` 设置为 `application/json`。
+* 批量请求会作为一个整体一起失败或一起成功，且所有 API 响应（无论错误还是成功）都会保留与初始请求相同的条目顺序。
+
+**批量响应**
+
+批量 API 响应返回一个有序的条目集合。除此之外，其结构与相应的单条目接口完全相同。
+
+**批量错误**
+
+* 请求级错误（例如，超过最大批处理大小）会在响应中的 `errors` 对象下显示。
+* 条目级错误（例如，缺少必需参数）会在响应中的 `operation_errors` 对象下显示。
+
+**Flexible Audiences**
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+* Flexible Audiences 创建后不可变更。
+* 自定义受众通过树形结构传入，并通过布尔逻辑组合来创建 Flexible Audiences。
+* 创建一个 Flexible Audience 最多可以使用 10 个自定义受众叶节点。
+
+**资源 URL[](#resource-url "此标题的永久链接")**
+
+`https://ads-api.x.com/12/batch/accounts/:account_id/custom_audiences`
+
+**参数[](#parameters "此标题的永久链接")**
+
+| Name                                                   | Description                                                                                                                                                                                                             |
+| :----------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                       | 所使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                                 |
+| audience&#95;type  <br />*required*                    | 要创建的受众类型。<br /><br />Type: enum<br /><br />Possible values: `FLEXIBLE`, `MOBILE_AUDIENCE`                                                                                                                               |
+| child&#95;segments  <br />*required*                   | 一个数组，其中包含对象，这些对象定义了你希望定向的自定义受众成员子集。每个对象应包含 `custom_audience_id`、`frequency`、`frequency_comparator`、`lookback_window`、`negate`，以及在某些情况下额外的 `child_segments`。<br /><br />Type: array                                      |
+| name  <br />*required*                                 | 受众的显示名称。必须使用唯一的名称值，否则会导致错误。<br /><br />Type: string<br /><br />Example: `my_flexible_audience_name`                                                                                                                     |
+| operation&#95;type  <br />*required*                   | 针对每个条目执行的操作类型。<br /><br />Type: enum<br /><br />Possible values: `Create`, `Update`, `Delete`                                                                                                                           |
+| boolean&#95;operator  <br />*sometimes required*       | 在其父（包含）对象中子 segment 之间的逻辑关系。如果父对象的 child&#95;segments 非空，则必填。<br /><br />Type: enum<br /><br />Possible values: `AND`, `OR`                                                                                             |
+| lookback&#95;window  <br />*sometimes required*        | 一个整数值，用于指定在多少天范围内，用户执行了特定操作并满足指定自定义受众的条件。<br /><br />Type: int<br /><br />Possible values: `1`, `7`, `14`, `30`                                                                                                         |
+| segments  <br />*sometimes required*                   | 一个对象，包含 `boolean_operator` 和 `child_segments`，用于定义你希望定向的自定义受众成员子集。<br /><br />Type: object                                                                                                                              |
+| custom&#95;audience&#95;id  <br />*sometimes required* | 要用作子 segment 的自定义受众的 id。<br /><br />Type: string<br /><br />Example: `tyfo`                                                                                                                                             |
+| frequency  <br />*optional*                            | 一个整数值，用于指定在回溯窗口内，用户执行特定操作并满足指定自定义受众条件的次数。<br /><br />Type: int<br /><br />Default value: `1`                                                                                                                            |
+| frequency&#95;comparator  <br />*optional*             | 与请求中传入的 `frequency` 进行比较的比较符。<br /><br />**Note**: 在下列取值中，`GTE` 表示大于或等于，`LT` 表示小于，依此类推。<br /><br />Type: string<br /><br />Possible values: `NUM_GTE`, `NUM_GT`, `NUM_EQ`, `NUM_LTE`, `NUM_LT` Default value: `NUM_GTE` |
+| negate  <br />*optional*                               | 将该 segment 取反，从而在组合中将其排除。<br /><br />Type: boolean<br /><br />Default value: `true`  <br />Possible values: `true`, `false`                                                                                             |
+
+**示例请求[](#example-request "此标题的固定链接")**
+
+`POST https://ads-api.x.com/12/batch/accounts/18ce54d4x5t/custom_audiences`
+
+```
+    [
+      {
+        "operation_type":"Create",
+        "params":{
+          "name":"my_flexible_audience_name",
+          "audience_type":"FLEXIBLE",
+          "segments":{
+            "boolean_operator":"AND",
+            "child_segments":[
+              {
+                "custom_audience_id":"TYIF",
+                "frequency":1,
+                "frequency_comparator":"NUM_GT",
+                "lookback_window":30,
+                "negate":true,
+                "child_segments":[
+
+                ]
+              },
+              {
+                "boolean_operator":"OR",
+                "child_segments":[
+                  {
+                    "custom_audience_id":"TXR1",
+                    "lookback_window":30,
+                    "child_segments":[
+
+                    ]
+                  },
+                  {
+                    "custom_audience_id":"TYFO",
+                    "frequency":1,
+                    "frequency_comparator":"NUM_GT",
+                    "lookback_window":30,
+                    "negate":true,
+                    "child_segments":[
+
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+```
+
+**示例响应[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "my_flexible_audience_name",
+        "targetable_types": [
+          "FLEXIBLE",
+          "EXCLUDED_FLEXIBLE"
+        ],
+        "audience_type": "FLEXIBLE",
+        "id": "13ld7",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "metadata": [
+          {
+            "custom_audience_id": "13ld7",
+            "account_id": "qsx3w2",
+            "name": "my_flexible_audience_name",
+            "audience_source": "FLEXIBLE_AUDIENCE",
+            "upload_status": "UPLOADED",
+            "segments": {
+              "boolean_operator": "AND",
+              "frequency": 1,
+              "frequency_comparator": "NUM_GTE",
+              "negate": false,
+              "child_segments": [
+                {
+                  "custom_audience_id": "tyif",
+                  "lookback_window": 30,
+                  "frequency": 1,
+                  "frequency_comparator": "NUM_GT",
+                  "negate": true,
+                  "child_segments": [
+
+                  ]
+                },
+                {
+                  "boolean_operator": "OR",
+                  "frequency": 1,
+                  "frequency_comparator": "NUM_GTE",
+                  "negate": false,
+                  "child_segments": [
+                    {
+                      "custom_audience_id": "txr1",
+                      "lookback_window": 30,
+                      "frequency": 1,
+                      "frequency_comparator": "NUM_GTE",
+                      "negate": false,
+                      "child_segments": [
+
+                      ]
+                    },
+                    {
+                      "custom_audience_id": "tyfo",
+                      "lookback_window": 30,
+                      "frequency": 1,
+                      "frequency_comparator": "NUM_GT",
+                      "negate": true,
+                      "child_segments": [
+
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "created_at": "2015-11-10T21:26:43Z",
+        "updated_at": "2015-11-11T01:11:47Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": null
+      },
+      "request": [
+        {
+          "params": {
+            "name": "my_flexible_audience_name",
+            "audience_type": "FLEXIBLE",
+            "segments": {
+              "boolean_operator": "AND",
+              "child_segments": [
+                {
+                  "custom_audience_id": "TYIF",
+                  "lookback_window": 30,
+                  "frequency": 1,
+                  "frequency_comparator": "NUM_GT",
+                  "negate": true,
+                  "child_segments": [
+
+                  ]
+                },
+                {
+                  "boolean_operator": "OR",
+                  "child_segments": [
+                    {
+                      "custom_audience_id": "TXR1",
+                      "lookback_window": 30,
+                      "child_segments": [
+
+                      ]
+                    },
+                    {
+                      "custom_audience_id": "TYFO",
+                      "lookback_window": 30,
+                      "frequency": 1,
+                      "frequency_comparator": "NUM_GT",
+                      "negate": true,
+                      "child_segments": [
+
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "account_id": "qsx3w2"
+          },
+          "operation_type": "Create"
+        }
+      ]
+    }
+```
+
+<div id="delete-accountsaccount_idcustom_audiencescustom_audience_id">
+  #### DELETE accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id[](#delete-accounts-account-id-custom-audiences-custom-audience-id "Permalink to this headline")
+</div>
+
+删除当前账户下指定的自定义受众（Custom Audience）。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                                 |
+| :------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id  <br />*required*             | 所使用账户的标识符。该值出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | 在该请求中要操作的自定义受众（Custom Audience）的引用。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                     |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "developers",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "owner_account_id": "18ce54d4x5t",
+        "id": "2906h",
+        "reasons_not_targetable": [
+          "TOO_SMALL"
+        ],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-30T18:09:00Z",
+        "partner_source": "OTHER",
+        "deleted": true,
+        "audience_size": null
+      },
+      "request": {
+        "params": {
+          "custom_audience_id": "2906h",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="do-not-reach-lists">
+  ### 禁止触达名单
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_iddo_not_reach_lists">
+  #### GET accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists[](#get-accounts-account-id-do-not-reach-lists "此标题的永久链接")
+</div>
+
+检索与当前账户关联的部分或全部 Do Not Reach 列表的详细信息。
+
+**注意**：一个 `account_id` 最多只能拥有一个 Do Not Reach 列表。
+
+**资源 URL[](#resource-url "此标题的永久链接")**
+
+`https://ads-api.x.com/12/accounts/:account_id/do_not_reach_lists`
+
+**参数[](#parameters "此标题的永久链接")**
+
+| Name                               | Description                                                                                                                                                                                   |
+| :--------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*   | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与经过身份验证的用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| with&#95;deleted  <br />*optional* | 在请求中包含已删除的结果。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false`                                                                                    |
+
+**请求示例[](#example-request "此标题的永久链接")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54bgxky/do_not_reach_lists`
+
+**响应示例[](#example-response "此标题的永久链接")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54bgxky"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "targetable": false,
+          "name": "Do Not Reach List",
+          "description": "test DNRL",
+          "id": "4kzrq",
+          "reasons_not_targetable": [
+            "TOO_SMALL"
+          ],
+          "created_at": "2021-10-28T22:09:29Z",
+          "list_size": null,
+          "updated_at": "2021-11-04T03:33:06Z",
+          "deleted": false
+        }
+      ]
+    }
+```
+
+<div id="post-accountsaccount_iddo_not_reach_lists">
+  #### POST accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists[](#post-accounts-account-id-do-not-reach-lists "Permalink to this headline")
+</div>
+
+创建一个与当前账户关联的新禁止触达列表（Do Not Reach List）。
+
+**注意**：一个 `account_id` 至多只能有一个禁止触达列表
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/do_not_reach_lists`
+
+**参数[](#parameters "Permalink to this headline")**
+
+| Name                             | Description                                                                                                                                                                             |
+| :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required* | 投放账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| description  <br />*optional*    | 此受众的描述。<br /><br />Type: string<br /><br />Example: `A list of users to exclude`                                                                                                        |
+
+**示例请求[](#example-request "Permalink to this headline")**
+
+`POST https://ads-api.x.com/12/accounts/18ce54bgxky/do_not_reach_lists?description=A list of users to exclude`
+
+**示例响应[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "description": "A list of users to exclude",
+          "account_id": "18ce54bgxky"
+        }
+      },
+      "data": {
+        "targetable": false,
+        "name": "Do Not Reach List",
+        "description": "A list of users to exclude",
+        "id": "4ofrq",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2022-02-08T23:02:48Z",
+        "list_size": null,
+        "updated_at": "2022-02-08T23:02:48Z",
+        "deleted": false
+      }
+    }
+```
+
+<div id="post-batchaccountsaccount_iddo_not_reach_listsdo_not_reach_list_idusers">
+  #### POST batch/accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists/:do&#95;not&#95;reach&#95;list&#95;id/users[](#post-batch-accounts-account-id-do-not-reach-lists-do-not-reach-list-id-users "Permalink to this headline")
+</div>
+
+该 endpoint 允许将用户添加到指定的 `do_not_reach_list_id`，以及对其进行更新和移除。该 endpoint 仅接受电子邮件作为有效的用户标识符类型。
+
+请求中 `emails` 字段中提供的所有数据都必须使用 `SHA256` 进行哈希处理，并进行[规范化](/zh/x-ads-api/audiences#e-mail-normalization)。
+
+**注意**
+
+* 一个 `account_id` 最多只能拥有一个 Do Not Reach 列表
+* 添加到此列表的用户**必须**设置 `expires_at` 时间戳，且该时间戳必须早于当前时间戳起 13 个月之后
+* Do Not Reach 列表 API 不接受 `effective_at` 时间戳，并默认使用当前时间戳
+* Do Not Reach 列表不会将用户从账户中的任何或所有自定义受众中移除，而是作为该账户所有投放广告系列的排除定向条件
+
+**批量请求**
+
+* 当前此 endpoint 的最大批量大小为 `2500`。批量大小由每个请求中的操作数（`Update`/`Delete`）决定。例如，在一个数组中包含超过 2500 个操作对象（`{"operation_type": "Update/Delete", [..] }`）会导致错误。
+* 此 endpoint 可接受的最大 POST 请求正文大小为 `5,000,000` 字节。
+* 此 endpoint 的速率限制为每 1 分钟时间窗口 1500 次。
+* 所有参数都通过请求正文发送，且必须使用 `application/json` 的 `Content-Type`。
+* 批量请求作为一个整体要么全部失败，要么全部成功，并且无论是错误还是成功的所有 API 响应都会保留初始请求中各项的顺序。
+
+**批量响应**
+
+Ads API 返回的响应包含两个字段：`success_count` 和 `total_count`。这两个值必须始终相等，它们表示后端已处理的请求记录数。如果请求正文中发送的记录数**不**等于 `success_count` 和 `total_count`，则应视为错误情况，需要重试。
+
+**批量错误**
+
+* 请求级别错误（例如，超过最大批量大小）会在响应的 `errors` 对象下显示。
+* 条目级别错误（例如，缺少必需参数）会在响应的 `operation_errors` 对象下显示。
+* `operation_errors` 中错误的索引对应于输入条目中的索引，并附带相应的错误消息。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/batch/accounts/:account_id/do_not_reach_lists/:do_not_reach_list_id/users`
+
+**参数[](#parameters "Permalink to this headline")**
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 要使用的账户标识符。出现在资源路径中，并且通常是除 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| do&#95;not&#95;reach&#95;list&#95;id  <br />*required* | 在请求中所操作的 Do Not Reach 列表的引用。<br /><br />Type: string<br /><br />Example: `2906h` |
+| operation&#95;type  <br />*required* | 针对每个 `users` 组执行的操作类型。<br /><br />Type: enum<br /><br />Possible values: `Update`, `Delete` |
+| params  <br />*required* | 一个 JSON 对象，包含 `emails` 数组和 `expires_at` 时间戳。<br /><br />Type: JSON |
+| users  <br />*required* | 一个 JSON 对象数组，包含单个用户的所有参数。<br /><br />Type: JSON |
+| expires&#95;at  <br />*optional* | 用户关联应过期的 UTC 时间。指定时间必须晚于当前时间戳的值。使用 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 表达。默认为当前时间戳起 13 个月后。<br /><br />Type: string<br /><br />Example: `2017-07-05T07:00:00Z` |
+
+鉴于对 `users` 对象采用了多键（multi-key）方式，下面对该对象的每个元素进行说明：
+
+| 名称                           | 描述                                     |
+| :--------------------------- | :------------------------------------- |
+| email  <br />*可选*            | 用户的电子邮件地址。<br /><br />类型：Array[String] |
+| phone&#95;number  <br />*可选* | 用户的电话号码。<br /><br />类型：Array[String]   |
+
+**示例请求[](#example-request "Permalink to this headline")**
+
+```
+`POST https://ads-api.x.com/12/batch/accounts/18ce54bgxky/do_not_reach_lists/4kzro/users`
+
+    [
+      {
+        "operation_type": "Update",
+        "params": {
+          "expires_at": "2023-01-22T00:00:00Z",
+          "users": [
+            {
+              "email": [
+                "FEAD76F6ADF99FFFB997AA4E3C8AD38FF531BC4C956DBD03CD0163F744D8AABC"
+              ],
+              "phone_number": [
+                "CCABF1B62A202E0FE28BC6C014983C89A65451DD4482BD66A0ADB65366F38A9A"
+              ]
+            },
+            {
+              "email": [
+                "FEAD76F6ADF99FFFB997AA4E3C8AD38FF531BC4C956DBD03CD0163F744D8AABA"
+              ],
+              "phone_number": [
+                "CCABF1B62A202E0FE28BC6C014983C89A65451DD4482BD66A0ADB65366F38A9E"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+**示例响应[](#example-response "指向此标题的固定链接")**
+
+```
+    {
+      "data": [
+        {
+          "success_count": 2,
+          "total_count": 2
+        }
+      ],
+      "request": [
+        {
+          "params": {
+            "do_not_reach_list_id": "4ofrq",
+            "expires_at": "2023-01-22T00:00:00Z",
+            "account_id": "18ce54bgxky"
+          },
+          "operation_type": "Update"
+        }
+      ]
+    }
+```
+
+<div id="delete-accountsaccount_iddo_not_reach_listsdo_not_reach_list_id">
+  #### DELETE accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists/:do&#95;not&#95;reach&#95;list&#95;id[](#delete-accounts-account-id-do-not-reach-lists-do-not-reach-list-id "此标题的永久链接")
+</div>
+
+删除当前账户下指定的禁止触达列表。
+
+**资源 URL[](#resource-url "此标题的永久链接")**
+
+`https://ads-api.x.com/12/accounts/:account_id/do_not_reach_lists/:do_not_reach_list_id`
+
+**参数[](#parameters "此标题的永久链接")**
+
+无
+
+**请求示例[](#example-request "此标题的永久链接")**
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54bgxky/do_not_reach_lists/4ofrp`
+
+**响应示例[](#example-response "此标题的永久链接")**
+
+```
+    {
+      "request": {
+        "params": {
+          "do_not_reach_list_id": "4ofrp",
+          "account_id": "18ce54bgxky"
+        }
+      },
+      "data": {
+        "targetable": false,
+        "name": "Do Not Reach List",
+        "description": null,
+        "id": "4ofrp",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2022-02-08T23:02:07Z",
+        "list_size": null,
+        "updated_at": "2022-02-08T23:02:21Z",
+        "deleted": true
+      }
+    }
+```

@@ -1,0 +1,231 @@
+---
+title: 集成指南
+sidebarTitle: 集成指南
+keywords: ["批量合规性集成", "合规性批量集成", "合规性作业集成", "批量合规性设置"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="working-with-resumable-uploads">
+  ## 使用可恢复上传
+</div>
+
+在使用批量合规端点时，开发者可以批量上传大量 X 数据，并确定需要采取哪些操作，以确保其数据集体现用户意图以及 X 上内容的当前状态。在系统和连接稳定可靠的情况下，将大量数据上传到远程服务器是一个相对简单的操作，但情况并非总是如此。一些环境可能会设置连接超时，在设定时间后切断你的应用与上传服务器之间的连接；你在上传时也可能遇到连接问题，例如尝试通过 Wi‑Fi 连接从笔记本电脑上传一个大文件。在这种情况下，将该文件拆分为较小部分分批上传，而不是依赖一次持续的单一连接，会更理想。
+
+X 的批量合规端点依赖 Google Cloud Storage 来处理大文件。这类存储针对多种应用场景进行了优化；Cloud Storage 支持一种用于管理大文件的技术，称为可恢复上传（resumable uploads）。
+
+如果上传在任意阶段出现问题，Google Cloud Storage 都能够从中断的位置恢复该操作。
+
+<div id="creating-a-resumable-job">
+  ### 创建可恢复上传任务
+</div>
+
+<div id="step-one">
+  #### 第一步：
+</div>
+
+首先，你需要创建一个合规作业（compliance job），并通过 `type` 参数指定你要上传的是 Post ID 还是用户 ID。另外，还要在请求体中添加 `resumable` 字段并将其设置为 `true`。请务必将下面的 `$APP&#95;ACCESS&#95;TOKEN` 替换为你的仅应用访问令牌（App-only Access Token）。
+
+```
+curl --request POST \
+ 'https://api.x.com/2/compliance/jobs' --header 'Authorization: Bearer $APP_ACCESS_TOKEN --header 'Content-Type: application/json' --data-raw '{
+   "type": "tweets",
+   "resumable": true
+}'
+```
+
+如果你的 API 调用成功，将会返回类似如下的响应：
+
+```
+{
+   "data": {
+       "download_expires_at": "2021-08-18T19:42:55.000Z",
+       "status": "created",
+       "upload_url": "https://storage.googleapis.com/twttr-tweet-compliance/1425543269983784962/submission/1202726487847104512_1425543269983784962?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210811%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210811T194255Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=355e4c4739ae508304d3df15b4e13e64b6c7752d8d79d73676a4d8e60dc5241f83924ad2a1f8b7bddcc768062bb9c64d39b8e8f7cce7f66ffbea9f9ed33a4da975b3a2c127fb738c1c1ff3c3964bd4d9dc0706e6c8a70e67522160ea774e090d2793e06f890d1158ce86be3031c1c471b74f961b6f18743a28730611000336286ad0111b41fb5d14aa813ff00cf06b3572dc68d0b3c6fdc07f25c1b1196c1af4325a9ead68994944bbef0d2123585ea051deb9765aa7f5832446440bc9ba76af327b69df1fd7b1a99bd4419c128f1f697dbbacbc62bbc7c2c9aebc82a2128be0ed05d48a54d814162daad1232a0d13081e9543ab8557f567149af82281193f37",
+       "created_at": "2021-08-11T19:42:55.000Z",
+       "resumable": false,
+       "id": "1425543269983784962",
+       "type": "tweets",
+       "download_url": "https://storage.googleapis.com/twttr-tweet-compliance/1425543269983784962/delivery/1202726487847104512_1425543269983784962?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210811%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210811T194255Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=0a11dd5a3c5adb508f32ce904568abada863dc9499ba2adeafb3452ccee0dcb3dade17910dbc502dcbe54c130ac4d8638eb176c8b7344de068139b06c970794efa6312f0a5149f40da441eafcaf475f670c93ca73951999902a531d34dfab1e5490918929e5b06ae803b5604e0c0c26852255ccdbc79a2c1e2eefe924e5e6bf5b6603a7f287d1621333b9548ec6cc203716070528bebc2e67c12e92b1f4e54471db92c15a54799f2b855ae224250ca44c47993fd7d79a4940a0f68fe09f73fc8b291e88cfd10ade860b4b35c2b964d1777c1d93cd300c313138d9ca90aa8b3ecd3bf9dc73d3ebe32ba7634228fe07e1e4ecdda57cd94c802afc520162735d5a3",
+       "upload_expires_at": "2021-08-11T19:57:55.000Z"
+   }
+}
+```
+
+请记录下 `upload_url` 的值，在后续步骤中还会用到它。
+
+<div id="step-two">
+  #### 第二步：
+</div>
+
+接下来，你需要启动可恢复上传。为此，请向上一步获得的 `upload_url` 发起一个 **POST** 请求，并确保包含以下请求头：
+
+Content-Type: text/plain
+
+Content-Length: 0
+
+x-goog-resumable: start
+
+```
+curl --request POST \
+'https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submission/1202726487847104512_1430227686685757442?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210824%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210824T175707Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-goog-resumable&X-Goog-Signature=890d958f9c7dcb7f238e4971b59da5afc5b8329fb197c67b5930fe0f9dfe180afe2d4bec341111809b88ccfab46ab1f81f4242abc1af7b67c6e8977c52e6d486f5f43ce6a37a7a6530d25f15e2bcd9bb54655fe4ee22b26f8886ba71b67b7b11afd1198d658d1b6f0c41260f55260a260e1be0239977feba43dce40bc0e8e6293a4a3a3f7ee0afc74d3d2f7f2d3d514f108d5887a52ac85760385e5b9bb67cd26bfcf6b1c19151ea8111e217a29407722dc0dc9ab373334e88c18159546237ec9334f9a1e33717dc82800c6a45bba82706d5aece84ecdf3fcac52b21c8a3085a639047cf2707a8b9e4c296fc7cf05edbb110f07b89e38f0f5ea77e8b313cade7' \
+--header 'Content-Type: text/plain' --header \
+ 'Content-Length: 0' --header \
+ 'x-goog-resumable: start
+```
+
+如果此调用成功，你会收到 201 响应码。然后，在响应头中复制 Location 头的值，它看起来大致如下所示：
+
+```
+https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submission/1202726487847104512_1430227686685757442?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210824%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210824T175707Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-goog-resumable&X-Goog-Signature=890d958f9c7dcb7f238e4971b59da5afc5b8329fb197c67b5930fe0f9dfe180afe2d4bec341111809b88ccfab46ab1f81f4242abc1af7b67c6e8977c52e6d486f5f43ce6a37a7a6530d25f15e2bcd9bb54655fe4ee22b26f8886ba71b67b7b11afd1198d658d1b6f0c41260f55260a260e1be0239977feba43dce40bc0e8e6293a4a3a3f7ee0afc74d3d2f7f2d3d514f108d5887a52ac85760385e5b9bb67cd26bfcf6b1c19151ea8111e217a29407722dc0dc9ab373334e88c18159546237ec9334f9a1e33717dc82800c6a45bba82706d5aece84ecdf3fcac52b21c8a3085a639047cf2707a8b9e4c296fc7cf05edbb110f07b89e38f0f5ea77e8b313cade7&upload_id=ADPycds-_Ow7aqcpbG4XguXSVAgd_2fy-XiDA2qm-It9PCwBlZhF4e2bfOAQzEmRJ4T_l6jU6LfYdfrKa_KlFFBOyx3PjYzrxQ
+```
+
+然后，你可以按照[快速入门指南中的第二步及后续步骤](/zh/x-api/compliance/batch-compliance#getting-started-with-the-batch-compliance-endpoints)，将你的帖子或用户 ID 上传到该位置。
+
+由于技术复杂度较高，断点续传式上传（resumable uploads）最适合配合代码使用。本指南将使用 Node.js 搭配 [needle 请求库](https://www.npmjs.com/package/needle)。
+
+<div id="install-the-dependencies">
+  ### 安装依赖项
+</div>
+
+在继续之前，你需要先安装 Node.js 运行环境；你可以从其官方网站获取 Node.js。安装完成后，Node.js 会附带一个名为 npm 的工具；通过运行以下命令确认 Node 和 npm 均已安装，并确保不会出现错误。
+
+`$ npm -v
+6.4.1`
+
+如果看到类似这样的版本号，则表示你的环境已准备就绪（请注意，你的版本号可能会不同）。我们将使用 npm 来安装上传库。运行以下命令：
+
+`$ npm install -g needle`
+
+一切就绪；无需进行任何其他配置。
+
+<div id="request-a-resumable-destination">
+  #### 请求支持断点续传的目标地址
+</div>
+
+在创建新作业时，将 `resumable` 参数设置为 `true`，这样就可以获取支持断点续传上传的目标地址。在响应体中，你会收到一个 `upload_url` 值。
+
+```
+"upload_url":\
+"https://storage.googleapis.com/compliance_tweet_ids/customer_test_object_12950882_GlYjiE?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=193969463581-compute%40developer.gserviceaccount.com%2F20200618%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20200618T184154Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=b7bdcf32479b08715be91ed47b06471b8acdcdb319f8e4f423bf3a3056dfa03ed83e47446f33338e292967a15c08fa5ba34395edaf057a2ac975b88e710ca994adb023a9e1673a7c58ce2fa0d73537f72812af78e92b708dfe6b907a7d75bd0f6cfa61fec867e80ac83ced0725d1ee59787c9dbca50d41f7b0f513dad63a7564136b1a70042a2ec6ba6b697cbe480a4405362f7a08255a5e8205aa7baa562f99e6a092f0420f33d67ffaeb132f877fbaf16c969630b5f173e8a3f31c473707241fa4e28f4bed13fb2ea01d3af1c449321a2e6ee9ec1e331b447cabcfc6f9d1f99f564d180f0cc1d28ea54972c996102c67c6501c6c16a00c13d17756f960e0e1"
+```
+
+<div id="prepare-the-code-to-upload-a-file">
+  #### 准备用于上传文件的代码
+</div>
+
+默认情况下，该库会通过接收一个上传位置（称为 bucket）以及你希望上传的文件名来创建一个新的上传目标。由于 batch compliance 端点会创建它们自己的上传目标，我们需要告知该库我们已经有一个可以接收上传内容的位置。
+
+我们需要将这个值连同包含要上传数据的文件名一起传递给上传库。创建一个文件，并将其命名为 ***twitter-upload.js***，然后添加以下代码：
+
+```
+const needle = require('needle');
+const fs = require('fs');
+const path = require('path');
+
+const [, scriptName, filename, uploadURL] = process.argv;
+if (!filename || !uploadURL) {
+  console.error(`Usage: node ${path.basename(scriptName)} filename upload_url`);
+  process.exit(-1);
+}
+
+async function uploadFile(file, url) {
+  // rangeEnd 是文件中最后一个字节的索引,即文件的字节数
+  const rangeEnd = (await fs.promises.stat(file)).size;
+
+  let options = {
+    headers: {
+      'Content-Range': `bytes */${rangeEnd}`,
+    },
+  };
+
+  const response = await needle('put', url, null, options);
+
+  switch (response.statusCode) {
+    case 200:
+    case 201:
+      console.log('上传完成');
+      return;
+    case 308:
+      return resumeUpload(response, file, url);
+    default:
+      console.log('收到意外响应代码: ', response.statusCode);
+      return;
+  }
+}
+
+async function resumeUpload(response, file, url) {
+  console.log('上传未完成,正在恢复');
+  if (response.headers.range) {
+    let resumeOffset = Number(response.headers.range.split('-')[1]) + 1;
+
+    let options = {
+      headers: {
+        'Content-Range': `bytes ${resumeOffset}-${rangeEnd-1}/${rangeEnd}`,
+        'Content-Length': `${rangeEnd-resumeOffset}`,
+      },
+    };
+
+    let readStream = fs.createReadStream(file, {start: resumeOffset});
+    return needle('put', url, readStream, options);
+  } else {
+    console.log('正在初始化上传');
+    let options = {
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    };
+
+    let readStream = fs.createReadStream(file);
+    return needle('put', url, readStream, options);
+  }
+}
+
+// 请求可恢复会话 URL
+async function requestResumableSession(url) {
+  const options = {
+    headers: {
+      'Content-Type': 'text/plain',
+      'Content-Length': '0',
+      'x-goog-resumable': 'start',
+    },
+  };
+
+  const res = await needle('post', url, null, options);
+  if (res.statusCode === 201) {
+    const resumableSessionURL = res.headers['location'];
+    console.log('开始上传至: ', resumableSessionURL);
+
+    await uploadFile(filename, resumableSessionURL);
+  } else {
+    console.log('创建可恢复会话 URI 失败');
+  }
+
+}
+
+requestResumableSession(uploadURL).then(result => console.log('Upload complete'));
+```
+
+将该文件保存在你认为最合适的位置。接下来，在命令行中调用脚本，并传递两个参数：
+
+1. 第一个参数是你希望上传的文件路径（其中包含 Post 或 User ID）。
+2. 第二个参数是我们从合规性端点响应中获得的上传 URL。
+
+请确保使用双引号括住该 URL；如果你的文件名中包含空格或其他字符，同样使用双引号括住文件名：
+
+```
+node twitter-upload.js compliance_upload.txt\
+"https://storage.googleapis.com/compliance_tweet_ids/customer_test_object_12950882_GlYjiE?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=193969463581-compute%40developer.gserviceaccount.com%2F20200618%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20200618T184154Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=b7bdcf32479b08715be91ed47b06471b8acdcdb319f8e4f423bf3a3056dfa03ed83e47446f33338e292967a15c08fa5ba34395edaf057a2ac975b88e710ca994adb023a9e1673a7c58ce2fa0d73537f72812af78e92b708dfe6b907a7d75bd0f6cfa61fec867e80ac83ced0725d1ee59787c9dbca50d41f7b0f513dad63a7564136b1a70042a2ec6ba6b697cbe480a4405362f7a08255a5e8205aa7baa562f99e6a092f0420f33d67ffaeb132f877fbaf16c969630b5f173e8a3f31c473707241fa4e28f4bed13fb2ea01d3af1c449321a2e6ee9ec1e331b447cabcfc6f9d1f99f564d180f0cc1d28ea54972c996102c67c6501c6c16a00c13d17756f960e0e1"
+```
+
+您将看到类似如下的输出：
+
+`Starting upload to:  https://storage.googleapis.com/twttr-tweet-compliance/<redacted>
+Upload not completed, resuming
+Initiating upload`
+
+您可以在任何时候按下 Ctrl + C 或关闭命令行窗口来暂停上传。稍后再次执行同一命令时，您可以从中断处恢复上传。文件完全上传后，您将看到以下消息：
+
+`Upload complete`
+
+此时，您可以使用[合规状态端点](/zh/x-api/compliance/get-compliance-job)来检查合规作业的状态，并在完成后下载合规结果。

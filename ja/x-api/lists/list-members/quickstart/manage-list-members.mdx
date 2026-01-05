@@ -1,0 +1,70 @@
+---
+title: リストメンバーの管理
+sidebarTitle: リストメンバーの管理
+keywords: ["リストメンバー管理クイックスタート", "リストメンバー追加クイックスタート", "リストメンバー削除クイックスタート", "リストメンバー管理"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="manage-list-members-quick-start-guide">
+  ### リストメンバー管理のクイックスタートガイド
+</div>
+
+<Note>
+  **注意:** このガイドは、[クイックスタート概要](/ja/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group) に記載されている前提条件をすべて完了していることを想定しています。
+</Note>
+
+<div id="steps-to-build-a-manage-list-member-request">
+  ### Listメンバー管理リクエストを作成する手順
+</div>
+
+<div id="step-one-choose-the-list-endpoint-collection-from-postman">
+  #### ステップ1：Postman で List エンドポイントコレクションを選択する
+</div>
+
+X API v2 コレクションを Postman に読み込んだら、「List」フォルダに移動し、次に「List members」フォルダを選択して、「Add a member」を選びます。
+ 
+
+<div id="step-two-specify-the-user-to-add">
+  #### Step two: 追加するユーザーを指定する
+</div>
+
+List メンバー管理エンドポイントでは、2 つの ID が必要です。List の ID と、追加するユーザーの ID です。[users lookup](/ja/x-api/users/lookup/introduction) を使用してユーザーの ID を取得できます。ユーザー名を渡すと、id フィールドが返されます。
+
+対象となる ID は、有効なユーザー ID であればどれでもかまいません。Postman では、「Params」タブに移動し、id パス変数の「Value」列に自分の ID を入力します。次に「Body」タブに移動し、追加したいユーザーの ID を user&#95;id パラメーターの値として入力します。いずれの ID の前後にもスペースを含めないように注意してください。
+
+|             |                        |                    |
+| :---------- | :--------------------- | :----------------- |
+| **Key**     | **Value**              | **Parameter type** |
+| `id`        | List の ID              | path               |
+| user&#95;id | メンバーとして追加したい対象ユーザーの ID | body               |
+
+これで、「Send」ボタンの横に次のような URL が表示されるはずです。
+
+`https://api.x.com/2/lists/1441162269824405510/members`
+
+Step three: リクエストを送信してレスポンスを確認する
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次のサンプルレスポンスと同様のレスポンスが返されます。
+
+```
+{
+  "data": {
+    "is_member": true
+  }
+}
+```
+
+返ってきたレスポンスオブジェクトで、キー is&#95;member の値が true になっている場合、そのユーザーをリストのメンバーとして正常に追加できたことを意味します。 
+
+リストからメンバーを削除するには、Postman に読み込まれた X API v2 コレクションの「Lists」フォルダー内にある「Remove a member」リクエストを選択します。このエンドポイントには、リストの ID と、削除したいメンバーのユーザー ID が必要です。「Params」タブで、id 列の値としてリストの ID を入力し、user&#95;id 列の値として削除するユーザーの ID を入力します。 
+
+削除リクエストが成功すると、次の例のようなレスポンスが返ってきます。
+
+```
+{
+  "data": {
+    "is_member": false
+  }
+}
+```

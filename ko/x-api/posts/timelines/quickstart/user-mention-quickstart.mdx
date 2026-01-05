@@ -1,0 +1,186 @@
+---
+title: 사용자 멘션
+sidebarTitle: 사용자 멘션
+keywords: ["사용자 멘션", "멘션 타임라인", "멘션 빠른 시작", "멘션 튜토리얼", "멘션 타임라인", "멘션 조회"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-user-post-and-mention-timeline-endpoints">
+  ## 사용자 게시물 및 멘션 타임라인 엔드포인트 시작하기
+</div>
+
+이 퀵스타트 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용하여 지정한 필드 집합과 함께 사용자 게시물 타임라인 엔드포인트에 첫 요청을 보내는 방법을 안내합니다.
+
+여러 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 리포지토리를 방문하세요. 
+
+<Note>
+  **사전 준비 사항**
+
+  이 가이드를 완료하려면 요청을 인증하기 위한 [키와 토큰](/ko/resources/fundamentals/authentication) 세트가 필요합니다. 다음 단계를 따라 이 키와 토큰을 생성할 수 있습니다:
+
+  * [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하고 승인을 받습니다.
+  * developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연관된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성합니다.
+  * App의 “Keys and tokens” 페이지로 이동하여 필요한 자격 증명을 생성합니다. 모든 자격 증명은 안전한 위치에 저장해야 합니다.
+</Note>
+
+**타임라인 요청을 구성하는 단계**
+
+*이 예제에서는 &quot;User Post timeline by ID&quot; 엔드포인트에 요청을 보내지만, 여기에서 배운 내용을 사용자 멘션 타임라인 요청에도 동일하게 적용할 수 있습니다.* 
+
+**1단계: 도구 또는 라이브러리 선택하기**
+
+이 엔드포인트에 요청을 보내기 위해 사용할 수 있는 다양한 도구, 코드 예제, 라이브러리가 있지만, 여기서는 프로세스를 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 로드하려면 다음 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 로드한 후, timeline 폴더로 이동하여 &quot;User Post timeline by ID&quot; 요청을 찾습니다.
+ 
+
+**2단계: 요청 인증하기**
+
+X API에 올바르게 요청을 보내려면, 요청 권한이 있는지 확인해야 합니다. 이 엔드포인트에서는 [OAuth 2.0 App-Only](/ko/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2), 또는 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 인증 방법 중 하나로 요청을 인증해야 합니다.
+
+단순화를 위해 여기서는 OAuth 2.0 App-Only를 사용하겠지만, 비공개 [메트릭](/ko/x-api/fundamentals/metrics)이나 비공개 게시물을 요청하려면 다른 인증 방법 중 하나를 사용해야 합니다. 
+
+Postman에 키와 토큰, 특히 [App Access Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (앱 전용 Bearer Token이라고도 함)을 추가해야 합니다. 이를 위해 Postman 오른쪽 상단에서 “X API v2”라는 이름의 환경을 선택한 후, 환경 드롭다운 옆의 눈 모양 아이콘을 클릭하여 &quot;initial value&quot; 및 &quot;current value&quot; 필드에 키와 토큰을 추가합니다.
+
+올바르게 설정했다면, 이 변수는 요청의 Authorization 탭에 자동으로 반영됩니다.
+ 
+
+**3단계: 게시물을 조회하려는 사용자를 식별하고 지정하기**
+
+요청에서 최근 게시물을 조회하려는 사용자를 지정해야 합니다. 이 예제에서는 단일 사용자 ID를 전달합니다.
+
+사용자 ID는 계정 프로필 URL에서 찾을 수 있는 계정 핸들을 나타내는 숫자 값입니다. 예를 들어, 다음 계정의 사용자 이름은 `XDevelopers`입니다.
+
+`https://x.com/XDevelopers`
+
+이 사용자 이름을 사용자 ID로 변환하려면 [users lookup endpoint](/ko/x-api/users/lookup/introduction)에 사용자 이름을 전달하여 페이로드에서 숫자형 사용자 ID를 찾아야 합니다. @XDevelopers의 경우 사용자 ID는 2244994945입니다.
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 후, 이 사용자 ID를 id 파라미터의 &quot;Value&quot; 열에 입력합니다.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**4단계: 조회하려는 필드를 식별하고 지정하기**
+
+3단계 이후에 &quot;Send&quot; 버튼을 클릭하면, 응답에 기본 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet) 필드인 id와 text가 포함됩니다.
+
+id와 text 외에 추가 필드를 받고 싶다면, 요청에서 [field](/ko/x-api/fundamentals/fields) 및/또는 [expansion](/ko/x-api/fundamentals/expansions) 파라미터에 해당 필드들을 지정해야 합니다.
+
+이 연습에서는 서로 다른 오브젝트에서 세 가지의 서로 다른 필드 세트를 추가로 요청하겠습니다.
+
+1. 기본 사용자 오브젝트의 추가 tweet.created&#95;at 필드
+2. 반환된 게시물에 대한 작성자(user) 오브젝트의 기본 필드: id, name, username
+3. 관련된 사용자 오브젝트의 추가 user.created&#95;at 필드
+    
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 뒤 &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `created_at` | `includes.users.created_at` |
+| max&#95;results | 5   |     |
+
+이제 &quot;Send&quot; 버튼 옆에 다음 URL이 표시되는 것을 볼 수 있습니다:
+
+`https://api.x.com/2/users/:id/tweets?tweet.fields=created_at&expansions=author_id&user.fields=created_at&max_results=5`
+
+<Info>
+  **유의하세요:**
+
+  Postman에서 URL 필드의 경로 파라미터 :id 는 `id` 파라미터 필드에 입력한 값으로 자동으로 업데이트되지 않습니다. 그렇기 때문에 위 URL에는 2244994945가 아니라 `:id` 가 포함되어 있습니다.
+</Info>
+
+**5단계: 요청을 보내고 응답을 검토하기**
+
+모든 설정이 완료되면 &quot;Send&quot; 버튼을 눌러 다음과 같은 응답을 확인합니다:
+
+```{
+    "data": [
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-09-03T17:31:39.000Z",
+            "id": "1301573587187331074",
+            "text": "Starting today, you can see your monthly Tweet usage for the v2 API in the developer portal. ✨📊\n\nThis tracks how many Tweets you’ve received from filtered stream and recent search. Learn more here: https://t.co/nfJHkFRQcZ https://t.co/vFXmoj3qaA"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-09-03T15:43:00.000Z",
+            "id": "1301546240887398401",
+            "text": "RT @snowman: So, we built a live golf leaderboard on the X API with Python, Flask, Postgres, and Heroku.\n\nSend a 'leaderboard' Direct…"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-09-01T20:07:50.000Z",
+            "id": "1300888112948752389",
+            "text": "⛳ Why do golfers carry an extra shirt? In case they get a hole in one.\n\nNow that we have your attention, learn how @snowman and @johnd built a real-time golf leaderboard using the #TwitterAPI. 📖\n\nhttps://t.co/rRKeKmaRrN"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-08-28T23:14:22.000Z",
+            "id": "1299485505478963200",
+            "text": "RT @jessicagarson: Posted my first tutorial on @ThePracticalDev on using v2 of the Twitter API! You will learn how to explore a user’s Twee…"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-08-21T19:10:05.000Z",
+            "id": "1296887316556980230",
+            "text": "See how @PennMedCDH are using Twitter data to understand the COVID-19 health crisis 📊\n\nhttps://t.co/1tdA8uDWes"
+        }
+    ],
+    "includes": {
+        "users": [
+            {
+                "created_at": "2013-12-14T04:35:55.000Z",
+                "id": "2244994945",
+                "name": "Twitter Dev",
+                "username": "TwitterDev"
+            }
+        ]
+    },
+    "meta": {
+        "newest_id": "1301573587187331074",
+        "next_token": "t3buvdr5pujq9g7bggsnf3ep2ha28",
+        "oldest_id": "1296887316556980230",
+        "previous_token": "t3equkmcd2zffvags2nkj0nhlrn78",
+        "result_count": 5
+    }
+}
+```
+
+**6단계: 결과 페이지네이션 처리하기**
+
+이전 응답의 하단에는 다음 필드를 포함하는 meta 데이터 객체가 있습니다:
+
+* oldest&#95;id
+* newest&#95;id
+* results&#95;count
+* next&#95;token
+* previous&#95;token
+
+4단계에서 `max_results` 값을 5로 전달했으므로 각 페이지에는 최대 다섯 개의 결과만 포함됩니다. 추가 데이터 페이지에 액세스하려면, 마지막 결과에서 `next&#95;token` 필드의 값을 가져와 그 문자열을 Postman params 페이지에서 `pagination&#95;token` 파라미터의 값으로 추가하고, 나머지 설정은 그대로 유지합니다. 
+
+|                    |                               |
+| :----------------- | :---------------------------- |
+| **Key**            | **Value**                     |
+| `pagination_token` | t3buvdr5pujq9g7bggsnf3ep2ha28 |
+
+모든 설정을 마쳤으면 다시 &quot;Send&quot;를 클릭하여 다음 결과 페이지를 받을 수 있습니다. 
+
+이 개념을 더 자세히 설명하는 [페이지네이션](/ko/x-api/fundamentals/pagination) 가이드를 준비해 두었습니다. 
+
+**다음 단계**
+[API Reference를 사용하여 요청 사용자 지정하기](/ko/x-api/posts/timelines#api-reference-index)
+
+[커뮤니티에 도움 요청하기](https://devcommunity.x.com "커뮤니티에 도움 요청하기")

@@ -1,0 +1,174 @@
+---
+title: Autenticación
+sidebarTitle: Autenticación
+---
+
+La X API requiere autenticación para todos los endpoints. El XDK admite tres métodos de autenticación:
+
+1. Bearer Token (solo aplicación)
+2. OAuth 2.0 con PKCE
+3. OAuth 1.0a (Contexto de usuario)
+
+- **Bearer Token**: Úsalo para acceso de solo lectura en endpoints que admiten autenticación de aplicación (por ejemplo, búsqueda de publicaciones, endpoints de streaming).
+- **OAuth 2.0 PKCE**: Autenticación segura para acceso autorizado por el usuario basado en scopes (por ejemplo, obtener las métricas non_public de las publicaciones del usuario autenticado).
+- **OAuth 1.0a**: Autenticación heredada para operaciones específicas de usuario (por ejemplo, publicar en nombre de un usuario, gestionar listas).
+
+Obtén las credenciales en el [X Developer Portal](https://developer.x.com/en/portal/dashboard). Necesitarás una cuenta de desarrollador aprobada y una aplicación con los permisos apropiados (por ejemplo, Lectura + Escritura).
+
+<div id="creating-a-client">
+  ## Crear un Client
+</div>
+
+Todos los flujos de autenticación crean una instancia de `Client`:
+
+```python
+from xdk import Client
+```
+
+
+<div id="1-bearer-token-app-only">
+  ### 1. Bearer Token (solo de aplicación)
+</div>
+
+Para operaciones de solo lectura sin contexto de usuario.
+**Pasos**:
+
+1. En el portal para desarrolladores, genera un Bearer Token para tu aplicación.
+2. Pásalo al `Client`.
+   **Ejemplo**:
+
+```python
+client = Client(bearer_token="XXXXX")
+```
+
+**Uso**:
+
+```python
+# search_recent devuelve un Iterator, así que iteramos sobre él
+for page in client.posts.search_recent(query="python", max_results=10):
+    if page.data and len(page.data) > 0:
+        first_post = page.data[0]
+        post_text = first_post.text if hasattr(first_post, 'text') else first_post.get('text', '')
+        print(post_text)  # Acceder a la primera Publicación
+        break
+```
+
+
+<div id="2-oauth-20-with-pkce-user-context">
+  ### 2. OAuth 2.0 con PKCE (Contexto de usuario)
+</div>
+
+Este ejemplo muestra cómo usar OAuth 2.0 con Proof Key for Code Exchange (PKCE). Utiliza este flujo para obtener acceso específico de un usuario (por ejemplo, para publicar en nombre de un usuario, subir contenido multimedia para un usuario, etc.).
+**Pasos**:
+
+1. En el portal para desarrolladores, registra tu App con un URI de redirección (por ejemplo, `http://localhost:8080/callback`).
+2. Obtén el Client ID (no se necesita secreto para PKCE).
+3. Inicia el flujo, dirige al usuario a la URL de autenticación y gestiona el callback.
+   **Ejemplo** (usando un servidor web para el callback):
+
+```python
+from xdk.oauth2_auth import OAuth2PKCEAuth
+from urllib.parse import urlparse
+import webbrowser
+# Paso 1: Crear instancia de PKCE
+auth = OAuth2PKCEAuth(
+    client_id="YOUR_CLIENT_ID",
+    redirect_uri="YOUR_CALLBACK_URL",
+    scope="tweet.read users.read offline.access"
+)
+# Paso 2: Obtener la URL de autorización
+auth_url = auth.get_authorization_url()
+print(f"Visita esta URL para autorizar: {auth_url}")
+webbrowser.open(auth_url)
+# Paso 3: Gestionar el callback (en una aplicación real, usa un framework web como Flask)
+# Supón que callback_url = "http://localhost:8080/callback?code=AUTH_CODE_HERE"
+callback_url = input("Pega la URL de callback completa aquí: ")
+# Paso 4: Intercambiar el código por tokens
+tokens = auth.fetch_token(authorization_response=callback_url)
+access_token = tokens["access_token"]
+refresh_token = tokens["refresh_token"]  # Almacenar para renovación
+# Paso 5: Crear el cliente
+# Opción 1: Usar bearer_token (los tokens de acceso de OAuth2 funcionan como Bearer Tokens)
+client = Client(bearer_token=access_token)
+# Opción 2: Pasar el diccionario completo de tokens para soporte de actualización automática
+# client = Client(token=tokens)
+```
+
+**Renovación del token** (automática en el SDK para sesiones de larga duración):
+
+```python
+# Si el token de acceso expira, actualízalo usando el refresh_token almacenado
+# El método refresh_token usa el token almacenado de la instancia OAuth2PKCEAuth
+tokens = auth.refresh_token()
+# Usa el token actualizado
+client = Client(bearer_token=tokens["access_token"])
+# O pasa el diccionario completo de tokens: client = Client(token=tokens)
+```
+
+
+<div id="3-oauth-10a-user-context">
+  ### 3. OAuth 1.0a (Contexto de usuario)
+</div>
+
+Para aplicaciones heredadas o casos de uso específicos que requieren autenticación OAuth 1.0a:
+**Pasos**:
+
+1. En el Developer Portal, obtén tu API Key y API Secret.
+2. Si ya tienes tokens de acceso, úsalos directamente. De lo contrario, completa el flujo de OAuth 1.0a para obtenerlos.
+3. Crea una instancia de OAuth1 y pásala al Client.
+   **Ejemplo** (con tokens de acceso existentes):
+
+```python
+from xdk import Client
+from xdk.oauth1_auth import OAuth1
+# Paso 1: Crear una instancia de OAuth1 con las credenciales
+oauth1 = OAuth1(
+    api_key="YOUR_API_KEY",
+    api_secret="YOUR_API_SECRET",
+    callback="http://localhost:8080/callback",
+    access_token="YOUR_ACCESS_TOKEN",
+    access_token_secret="YOUR_ACCESS_TOKEN_SECRET"
+)
+# Paso 2: Crear el Client con OAuth1
+client = Client(auth=oauth1)
+# Paso 3: Usar el Client
+response = client.users.get_me()
+me = response.data
+print(me)
+```
+
+**Ejemplo** (flujo completo de OAuth 1.0a):
+
+```python
+from xdk import Client
+from xdk.oauth1_auth import OAuth1
+import webbrowser
+# Paso 1: Crear instancia de OAuth1
+oauth1 = OAuth1(
+    api_key="YOUR_API_KEY",
+    api_secret="YOUR_API_SECRET",
+    callback="http://localhost:8080/callback"
+)
+# Paso 2: Obtener el token de solicitud
+request_token = oauth1.get_request_token()
+# Paso 3: Obtener la URL de autorización
+auth_url = oauth1.get_authorization_url(login_with_x=False)
+print(f"Visita esta URL para autorizar: {auth_url}")
+webbrowser.open(auth_url)
+# Paso 4: El usuario autoriza y recibes el oauth_verifier
+# En una aplicación real, maneja esto a través de la URL de callback
+oauth_verifier = input("Ingresa el verificador de OAuth del callback: ")
+# Paso 5: Intercambiar por el token de acceso
+access_token = oauth1.get_access_token(oauth_verifier)
+# Paso 6: Crear el client
+client = Client(auth=oauth1)
+# Ahora puedes usar el client
+response = client.users.get_me()
+```
+
+**Nota**:
+
+* Nunca incluyas secretos directamente en el código en producción; usa variables de entorno o administradores de secretos (por ejemplo, `os.getenv("X_BEARER_TOKEN")`).
+* Para PKCE, asegúrate de usar HTTPS para los URI de redirección en producción.
+* El SDK valida los tokens y lanza `xdk.AuthenticationError` en caso de error.
+  Para ver ejemplos de código detallados que utilizan el XDK de Python, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).

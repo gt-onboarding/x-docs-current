@@ -1,0 +1,167 @@
+---
+title: 创建签名
+sidebarTitle: 创建签名
+keywords: ["OAuth 签名", "创建签名", "OAuth 1.0a 签名", "HMAC 签名", "签名生成", "OAuth 签名"]
+---
+
+import { Button } from "/snippets/zh/button.mdx";
+
+<div id="creating-a-signature">
+  ### 创建签名
+</div>
+
+本页说明如何为 HTTP 请求生成 OAuth 1.0a HMAC-SHA1 签名。该签名可按照[授权请求](/zh/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request)中的说明，作为已授权请求的一部分传递给 X API。
+
+用于演示签名的请求是一个发往 [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json) 的 POST 请求。原始请求如下所示：
+
+```
+POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
+Accept: */*
+Connection: close
+User-Agent: OAuth gem v0.4.4
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 76
+Host: api.x.com
+
+status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
+```
+
+**收集请求方法和 URL**
+
+要生成签名，首先确定请求的 HTTP 方法和 URL。这两项在创建请求时就已经确定，因此容易获取。
+
+对于 X API 请求，请求方法几乎总是 GET 或 POST。
+
+|             |      |
+| :---------- | :--- |
+| HTTP Method | POST |
+
+基础 URL 是请求所指向的 URL，去掉任何查询字符串或哈希参数。在这里使用正确的协议非常重要，因此请确保 URL 中的“https://”部分与实际发送到 API 的请求相匹配。
+
+|          |                                                                                          |
+| :------- | :--------------------------------------------------------------------------------------- |
+| Base URL | [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json) |
+
+<div id="collecting-parameters">
+  #### 收集参数
+</div>
+
+接下来，收集请求中包含的所有参数。这些附加参数可能出现在两个位置：URL（作为查询字符串的一部分）和请求体。示例请求在这两个位置各包含一个参数：
+
+```
+POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
+Accept: */*
+Connection: close
+User-Agent: OAuth gem v0.4.4
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 76
+Host: api.x.com
+
+status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
+```
+
+HTTP 请求中的参数会进行 URL 编码，但你应该收集其原始值。除了请求参数之外，每个以 oauth&#95;* 开头的参数也必须包含在签名中，因此也需要一并收集。下面是来自[授权请求](/zh/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request)的参数示例：
+
+|                                |                                                    |
+| :----------------------------- | :------------------------------------------------- |
+| status                         | Hello Ladies + Gentlemen, a signed OAuth request!  |
+| include&#95;entities           | true                                               |
+| oauth&#95;consumer&#95;key     | xvz1evFS4wEEPTGEFPHBog                             |
+| oauth&#95;nonce                | kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg         |
+| oauth&#95;signature&#95;method | HMAC-SHA1                                          |
+| oauth&#95;timestamp            | 1318622958                                         |
+| oauth&#95;token                | 370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb |
+| oauth&#95;version              | 1.0                                                |
+
+这些值需要被编码成一个单独的字符串，后续会用到。构建该字符串的步骤非常严格：
+
+1. 对将要签名的每一个键和值进行[百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)。
+2. 按编码后的键的字母顺序 [[1]](/zh/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature) 对参数列表进行排序 [[2]](/zh/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature)。
+3. 对于每一个键/值对：
+4. 将编码后的键追加到输出字符串。
+5. 将字符 ‘=’ 追加到输出字符串。
+6. 将编码后的值追加到输出字符串。
+7. 如果还有剩余的键/值对，则将字符 ‘&amp;’ 追加到输出字符串。
+    
+
+[1] OAuth 规范要求按字典序排序，这也是许多库的默认字母排序方式。
+
+[2] 如果有两个参数具有相同的编码键，OAuth 规范要求继续根据值进行排序。不过，X 不接受在 API 请求中出现重复键。
+ 
+
+**参数字符串**
+
+通过对上面收集的参数重复这些步骤，将生成如下*参数字符串*：
+
+| status                   | Hello Ladies + Gentlemen, a signed OAuth request!  |
+| :----------------------- | :------------------------------------------------- |
+| `include_entities`       | true                                               |
+| `oauth_consumer_key`     | xvz1evFS4wEEPTGEFPHBog                             |
+| `oauth_nonce`            | kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg         |
+| `oauth_signature_method` | HMAC-SHA1                                          |
+| `oauth_timestamp`        | 1318622958                                         |
+| `oauth_token`            | 370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb |
+| `oauth_version`          | 1.0                                                |
+
+<div id="creating-the-signature-base-string">
+  #### 创建签名基字符串
+</div>
+
+目前收集到的这三个值必须连接成一个单个字符串，用来生成签名。根据 OAuth 规范，这被称为 **签名基字符串（signature base string）**。
+
+要将 HTTP 方法、基础 URL 和参数字符串编码为一个单个字符串：
+
+1. 将 HTTP 方法转换为大写，并将输出字符串设为该值。
+2. 在输出字符串后追加字符 ‘&amp;’。
+3. 将 URL [进行百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)，并将结果追加到输出字符串。
+4. 在输出字符串后追加字符 ‘&amp;’。
+5. 将参数字符串[进行百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)，并将结果追加到输出字符串。
+    
+
+这样就会生成如下的 *签名基字符串（signature base string）*：
+
+```
+POST&https%3A%2F%2Fapi.x.com%2F1.1%2Fstatuses%2Fupdate.json&include_entities%3Dtrue%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521
+```
+
+请确保对参数字符串进行百分号编码。签名基字符串中应当恰好包含 2 个与号 ‘&amp;’ 字符。参数字符串中的百分号 ‘%’ 字符在签名基字符串中必须被编码为 %25。
+
+<div id="getting-a-signing-key">
+  #### 获取签名密钥
+</div>
+
+最后需要收集的几项数据是用于标识发出该请求的 [X 应用](/zh/resources/fundamentals/developer-apps) 的机密信息，以及该请求代表的用户。务必特别注意，这些值极其敏感，绝不能与任何人共享。
+
+用于将你的应用标识给 X 的值称为 **consumer secret（消费者密钥）**，可以在 [developer portal](/zh/resources/fundamentals/developer-portal) 中查看 [app details page](/zh/resources/fundamentals/developer-apps) 获取。对于你的 X 应用发送的每一个请求，这个值都是相同的。
+
+|     |     |
+| :--- | :--- |
+| Consumer secret | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw |
+
+用于标识你的应用代表哪个账号执行操作的值称为 **OAuth token secret（OAuth 令牌密钥）**。该值可以通过多种方式获取，所有方式都在 [obtaining access tokens](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) 中进行了说明。
+
+|     |     |
+| :--- | :--- |
+| OAuth token secret | LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
+
+同样，务必确保这些值只由你的应用持有。如果你认为这些值已遭泄露，请重新生成你的令牌（本页面中的令牌已被标记为无效，不能用于真实请求）。
+
+这两个值都需要组合起来形成一个 **signing key（签名密钥）**，用于生成签名。签名密钥只是经过 [百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) 的 token secret：
+
+请注意，在某些流程（例如获取 [request token](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) 时），token secret 尚未确定。在这种情况下，签名密钥应由经过 [百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) 的 **consumer secret**，后面紧跟一个和号字符 “&amp;” 组成。
+
+|     |     |
+| :--- | :--- |
+| Signing key | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&amp;LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
+
+<div id="calculating-the-signature">
+  #### 计算签名
+</div>
+
+最后，将签名基字符串和签名密钥传递给 HMAC-SHA1 哈希算法来计算签名。该算法的细节在 hash&#95;hmac 函数的说明中进行了介绍。
+
+HMAC 签名函数的输出是一个二进制字符串。需要对其进行 Base64 编码以生成签名字符串。例如，在本页给定的基字符串和签名密钥的情况下，输出为 2E CF 77 84 98 99 6D 0D DA 90 5D C7 17 7C 75 07 3F 3F CD 4E。该值在转换为 Base64 后，就是此请求的 OAuth 签名：
+
+|     |     |
+| :--- | :--- |
+| OAuth signature | Ls93hJiZbQ3akF3HF3x1Bz8/zU4= |

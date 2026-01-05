@@ -1,0 +1,48 @@
+---
+title: Recuperación y redundancia
+sidebarTitle: Recuperación y redundancia
+keywords: ["recuperación", "redundancia", "recuperación de flujo", "reconexión", "tolerancia a fallos", "redundancia de flujo", "recuperación de errores"]
+---
+
+<div id="introduction">
+  #### Introducción
+</div>
+
+Al consumir datos en streaming, maximizar el tiempo de conexión y recibir todos los datos que cumplan las condiciones de filtrado es un objetivo fundamental. Esto significa que es importante aprovechar las conexiones redundantes, detectar automáticamente las desconexiones, reconectar rápidamente y tener un plan para recuperar los datos perdidos.
+
+En esta guía de integración, analizaremos diferentes funcionalidades de recuperación y redundancia: conexiones redundantes, backfill y recuperación.
+ 
+
+**Conexiones redundantes**
+
+Una conexión redundante simplemente te permite establecer más de una conexión simultánea al flujo filtrado. Esto proporciona redundancia al permitirte conectarte al mismo flujo con dos consumidores independientes, recibiendo los mismos datos a través de ambas conexiones. De este modo, tu aplicación tiene un sistema de conmutación por error en caliente para diversas situaciones, como que se desconecte un flujo o que falle el servidor principal de tu aplicación.
+
+Actualmente, el flujo filtrado solo permite que los Proyectos con acceso Enterprise se conecten a un máximo de dos conexiones redundantes. Para usar una conexión redundante, simplemente conéctate a la misma URL que utilizas para tu conexión principal. Los datos de tu flujo se enviarán a través de ambas conexiones.
+
+<div id="recovering-missed-data-after-a-disconnection-backfill">
+  #### Recuperar datos perdidos después de una desconexión: Backfill
+</div>
+
+Después de detectar una desconexión, tu sistema debe ser capaz de reconectarse al flujo. Si es posible, tu sistema debe registrar cuánto duró la desconexión para que puedas usar la función de recuperación adecuada y rellenar (backfill) los datos. 
+
+Si estás usando un Proyecto con acceso Enterprise y has identificado que la desconexión duró cinco minutos o menos, puedes usar el parámetro de backfill, `backfill_minutes`. Si incluyes este parámetro en tu solicitud [GET /tweets/search/stream](/es/x-api/posts/filtered-stream#get-2-tweets-search-stream), recibirás las Publicaciones que coincidan con tus reglas de entre los últimos uno a cinco minutos. Generalmente entregamos primero estas Publicaciones más antiguas antes que cualquier Publicación nueva que coincida, y además no eliminamos duplicados de Publicaciones. Esto significa que si estuviste desconectado durante 90 segundos, pero solicitas dos minutos de datos de backfill, recibirás 30 segundos de Publicaciones duplicadas, lo cual tu sistema debe ser capaz de tolerar. Aquí tienes un ejemplo de cómo podría verse una solicitud con el parámetro de backfill:
+
+`curl 'https://api.x.com/2/tweets/search/stream?backfill_minutes=5' -H "Authorization: Bearer $ACCESS_TOKEN"`
+
+Si no tienes acceso Enterprise, o has identificado que el tiempo de desconexión fue superior a cinco minutos, puedes utilizar el [endpoint de búsqueda reciente](/es/x-api/posts/search/introduction) o la función de recuperación para solicitar los datos perdidos. Sin embargo, ten en cuenta que los endpoints de búsqueda de Publicaciones no incluyen los operadores `sample:`, `bio:`, `bio_name:` ni `bio_location:`, y presentan ciertas diferencias en el comportamiento de coincidencia al usar acentos y signos diacríticos con los operadores `keyword` y `#hashtag`. Estas diferencias podrían implicar que no recuperes completamente todas las Publicaciones que podrían haberse recibido a través de los endpoints de flujo filtrado. 
+
+**Recuperar datos perdidos después de una desconexión: Recovery**
+
+Si estás usando un Proyecto con acceso Enterprise, puedes usar la función Recovery para recuperar datos perdidos de las últimas 24 horas si no puedes reconectarte dentro de la ventana de backfill de 5 minutos.
+
+La función de recuperación de streaming te permite tener una ventana de backfill extendida de 24 horas. Recovery te permite &quot;reproducir&quot; el período de tiempo de los datos perdidos. Se inicia un flujo de recuperación cuando realizas una solicitud de conexión usando los parámetros de solicitud `start_time` y `end_time`. Una vez conectado, Recovery volverá a emitir el período de tiempo indicado y luego se desconectará.  
+
+Podrás realizar 2 solicitudes concurrentes a Recovery al mismo tiempo, es decir, &quot;dos trabajos de recuperación&quot;. Recovery funciona técnicamente de la misma manera que backfill, excepto que se define una hora de inicio y una hora de fin. Un período de recuperación corresponde a un único rango de tiempo.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Name** | **Type** | **Description** |
+| start&#95;time | date (ISO 8601) | YYYY-MM-DDTHH:mm:ssZ (ISO 8601/RFC 3339).<br /><br />Fecha en UTC que indica la hora de inicio desde la que se va a recuperar. |
+| end&#95;time | date (ISO 8601) | YYYY-MM-DDTHH:mm:ssZ (ISO 8601/RFC 3339).<br /><br />Fecha en UTC que indica la hora de finalización hasta la que se va a recuperar. |
+
+Ejemplo de URL de solicitud: [https://api.x.com/2/tweets/search/stream?start&#95;time=2022-07-12T15:10:00Z&amp;end&#95;time=2022-07-12T15:20:00Z](https://api.x.com/2/tweets/search/stream?start_time=1985-04-12T23:20:50.52Z\&end_time=1985-04-13T00:20:50.52Z)

@@ -1,0 +1,161 @@
+---
+title: 리스트 멤버 조회
+sidebarTitle: 리스트 멤버 조회
+keywords: ["리스트 멤버 조회 빠른 시작", "리스트 멤버 조회", "리스트 멤버 가져오기 빠른 시작", "리스트 멤버십 조회"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<Note>
+  **참고:** 이 가이드는 [빠른 시작 개요](/ko/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group)에 있는 사전 준비 단계를 모두 완료했다고 가정합니다.
+</Note>
+
+<div id="steps-to-build-a-list-members-lookup-request">
+  ### List 멤버 조회 요청을 구성하는 단계
+</div>
+
+**1단계: Postman에서 List 엔드포인트 컬렉션 선택**
+
+Postman에 X API v2 컬렉션을 불러온 후 “List” 폴더로 이동한 다음, 그 안의 “List members” 폴더를 선택하고 &quot;Members lookup&quot;을 선택합니다.
+ 
+
+**2단계: 멤버를 조회하려는 List를 식별하고 지정**
+
+멤버를 가져오려는 List를 지정해야 합니다. x.com으로 이동해 원하는 List를 클릭한 후, URL에서 List ID를 확인할 수 있습니다. 예를 들어, 다음 URL의 List ID는 84839422입니다.
+
+https://x.com/i/lists/84839422
+
+대상 ID로는 유효한 아무 List ID나 사용할 수 있습니다. Postman에서 &quot;Params&quot; 탭으로 이동한 뒤, id 경로 변수의 &quot;Value&quot; 열에 ID를 입력합니다. ID 앞이나 뒤에 공백이 포함되지 않도록 주의하세요.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 84839422 (List ID) |
+
+**3단계: 조회하려는 필드를 식별하고 지정**
+
+3단계를 완료한 뒤 &quot;Send&quot; 버튼을 클릭하면, 응답에는 기본 [user object](/ko/x-api/fundamentals/data-dictionary#user) 필드인 id, name, username이 포함되어 반환됩니다.
+
+id, name, username 외에 추가 필드를 받으려면, 요청에 [field](/ko/x-api/fundamentals/fields) 및/또는 [expansion](/ko/x-api/fundamentals/expansions) 파라미터를 사용해 해당 필드를 명시해야 합니다.
+
+이 예제에서는 서로 다른 오브젝트에서 다음 세 가지 추가 필드 세트를 요청합니다.
+
+* 기본 user object에서 추가 user.created&#95;at 필드
+* expansion 파라미터를 사용한 전체 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet)
+* 연관된 Post object에서 추가 tweet.created&#95;at 필드
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 뒤, &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | `created_at` |
+| expansions | pinned&#95;tweet&#95;id | `includes.tweets.id,  <br/>includes.tweets.text  <br/>` |
+| tweet.fields | created&#95;at | `includes.tweets.created_at` |
+
+이제 “Send” 버튼 옆에 다음과 유사한 URL이 표시되는 것을 볼 수 있습니다:
+
+`https://api.x.com/2/lists/84839422/members?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**4단계: 요청을 보내고 응답을 검토**
+
+모든 설정을 마쳤다면 &quot;Send&quot; 버튼을 클릭하면, 다음 예시와 유사한 응답을 받게 됩니다:
+
+```
+{
+  "data": [
+    {
+      "pinned_tweet_id": "1353789891348475905",
+      "id": "1319036828964454402",
+      "created_at": "2020-10-21T22:04:47.000Z",
+      "name": "Birdwatch",
+      "username": "birdwatch"
+    },
+    {
+      "id": "1244731491088809984",
+      "created_at": "2020-03-30T21:02:29.000Z",
+      "name": "Twitter Thailand",
+      "username": "TwitterThailand"
+    },
+    {
+      "id": "1194267639100723200",
+      "created_at": "2019-11-12T14:56:22.000Z",
+      "name": "Twitter Retweets",
+      "username": "TwitterRetweets"
+    },
+    {
+      "id": "1168976680867762177",
+      "created_at": "2019-09-03T19:59:02.000Z",
+      "name": "Twitter Able",
+      "username": "TwitterAble"
+    },
+    {
+      "pinned_tweet_id": "1451239134798942208",
+      "id": "1065249714214457345",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "name": "Spaces",
+      "username": "TwitterSpaces"
+    },
+    {
+      "id": "1049385226424786944",
+      "created_at": "2018-10-08T19:45:09.000Z",
+      "name": "Twitter Miami",
+      "username": "TwitterMiami"
+    },
+    {
+      "pinned_tweet_id": "1438533888498876420",
+      "id": "1004367799588880384",
+      "created_at": "2018-06-06T14:21:58.000Z",
+      "name": "Twitter México",
+      "username": "TwitterMexico"
+    },
+    {
+      "pinned_tweet_id": "1370178223846297602",
+      "id": "773578328498372608",
+      "created_at": "2016-09-07T17:47:00.000Z",
+      "name": "Twitter Together",
+      "username": "TwitterTogether"
+    },
+    {
+      "id": "766296039036948480",
+      "created_at": "2016-08-18T15:29:47.000Z",
+      "name": "Moments MENA",
+      "username": "momentsmena"
+    },
+    {
+      "id": "738118487122419712",
+      "created_at": "2016-06-01T21:22:15.000Z",
+      "name": "Twitter Asians",
+      "username": "TwitterAsians"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-01-25T19:40:36.000Z",
+        "id": "1353789891348475905",
+        "text": "Want to help build a new community-driven approach to tackling misleading information? Join us — sign up for Birdwatch! \n\nhttps://t.co/FSsqNznPy1"
+      },
+      {
+        "created_at": "2021-10-21T17:29:07.000Z",
+        "id": "1451239134798942208",
+        "text": "the time has arrived -- we’re now rolling out the ability for everyone on iOS and Android to host a Space\n\nif this is your first time hosting, welcome! here’s a refresher on how https://t.co/cLH8z0bocy"
+      },
+      {
+        "created_at": "2021-09-16T16:03:00.000Z",
+        "id": "1438533888498876420",
+        "text": "Algunos le dicen amor, pero yo le digo:\n\n‌    ∧＿∧　 \n（｡･ω･｡)つ━☆・*\n⊂     　ノ 　　　・゜+.\n　しーＪ　　　°。+ *´¨)\n　　　　　 　　　☆ RECALENTADO ☆ \n#VivaMéxico"
+      },
+      {
+        "created_at": "2021-03-12T01:01:59.000Z",
+        "id": "1370178223846297602",
+        "text": "그래도 우리는 날아오릅니다\n\n... 2020년이 우리를 몇 번이나 쓰러뜨리려 했지만, 우리는 다시 일어나 공감, 민첩성, 혁신, 리더십으로 대응했기 때문입니다.\n\n2020 포용성 &amp; 다양성 연례 보고서에서 자세히 알아보세요 #UntilWeAllBelong"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 10,
+    "next_token": "5349804505549807616"
+  }
+}
+```

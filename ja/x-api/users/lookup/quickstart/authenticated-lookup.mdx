@@ -1,0 +1,87 @@
+---
+title: 認証済みユーザーの取得
+sidebarTitle: 認証済みユーザーの取得
+keywords: ["認証済みユーザー取得クイックスタート", "認証済みユーザーを取得するクイックスタート", "me エンドポイントのクイックスタート", "認証済みユーザーに関するチュートリアル"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-authenticated-user-lookup-endpoint">
+  ## Authenticated User Lookup エンドポイントの利用開始
+</div>
+
+このクイックスタートガイドでは、Postman を使用して Authenticated User Lookup エンドポイントに対する最初のリクエストを送信する方法を説明します。
+
+さまざまなプログラミング言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストを認証するための [キーとトークン](/ja/resources/fundamentals/authentication) のセットが必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access)し、承認を受けます。
+  * developer portal 上で [プロジェクト](/ja/resources/fundamentals/projects) を作成し、それに関連付ける [開発者アプリ](/ja/resources/fundamentals/developer-apps) も作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-an-authenticated-user-lookup-request">
+  ### Authenticated User Lookup リクエストを作成する手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ1: ツールまたはライブラリから始める
+</div>
+
+このエンドポイントにリクエストを送信するために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、「Authenticated User Lookup」フォルダに移動し、「Lookup an Authenticated User」を選択します。
+
+<div id="step-two-authenticate-your-request">
+  #### ステップ2：リクエストを認証する
+</div>
+
+X API に正しくリクエストを送信するには、自分に権限が付与されていることを確認する必要があります。このエンドポイントでそれを行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使用してリクエストを認証する必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+API Key、API Secret Key、OAuth 1.0a ユーザー Access Token、OAuth 1.0a ユーザー Access Token Secret を含むキーとトークンを、Postman に追加する必要があります。これを行うには、Postman の右上隅で「X API v2」という名前の environment を選択し、「initial value」と「current value」のフィールドにキーとトークンを追加します（environment のドロップダウンの横にある目のアイコンをクリックします）。
+
+正しく設定されていれば、これらの変数はリクエストの「Authorization」タブに自動的に反映されます。
+ 
+
+<div id="step-three-determine-which-user-fields-you-want-to-retrieve">
+  ##### ステップ3: 取得したいユーザーフィールドを決定する
+</div>
+
+ステップ3の後に「Send」ボタンをクリックすると、レスポンス内でデフォルトの [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user) のフィールドである id、name、username が返されます。
+
+id、name、username 以外の追加フィールドを取得したい場合は、[field](/ja/x-api/fundamentals/fields) パラメータおよび / または [expansion](/ja/x-api/fundamentals/expansions) パラメータを使って、リクエスト内でそれらのフィールドを指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 つの追加フィールドセットをリクエストします。
+
+1. プライマリの user オブジェクトに対する追加フィールド user.created&#95;at
+
+2. 返されるユーザーに関連付けられたピン留めポストオブジェクトのデフォルトフィールド: id と text
+
+3. 関連するポストオブジェクトに対する追加フィールド tweet.created&#95;at
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|              |                               |                                                                   |
+| :----------- | :---------------------------- | :---------------------------------------------------------------- |
+| **Key**      | **Value**                     | **Returned fields**                                               |
+| user.fields  | created&#95;at                | user.created&#95;at                                               |
+| expansions   | pinned&#95;tweet&#95;id       | includes.tweets.id,  <br />includes.tweets.text                   |
+| tweet.fields | created&#95;at, author&#95;id | includes.tweets.created&#95;at, includes&#95;tweets.author&#95;id |
+
+これで、「Send」ボタンの横に同様の URL が表示されるはずです。
+
+```
+      https://api.x.com/2/users/me?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=author_id,created_at
+```

@@ -1,0 +1,97 @@
+---
+title: 快速入门
+sidebarTitle: 快速入门
+keywords: ["管理列表快速入门", "列表管理快速入门", "创建列表快速入门", "列表快速入门教程"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-manage-lists-endpoint-group">
+  ## 开始使用管理 List 端点组
+</div>
+
+本快速概览将帮助你使用 [Postman](/zh/tutorials/postman-getting-started) 向管理 List 端点发送你的第一个请求。
+
+如果你想查看不同编程语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。
+
+**注意：**在本示例中，我们将向 *Create a List* 端点发起请求，但你也可以将本快速入门中的内容应用到其他管理类请求中。
+
+<Note>
+  **先决条件**
+
+  要完成本指南，你需要拥有一组用于对请求进行认证的 [密钥和令牌](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审批。
+  * 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 和关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+  * 前往你的 App 的 “Keys and tokens” 页面生成所需的凭证。请确保将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-build-a-manage-list-request">
+  ### 构建管理列表请求的步骤
+</div>
+
+**第一步：从工具或库开始**
+
+有多种不同的工具、代码示例和库可以用来向此端点发起请求，但在这里我们将使用 Postman 工具来简化流程。
+
+要将 X API v2 Postman 集合加载到你的环境中，请点击以下按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 之后，导航到 “List” 文件夹，选择其中的 “Manage List” 文件夹，然后选择 &quot;Create a List&quot;。
+
+**第二步：对请求进行认证**
+
+要正确地向 X API 发起请求，你需要确认自己是否有权限。对于 manage Lists 端点，你必须使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 或 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 来对请求进行认证。
+
+在本示例中，我们将使用 OAuth 1.0a User Context。
+
+你必须将你的密钥和令牌（特别是 API Key、API Secret Key、OAuth 1.0a 用户 Access Token 和 OAuth 1.0a 用户 Access Token Secret）添加到 Postman 中。你可以通过选择名为 “X API v2” 的环境（位于 Postman 右上角），然后将你的密钥和令牌添加到 &quot;initial value&quot; 和 &quot;current value&quot; 字段中（点击环境下拉菜单旁边的眼睛图标）来完成此操作。
+
+如果你已经正确完成了这些操作，这些变量将会自动被填充到请求的 authorization 选项卡中。
+ 
+**第三步：为新列表指定名称**
+
+使用此端点创建新列表时，列表名称是一个必需的请求正文参数。你还可以选择提供描述，并指定列表是否为私有。
+
+在 Postman 中，导航到 “Body” 选项卡，将列表名称作为 name 参数的值输入。如果你希望为列表添加描述，只需以与 name 相同的方式添加一个新的键 description，并将列表的描述作为其值。将列表设为私有也遵循相同的模式，但此参数只接受 true 或 false 值。 
+
+|             |                  |                    |
+| :---------- | :--------------- | :----------------- |
+| **Key**     | **Value**        | **Parameter type** |
+| `name`      | 列表名称（必填）         | body               |
+| description | 列表描述（可选）         | body               |
+| private     | true 或 false（可选） | body               |
+
+此时你应该会在 &quot;Send&quot; 按钮旁看到类似如下的 URL：
+
+`https://api.x.com/2/lists`
+
+Step four: Make your request and review your response
+
+一切设置完成后，点击 &quot;Send&quot; 按钮，你将会收到与以下示例响应类似的返回结果：
+
+```
+{
+  "data": {
+    "id": "1441162269824405510",
+    "name": "New list created from Postman"
+  }
+}
+```
+
+如果返回的响应对象同时包含一个 id 和你的列表名称，则说明你已成功创建该列表。 
+
+要删除列表，请在已加载到 Postman 中的 X API v2 集合的“Lists”文件夹中选择“Delete a List”请求。此端点需要你想要删除的列表的 ID。在“Params”选项卡中，将你想要删除的列表的 ID 作为 id 列的值输入。 
+
+删除请求成功后，你将收到类似于以下示例的响应：
+
+```
+{
+  "data": {
+    "deleted": true
+  }
+}
+```

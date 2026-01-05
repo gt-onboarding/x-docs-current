@@ -1,0 +1,65 @@
+---
+title: 개요
+sidebarTitle: 개요
+keywords: ["리트윗 마이그레이션", "리트윗 이전", "v1.1에서 v2로 리트윗 마이그레이션", "리트윗 마이그레이션 가이드", "리트윗 이전 가이드"]
+---
+
+<div id="comparing-x-apis-retweets-endpoints">
+  ## X API의 리트윗 엔드포인트 비교
+</div>
+
+**리트윗 조회**
+
+v2 리트윗 조회 엔드포인트는 기존의 표준 [v1.1 GET statuses/retweets/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweets-id) 및 [v1.1 GET statuses/retweets/:ids](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids) 엔드포인트를 대체합니다.
+
+다음 표는 표준 v1.1과 X API v2 리트윗 엔드포인트를 비교한 것입니다.
+
+| 설명 | 표준 v1.1 | X API v2 |
+| :--- | :--- | :--- |
+| 지원되는 HTTP 메서드 | GET | GET |
+| 호스트 도메인 | https://api.x.com | https://api.x.com |
+| 엔드포인트 경로 | /1.1/retweeters/id.json<br /><br />`/1.1/retweets/ids.json` | /2/users/:id/retweeted&#95;by |
+| [인증](/ko/resources/fundamentals/authentication) | OAuth 1.0a 사용자 컨텍스트 | OAuth 2.0 Bearer Token<br /><br />OAuth 1.0a 사용자 컨텍스트 |
+| 기본 요청 [요청 한도](/ko/resources/fundamentals/rate-limits) | 15분당 75회 요청 | 15분당 75회 요청(앱 기준)<br /><br />15분당 75회 요청(사용자 기준) |
+| 데이터 형식 | 표준 v1.1 형식 | [X API v2 형식](/ko/x-api/fundamentals/data-dictionary) (요청 파라미터인 fields 및 expansions에 의해 결정되며, v1.1 형식과는 하위 호환되지 않음)<br /><br />표준 v1.1 형식에서 X API v2 형식으로 마이그레이션하는 방법에 대해 자세히 알아보려면 [데이터 형식 마이그레이션 가이드](/ko/x-api/migrate/data-format-migration)를 참고하세요. |
+| [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)의 자격 증명을 사용해야 함 |     | ✔️  |
+
+<div id="manage-retweets">
+  ### 리트윗 관리
+</div>
+
+아래 표는 표준 v1.1과 X API v2의 리트윗 취소 엔드포인트를 비교합니다:
+
+**게시물 리트윗**
+
+| Description | Standard v1.1 | X API v2 |
+| :--- | :--- | :--- |
+| HTTP methods supported | POST | POST |
+| Host domain | https://api.x.com | https://api.x.com |
+| Endpoint path | /1.1/statuses/retweet/:id.json | /2/users/:id/retweets |
+| [Authentication](/ko/resources/fundamentals/authentication) | OAuth 1.0a User Context | OAuth 1.0a User Context |
+| 기본 요청 [rate limits](/ko/resources/fundamentals/rate-limits) | 없음<br /><br />3시간 단위 윈도우당 300회 요청(사용자 및 앱당). 이는 POST Tweet endpoint와 공유됩니다. | 15분당 50회 요청(사용자당)<br /><br />3시간 단위 윈도우당 300회 요청(사용자 및 앱당). 이는 게시물 관리를 위한 POST Tweet endpoint와 공유됩니다. |
+| [Project](/ko/resources/fundamentals/projects)에 연결된 [developer App](/ko/resources/fundamentals/developer-apps)의 credentials 사용 필요 |     | ✔️  |
+
+<div id="undo-a-retweet">
+  #### 리트윗 취소
+</div>
+
+다음 표는 Standard v1.1과 X API v2의 리트윗 취소 엔드포인트를 비교한 것입니다.
+
+| 설명 | Standard v1.1 | X API v2 |
+| :--- | :--- | :--- |
+| 지원되는 HTTP 메서드 | POST | DELETE |
+| 호스트 도메인 | https://api.x.com | https://api.x.com |
+| 엔드포인트 경로 | /1.1/statuses/unretweet/:id.json | /2/users/:id/retweets/:source&#95;tweet&#95;id |
+| [인증](/ko/resources/fundamentals/authentication) | OAuth 1.0a 사용자 컨텍스트 | OAuth 1.0a 사용자 컨텍스트 |
+| 기본 요청 [요청 한도](/ko/resources/fundamentals/rate-limits) | 없음 | 15분당 50회 요청(사용자 기준) |
+| [프로젝트](/ko/resources/fundamentals/projects)와 연결된 [개발자 앱](/ko/resources/fundamentals/developer-apps)의 자격 증명 사용 필요 |     | ✔️  |
+
+**기타 마이그레이션 자료**
+
+[리트윗 조회: Standard v1.1에서 X API v2로](/ko/x-api/posts/retweets#retweets-lookup-standard-v1-1-compared-to-x-api-v2 "리트윗 조회: Standard v1.1에서 X API v2로")
+
+[리트윗 관리: Standard v1.1에서 X API v2로](/ko/x-api/posts/retweets#manage-retweets-standard-v1-1-compared-to-x-api-v2)
+
+[X API 마이그레이션 허브](/ko/x-api/migrate/overview)

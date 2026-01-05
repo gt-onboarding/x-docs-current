@@ -1,0 +1,92 @@
+---
+title: 좋아요 조회
+sidebarTitle: 좋아요 조회
+keywords: ["좋아요 조회 마이그레이션", "v1.1에서 v2로 좋아요 조회", "좋아요 조회 마이그레이션", "Standard v1.1에서 v2 좋아요로 마이그레이션", "좋아요 마이그레이션"]
+---
+
+<div id="likes-lookup-standard-v11-compared-to-x-api-v2">
+  ### 좋아요 조회: Standard v1.1과 X API v2 비교
+</div>
+
+Standard v1.1 [GET favorites/list](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-favorites-list) 엔드포인트를 사용해 왔다면, 이 가이드는 Standard v1.1과 X API v2 좋아요 조회 엔드포인트 간의 공통점과 차이점을 이해하는 데 도움을 주기 위한 것입니다.
+
+v2에서는 게시물에 좋아요를 표시한 사용자에 대한 정보를 가져올 수 있는 새로운 좋아요한 사용자 조회 엔드포인트도 도입했습니다.
+
+* **유사점**
+  * 인증
+  * 요청 한도
+* **차이점**
+  * 엔드포인트 URL
+
+  * 요청 제한 사항
+
+  * 앱 및 프로젝트 요구 사항
+
+  * 요청 매개변수
+
+  * 새로운 JSON 형식
+
+<div id="similarities">
+  #### 유사점
+</div>
+
+**인증**
+
+표준 v1.1과 X API v2 Likes 조회 엔드포인트는 모두 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 또는 [OAuth 2.0 Bearer Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)을 사용합니다. 따라서 이전에 표준 v1.1의 [GET favorites/list 엔드포인트](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-favorites-list)를 사용하고 있었다면, 원한다면 X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다. 
+
+사용하는 인증 라이브러리/패키지에 따라 다를 수 있지만, Bearer Token 인증이 가장 쉽게 시작할 수 있는 방법인 경우가 많으며, 간단하게 요청 헤더만 설정하면 사용할 수 있습니다. Bearer Token을 생성하는 방법을 알아보려면 [이 OAuth 2.0 Bearer Token 가이드](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)를 참고하세요. 
+ 
+
+**요청 한도**
+
+표준 v1.1 GET favorites/list 엔드포인트에는 사용자당 15분당 75건의 요청 한도가 있습니다. v2의 해당 ‘좋아요한 게시물’ 엔드포인트에도 동일한 요청 한도가 적용됩니다. 다만 이 v2 엔드포인트에는 추가로 앱당 15분당 75건의 요청 한도가 있습니다.
+
+<div id="differences">
+  #### 차이점
+</div>
+
+**엔드포인트 URL**
+
+* Standard v1.1 엔드포인트:
+  * GET https://api.x.com/1.1/favorites/list.json
+    (지정된 사용자가 좋아요한 게시물 목록)
+  * v2 liking users 엔드포인트와 동일한 v1.1 엔드포인트는 없습니다.
+* X API v2 엔드포인트:
+  * GET https://api.x.com/2/users/:id/liked&#95;tweets
+    (지정된 사용자 ID가 좋아요를 누른 게시물 목록)
+  * GET https://api.x.com/2/tweets/:id/liking&#95;users
+    (지정된 게시물 ID에 좋아요를 누른 사용자 목록)
+
+**요청 한도**
+
+v2 liked Posts 엔드포인트는 요청당 5개에서 100개의 게시물을 요청할 수 있지만, 페이지네이션 토큰을 사용해 하나의 게시물에 대한 모든 좋아요를 요청할 수 있습니다. v1.1 GET favorites/list 엔드포인트도 게시물의 모든 좋아요를 가져올 수 있지만, 요청당 20개에서 200개의 게시물을 가져올 수 있습니다.
+
+v2 liking users 엔드포인트의 경우, 게시물당 최대 100명의 liking users로 제한됩니다. 
+ 
+
+**앱 및 프로젝트 요구 사항**
+
+X API v2 엔드포인트는 요청을 인증할 때, [개발자 앱](/ko/resources/fundamentals/developer-apps)에서 발급되고 [프로젝트](/ko/resources/fundamentals/developer-apps)에 연결된 자격 증명을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 독립 실행형 앱 또는 프로젝트에 연결된 앱의 자격 증명을 사용할 수 있습니다.
+
+**요청 파라미터**
+
+다음 standard v1.1 요청 파라미터는 두 개의 쿼리 파라미터(user&#95;id 또는 screen&#95;name)를 허용했습니다. X API v2는 숫자 사용자 ID만 허용하며, 엔드포인트 경로의 일부로 전달해야 합니다.
+
+standard v1.1과 X API v2 엔드포인트 버전 간의 가장 큰 차이점 중 하나는 페이로드에서 어떤 필드를 반환할지 선택하는 방식입니다. standard 엔드포인트에서는 페이로드에 반환할 필드 또는 필드 집합을 지정하기 위해 여러 파라미터를 사용할 수 있었지만, X API v2 버전에서는 이러한 다양한 파라미터를 [fields](/ko/x-api/fundamentals/fields)와 [expansions](/ko/x-api/fundamentals/expansions)로 단순화했습니다. 
+ 
+
+**새 JSON 형식**
+
+X API v2는 API가 반환하는 객체에 대해 새로운 JSON 디자인을 도입하고 있으며, 여기에는 [Post](/ko/x-api/fundamentals/data-dictionary#tweet) 및 [user](/ko/x-api/fundamentals/data-dictionary#user) 객체가 포함됩니다.
+
+* JSON 루트 레벨에서, standard 엔드포인트는 statuses 배열에 Post 객체를 반환하는 반면, X API v2는 data 배열을 반환합니다. 
+* 리트윗 및 인용된 &quot;statuses&quot;를 참조하는 대신, X API v2 JSON은 리트윗 및 인용 트윗을 참조합니다. contributors 및 user.translator&#95;type과 같은 많은 레거시 및 사용 중단 필드는 제거되고 있습니다. 
+* Post 객체의 favorites와 user 객체의 favourites를 모두 사용하는 대신, X API v2는 like라는 용어를 사용합니다. 
+* X는 값이 없는 JSON 값(예: null)은 페이로드에 기록하지 않는 규칙을 채택하고 있습니다. Post 및 user 속성은 null이 아닌 값을 가진 경우에만 포함됩니다.
+   
+
+새 JSON 형식에 적용한 변경 사항 외에도, Post 객체에 다음을 포함한 새로운 필드 세트를 도입했습니다:
+
+* [conversation&#95;id](/ko/x-api/fundamentals/conversation-id)
+* context 및 entities를 포함하는 두 개의 새로운 [Post annotations](/ko/x-api/fundamentals/post-annotations) 필드
+* 여러 개의 새로운 [메트릭](/ko/x-api/fundamentals/metrics) 필드 

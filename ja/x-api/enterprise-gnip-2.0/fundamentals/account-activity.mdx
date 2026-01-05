@@ -1,0 +1,2426 @@
+---
+title: "Account Activity API：Enterprise"
+keywords: ["Enterprise版 Account Activity API", "Enterprise AAA", "Account Activity Enterprise", "Enterprise Webhooks", "Enterprise Activity"]
+---
+
+<Note>
+  このエンドポイントは、ポストの編集メタデータを含むように更新されています。これらのメタデータの詳細については、「[ポストを編集する](/ja/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)」の基礎ページをご覧ください。 
+
+  このエンドポイントは Direct Messages エンドポイントと併せて使用されることがよくあります。新しい [v2 Direct Messages エンドポイント](/ja/x-api/direct-messages/manage/introduction) を公開しました。Enterprise および Premium Account Activity API は v2 の 1 対 1（個別）メッセージをサポートしていますが、グループ会話はまだサポートしていません。   
+</Note>
+
+Overview
+
+`Enterprise`
+
+Account Activity API を使用すると、Webhook を介してユーザーアカウントに関連するアクティビティをリアルタイムで購読できます。これは、単一の接続を通じて、あなたが所有または購読している 1 つ以上のアカウントから、リアルタイムのポスト、ダイレクトメッセージ、およびその他のアカウントイベントを受信できることを意味します。
+
+Webhook の登録ごとに、各ユーザーサブスクリプションに対して以下のすべての関連アクティビティを受信します。
+
+| Activity types |     |
+| :--- | :--- |
+| * ポスト（ユーザーによる）  <br />    <br />* ポストの削除（ユーザーによる）<br />* @メンション（ユーザー宛）<br />* 返信（ユーザーへの返信／ユーザーからの返信）<br />* リポスト（ユーザーによる／ユーザー宛）<br />* 引用ポスト（ユーザーによる／ユーザー宛）<br />* 引用ポストのリポスト（ユーザーによる／ユーザー宛）<br />* いいね（ユーザーによる／ユーザー宛）<br />* フォロー（ユーザーによる／ユーザー宛）  <br />    <br />* フォロー解除（ユーザーによる） | * ブロック（ユーザーによる）<br />* ブロック解除（ユーザーによる）<br />* ミュート（ユーザーによる）<br />* ミュート解除（ユーザーによる）<br />* 送信されたダイレクトメッセージ（ユーザーによる）<br />* 受信したダイレクトメッセージ（ユーザー宛）<br />* 入力中インジケーター（ユーザー宛）<br />* 既読通知（ユーザー宛）<br />* サブスクリプション取り消し（ユーザーによる） |
+
+**注意** - Account Activity API ではホームタイムラインのデータは配信されません。このデータを取得するには、[GET statuses/home&#95;timeline](https://developer.x.com/en/docs/x-api/v1/tweets/timelines/overview) を使用してください。
+ 
+
+<div id="video-series">
+  #### 動画シリーズ
+</div>
+
+Account Activity API について手早くキャッチアップするには、[全4回の動画シリーズ](https://www.youtube.com/watch?v=otPxejFhyy8\&index=0\&list=PLFKjcMIU2WshGG6Yj940XM7Z6BFs1zfBg)をご覧ください。
+
+<iframe src="https://platform.x.com/embed/Tweet.html?dnt=false&embedId=twitter-widget-0&features=eyJ0ZndfdGltZWxpbmVfbGlzdCI6eyJidWNrZXQiOltdLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X2ZvbGxvd2VyX2NvdW50X3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9iYWNrZW5kIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19yZWZzcmNfc2Vzc2lvbiI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfZm9zbnJfc29mdF9pbnRlcnZlbnRpb25zX2VuYWJsZWQiOnsiYnVja2V0Ijoib24iLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X21peGVkX21lZGlhXzE1ODk3Ijp7ImJ1Y2tldCI6InRyZWF0bWVudCIsInZlcnNpb24iOm51bGx9LCJ0ZndfZXhwZXJpbWVudHNfY29va2llX2V4cGlyYXRpb24iOnsiYnVja2V0IjoxMjA5NjAwLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X3Nob3dfYmlyZHdhdGNoX3Bpdm90c19lbmFibGVkIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19kdXBsaWNhdGVfc2NyaWJlc190b19zZXR0aW5ncyI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdXNlX3Byb2ZpbGVfaW1hZ2Vfc2hhcGVfZW5hYmxlZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdmlkZW9faGxzX2R5bmFtaWNfbWFuaWZlc3RzXzE1MDgyIjp7ImJ1Y2tldCI6InRydWVfYml0cmF0ZSIsInZlcnNpb24iOm51bGx9LCJ0ZndfbGVnYWN5X3RpbWVsaW5lX3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9mcm9udGVuZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9fQ%3D%3D&frame=false&hideCard=false&hideThread=false&id=996790447048613888&lang=en&origin=https%3A%2F%2Fdeveloper.x.com%2Fen%2Fdocs%2Fx-api%2Fenterprise%2Faccount-activity-api%2Foverview&sessionId=81f4a0339cbd7bd77b669faa00bd3a7224bc4418&theme=light&widgetsVersion=2615f7e52b7e0%3A1702314776716&width=550px" height="400px" />
+
+<div id="feature-summary">
+  ### 機能概要
+</div>
+
+| ティア | 料金 | 一意のサブスクリプション数 | Webhook の数 | 信頼性とアクティビティの復旧 |
+| :--- | :--- | :--- | :--- | :--- |
+| Enterprise | [営業担当にお問い合わせ](/ja/x-api/enterprise-gnip-2.0/enterprise-gnip) | 最大 500 件超 | 3 件以上  | [再試行](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries) と [リプレイ](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) |
+
+* ご不明な点がありますか？ エラーが発生していますか？
+  * [よくある質問](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions) または [エラーのトラブルシューティングガイド](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions) をお読みください。
+
+* サンプルコードをご覧ください:
+  * [Enterprise Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard-enterprise) は、Enterprise ティアの Account Activity API を使用して webhook イベントを表示し、[リプレイ](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) 機能を備えた Node.js 製の Web アプリです。
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev) は、Enterprise の Account Activity API と Direct Message API を基盤として構築された Ruby 製の Web アプリです。
+
+<div id="manage-webhooks-and-subscribed-users">
+  ## Webhook と購読ユーザーを管理する
+</div>
+
+**⏱ 読了目安 10 分**
+
+Enterprise Account Activity API は、あなたのサービスを購読している X アカウントに関連するイベントが発生するたびに、webhook ベースの JSON メッセージを送信します。X はこれらのアクティビティを、あなたが登録した webhook に配信します。以下の手順では、webhook と購読ユーザーの管理方法について説明します。
+
+webhook と購読ユーザーの両方について、登録・確認・削除する方法を学びます。ここでは、各種 API エンドポイントにリクエストを送信するために、シンプルな cURL コマンドを使用します。cURL は、URL 構文を使ってリクエストの送受信を行うコマンドラインツールです。
+
+必要なもの：
+
+* 登録済みの X アプリ - *[こちらから登録](https://developer.x.com/content/developer-twitter/en/apps)*
+* Bearer Token - *[詳細はこちら](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)*
+* Challenge-Response Check (CRC) に合格する webhook - *[詳細はこちら](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks)*
+* Enterprise アカウント - *[こちらから申請](https://developer.x.com/en/products/x-api/enterprise)*
+
+*開始する前に、X の Account Activity API を使い始めるためのサンプル Web アプリとヘルパースクリプトを提供している [GitHub リポジトリ](https://github.com/xdevplatform/account-activity-dashboard) をご覧いただくことをおすすめします。*
+
+<div id="managing-a-webhook">
+  #### Webhook の管理：
+</div>
+
+Webhook を使用すると、単一の接続でユーザーアカウントに関連するリアルタイムのアクティビティを購読できるようになります。 
+
+<Tabs>
+  <Tab title="Webhook を追加する">
+    まず、対象のアプリケーションコンテキストに対して新しい webhook URL を登録します。
+
+    URL は保存前に CRC リクエストを通じて検証されます。Webhook を登録したら、後で必要になるため webhook ID を必ず記録しておいてください。
+
+    次の cURL リクエストを、以下を変更したうえでコマンドラインにコピーして実行します。
+
+    * **URL** `<URL>` 例: `https://yourdomain.com/webhooks/twitter/`
+
+    * **Consumer key** `<CONSUMER_KEY>` 例: `xvz1evFS4wEEPTGEFPHBog`
+
+    * **Access token** `<ACCESS_TOKEN>` 例:  `370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```
+      curl --request POST --url 'https://api.x.com/1.1/account_activity/webhooks.json?url=<URL>' --header 'authorization: OAuth oauth_consumer_key="<CONSUMER_KEY>", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="<ACCESS_TOKEN>", oauth_version="1.0"'
+      ```
+  </Tab>
+
+  <Tab title="Webhook を表示する">
+    指定されたアプリケーションに対して、登録されているすべての webhook URL とそのステータスを取得するため、次のコマンドを実行します。
+
+    次の cURL リクエストを、以下を変更したうえでコマンドラインにコピーして実行します。
+
+    * **Bearer token** `<BEARER_TOKEN>` 例: `AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+      ```curl --request GET --url https://api.x.com/1.1/account_activity/webhooks.json --header 'authorization: Bearer <BEARER_TOKEN>'
+      ```
+  </Tab>
+
+  <Tab title="Webhook を削除する">
+    指定されたアプリケーションの設定から webhook を削除するには、以下を変更したうえで次の cURL リクエストをコマンドラインにコピーして実行します。
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例: `1234567890`
+
+    * **Consumer key** `<CONSUMER_KEY>` 例: `xvz1evFS4wEEPTGEFPHBog`
+
+    * **Access token** `<ACCESS_TOKEN>` 例:  `370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```curl --request DELETE --url https://api.x.com/1.1/account_activity/webhooks/<:WEBHOOK_ID>.json --header 'authorization: OAuth oauth_consumer_key="<CONSUMER_KEY>", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="<ACCESS_TOKEN>", oauth_version="1.0"'
+      ```
+  </Tab>
+</Tabs>
+
+<div id="managing-subscribed-users">
+  #### サブスクライブ済みユーザーの管理：
+</div>
+
+Webhook を登録したら、Account Activity API にサブスクライブ対象のユーザーを追加して、そのユーザーのアカウントアクティビティの受信を開始できます。
+
+<Tabs>
+  <Tab title="サブスクリプションの追加">
+    まずはユーザーをサブスクライブし、すべてのイベントタイプを受信できるようにします。
+
+    次の項目を変更したうえで、以下の cURL リクエストをコマンドラインにコピーして実行します。
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例: `1234567890`
+
+    * **Consumer key 名** `<CONSUMER_KEY>` 例: `xvz1evFS4wEEPTGEFPHBog`
+
+    * **サブスクライブするユーザーのアクセストークン** `<SUBSCRIBING_USER'S_ACCESS_TOKEN>` 例: `370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```
+      curl --request POST --url https://api.x.com/1.1/account_activity/webhooks/<:WEBHOOK_ID>/subscriptions/all.json --header 'authorization: OAuth oauth_consumer_key="<CONSUMER_KEY>", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="<SUBSCRIBING_USER'S_ACCESS_TOKEN>", oauth_version="1.0"'
+      ```
+  </Tab>
+
+  <Tab title="サブスクリプションの表示">
+    指定した Webhook に対する、すべてのアクティビティタイプのサブスクリプション一覧を表示するには、次の項目を変更したうえで、以下の cURL リクエストをコマンドラインにコピーして実行します。
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例: `1234567890`
+
+    * **Bearer Token** `<BEARER_TOKEN>` 例: `AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+      ```
+      curl --request GET --url https://api.x.com/1.1/account_activity/webhooks/<:WEBHOOK_ID>/subscriptions/all/list.json --header 'authorization: Bearer <BEARER_TOKEN>'
+      ```
+  </Tab>
+
+  <Tab title="サブスクリプションの削除">
+    サブスクリプションを無効化すると、そのリクエストユーザーに関するすべてのイベントは Webhook URL に送信されなくなります。
+
+    指定されたユーザーコンテキストとアプリケーションからサブスクリプションを無効化するには、次の項目を変更したうえで、以下の cURL リクエストをコマンドラインにコピーして実行します。
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例: `1234567890`
+
+    * **Consumer key** `<CONSUMER_KEY>` 例: `xvz1evFS4wEEPTGEFPHBog`
+
+    * **サブスクライブされたユーザーのアクセストークン** `<SUBSCRIBING_USER'S_ACCESS_TOKEN>` 例: `370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```
+      curl --request DELETE --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID/subscriptions/all.json --header 'authorization: OAuth oauth_consumer_key="CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="SUBSCRIBED_USER'S_ACCESS_TOKEN", oauth_version="1.0"'
+      ```
+  </Tab>
+</Tabs>
+
+これで、Webhook とサブスクライブ済みユーザーを管理できるようになりました。
+
+<div id="referenced-articles">
+  #### 参照記事
+</div>
+
+* [Challenge-Response Check (CRC) の概要](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks)
+* [Account Activity のデータ型](/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-data-object-structure
+* [Webhook とサブスクリプションの管理](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#managing-webhooks-and-subscriptions)
+
+<div id="a-video-walkthrough-of-the-account-activity-api">
+  ## Account Activity API の動画ウォークスルー
+</div>
+
+この動画ウォークスルーでは、Account Activity API の Premium および Enterprise ティアで利用できる機能について学びます。
+
+この動画を最後まで視聴すると、次の機能について理解できるようになります。
+
+* Webhook の登録
+* ユーザーサブスクリプションの追加
+* ユーザーサブスクリプションの削除
+* アカウントアクティビティの受信
+* アカウントアクティビティのリプレイ
+
+<iframe src="https://platform.x.com/embed/Tweet.html?dnt=false&embedId=twitter-widget-0&features=eyJ0ZndfdGltZWxpbmVfbGlzdCI6eyJidWNrZXQiOltdLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X2ZvbGxvd2VyX2NvdW50X3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9iYWNrZW5kIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19yZWZzcmNfc2Vzc2lvbiI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfZm9zbnJfc29mdF9pbnRlcnZlbnRpb25zX2VuYWJsZWQiOnsiYnVja2V0Ijoib24iLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X21peGVkX21lZGlhXzE1ODk3Ijp7ImJ1Y2tldCI6InRyZWF0bWVudCIsInZlcnNpb24iOm51bGx9LCJ0ZndfZXhwZXJpbWVudHNfY29va2llX2V4cGlyYXRpb24iOnsiYnVja2V0IjoxMjA5NjAwLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X3Nob3dfYmlyZHdhdGNoX3Bpdm90c19lbmFibGVkIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19kdXBsaWNhdGVfc2NyaWJlc190b19zZXR0aW5ncyI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdXNlX3Byb2ZpbGVfaW1hZ2Vfc2hhcGVfZW5hYmxlZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdmlkZW9faGxzX2R5bmFtaWNfbWFuaWZlc3RzXzE1MDgyIjp7ImJ1Y2tldCI6InRydWVfYml0cmF0ZSIsInZlcnNpb24iOm51bGx9LCJ0ZndfbGVnYWN5X3RpbWVsaW5lX3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9mcm9udGVuZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9fQ%3D%3D&frame=false&hideCard=false&hideThread=false&id=1204084171334832128&lang=en&origin=https%3A%2F%2Fdeveloper.x.com%2Fen%2Fdocs%2Fx-api%2Fenterprise%2Faccount-activity-api%2Fquick-start%2Fa-visual-walkthrough-of-the-account-activity-api&sessionId=b5b8e259a4c6287be2413de9059093170036fb30&theme=light&widgetsVersion=2615f7e52b7e0%3A1702314776716&width=550px" />
+
+* 質問がありますか？エラーが発生していますか？
+  * [よくある質問](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions) や [エラーのトラブルシューティングガイド](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions) を参照してください。
+
+* サンプルコードをご覧ください:
+  * [Enterprise Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard-enterprise) は、Account Activity API の Enterprise ティアを利用して webhook イベントを表示し、[Replay](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) 機能も備えた Node.js 製のウェブアプリです。
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev) は、Enterprise の Account Activity API と Direct Message API を利用して構築された Ruby 製のウェブアプリです。
+
+**Enterprise**
+
+<div id="getting-started-with-webhooks">
+  ## Webhook を使い始める
+</div>
+
+Account Activity API は、開発・デプロイ・ホストしたあなたの Web アプリにアカウントイベントを送信する、Webhook ベースの API です。 
+
+イベントコンシューマー（受信側）アプリケーションで Webhook イベントを受信し始める前に、あらかじめ対応しておくべきいくつかの細かな設定事項があります。以下で説明するように、X アプリを作成し、Account Activity API へのアクセス権を取得し、Webhook イベントを受信して処理する Web アプリを開発する必要があります。 
+
+<div id="1-create-a-x-app">
+  ### 1. X アプリを作成する
+</div>
+
+* [developer portal](/ja/resources/fundamentals/developer-portal) で承認済みの開発者アカウントを使って、[X アプリ](/ja/resources/fundamentals/developer-apps) を作成します。会社を代表してアプリを作成する場合は、企業の X アカウントでアプリを作成することを推奨します。開発者アカウントに申し込むには、[こちらをクリック](/ja/resources/fundamentals/developer-apps)してください。
+* アプリページの [permissions](/ja/resources/fundamentals/developer-apps#oauth-1-0a-app-permissions) タブで「Read, Write and Access direct messages」を有効にします。
+* &quot;Keys and Access Tokens&quot; タブで、アプリの Consumer Key (API Key) と Consumer Token (API Secret) を控えておきます。
+* 同じタブで、アプリの [Access Token と Access Token Secret](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を生成します。これらの Access Token は、X がアカウントイベントを送信する先となる webhook URL を登録する際に必要になります。
+* [X Sign-in](/ja/resources/fundamentals/authentication#log-in-with-x) や、X API でのユーザーコンテキストの仕組みに不慣れな場合は、[Obtaining Access Tokens](https://dev.x.com/webhooks/access-tokens) を確認してください。イベントを受信するアカウントを追加する際には、そのアカウントの Access Token を使ってサブスクライブします。
+* [developer portal](/ja/resources/fundamentals/developer-portal) の [&quot;Apps&quot;](/ja/resources/fundamentals/developer-apps) ページに表示されている、アプリの数値 ID を控えておきます。Account Activity API アクセスを申請する際に、このアプリ ID が必要になります。
+   
+
+<div id="2-get-account-activity-api-access">
+  ### 2. Account Activity API へのアクセスを取得する
+</div>
+
+X アプリを作成したら、次のステップは Account Activity API へのアクセスを申請することです。 
+
+Account Activity API は Enterprise でのみ利用可能なため、以下のリンクから Enterprise アクセスを申請してください。
+
+<Button href="https://developer.x.com/en/enterprise-application.html">
+  Enterprise アクセスを申請する
+</Button>
+
+<div id="3-develop-webhook-consumer-app">
+  ### 3. Webhook コンシューマーアプリを開発する
+</div>
+
+Account Activity API へのアクセス権を取得したら、X の webhook イベントを受信する Web アプリを開発し、デプロイしてホストする必要があります。 
+
+* イベントを受信するための webhook として使用する URL を持つ Web アプリを作成します。これは、受信する X webhook イベントを待ち受けるためにサーバー上にデプロイされるエンドポイントです。 
+  * URI の *path* は完全に任意です。次の例は有効です: https://mydomain.com&#95;/service/listen&#95;
+
+  * さまざまなソースからの webhook を受信する場合、一般的なパターンは次のようになります: https://mydomain.com/webhook/twitter
+
+  * 指定する URL にポート指定を含めることはできない点に注意してください (https://mydomain.com:5000/NoWorkie は不可)。
+
+* [Securing Webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks) ガイドで説明しているように、最初のステップは、X Challenge Response Check (CRC) の GET リクエストを受信し、適切にフォーマットされた JSON レスポンスで応答するコードを書くことです。 
+
+* Webhook URL を登録します。`/webhooks.json?url=` エンドポイントに POST リクエストを送信します。このリクエストを送信すると、X は Web アプリに CRC リクエストを送信します。Webhook が正常に登録されると、レスポンスには webhook の `id` が含まれます。この webhook `id` は、後で Account Activity API に対して一部のリクエストを行う際に必要になります。 
+
+* X は、登録した URL にアカウント関連の webhook イベントを送信します。Web アプリが、受信イベントに対する POST リクエストをサポートしていることを確認してください。これらのイベントは JSON 形式でエンコードされたデータとして送信されます。Webhook の JSON ペイロード例については [HERE](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-data-object-structure) を参照してください。
+
+* Web アプリの準備ができたら、次のステップはアクティビティを受信対象とするアカウントを追加することです。アカウントを追加 (または削除) する際には、アカウントの `id` を指定して POST リクエストを行います。詳細については、[サブスクリプションの追加に関するガイド](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#managing-webhooks-and-subscriptions) を参照してください。
+
+<div id="4-validate-setup">
+  ### 4. セットアップを検証する
+</div>
+
+* アプリと webhook が正しく構成されていることを検証するには、アプリがサブスクライブしている X アカウントのいずれかが投稿したポストを「お気に入り」登録してください。サブスクライバーが受け取る各「お気に入り」について、webhook URL に対して `favorite_events` が POST リクエストとして届くはずです。
+* サブスクリプションの追加後、イベントの配信が開始されるまで最長で 10 秒かかる場合があることに注意してください。
+
+**重要な注意事項**
+
+* webhook URL を登録する際、Web アプリはコンシューマートークンとシークレット *に加えてアプリ所有者のユーザーアクセストークンとシークレット* で認証を行う必要があります。
+
+* すべての受信ダイレクトメッセージは webhook 経由で配信されます。[POST direct&#95;messages/events/new (message&#95;create)](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) を介して送信されたすべてのダイレクトメッセージも webhook 経由で配信されます。これは、別のクライアントから送信されたダイレクトメッセージを Web アプリが把握できるようにするためです。
+
+* すべての webhook イベントには、そのイベントがどのサブスクリプションに対して配信されたかを示すユーザー ID である `for_user_id` が含まれていることに注意してください。
+
+* 同じ会話内でダイレクトメッセージに対して 2 人のユーザーが Web アプリを使用している場合、webhook には重複したイベントが 2 回（各ユーザー分 1 回ずつ）届きます。Web アプリはこれを考慮する必要があります。
+
+* 同じ webhook URL を共有し、かつ同じユーザーが各アプリにマッピングされている Web アプリが複数ある場合、同じイベントが（Web アプリごとに 1 回ずつ）複数回 webhook に送信されます。
+
+* 場合によっては、webhook が重複したイベントを受信することがあります。webhook アプリはこれに対して耐性を持つように実装し、イベント ID によって重複排除を行う必要があります。
+
+* Quick Reply のレスポンスがリクエストに直接続いて返ってくるとは想定しないでください。ユーザーは Quick Reply リクエストを無視し、従来のダイレクトメッセージで返信することができます。また、ユーザーはメッセージスレッド内で以前に返信していなかったリクエストに対して、後から Quick Reply でレスポンスを提供する場合もあります。
+
+* コード例を参照してください:
+  * [Enterprise Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard-enterprise) は、Account Activity API の Enterprise ティアを使用して webhook イベントを表示する Node.js 製の Web アプリであり、[Replay](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) 機能を含みます。
+
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev) は、Account Activity API と Direct Message API の上に構築された Ruby 製の Web アプリです。このコードベースには、Account Activity API webhook のセットアップを支援する [スクリプト](https://github.com/xdevplatform/SnowBotDev/wiki/Account-Activity-API-setup-script) が含まれています。
+
+<div id="securing-webhooks">
+  ## Webhook の保護
+</div>
+
+X の Webhook ベースの API では、Webhook サーバーのセキュリティを確認するために、次の 2 つの方法を提供しています。
+
+1. Challenge-Response チェックにより、Webhook イベントを受信する Web アプリの所有者であることを、X が確認できます。 
+2. 各 POST リクエスト内の署名ヘッダーにより、受信した Webhook が X から送信されたものであることを確認できます。
+    
+
+<div id="challenge-response-checks">
+  ### チャレンジ・レスポンス チェック
+</div>
+
+アプリと webhook URL の両方の所有者があなたであることを検証するために、X は Challenge-Response Check (CRC) を実行します。これは巡回冗長検査 (cyclic redundancy check) とは異なります。CRC が送信されると、X は `_crc_token` パラメータを付与してあなたの Web アプリに対して GET リクエストを行います。このリクエストを受信したとき、あなたの Web アプリは、*`crc_token`* パラメータとアプリの Consumer Secret（詳細は後述）に基づいて暗号化された `response_token` を生成する必要があります。`response_token` は JSON 形式でエンコードされている必要があり（下記の例を参照）、3 秒以内に返さなければなりません。成功すると、webhook の `id` が返されます。 
+
+webhook URL を登録するときに CRC が送信されるため、CRC レスポンス用コードの実装は最初の基本ステップとなります。webhook が確立された後は、最後に成功したレスポンスを受信してからおおよそ 24 時間ごとに、X が CRC をトリガーします。あなたのアプリからも、webhook の `id` を指定して PUT リクエストを行うことで、必要に応じて CRC をトリガーできます。CRC をトリガーすることは、webhook アプリケーションの開発中や、新しいコードをデプロイしてサービスを再起動した直後などに有用です。 
+
+*`crc_token`* は、受信する CRC リクエストごとに値が変化することを想定しておく必要があり、Consumer Secret をキーとして計算を行う際のメッセージとして使用する必要があります。
+
+レスポンスが 3 秒以内に送信されない、または無効になった場合、登録済み webhook へのイベント送信は停止します。
+
+<div id="the-crc-request-will-occur">
+  #### CRC リクエストが発生するタイミング:
+</div>
+
+* Webhook URL が登録されたとき
+* Webhook URL を検証するために、おおよそ *1 時間ごと* に
+* PUT リクエストを行うことで、CRC を手動でトリガーできます。Webhook クライアントを開発する際は、CRC レスポンスを実装しながら CRC を手動でトリガーできるように計画しておく必要があります。 
+   
+
+<div id="response-requirements">
+  #### 応答の要件:
+</div>
+
+* `crc_token` とアプリの Consumer Secret から生成された、base64 でエンコードされた HMAC SHA-256 ハッシュ。
+* 有効な response&#95;token および JSON 形式。
+* 3 秒未満のレイテンシ。
+* HTTP ステータスコード 200。
+   
+
+<div id="language-specific-hmac-libraries">
+  #### 言語ごとの HMAC ライブラリ:
+</div>
+
+* [Java/Scala](https://docs.oracle.com/javase/8/docs/api/index.html?javax/crypto/Mac.html)
+* [Ruby](http://ruby-doc.org/stdlib-2.1.0/libdoc/openssl/rdoc/OpenSSL/HMAC.html)
+* [Node.js](https://nodejs.org/api/crypto.html#crypto_class_hmac)
+* [Python](https://docs.python.org/2/library/hmac.html)
+
+<div id="example-response-token-generation-in-python">
+  #### Python での応答トークン生成の例:
+</div>
+
+次のコードは、Python 2.7 と Flask を使った Web アプリで、チャレンジレスポンスチェックに正しく応答するルートを定義しています。
+
+```
+import base64
+import hashlib
+import hmac
+import json
+
+
+\# Defines a route for the GET request
+@app.route('/webhooks/twitter', methods=\['GET'\])
+def webhook_challenge():
+
+  # 受信トークンとコンシューマーシークレットからHMAC SHA-256ハッシュを作成します
+  sha256\_hash\_digest = hmac.new(TWITTER\_CONSUMER\_SECRET, msg=request.args.get('crc_token'), digestmod=hashlib.sha256).digest()
+
+  # base64エンコードされたハッシュを使用してレスポンスデータを構築します
+  response = {
+    'response\_token': 'sha256=' + base64.b64encode(sha256\_hash_digest)
+  }
+
+  # 適切にフォーマットされたJSONレスポンスを返します
+  return json.dumps(response)
+```
+
+<div id="example-json-response">
+  #### JSON レスポンスの例:
+</div>
+
+上記のようにルートを定義しておくと、Web ブラウザで [https://your-app-domain/webhooks/twitter?crc&#95;token=foo](https://your-app-domain/webhooks/twitter?crc_token=foo) にアクセスした際、Web アプリは以下のようなレスポンスを返すはずです。
+
+```
+{
+  "response_token": "sha256=x0mYd8hz2goCTfcNAaMqENy2BFgJJfJOb4PdvTffpwg="
+}
+```
+
+<div id="other-examples">
+  #### その他の例:
+</div>
+
+* [HERE](https://github.com/xdevplatform/account-activity-dashboard/blob/master/helpers/security.js) は、Node/JS で実装された CRC レスポンスメソッドの例です。
+* [HERE](https://github.com/xdevplatform/SnowBotDev/blob/master/app/controllers/snow_bot_dev_app.rb) は、Ruby で実装された CRC レスポンスメソッドの例です（*generate&#95;crc&#95;response* メソッドと、CRC イベントを受信する /GET ルートを参照してください）。
+
+<div id="optional-signature-header-validation">
+  ### 任意のシグネチャヘッダー検証
+</div>
+
+X からの POST リクエストを受信する場合、webhook を作成するために GET リクエストを送信する場合、または手動 CRC を実行するために GET リクエストを送信する場合、`x-twitter-webhooks-signature` というヘッダーでハッシュシグネチャが渡されます。このシグネチャは、データの送信元が X であることを検証するために使用できます。POST のハッシュシグネチャは `sha256=` で始まり、X アプリの Consumer Secret とペイロードを暗号化するために HMAC SHA-256 が使用されていることを示します。GET のハッシュは、クエリパラメータ文字列 `crc_token=$token&nonce=$nonce` から計算されます。 
+
+**リクエストを検証する手順**
+
+1. Consumer Secret と受信したペイロードボディを使用してハッシュを作成します。
+2. 作成したハッシュと、Base64 でエンコードされた `x-twitter-webhooks-signature` の値を比較します。タイミング攻撃に対する脆弱性を低減するために、[compare&#95;digest](https://docs.python.org/2/library/hmac.html) のようなメソッドを使用してください。
+
+<div id="additional-security-guidelines">
+  ### 追加のセキュリティガイドライン
+</div>
+
+以下は、ウェブアプリケーションで検討すべき追加のセキュリティガイドラインです。これらのガイドラインを実装していなくても Webhook が機能しなくなることはありませんが、X の情報セキュリティチームにより強く推奨されています。以下の推奨事項についてよく分からない場合は、サーバー管理者に相談してください。
+
+<div id="x-aggregate-network-blocks">
+  #### X の集約ネットワークブロック
+</div>
+
+セキュリティをさらに強化するために、次の集約ネットワークブロックを許可リストに追加することを検討してください。
+
+* 199.59.148.0/22
+
+* 199.16.156.0/22
+
+* 192.133.77.0/26
+
+* 64.63.15.0/24
+
+* 64.63.31.0/24
+
+* 64.63.47.0/24
+
+* 202.160.128.0/24
+
+* 202.160.129.0/24
+
+* 202.160.130.0/24
+
+<div id="recommended-server-configurations">
+  #### 推奨サーバー構成
+</div>
+
+* [ssllabs.com](http://ssllabs.com/) のテストで「A」評価を取得する
+* **TLS 1.2 を有効にする**
+* Forward Secrecy を有効にする
+* SSLv2 を無効にする
+* SSLv3 を無効にする（POODLE 対策）
+* TLS 1.0 を無効にする
+* TLS 1.1 を無効にする
+* TLS 圧縮を無効にする
+* セッションチケットキーをローテーションしない場合は、Session Tickets を無効にする
+* SSL 設定で “ssl&#95;prefer&#95;server&#95;ciphers” または “SSLHonorCipherOrder” オプションを “on” に設定する
+* 暗号スイートの一覧が、次のようなモダンなリストになっていることを確認する:
+  `ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA:ECDHE-RSA-DES-CBC3-SHA:DES-CBC3-SHA`
+
+<div id="managing-webhooks-and-subscriptions">
+  ## Webhook およびサブスクリプションの管理
+</div>
+
+<div id="creating-changing-webhooks">
+  ### Webhook の作成と変更
+</div>
+
+Webhook の URL を変更するには、既存の webhook を削除してから、新しい webhook を作成する必要があります。この操作を行うと、新しい webhook に対してユーザーのサブスクリプションを再度追加する必要がある点に注意してください。
+
+<div id="webhook-configuration-management-endpoints">
+  #### webhook 構成管理エンドポイント：
+</div>
+
+|     |     |
+| :--- | :--- |
+| **メソッド** | Enterprise |
+| webhook URL を登録する / webhook&#95;id を生成する | [POST webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) |
+| すべての webhook URL とそのステータスを返す | [GET webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |
+| アプリの現在の webhook 構成を削除する | [DELETE webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) |
+| CRC リクエストを手動でトリガーする | [PUT webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) |
+
+<div id="why-cant-i-just-update-the-webhook-url">
+  #### なぜ webhook URL を更新できないのですか？
+</div>
+
+なぜ webhook 設定は変更できないのでしょうか？ X はセキュリティを非常に重視しています。webhook URL が変更された場合、アプリケーションの consumer key と consumer secret が漏えいしている可能性があります。新しい webhook 設定の作成を必須にすることで、ユーザーのイベントに対しても再度サブスクライブすることが必要になります。これには、悪意のある第三者が保有している可能性が比較的低いアクセストークンの使用が必要になります。その結果、第三者があなたのユーザーの非公開情報を受け取ってしまう可能性が低減されます。
+ 
+
+<div id="adding-removing-user-subscriptions">
+  ### ユーザーサブスクリプションの追加と削除
+</div>
+
+数千件規模のサブスクリプションは Enterprise ティアでサポートされています。すでにアカウント担当者がいる場合は、ご不明な点があればその担当者までお問い合わせください。Enterprise API へのアクセスを申請するには、[こちらをクリック](https://developer.x.com/en/products/x-api/enterprise)してください。 
+
+<div id="subscription-management-endpoints">
+  #### サブスクリプション管理エンドポイント
+</div>
+
+|     |     |
+| :--- | :--- |
+| メソッド | Enterprise |
+| 新しいユーザーサブスクリプションを追加する | [POST webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) |
+| ユーザーサブスクリプションを取得する | [GET webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) |
+| すべての有効なサブスクリプションの一覧を返す | [GET webhooks/:webhook&#95;id/subscriptions/all/list](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |
+| アプリケーション専用の OAuth を使用してユーザーサブスクリプションを無効化する | [DELETE webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |
+
+Account Activity API: Enterprise
+
+<Note>
+  **注意**: 
+
+  API を使い始める前に、お使いの開発者アプリに対して X が Account Activity API へのアクセスを有効化する必要があります。そのため、認証で使用する予定の App ID を、必ずアカウントマネージャーまたはテクニカルサポートチームに共有してください。
+</Note>
+
+[Account Activity API](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity) は、一連のエンドポイントで構成されており、単一の接続を通じて、購読対象としているすべてのアカウントに対するリアルタイムのアカウントアクティビティを受信するためのユーザーサブスクリプションを作成および管理できます。 
+
+Account Activity API では 2 つの認証方法（[OAuth 1.0a](/ja/resources/fundamentals/authentication#oauth-1-0a-2) と [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)）が利用可能です。どの認証方法を使用するかは、利用するエンドポイントによって異なります。
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **Description** | **Endpoint ** | OAuth 1.0a  <br />(user context) | OAuth 2.0 Bearer Token (application-only) |
+| 指定されたアプリケーションコンテキスト用に新しい webhook URL を登録します | [POST account&#95;activity/webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks) | ✓   |     |
+| 指定されたアプリケーションに対するすべての URL とそのステータスを返します | [GET account&#95;activity/webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |     | ✓   |
+| 指定された webhook の URL に対して Challenge Response Check（CRC）をトリガーします | [PUT account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) | ✓   |     |
+| アプリケーションをユーザーのアカウントイベントにサブスクライブします | [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 現在アクティブなサブスクリプションの件数を返します | [GET account&#95;activity/subscriptions/count](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |     | ✓   |
+| webhook 構成がユーザーのイベントをサブスクライブしているかどうかを確認します | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 現在アクティブなサブスクリプションの一覧を返します | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all-list) |     | ✓   |
+| webhook を削除します | [DELETE account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) | ✓   |     |
+| [DEPRECATED] 指定されたユーザーコンテキストおよびアプリケーションに対するサブスクリプションを無効化します | [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) | ✓ * |     |
+| application-only OAuth を使用してサブスクリプションを無効化します | [DELETE /account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |     | ✓   |
+| アクティビティを webhook に再配信します | [POST /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#replay-api) |     | ✓   |
+
+*&#95; 認証には、サブスクライブしているユーザーのアクセストークンが必要です。 &#95;
+
+OAuth 1.0a User Context 認証を必要とするエンドポイントについては、リクエストを認証するために以下の認証情報を提供する必要があります。 
+
+* Consumer Keys（API Key と Secret）
+* Access Tokens（Access Token と Secret）
+
+次の 3 つのエンドポイントの場合、X ユーザーは関与せず、アプリケーションのコンテキスト内で書き込みアクションを実行します。そのため、提供する必要があるアクセストークンは開発者アプリに属するものになります。これらは、[developer portal](https://developer.x.com/en/portal/projects-and-apps) 内のアプリの「Keys and tokens」タブから直接生成できます。  
+
+* [POST account&#95;activity/webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks): 指定したアプリケーションコンテキストに対して新しい webhook URL を登録します
+* [PUT account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id): 指定した webhook の URL に対してチャレンジレスポンスチェック（CRC）を実行します
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id): webhook を削除します
+
+一方、次の 3 つのエンドポイントでは、X ユーザー（たとえばダイレクトメッセージ）の代わりにアプリケーションが保護されたデータにアクセスできるようにするリクエストを行います。そのため、対象となる購読ユーザーに属するアクセストークンを指定する必要があります。必要なアクセストークンは、3-legged OAuth フローを使用して取得できます（[OAuth 1.0a: how to obtain a user’s Access Tokens](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を参照）。これらのエンドポイントは、上記の表ではアスタリスク（*）でマークされています。
+
+* [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all): アプリをユーザーのアカウントイベントに購読登録します
+* [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all): webhook 構成がユーザーのイベントを購読しているかどうかを確認します
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated): 指定したユーザーコンテキストおよびアプリケーションに対するサブスクリプションを無効化します [DEPRECATED]
+
+<Note>
+  **Please note**: 
+
+  開発者アプリで「Read, Write, and Direct Messages」が有効になっていることを確認してください。この設定は、開発者アカウントの [Projects &amp; Apps セクション](https://developer.x.com/en/portal/projects-and-apps)で、対象の開発者アプリの「App permissions」から変更できます。権限設定を変更した後は、アプリの認証情報を再生成する必要があります。
+</Note>
+
+Account Activity API で利用可能なすべてのエンドポイントの一覧は、関連する説明および認証実装例を含む cURL リクエストの例とともに、[API リファレンスドキュメント](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index)に掲載されています。
+
+さらに詳しい情報については、Enterprise Account Activity API を使い始める際に役立つ、XDev の [sample web app and helper scripts](https://github.com/xdevplatform/account-activity-dashboard-enterprise) も参照してください。
+
+<Note>
+  **Please note**: 
+
+  Account Activity API を利用開始する前に、開発者アプリに対して X 側で Account Activity API へのアクセスを有効にする必要があります。このため、認証に使用する予定の App ID をアカウントマネージャーまたはテクニカルサポートチームと共有するようにしてください。
+</Note>
+
+[Account Activity API](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity) は、単一の接続を通じて、購読しているすべてのアカウントのリアルタイムなアカウントアクティビティを受信するためのユーザーサブスクリプションを作成および管理できる、一連のエンドポイントで構成されています。 
+
+Account Activity API では、2 つの認証方法（[OAuth 1.0a](/ja/resources/fundamentals/authentication#oauth-1-0a-2) と [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0)）が利用可能です。どの認証方法を使用すべきかは、利用するエンドポイントによって異なります。
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **説明** | **エンドポイント** | OAuth 1.0a  <br />(User Context) | OAuth 2.0 Bearer Token（アプリケーション専用） |
+| 指定したアプリケーションコンテキスト用に新しい webhook URL を登録します | [POST account&#95;activity/webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks) | ✓   |     |
+| 指定したアプリケーションに対するすべての URL とそのステータスを返します | [GET account&#95;activity/webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |     | ✓   |
+| 指定した webhook の URL に対してチャレンジレスポンスチェック（CRC）を実行します | [PUT account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) | ✓   |     |
+| アプリケーションをユーザーのアカウントイベントにサブスクライブします | [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 現在アクティブなサブスクリプションの件数を返します | [GET account&#95;activity/subscriptions/count](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |     | ✓   |
+| webhook 構成がユーザーのイベントをサブスクライブしているかどうかを確認します | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 現在アクティブなサブスクリプションの一覧を返します | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all-list) |     | ✓   |
+| webhook を削除します | [DELETE account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) | ✓   |     |
+| [DEPRECATED] 指定したユーザーコンテキストおよびアプリケーションのサブスクリプションを無効化します | [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) | ✓ * |     |
+| アプリケーション専用の OAuth を使用してサブスクリプションを無効化します | [DELETE /account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |     | ✓   |
+| アクティビティを webhook に再配信します | [POST /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#replay-api) |     | ✓   |
+
+*&#95; 認証には、サブスクライブするユーザーのアクセストークンが必要です。 &#95;
+
+OAuth 1.0a User Context 認証を必要とするエンドポイントでは、リクエストを認証するために次のクレデンシャルを指定する必要があります。 
+
+* Consumer Keys（API Key と Secret）
+* Access Tokens（Access Token と Secret）
+
+次の 3 つのエンドポイントでは、アプリケーションのコンテキスト内で書き込み操作を実行します（X ユーザーは関与しません）。そのため、指定する必要があるアクセストークンは、開発者アプリに属するものです。これらは、[developer portal](https://developer.x.com/en/portal/projects-and-apps) 内のアプリの「キーとトークン」タブから直接生成できます。  
+
+* [POST account&#95;activity/webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks): 指定したアプリケーションコンテキストに対して新しい webhook URL を登録します
+* [PUT account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id): 指定した webhook の URL に対してチャレンジレスポンスチェック (CRC) を実行します
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id): webhook を削除します
+
+一方、次の 3 つのエンドポイントでは、アプリケーションが X ユーザー（たとえばダイレクトメッセージ）の保護されたデータに、そのユーザーに代わってアクセスできるようにするリクエストを実行します。したがって、対象となる購読ユーザーに属するアクセストークンを必ず指定する必要があります。必要なアクセストークンは 3-legged OAuth フローを使用して取得できます（[OAuth 1.0a: how to obtain a user’s Access Tokens](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を参照）。これらのエンドポイントは、上記の表でアスタリスク（*）付きで示されています。
+
+* [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all): アプリケーションをユーザーのアカウントイベントに購読させます
+* [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all): webhook 設定がユーザーのイベントを購読しているかどうかを確認します
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated): 指定されたユーザーコンテキストおよびアプリケーションのサブスクリプションを無効化します [DEPRECATED]
+
+<Note>
+  **注意**: 
+
+  開発者アプリが &quot;Read, Write, and Direct Messages&quot; に対して有効になっていることを確認してください。この設定は、開発者アカウントの [Projects &amp; Apps セクション](https://developer.x.com/en/portal/projects-and-apps)の、選択した開発者アプリの &quot;App permissions&quot; で変更できます。権限設定を変更した後は、アプリの認証情報を再生成する必要があります。
+</Note>
+
+Account Activity API で利用可能なすべてのエンドポイントの一覧（関連する説明および、認証の実装例を含む cURL リクエストのサンプル）は、[API リファレンスドキュメント](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index)に記載されています。
+
+さらに詳しい情報については、Enterprise Account Activity API の利用を開始する際の参考として、XDev の [sample web app and helper scripts](https://github.com/xdevplatform/account-activity-dashboard-enterprise) を参照してください。
+
+<div id="retries">
+  ## 再試行
+</div>
+
+`Enterprise`
+
+Account Activity API の Enterprise ティアを利用すると得られる利点の 1 つが、webhook イベント向けの再試行メカニズムです。HTTP レスポンスステータスコード 200（success）が受信されなかった場合、X サーバーは再試行メカニズムを開始し、5 分間にわたって最大 3 回まで webhook イベントを再送信します。この webhook イベントの再試行サービスにより、ネットワークの問題が発生した場合や、クライアント側サービスの中断やデプロイ中においても、信頼性の向上とイベントの復旧が可能になります。
+ 
+
+<div id="what-are-retries">
+  ### リトライとは何ですか？
+</div>
+
+Account Activity API には、クライアントの Web アプリがアカウントアクティビティの webhook イベントに対して「成功」を示す 200 レスポンスを返さない場合のリトライ機能があります。クライアント側でイベントの正常な受信が確認されないと、X はイベントが受信されなかったものとみなします。非 200 のレスポンスが返される場合、3 秒以内にレスポンスが返ってこない場合、もしくはまったくレスポンスが返ってこない場合、X はリクエストを再試行し、そのリクエストに対する接続を 3 秒間維持します。つまり、X があなたの webhook URL に送信しようとしているアクティビティに応答するために、2 回の試行で合計およそ 5 秒の猶予があります。サーバーが応答しない、または一時的なエラーを返す場合、X は 5 分間リトライを行います。検証が完了したことを確認するためのリトライ試行は合計 3 回行われます。これにより、すべての webhook イベントを確実に受信できる冗長性と安全性が確保されます。リトライが有効なサブスクリプションでは、webhook に登録されているすべてのユーザーのあらゆるアクティビティについて、リトライされたイベントを受け取ることになります。
+
+これら 8 回の試行のいずれにおいても検証を確認できない場合、そのアクティビティは Account Activity API 経由では取得できなくなります。 
+
+<div id="retry-timeline">
+  ### 再試行のタイムライン
+</div>
+
+Account Activity API は、200 レスポンスが受信されるまで、最大 5 分間のあいだに 3 回まで再試行を行います。詳細は以下の表を参照してください。およそ 5 分が経過すると、そのアクティビティは Account Activity API を通じて再送信できません。取り逃したデータを取得するには、他の X エンドポイントを使用する必要があります。たとえば、[search APIs](/ja/x-api/enterprise-gnip-2.0/fundamentals/search-api) を使用して、関連するポスト、リポスト、引用ポスト、メンション、および返信を取得できます。取り逃したダイレクトメッセージは、[このエンドポイント](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events)で取得できます。
+
+<div id="retries-timeline">
+  #### 再試行のタイムライン
+</div>
+
+|     |
+| :--- |
+| アクティビティが作成され、Account Activity API から webhook URL への POST 要求が送信されますが、3 秒でタイムアウトします。 |
+| 直前のタイムアウト完了から 3 秒待機した後、Account Activity API から webhook URL への POST 要求が再度送信され、3 秒でタイムアウトします。 |
+| 直前のタイムアウト完了から 27 秒待機した後、Account Activity API から webhook URL への POST 要求が再度送信され、3 秒でタイムアウトします。 |
+| 直前のタイムアウト完了から 242 秒待機した後、Account Activity API から webhook URL への POST 要求が再度送信され、3 秒でタイムアウトします。 |
+| この後、Account Activity API はそれ以上 POST を試行しません。Client はデータを復旧するために他の X エンドポイントを使用する必要があります。 |
+
+<div id="account-activity-data-object-structure">
+  ## アカウントアクティビティ データオブジェクトの構造
+</div>
+
+| Object | 詳細 |
+| :--- | :--- |
+| for&#95;user&#95;id | イベントに関連するサブスクリプション対象ユーザーを識別します。 |
+| is&#95;blocked&#95;by | （条件付き）他のユーザーがサブスクリプション対象ユーザーをメンションしたときのみ表示されます。ポストのメンションイベントで true の場合にのみ含まれます。 |
+| source | アクティビティを実行しているユーザーです。たとえば、フォロー、ブロック、ミュートしているユーザーが source ユーザーになります。 |
+| target | アクティビティの対象となるユーザーです。たとえば、フォローされる、ブロックされる、ミュートされるユーザーが target ユーザーになります。 |
+
+**利用可能なアクティビティ**
+
+| メッセージ種別 | 詳細 |
+| :--- | :--- |
+| [tweet&#95;create&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#tweet-create-events-posts-retweets-replies-quotetweets) | サブスクリプション対象ユーザーによる、または対象ユーザーに対して次のいずれかのアクションが行われたときのポストステータスのペイロード：ポスト、リポスト、返信、@メンション、QuoteTweet、QuoteTweet のリポスト。 |
+| [favorite&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#favorite-events) | ユーザーおよびターゲットを含む「お気に入り（いいね）」イベントステータス。 |
+| [follow&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#follow-events) | ユーザーおよびターゲットを含むフォローイベント。 |
+| [unfollow&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#unfollow-events) | ユーザーおよびターゲットを含むフォロー解除イベント。 |
+| [block&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#block-events) | ユーザーおよびターゲットを含むブロックイベント。 |
+| [unblock&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#unblock-events) | ユーザーおよびターゲットを含むブロック解除イベント。 |
+| [mute&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#mute-events) | ユーザーおよびターゲットを含むミュートイベント。 |
+| [unmute&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#unmute-events) | ユーザーおよびターゲットを含むミュート解除イベント。 |
+| [user&#95;event](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#user-event) | ユーザーがアプリケーション認可を取り消し、その結果サブスクリプションが自動的に削除されたときに送信される取り消しイベント。 |
+| [direct&#95;message&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-events) | ダイレクトメッセージの送受信時に、ユーザーおよびターゲットを含むダイレクトメッセージステータス。 |
+| [direct&#95;message&#95;indicate&#95;typing&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-indicate-typing-events) | ユーザーおよびターゲットを含む、ダイレクトメッセージの入力中イベント。 |
+| [direct&#95;message&#95;mark&#95;read&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-mark-read-events) | ユーザーおよびターゲットを含む、ダイレクトメッセージの既読イベント。 |
+| [tweet&#95;delete&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#tweet-delete-events) | コンプライアンス対応を容易にするための、削除されたポストに関する通知。 |
+
+**ペイロード例**
+
+上記の表で説明した各アカウントアクティビティイベントのペイロード例については、以下を参照してください。
+
+<div id="tweet_create_events-posts-retweets-replies-quotetweets">
+  #### tweet&#95;create&#95;events (ポスト、リツイート、返信ポスト、引用ポスト)
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"tweet_create_events": [
+	  {
+		<Tweet Object>
+	  }
+	]
+}
+```
+
+<div id="tweet_create_events-mentions">
+  #### tweet&#95;create&#95;events (@メンション)
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"user_has_blocked": "false",
+	"tweet_create_events": [
+	  {
+		<Tweet Object>
+	  }
+	]
+}
+```
+
+<div id="favorite_events">
+  #### favorite&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"favorite_events": [{
+		"id": "a7ba59eab0bfcba386f7acedac279542",
+		"created_at": "Mon Mar 26 16:33:26 +0000 2018",
+		"timestamp_ms": 1522082006140,
+		"favorited_status": {
+			<Tweet Object>
+		},
+		"user": {
+			<User Object>
+		}
+	}]
+}
+```
+
+<div id="follow_events">
+  #### follow&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"follow_events": [{
+			"type": "follow",
+			"created_timestamp": "1517588749178",
+			"target": {
+				<User Object >
+			},
+			"source": {
+				< User Object >
+			}
+		]
+	}
+}
+```
+
+<div id="unfollow_events">
+  #### unfollow&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"follow_events": [{
+			"type": "unfollow",
+			"created_timestamp": "1517588749178",
+			"target": {
+				<User Object >
+			},
+			"source": {
+				< User Object >
+			}
+		]
+	}
+}
+```
+
+<div id="block_events">
+  #### block&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"block_events": [{
+		"type": "block",
+		"created_timestamp": "1518127020304",
+		"source": {
+			<User Object>
+		},
+		"target": {
+			<User Object>
+		}
+	}]
+}
+```
+
+<div id="unblock_events">
+  #### unblock&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"block_events": [{
+		"type": "unblock",
+		"created_timestamp": "1518127020304",
+		"source": {
+			<User Object>
+		},
+		"target": {
+			<User Object>
+		}
+	}]
+}
+```
+
+<div id="mute_events">
+  #### mute&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"mute_events": [
+		{
+			"type": "mute",
+		  	"created_timestamp": "1518127020304",
+			"source": {
+				<User Object>
+			},
+			"target": {
+				<User Object>
+			}
+		}
+	]
+}
+```
+
+<div id="unmute_events">
+  #### unmute&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"mute_events": [
+		{
+			"type": "unmute",
+		  	"created_timestamp": "1518127020304",
+			"source": {
+				<User Object>
+			},
+			"target": {
+				<User Object>
+			}
+		}
+	]
+}
+```
+
+<div id="user_event">
+  #### user&#95;event
+</div>
+
+```
+{
+	"user_event": {
+		"revoke": {
+			"date_time": "2018-05-24T09:48:12+00:00",
+			"target": {
+				"app_id": "13090192"
+			},
+			"source": {
+				"user_id": "63046977"
+			}
+		}
+	}
+}
+```
+
+<div id="direct_message_events">
+  #### direct&#95;message&#95;events
+</div>
+
+```
+{
+  	"for_user_id": "4337869213",
+	"direct_message_events": [{
+		"type": "message_create",
+		"id": "954491830116155396",
+		"created_timestamp": "1516403560557",
+		"message_create": {
+			"target": {
+				"recipient_id": "4337869213"
+			},
+			"sender_id": "3001969357",
+			"source_app_id": "13090192",
+			"message_data": {
+				"text": "こんにちは世界！",
+				"entities": {
+					"hashtags": [],
+					"symbols": [],
+					"user_mentions": [],
+					"urls": []
+				}
+			}
+		}
+	}],
+	"apps": {
+		"13090192": {
+			"id": "13090192",
+			"name": "FuriousCamperTestApp1",
+			"url": "https://x.com/furiouscamper"
+		},
+		"users": {},
+		"3001969357": {
+			"id": "3001969357",
+			"created_timestamp": "1422556069340",
+			"name": "Jordan Brinks",
+			"screen_name": "furiouscamper",
+			"location": "Boulder, CO",
+			"description": "Alter Ego - X PE opinions-are-my-own",
+			"url": "https://t.co/SnxaA15ZuY",
+			"protected": false,
+			"verified": false,
+			"followers_count": 22,
+			"friends_count": 45,
+			"statuses_count": 494,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/851526626785480705/cW4WTi7C_normal.jpg"
+		},
+		"4337869213": {
+			"id": "4337869213",
+			"created_timestamp": "1448312972328",
+			"name": "Harrison Test",
+			"screen_name": "Harris_0ff",
+			"location": "Burlington, MA",
+			"protected": false,
+			"verified": false,
+			"followers_count": 8,
+			"friends_count": 8,
+			"profile_image_url": "null",
+			"statuses_count": 240,
+			"profile_image_url_https": "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"
+		}
+	}
+}
+```
+
+<div id="direct_message_indicate_typing_events">
+  #### direct&#95;message&#95;indicate&#95;typing&#95;events
+</div>
+
+```
+{
+	"for_user_id": "4337869213",
+	"direct_message_indicate_typing_events": [{
+		"created_timestamp": "1518127183443",
+		"sender_id": "3284025577",
+		"target": {
+			"recipient_id": "3001969357"
+		}
+	}],
+	"users": {
+		"3001969357": {
+			"id": "3001969357",
+			"created_timestamp": "1422556069340",
+			"name": "Jordan Brinks",
+			"screen_name": "furiouscamper",
+			"location": "Boulder, CO",
+			"description": "Alter Ego - X PE opinions-are-my-own",
+			"url": "https://t.co/SnxaA15ZuY",
+			"protected": false,
+			"verified": false,
+			"followers_count": 23,
+			"friends_count": 47,
+			"statuses_count": 509,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/851526626785480705/cW4WTi7C_normal.jpg"
+		},
+		"3284025577": {
+			"id": "3284025577",
+			"created_timestamp": "1437281176085",
+			"name": "Bogus Bogart",
+			"screen_name": "bogusbogart",
+			"protected": true,
+			"verified": false,
+			"followers_count": 1,
+			"friends_count": 4,
+			"statuses_count": 35,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/763383202857779200/ndvZ96mE_normal.jpg"
+		}
+	}
+}
+```
+
+<div id="direct_message_mark_read_events">
+  #### direct&#95;message&#95;mark&#95;read&#95;events
+</div>
+
+```
+{
+	"for_user_id": "4337869213",
+	"direct_message_mark_read_events": [{
+		"created_timestamp": "1518452444662",
+		"sender_id": "199566737",
+		"target": {
+			"recipient_id": "3001969357"
+		},
+		"last_read_event_id": "963085315333238788"
+	}],
+	"users": {
+		"199566737": {
+			"id": "199566737",
+			"created_timestamp": "1286429788000",
+			"name": "Le Braat",
+			"screen_name": "LeBraat",
+			"location": "Denver, CO",
+			"description": "data by day @X, design by dusk",
+			"protected": false,
+			"verified": false,
+			"followers_count": 299,
+			"friends_count": 336,
+			"statuses_count": 752,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/936652894371119105/YHEozVAg_normal.jpg"
+		},
+		"3001969357": {
+			"id": "3001969357",
+			"created_timestamp": "1422556069340",
+			"name": "Jordan Brinks",
+			"screen_name": "furiouscamper",
+			"location": "Boulder, CO",
+			"description": "Alter Ego - X PE opinions-are-my-own",
+			"url": "https://t.co/SnxaA15ZuY",
+			"protected": false,
+			"verified": false,
+			"followers_count": 23,
+			"friends_count": 48,
+			"statuses_count": 510,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/851526626785480705/cW4WTi7C_normal.jpg"
+		}
+	}
+}
+```
+
+<div id="tweet_delete_events">
+  #### tweet&#95;delete&#95;events
+</div>
+
+```
+{
+    "for_user_id": "930524282358325248",
+    "tweet_delete_events": [
+{
+        "status": {
+            "id": "1045405559317569537",
+            "user_id": "930524282358325248"
+        },
+        "timestamp_ms": "1432228155593"
+    }
+   ]
+}
+```
+
+<div id="account-activity-replay-api">
+  ## Account Activity Replay API
+</div>
+
+`Enterprise`
+
+Account Activity Replay API は、最長で 5 日前までさかのぼってイベントを取得できるデータ復旧ツールです。これは、[webhook](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) サーバーがイベントを受信し損ねた場合にデータを復旧するために使用します。たとえば、[retry window](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries) を超える時間の切断が発生した場合や、数日かけてシステムを通常状態に復旧する必要があるディザスターリカバリのシナリオなどです。
+
+Account Activity Replay API は、一定期間にわたって [activities](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity) の取り込みに失敗したあらゆるシナリオを想定して開発されました。アクティビティは、元のリアルタイム配信に使用していたのと同じ webhook に配信されます。このプロダクトはデータ復旧ツールでありバックフィルツールではないため、イベントは過去に配信が試行された場合にのみリプレイされます。Account Activity Replay API は、サブスクリプションが作成される前の期間に発生したイベントを配信することはできません。
+
+<div id="using-account-activity-replay-api">
+  ### Account Activity Replay API の使用
+</div>
+
+アカウントに Replay 機能が設定されている場合、Account Activity API へのリクエストと同様の方法でリクエストを送信できます。重要な点として、どの webhook のアクティビティをリプレイしたいかを示すために、リクエストで webhook id パラメーターを指定する必要があります。言い換えると、Replay リクエストは、webhook id と application id に基づいて、指定した開始日時から終了日時までのイベントを取得するよう Account Activity Replay API に指示するものです。
+
+時刻は UTC で指定する必要がある点に注意してください。これらのアクティビティは、その id に関連付けられた登録済み webhook を通じて、1 秒あたり最大 2,500 件のイベントという速度で配信されます。また、1 つの webhook につき同時に実行できる Replay ジョブは 1 つだけですが、その webhook で指定した日時の間にアクティブだったすべてのサブスクリプションはリプレイされることにも留意してください。
+
+イベントは、指定した期間内の最初（最も古い）1 分から配信が開始され、その後、最終の 1 分が配信されるまで、可能な限り時系列順に続きます。その時点で、Replay は [ジョブ完了イベント](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#job-completed-successfully-message) を webhook に配信します。アクティビティは時系列順に配信されるため、開始時刻付近に該当する結果がほとんど、あるいはまったくない場合、最初の結果が配信されるまで時間が空く可能性があります。
+
+<div id="limitations">
+  ### 制限事項
+</div>
+
+Replay は、最大で過去 5 日分のアクティビティを簡単に再取得するためのツールとして設計されていますが、サブスクリプションが作成された時刻より前のイベントは配信しません。たとえば、3 日前に新しいサブスクリプションを追加し、本日から過去 5 日間を対象とする Replay ジョブを実行した場合、この新しいサブスクリプションが有効であった 3 日分のデータのみを受け取ることができます。
+
+<div id="data-availability-and-types">
+  ### データの提供期間と種類
+</div>
+
+Account Activity Replay API から取得できるアクティビティは、リクエストの開始時点から 5 日間利用可能で、各アクティビティが作成されてからおおよそ 10 分後に新しいデータが利用可能になります。この 5 日間の範囲内で、リクエスト内の from&#95;date および to&#95;date パラメータを使用して、取得したい時間枠を指定してリクエストを行うことができます。Replay へのアクセスが有効化される以前に元々配信されていたイベントは、Replay を使って再取得することはできません。たとえば、アカウントが 2019 年 6 月 1 日 3:30 PM（UTC）に Account Activity Replay API へのアクセスを有効化された場合、その日時より前のイベントを Replay を使って取得することはできません。
+
+[Account Activity Replay API リファレンス](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated)に進む
+
+<div id="migration-introduction">
+  ## 移行の概要
+</div>
+
+**Site Streams、User Streams、および Account Activity API - DM Only の標準ベータ版のプロダクトは 2018 年に提供を終了しました。これらのプロダクトを利用していた場合は、必ず Account Activity API のプレミアム版または Enterprise 版へ移行してください。**
+
+**レガシーのダイレクトメッセージ（Direct Message）エンドポイントも提供を終了しました。これらのエンドポイントを利用していた場合は、新しい DM エンドポイント、もしくは Account Activity API のプレミアム版または Enterprise 版のいずれかへ必ず移行してください。**
+
+**詳細については [このお知らせ](https://devcommunity.x.com/t/details-and-what-to-expect-from-the-api-deprecations-this-week-on-august-16-2018/110746) をご覧ください。**
+
+これらの変更によって影響を受けるエンドポイントは次のとおりです。
+
+* User Streams
+* Site Streams
+* GET direct&#95;messages
+* GET direct&#95;messages/sent
+* GET direct&#95;messages/show
+* POST direct&#95;messages/new
+* POST direct&#95;messages/destroy
+   
+
+これらに代わって、同等のアクセスを提供し、ダイレクトメッセージ向けには追加機能も備えた新しいエンドポイントとサービスを提供しています。
+
+* Account Activity API の [enterprise](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) と [premium](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index)
+* [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events)
+* [GET direct&#95;messages/events/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event)
+* [POST direct&#95;messages/events/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event)
+* [POST direct&#95;messages/events/destroy](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/delete-message-event)
+
+これらの新しいエンドポイントやサービスへスムーズに移行できるよう、次の 2 つの移行ガイドを用意しています。
+
+* User Streams と Site Streams から新しい Webhook ベースのサービスへ移行するための [Account Activity API 移行ガイド](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#migration-guide-moving-from-user-streams-site-streams-to-account-activity-api)
+* ダイレクトメッセージの REST エンドポイント間で移行するための [ダイレクトメッセージ移行ガイド](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/guides/direct-message-migration)
+   
+
+さらに、Account Activity API の概要と始め方を説明した [動画シリーズ](https://www.youtube.com/playlist?list=PLFKjcMIU2WshGG6Yj940XM7Z6BFs1zfBg) も用意しています。
+
+最後に、理解を深め、すばやく利用を開始できるよう、コードサンプルも提供しています。
+
+* [Account Activity Dashboard](https://github.com/xdevplatform/Account-Activity-dashboard) は、Account Activity API を使い始めるためのヘルパースクリプトを備えた、サンプルの Node.js Web アプリです。
+* [SnowBot](https://github.com/xdevplatform/SnowBotDev) は、Account Activity API と REST ダイレクトメッセージエンドポイントを使用したサンプルのチャットボットです。Ruby で書かれており、Sinatra Web アプリフレームワークを使用し、Heroku にデプロイされています。
+
+<div id="migration-guide-moving-from-user-streamssite-streams-to-account-activity-api">
+  ## 移行ガイド: User Streams/Site Streams から Account Activity API へ
+</div>
+
+**2018 年 8 月 23 日をもって、Site Streams と User Streams は廃止されました。必ず Account Activity API への移行を行ってください。**
+
+**詳しくは、[このお知らせ](https://devcommunity.x.com/t/details-and-what-to-expect-from-the-api-deprecations-this-week-on-august-16-2018/110746) をご確認ください。**
+
+このガイドは、レガシーの User Streams および Site Streams API から、その後継である Account Activity API へ移行する際の支援を目的としています。以下では、変更点の概要、新機能の一覧に加えて、移行を進めるうえで役立つ主な相違点と考慮事項を説明します。基本的な DM エンドポイントからの移行に関するガイドラインについては、[ダイレクトメッセージ移行ガイド](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/guides/direct-message-migration) を参照してください。
+
+<div id="summary-of-changes">
+  ### 変更内容の概要
+</div>
+
+Account Activity API は、User Streams や Site Streams のようなストリーミング接続ではなく、Webhook を介して、認証済みおよびサブスクライブ済みアカウント向けのイベントを配信します。
+
+<div id="deprecated-apis">
+  #### 非推奨API
+</div>
+
+GET user
+
+GET site  (コントロールストリームを含む: GET site/c/:stream&#95;id,  GET site/c/:stream&#95;id/info.json,  GET site/c/:stream&#95;id/friends/ids.json,  POST site/c/:stream&#95;id/add&#95;user.json,  POST /site/c/:stream&#95;id/remove&#95;user.json)
+
+<div id="replacement-apis">
+  #### 代替 API
+</div>
+
+[Enterprise Account Activity API - すべてのアクティビティ](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api)
+
+### 差分と移行時の考慮事項
+
+**API フォーマット:** 新しい Account Activity API は、User Streams や Site Streams とは動作が異なります。webhook でデータを受信できるように、Web アプリを変更する必要があります。webhook の詳細については[こちら](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks)を参照してください。
+
+**利用可能なデータ:** もう 1 つの大きな違いは、配信されるデータに関する点です。X は、X でフォローしているユーザー（ホームタイムライン）からのイベントを今後は送信しません。これは意図的な変更であり、今後変更する予定はありません。
+
+**信頼性:** ストリーミングと異なり、webhook では配信確認が可能であり、webhook URL に到達しなかった POST されたアクティビティを再試行するオプションも提供されます。これにより、一時的な切断やダウンタイムがあった場合でも、アプリが該当するすべてのアクティビティを受信できていることを、より確実に担保できます。
+
+<div id="new-features">
+  ### 新機能
+</div>
+
+Account Activity API では多くの新機能が提供されており、とくに大きな違いは、これまでのストリーミングではなく webhook によってデータが配信されるようになった点です。webhook にはストリーミングと比べて多くの利点がありますが、中でも際立っているのは速度と信頼性です。API は、利用可能になったタイミングで JSON 形式のイベントとしてデータを送信するため、アクティブな接続を維持したり、エンドポイントをポーリングしたりする必要はありません。これにより冗長化機能の必要性が軽減され、全体として効率が向上します。webhook の詳細については、[技術ドキュメント](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks) を参照してください。
+
+<div id="managing-user-subscriptions">
+  ### ユーザーサブスクリプションの管理
+</div>
+
+Account Activity API では、1 つの登録済み webhook に対して複数のサブスクリプションを持つことができます。これにより、Site Streams のアーキテクチャと同様に、webhook を用いて複数のユーザーサブスクリプションのアクティビティを同一の場所に配信できます。これは、サブスクリプションの上限に対する利用状況としてのサブスクリプションを、webhook 接続とは独立して追跡できることを意味します。また、1 つまたは少数のサブスクリプションから、単一の webhook に対して数千のサブスクリプションまでスケールさせることも可能になります。
+
+<div id="how-to-migrate">
+  ### **移行方法**
+</div>
+
+<div id="follow-the-steps-below-to-easily-migrate-from-the-site-streams-api-to-the-account-activity-api">
+  ### **以下の手順に従って、Site Streams API から Account Activity API に簡単に移行してください**
+</div>
+
+**ステップ 1: パッケージを決定する**
+
+現在 User Streams または Site Streams をどのように運用しているかに応じて、Account Activity API の Enterprise 版またはプレミアム版への移行を検討する必要があります。現在サポートしているアプリケーション数や承認済みユーザー数を考慮し、必要なボリュームと信頼性に応じてスケールさせてください。自分のニーズに最も適したパッケージを決定する際には、次のような点を検討してください。
+
+* 必要な webhook の数
+* アプリケーション上で現在管理している／今後管理する予定のサブスクリプション数／承認済みユーザー数
+* 現在の X クライアントアプリケーション数
+* X から希望するサポートレベル（フォーラムサポートか、Enterprise レベルの 1:1 マネージドサポートか）
+* 各パッケージの価格
+
+**ステップ 2:** **developer portal での X アプリの設定を確認する**
+
+現在 User Streams または Site Streams に使用している [X app](/ja/resources/fundamentals/developer-apps) は、[developer portal](/ja/resources/fundamentals/developer-portal) 内で所有ユーザーに紐付けられて一覧表示されています。この X app は、そのアプリケーションの承認済みユーザーを保持するために、Account Activity API でも利用できます。新しいアプリを作成し、必要に応じてユーザーにこの新しいアプリを再承認してもらうこともできます。ビジネスを代表して新しいアプリを作成する場合は、企業の X @handle アカウントでアプリを作成することを推奨します。
+
+* X app のページにある [permissions](/ja/resources/fundamentals/developer-apps#app-permissions) タブで “Read, Write and Access direct messages” を有効にします。\
+  *なお、これらの設定変更は遡及的には適用されず、すでに承認しているユーザーは承認時点の設定を保持します。ユーザーがまだ Read、Write、およびダイレクトメッセージへのアクセス権を付与していない場合は、そのユーザーにアプリケーションを再承認してもらう必要があります。*
+* [X Sign-in](/ja/resources/fundamentals/authentication#log-in-with-x) や、X API におけるユーザーコンテキストの動作に不慣れな場合は、[Obtaining Access Tokens](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks) を確認してください。
+* 「Keys and Tokens」タブの下部で、X アプリ所有者のアクセストークンを生成します。同じタブで Consumer Key、Consumer Secret、Access Token、Access Token Secret を控えておいてください。これらは API を使用する際に必要になります。
+* Consumer Key と Consumer Secret を使って、[application-only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) API メソッド用の Bearer Token を生成します。
+
+**ステップ 3: Webhook をセットアップして構成する**
+
+* イベントを受信するための webhook として使用するエンドポイントを持つ Web アプリを作成します（例: https://your&#95;domain.com/webhook/twitter または https://webhooks.your&#95;domain.com）。
+
+* webhook を作成する際には、Consumer Key、Consumer Secret、Access Token、Access Token Secret を使用します。なお、エンドポイントは、`crc_token` とアプリの Consumer Secret から作成される、base64 エンコードされた HMAC SHA-256 ハッシュである `response_token` を含む JSON レスポンスを返さなければなりません。
+
+* [Securing Webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks) のドキュメントを確認し、とくに Challenge Response Check (CRC) の要件に注意してください。
+
+* webhook が、イベント受信用の POST リクエストと CRC 用の GET リクエストをサポートしていることを確認してください。
+
+* webhook が低レイテンシ（POST リクエストに対して 3 秒未満で応答）であることを確認してください。
+
+**ステップ 4: Webhook セットアップを検証する**
+
+* Webhook API は、次の 2 つの方法で webhook を保護します。
+
+               - webhook の所有者が Web アプリの所有者であることを検証するため、Challenge Response Check を要求します。
+
+               - 各 POST リクエストに署名ヘッダーを含め、Web アプリ側で送信元を検証できるようにします。
+
+* Web アプリと webhook URL の両方の所有者があなたであることを検証するために、X は Challenge Response Check (CRC) を実行します。これは循環冗長検査（cyclic redundancy check）とは異なるものです。
+* `crc_token` という名前のパラメータを含む GET リクエストが、webhook URL に送信されます。エンドポイントは、`crc_token` とアプリの Consumer Secret から作成される base64 エンコードされた HMAC SHA-256 ハッシュである `response_token` を含む JSON レスポンスを返さなければなりません。
+* `crc_token` は、受信する各 CRC リクエストごとに変わるものとして想定しておく必要があります。計算においては、`crc_token` をメッセージとして使用し、Consumer Secret をキーとして使用します。
+* 応答が無効な場合、登録された webhook へのイベント送信は停止します。
+
+**ステップ 5: 各 User Stream または Site Streams の承認ユーザーごとにサブスクリプションを作成する**
+
+User Streams から Account Activity API へ移行する場合:
+
+* User Streams 上で現在のユーザーサブスクリプションのリストを取得します
+* リクエスト  *POST account&#95;activity/all/:env&#95;name/subscriptions* を使用して、新しい Account Activity API サブスクリプションを設定します
+* リクエスト  &#95;GET account&#95;activity/all/:env&#95;name/subscriptions/list
+   &#95; を使用して、Account Activity API サブスクリプションを確認します
+
+Site Streams から Account Activity API への移行: （コントロールストリームを使用）
+
+* リクエスト  *GET /1.1/site/c/:stream&#95;id/info.json* を使用して、Site Streams 上で現在のサブスクリプションのリストを取得します
+* リクエスト  *POST account&#95;activity/all/:env&#95;name/subscriptions* を使用して、新しい Account Activity API サブスクリプションを設定します
+* リクエスト  &#95;GET account&#95;activity/all/:env&#95;name/subscriptions/list
+   &#95; を使用して、Account Activity API サブスクリプションを確認します
+
+Webhook の登録とサブスクリプションの作成（Site Streams または User Streams からの移行ではない場合）
+
+* [POST webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) を使用してアプリに webhook URL を登録し、webhook&#95;id を受け取ります。
+* 返された webhook&#95;id を使用して、[POST webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) でユーザーサブスクリプションを追加します。
+
+<div id="the-account-activity-dashboard-sample-account-activity-api-application">
+  ### Account Activity ダッシュボード（Account Activity API サンプルアプリケーション）
+</div>
+
+Account Activity API のテストを手早く行えるよう、サンプルアプリを用意しました。   
+
+* Account Activity Dashboard サンプルアプリケーションを[こちら](https://github.com/xdevplatform/Account-Activity-dashboard)からダウンロードします（Node.js を使用しています）
+* README の手順に従ってアプリをインストールし、起動します
+* アプリケーションを起動したら、UI を使用して webhook を簡単に設定し、新しいサブスクリプションを作成できます
+
+<div id="available-activities">
+  ### 利用可能なアクティビティ
+</div>
+
+| メッセージタイプ | 詳細 |
+| :--- | :--- |
+| [tweet&#95;create&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#tweet-create-events-posts-retweets-replies-quotetweets) | サブスクリプションユーザーが行う、またはサブスクリプションユーザーに対して行われる次のいずれかのアクションに伴うポストステータスのペイロード：ポスト、リツイート、返信、@メンション、引用ポスト |
+| [favorite&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#favorite-events) | ユーザーおよび対象アカウントを含む、いいね（Favorite）イベントのステータス。 |
+| [follow&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#follow-events) | ユーザーおよび対象アカウントを含むフォローイベント。 |
+| [block&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#block-events) | ユーザーおよび対象アカウントを含むブロックイベント。 |
+| [mute&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#mute-events) | ユーザーおよび対象アカウントを含むミュートイベント。 |
+| [direct&#95;message&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-events) | ユーザーおよび対象アカウントを含むダイレクトメッセージイベントのステータス。 |
+| [direct&#95;message&#95;indicate&#95;typing&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-indicate-typing-events) | ユーザーおよび対象アカウントを含む、ダイレクトメッセージの入力中インジケーターイベント。 |
+| [direct&#95;message&#95;mark&#95;read&#95;events](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-mark-read-events) | ユーザーおよび対象アカウントを含む、ダイレクトメッセージの既読イベント。 |
+
+<div id="deprecated-streaming-message-types">
+  ### 廃止されたストリーミングメッセージ種別
+</div>
+
+|     |     |
+| :--- | :--- |
+| 空行 | これまで User Streams と Site Streams でキープアライブメッセージとして使用されていた空行は、Account Activity API では今後配信されません。 |
+| 制限通知 | 制限通知は、特定の webhook に送信されなくなります。代わりに、利用可能なハンドルの現在の使用量を取得するために API を呼び出すことができます。これは将来的に developer portal にも表示される予定です。 |
+| 切断メッセージ | webhook はアクティブな接続に依存しないため、切断通知は送信されなくなります。 |
+| ストール警告 | webhook は、多数の受信メッセージを処理できるアクティブな接続に依存しないため、ストール警告は送信されなくなります。 |
+| フレンドリスト | フレンドリストは、今後は自動的には送信されません。この情報を取得するための REST エンドポイントが用意されます。 |
+
+<div id="deprecated-event-types">
+  ### 非推奨のイベントタイプ
+</div>
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| **説明** | **イベント名** | **送信元** | **送信先** | **対象オブジェクト** |
+| ユーザーがポストを削除する | delete | 現在のユーザー | 現在のユーザー | Post |
+| フォロー中のユーザーがポストを削除する | delete | フォロー中のユーザー | フォロー中のユーザー | Post |
+| ユーザーがポストをお気に入りから外す | unfavorite | 現在のユーザー | ポストの作成者 | Post |
+| ユーザーのポストがお気に入りから外される | unfavorite | お気に入りを解除したユーザー | 現在のユーザー | Post |
+| ユーザーが誰かのフォローを解除する | unfollow | 現在のユーザー | フォロー解除されたユーザー | Null |
+| ユーザーがリストを作成する | list&#95;created | 現在のユーザー | 現在のユーザー | リスト |
+| ユーザーがリストを削除する | list&#95;destroyed | 現在のユーザー | 現在のユーザー | リスト |
+| ユーザーがリストを編集する | list&#95;updated | 現在のユーザー | 現在のユーザー | リスト |
+| ユーザーが誰かをリストに追加する | list&#95;member&#95;added | 現在のユーザー | 追加されたユーザー | リスト |
+| ユーザーがリストに追加される | list&#95;member&#95;added | 追加したユーザー | 現在のユーザー | リスト |
+| ユーザーが誰かをリストから削除する | list&#95;member&#95;removed | 現在のユーザー | 削除されたユーザー | リスト |
+| ユーザーがリストから削除される | list&#95;member&#95;removed | 削除したユーザー | 現在のユーザー | リスト |
+| ユーザーがリストを購読する | list&#95;user&#95;subscribed | 現在のユーザー | リスト所有者 | リスト |
+| ユーザーのリストが購読される | list&#95;user&#95;subscribed | 購読したユーザー | 現在のユーザー | リスト |
+| ユーザーがリストの購読を解除する | list&#95;user&#95;unsubscribed | 現在のユーザー | リスト所有者 | リスト |
+| ユーザーのリストの購読が解除される | list&#95;user&#95;unsubscribed | 購読を解除したユーザー | 現在のユーザー | リスト |
+| ユーザーがプロフィールを更新する | user&#95;update | 現在のユーザー | 現在のユーザー | Null |
+| ユーザーが非公開設定を更新する | user&#95;update | 現在のユーザー | 現在のユーザー | Null |
+
+<div id="direct-message-migration-guide">
+  ## ダイレクトメッセージ移行ガイド
+</div>
+
+**2018年9月17日をもって、従来のダイレクトメッセージエンドポイントの提供を終了しました。
+これらのエンドポイントを利用していた場合は、新しいダイレクトメッセージエンドポイント、または Account Activity API への移行を必ず行ってください。**
+
+**詳細については、[このお知らせ](https://devcommunity.x.com//t/details-and-what-to-expect-from-the-api-deprecations-this-week-on-august-16-2018/110746)をご覧ください。**
+
+このガイドは、従来のダイレクトメッセージ REST API から、ベータ版を卒業した強化版 API への移行を支援することを目的としています。以下では、変更点の概要、新機能一覧、移行の際に役立つ主な相違点と考慮事項を説明します。新しいダイレクトメッセージエンドポイントは、すべての開発者が既に利用可能です。User Streams または Site Streams からの移行については、[Account Activity API への移行ガイド](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#migration-guide-moving-from-user-streams-site-streams-to-account-activity-api)を参照してください。
+
+* [変更点の概要](#summary)
+* [新機能](#features)
+* [ダイレクトメッセージの送信](#sending)
+* [ダイレクトメッセージの受信](#receiving)
+* [ダイレクトメッセージの削除](#deleting)
+
+### 変更点の概要
+
+以下のダイレクトメッセージ（DM）エンドポイントをまだ使用している場合は、新しいエンドポイントへ移行する必要があります。 
+
+| 非推奨のエンドポイント | 移行先の新エンドポイント |
+| :--- | :--- |
+| [POST direct&#95;messages/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) | [POST direct&#95;messages/events/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) |
+| [GET direct&#95;messages/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) | [GET direct&#95;messages/events/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) |
+| [GET direct&#95;messages](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) | [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) |
+| [GET direct&#95;messages/sent](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) | [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) |
+| [POST direct&#95;messages/destroy](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/delete-message-event) | [DELETE direct&#95;messages/events/destroy](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/delete-message-event "GET direct_messages/events/list") |
+
+<div id="new-features">
+  ### 新機能
+</div>
+
+新しい Direct Message API エンドポイントは、いくつかの新機能をサポートし、過去の Direct Message へのアクセス性も向上しています。新機能には次のものが含まれます。
+
+* メディア添付（画像、GIF、動画）のサポート。
+* あらかじめ定義された選択肢リストを使用して、ユーザーに構造化された返信を促す機能。
+* 過去の Direct Message に最大 30 日前までアクセス可能。
+
+新しい Direct Message 機能の一覧および追加の API エンドポイントについては、[技術ドキュメント](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/overview)を参照してください。
+ 
+
+<div id="differences-migration-considerations">
+  ### 相違点と移行時の考慮事項
+</div>
+
+新しい API エンドポイントは、以前の対応するエンドポイントとは挙動が大きく異なります。単純にエンドポイントの URL を更新するだけでは、アプリケーションでエラーが発生します。移行のためにアプリケーションを更新する際には、次の点を考慮してください。
+
+<div id="new-direct-message-object">
+  #### 新しいダイレクトメッセージオブジェクト
+</div>
+
+最初に目に付くのは、ダイレクトメッセージの新しいオブジェクト構造でしょう。この新しい Message Create オブジェクト構造は、[Quick Replies](https://developer.x.com/en/docs/x-api/v1/direct-messages/quick-replies/overview) や [Attachments](https://developer.x.com/en/docs/x-api/v1/direct-messages/message-attachments/overview) といった新機能をサポートするために導入されました。この新しいオブジェクトには、より小さくコンパクトなユーザーオブジェクトも含まれています。アプリケーションでは、この新しいオブジェクト構造を考慮してパース処理を行い、必要に応じてデータモデルやストレージも更新する必要があります。各プロパティの説明については、[Message Create Object に関する詳細なドキュメント](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/guides/message-create-object)を参照してください。
+
+**Message Create オブジェクトの例**
+
+```json
+{
+      "type": "message_create",
+      "id": "1234858592",
+      "created_timestamp": "1392078023603",
+      "initiated_via": {
+        "tweet_id": "123456",
+        "welcome_message_id": "456789"
+      },
+      "message_create": {
+        "target": {
+          "recipient_id": "1234858592"
+        },
+        "sender_id": "3805104374",
+        "source_app_id": "268278",
+        "message_data": {
+          "text": "Blue Bird",
+          "entities": {
+            "hashtags": [],
+            "symbols": [],
+            "urls": [],
+            "user_mentions": [],
+          },
+          "quick_reply_response": {
+            "type": "options",
+            "metadata": "external_id_2"
+          },
+          "attachment": {
+            "type": "media",
+            "media": {
+             ...
+            }
+          }
+        }
+      }
+```
+
+#### 概要
+
+* Direct Message のオブジェクト構造が一新されました。
+* user オブジェクトが簡略化されました。
+* 新しい情報が利用可能になりました（クイックリプライの応答、添付ファイルなど）。
+
+<div id="sending-direct-messages">
+  ### ダイレクトメッセージの送信
+</div>
+
+[POST direct&#95;messages/events/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) は、ダイレクトメッセージ送信用エンドポイントの直接の後継です。主な変更点は、すべての情報が個別の POST パラメータではなく、POST リクエストボディ内の JSON として送信されるようになったことです。
+
+**Twurl リクエスト例**
+
+```bash
+twurl -A 'Content-type: application/json' -X POST /1.1/direct\_messages/events/new.json -d '{"event": {"type": "message\_create", "message\_create": {"target": {"recipient\_id": "4534871"}, "message_data": {"text": "Hello World!"}}}}'
+```
+
+上記のリクエストでは、Content-Type ヘッダーが application/x-www-form-urlencoded ではなく application/json に設定されている点に注意してください。さらに、OAuth 1.0a の署名を生成する場合、署名の生成には JSON ボディは含まれないことにも注意してください。ほとんどの OAuth ライブラリは、すでにこの点を考慮しています。[twurl](https://github.com/twitter/twurl) を使用している場合は、少なくともバージョン 0.9.3 を使用していることを確認してください。
+
+<div id="summary">
+  #### まとめ
+</div>
+
+* メッセージは JSON POST ボディ内で定義されます
+* Content-Type ヘッダーを `application/json` に設定する必要があります
+* JSON ボディは OAuth 署名の生成には含まれません
+   
+
+<div id="retrieving-direct-messages">
+  ### ダイレクトメッセージの取得
+</div>
+
+過去のダイレクトメッセージの取得は、単一の API エンドポイント [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) で行えるようになりました。この新しいエンドポイントの大きな違いは、送信済みメッセージと受信メッセージの両方を、新しいものから古いものへと時系列を逆順に返す点です。これにより、会話履歴を再構築しやすくなる場合があります。ただし、送信メッセージのみ、または受信メッセージのみを取得したい場合は、`sender_id` プロパティを参照してレスポンスを後処理する必要があります。
+
+ページネーションは、ダイレクトメッセージの ID ではなくカーソル値に基づく方式になりました。各レスポンスには `cursor` プロパティが返されます。[GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) は、過去 30 日分のメッセージを返します。過去 30 日間にどれだけ多くのメッセージが存在していても、取得対象となるのはその期間内のメッセージのみです。カーソルが返されない場合は、それ以上返せるメッセージが存在しないことを意味します。[GET direct&#95;messages/events/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) による個々のダイレクトメッセージへのアクセス方法は変わっていませんが、返されるダイレクトメッセージオブジェクトの構造は、前述のとおり異なります。
+
+最後に、ダイレクトメッセージへのリアルタイムアクセスは、[Account Activity API](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity) を用いた webhook 経由で行われます。User Streams や Site Streams からの移行については、Account Activity API への移行ガイドを参照して、詳細な情報と手順を確認してください。
+
+#### 概要
+
+* 送信済みメッセージと受信メッセージを同一のエンドポイントから取得できます。
+* 最大30日分のメッセージを取得できます。
+* カーソルベースのページネーションに対応しています。
+* Webhook を介してダイレクトメッセージにリアルタイムでアクセスできます。
+
+<div id="deleting-direct-messages">
+  ### ダイレクトメッセージの削除
+</div>
+
+ダイレクトメッセージは、`DELETE direct_messages/events/destroy` を使用して削除できるようになりました。エンドポイントの仕様はほぼ同じで、削除するメッセージの `id` を指定する必要があります。主な違いは、このエンドポイントでは POST リクエストではなく DELETE リクエストを使用する必要がある点です。
+
+削除されたダイレクトメッセージが公式 X クライアントにどのように反映されるかは、これまでと同じです。ダイレクトメッセージは、指定されたユーザーコンテキストのインターフェース上からのみ削除されます。会話の他の参加者は、そのダイレクトメッセージに引き続きアクセスできます。
+
+#### 概要
+
+* ダイレクトメッセージを削除するには ID が必要です。
+* 新しいエンドポイントでは DELETE リクエストが必要です。
+* 削除されたダイレクトメッセージが公式 X クライアントにどのように反映されるかは、これまでと変わりません。
+
+**新しいダイレクトメッセージエンドポイントへの移行について質問がありますか？
+**質問を開発者コミュニティフォーラム [devcommunity.com](https://devcommunity.x.com/) に投稿してください。
+
+<div id="frequently-asked-questions">
+  ## よくある質問
+</div>
+
+<div id="general">
+  ### 一般
+</div>
+
+**Account Activity API を使用する利点は何ですか？**
+
+Account Activity API は webhook を使用します。そのため、ストリーミング API と異なり、X から情報を送信するために常時オープンな接続を維持しておく必要がありません。webhook は REST API とも異なり、必要なデータを取得するために、15 分ごとに何百回もポーリングする必要がありません。これにより、ユーザーとあなたのアプリ間の効率が向上し、イベント発生時にデータが配信されます。
+
+Account Activity API には、次のような多くの利点があります。
+
+1. **速度**: X のスピードでデータを配信します。
+2. **シンプルさ**: アカウントのすべてのイベントを、単一の webhook 接続を通じて配信します。API で配信されるアクティビティには、ポスト、@メンション、返信、Retweet、Quote Tweet、Quote Tweet の Retweet、いいね、送信されたダイレクトメッセージ、受信したダイレクトメッセージ、フォロー、ブロック、ミュートが含まれます。
+3. **スケール**: イベント数に関するいかなるレート制限や上限にも制約されることなく、管理しているアカウントに対するすべてのアクティビティを受け取ることができます。
+
+Account Activity API は、Premium サンドボックス、Premium 有料版、Enterprise のオファリングとして利用可能であり、コンプライアンス機能や追加機能のためにより多くのアカウントが必要になった場合でも、必要に応じてスケールできます。
+
+開始するには、[GitHub](https://github.com/xdevplatform/account-activity-dashboard) からサンプルコードのスニペットをダウンロードしてください。
+ 
+
+**自分にはどのプロダクト階層が最適か、どのように判断すればよいですか？**
+
+Premium オプションと Enterprise オプションの違いについて詳しく知るには、[Account Activity API Overview](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity) ページをお読みください。
+ 
+
+**Premium environment と Enterprise webhook の違いは何ですか？**
+
+違いはありません。各 Premium environment は、それぞれ独自の webhook&#95;id を持ちます。
+ 
+
+**Account Activity API 用に開発・ステージング・本番環境が必要です。これは可能ですか？**
+
+はい。Account Activity API の有料階層 (Paid Premium および Enterprise) では、複数の webhook URL を登録し、API メソッドを通じて環境ごとに個別にサブスクリプションを管理することが可能です。さらに、複数のクライアントアプリを allowlist に追加して、現在認可されているユーザーの認可状態を維持できます。
+ 
+
+**Account Activity API のセットアップ方法について、ステップバイステップのガイドはありますか？**
+
+もちろんあります。
+
+* これから始める場合は、まず [Getting started with webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks) ガイドをご覧になることをおすすめします。
+
+* 次に、X Dev がサポートしているスクリプトを使って進めてください:
+  * [Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard): webhook イベントを表示する Node ベースのウェブアプリです。
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev): Account Activity API と Direct Message API 上に構築された Ruby 製ウェブアプリです。このコードベースには、Account Activity API の webhook セットアップを支援する [script](https://github.com/xdevplatform/SnowBotDev/wiki/Account-Activity-API-setup-script) が含まれています。
+     
+
+**システムが一定時間ダウンした場合、データを復旧する方法はありますか？**
+
+Account Activity API の有料階層 (Paid Premium および Enterprise) では、当社のシステムが 4 時間の間に複数回にわたりアクティビティの送信を[再試行](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)します。4 時間以内にあなたのシステムが応答しなかった場合、そのアクティビティは失われ、7 日以内にその他の REST エンドポイントを使用してデータを復旧する必要があります。
+
+システムのいずれかがダウンした場合でもアクティビティを取り逃さないように、[Account Activity Replay API](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) のように、複数の webhook や environment を冗長化のためのツールとして使用することをおすすめします。
+ 
+
+**Account Activity API では、どの認証方式を使用する必要がありますか？**
+
+Account Activity API で必要となる認可方式は、[API reference ページ](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index) の各メソッドごとに説明されています。X の認証をこれから学ぶ場合は、[こちらのセクション](/ja/resources/fundamentals/authentication) をお読みになることをおすすめします。
+
+**challenge-response check (CRC) とは何ですか？**
+
+Account Activity API のチャレンジレスポンスチェックは、Account Activity API のアクティビティが正しい開発者に送信されていることを保証するために設けられたセキュリティ機能です。これはまた、受信しているデータが X から送られていることを開発者が確認するためにも利用できます。X は、webhook URL が最後に検証されてから 24 時間ごとに 1 回、自動的に CRC をあなたの webhook URL に送信します。検証状態を維持するには、あなたのシステムは 3 秒以内に有効なレスポンスを返す必要があります。 
+
+詳細については、[Securing webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks) のページをご覧ください。
+ 
+
+**webhook URL が即座に無効化される条件はありますか？**
+
+次のいずれかが発生した場合、webhook は直ちに無効としてマークされます。
+
+* サーバーが CRC に対して誤ったトークンで応答した場合。この場合、当社のシステムはアクティビティを送信するために[再試行](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)しません。
+* webhook URL に誤った証明書が設定されている場合。この場合も、当社のシステムはアクティビティを送信するために[再試行](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)しません。
+* サーバーが 2XX、4XXX、5XXX 以外のレスポンスコードを返した場合。
+* gzip を使用すると指定しているにもかかわらず、実際には送信していない場合。
+* gzip の使用を指定していないにもかかわらず、レスポンスで実際には gzip を送信している場合。
+   
+
+**相互にやり取りしているユーザーに対して購読を行っている場合、重複したアクティビティを受け取ることはありますか？**
+
+はい。あなたの Web アプリがユーザー A とユーザー B に対して有効なサブスクリプションを持っていて、ユーザー A がポスト内でユーザー B に言及した場合、登録済みの webhook には 2 つの POST アクティビティが送信されます。各アクティビティには、そのアクティビティがどのサブスクリプションに対応するかを示す &quot;for&#95;user&#95;id&quot; というインジケーターが含まれます。
+ 
+
+**webhook へのサブスクリプションを作成する際に、次のエンドポイントの `/all/` 部分を、配信されるアクティビティを制限するために他の account activity データオブジェクトに置き換えることはできますか？ **`POST https://api.x.com/1.1/account_activity/all/:env_name/subscriptions.json`
+
+いいえ、これはできません。現時点では、利用可能なプロダクトは `/all/` のみです。
+ 
+
+**ユーザーから Direct Messages の権限をリクエストせずに Account Activity API を使用する方法はありますか？ **
+
+現時点では、この API で Direct Messages のアクティビティだけを「フィルタリングして除外する」方法が存在しないため、Direct Messages の権限は必須です。 
+ 
+
+**Account Activity API に無料版はありますか？**
+
+はい、無料ティアとして sandbox バージョンを提供しています。sandbox オプションは、単一の webhook と最大 15 件のサブスクリプションまでに制限されています。sandbox オプションの詳細については、[ドキュメント](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity)をご覧ください。 
+
+**Account Activity API を使って、購読対象ユーザーに言及しているポストの Retweet を取得することはできますか？ **
+
+残念ながら、これはこの API で配信されるアクティビティには含まれていません。この用途には、代わりに Streaming API の使用をお勧めします。 
+ 
+
+**tweet&#95;create&#95;event で表現される可能性のあるアクティビティタイプにはどのようなものがありますか？**
+
+次のいずれかの条件で、tweet&#95;create&#95;event のペイロードが送信されます。
+
+サブスクリプションユーザーが次のいずれかのアクションを行った場合:
+
+* ポストを作成したとき
+* Retweet したとき
+* ポストに返信したとき
+
+別のユーザーが次のいずれかを行った場合:
+
+* サブスクリプションユーザーを @メンション* したとき
+* サブスクリプションユーザーが作成した Tweet を引用したとき 
+
+*注記: Account Activity API は、サブスクリプションユーザーが X から通知を受け取り、かつそのイベントを公開で閲覧できる場合にのみイベントを配信します。つまり、メンションされたアカウント (@userA) が保護アカウント (@userB) をフォローしている場合、UserA は UserB からメンションされたことの通知を受け取ります。一方、UserA が UserB をフォローしていない（かつ UserB に承認されていない）場合、UserA は通知を受け取らないため、@userA にサブスクリプションがあっても、tweet&#95;create&#95;event は AAA 経由で送信されません。
+
+**ブロックしているユーザーが、私が購読しているユーザーにメンションした場合、どのように識別できますか？**
+
+json レスポンスのトップレベルに、&quot;true&quot; または &quot;false&quot; のいずれかが設定された boolean フィールド `user&#95;has&#95;blocked` が表示されます。このフィールドは、ポストへのメンションでのみ公開されます。 
+
+Enterprise
+
+**allowlist にアプリを追加するには、または自分のアプリがすでに allowlist に登録されているか確認するにはどうすればよいですか？**
+
+Enterprise APIs を通じてアクセスするために許可リストに追加した [X apps](/ja/resources/fundamentals/developer-apps) を管理するには、app ID を添えてアカウントマネージャーまでご連絡ください。app ID は、[developer portal](/ja/resources/fundamentals/developer-portal) 内の「[Apps](/ja/resources/fundamentals/developer-apps)」ページに移動すると確認できます。
+ 
+
+**3 つの webhook へのアクセス権がある場合、Enterprise 利用として登録した各アプリで 3 つずつ webhook を使うことはできますか？**
+
+webhook の上限はアカウント単位で設定されており、アプリ単位ではありません。3 つの webhook と Enterprise 利用として登録済みの 2 つのアプリがある場合、1 つのアプリで 2 つ、もう一方のアプリで 1 つ、というように使うことはできますが、各アプリで 3 つずつ使うことはできません。 
+
+**Account Activity Replay API を使って再配信されるイベントの種類を指定できますか？**
+
+再配信するイベントの種類を指定することはできません。指定した日時の範囲内で配信されたすべてのイベントが再配信されます。 
+
+**アプリケーションが Account Activity Replay API のイベントの取り込みに失敗した場合、再試行は行われますか？**
+
+いいえ、再試行は行われません。アプリケーションが Account Activity Replay API によって送信されたイベントの取り込みに失敗した場合、同じ期間を指定して再度 Replay ジョブを送信することで、取り逃した Replay イベントの再配信を試みることができます。 
+
+**partial success completion event を受信したときは、どうすればよいですか？**
+
+受信できたイベントのタイムスタンプを控え、受信できなかったイベントについて、もう一度 Replay ジョブをリクエストすることをお勧めします。 
+
+**同時に実行できる Account Activity Replay API ジョブはいくつですか？**
+
+1 つの webhook につき、同時に実行できる Account Activity Replay API ジョブは 1 つだけです。 
+
+**Account Activity Replay API のイベントと、webhook に配信されるリアルタイムの本番イベントをどのように区別できますか？**
+
+Account Activity Replay API は常に過去のイベントのみを配信するため、イベントのタイムスタンプに基づいて、リアルタイムの本番イベントと区別できます。 
+
+**アプリケーションがドロップまたは取り逃したアクティビティの再配信に Account Activity Replay API を使い始められるのは、どのくらい後からですか？**
+
+アクティビティは、作成から約 10 分後に再配信可能になります。 
+
+<div id="error-troubleshooting-guide">
+  ### エラーのトラブルシューティングガイド
+</div>
+
+<div id="code-32">
+  #### Code 32
+</div>
+
+このエラーは一般的に、指定しているリクエスト、ヘッダー、認可、または URL などのいずれかが不正な形式になっていることを意味します。これは Account Activity API 固有のエラーではなく、認可エラーであり、X が適切な OAuth 設定または URL を受け取れていません。
+
+* **Enterprise** - 使用しているコンシューマーキーとアクセストークンが、Enterprise 製品を利用するために登録された [X アプリ](/ja/resources/fundamentals/developer-apps) に属していることを確認してください。コンシューマーキーとアクセストークンをお持ちでない場合、または X アプリを許可リストに追加する必要がある場合は、アカウントマネージャーまでご連絡ください。 
+
+* ユーザーコンテキストで認証している場合は、`oauth nonce`、`oauth_signature`、`oauth_timestamp` を正しく指定したうえで[リクエストを認可](/ja/resources/fundamentals/authentication#authorizing-a-request)していることを確認してください。
+
+* アクセストークンに適切な権限レベルが付与されていることを確認してください。
+  * [アプリダッシュボード](/ja/resources/fundamentals/developer-apps)の「Keys and tokens」タブを開き、アクセストークンに「Read, write, and direct messages」の[権限レベル](/ja/resources/fundamentals/developer-apps#app-permissions)が設定されていることを確認してください。 
+  * トークンの権限レベルがこれより低いレベルに設定されている場合は、「Permissions」タブに移動し、アクセス権限を「Read, write, and direct messages」に変更したうえで、「Keys and tokens」タブからアクセストークンとシークレットを再生成してください。
+
+* URL が正しい形式になっていることを確認してください。
+  * `:env_name` は大文字と小文字が区別されることに注意してください。
+     
+
+<div id="code-200-forbidden">
+  #### コード 200 - Forbidden（アクセス禁止）
+</div>
+
+* **Premium** - API にリクエストを送信する前に、承認済みの[開発者アカウント](/ja/resources/fundamentals/developer-portal)を取得していることを確認してください。また、リクエストでは適切な :env&#95;name を使用する必要があります。これは [dev environments](/ja/resources/fundamentals/developer-portal) ページで設定できます。
+
+* **Enterprise** - アカウントマネージャーから Account Activity API へのアクセス権が付与されていることを確認してください。
+
+* URI を正しく設定していることを確認してください。リクエスト内に誤った URI を指定すると、このエラーが発生することがあります。
+   
+
+<div id="code-214-webhook-url-does-not-meet-the-requirements">
+  #### コード 214 - Webhook URL が要件を満たしていません。
+</div>
+
+* `https` を使用していることを確認してください。
+* Webhook URL の書式が正しくない可能性があります。
+* Webhook URL の設定方法については、[Getting started with webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks) ページの [Develop webhook consumer app](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#3-develop-webhook-consumer-app) セクションを参照してください。
+   
+
+<div id="code-214-high-latency-on-crc-get-request-your-webhook-should-respond-in-less-than-3-seconds">
+  #### Code 214 - CRC GET リクエストのレイテンシーが高すぎます。webhook は 3 秒未満で応答する必要があります。
+</div>
+
+* これは、サーバーの応答が遅いことを意味します。CRC に 3 秒以内に応答するようにしてください。
+   
+
+<div id="code-214-non-200-response-code-during-crc-get-request-ie-404-500-etc">
+  #### Code 214 - CRC GET リクエスト中の非 200 レスポンスコード（例: 404、500 など）。
+</div>
+
+* サーバーがダウンしています。サーバーが正常に稼働していることを確認してください。
+   
+
+<div id="code-214-too-many-resources-already-created">
+  #### コード 214 - 作成済みのリソース数が上限を超えています。
+</div>
+
+* **Enterprise** - 利用可能な webhook をすでにすべて使用しています。登録済みの各アプリで [GET webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) エンドポイントを呼び出し、webhook がどこに割り当てられているかを確認してください。 
+
+<div id="code-261-application-cannot-perform-write-actions">
+  #### Code 261 - アプリケーションは書き込みアクションを実行できません。
+</div>
+
+* API で使用しているアプリのアクセストークンおよびアクセストークンシークレットに、適切な[権限レベル](/ja/resources/fundamentals/developer-apps#app-permissions)が設定されていません。[X apps](/ja/resources/fundamentals/developer-apps) ダッシュボードの「Keys and tokens」タブに移動し、アクセストークンとアクセストークンシークレットに割り当てられている権限レベルを確認してください。「Read, write and Direct Messages」以外に設定されている場合は、「Permission」タブで設定を変更し、新しい設定を反映させるためにアクセストークンとアクセストークンシークレットを再生成する必要があります。
+* または、サポートされていないアプリ専用 (app-only) 認証を使用して webhook を登録しようとしている可能性があります。代わりに、[Enterprise Account Activity API](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks) の webhook 登録に関する API リファレンスセクションで説明しているとおり、ユーザーコンテキストで認証してください。
+
+<div id="account-activity-api-reference-index">
+  ## Account Activity API リファレンスインデックス
+</div>
+
+|     |     |
+| :--- | :--- |
+| **目的** | Enterprise |
+| webhook URL を登録 / webhook&#95;id を生成 | [POST  <br />webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) |
+| すべての webhook URL とそのステータスを返す | [GET  <br />webhooks](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |
+| チャレンジレスポンス検証を手動で実行する | [PUT  <br />webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) |
+| アカウントのイベントをアプリケーションでサブスクライブする | [POST  <br />webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) |
+| 現在アクティブなサブスクリプションの件数を返す | [GET  <br />subscriptions/count](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |
+| webhook がアカウントをサブスクライブしているか確認する | [GET  <br />webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) |
+| 現在アクティブなサブスクリプションのリストを返す | [GET  <br />webhooks/:webhook&#95;id/subscriptions/all/list](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |
+| webhook を削除する | [DELETE  <br />webhooks/:webhook&#95;id](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) |
+| 3-legged OAuth を使用してサブスクリプションを無効化する（非推奨） | [DELETE  <br />webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) |
+| アプリケーション専用 OAuth を使用してサブスクリプションを無効化する | [DELETE  <br />webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |
+| アクティビティを webhook に再配信する | [POST  <br />replay/webhooks/:webhook&#95;id/subscriptions/all](/ja/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) |
+
+<div id="enterprise-account-activity-api">
+  ### Enterprise アカウントアクティビティ API
+</div>
+
+<div id="post-account_activitywebhooks">
+  #### POST account&#95;activity/webhooks[](#post-account-activity-webhooks "Permalink to this headline")
+</div>
+
+指定されたアプリケーションコンテキストに対して、新しい webhook URL を登録します。保存前に、その URL は CRC リクエストによって検証されます。検証に失敗した場合は、要求元に対して詳細なエラーメッセージを返します。
+
+許可される webhook の数は、課金パッケージによって決まります。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（ユーザーコンテキスト - すべてのコンシューマートークンとアクセストークン） |
+| レート制限 | あり |
+| リクエスト数 / 15分（ユーザー認証） | 15  |
+| ポスト編集のサポート | すべてのポストオブジェクトには、そのポストの編集履歴を表すポスト編集メタデータが含まれます。詳しくは「[ポスト編集](/ja/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)」の基本事項ページを参照してください。 |
+
+<div id="parameters">
+  ### パラメーター[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| url (required) | コールバックエンドポイントのエンコード済み URL。 |
+
+<div id="example-request">
+  ### リクエスト例[](#example-request "Permalink to this headline")
+</div>
+
+$ curl --request POST
+--url &#39;https://api.x.com/1.1/account&#95;activity/webhooks.json?url=https%3A%2F%2Fyour&#95;domain.com%2Fwebhooks%2Ftwitter%2F0&#39;
+--header &#39;authorization: OAuth oauth&#95;consumer&#95;key=&quot;CONSUMER&#95;KEY&quot;, oauth&#95;nonce=&quot;GENERATED&quot;, oauth&#95;signature=&quot;GENERATED&quot;, oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;GENERATED&quot;, oauth&#95;token=&quot;ACCESS&#95;TOKEN&quot;, oauth&#95;version=&quot;1.0&quot;&#39;
+
+<div id="http-responses">
+  ### HTTP レスポンス[](#http-responses "Permalink to this headline")
+</div>
+
+| HTTP Code | メッセージ |
+| :--- | :--- |
+| 200 | Webhook URL が指定されたアプリケーションに登録されています |
+| 403 | リクエストにエラーがあります。以下の「エラーメッセージ」セクションを参照してください。 |
+
+### 成功時のレスポンス例[](#example-response-success "Permalink to this headline")
+
+```json
+_HTTP 200_
+
+    {
+      "id": "1234567890",
+      "url": "https://your_domain.com/webhook/twitter/0",
+      "valid": true,
+      "created_at": "2016-06-02T23:54:02Z"
+    }
+```
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message                                                  |
+| :--- | :------------------------------------------------------- |
+| 214  | Webhook URL が要件を満たしていません。                                |
+| 214  | 既に作成されているリソースが多すぎます。                                     |
+| 214  | Webhook URL が要件を満たしていません。CRC トークンが無効か、JSON レスポンス形式が不正です。 |
+| 214  | CRC GET リクエストのレイテンシーが高すぎます。Webhook は 3 秒未満で応答する必要があります。  |
+| 214  | CRC GET リクエスト中に 200 以外のレスポンスコードが返されました (例: 404、500 など)。  |
+
+*HTTP 403*
+
+```json
+    {
+      "errors": [
+        {
+          "code": 214,
+          "message": "リソースが既に作成されすぎています。"
+        }
+      ]
+    }
+```
+
+<div id="get-account_activitywebhooks">
+  #### GET account&#95;activity/webhooks[](#get-account-activity-webhooks "この見出しへのパーマリンク")
+</div>
+
+指定したアプリケーション用のすべての URL とそのステータスの一覧を返します。
+
+URL が毎日の検証チェックに失敗した場合、その URL を無効と見なします。URL を再度有効にするには、update エンドポイントを呼び出してください。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（アプリケーション認証のみ - Bearer Token） |
+| レート制限 | あり |
+| リクエスト数 / 15分間のウィンドウ（アプリケーション認証） | 15  |
+
+### リクエスト例[](#example-request "この見出しへのパーマリンク")
+
+```bash
+    $ curl --request GET
+     --url https://api.x.com/1.1/account_activity/webhooks.json
+     --header 'authorization: Bearer TOKEN'
+```
+
+<div id="example-response">
+  ### レスポンス例[](#example-response "Permalink to this headline")
+</div>
+
+*HTTP 200 OK*
+
+```json
+    [
+      {
+        "id": "1234567890",
+        "url": "https://your_domain.com/webhook/twitter/0",
+        "valid": true,
+        "created_at": "2016-06-02T23:54:02Z"
+      }
+      {
+        "id": "2468013579",
+        "url": "https://your_domain2.com/webhook/twitter/0",
+        "valid": true,
+        "created_at": "2016-06-04T22:31:29Z"
+      }
+    ]
+```
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message |
+| :--- | :--- |
+| 99  | このリソースにアクセスする権限がありません。 |
+
+<div id="put-account_activitywebhookswebhook_id">
+  #### PUT account&#95;activity/webhooks/:webhook&#95;id[](#put-account-activity-webhooks-webhook-id "Permalink to this headline")
+</div>
+
+指定された webhook の URL に対して challenge-response check (CRC) を実行します。チェックに成功すると、204 を返し、ステータスを `valid` に設定して webhook を再度有効化します。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（ユーザーコンテキスト - すべてのコンシューマーキーおよびアクセストークン） |
+| レート制限あり | はい |
+| リクエスト数 / 15分あたり（ユーザー認証） | 15  |
+
+<div id="parameters">
+  ### パラメーター[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook ID。リソースパス上で定義されます。 |
+
+<div id="example-request">
+  ### リクエスト例[](#example-request "Permalink to this headline")
+</div>
+
+```json
+    $ curl --request PUT
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID.json
+     --header 'authorization: OAuth oauth_consumer_key="CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+<div id="response">
+  ### レスポンス[](#response "Permalink to this headline")
+</div>
+
+*HTTP 204 OK*
+
+```
+    { }
+```
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message |
+| :--- | :--- |
+| 34  | Webhook が存在しないか、別の X アプリに関連付けられています。 |
+| 214 | Webhook URL が要件を満たしていません。 |
+| 214 | Webhook URL が要件を満たしていません。CRC トークンまたは JSON レスポンス形式が無効です。 |
+| 214 | CRC GET リクエストのレイテンシが高すぎます。Webhook は 3 秒未満で応答する必要があります。 |
+| 214 | CRC GET リクエスト中に 200 以外のレスポンスコード (例: 404、500 など) が返されました。 |
+
+<div id="post-account_activitywebhookswebhook_idsubscriptionsall">
+  #### POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all[](#post-account-activity-webhooks-webhook-id-subscriptions-all "Permalink to this headline")
+</div>
+
+指定されたユーザーコンテキストについて、すべてのメッセージタイプに対するすべてのイベントを、指定されたアプリケーションで購読するよう登録します。有効化後、リクエスト元ユーザーに対するすべてのイベントは、POST リクエストを介してアプリケーションの webhook に送信されます。
+
+サブスクリプションは現在、お使いのアカウント設定に基づいて制限されています。追加のサブスクリプションが必要な場合は、アカウントマネージャーまでお問い合わせください。
+
+### リソースURL[](#resource-url "Permalink to this headline")
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（3-legged OAuth - ホワイトリスト登録済みの consumer key とサブスクライブしているユーザーのアクセストークン） |
+| レート制限 | あり |
+| リクエスト数 / 15 分ウィンドウ（ユーザー認証） | 500 |
+
+### パラメータ[](#parameters "Permalink to this headline")
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook ID。リソースパスで定義される値です。 |
+
+### リクエストの例[](#example-request "この見出しへのパーマリンク")
+
+```bash
+    $ curl --request POST
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID/subscriptions/all.json
+     --header 'authorization: OAuth oauth_consumer_key="WHITELISTED_CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="SUBSCRIBING_USER'S_ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+<div id="example-response-success">
+  ### レスポンス例 - 成功時[](#example-response-success "Permalink to this headline")
+</div>
+
+*HTTP 204 NO CONTENT*
+
+```
+    {}
+```
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | メッセージ |
+| :--- | :--- |
+| 34  | Webhook が存在しないか、別の X アプリに関連付けられています。 |
+| 348 | クライアントアプリには、このユーザーの Webhook サブスクリプションへアクセスする権限がありません。 |
+
+<div id="get-account_activitysubscriptionscount">
+  #### GET account&#95;activity/subscriptions/count[](#get-account-activity-subscriptions-count "Permalink to this headline")
+</div>
+
+現在あなたのアカウントで有効なサブスクリプションの件数を返します。`/count` エンドポイントにはアプリケーション専用（app-only）の OAuth が必要なため、ユーザーコンテキストではなく Bearer Token を使用してリクエストを行う必要があります。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/subscriptions/count.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | HTTP レスポンスコード |
+| 認証が必要 | はい（アプリのみ - Bearer Token） |
+| レート制限 | はい |
+| リクエスト数 / 15分ウィンドウ（アプリ認証） | 15  |
+
+### HTTP レスポンスコード[](#http-response-codes "Permalink to this headline")
+
+|     |     |
+| :--- | :--- |
+| コード | メッセージ |
+| 200 | 成功。リクエストされた webhook に対するサブスクリプションの件数が返されます。 |
+| 401 | 指定された webhook のサブスクリプションを表示する権限がアプリにありません。 |
+
+<div id="example-request">
+  ### リクエスト例[](#example-request "Permalink to this headline")
+</div>
+
+```bash
+    $ curl --request GET
+     --url https://api.x.com/1.1/account_activity/subscriptions/count.json
+     --header 'authorization: Bearer TOKEN'
+```
+
+### 成功時のレスポンス例[](#example-response-success "Permalink to this headline")
+
+*HTTP 200*
+
+```bash
+    {
+      "account_name":"my-account",
+      "subscriptions_count_all":"1",
+      "subscriptions_count_direct_messages":"0",
+      "provisioned_count":"50"
+    }
+```
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message    |
+| :--- | :--------- |
+| 32   | 認証に失敗しました。 |
+
+*HTTP 401*
+
+```abash
+    {
+      "errors": [
+        {
+           "code": 32,
+          "message": "Could not authenticate you."
+        }
+      ]
+    }
+```
+
+<div id="get-account_activitywebhookswebhook_idsubscriptionsall">
+  #### GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all[](#get-account-activity-webhooks-webhook-id-subscriptions-all "Permalink to this headline")
+</div>
+
+指定されたユーザーのイベントに対して、ある webhook 構成がサブスクライブされているかどうかを判定するためのエンドポイントです。指定されたユーザーコンテキストが、指定されたアプリケーションで有効なサブスクリプションを持っている場合は、204 OK を返します。レスポンスコードが 204 でない場合、そのユーザーには有効なサブスクリプションはありません。詳細については、以下の HTTP レスポンスコードおよびエラーメッセージを参照してください。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証 | はい（3-legged OAuth - ホワイトリスト登録済みコンシューマーキーと購読ユーザーのアクセストークン） |
+| レート制限 | はい |
+| リクエスト数 / 15分間ウィンドウ（ユーザー認証） | 500 |
+
+### パラメータ[](#parameters "Permalink to this headline")
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (必須) | Webhook ID。リソースパスで定義されます。 |
+
+### リクエスト例[](#example-request "この見出しへの固定リンク")
+
+$ curl --request GET
+--url https://api.x.com/1.1/account&#95;activity/webhooks/:WEBHOOK&#95;ID/subscriptions/all.json
+--header &#39;authorization: OAuth oauth&#95;consumer&#95;key=&quot;WHITELISTED&#95;CONSUMER&#95;KEY&quot;, oauth&#95;nonce=&quot;GENERATED&quot;, oauth&#95;signature=&quot;GENERATED&quot;, oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;GENERATED&quot;, oauth&#95;token=&quot;SUBSCRIBING&#95;USER&#39;S&#95;ACCESS&#95;TOKEN&quot;, oauth&#95;version=&quot;1.0&quot;&#39;
+
+<div id="example-response-success">
+  ### レスポンス例 - 成功時[](#example-response-success "Permalink to this headline")
+</div>
+
+*HTTP 204 NO CONTENT*
+
+```
+    { }
+```
+
+<div id="get-account_activitywebhookswebhook_idsubscriptionsalllist">
+  #### GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list[](#get-account-activity-webhooks-webhook-id-subscriptions-all-list "この見出しへのパーマリンク")
+</div>
+
+指定された webhook について、現在の All Activity タイプのサブスクリプションのリストを返します。/list エンドポイントにはアプリケーション専用の OAuth が必要なため、ユーザーコンテキストではなく Bearer Token を使用してリクエストを行う必要があります。
+
+### リソース URL[](#resource-url "この見出しへのパーマリンク")
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all/list.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | HTTP ステータスコード |
+| 認証が必要 | はい（アプリケーションのみ・Bearer Token） |
+| レート制限あり | はい |
+| リクエスト数 / 15 分間（アプリケーション認証） | 50  |
+
+### パラメータ[](#parameters "この見出しへのパーマリンク")
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (必須) | Webhook ID。リソースパスで定義されます。 |
+
+<div id="http-response-codes">
+  ### HTTP Response Codes[](#http-response-codes "Permalink to this headline")
+</div>
+
+| Code | Message |
+| :--- | :--- |
+| 200 | 成功。要求された webhook のサブスクリプションのリストが返されます。 |
+| 401 | 指定された webhook のサブスクリプションを表示する権限がアプリケーションにありません。 |
+
+### リクエスト例[](#example-request "この見出しへのパーマリンク")
+
+$ curl --request GET
+--url https://api.x.com/1.1/account&#95;activity/webhooks/:WEBHOOK&#95;ID/subscriptions/all/list.json
+--header &#39;authorization: Bearer TOKEN&#39;
+
+<div id="example-response-success">
+  ### レスポンス例 - 成功時[](#example-response-success "Permalink to this headline")
+</div>
+
+*HTTP 200*
+
+```bash
+    {
+      "webhook_id": "1234567890",
+      "webhook_url": "https://your_domain.com/webhook/twitter/0",
+      "application_id": "11231812",
+      "subscriptions": [{
+        "user_id": "20212306"
+      }]
+    }
+```
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message     |
+| :--- | :---------- |
+| 32   | 認証できませんでした。 |
+
+*HTTP 401*
+
+```bash
+    {
+      "errors": [
+        {
+           "code": 32,
+          "message": "認証できませんでした。"
+        }
+      ]
+    }
+```
+
+<div id="delete-account_activitywebhookswebhook_id">
+  #### DELETE account&#95;activity/webhooks/:webhook&#95;id[](#delete-account-activity-webhooks-webhook-id "Permalink to this headline")
+</div>
+
+指定されたアプリケーションの設定からこの webhook を削除します。webhook ID は、GET /1.1/account&#95;activity/webhooks を呼び出すことで取得できます。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（ユーザーコンテキスト - すべてのコンシューマートークンおよびアクセストークン） |
+| レート制限あり | はい |
+| リクエスト数 / 15分間ウィンドウ（ユーザー認証） | 15  |
+
+### パラメータ[](#parameters "Permalink to this headline")
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook ID。リソースパスで定義されます。 |
+
+<div id="example-request">
+  ### リクエスト例[](#example-request "Permalink to this headline")
+</div>
+
+```bash
+    $ curl --request DELETE
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID.json
+     --header 'authorization: OAuth oauth_consumer_key="CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+<div id="response">
+  ### レスポンス[](#response "Permalink to this headline")
+</div>
+
+*HTTP 204 OK*
+
+```
+    { }
+```
+
+<div id="delete-account_activitywebhookswebhook_idsubscriptionsall-deprecated">
+  #### DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all (DEPRECATED)[](#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated- "この見出しへのパーマリンク")
+</div>
+
+指定したユーザーコンテキストおよびアプリケーションに対するサブスクリプションを無効にします。無効化後は、リクエスト元ユーザーに関するすべてのイベントは webhook URL に送信されなくなります。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all.json`
+
+<div id="resource-information">
+  ### リソース情報[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（3-legged OAuth。ホワイトリストに登録された consumer key と購読ユーザーのアクセストークン） |
+| レート制限 | あり |
+| リクエスト数 / 15分あたり（ユーザー認証） | 500 |
+
+### パラメータ[](#parameters "Permalink to this headline")
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook の ID。リソースパスで定義されます。 |
+
+<div id="example-request">
+  ### リクエスト例[](#example-request "Permalink to this headline")
+</div>
+
+```bash
+    $ curl --request DELETE
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID/subscriptions/all.json
+     --header 'authorization: OAuth oauth_consumer_key="WHITELISTED_CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="SUBSCRIBED_USER'S_ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+リクエスト例
+
+```
+    { }
+```
+
+<div id="delete-account_activitywebhookswebhook_idsubscriptionsuser_idalljson">
+  #### DELETE /account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json[](#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json "Permalink to this headline")
+</div>
+
+指定された webhook とユーザー id に対するサブスクリプションを無効化します。無効化後は、このリクエストを行っているユーザーに関するすべてのイベントが webhook URL に送信されなくなります。なお、このエンドポイントは application-only OAuth（アプリケーション専用 OAuth）を必要とするため、リクエストはユーザーコンテキストではなく Bearer Token を使用して行う必要があります。
+
+<div id="resource-url">
+  ### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/:user_id/all.json`
+
+### リソース情報[](#resource-information "この見出しへのパーマリンク")
+
+|     |     |
+| :--- | :--- |
+| レスポンス形式 | JSON |
+| 認証が必要 | はい（アプリのみ - Bearer Token） |
+| レート制限 | あり |
+| リクエスト数 / 15 分ウィンドウ | 500 |
+
+### リクエスト例[](#example-request "この見出しへのパーマリンク")
+
+```bash
+    $ curl --request DELETE
+     --url https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/:user_id/all.json
+     --header 'authorization: Bearer TOKEN'
+```
+
+<div id="response">
+  ### レスポンス[](#response "Permalink to this headline")
+</div>
+
+*HTTP 204 NO CONTENT*
+
+<div id="error-messages">
+  ### エラーメッセージ[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message |
+| :--- | :--- |
+| 404 | 申し訳ありません、そのページは存在しません。このエラーは、指定したユーザーidが実際には登録されていない場合によく発生します。 |
+
+<div id="replay-api">
+  ### Replay API
+</div>
+
+**POST /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json [¶](#post-1-1-account-activity-replay-webhooks-webhook-id-subscriptions-all-json- "Permalink to this headline")**
+
+リクエストで指定した日時の範囲内に存在していたすべてのサブスクリプションから、過去最大5日分のアクティビティを取得するリクエストを送信します。Webhook にアクティブなユーザーサブスクリプションがある場合、それらのイベントも同時に受信します。なお、リプレイイベントを配信する前に CRC を実行します。
+
+|     |     |
+| :--- | :--- |
+| **Request Method** | HTTP POST |
+| **URL** | /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json?from&#95;date=yyyymmddhhmm&amp;to&#95;date=yyyymmddhhmm |
+| **Response Format** | JSON |
+| **Requires Authentication** | Yes (application only - Bearer Token) |
+| **Rate Limit** | 15分あたり5リクエスト。現在、要求できるリプレイジョブの数に上限はありません。 |
+| **from&#95;date** | イベントが提供される最も古い（開始）UTC タイムスタンプで、&#39;yyyymmddhhmm&#39; 形式で指定する必要があります。タイムスタンプは分単位の粒度で、包含的です（例: 12:00 は 00 分を含みます）。有効な時刻は直近5日以内の UTC 時刻であり、現在時刻より31分以上前である必要があります。`from_date` と `to_date` はおおよそ2時間以内の範囲に収めることを推奨します。 |
+| **to&#95;date** | イベントが提供される最新（終了）UTC タイムスタンプで、&#39;yyyymmddhhmm&#39; 形式で指定する必要があります。タイムスタンプは分単位の粒度で、排他的です（例: 12:30 はその時間の30分を含みません）。有効な時刻は直近5日以内の UTC 時刻であり、現在時刻より10分以上前である必要があります。 |
+
+<div id="responses">
+  #### レスポンス
+</div>
+
+以下のレスポンスが API から返される可能性があります。ほとんどのエラーコードは、ボディ内に追加の詳細を含む文字列とともに返されます。200 以外のレスポンスの場合は、エラーを解消してから再試行してください。
+
+| Status | Text | Error Code | Description | Message |
+| :--- | :--- | :--- | :--- | :--- |
+| 202 | Accepted | N/A | リクエストは成功し、アクティビティが送信されます。 | N/A |
+| 400 | Bad Request | 214 | Webhook は無効としてマークされています。 | Webhook は無効としてマークされており、CRC チェックが必要です。 |
+| 400 | Bad Request | 357 | クエリパラメータがありません。 | : queryParam は必須です。 |
+| 400 | Bad Request | 358 | ルートまたはクエリパラメータの形式が正しくありません。 | パラメータを解析できません。 |
+| 400 | Bad Request | 360 | ルートパラメータが負の値です。 | webhook&#95;id: [] は 0 以上ではありません。 |
+| 400 | Bad Request | 368 | from&#95;date または to&#95;date が過去の日時ではありません。 | : [&lt;field&#95;value&gt;] は過去の日時ではありません。 |
+| 400 | Bad Request | 356 | from&#95;date は to&#95;date より前でなければなりません。 | from&#95;date は to&#95;date より前でなければなりません。 |
+| 400 | Bad Request | 356 | from&#95;date は過去 5 日以内でなければなりません。 | from&#95;date は過去 5 日以内でなければなりません。 |
+| 401 | Unauthorized | 32  | 提供された 3-legged 認証が原因で HTTP 認証に失敗しました。 | 無効な認証方式です。application-only 認証を使用してください。 |
+| 401 | Unauthorized | 61  | クライアントにはこのメソッドをリクエストする権限がありません。 | クライアントにはこのメソッドをリクエストする権限がありません。 |
+| 403 | Forbidden | 200 | クライアントは Replay が有効な Enterprise アカウントを持っていません。 | Replay が有効な Account Activity API Enterprise アカウントが必要です。Enterprise アカウントを保有し、Replay が有効になっていることを確認してください。 |
+| 404 | Not Found | 34  | 存在しない webhook&#95;id、または webhook&#95;id と application&#95;id の不一致です。 | Webhook が存在しないか、別の X アプリケーションに関連付けられています。 |
+| 409 | Conflict | 355 | 進行中のリクエストがあり、別のリクエストを行う前に処理の完了を待つ必要があります。 | この webhook ではすでに Replay ジョブが進行中です。 |
+| 429 | Too Many Requests | 88  | レート制限（一定時間あたりのリクエスト数の上限に達しました） | リクエストが多すぎます。API リクエストのレートを下げてください。 |
+| 500 | Internal Server Error | 0   | 内部サーバーエラーです。 | 内部サーバーエラーです。 |
+| 503 | Service Unavailable | 67  | X 内の 1 つ以上の依存サービスが利用できません。 | X サーバーエラーです。指数バックオフパターンを使用して再試行してください。 |
+
+<div id="job-completed-successfully-message">
+  #### &quot;Job completed successfully” メッセージ
+</div>
+
+ジョブが正常に完了すると、Account Activity Replay API は次のジョブ完了イベントを配信します。このイベントを受信した時点で、そのジョブの処理は終了しており、別のジョブを送信できます。
+
+```json
+{
+  "replay\_job\_status": {
+    "webhook_id": "1234577122340233217",
+    "job_state": "Complete",
+    "job\_state\_description": "Job completed successfully"
+    "job_id": "1095098195724558337"
+  }
+}
+```
+
+<div id="job-failed-to-complete-message">
+  #### &quot;ジョブが完了しませんでした&quot; メッセージ
+</div>
+
+ジョブが正常に完了しなかった場合、Replay ジョブの再試行を促す次のメッセージを返します。このイベントを受信した時点で、そのジョブの実行は終了しており、別のジョブを送信できます。
+
+```json
+{
+  "replay\_job\_status": {
+    "webhook_id": "123451374207332352",
+    "job_state": "Incomplete",
+    "job\_state\_description": "Job failed to deliver all events, please retry your replay job",
+    "job_id": "1093226942650736640"
+  }
+}
+```
+
+<div id="example-curl-request">
+  #### curl リクエスト例
+</div>
+
+```bash
+    curl --request POST  --url 'https://api.x.com/1.1/account_activity/replay/webhooks/:webhook_id/subscriptions/all.json?from_date=yyyymmddhhmm&to_date=yyyymmddhhmm'
+    --header 'authorization: Bearer TOKEN'
+```
+
+#### レスポンス例
+
+HTTP 202
+
+```bash
+{
+  "job_id": "1234567890",
+  "created_at": "2016-06-02T23:54:02Z"
+}
+```

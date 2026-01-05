@@ -1,0 +1,138 @@
+---
+title: Búsqueda de Retweets
+sidebarTitle: Búsqueda de Retweets
+keywords: ["búsqueda de retweets", "inicio rápido de retweets", "obtener retweets", "tutorial de retweets", "guía de retweets", "ejemplo de retweets"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-retweets-lookup-endpoint">
+  ### Cómo empezar a usar el endpoint de consulta de Retweets
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud al endpoint de consulta de Retweets usando [Postman](/es/tutorials/postman-getting-started). Si deseas ver código de ejemplo en diferentes lenguajes de programación, visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatformTwitter-API-v2-sample-code).
+
+<div id="prerequisites">
+  #### Requisitos previos
+</div>
+
+Para completar esta guía, necesitarás un conjunto de [claves y tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+* [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y obtén la aprobación.
+* Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+* Ve a la página «Keys and tokens» de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+
+<div id="steps-to-build-a-retweets-lookup-request">
+  #### Pasos para crear una solicitud de consulta de Retweets
+</div>
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Existen varias herramientas, ejemplos de código y bibliotecas que puedes usar para hacer una solicitud a este endpoint, pero aquí usaremos la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agrega X API v2 a Postman
+</Button>
+
+Una vez que hayas cargado la colección de X API v2 en Postman, ve a la carpeta &quot;Retweets&quot; y selecciona &quot;Retweeted by&quot;.
+
+**Paso dos: Autentifica tu solicitud**
+
+Para realizar correctamente una solicitud a la X API, debe verificar que tiene permiso. Para ello, este endpoint requiere que autentique su solicitud con alguno de los siguientes métodos de autenticación: [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) o [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication).
+
+Por motivos de simplicidad, utilizaremos OAuth 2.0 solo para la aplicación con esta solicitud, pero necesitará usar uno de los otros métodos de autenticación si desea solicitar [métricas](/es/x-api/fundamentals/metrics) privadas o Retweets.
+
+Para utilizar OAuth 2.0 solo para la aplicación, debe agregar sus claves y tokens, específicamente el [Token de acceso de la aplicación](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (también conocido como Bearer Token solo para la aplicación), a Postman. Para ello, seleccione el entorno denominado &quot;X API v2&quot; en la esquina superior derecha de Postman y agregue sus claves y tokens en los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el icono de ojo junto al menú desplegable de entorno).
+
+Estas variables se incorporarán automáticamente en la pestaña de autorización de la solicitud si has configurado esto correctamente.
+
+**Paso tres: Especifica una publicación**
+
+Con este endpoint, debe especificar el id de la Publicación de la que desea obtener los usuarios que han hecho Retweet. Puede encontrar el id de una Publicación navegando a esa Publicación en X y extrayendo el código numérico al final de la URL. Por ejemplo, el id de Publicación de la siguiente URL es 1354143047324299264.
+
+[https://x.com/TwitterDev/status/1354143047324299264](https://x.com/TwitterDev/status/1354143047324299264)
+
+En Postman, vaya a la pestaña &quot;Params&quot; e introduzca este nombre de usuario en la columna &quot;Value&quot; de la variable de ruta id (en la parte inferior de la sección), asegurándose de no incluir espacios antes ni después de los nombres de usuario.
+
+|           |                                                                                        |
+| :-------- | :------------------------------------------------------------------------------------- |
+| **Clave** | **Valor**                                                                              |
+| `id`      | El id de la Publicación para la que quieres obtener los usuarios que la han retuiteado |
+
+**Paso cuatro: Identifica y especifica qué campos deseas recuperar**
+
+Si hace clic en el botón &quot;Enviar&quot; después del paso tres, recibirá en su respuesta los campos predeterminados del [objeto de usuario](/es/x-api/fundamentals/data-dictionary#user): id, name y username.
+
+Si desea recibir campos adicionales además de id, name y username, deberá especificar dichos campos en su solicitud mediante los parámetros [fields](/es/x-api/fundamentals/fields) y/o [expansions](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de distintos objetos:
+
+1. El campo adicional user.created&#95;at en los objetos de usuario principales.
+2. Los campos predeterminados del objeto de la Publicación fijada asociada para los usuarios devueltos son: id y text.
+3. El campo adicional tweet.created&#95;at de los objetos Post asociados.
+
+En Postman, navegue a la pestaña &quot;Params&quot; y añada el siguiente par clave:valor a la tabla &quot;Query Params&quot;:
+
+|              |                         |                      |
+| :----------- | :---------------------- | :------------------- |
+| **Clave**    | **Valor**               | **Campos devueltos** |
+| user.fields  | created&#95;at          | user.created&#95;at  |
+| expansiones  | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at          | tweet.created&#95;at |
+
+Ahora debería ver la siguiente URL junto al botón &quot;Enviar&quot;:
+
+`https://api.x.com/2/tweets/1354143047324299264/retweeted_by?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**Paso cinco: Realiza tu solicitud y revisa tu respuesta**
+
+Una vez que tengas todo listo, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar a la siguiente respuesta de ejemplo:
+
+```
+{
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "ahora, todos los que tengan 600 o más seguidores pueden organizar un Space.\n\nbasándonos en lo que hemos aprendido, es probable que estas cuentas tengan una buena experiencia como anfitriones debido a su audiencia existente. antes de llevar la capacidad de crear un Space a todos, nos estamos enfocando en algunas cosas. 🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+}
+```

@@ -1,0 +1,147 @@
+---
+title: Editar publicaciones
+keywords: ["editar publicaciones", "editar tweets", "edición de publicaciones", "historial de edición", "ediciones de publicaciones", "editar metadatos", "ventana de edición", "publicaciones editadas"]
+---
+
+<div id="introduction">
+  # Introducción
+</div>
+
+Los endpoints de X API v2 proporcionan metadatos de Publicaciones editadas. La función *Editar Publicaciones* se introdujo inicialmente para pruebas internas entre empleados de X el 1 de septiembre de 2022. A partir de esa fecha, las Publicaciones aptas se pueden editar durante 30 minutos y hasta 5 veces. *Todos los objetos de Publicaciones creadas desde el 29 de septiembre de 2022* incluyen metadatos de edición de la Publicación, incluso si la Publicación nunca se editó. Cada vez que se edita una Publicación, se crea un nuevo ID de Publicación. El historial de edición de una Publicación se puede describir encadenando estos ID, comenzando por el ID original. Además, si se elimina cualquier Publicación en la cadena de edición, todas las Publicaciones de esa cadena también se eliminan.
+
+Con X API v2, un desarrollador puede determinar:
+
+* Si una Publicación era apta para edición en el momento de su creación. Algunas Publicaciones, como las que tienen encuestas o las Publicaciones programadas, no se pueden editar.
+* Que las Publicaciones se pueden editar durante 30 minutos y hasta 5 veces. Para las Publicaciones editables, puedes ver si aún queda tiempo para editar y cuántas ediciones adicionales son posibles.
+* Si estás viendo una versión editada de una Publicación (en la mayoría de los casos, la API devolverá la versión más reciente de una Publicación, a menos que se solicite explícitamente una versión anterior mediante el ID de la Publicación).
+* Todo el historial de edición de la Publicación.
+* La interacción atribuida a cada versión de la Publicación.
+
+Hay tres componentes en el historial de edición de una Publicación:
+
+1. De forma predeterminada, la carga útil de la Publicación contendrá un array de ID de Publicaciones que forman parte del historial de edición de una Publicación. Esta información se especifica mediante `edit_history_tweet_ids`, que es un campo predeterminado en la carga útil de la Publicación. Este array contendrá al menos un ID: el ID de la Publicación original sin editar. Cuando solo hay un ID, significa que la Publicación no tiene historial de edición. 
+2. Puedes obtener información como si una Publicación era editable en el momento en que se creó, cuánto tiempo queda, en su caso, para que la Publicación se pueda editar y cuántas ediciones quedan, especificando `edit_controls` en tu parámetro [tweet.fields](/es/x-api/fundamentals/fields).
+3. Por último, puedes obtener los objetos de Publicación para cada Publicación en el historial de edición de una Publicación especificando `edit_history_tweet_ids` mediante el parámetro [expansion](/es/x-api/fundamentals/expansions).
+
+La mayoría de las Publicaciones son aptas para edición. Sin embargo, los siguientes tipos de Publicaciones no lo son: 
+
+* Publicación promocionada
+* Publicación con encuesta
+* Publicación que es una respuesta en un hilo de otra cuenta
+* Publicación que es un Retweet (ten en cuenta que las Publicaciones citadas sí son aptas para edición)
+* Publicación nullcast
+* Publicación de Comunidad
+* Publicación de Superfollow
+* Publicación colaborativa
+
+Ejemplos
+
+***
+
+Los ejemplos a continuación muestran cómo un desarrollador puede solicitar metadatos de Publicaciones editadas usando X API v2. 
+
+**Nota:** Los ejemplos a continuación usan el endpoint User Post Timeline, pero puedes solicitar estos metadatos usando los mismos parámetros (con campos y expansiones) para todos los endpoints que devuelven Publicaciones (por ejemplo, consulta de Publicaciones, búsqueda, flujo filtrado, etc.).
+
+<div id="default-behavior">
+  ### Comportamiento predeterminado
+</div>
+
+De forma predeterminada, cuando haces una solicitud de API a cualquier endpoint que devuelva objetos de Publicación en la X API v2, obtendrás:
+
+* El ID de la Publicación
+* El texto de la Publicación
+* Un array de IDs de Publicación que forman parte del historial de edición de una Publicación. Si solo se proporciona un ID, significa que la Publicación no se ha editado.
+
+**Solicitud:**
+
+`curl --request GET 'https://api.x.com/2/users/:id/tweets' --header 'Authorization: Bearer $BEARER_TOKEN'`
+
+**Respuesta de ejemplo:**
+
+```{
+  "data": [
+    {
+      "id": "1514991667853602823",
+      "text": "we have an edit button",
+      "edit_history_tweet_ids": ["1514991667853602822", "1514991667853602823"]
+    }
+  ]
+}
+```
+
+<div id="getting-additional-data-with-edit_controls">
+  ### Obtener datos adicionales con edit&#95;controls
+</div>
+
+Si deseas metadatos adicionales de una Publicación editada, como si una Publicación podía editarse cuando se creó y cuánto tiempo queda para que una Publicación siga siendo editable, puedes solicitar esta información usando el parámetro tweet.fields y definiéndolo como edit&#95;control.
+
+**Solicitud:**
+
+`curl --request GET 'https://api.x.com/2/users/:id/tweets?tweet.fields=edit_control' --header 'Authorization: Bearer $BEARER_TOKEN'`
+
+**Respuesta de ejemplo:**
+
+```
+  {
+  "data": [
+    {
+      "id": "1514991667853602823",
+      "text": "we have an edit button",
+      "edit_history_tweet_ids": ["1514991667853602822", "1514991667853602823"],
+      "edit_controls": {
+        "is_edit_eligible": true,
+        "editable_until": "2022-04-21 09:35:20.311",
+        "edits_remaining": 4
+      }
+    }
+  ]
+}
+```
+
+<div id="getting-post-objects-for-all-posts-in-a-posts-edit-history">
+  ### Obtención de objetos de Publicación para todas las Publicaciones en el historial de edición de una Publicación
+</div>
+
+Los ejemplos anteriores proporcionan una matriz de id de Publicación en el historial de edición de una Publicación. Si quieres obtener el objeto de Publicación para cada uno de estos id de Publicación, puedes usar el parámetro de expansión y establecerlo en `edit_history_tweet_ids`. Los objetos de Publicación que conforman el historial de edición se proporcionarán en el objeto &quot;includes&quot;. 
+
+**Solicitud:**
+
+```bash
+      curl --location --request GET 'https://api.x.com/2/users/:id/tweets?tweet.fields=edit_control&expansions=edit_history_tweet_ids' --header 'Authorization: Bearer $BEARER_TOKEN'`
+```
+
+**Ejemplo de respuesta:**
+
+```
+  {
+  "data": [
+    {
+      "id": "1514991667853602823",
+      "text": "we have an edit button",
+      "edit_history_tweet_ids": ["1514991667853602822", "1514991667853602823"],
+      "edit_controls": {
+        "is_edit_eligible": true,
+        "editable_until": "2022-04-21 09:35:20.311",
+        "edits_remaining": 4
+      }
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "id": "1514991667853602822",
+        "text": "we need an eidt button",
+        "edit_history_tweet_ids": [
+          "1514991667853602822",
+          "1514991667853602823"
+        ],
+        "edit_controls": {
+          "is_edit_eligible": true,
+          "editable_until": "2022-04-21 09:35:20.311",
+          "edits_remaining": 4
+        }
+      }
+    ]
+  }
+}
+```

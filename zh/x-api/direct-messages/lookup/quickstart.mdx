@@ -1,0 +1,174 @@
+---
+title: 快速入门
+sidebarTitle: 快速入门
+keywords: ["私信快速入门", "DM 快速入门", "DM 查询快速入门", "私信教程", "DM 教程"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-manage-direct-message-endpoints">
+  ## Direct Message 管理端点入门
+</div>
+
+本快速入门指南将帮助你使用 Postman（一个用于管理和发送 HTTP 请求的工具）向 Direct Message 端点发送你的第一个请求。要了解更多关于我们 Postman 集合的信息，请访问[使用 Postman](/zh/tutorials/postman-getting-started)指南。
+
+如果你想查看基于 Python 的示例，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。此外，官方的 [X Developer Platform software development kits (SDKs)](/zh/x-api/tools-and-libraries/sdks) 将会更新以支持这些 Direct Message 端点。  
+
+<Note>
+  **先决条件**
+
+  要完成本指南，你需要准备一组用于对你的请求进行身份验证的[密钥和令牌](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access)并通过审批。
+  * 在开发者门户中创建一个[项目](/zh/resources/fundamentals/projects)以及一个关联的[开发者应用](/zh/resources/fundamentals/developer-apps)。
+  * 转到你的 App 的“Keys and tokens”页面以生成所需的凭证。请确保将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-building-direct-message-lookup-requests">
+  ### 构建私信（Direct Message）查询请求的步骤
+</div>
+
+在本示例中，我们将在单个请求中创建一个新的群组会话，并向其中添加第一条消息。然后，我们会向已创建的会话再添加第二条消息。
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### 第一步：从工具或库开始
+</div>
+
+要开始使用管理 Direct Message 的端点，我们将使用 Postman 工具来简化流程。我们会使用由 XDevelopers 编写的一个 X API v2 示例请求集合，来探索六个用于创建新的 Direct Message 以及列出 Direct Message 会话事件的端点。
+
+虽然集合中的大部分内容已经预先填好，但你仍需要根据为这些 API 请求创建的 X 应用提供一些详细信息。首先，让我们加载或更新该集合。
+
+要将 X API v2 Postman 集合加载到你的环境中，请点击下面的按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 后，导航到 “Manage Direct Messages” 文件夹。该文件夹的 Authorization 选项卡在可能的情况下已预先填好。你需要更新一些设置以填入你的 X 应用的认证信息。
+
+该文件夹还包含三个用于创建新的 Direct Message 的端点。请注意，还有一个名为 &quot;Direct Message lookup&quot; 的文件夹，其中包含三个可用端点，用于检索 Direct Message 会话事件，包括发送和接收消息，以及会话参与者加入和离开时的事件。
+
+由于创建群组会话是 X API v2 的一项新功能，本示例将重点介绍这一点。我们将使用 &quot;New group DM and conversation&quot; 示例。我们会使用此请求来创建一个 Direct Message 群组会话。
+
+下一步是为该端点配置认证。
+
+<div id="step-two-authenticate-your-request">
+  #### 步骤二：对请求进行认证
+</div>
+
+要正确向 X API 发起请求，你需要验证自己是否具有执行该操作的权限。为了成功请求此端点，我们将使用 [OAuth 2.0 Authorization Code Flow with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)。你可以在 Postman 中生成访问令牌。 
+
+在 Postman 中，你可以在文件夹级别或请求级别设置认证方式。这里我们将在文件夹级别配置认证信息。导航到 &quot;Mange Direct Messages&quot; 文件夹，选择 &quot;Authorization&quot; 选项卡，并确认 Type 设置为 “OAuth 2.0”，且 &quot;Add auth data to&quot; 设置为 &quot;Request Headers&quot;。在 &quot;Current Token&quot; 部分，确认 &quot;header Prefix&quot; 设置为 Bearer。  
+
+要配置并生成新令牌：
+
+1. 为令牌创建一个名称，例如 &quot;DM lookup&quot;。
+
+2. 确认 **Grant Type** 设置为 Authorization Code (with PKCE)。
+
+3. 设置你的 **Callback URL**。你需要将 Callback URL 更新为与 [v2 Dev Portal](https://developer.x.com/en/portal/dashboard) 中与你的应用关联的 Callback URL 完全一致。在本示例使用的 X 应用中，Callback URL 设置为 - [https://www.example.com.](https://www.example.com/)（注意由于必须完全匹配，[https://example.com](https://example.com) 将无法使用。） 
+
+4. 确认 **Auth URL** 设置为 [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize)
+
+5. 确认 **Access Token URL** 设置为 [https://api.x.com/2/oauth2/token.](https://api.x.com/2/oauth2/token)\
+   **Client ID** - 从开发者门户复制并粘贴 OAuth 2.0 client ID\
+   **Client Secret** - 只有当你使用的应用类型（App type）是 confidential client 时才需要。如果是这种情况，请从开发者门户复制并粘贴 OAuth 2.0 Client Secret。 
+
+6. 确认 **Scope** 设置为 dm.read dm.write tweet.read users.read。
+
+7. 确认 **State** 设置为 “state”。
+
+8. 确认 **Client Authentication** 设置为 Send as Basic Auth header。
+
+9. 点击 “Get New Access Token”，在 &quot;Sign-in with X&quot; 流程中点击 &quot;Authorize app&quot;。
+
+10. 点击 &quot;Proceed&quot; 按钮，然后点击 &quot;Use Token&quot; 以生成令牌。 
+
+11. 点击 &quot;Save&quot; 按钮以保存这些配置信息。
+
+你可能会收到一条提示，表明你尚未登录 X。如果出现该错误，你需要在 Postman 中登录你试图代表其发布内容的 X 账号。
+
+现在这些 OAuth 2.0 配置已经在文件夹级别设置完成，导航到每个示例的 &quot;Authorization&quot; 选项卡，确认它们的 Type 都设置为 &quot;Inherit auth from parent&quot;。 
+
+请注意，此令牌很快会过期，你需要通过点击 &quot;Get New Access Token&quot; 按钮重新生成它。点击该按钮会触发 &quot;Sign-in with X&quot; 流程，并生成一个新的令牌用于发起请求。
+
+<div id="step-three-retrieve-direct-messages-conversation-events">
+  #### 步骤三：检索私信会话事件
+</div>
+
+使用此端点检索私信会话事件时，你需要指定会话 ID。会话 ID 是端点路径的一部分：[https://api.x.com/2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events](https://api.x.com/2/dm\\_conversations/:dm\\_conversation\\_id/dm\\_events)
+
+在 Postman 中，切换到 “Params” 选项卡，并在 &quot;Path Variables&quot; 部分输入你要检索事件的会话 ID。
+
+设置如下所示：
+
+|                      |                       |
+| :------------------- | :-------------------- |
+| **Key**              | **Value**             |
+| `dm_conversation_id` | `1228393702244134912` |
+
+在指定此会话后，最终路径变为 [https://api.x.com/2/dm&#95;conversations/1582103724607971328/dm&#95;events](https://api.x.com/2/dm\\_conversations/1582103724607971328/dm\\_events)
+
+点击 &quot;Send&quot; 按钮后，你将在响应中收到默认的私信对象字段：id、text 和 event&#95;type。还会有一个 &quot;meta&quot; 对象，其中包含结果数量，以及（如果有的话）用于检索更多事件的分页 token。
+
+```
+{
+   "data": [
+       {
+           "event_type": "MessageCreate",
+           "id": "1580705921830768647",
+           "text": "hello to you two, this is a new group conversation."
+       }
+   ],
+   "meta": {
+       "result_count": 1,
+       "next_token": "18LAA5FFPEKJA52G0G00ZZZZ",
+       "previous_token": "1BLC45FFPEKJA52G0S00ZZZZ"
+   }
+}
+```
+
+如果你想接收更多字段，需要在请求中通过 [field](/zh/x-api/fundamentals/fields) 和/或 [expansion](/zh/x-api/fundamentals/expansions) 参数来明确指定这些字段。
+
+在本练习中，我们将为 dm&#95;event 对象请求额外的一组字段：
+
+1. 默认的私信（Direct Message）对象字段：id、text 和 event&#95;type。
+
+2. 额外的私信对象字段：dm&#95;conversation&#95;id、created&#95;at、sender&#95;id、attachments、participant&#95;ids、referenced&#95;tweets
+
+在 Postman 中，切换到“Params”选项卡，并在“Query Params”表中添加以下键值对：
+
+|                     |                                                                                                               |
+| :------------------ | :------------------------------------------------------------------------------------------------------------ |
+| Key                 | Value                                                                                                         |
+| dm&#95;event.fields | dm&#95;conversation&#95;id,created&#95;at,sender&#95;id,attachments,participant&#95;ids,referenced&#95;tweets |
+
+现在你应该会在“Send”按钮旁边看到以下 URL：
+
+[https://api.x.com/2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events?dm&#95;event.fields=id,text,event&#95;type,dm&#95;conversation&#95;id,created&#95;at,sender&#95;id,attachments,participant&#95;ids,referenced&#95;tweets](https://api.x.com/2/dm\\_conversations/:dm\\_conversation\\_id/dm\\_events?dm\\_event.fields=id,text,event\\_type,dm\\_conversation\\_id,created\\_at,sender\\_id,attachments,participant\\_ids,referenced\\_tweets)
+
+<div id="step-four-make-your-request-and-review-your-response">
+  #### 步骤四：发送请求并查看响应
+</div>
+
+在完成所有设置后，再次点击“Send”按钮，你会收到与下方相似的响应。请注意，该响应包含所有可用的 dm&#95;event 字段。
+
+```
+{
+   "data": [
+       {
+           "text": "hello to you two, this is a new group conversation.",
+           "id": "1580705921830768647",
+           "dm_conversation_id": "1580705921830768643",
+           "event_type": "MessageCreate",
+           "sender_id": "17200003",
+           "created_at": "2022-10-13T23:43:54.000Z"
+       }
+   ],
+   "meta": {
+       "result_count": 1,
+       "next_token": "18LAA5FFPEKJA52G0G00ZZZZ",
+       "previous_token": "1BLC45FFPEKJA52G0S00ZZZZ"
+   }
+}
+```

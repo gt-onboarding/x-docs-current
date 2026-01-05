@@ -1,0 +1,114 @@
+---
+title: 编辑帖子
+keywords: ["编辑帖子 enterprise", "enterprise 编辑帖子", "编辑帖子 enterprise", "帖子编辑 enterprise", "编辑元数据 enterprise"]
+---
+
+Enterprise 端点已更新，以提供编辑后帖子的元数据。&#95;Edit Posts&#95; 功能最初于 2022 年 9 月 1 日在 X 员工中上线测试。从该日期开始，符合条件的帖子在发布后 30 分钟内最多可编辑 5 次。*自 2022 年 9 月 29 日以来创建的所有帖子对象* 都包含帖子编辑元数据，即使该帖子从未被编辑过。每次帖子被编辑时，都会创建一个新的 Post ID。可以通过将这些 ID 串联起来（从原始 ID 开始）来描述一个帖子的编辑历史。此外，如果编辑链中的任何一个帖子被删除，该链中的所有帖子也都会被删除。
+
+这些元数据会自动包含在内。无需在请求中添加任何参数即可将可用的编辑历史作为帖子对象的一部分返回。
+
+借助这些新的元数据，开发者可以了解：
+
+* 某个帖子在创建时是否具备可编辑资格。某些帖子（例如带有投票的帖子或定时发布的帖子）无法编辑。
+* 帖子在 30 分钟内可编辑，并且最多可编辑 5 次。对于可编辑的帖子，你可以查看是否仍有可用的编辑时间以及还可以编辑多少次。
+* 你当前查看的是否是帖子的已编辑版本。在大多数情况下，除非通过 Post ID 请求特定的历史版本，否则 API 将返回帖子的最新版本。
+
+在根级别新增了三个帖子属性：
+
+* **edit&#95;history**  - 提供与该帖子的编辑历史相关联的所有 Post ID。&quot;initial&#95;tweet&#95;id&quot; 属性表示原始帖子，而 &quot;edit&#95;tweet&#95;ids&quot; 属性是一个数组，包含与其编辑历史相关联的所有 ID。如果帖子尚未被编辑，该数组将只包含一个 ID。
+
+```
+"edit_history": {
+    "initial\_tweet\_id": "1283764123"
+    "edit\_tweet\_ids": \["1283764123"\]
+  }
+```
+
+* **edit&#95;controls** - 提供属性，用于指示 30 分钟编辑窗口何时结束，以及还可以编辑多少次。
+
+```
+"edit_controls": {  
+     "editable\_until\_ms": 1660155761384
+     "edits_remaining": 3   
+  }
+```
+
+* **editable** - 指示帖子在创建时是否可编辑。 
+
+&quot;editable&quot;: true
+
+大多数帖子都是可编辑的。但是，以下类型的帖子不可编辑： 
+
+* 帖子是推广内容
+* 帖子包含投票
+* 帖子是在他人串帖中的回复
+* 帖子是转发（注意：引用帖子可以编辑）
+* 帖子为 nullcast 类型
+* 社区帖子
+* Superfollow 帖子
+* 协作帖子
+
+**未编辑帖子的示例属性**
+
+下面的 JSON 突出显示了在编辑帖子功能添加之后发布的帖子所包含的编辑元数据。此示例适用于没有编辑历史的帖子。 
+
+请注意，`"edit_tweet_ids"` 数组仅包含一个 ID。
+
+```
+{
+  "created_at": "Wed Aug 16 18:29:02 +0000 2022",
+  "id": 1557433858676740098,
+  "id_str": "1557433858676740098",
+  "text": "I wonder if I will every use teh edit button",
+  "edit_history": {
+    "initial_tweet_id": "1557433858676740098",
+    "edit_tweet_ids": ["1557433858676740098"]
+  },
+  "edit_controls": {
+    "editable_until_ms": 1660155761384,
+    "edits_remaining": 5
+  },
+  "editable": true
+}
+```
+
+**已编辑帖子示例属性**
+
+下面的 JSON 突出了在添加编辑帖子功能后发布的帖子所包含的编辑元数据。此示例展示的是一个仅被编辑过一次的帖子。 
+
+请注意，`"edit_tweet_ids"` 数组中有两个 ID，一个对应原始帖子，另一个对应编辑后的更新。
+
+```
+{
+  "created_at": "Wed Aug 16 18:35:42 +0000 2022",
+  "id": 1557445923210514432,
+  "id_str": "1557445923210514432",
+  "text": "I wonder if I will ever use the edit button",
+  "edit_history": {
+    "initial_tweet_id": "1557433858676740098",
+    "edit_tweet_ids": ["1557433858676740098", "1557445923210514432"]
+  },
+  "edit_controls": {
+    "editable_until_ms": 1660155761384,
+    "edits_remaining": 4
+  },
+  "editable": true
+}
+```
+
+**合规支持**
+
+[Compliance Firehose](/zh/x-api/enterprise-gnip-2.0/fundamentals/firehouse) 和 v2 的 [batch compliance endpoint](/zh/x-api/compliance/batch-compliance/introduction) 均已更新，以支持帖子编辑功能：
+
+在 Compliance Firehose 中新增了一种名为 &quot;tweet&#95;edit&quot; 的事件类型。
+
+```
+{
+  "tweet_edit": {
+    "id": <tweetId>,
+    "initial_tweet_id": <tweetId>,
+    "edit_tweet_ids": [<tweetId1>, <tweetId2>, <tweetId3> ...],
+    "timestamp_ms": "<timestampMsStr>"
+  }
+}
+```

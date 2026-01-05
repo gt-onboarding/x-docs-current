@@ -1,0 +1,160 @@
+---
+title: 통합 가이드
+sidebarTitle: 통합 가이드
+keywords: ["타임라인 통합", "타임라인 가이드", "타임라인 구현", "홈 타임라인 통합", "사용자 타임라인 통합"]
+---
+
+<div id="how-to-integrate-with-the-timelines-endpoints">
+  ## Timelines 엔드포인트를 통합하는 방법
+</div>
+
+이 페이지에서는 Timelines 엔드포인트를 시스템에 통합할 때 알아두어야 할 여러 도구와 핵심 개념에 대한 정보를 제공합니다. 이 페이지는 다음과 같은 섹션으로 나뉩니다:
+
+* [유용한 도구](#helpful-tools)
+* 핵심 개념
+  * [인증](#authentication)
+  * [Developer portal, 프로젝트 및 앱](#portal)
+  * [요청 한도](#rate-limits)
+  * [필드와 expansions](#fields)
+  * [게시물 메트릭](/ko/x-api/posts/timelines#timelines-integration-guide)
+  * [페이지네이션](#pagination)
+  * [결과 필터링](#filtering)
+  * [게시물 상한 및 반환되는 게시물 수](#caps)
+  * [게시물 편집](#edits)
+  * [엣지 케이스](#edge)[](#edge)
+
+<div id="helpful-tools">
+  ### 유용한 도구
+</div>
+
+주요 개념을 살펴보기 전에, 이 엔드포인트의 기능을 테스트해 보기 위해 다음 도구나 코드 샘플 중 하나를 사용하실 것을 권장합니다.
+
+**코드 샘플**
+
+선호하는 프로그래밍 언어의 코드로 이 엔드포인트를 연동하고 싶으신가요? 시작점으로 활용할 수 있는 다양한 코드 샘플을 [GitHub 페이지](https://github.com/xdevplatform/Twitter-API-v2-sample-code)에서 제공하고 있습니다.
+
+**라이브러리**
+
+시작할 때 도움이 되도록 다양한 [커뮤니티 서드파티 라이브러리](/ko/x-api/tools-and-libraries/overview)를 활용할 수 있습니다. 적절한 버전 태그를 확인해 v2 엔드포인트와 호환되는 라이브러리를 찾을 수 있습니다.
+
+**Postman**
+
+Postman은 이러한 엔드포인트를 테스트하는 데 활용할 수 있는 매우 유용한 도구입니다. 각 Postman 요청에는 사용 가능한 항목을 빠르게 이해할 수 있도록 모든 경로 및 본문 파라미터가 포함되어 있습니다. Postman 컬렉션에 대한 자세한 내용은 [Using Postman](/ko/tutorials/postman-getting-started) 페이지를 방문해 주세요.
+
+<div id="key-concepts">
+  ### 핵심 개념
+</div>
+
+**인증**
+
+모든 X API v2 엔드포인트에 대한 요청은 키와 토큰이라고도 불리는 자격 증명 세트를 사용해 [인증](/ko/resources/fundamentals/authentication)되어야 합니다. 이 엔드포인트에 대한 요청을 인증하기 위해 OAuth 1.0a 사용자 컨텍스트(OAuth 1.0a User Context) 또는 OAuth 2.0 Authorization Code with PKCE를 사용할 수 있습니다. 사용자 게시물 타임라인과 사용자 멘션 타임라인에는 OAuth 2.0 앱 전용(App-Only)을 사용할 수 있습니다.
+
+[OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 방식에서는 API 키, 사용자 액세스 토큰, 그리고 몇 가지 다른 매개변수를 사용해 [Authorization 헤더를 생성](https://developer-staging.x.com/resources/fundamentals/authentication/authorizing-a-request)한 후, 이 헤더를 요청과 함께 전송해야 합니다. 액세스 토큰은 요청을 대신 수행하려는 해당 사용자와 연결되어 있어야 합니다. 다른 사용자를 위한 액세스 토큰 세트를 생성하려면, 해당 사용자가 [3-legged OAuth 플로우](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens)를 사용해 앱을 승인해야 합니다. 
+
+OAuth 1.0a는 사용하기가 어려울 수 있습니다. 이 인증 방식에 익숙하지 않다면, [라이브러리](/ko/x-api/tools-and-libraries/overview)를 사용하거나 Postman 같은 도구를 사용하거나, OAuth 2.0을 사용해 요청을 인증할 것을 권장합니다. 이 엔드포인트를 통해 게시물 또는 비공개 메트릭을 요청하려면, 콘텐츠 소유자로부터 적절한 권한을 확보할 수 있도록 OAuth 1.0a 사용자 컨텍스트 또는 OAuth 2.0 Authorization Code with PKCE 중 하나를 사용해야 합니다.
+
+[OAuth 2.0 앱 전용(App-Only)](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 방식은 요청과 함께 [OAuth 2.0 앱 액세스 토큰](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)을 전송하기만 하면 됩니다. 앱 액세스 토큰은 developer App 내에서 직접 생성하거나, [POST oauth2/token](/ko/resources/fundamentals/authentication#post-oauth2-token) 엔드포인트를 사용해 생성할 수 있습니다. 이는 사용자 게시물 타임라인 또는 사용자 멘션 타임라인에 사용할 수 있습니다.
+
+[OAuth 2.0 Authorization Code with PKCE](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 방식은 애플리케이션의 스코프에 대한 더 세밀한 제어와 여러 기기에 걸친 인증 플로우를 지원합니다. OAuth 2.0을 사용하면 사용자 대신 특정 권한을 부여하는 세밀한 스코프를 선택할 수 있습니다. 
+
+앱에서 OAuth 2.0을 활성화하려면, developer portal의 App 설정 섹션에 있는 앱의 인증 설정에서 이를 켜야 합니다.
+
+<Info>
+  **주의 사항**
+
+  다음 [필드](/ko/x-api/fundamentals/fields)를 요청하는 경우, OAuth 1.0a 사용자 컨텍스트 또는 OAuth 2.0 Authorization Code가 필요합니다: 
+
+  * `tweet.fields.non_public_metrics`
+  * `tweet.fields.promoted_metrics`
+  * `tweet.fields.organic_metrics`
+  * `media.fields.non_public_metrics`
+  * `media.fields.promoted_metrics`
+  * `media.fields.organic_metrics`
+</Info>
+
+**[](/ko/x-api/fundamentals/pagination)developer portal, 프로젝트, 및 개발자 앱**
+
+어떤 X API v2 엔드포인트를 사용하더라도, 먼저 [개발자 계정에 가입](https://developer.x.com/en/portal/petition/essential/basic-info)하고 해당 계정 내에 [프로젝트](/ko/resources/fundamentals/projects)를 설정한 뒤, 그 프로젝트 안에 [개발자 앱](/ko/resources/fundamentals/developer-apps)을 생성해야 합니다. 해당 개발자 앱에 있는 키와 토큰은 이 타임라인 엔드포인트에 대한 요청을 인증하는 데 사용할 수 있습니다.
+
+**요청 한도**
+
+매일 수천 명이 넘는 개발자들이 X API에 요청을 보내고 있습니다. 이러한 요청량을 관리하기 위해, 각 엔드포인트에는 앱 또는 인증된 사용자를 대신해 개발자가 보낼 수 있는 요청 수를 제한하는 [요청 한도](/ko/x-api/fundamentals/rate-limits)가 설정되어 있습니다. 
+
+이 엔드포인트에는 사용되는 인증 방식에 따라 서로 다른 요청 한도가 적용됩니다. 앱 수준 요청 한도는 OAuth 2.0 앱 전용(App-Only)을 사용해 요청을 보내는 앱에 적용되며, 사용자 수준 요청 한도는 OAuth 1.0a 사용자 컨텍스트를 사용해 특정 승인 사용자를 대신해 요청을 보낼 때 적용됩니다. 이 두 요청 한도는 15분 단위의 요청 빈도에 기반합니다.
+
+예를 들어, 이 두 타임라인 엔드포인트 모두에 대해 OAuth 2.0 앱 전용(App-Only) 인증을 사용하는 앱은 15분 동안 사용자 게시물 타임라인에 최대 1,500회(페이지네이션 요청 포함), 사용자 멘션 타임라인에 최대 450회(페이지네이션 요청 포함)까지 요청을 보낼 수 있습니다. 동일한 앱이 동일한 15분 동안 서로 다른 두 명의 인증된 사용자(OAuth 1.0a 사용자 컨텍스트 사용)를 보유한 경우, 각 인증된 사용자마다 사용자 게시물 타임라인에 최대 900회(페이지네이션 요청 포함), 사용자 멘션 타임라인에 최대 180회(페이지네이션 요청 포함)까지 요청을 보낼 수 있습니다. 
+
+역순 정렬 홈(home) 타임라인에는 사용자당 15분당 180회 요청의 레이트 리밋(rate limit)이 있습니다. 이 엔드포인트를 사용하면 해당 타임라인에서 지난 7일 동안 생성된 모든 게시물뿐만 아니라 생성 날짜와 관계없이 가장 최근 게시물 800개를 반환할 수 있습니다.
+
+**Fields and expansions**
+
+X API v2에서는 [fields](/ko/x-api/fundamentals/fields)와 [expansions](/ko/x-api/fundamentals/expansions)를 사용하여 API에서 반환받고자 하는 정확한 데이터를 선택할 수 있습니다. expansions 파라미터를 사용하면 페이로드에서 참조되는 객체를 확장할 수 있습니다. 예를 들어, 이 엔드포인트에서는 expansions 파라미터를 사용하여 poll, place, 미디어 및 기타 객체를 요청할 수 있습니다.
+
+fields 파라미터를 사용하면 서로 다른 데이터 객체 내에서 어떤 필드를 받을지 정확하게 선택할 수 있습니다. 기본적으로, 이 엔드포인트들에서 반환되는 기본 게시물 객체에는 id 및 text 필드가 포함됩니다. author&#95;id 또는 public&#95;metrics와 같은 추가 필드를 받으려면 fields 파라미터를 사용하여 해당 필드를 명시적으로 요청해야 합니다. 통합 작업에서 사용을 고려할 만한 중요한 필드로는 당사의 설문조사 데이터, [metrics](/ko/x-api/fundamentals/metrics), [Post annotations](/ko/x-api/fundamentals/post-annotations), 그리고 [conversation ID](/ko/x-api/fundamentals/conversation-id) 필드가 있습니다.
+
+[X API v2 데이터 사전](/ko/x-api/fundamentals/data-dictionary)에 [fields 및 expansions를 함께 사용하는 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에 대한 가이드를 추가해 두었습니다.
+
+**Post metrics**
+
+X API v2 엔드포인트를 사용하면 요청에 적절한 fields를 전달한다는 전제하에, 반환된 게시물 객체에서 직접 게시물 메트릭을 요청할 수 있습니다.
+
+게시물 메트릭에는, 특히 사용자 프라이버시 및 다음 응답 필드와 관련하여 인지해야 할 몇 가지 제한 사항이 있습니다.
+
+* `tweet.fields.non_public_metrics`
+* `tweet.fields.promoted_metrics`
+* `tweet.fields.organic_metrics`
+* `media.fields.non_public_metrics`
+* `media.fields.promoted_metrics`
+* `media.fields.organic_metrics`
+
+위에 언급된 필드에는 비공개 메트릭 데이터가 포함되어 있으므로, 사용자 게시물 타임라인 엔드포인트를 사용할 때 게시물 게시자를 대신하여 이 데이터를 가져오려면 해당 게시자로부터 권한을 받아야 하며, 이를 위해서는 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 또는 [OAuth 2.0 Authorization Code Flow with PKCE](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3)를 사용해야 합니다.
+
+예를 들어, user ID 1234의 사용자 게시물 타임라인에 대해 `non_public_metrics`를 받으려면, 요청에 해당 사용자와 연관된 액세스 토큰을 포함해야 합니다. [3-legged OAuth 플로우](/ko/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)를 사용하면 사용자가 앱에 권한을 부여하고, 그들과 연관된 액세스 토큰 세트를 받을 수 있습니다. 
+
+사용자 멘션 타임라인을 사용하는 경우, 위에 언급된 필드는 멘션을 작성한 작성자가 자신의 비공개 메트릭 데이터에 대한 액세스를 앱에 허용하고, OAuth 1.0a 사용자 컨텍스트로 요청을 보낼 때 해당 사용자의 액세스 토큰을 사용하는 경우에만 제공됩니다.
+
+모든 `non_public_metrics`, organic&#95;metrics 및 promoted&#95;metrics는 지난 30일 내에 생성된 게시물에만 사용할 수 있습니다. 즉, 위에 언급된 필드를 요청하는 경우 결과는 자동으로 최근 30일 이내의 게시물만 포함하도록 조정됩니다.
+
+이러한 필드를 요청하는 경우, 인증된 사용자가 작성한 게시물만 반환되며, 그 외의 모든 게시물에 대해서는 오류가 반환됩니다.
+
+**Pagination**
+
+이 엔드포인트들은 응답을 빠르게 반환하기 위해 페이지네이션을 사용합니다. 단일 응답으로 전송할 수 있는 결과 수(타임라인 엔드포인트의 경우 최대 100개 게시물)를 초과하는 결과가 있는 경우, 페이지네이션을 수행해야 합니다. 페이지당 반환할 결과 수를 지정하기 위해 max&#95;results 파라미터를 사용하고, pagination&#95;token 파라미터를 사용하여 다음 페이지의 결과를 반환합니다. 자세한 내용은 [페이지네이션 가이드](/ko/x-api/fundamentals/pagination)를 참고하세요.
+
+**Filtering results**
+
+이 엔드포인트에는 결과를 필터링하는 데 사용할 수 있는 여러 매개변수가 포함되어 있습니다. start&#95;date와 end&#95;date를 사용하면 결과를 특정 기간으로 좁힐 수 있습니다. 특정 게시물 집합을 선택하기 위해 게시물 ID를 사용하고 싶다면 since&#95;id와 until&#95;id를 사용할 수 있습니다. 사용자 게시물 타임라인에는 반환 결과에서 리트윗과 답글을 제거할 수 있는 exclude 매개변수도 있습니다. 
+
+**게시물 상한 및 반환되는 게시물 수량**
+
+사용자 게시물 타임라인과 사용자 멘션 타임라인 엔드포인트는 한 달 동안 반환할 수 있는 게시물 개수에 제한이 있습니다. 역순(최신순) 홈 타임라인 엔드포인트에는 이러한 제한이 적용되지 않습니다.
+
+어떤 타임라인 엔드포인트를 사용하더라도, 반환된 게시물은 프로젝트 수준 [게시물 상한](/ko/x-api/fundamentals/post-cap)에 포함됩니다. 사용량은 developer portal에 표시되며, ‘월’은 [developer portal 대시보드](https://developer.x.com/en/portal/dashboard)에 표시된 구독 갱신일을 기준으로 시작됩니다. 
+
+사용자 게시물 타임라인 엔드포인트는 한 사용자의 타임라인에 게시된 가장 최근 3,200개의 게시물만 반환합니다. start&#95;time 및 end&#95;time을 가장 최근 3,200개를 넘어서는 기간으로 설정하면, 응답은 성공적으로 반환되지만 게시물은 반환되지 않습니다.
+
+또한 사용자 게시물 타임라인 요청에 excludes=replies를 전달하는 경우, 가장 최근 800개의 게시물만 반환된다는 점도 중요합니다.
+
+사용자 멘션 타임라인 엔드포인트는 가장 최근 800개의 게시물 멘션만 반환합니다.
+
+역순(최신순) 홈 타임라인 엔드포인트는 마지막 3,200개의 게시물을 반환합니다.
+
+**게시물 수정**
+
+수정 가능한 게시물은 원본 게시물이 게시된 이후 30분 동안 최대 5회까지 수정할 수 있습니다. 검색 엔드포인트는 항상 해당 게시물의 최신 버전을 제공합니다. 게시된 지 30분 이상 지난 게시물만 요청하는 경우, 항상 해당 게시물의 최종 버전을 받게 됩니다. 그러나 거의 실시간에 가까운 사용 사례에서 최근 30분 이내에 게시된 게시물을 쿼리하는 경우, 수신한 이후에 게시물이 수정되었을 수 있습니다. 이러한 게시물은 검색 또는 Post Lookup 엔드포인트로 다시 조회하여 최종 상태를 확인할 수 있습니다. 게시물 수정 방식에 대해 더 자세히 알아보려면 [게시물 수정 기본 사항](/ko/x-api/fundamentals/edit-posts) 페이지를 참조하세요.  
+
+**예외 사례**
+
+* 사용자 게시물 타임라인 엔드포인트에서 30일이 지난 게시물에 대해 비공개 메트릭을 요청할 때, 결과 개수가 0인데도 응답에 next&#95;token이 포함될 수 있습니다. 이 문제를 피하려면, non&#95;public&#95;metrics 매개변수로 요청하는 기간이 최근 30일 이내가 되도록 해야 합니다. 추가로, max&#95;results의 최소값은 10이어야 합니다. 이러한 설정이 이 시나리오를 피하는 데 도움이 될 수 있지만, 여전히 발생할 수 있습니다.
+
+* 프로모션되지 않은 게시물에 대해 프로모션 메트릭을 요청하면, 게시물 데이터 대신 비어 있는 응답이 반환됩니다. 현재 이 문제를 해결하기 위해 작업 중입니다.
+
+* 본문 텍스트 길이가 140자를 초과하는 게시물 본문을 포함하는 리트윗의 경우, 전체 게시물 텍스트를 반환하는 대신 text 필드가 잘려서(truncated) 반환됩니다. 단기적인 해결 방법은 참조된 게시물에 대한 확장(expansion)을 요청하여 해당 확장에서 전체 텍스트를 가져오는 것입니다. 이는 향후 수정할 버그입니다.
+
+**다음 단계**
+
+[Timelines 엔드포인트에 첫 요청 보내기]/x-api/posts/timelines#getting-started-with-reverse-chronological-home-timeline &quot;Timelines 엔드포인트에 첫 요청 보내기&quot;)
+
+[API Reference 페이지에서 매개변수, 필드 등 전체 목록 확인하기](/ko/x-api/posts/timelines#api-reference-index)
+
+[지원 받기 또는 오류 해결하기](https://developer.x.com/en/support/x-api)

@@ -1,0 +1,120 @@
+---
+title: Consistencia
+keywords: ["consistencia", "consistencia de la API", "API uniforme", "endpoints coherentes", "diseño de API", "consistencia de los endpoints"]
+---
+
+<div id="consistency-across-the-x-api-v2-endpoints">
+  ## Coherencia en los endpoints de la X API v2
+</div>
+
+Uno de los aspectos principales de la nueva X API v2 es la coherencia entre los endpoints. Esto significa que los objetos devueltos, las características y los comportamientos de la API son uniformes en endpoints similares.
+
+Puedes esperar que los siguientes elementos se mantengan iguales en todos los endpoints:
+
+<div id="path-naming">
+  ### Nomenclatura de rutas
+</div>
+
+La nomenclatura de rutas siempre incluye la [versión](/es/x-api/fundamentals/versioning) del endpoint, seguida del **recurso**. A partir de ahí, la ruta puede contener un **ID** que se relaciona con el recurso anterior, un **verbo de selección** que ayuda a determinar qué datos se devolverán (por ejemplo, `search` o `sample`), un **verbo de entrega** que ayuda a determinar cómo se entregarán los datos (por ejemplo, `stream`), u otros recursos que tengan una **relación** con el recurso principal (por ejemplo, `/user/12/tweets`). Por último, puedes añadir un **parámetro de consulta** al final si el endpoint incluye parámetros de consulta.
+
+A continuación se muestran algunos ejemplos de cómo se podrían organizar estos elementos de ruta y consulta:
+
+`/version/resource/id?param1=value&param2=value /version/resource/delivery/selection?param1=value&param2=value`
+
+Ejemplos de solicitudes reales:
+
+`/2/tweets/1067094924124872705?expansions=attachments.media_keys&tweet.fields=author_id /2/users/2244994945?user.fields=created_at,description /2/tweets/search/stream /2/tweets/search/recent?query=snow`
+
+<div id="json-schema">
+  ### Esquema JSON
+</div>
+
+Las respuestas a las solicitudes se definen mediante [JSON Schema](http://json-schema.org/). Esto significa que las solicitudes devuelven de forma consistente conjuntos de objetos como arrays, donde cada elemento tiene un id. Las solicitudes no devuelven mapas con ids como claves.
+
+<div id="response-object-and-parameters">
+  ### Objeto de respuesta y parámetros
+</div>
+
+El objeto predeterminado que se devuelve es el mismo para todos los endpoints de ese tipo de objeto:
+
+* Los objetos `id` siempre son cadenas.
+* Los parámetros y los campos de respuesta usan de forma coherente la ortografía del inglés estadounidense.
+* Los campos están vacíos o no se devuelven si no tienen ningún valor.
+* El objeto `entities` solo contiene entidades obtenidas del texto de la Publicación: esto incluye `urls`, `hashtags`, `mentions` y `cashtags`.
+* Toda la información relacionada con tarjetas, incluidos los campos `media_keys` y `poll_ids`, se devuelve en el objeto `attachments`.
+
+A continuación se muestra un ejemplo de objeto de respuesta del endpoint de [búsqueda de una sola Publicación](/es/x-api/posts/post-lookup-by-post-id) (con el parámetro [tweet.fields](/es/x-api/fundamentals/data-dictionary#tweet) establecido en `author_id`, `entities`):
+
+```json
+{
+   "data": {
+       "id": "1278747501642657792",
+       "text": "Ha pasado un año desde el lanzamiento de Twitter Developer Labs.\n\nMientras construimos la próxima generación de #TwitterAPI (muy pronto), mira lo que hemos aprendido y cambiado en el camino. https://t.co/WvjuEWCa6G",
+       "author_id": "2244994945",
+       "entities": {
+           "urls": [
+               {
+                   "start": 188,
+                   "end": 211,
+                   "url": "https://t.co/WvjuEWCa6G",
+                   "expanded_url": "https://blog.x.com/developer/en_us/topics/tools/2020/a-year-with-twitter-developer-labs.html",
+                   "display_url": "blog.x.com/developer/en_u…",
+                   "images": [
+                       {
+                           "url": "https://pbs.twimg.com/news_img/1278747527043362816/7HQRkQeV?format=jpg&name=orig",
+                           "width": 1600,
+                           "height": 600
+                       },
+                       {
+                           "url": "https://pbs.twimg.com/news_img/1278747527043362816/7HQRkQeV?format=jpg&name=150x150",
+                           "width": 150,
+                           "height": 150
+                       }
+                   ],
+                   "status": 200,
+                   "title": "A year with Twitter Developer Labs: What we've learned and changed",
+                   "description": "Labs has been invaluable in helping us understand what works well and what doesn’t, what you liked and what you didn’t.",
+                   "unwound_url": "https://blog.x.com/developer/en_us/topics/tools/2020/a-year-with-twitter-developer-labs.html"
+               }
+           ],
+           "hashtags": [
+               {
+                   "start": 106,
+                   "end": 117,
+                   "tag": "TwitterAPI"
+               }
+           ]
+       }
+   }
+}
+```
+
+<div id="authentication">
+  ### Autenticación
+</div>
+
+Todos los endpoints de X API v2 requieren autenticación. Muchos de ellos aceptan el método [OAuth 2.0 Bearer Token](/es/resources/fundamentals/authentication#oauth-2-0), que requiere un Bearer Token en la solicitud al endpoint para realizar una solicitud exitosa.
+
+Para los endpoints que requieren autorización para crear, manipular o recuperar datos en nombre de otro usuario, usa [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication). Esto implica proporcionar las [claves y tokens de API](/es/resources/fundamentals/authentication#api-key-and-secret) de tu [aplicación de desarrollador](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow), así como un conjunto de [Tokens de acceso](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) de usuario que generas para el usuario en cuyo nombre estás realizando una solicitud. El [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) puede ayudarte a obtener Tokens de acceso. Usa una [herramienta o biblioteca](/es/x-api/tools-and-libraries/overview) que construya automáticamente este encabezado de autorización.
+
+Puedes encontrar más información sobre la autenticación en nuestra documentación sobre [autenticación](/es/resources/fundamentals/authentication).
+
+***
+
+<div id="fields">
+  ### Campos
+</div>
+
+El objeto devuelto por cada endpoint es una versión condensada. Para permitir que los desarrolladores tengan mayor capacidad de personalización en la respuesta que reciben de la API, se utiliza el parámetro [`fields`](/es/x-api/fundamentals/fields) para solicitar los campos deseados. Los campos son consistentes en todos los endpoints. El objeto Post devolverá los mismos campos en todos los endpoints en los que se devuelva el objeto Post. El mismo conjunto de campos se puede consultar en endpoints similares.
+
+Por ejemplo, se pueden consultar los mismos campos de Post en [Posts lookup](/es/x-api/posts/lookup/introduction) y para la Publicación fijada expandida en [Users lookup](/es/x-api/users/lookup/introduction).
+
+***
+
+<div id="expansions">
+  ### Expansiones
+</div>
+
+Cuando corresponda, las [expansions](/es/x-api/fundamentals/expansions) están disponibles para todos los campos de id anidados (por ejemplo, todos los campos cuyo nombre es `*_id`, como `author_id`). Las expansiones también están disponibles para todos los campos que tienen un id que no es el identificador de nivel superior del objeto actual. Por ejemplo, en el endpoint de [búsqueda de Publicaciones](/es/x-api/posts/lookup/introduction), la Publicación es el objeto actual y el campo `id` es su identificador de nivel superior. Los campos `author_id` o `referenced_tweets.id` se pueden expandir en objetos completos de usuario o de Publicación añadiendo estos valores separados por comas al parámetro `expansions`.
+
+Por favor, [infórmanos de cualquier inconsistencia](https://twitterdevfeedback.uservoice.com/) que observes relacionada con estos campos.

@@ -1,0 +1,209 @@
+---
+title: 응답 코드와 오류
+sidebarTitle: 응답 코드
+keywords: ["응답 코드", "오류 코드", "HTTP 상태 코드", "API 오류", "오류 처리", "디버깅", "오류 메시지", "상태 코드"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+X API는 상황을 즉시 이해하고 디버깅하는 데 도움이 되도록 다음과 같은 응답 및 오류 코드를 제공합니다. 추가적인 맥락이 필요하면 아래의 디버깅 가이드와 오류 인덱스를 사용하세요.
+
+성공 응답은 200번대 HTTP 코드와 함께, 요청된 객체(또는 생성, 수정, 삭제된 객체)와 서버가 요청을 어떻게 해석했는지를 나타내는 표현이 포함된 JSON 기반 페이로드로 반환됩니다.
+
+오류 응답은 200번대가 아닌 HTTP 코드와 함께 반환됩니다. 오류 코드는 각각 오류가 발생한 서로 다른 이유를 나타냅니다. X API는 모든 요청에 대해 적절한 [HTTP status codes](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)를 반환하려고 합니다.
+
+<div id="x-api-v2-http-status-codes">
+  ## X API v2 HTTP 상태 코드
+</div>
+
+| Code | Text                  | Description                                                                                                                                                                               | Troubleshooting tips                                                                                                                              |
+| :--- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 200  | OK                    | 요청이 성공했습니다.                                                                                                                                                                               |                                                                                                                                                   |
+| 400  | Bad Request           | 요청이 잘못되었거나 처리할 수 없습니다. 함께 반환되는 오류 메시지에서 더 자세한 설명을 확인할 수 있습니다. 인증이 없거나 잘못된 쿼리 매개변수가 포함된 요청은 잘못된 것으로 간주되며 이 응답을 반환합니다.                                                                      | JSON 쿼리의 형식을 다시 한 번 점검하세요. 예를 들어, 규칙에 정확히 일치하는 연산자나 다른 연산자에 사용되는 큰따옴표 문자가 포함되어 있는 경우, JSON 형식의 구조에 사용하는 큰따옴표와 구분하기 위해 백슬래시로 이들을 이스케이프해야 할 수 있습니다. |
+| 401  | Unauthorized          | 요청을 인증하는 데 문제가 발생했습니다. 이는 누락되었거나 잘못된 인증 자격 증명 때문일 수 있습니다. 정의되지 않은 다른 상황에서도 이 코드가 반환될 수 있습니다.                                                                                              | 올바른 [인증 방식](https://docs.x.com/resources/fundamentals/authentication/overview)을 사용하고 있는지, 자격 증명이 올바른지 확인하세요.                                      |
+| 403  | Forbidden             | 요청은 이해되었지만 거부되었거나 액세스가 허용되지 않습니다. 함께 제공되는 오류 메시지가 그 이유를 설명합니다.                                                                                                                            | 사용하려는 엔드포인트에 대해 개발자 계정에 액세스 권한이 있는지 확인하세요. 또한 앱을 허용 목록(allowlist)에 추가해야 할 수도 있습니다(예: Engagement API 또는 Ads API), 또는 액세스에 가입해야 할 수 있습니다.           |
+| 404  | Not Found             | 요청한 URI가 유효하지 않거나, 사용자와 같은 요청한 리소스가 존재하지 않습니다.                                                                                                                                            | 사용 중인 엔드포인트에 대해 유효한 매개변수와 올바른 URI를 사용하고 있는지 확인하세요.                                                                                                |
+| 409  | Connection Exception  | 규칙이 없는 filtered stream에 연결을 시도할 때 반환됩니다.                                                                                                                                                  | 연결 중인 스트림에 최소 하나의 규칙을 생성했는지 확인하세요. filtered stream은 활성 규칙과 일치하는 게시물만 반환합니다. 규칙이 없으면 스트림은 게시물을 반환하지 않습니다.                                          |
+| 429  | Too Many Requests     | 앱의 [rate limit](/ko/resources/fundamentals/rate-limits) 또는 [Post cap](/ko/x-api/fundamentals/post-cap)이 소진되어 요청을 처리할 수 없을 때 반환됩니다. [Rate Limiting](/ko/resources/fundamentals/rate-limits)을 참조하세요. | 사용 중인 엔드포인트에서 허용되는 시간 단위당 요청 개수를 확인하세요. 해당 시간 단위가 재설정될 때까지 기다리세요. 요청을 분산해서 보내 요청 한도에 도달하지 않도록 하거나, 다음 단계의 사용 가능한 데이터 플랜으로 업그레이드하세요.               |
+| 500  | Internal Server Error | 문제가 발생했습니다. 이는 일반적으로 높은 부하 상황이나 엔드포인트에 일시적인 문제가 있는 경우 발생하는 일시적 오류입니다.                                                                                                                     | 다른 사람들도 비슷한 문제를 겪고 있는지 확인하기 위해 X API [status page](/ko/status)나 [developer community forum](https://devcommunity.x.com/)을 확인하거나, 잠시 기다린 후 다시 시도하세요.  |
+| 501  | Unimplemented         | X API는 이 엔드포인트를 지원하지 않으며 요청을 처리할 수 없습니다.                                                                                                                                                  |                                                                                                                                                   |
+| 503  | Service Unavailable   | X 서버는 실행 중이지만 요청이 과도하게 많습니다. 나중에 다시 시도하세요.                                                                                                                                                | 다른 사람들도 비슷한 문제를 겪고 있는지 확인하기 위해 X API [status page](/ko/status)나 [developer community forum](https://devcommunity.x.com/)을 확인하거나, 잠시 기다린 후 다시 시도하세요.  |
+
+요청 중에 오류가 발생하면 문제 진단을 돕기 위해 응답 본문에 오류에 대한 자세한 정보가 반환됩니다. 문제의 유형을 나타내는 URI인 type 필드와 함께, 추가 필드가 문제에 대한 세부 정보를 제공합니다. 이러한 본문에서는 항상 type, title, detail 필드가 반환됩니다(아래 표 참조). 아래 예시와 같이 추가 필드는 오류 유형에 따라 달라집니다.
+
+```json
+{
+  "client_id": "101010101",
+  "required_enrollment": "Standard Basic",
+  "registration_url": "https://developer.twitter.com/en/account",
+  "title": "Client Forbidden",
+  "detail": "이 요청은 요청된 엔드포인트에 등록된 승인된 개발자 계정을 사용하여 수행해야 합니다. 자세한 내용은 문서를 참조하세요.",
+  "reason": "client-not-enrolled",
+  "type": "https://api.x.com/2/problems/client-forbidden"
+}
+```
+
+<div id="partial-errors">
+  ## 부분 오류
+</div>
+
+경우에 따라 200 상태 코드로 응답이 반환되더라도 위에 설명한 오류들이 함께 포함될 수 있습니다. 이런 경우 해당 엔드포인트는 반환할 수 있는 데이터는 그대로 반환하고, 반환할 수 없었던 항목에 대해서는 자세한 오류 정보를 함께 제공합니다.
+
+예를 들어, [Posts lookup endpoint](/ko/x-api/posts/lookup/introduction)는 X [developer App](/ko/resources/fundamentals/developer-apps#overview)이 둘 이상의 ID를 요청할 수 있도록 허용합니다. 요청한 게시물 중 일부는 사용 가능하지만 그중 하나가 삭제된 경우, 사용 가능한 게시물은 응답의 `data` 필드에 반환됩니다. 추가적으로 `errors` 필드가 페이로드에 포함되어, 요청된 게시물 중 어떤 게시물(들)을 반환할 수 없었는지 알려줍니다. 문제를 더 쉽게 진단할 수 있도록, 이 필드는 전체 요청이 실패했을 때의 오류와 동일한 형식을 사용합니다.
+
+<div id="error-information">
+  ### 오류 정보
+</div>
+
+각 문제 유형은 발생한 문제의 성격을 나타냅니다. 발생할 수 있는 모든 문제의 전체 목록은 [API 사양](https://api.x.com/2/openapi.json)에서도 확인할 수 있습니다.
+
+X API는 각 요청에 대해 가능한 한 적절한 [HTTP 상태 코드](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)를 반환하려고 합니다.
+
+| 제목 | 유형 | 설명 |
+| :--- | :--- | :--- |
+| 일반 문제 | `about:blank` | HTTP 상태 코드에서 제공되는 정보 외에 추가 정보가 없는 일반적인 문제입니다. |
+| 유효하지 않은 요청 문제 | `https://api.X.com/2/problems/invalid-request` | 이 요청이 유효하지 않음을 나타내는 문제입니다. 요청이 POST 본문을 사용하는 경우, 내용이 유효한 JSON이며 [OpenAPI 명세](https://api.x.com/2/openapi.json)와 일치하는지 확인하세요. |
+| 리소스를 찾을 수 없음 문제 | `https://api.X.com/2/problems/resource-not-found` | 지정된 게시물, 사용자 등 리소스가 존재하지 않음을 나타내는 문제입니다. |
+| 리소스 권한 없음 문제 | `https://api.X.com/2/problems/not-authorized-for-resource` | 특정 게시물, 사용자 등을 볼 수 있는 권한이 없음을 나타내는 문제입니다. |
+| 클라이언트 금지 문제 | `https://api.X.com/2/problems/client-forbidden` | 클라이언트가 이 요청을 보낼 수 없도록 금지되어 있음을 나타내는 문제입니다. |
+| 허용되지 않은 리소스 문제 | `https://api.X.com/2/problems/disallowed-resource` | 요청한 리소스가 이 API의 규정을 위반함을 나타내는 문제입니다. |
+| 지원되지 않는 인증 문제 | `https://api.X.com/2/problems/unsupported-authentication` | 사용한 인증 방식이 지원되지 않음을 나타내는 문제입니다. |
+| 사용량 제한 초과 문제 | `https://api.X.com/2/problems/usage-capped` | 사용량 상한을 초과했음을 나타내는 문제입니다. |
+| 연결 예외 문제 | `https://api.X.com/2/problems/streaming-connection` | 연결에 문제가 있음을 나타내는 문제입니다. |
+| 클라이언트 연결 끊김 문제 | `https://api.X.com/2/problems/client-disconnected` | 클라이언트 연결이 종료되었습니다. |
+| 운영상 연결 종료 문제 | `https://api.X.com/2/problems/operational-disconnect` | 운영상의 이유로 연결이 종료되었습니다. |
+| 규칙 상한 문제 | `https://api.X.com/2/problems/rule-cap` | 허용되는 규칙의 최대 개수를 초과했습니다. |
+| 규칙 길이 문제 | `https://api.X.com/2/problems/rule-length` | 액세스 수준에 따라 쿼리 또는 규칙에 허용된 최대 문자 수를 초과했습니다. [access levels](/ko/x-api/getting-started/about-x-api#x-api-access-levels-and-versions)를 참조하세요. |
+| 유효하지 않은 규칙 문제 | `https://api.X.com/2/problems/invalid-rules` | 제출한 규칙이 유효하지 않습니다. |
+| 중복 규칙 문제 | `https://api.X.com/2/problems/duplicate-rules` | 제출한 규칙이 중복되었습니다. |
+
+<div id="troubleshooting-tips">
+  ## 문제 해결 팁
+</div>
+
+<Accordion title="코드 디버깅">
+  애플리케이션을 개발할 때는 때때로 오류나 예기치 않은 문제가 발생하는 것이 정상입니다. 아래는 코드를 디버깅하는 데 도움이 되는 몇 가지 팁입니다.
+
+  먼저 문제를 더 작은 부분으로 나누어 어떤 지점에 문제가 있는지 식별하세요. 예를 들어 REST 엔드포인트나 스트리밍 엔드포인트를 통합하는 경우, 문제는 다음 항목들 중 어느 곳에든 있을 수 있습니다:
+
+  * 엔드포인트는 올바른 [인증](/ko/resources/fundamentals/authentication/overview)이 필요합니다.
+  * 엔드포인트에는 유효한 파라미터와 헤더가 필요합니다. 모든 필터링 규칙은 적절한 연산자와 올바른 [구문](/ko/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries)을 사용해 작성되어야 합니다.
+  * 엔드포인트의 URI가 올바른지, 그리고 REST 엔드포인트인 경우 HTTP 메서드를 올바르게 사용하고 있는지 확인해야 합니다.
+  * 액세스하려는 데이터나 리소스에 접근 권한이 없을 수 있습니다(예: 비공개 데이터는 인증된 사용자에게만 제공됩니다).
+  * 현재 데이터 패키지에서는 일부 엔드포인트와 해당 요청 한도까지만 접근할 수 있습니다. 자세한 내용은 [developer portal](https://developer.x.com/en/portal/products)을 확인하세요.
+  * 코드에서 엔드포인트 연동을 위해 서드파티 라이브러리를 사용하고 있습니다.
+  * 코드가 엔드포인트 응답을 올바르게 파싱해야 합니다.
+
+  함께 제공되는 오류 메시지를 읽어 보세요. 이를 통해 어떤 문제가 있는지 상당 부분 파악할 수 있습니다. 각 오류 코드에 대한 문제 해결 팁은 [오류 및 응답 코드 섹션](#x-api-http-status-codes)의 표를 참고하세요.
+
+  REST 엔드포인트의 경우, [Postman](https://www.postman.com/)이나 [Insomnia](https://insomnia.rest/) 같은 REST 클라이언트를 사용하여 위의 (1)부터 (5)까지 단계를 검증할 수 있습니다( [&quot;Postman 시작하기&quot;](/ko/tutorials/postman-getting-started) 가이드를 참고하세요). REST 클라이언트로 전송한 요청이 200 성공 상태 코드를 반환한다면, 문제는 엔드포인트 요청 자체가 아니라 코드나 사용 중인 라이브러리에 있다고 볼 수 있습니다.
+
+  스트리밍 엔드포인트의 경우, URL 구문을 사용해 요청을 보내거나 받는 명령줄 도구인 cURL을 사용하여, 문제가 엔드포인트로의 요청((1)~(5) 단계)인지, 아니면 코드 자체((6)~(7) 단계)인지 확인할 수 있습니다.
+</Accordion>
+
+<Accordion title="인증 관련 문제">
+  * 엔드포인트에서 요구하는 올바른 [인증 방식](/ko/resources/fundamentals/authentication/overview)을 사용하고 있는지 확인하세요. 이는 엔드포인트의 API 참조 페이지에서 확인할 수 있습니다.
+  * 인증 자격 증명이 올바른지 확인하세요. [Apps 섹션](https://developer.x.com/en/portal/projects-and-apps)의 developer portal 대시보드(“Details” 아래)에서 앱 키와 토큰을 확인하거나 재생성할 수 있습니다.
+  * `oauth_nonce`, `oauth_signature`, `oauth_timestamp`를 사용해 [OAuth 1.0a 요청을 올바르게 인가](/ko/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request)했는지 확인하세요.
+  * 문제가 계속되는 경우, OAuth 라이브러리, [Postman](https://www.postman.com/)이나 [Insomnia](https://insomnia.rest/) 같은 REST 클라이언트, 또는 [xurl](https://github.com/xdevplatform/xurl) 사용을 고려해 보세요.
+
+  위 모든 내용에 대한 추가 정보는 [인증 가이드](/ko/resources/fundamentals/authentication/overview)를 참고하세요.
+</Accordion>
+
+<Accordion title="요청 한도 및 게시물 상한 문제">
+  429 오류는 특정 엔드포인트의 요청 한도에 도달했거나 게시물 상한(Post cap)에 도달했을 때 발생할 수 있습니다.
+
+  ‘Too many requests’라는 구체적인 오류가 반환되었다면, 해당 엔드포인트의 요청 한도에 도달했다는 의미입니다. 즉, 지정된 기간 동안 해당 엔드포인트에서 허용되는 최대 요청 개수를 초과한 것입니다.
+
+  요청 한도는 앱 단위와 사용자 단위로 각각 설정된다는 점에 유의하세요.
+
+  * **X App 수준**은 OAuth 2.0 앱 전용(App-Only)을 사용할 때 허용되는 요청 수를 의미하며, 이때 요청 한도는 전체 App에 대해 전역적으로 결정됩니다. 예를 들어, 한 메서드가 요청 한도 윈도우당 15개의 요청을 허용한다면, 해당 메서드는 X App을 대신해 윈도우당 15개의 요청을 허용한다는 의미입니다. 이 한도는 사용자 수준 한도와는 완전히 별도로 간주됩니다. 자세한 내용은 [OAuth 2.0 App-Only](/ko/resources/fundamentals/authentication/oauth-2-0/application-only) 가이드를 참고하세요.
+  * **사용자 컨텍스트 수준**은 OAuth 1.0a 사용자 컨텍스트 또는 OAuth 2.0 Authorization Code with PKCE를 사용할 때, 사용자별 액세스 토큰당 허용되는 요청 수를 의미합니다. 예를 들어, 한 메서드가 요청 한도 윈도우당 15개의 요청을 허용한다면, 윈도우당 사용자 액세스 토큰별로 15개의 요청이 허용된다는 의미입니다. [OAuth 1.0a](/ko/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) 및 [OAuth 2.0](/ko/resources/fundamentals/authentication/oauth-2-0/user-access-token)을 사용해 사용자의 액세스 토큰을 얻는 방법에 대한 가이드를 참고하세요.
+
+  먼저 사용 중인 엔드포인트의 요청 한도를 확인하세요. 이 정보는 해당 엔드포인트의 API reference 페이지와 새 developer portal 대시보드에서 확인할 수 있습니다.
+
+  요청 한도에 대한 추가 정보(특정 요청 한도에 대해 앱이 어느 정도 사용했는지를 HTTP 헤더를 사용해 추적하는 방법, 요청 한도 429 오류 코드에서 복구하는 방법, 그리고 처음부터 요청 한도에 도달하지 않도록 하는 팁)를 보려면 다음 문서를 검토하세요.
+
+  * [v2 엔드포인트에 대한 요청 한도](/ko/x-api/fundamentals/rate-limits)
+
+  &quot;Usage cap exceeded: Monthly product cap&quot;라는 구체적인 오류를 받은 경우, 이는 현재 액세스 수준에 대해 설정된 게시물 상한(Post cap)에 도달했다는 의미입니다. 이러한 [게시물 상한](/ko/x-api/fundamentals/post-cap)에 대한 자세한 내용은 문서 페이지에서 확인할 수 있습니다.
+</Accordion>
+
+<Accordion title="게시물 누락 문제">
+  엔드포인트에서 반환되기를 기대했던 게시물이 있었는데 반환되지 않은 경우, 아래 단계를 따르세요.
+
+  * 올바른 [연산자](/ko/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators)와 [구문](/ko/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries)을 사용하고 있는지 규칙을 확인합니다. 규칙을 더 작은 조건들로 나누어 올바른 구문을 사용하고 있는지 확인하세요.
+  * 게시물을 보낸 계정이 게시물이 생성될 당시 [보호됨](https://help.twitter.com/en/safety-and-security/public-and-protected-tweets) 상태였다면, 해당 게시물은 엔드포인트 요청 시점에 계정이 공개 상태이더라도 반환되지 않습니다. 일반적으로 [X Advanced Search](https://x.com/search-advanced)를 사용해 이를 확인할 수 있습니다. X Advanced Search 기능으로 해당 게시물이 노출되지 않는다면, 엔드포인트에서도 반환되지 않을 것이라고 가정해야 합니다.
+
+  다음 단계는 스트리밍 엔드포인트에만 적용됩니다.
+
+  * 게시물이 전송되었을 때 스트림에 연결되어 있었나요? 게시물 객체에 포함된 타임스탬프는 UTC 시간임을 기억하세요. 게시물이 전송될 때 연결이 끊어졌다면, 누락된 데이터를 보충하기 위해 사용할 수 있는 [복구 및 중복 기능](/ko/x-api/posts/filtered-stream/integrate/recovery-and-redundancy-features#recovery-and-redundancy)을 검토하세요.
+  * 게시물이 전송되었을 때 해당 규칙이 이미 설정되어 있었나요? 게시물 객체에 포함된 타임스탬프는 UTC 시간임을 기억하세요.
+</Accordion>
+
+<Accordion title="버퍼 가득 참으로 인한 연결 해제 문제">
+  스트림이 당사가 데이터를 전달하는 속도를 따라가지 못하고, 앱이 스트림에서 데이터를 충분히 빠르게 소비하지 못할 때 다음 오류 중 하나가 발생할 수 있습니다:
+
+  ```
+  This stream has been disconnected because your client was unable to keep up with us.
+  ```
+
+  ```
+  This stream has been disconnected for operational reasons.
+  ```
+
+  당사는 일정 기간 동안 전달 지연을 허용하며, 각 스트림마다 임시 스테이징 버퍼를 두고 있습니다. 하지만 그 사이에 따라잡지 못하면, 현재 시점에서 다시 연결할 수 있도록 연결 해제를 진행합니다. 이 경우 전체 버퍼가 가득 차 연결이 해제되는 시점에 버퍼 안에 있는 데이터가 손실될 수 있다는 점에 유의하십시오.
+
+  이러한 현상은 데이터가 급격히 증가할 때 발생할 수 있습니다. 일반적으로는, 후속 처리 프로세스와 분리된 별도의 버퍼링 프로세스를 사용해 데이터를 빠르게 소비하도록 구성할 것을 권장합니다.
+
+  v1.1 엔드포인트를 사용하는 Enterprise 고객이라면, 이러한 연결 해제를 방지하기 위해 앱을 최적화하는 방법에 대해 [연결](/ko/x-api/enterprise-gnip-2.0/powertrack-api#disconnections-explained) 관련 문서와 스트리밍 데이터 소비 방법을 다룬 [여기](https://developer.x.com/en/docs/tutorials/consuming-streaming-data) 및 [여기](/ko/x-api/enterprise-gnip-2.0/powertrack-api#planning-for-high-volume-social-data-events) 문서에서 더 자세한 내용을 확인할 수 있습니다.
+
+  연결 해제로 인해 놓친 게시물을 다시 가져오기 위한 다양한 도구가 있으며, 아래에 나열된 도구들이 그 예입니다. 다음 도구들은 Enterprise 수준의 v1.1 엔드포인트에서만 사용할 수 있다는 점에 유의하십시오.
+
+  * [**Redundant Connections**](/ko/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - 여러 연결을 사용해 여러 서버에서 스트림을 소비함으로써, 한 연결이 해제되더라도 데이터 누락을 방지합니다.
+  * [**Replay**](/ko/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - 별도의 스트림을 사용하여 최근 5일 이내의 데이터를 복구합니다.
+  * [**Backfill**](/ko/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - 5분 이내에 다시 연결하여 중단된 지점부터 재시작합니다.
+  * **Historical PowerTrack** - 전체 X 아카이브에서 데이터를 복구합니다.
+</Accordion>
+
+<div id="get-help">
+  ## 도움 받기
+</div>
+
+X 커뮤니티 포럼에서는 X 개발자 플랫폼과 관련된 기술 질문을 할 수 있습니다. 이곳은 토론 포럼으로, 다른 개발자들이 올린 질문과 X API 사용과 관련된 다양한 주제의 기술 정보를 찾아볼 수 있습니다.
+
+질문에 답변하고 포럼에서 대화에 참여하며 적극적으로 소통해 주시기 바랍니다. X 직원들도 지원을 제공하기 위해 포럼에 참여하고 있습니다.
+
+<Button href="https://devcommunity.x.com/">
+  X 커뮤니티 포럼
+</Button>
+
+<div id="before-you-post-a-question">
+  ### 질문을 게시하기 전에
+</div>
+
+* 문제와 관련된 정보를 X 개발자 문서에서 검색하세요
+* 다른 개발자가 올린 비슷한 질문이 있는지 커뮤니티 포럼에서 검색하세요
+* 커뮤니티 포럼 가이드라인을 확인하세요
+
+<div id="when-you-post-a-question-make-sure-to-include-the-following-information">
+  ### 질문을 게시할 때는 다음 정보를 포함해 주세요
+</div>
+
+* 문제에 대한 설명
+* 수행한 API 호출 (가능하다면 헤더 포함)
+* 반환된 X 응답 (오류 메시지가 있다면 포함)
+* 실제로는 어떤 응답을 받기를 기대했는지
+* 문제를 해결하기 위해 시도한 단계 목록
+* 문제를 재현하기 위해 필요한 단계 목록
+* 해당된다면, 문제가 발생한 기간
+* 해당된다면, App ID, Post ID 등
+* 관련된 코드 샘플 또는 스크린샷
+
+게시물에는 한 가지 주제/질문만 포함해 주세요.
+
+기능 요청이나 피드백이 있다면 [X Developer Platform Feedback Form](https://t.co/devfeedback)을 통해 제출해 주세요.
+
+앱 정지와 같은 정책 관련 문제는 [Policy support](https://help.twitter.com/forms/platform)에 문의해 주세요.
+
+로그인 및 계정 지원과 같은 X 관련 문제는 [X Help Desk](https://help.twitter.com/en/contact-us)를 이용해 주세요.

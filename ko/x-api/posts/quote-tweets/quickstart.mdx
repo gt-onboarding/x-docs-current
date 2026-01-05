@@ -1,0 +1,251 @@
+---
+title: 빠른 시작
+sidebarTitle: 빠른 시작
+keywords: ["인용 트윗 빠른 시작", "인용 트윗 튜토리얼", "인용 트윗 가이드", "인용 트윗 예제", "인용 리트윗"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-quote-tweets-lookup-endpoint">
+  ## 인용 트윗 조회 엔드포인트 시작하기
+</div>
+
+이 빠른 시작 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용해 지정된 필드 집합과 함께 인용 트윗 조회 엔드포인트에 첫 요청을 보내는 방법을 안내합니다.
+
+다양한 언어로 작성된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 리포지토리를 방문하세요. 
+
+<div id="prerequisites">
+  #### 사전 준비 사항
+</div>
+
+이 가이드를 완료하려면 요청을 인증하기 위한 [keys and tokens](/ko/resources/fundamentals/authentication) 세트를 보유해야 합니다. 다음 단계를 따라 이러한 키와 토큰을 생성할 수 있습니다:
+
+* [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하고 승인을 받습니다.
+* developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연관된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성합니다.
+* App의 “Keys and tokens” 페이지로 이동하여 필요한 자격 증명을 생성합니다. 모든 자격 증명을 안전한 위치에 저장했는지 확인하세요.
+
+**Quote Tweets 조회 요청을 생성하는 단계**
+
+**1단계: 도구 또는 라이브러리 선택**
+
+이 엔드포인트에 요청을 보내는 데 사용할 수 있는 다양한 도구, 코드 예제, 라이브러리가 있지만, 여기서는 과정을 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+환경에 X API v2 Postman 컬렉션을 로드하려면 아래 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 로드한 후 timeline 폴더로 이동하여 &quot;Quote Tweets by ID&quot; 요청을 찾습니다.
+
+**2단계: 요청 인증**
+
+X API에 적절하게 요청을 보내려면 권한이 있는지 확인해야 합니다. 이 엔드포인트에서 이를 수행하려면, [OAuth 2.0 App-Only](/ko/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2), 또는 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 인증 방식을 사용하여 요청을 인증해야 합니다.
+
+단순화를 위해 이 예시에서는 OAuth 2.0 App-Only를 사용하겠지만, 비공개 [metrics](/ko/x-api/fundamentals/metrics) 또는 게시물을 요청하려면 다른 인증 방식 중 하나를 사용해야 합니다. 
+
+Postman에 키와 토큰, 특히 [App Access Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (App-only Bearer Token이라고도 함)을 추가해야 합니다. 이를 위해 Postman 우측 상단에서 “X API v2”라는 이름의 환경을 선택하고, 환경 드롭다운 옆의 눈 아이콘을 클릭해 &quot;initial value&quot; 및 &quot;current value&quot; 필드에 키와 토큰을 추가합니다.
+
+올바르게 설정했다면, 이 변수는 요청의 authorization 탭에 자동으로 반영됩니다.
+
+**3단계: Quote Tweets를 조회할 게시물 식별 및 지정**
+
+요청에서 게시물 ID를 전달하여 Quote Tweets를 조회할 게시물을 지정해야 합니다.
+
+이 예제에서 사용할 게시물 ID는 1409931481552543749입니다.
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 다음, 이 게시물 ID를 id 파라미터의 &quot;Value&quot; 열에 입력합니다.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 1409931481552543749 |
+
+**4단계: 조회할 필드 식별 및 지정**
+
+3단계 후 &quot;Send&quot; 버튼을 클릭하면 응답에서 기본 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet) 필드(id,  text, edit&#95;history&#95;tweet&#95;ids)를 받게 됩니다.
+
+추가 필드를 받고 싶다면, 요청에서 [field](/ko/x-api/fundamentals/fields) 및/또는 [expansion](/ko/x-api/fundamentals/expansions) 파라미터를 사용해 해당 필드를 지정해야 합니다.
+
+이 연습에서는 서로 다른 객체에서 세 개의 추가 필드 세트를 요청하겠습니다:
+
+1. 기본 user 객체의 추가 tweet.created&#95;at 필드
+2. 반환된 게시물에 대한 연관 작성자의 user 객체 기본 필드: id, name, username
+3. 연관 user 객체의 추가 user.created&#95;at 필드
+    
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 다음, &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다:
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **키** | **값** | **반환되는 필드** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `created_at` | `includes.users.created_at` |     |
+
+이제 &quot;Send&quot; 버튼 옆에 다음 URL이 표시됩니다:
+
+`https://api.x.com/2/tweets/:id/quote_tweets?expansions=author_id&tweet.fields=created_at&user.fields=created_at`
+
+**주의:**
+
+Postman에서는 URL 필드의 경로 매개변수 `:id`가 `id` params 필드에 입력한 값으로 자동으로 업데이트되지 않습니다. 그렇기 때문에 위 URL에는 1409931481552543749 대신 `:id`가 포함되어 있습니다.
+
+**5단계: 요청을 보내고 응답을 검토하기**
+
+모든 설정을 마쳤다면 &quot;Send&quot; 버튼을 클릭해 다음과 같은 응답을 받습니다:
+
+```
+{
+ "data": [
+   {
+     "created_at": "2022-02-22T04:31:34.000Z",
+     "text": "RT @chris_bail: Twitter has created an entire course (with videos, code, and other materials) to help researchers learn how to collect data…",
+     "author_id": "29757971",
+     "id": "1495979553889697792"
+   },
+   {
+     "created_at": "2022-01-26T17:07:43.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "241588187",
+     "id": "1486385372401737728"
+   },
+   {
+     "created_at": "2022-01-11T17:28:04.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "24961055",
+     "id": "1480954678447857669"
+   },
+   {
+     "created_at": "2022-01-10T20:34:46.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "1441574419789324291",
+     "id": "1480639272721940486"
+   },
+   {
+     "created_at": "2021-12-16T22:55:24.000Z",
+     "text": "RT @chris_bail: Twitter has created an entire course (with videos, code, and other materials) to help researchers learn how to collect data…",
+     "author_id": "1623598771",
+     "id": "1471614967207976961"
+   },
+   {
+     "created_at": "2021-12-13T15:59:55.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "1506401233",
+     "id": "1470423243513372679"
+   },
+   {
+     "created_at": "2021-12-10T02:02:45.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "40103034",
+     "id": "1469125403373568001"
+   },
+   {
+     "created_at": "2021-12-08T17:27:54.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "1436400156006567936",
+     "id": "1468633446935318529"
+   },
+   {
+     "created_at": "2021-09-15T21:40:24.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "81650379",
+     "id": "1438256410417143809"
+   },
+   {
+     "created_at": "2021-08-26T16:45:16.000Z",
+     "text": "RT @suhemparack: Super excited to share our course on Getting started with the #TwitterAPI v2 for academic research\n\nIf you know students w…",
+     "author_id": "40462535",
+     "id": "1430934381829492746"
+   }
+ ],
+ "includes": {
+   "users": [
+     {
+       "username": "j_a_tucker",
+       "id": "29757971",
+       "name": "Joshua Tucker",
+       "created_at": "2009-04-08T16:45:38.000Z"
+     },
+     {
+       "username": "whimchic",
+       "id": "241588187",
+       "name": "whimchic",
+       "created_at": "2011-01-22T16:51:43.000Z"
+     },
+     {
+       "username": "mattbiehl",
+       "id": "24961055",
+       "name": "Matthias Biehl",
+       "created_at": "2009-03-17T21:41:27.000Z"
+     },
+     {
+       "username": "weixinac",
+       "id": "1441574419789324291",
+       "name": "J",
+       "created_at": "2021-09-25T01:25:19.000Z"
+     },
+     {
+       "username": "RSangeleer",
+       "id": "1623598771",
+       "name": "Richard Sangeleer",
+       "created_at": "2013-07-26T18:25:45.000Z"
+     },
+     {
+       "username": "Gulnerman",
+       "id": "1506401233",
+       "name": "Giz Gulnerman",
+       "created_at": "2013-06-11T20:13:40.000Z"
+     },
+     {
+       "username": "efishman123",
+       "id": "40103034",
+       "name": "Elishema Fishman",
+       "created_at": "2009-05-14T22:25:58.000Z"
+     },
+     {
+       "username": "dtcxwz",
+       "id": "1436400156006567936",
+       "name": "Hüseyin Ateş",
+       "created_at": "2021-09-10T18:44:30.000Z"
+     },
+     {
+       "username": "brendaberkelaar",
+       "id": "81650379",
+       "name": "Dr. Brenda Berkelaar",
+       "created_at": "2009-10-11T18:09:16.000Z"
+     },
+     {
+       "username": "misoca",
+       "id": "40462535",
+       "name": "Michael Soto",
+       "created_at": "2009-05-16T13:26:05.000Z"
+     }
+   ]
+ },
+ "meta": {
+   "result_count": 10,
+   "next_token": "avdjwk0udyx6"
+ }
+}
+```
+
+<div id="step-six-paginate-through-your-results">
+  #### 6단계: 결과 페이지네이션하기
+</div>
+
+이전 응답의 하단에는 다음 필드들을 포함하는 meta 데이터 객체가 있습니다:
+
+* results&#95;count
+* next&#95;token
+
+4단계에서 max&#95;results 파라미터를 지정하지 않았기 때문에 기본적으로 게시물 10개만 받게 됩니다. 추가 데이터 페이지를 가져오려면 마지막 결과에서 next&#95;token 필드의 값을 가져와, 그 문자열을 Postman의 Params 페이지에서 pagination&#95;token 파라미터 값으로 추가하고 나머지 설정은 그대로 두면 됩니다.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `pagination_token` | avdjwk0udyx6 |
+
+이 모든 설정을 마친 후 다시 &quot;Send&quot;를 클릭하면 다음 페이지의 결과를 받을 수 있습니다.
+
+이 개념을 더 자세히 설명하는 [페이지네이션](/ko/x-api/fundamentals/pagination) 가이드를 제공하고 있습니다.

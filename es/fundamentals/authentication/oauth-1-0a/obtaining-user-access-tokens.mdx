@@ -1,0 +1,167 @@
+---
+title: Obtención de tokens de acceso mediante el flujo OAuth de tres patas
+sidebarTitle: Tokens de acceso de usuario (flujo OAuth de tres patas)
+keywords: ["flujo OAuth de tres patas", "tokens de acceso de usuario", "flujo OAuth", "obtener tokens de acceso", "flujo OAuth 1.0a", "generación de tokens de acceso"]
+---
+
+import { Button } from "/snippets/es/button.mdx";
+
+<div id="obtaining-access-tokens-using-3-legged-oauth-flow">
+  ### Obtención de tokens de acceso usando el flujo OAuth de tres patas
+</div>
+
+Para realizar acciones en nombre de otro usuario, necesitarás obtener sus tokens de acceso. Los tokens de acceso especifican la cuenta de X en cuyo nombre se realiza la solicitud, por lo que, para que puedas obtenerlos, primero deberán otorgarte acceso. Estos tokens no caducan, pero el usuario puede revocarlos en cualquier momento.
+
+X te permite obtener tokens de acceso de usuario mediante el flujo OAuth de tres patas, que permite que tu aplicación obtenga un **access token** y un secreto de token de acceso redirigiendo a un usuario a X y haciendo que autorice tu aplicación. Este flujo es casi idéntico al flujo descrito en [implementar Log in with X](/es/resources/fundamentals/authentication/guides/log-in-with-x), con dos excepciones:
+
+* Se utiliza el endpoint [GET oauth/authorize](/es/resources/fundamentals/authentication/api-reference#get-oauth-authorize) en lugar de [GET oauth/authenticate](/es/resources/fundamentals/authentication/api-reference#get-oauth-authenticate).
+* Al usuario **siempre** se le pedirá que autorice el acceso a tu aplicación, incluso si ya lo había otorgado anteriormente.
+   
+
+Antes de empezar, deberás comprobar los permisos de tu [aplicación](/es/resources/fundamentals/developer-apps) y conocer las consumer keys y la URL de callback. Si no tienes una URL de callback ni una interfaz de usuario accesible públicamente, considera usar la [autorización basada en PIN](/es/resources/fundamentals/authentication/oauth-1-0a/pin-based-oauth), que está pensada para aplicaciones que no pueden acceder o incrustar un navegador web para redirigir al usuario después de la autorización. 
+
+Los posibles estados de la interacción de inicio de sesión con el flujo OAuth de tres patas se ilustran en el siguiente diagrama de flujo:
+
+![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/obtaining-access-tokens.png.twimg.1920.png)
+
+<div id="overview-of-the-process">
+  #### Descripción general del proceso
+</div>
+
+A grandes rasgos, el proceso de OAuth con 3 participantes (3-legged OAuth) hará lo siguiente:
+
+1. Crear una solicitud para que una aplicación consumidora obtenga un token de solicitud.
+2. Hacer que el usuario se autentique y enviar a la aplicación consumidora un token de solicitud.
+3. Convertir el token de solicitud en un token de acceso de usuario que se pueda usar.
+
+**Aclaración de terminología**
+
+En la guía a continuación, verás distintos términos que se refieren a lo mismo.
+
+**Credenciales de cliente:**
+
+* App Key === API Key === Consumer API Key === Consumer Key === Customer Key === `oauth_consumer_key`
+* App Key Secret === API Secret Key === Consumer Secret === Consumer Key === Customer Key === `oauth_consumer_secret`
+* Callback URL === `oauth_callback`
+   
+
+**Credenciales temporales:**
+
+* Request Token === `oauth_token`
+* Request Token Secret === `oauth_token_secret`
+* oauth&#95;verifier
+   
+
+**Credenciales de token:**
+
+* Token de acceso === Token === `oauth_token` resultante
+* Secreto del token de acceso === Token Secret === `oauth_token_secret` resultante
+
+<div id="walkthrough-steps">
+  #### Pasos del recorrido
+</div>
+
+**Paso 1: [POST oauth/request&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-request-token)**
+
+Crea una solicitud para que una aplicación cliente obtenga un request token.
+
+El único parámetro exclusivo en esta solicitud es `oauth_callback`, que debe ser una versión [codificada en URL](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) de la URL a la que deseas que tu usuario sea redirigido cuando complete el paso 2. Los parámetros restantes se agregan mediante el proceso de firma de OAuth.
+
+Ten en cuenta que cualquier URL de callback que utilices con el endpoint [POST oauth/request&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-request-token) tendrá que configurarse en la página de detalles de la aplicación en la configuración de tu [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) en el portal para desarrolladores.
+ 
+
+**La solicitud incluye:**
+
+`oauth_callback="https%3A%2F%2FyourCallbackUrl.com"`
+
+`oauth_consumer_key="cChZNFj6T5R0TigYB9yd1w" `
+
+Tu aplicación debe examinar el estado HTTP de la respuesta. Cualquier valor distinto de 200 indica un error. El cuerpo de la respuesta contendrá los parámetros `oauth_token`, `oauth_token_secret` y `oauth_callback_confirmed`. Tu aplicación debe verificar que `oauth_callback_confirmed` sea true y almacenar los otros dos valores para los siguientes pasos.
+ 
+
+**La respuesta incluye**
+
+`oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
+
+`oauth_token_secret=veNRnAWe6inFuo8o2u8SLLZLjolYDmDP7SzL0YfYI`
+
+`oauth_callback_confirmed=true`
+
+**Paso 2: [GET oauth/authorize](/es/resources/fundamentals/authentication/api-reference#get-oauth-authorize)**
+
+Haz que el usuario se autentique y envíe a la aplicación cliente un request token.
+ 
+
+**Ejemplo de URL a la que redirigir al usuario:**
+
+`https://api.x.com/oauth/authorize?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
+
+Tras una autenticación correcta, tu `callback_url` recibirá una solicitud que contiene los parámetros `oauth_token` y `oauth_verifier`. Tu aplicación debe verificar que el token coincida con el request token recibido en el paso 1.
+ 
+
+**Solicitud desde la redirección del cliente:**
+
+`https://yourCallbackUrl.com?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0&oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY`
+
+**Paso 3: [POST oauth/access&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-access-token)**
+
+Convierte el request token en un access token utilizable.
+
+Para transformar el request token en un access token utilizable, tu aplicación debe realizar una solicitud al endpoint [POST oauth/access&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-access-token), que contenga el valor `oauth_verifier` obtenido en el paso 2. El request token también se pasa en la parte `oauth_token` del encabezado, pero esto se habrá agregado mediante el proceso de firma.
+ 
+
+**La solicitud incluye:**
+
+`POST /oauth/access_token`
+
+`oauth_consumer_key=cChZNFj6T5R0TigYB9yd1w`
+
+`oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
+
+`oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY`
+
+Una respuesta correcta contiene los parámetros `oauth_token` y `oauth_token_secret`. El token y el token secret deben almacenarse y usarse para futuras solicitudes autenticadas a la X API. Para determinar la identidad del usuario, usa [GET account/verify&#95;credentials](/es/resources/fundamentals/authentication/api-reference).
+ 
+
+**La respuesta incluye:**
+
+`oauth_token=7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4`
+
+`oauth_token_secret=PbKfYqSryyeKDWz4ebtY3o5ogNLG11WJuZBc9fQrQo`
+
+**Uso de estas credenciales para solicitudes requeridas de OAuth 1.0a (aplicación-usuario)**
+
+Ahora que has obtenido los tokens de acceso de usuario, puedes usarlos para acceder a ciertas API, como [POST statuses/update](/es/x-api/posts/manage-tweets/introduction) para crear Publicaciones en nombre de los usuarios.
+ 
+
+**La solicitud incluye:**
+
+`POST statuses/update.json`
+
+`oauth_consumer_key=cChZNFj6T5R0TigYB9yd1w`
+
+`oauth_token=7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4`
+
+<div id="sample-use-case">
+  #### Caso de uso de ejemplo
+</div>
+
+El flujo estándar es basado en la web y utiliza el flujo de autorización OAuth de 3 pasos (3-legged). Las capturas de pantalla descritas aquí forman parte de un ejemplo cuyo código fuente puedes consultar en [https://github.com/xdevplatform/twauth-web](https://github.com/xdevplatform/twauth-web).
+
+En algún momento del flujo de tu aplicación, querrás redirigir a X para autorizar tu aplicación.
+
+<Frame>
+  <img src="/images/twauth-web-2.png" alt="" />
+</Frame>
+
+Cuando redirijas a X con el token de solicitud, se le pedirá al usuario que autorice tu aplicación.
+
+<Frame>
+  <img src="/images/twauth-web-3.png" alt="" />
+</Frame>
+
+Una vez que el usuario autorice tu aplicación, será redirigido a la URL de callback que proporcionaste cuando generaste el token de solicitud. Usarás esta redirección para obtener el token de acceso permanente de este usuario y almacenarlo localmente.
+
+<Frame>
+  <img src="/images/twauth-web-4.png" alt="" />
+</Frame>

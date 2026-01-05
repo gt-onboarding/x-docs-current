@@ -1,0 +1,120 @@
+---
+title: 広告アカウントへのアクセス
+keywords: ["広告アカウント", "広告用アカウント", "広告アカウントへのアクセス", "アカウントアクセス", "広告アカウント管理", "アカウント階層"]
+---
+
+<div id="user-accounts-vs-ad-accounts">
+  # ユーザーアカウントと広告アカウント
+</div>
+
+Ads API を利用する際には、広告アカウントと X ユーザーアカウントという 2 種類のアカウントが関係します。Ads API ドキュメント全体を通じて、「account」という用語は通常、広告アカウントを指します。
+
+* 広告アカウントは **business.x.com** 上で登録され、API では `account_id` によって識別されます。広告アカウントは資金提供元に直接リンクし、1 つ以上の X ユーザーアカウントのコンテンツを「プロモーション対象ユーザー」として活用します。各広告アカウントは、1 つ以上の X ユーザーアカウントに対して権限を付与できます。広告アカウント、すなわち「現在のアカウント」は、実行されるほぼすべての URL において、インラインの `:account_id` パラメーターとして表されます。
+* X ユーザーアカウント（@AdsAPI など）は、Ads API において `user_id` によって識別されます。これらのアカウントは、1 つ以上を広告アカウントに関連付けることができます。API にリクエストを送信している認証済みの X ユーザーアカウントは「現在のユーザー」と呼ばれます。現在のユーザーがアクセスできる広告アカウントの一覧は、[GET accounts](/ja/x-ads-api/campaign-management#accounts) で取得できます。「プロモーション対象ユーザー」とは、特定の広告アカウントによってプロモーション可能な X ハンドルです。詳細については、[Obtaining Ads Account Access](/ja/x-ads-api/introduction) を参照してください。
+
+<div id="methods-for-ad-account-access">
+  ## 広告アカウントへのアクセス方法
+</div>
+
+広告主のアカウントに対して Ads API リクエストを行う方法は 2 つあります。
+
+1. 広告主の代理としてリクエストを行う方法（**推奨**）
+2. 広告主のアカウントへのアクセス権が付与されている自分のアカウント（例：[代理店](https://business.x.com/en/blog/agencies-manage-multiple-Twitter-Ads-accounts.html)として複数アカウントをサポートしている場合）を使用してリクエストを行う方法
+
+本ドキュメントは、これらのオプション間の違いを簡潔にまとめた概要であり、[マルチユーザーログインに関する FAQ](https://business.x.com/en/help/troubleshooting/multi-user-login-faq.html) など、他のリソースと併せて参照してください。 
+
+[リクエストの認可](/ja/resources/fundamentals/authentication#authorizing-a-request#authorizing-a-request)で説明しているとおり、Ads API へのすべてのリクエストには、[OAuth 1.0a](/ja/resources/fundamentals/authentication) を使用した Authorization ヘッダーが必要であり、そのためには [3-legged](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)[OAuth](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) フローを通じて取得したアクセストークンが必要です。アプリケーション側では、[アクセストークンを取得](/ja/resources/fundamentals/authentication#oauth-1-0a-2)するための Web ベースの OAuth フローを実装する必要があります。Ads API の開発者は、X 広告主にログイン認証情報の共有を求めてはいけません。
+
+デフォルトでは、各 [X developer application](/ja/resources/fundamentals/developer-apps) には静的な **access token** が含まれており、そのアプリケーションを所有するアカウントに対して Ads API リクエストを行うために使用できます。これらの認証情報は、3-legged や [PIN ベースの OAuth](/ja/resources/fundamentals/authentication#pin-based-authorization) フローを必要としない単一アカウントのユースケースに最適です。別の X 広告アカウントへアクセスしない場合は、以下の手順ではなく、これらの[シングルユーザー](/ja/resources/fundamentals/authentication#oauth-1-0a-2)認証情報を使用してください。
+
+<div id="levels-of-access">
+  ## アクセスレベル
+</div>
+
+<div id="app-level-permissions">
+  ### アプリレベルの権限
+</div>
+
+各ユーザーには、[Ads API への申請](/ja/x-ads-api/getting-started/step-by-step-guide)時にリクエストした内容に応じたアクセスレベルが付与されます。
+
+* **コンバージョンのみ**: ユーザーは、[Mobile](/ja/x-ads-api/measurement/mobile-conversions) および [Web Conversion](/ja/x-ads-api/measurement/web-conversions) エンドポイントに対する [読み取りおよび書き込み](/ja/resources/fundamentals/developer-apps) アクセスを持ちます。
+* **標準アクセス**: ユーザーは、[Analytics](/ja/x-ads-api/analytics)、[Campaign Management](https://developer.x.com/en/docs/twitter-ads-api/campaign-management/overview)、[Creatives](https://developer.x.com/en/docs/twitter-ads-api/creatives/overview)、[Custom Audiences](https://developer.x.com/en/docs/twitter-ads-api/audiences/overview)、および [Conversion](/ja/x-ads-api/measurement/web-conversions) エンドポイントに対する [読み取りおよび書き込み](/ja/resources/fundamentals/developer-apps) アクセスを持ちます。
+
+**注記:** 2023 年 7 月以前にアクセスをリクエストした Ads API 開発者は、アクセスレベルや権限が異なる場合があり、OAuth トークン数が 5 個に制限されていることがあります。既存アプリケーションで追加のエンドポイントへのアクセスを有効化したり、トークン上限の引き上げを行ったりする方法については、[アクセスの拡張](/ja/x-ads-api/getting-started/increasing-access) ガイドを参照してください。
+
+<div id="ad-account-level-permissions">
+  ### 広告アカウントレベルの権限
+</div>
+
+Ads アカウントへのアクセス権を持つ各ユーザーには、特定のアカウントレベルの権限が付与されます。**Account administrator**、**Ad manager**、**Campaign analyst**、**Organic analyst**、および **Creative Manager** です。アカウントレベルの権限に関する最新のドキュメントについては、**business.x.com** を参照してください。アプリケーションは、どの API エンドポイントおよび Ads 機能にアクセスできるかを判断するために、[Authenticated User Access](/ja/x-ads-api/campaign-management#authenticated-user-access) API エンドポイントを使用して、現在認証されているユーザーの権限を取得する必要があります。
+
+**注:** [Conversion API](/ja/x-ads-api/measurement/web-conversions) と共に使用されるユーザートークンは、**Account administrator** または **Ad manager** のアカウントレベルの権限を持つユーザーのものでなければなりません。                                                                                                                                              
+
+<div id="methods-of-obtaining-access-tokens">
+  ## アクセストークンの取得方法
+</div>
+
+<div id="1-obtain-an-advertisers-user-access-token">
+  ### 1. 広告主（ユーザー）のアクセストークンを取得する
+</div>
+
+広告主の**アクセストークン**を取得する方法は 2 通りあります。最も一般的な方法は、Web UI 内から直接実行する [3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) です。広告主が利用できる公開 UI を持たないアプリケーションは、[PIN ベース](/ja/resources/fundamentals/authentication#pin-based-authorization) の OAuth プロセスを実装できます。ユーザーが 3-legged フローを完了すると、アプリケーションは API 経由でそのユーザーの Ads アカウントにリクエストを行うための認証情報を取得できます。
+
+OAuth フローを通じてユーザーの認証情報を取得する方法は、広告主アカウントへのアクセスを得ようとするほとんどの Ads API 開発者に対して、**強く推奨**される方法です。これにより、ユーザーに代わって API を呼び出し、そのユーザーとして操作を実行できます。これらのトークンには有効期限はありませんが、ユーザーがいつでも取り消すことができます。
+
+<div id="2-obtain-your-developer-access-token">
+  ### 2. （開発者用）アクセストークンを取得する
+</div>
+
+このオプションでは、広告主が business.x.com の X UI を通じて、あなたの [@username に権限を付与](https://business.x.com/en/help/troubleshooting/multi-user-login-faq.html)（または複数の @username）し、自身の X Ads アカウントへのアクセス権を与える必要があります。あなたのアカウントに対して 3-legged OAuth フローを通じて取得された **アクセストークン** は、広告主の X Ads アカウントにアクセスできるようになります。
+
+これにより、広告主の OAuth トークンではなく、あなた自身の @username の OAuth トークンを使って API を呼び出すことができます。この方法の重要なポイントは、ポスト委任/コンポーザー権限があなたの @username に付与されている場合にのみ、Promoted-Only ポストを作成できるという点です。
+
+アカウント上の `FULL` プロモート可能ユーザーの代わりに Promoted-Only ポストを作成するアクセス権を得るには、このフローでポストを作成する権限も付与されている必要があります。これにより、[GET accounts/:account&#95;id/authenticated&#95;user&#95;access](/ja/x-ads-api/campaign-management#accounts) エンドポイントで `TWEET_COMPOSER` 権限を通じてアクセスできるようになります。
+
+<div id="differences-between-these-methods">
+  ## これらの方法の違い
+</div>
+
+|     |     |     |
+| :--- | :--- | :--- |
+|     | 広告主(ユーザー)のOAuthトークン | (開発者)のOAuthトークン  <br /> (@usernameを別アカウントに追加) |
+| 広告アカウントへのアクセス | ✔   | ✔   |
+| ユーザーに代わってポストを作成 | ✔   | ✔*  |
+| キャンペーンの管理 | ✔   | ✔   |
+| 分析データへのアクセス | ✔   | ✔   |
+| ユーザーに代わってカードを作成 | ✔   | ✔   |
+| 開発者によるX広告UIを介した  <br />アクセス |     | ✔   |
+| [レート制限](/ja/x-api/enterprise-gnip-2.0/fundamentals/rate-limits) | 広告主ごとに個別 | 広告主アカウントごとに個別 |
+
+<Note>
+  **注:** 詳細については、上記の**[(開発者)アクセストークンの取得](/ja/x-ads-api/fundamentals/accessing-ads-accounts#2-obtain-your-developer-access-token)**セクションを参照してください。
+</Note>
+
+<div id="sample-use-case">
+  ## ユースケース例
+</div>
+
+<div id="advertisers-access-token-via-oauth-3-legged-web-flow">
+  ### 広告主のアクセストークン（OAuth 3-legged Web フロー）
+</div>
+
+標準的なフローは Web ベースであり、[3-legged authorization](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) の OAuth フローを使用します。ここで示しているスクリーンショットは、[https://github.com/xdevplatform/twauth-web](https://github.com/xdevplatform/twauth-web) でソースを確認できるサンプルの一部です。
+
+アプリケーションのあるタイミングで、アプリケーションを認可するために X へリダイレクトする必要があります。
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/twauth-web-2.png" alt="image0" />
+</Frame>
+
+リクエストトークンを指定して X にリダイレクトすると、ユーザーにアプリケーションの認可が求められます。
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/twauth-web-3.png" alt="image1" />
+</Frame>
+
+ユーザーがアプリケーションを認可すると、リクエストトークンを生成した際に指定したコールバック URL にリダイレクトされます。この情報を使用して、このユーザー用の永続的なアクセストークンを取得し、ローカルに保存します。
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/twauth-web-4.png" alt="image" />
+</Frame>

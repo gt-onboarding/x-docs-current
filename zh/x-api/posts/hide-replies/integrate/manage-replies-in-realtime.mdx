@@ -1,0 +1,32 @@
+---
+title: 按话题管理回复
+sidebarTitle: 按话题管理回复
+keywords: ["管理回复", "隐藏回复集成", "回复审核", "实时审核", "回复管理", "审核回复"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+
+<div id="manage-replies-in-realtime">
+  ### 实时管理回复
+</div>
+
+借助 hide replies 端点，你可以构建一个工作流，帮助用户隐藏那些极有可能与对话无关的回复。
+
+有用的应用通常会结合多种技术，从而为用户提供更高价值。本文展示如何使用 [Perspective API](https://www.perspectiveapi.com/) 来隐藏回复。该 API 是由 Google 内部团队 [Jigsaw](https://jigsaw.google.com/) 训练的人工智能，用于检测具有毒性（有害）的评论。应用逻辑将按如下方式工作：
+
+1. 向用户请求授权，以读取其帖子并隐藏或取消隐藏其回复。
+2. 使用 [Account Activity API](https://developer.x.com/en/docs/x-api/v1/accounts-and-users/subscribe-account-activity/overview) 来检测新收到的回复。
+3. 请求 Perspective API 返回一个“分数”（0 到 1 之间的数字），表示其算法对某条评论与其以往见过的有毒评论相似程度的置信度。（Perspective 不会存储发送到该服务的文本。）
+4. 如果算法的分数非常高，则调用 hide replies 端点。
+
+<div id="strive-for-transparency">
+  #### 努力保持透明
+</div>
+
+由于 Perspective 并非基于实际帖子内容进行训练，某些语言细微差异可能会导致此应用隐藏用户本希望保持可见的回复。无论在设计应用时使用何种技术或方法，都应尽最大努力确保用户了解你的应用隐藏了哪些内容，并且可以进行更改。
+
+* 最佳做法是始终信任用户，并让他们对自己的决定拥有完全的控制权。这意味着在你的产品体验中应提供选项，用于撤销应用代表用户执行的任何操作。
+* 当使用人工智能模型时，你的应用在检测并隐藏帖子时应使用非常高的置信度阈值。
+* 不是所有人都使用相同的词语，你的应用在设计时应尽量避免任何偏见。留意被重新认领（reclaimed）的用语和俚语，它们可能会导致误判。
+* 如果你正在训练人工智能，请考虑采用能够尽量贴近 X 上常用语言的模型。

@@ -1,0 +1,886 @@
+---
+title: 互动 API
+keywords: ["互动 API", "Enterprise 互动 API", "互动指标", "互动数据", "Enterprise 互动", "GNIP 互动"]
+---
+
+<div id="overview">
+  ## 概览
+</div>
+
+[`Enterprise`](https://developer.x.com/en/products/x-api/enterprise)
+
+*这是仅在我们的托管访问级别内可用的 Enterprise API。要使用此 API，您必须先与我们的 Enterprise 销售团队开通账号。 [了解更多](/zh/x-api/enterprise-gnip-2.0/enterprise-gnip)*
+
+Engagement API 提供对帖子曝光和互动指标的访问。虽然大多数指标和端点都要求您使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 进行身份验证，但您可以使用 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#oauth-2-0) 和 /totals 端点访问公开的 Favorite、Retweet、Reply 和 Video Views 指标。  
+
+**注意：** 您可能会发现某些 X Web 仪表板上报告的数据与 Engagement API 中报告的数据存在差异。出现这些差异，是因为 Web 仪表板通常只显示在所选时间范围内发生的互动和/或曝光。例如，某个 Web 仪表板可能只显示日历月范围内帖子上的互动，而 Engagement API 可能会显示超出该月份跨度、但仍在您请求的时间范围内发生的互动。在这些情况下，应以 Engagement API 作为权威数据来源。
+ 
+
+<div id="request-endpoints">
+  ### 请求端点
+</div>
+
+Engagement API 有三个端点：
+
+<div id="current-totals-totals">
+  #### 当前总计：[/totals]
+</div>
+
+* 请求会返回目标帖子展示次数和互动次数的总计指标
+* 限制为以下指标：Impressions（展示次数）、Engagements（互动次数）、Favorites（点赞）、Replies（回复）、Retweets（转发）、Quote Tweets（引用转发）以及 Video Views（视频观看次数）
+* 支持使用 OAuth 1.0a 用户上下文，检索在**过去 90 天内**创建的帖子对应的 **Impressions** 和 **Engagements** 指标
+* 支持使用 OAuth 2.0 Bearer Token，检索**任意帖子**对应的 **Favorites、Retweets、Quote Tweets、Replies** 和 **Video Views** 指标
+* 结果基于发起请求时刻的最新展示次数和互动次数总计
+* 非常适合用于为仪表盘报表提供数据支持，以及在多个 @账号之间计算互动率
+* 支持每个请求最多为 250 条帖子获取指标
+   
+
+<div id="last-28-hours-28hr">
+  #### 最近 28 小时：[/28hr]
+</div>
+
+* 请求可以返回展示次数的总指标、互动次数的总指标，以及最近 28 小时内发生的各单项互动指标的明细
+* 数据可以按帖子 ID 分组，也可以作为时间序列按天或按小时汇总分组
+* 非常适合追踪最近创建内容的效果
+* 支持所有可用指标
+* 每次请求最多可为 25 条帖子获取指标
+   
+
+<div id="historical-historical">
+  #### 历史：[/historical]
+</div>
+
+* 请求可以根据互动发生时间（而非帖子创建时间）返回最近一年的展示量、互动量，以及各类单项互动指标的明细数据。
+* 请求支持开始日期和结束日期参数，可灵活限定在最长 4 周的特定时间范围内。
+* 帖子互动数据仅能追溯至过去 365 天。
+* 数据可以按帖子 ID 分组，也可以按时间序列聚合后按天或按小时分组。
+* 非常适合将近期表现与历史基准进行对比评估，或构建某个 @handle 历史表现的整体概况。
+* 支持所有可用指标。
+* 支持在每个请求中为最多 25 条帖子请求指标。
+
+<div id="available-metrics">
+  ### 可用指标
+</div>
+
+下表描述了可通过 Engagement API 获取的各类指标类型。
+
+请查看我们的[指标解读页面](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#interpreting-the-metrics)，以进一步了解以下指标。
+
+| 指标                                                                                                                                                  | 接口可用性             | 是否需要用户上下文                                           | 描述                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :-------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 展示次数                                                                                                                                                | 全部                | 是                                                   | 帖子被查看的总次数。此指标仅适用于在过去 90 天内发布的帖子。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| 互动次数                                                                                                                                                | 所有端点              | 是                                                   | 用户与该帖子互动次数的计数。此指标仅适用于在过去 90 天内发布的帖子。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 点赞数                                                                                                                                                 | 全部                | 是 - /28hrs &amp; /Historical<br /><br />否 - /totals | 对帖子被收藏次数的计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 转发次数                                                                                                                                                | 全部                | 是 - /28hrs 和 /Historical<br /><br />否 - /totals     | 帖子被转发的次数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| quote&#95;tweets                                                                                                                                    | /totals           | 否 - /totals                                         | 帖子被带评论转发（也称为引用）的次数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 回复数                                                                                                                                                 | 全部                | 是 - /28hrs 和 /Historical<br /><br />否 - /totals     | 该帖子被回复的次数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| video&#95;views                                                                                                                                     | 全部                | 是 - /28hrs 和 /Historical<br /><br />否 - /totals     | 统计给定帖子中某个视频在至少 2 秒内有 50% 画面可见的次数。<br /><br />视频观看次数仅适用于发布时间在 1800 天以内的帖子。如果你尝试为任何超过 1800 天的帖子请求视频观看次数，你将在响应中收到如下对象，以及一个包含你请求的其他指标的单独对象：<br /><br />&quot;unsupported&#95;for&#95;video&#95;views&#95;tweet&#95;ids&quot;: [&quot;TWEET&#95;ID&quot;]<br /><br />**请注意：** 你在 X 自有及运营的平台（移动应用和网站）上看到的视频观看次数指标，可能会与通过 /28hr 和 /historical 端点获得的数值存在差异。<br /><br />*   X 用户界面和 /totals 端点中显示的视频观看次数，是将该视频在所有发布过该视频的帖子中的观看次数汇总后的结果。也就是说，UI 中展示的指标包含了该视频在被转发或在其他单独帖子中再次发布等所有场景下的合并观看次数。该指标不包含 GIF 动图的视频观看次数。<br />*   /28hr 和 /historical 端点提供的视频观看次数，仅包含由你获取指标的那个特定帖子所产生的观看次数。该指标不包含 GIF 动图的视频观看次数。 |
+| media&#95;views                                                                                                                                     | /28hr /historical | 是                                                   | 在视频、GIF 和图片中，您的媒体通过自动播放或点击产生的所有观看次数总数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| media&#95;engagements<br /><br />([此前称为 Media Clicks](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#recent-changes-to-the-engagement-api)) | /28hr /historical | 是                                                   | 媒体（例如帖子中的图片或视频）被点击的次数计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| url&#95;clicks                                                                                                                                      | /28hr /historical | 是                                                   | 帖子中 URL 被点击次数的计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| hashtag&#95;clicks                                                                                                                                  | /28hr /historical | 需要                                                  | 帖子中话题标签被点击次数的计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| detail&#95;expands                                                                                                                                  | /28hr /historical | 是                                                   | 用于统计为查看更多详情而点击该帖子的次数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| permalink&#95;clicks                                                                                                                                | /28hr /historical | 需要                                                  | 帖子固定链接（该帖子对应的独立网页）被点击的次数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| app&#95;install&#95;attempts                                                                                                                        | /28hr /historical | 是                                                   | 表示从该帖子产生的应用安装事件发生次数的计数                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| app&#95;opens                                                                                                                                       | /28hr /historical | 是                                                   | 从该帖子产生的 App 打开事件发生次数的计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| email&#95;tweet                                                                                                                                     | /28hr /historical | 需要                                                  | 帖子通过电子邮件被分享的次数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| user&#95;follows                                                                                                                                    | /28hr /historical | 是                                                   | 通过此帖子关注该用户（帖子作者）的次数计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| user&#95;profile&#95;clicks                                                                                                                         | /28hr /historical | 是                                                   | 从此帖子点击该用户（帖子作者）个人资料的次数计数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+
+<div id="engagement-groupings">
+  ### 互动分组
+</div>
+
+分组用于对返回的互动指标进行自定义分组。每个请求中最多可以包含 3 个分组。你可以按以下一个或多个值对指标进行分组：
+
+*三个端点都支持：*
+
+* tweet.id
+* engagement.type
+   
+
+`/28hr` 和 `/historical` 可以提供时间序列指标，因此支持：&#95;
+
+* engagement.day
+* engagement.hour
+
+若要了解有关分组的更多信息，请访问指南部分中的 [Engagement API 分组](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings) 页面。
+
+<div id="guides">
+  ## 指南
+</div>
+
+<div id="developer-getting-started-guide">
+  ### 开发者入门指南
+</div>
+
+<div id="introduction">
+  #### 介绍
+</div>
+
+本文档旨在帮助开发者入门了解如何与 Engagement API 集成。我们将先讨论“为什么要集成”，然后再深入讲解“如何集成”的技术细节。
+
+<div id="what-does-the-engagement-api-provide">
+  ##### **Engagement API 提供了什么功能？**
+</div>
+
+* Engagement API 为任何 X 账号在过去 90 天内发布的自有帖子提供曝光量和互动数据，前提是该账号已授权你的应用，允许其代表账号使用 [3-legged OAuth](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) 请求指标。这个功能强大且易于集成的解决方案，可以让你立即获取曝光量以及更深层次的互动数据，例如 URL 点击、#hashtag 点击等多种行为。
+* Engagement API 为任何帖子提供点赞、Retweet、Quote Tweet、回复以及视频观看次数等汇总指标（总量）。你可以将其作为一种强大的方式，获取关于任意单条帖子或一组帖子的基础互动数据。
+* Engagement API 通过允许客户利用 15+ 项表现指标，有效衡量内容表现，从而为社交聆听、营销和内容发布平台创造新的价值，帮助他们衡量在 X 上的投资回报率 (ROI)。
+* Engagement API 是一种请求/响应式 API，应用开发者可以发送包含帖子 id、所需指标以及时间范围的请求，API 会即时返回相应数据。
+   
+
+<div id="why-integrate-example-use-cases">
+  ##### **为什么要集成？示例用例**
+</div>
+
+* 了解你的内容的总体触达范围，看看有多少人查看。查看有多少人观看视频、点击链接、点击话题标签，或安装你的应用。
+* 生成汇总和时间序列两种参与度指标。
+* 了解任意公开帖子上的基础参与度指标（点赞、转发、引用帖子、回复）。
+* 使用这些指标来判断哪些类型的帖子效果更好，从而更高频率地发布这类内容，为你的内容获得更多展示量和更多互动。
+* 将营销行为自动化（例如，当你的某条帖子获得 100 个点赞，或达到其他阈值时，从另一个自有帐号转发内容）。
+* 将不同活动进行基准测试和相互对比，作为 A/B 测试的工具。
+* 分析哪些类型的内容更能引起你客服团队受众的共鸣，以确定如何以及何时进行回应。
+* 展示通过你的平台发布内容的分析数据。
+   
+
+[Engagement API 于 2016 年发布](https://blog.x.com/official/en_us/a/2016/gnip-s-engagement-api-is-now-generally-available.html)，是首个在大规模场景下提供这些深度参与度指标的 X API。Engagement API 使用简单，并能让客户将这一流程自动化。以下是一个描述集成示例的案例研究：
+
+* [利用红十字会衡量活动成效](https://blog.x.com/developer/en_us/topics/spotlight/2016/measuring-campaign-success-with-the-red-cross.html)[](https://simplymeasured.com/blog/true-twitter-impressions-and-url-clicks-new-from-simply-measured/#sm.0007werel134td8zqf02m2mduumr6)
+
+既然我们已经了解了 Engagement API 的各种用途，接下来就开始深入技术细节。
+
+<div id="integrating-the-engagement-api">
+  #### 集成 Engagement API
+</div>
+
+<div id="introduction-to-api">
+  ##### **API 简介**
+</div>
+
+Engagement API 是一个简单的 RESTful API，它接收以 JSON 编码的请求，并以 JSON 编码的互动指标作为响应。请求主要包含三个部分（更多文档请参见链接）：
+
+* 一个 ***Post id*** 数组。
+* 一个数组，用于指定你感兴趣的[指标类型](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#EngagementTypes)。类型包括 “impressions”、“retweets”、“hashtag&#95;clicks” 和 “user&#95;follows” 等。
+* [Engagement groupings](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings)，这是一个 JSON 结构，用于指示你希望在 API 响应中如何组织互动数据。
+
+在很多情况下，多次请求之间 Engagement Types 和 Groupings 会保持相对固定，只有 Post id 会被更新。
+
+Engagement API 提供了[三个端点](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#RequestEndpoints)：
+
+* **Totals** - 为帖子提供整体的互动总数。部分指标适用于所有帖子，而有些指标仅适用于过去 90 天内的帖子。
+* **28 hour** - 提供最近 28 小时的时间序列互动指标。
+* **Historical** - 为自 2014 年 9 月 1 日以来发布的帖子提供最长连续四周的时间序列互动指标。
+
+**/totals** 端点支持在一次请求中为最多 **250 个帖子** 请求指标。**/28hour** 和 **/historical** 端点支持每次请求 **25 个帖子**。
+
+在讨论如何获取 Engagement API 的访问权限之后，我们将演示如何发起 API 请求，概述 OAuth，并提供指向其他技术资源的链接。
+
+<div id="getting-api-access">
+  ##### **获取 API 访问权限**
+</div>
+
+如果你正在阅读本文档，很可能你已经获得了 Engagement API 的访问权限。如果还没有，请联系你的 Enterprise 客户经理，或在[此处](/zh/x-api/enterprise-gnip-2.0/enterprise-gnip)申请 Enterprise 访问权限。
+
+第一步是通过[开发者门户](/zh/resources/fundamentals/developer-portal)，使用已获批准的开发者账号创建一个 [X 应用](/zh/resources/fundamentals/developer-apps)。你的客户经理需要与你的这个应用关联的数字形式的 App ID，才能为你开通访问权限。如果你需要申请开发者账号，可以在[此处](/zh/resources/fundamentals/developer-apps)完成申请。
+
+<div id="making-a-request">
+  ##### **发起请求**
+</div>
+
+好消息是，向 Engagement API 发起请求非常简单。对于本次请求，我们将获取以下两条 [@XDevelopers](https://x.com/XDevelopers) 帖子的转发（Retweet）、引用帖子（Quote Tweet）、收藏（Favorite）和回复总数：
+
+> 1/ Today we’re sharing our vision for the future of the X API platform![https://t.co/XweGngmxlP](https://t.co/XweGngmxlP)
+>
+> — Twitter Dev (@TwitterDev) [April 6, 2017](https://x.com/TwitterDev/status/850006245121695744)
+
+> Don’t miss the Posts about your Post.
+>
+> Now on iOS, you can see Retweets with comments all in one place. [pic.x.com/oanjZfzC6y](https://t.co/oanjZfzC6y)
+>
+> — X (@X) [May 12, 2020](https://x.com/status/1260294888811347969?ref_src=twsrc%5Etfw)
+
+第一步是用 JSON 构造 API 请求，请求中包含放在数组里的这两个 Post id、一个包含感兴趣互动类型的数组，以及一个自定义命名的“groupings”JSON 对象，用来指明我们希望在响应中如何排列这些指标。下面是我们的请求示例：
+
+```json
+{
+  "tweet_ids": [
+    1260294888811347969, 850006245121695744
+  ],
+  "engagement_types": [
+    "retweets", "quote_tweets", "favorites", "replies"
+  ],
+  "groupings": {
+    "engagement-types-by-id": {
+      "group_by": [
+        "Tweet.id", "engagement.type"
+      ]
+    }
+  }
+}
+```
+
+为了获取这些总计指标，我们向 [https://data-api.x.com/insights/engagement/totals](https://data-api.x.com/insights/engagement/totals) 端点发送此 JSON POST 请求。
+
+我们会包含以下请求头，以表明我们的请求主体是以 JSON 编码的，并且经过 Gzip 压缩（请求主体可能会非常大）：
+
+* Content-Type: application/json
+* Accept-Encoding: gzip
+   
+
+当我们发起请求时，会使用 OAuth 进行认证，我们将在下一节中进一步讨论。
+
+API 会返回如下响应负载：
+
+```json
+{
+  "grouping name": {
+    "1260294888811347969": {
+      "favorites": "17111",
+      "quote_tweets": "3254",
+      "replies": "1828",
+      "retweets": "5218"
+    },
+    "850006245121695744": {
+      "favorites": "492",
+      "quote_tweets": "66",
+      "replies": "42",
+      "retweets": "324"
+    }
+  }
+}
+```
+
+请注意，响应中的指标是按照“分组”（groupings）定义中描述的结构组织的：首先按帖子 ID 列出指标，然后在下一层级按互动类型进行划分。
+
+这相当简单。如果你刚开始使用 OAuth 进行身份验证，请继续阅读下一节。
+
+<div id="authenticating-with-oauth">
+  #### 使用 OAuth 进行认证
+</div>
+
+OAuth 是技术行业中非常常见的一种认证标准。如果你已经在使用 OAuth（例如与其他 X API 一起使用），那么你很可能已经在使用某种特定编程语言的 OAuth 包来帮你屏蔽所有繁琐的细节。如果你对 OAuth 还不熟悉，请访问我们的 [OAuth with the X API](/zh/resources/fundamentals/authentication) 页面，或者直接前往 [https://oauth.net](https://oauth.net/) 了解更多信息。然后，我们建议你为自己集成所用的编程语言选择一个合适的 OAuth 包，从那里开始入手。使用这些包时，典型的认证流程通常包括：配置你的密钥和令牌、创建某种 HTTP 对象，然后使用该对象发起请求。
+
+例如，在 Ruby 生态中，下面的伪代码展示了一种步骤示例：使用 Ruby gem `oauth` 构建一个启用 OAuth 的应用，并发起一个 POST 请求：
+
+```js
+require 'oauth'
+
+#组装 JSON 请求(如上所示)。
+request = make_json_request()
+
+#使用我的应用消费者密钥和密钥构建应用消费者对象。
+consumer = OAuth::Consumer.new(keys['consumer_key'], keys['consumer_secret'], {:site => ‘https://data-api.x.com’})
+#使用授权账户提供的令牌构建用户令牌。如果发起仅限应用的请求(使用 /totals 端点检查无需权限的帖子),可以跳过此步骤。
+token = {:oauth_token => keys['access_token'], :oauth_token_secret => keys['access_token_secret']}
+
+#创建启用 OAuth 的应用对象。
+app = OAuth::AccessToken.from_hash(consumer, token)
+#发起 POST 请求。
+result = app.post(“/insights/engagement/totals", request, {"content-type" => "application/json", "Accept-Encoding" => "gzip"})
+```
+
+Engagement API 支持仅应用（application-only）和用户上下文两种身份验证方式。如果你正在使用 `/totals` 端点收集非自有的公开帖子参与度指标，则不需要用户授权，可以使用仅应用身份验证。在这种情况下，你只需使用你的应用 key 和 secret 进行身份验证。
+
+OAuth 也允许应用使用与用户关联的令牌，以“代表另一位用户”的方式发起 API 请求。如果你要为自有帖子生成 Engagement 指标（即由你持有其用户令牌的用户所发布的帖子），你将以用户上下文发起请求，也就是同时使用你的应用密钥和用户特定的访问令牌进行身份验证。这些用户访问令牌通常通过“[Sign-in with X](/zh/resources/fundamentals/authentication#log-in-with-x)”流程提供，或者由用户直接提供（请注意，如果你直接从用户获取令牌，则必须使用 [twurl](https://github.com/xdevplatform/xurl)）。一旦用户提供了他们的令牌，这些令牌不会过期，并且在用户没有重置令牌或更改密码的前提下，可以与 Engagement API 搭配使用，以代表他们发起请求；如果用户重置了令牌或更改了密码，则需要向你提供新的令牌。
+
+你可以通过[此表](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings)查看不同指标所需的身份验证类型。
+
+<div id="selecting-an-engagement-api-endpoint">
+  ### 选择 Engagement API 端点
+</div>
+
+Engagement API 提供三个不同的端点：
+
+* **[Totals](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement)** - 提供自有（owned）或非自有（unowned）帖子中所选指标的总体汇总结果。部分指标适用于所有帖子，而另一些仅适用于最近 90 天内发布的帖子。每个请求最多支持 250 条帖子。
+* **[28 hour](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement)** - 为最近 28 小时内的自有帖子提供时间序列的互动指标。每个请求最多支持 25 条帖子。
+* **[Historical](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-historical)** - 为自 2014 年 9 月 1 日以来发布的自有帖子提供最长连续四周的时间序列互动指标。每个请求最多支持 25 条帖子。
+   
+
+每个端点都有其独特的特性。无论你计划使用全部三个端点，还是在尝试决定哪一个最符合你的使用场景，理解它们之间的差异都非常重要。
+
+下面我们将介绍一些关键概念，进一步探讨这三个端点，然后给出示例用例，这些用例大致映射到某一个特定端点。我们希望这些信息能帮助你更高效地集成这三个端点，或者帮助你决定哪一个端点最适合你的目标。
+ 
+
+<div id="key-concepts">
+  #### 关键概念
+</div>
+
+有几个关键概念，有助于阐明三个 Engagement API 端点各自的不同功能以及它们所提供的数据。
+ 
+
+<div id="impressions-and-engagement-metrics">
+  ##### 展现次数和互动指标
+</div>
+
+展现次数表示某条给定帖子在 X 平台自然（非付费）场景中被查看的总次数。在推广或付费场景中被看到所产生的展现次数不包含在内。在 Engagement API 出现之前，帖子展现次数只是一种潜在浏览量的度量方式，它基于对作者账号的关注者，以及转发该内容的任意账号的关注者进行计数，并未考虑到一个常见情况：某个用户实际上并未看到该帖子。
+
+由 Engagement API 生成的展现次数指标是真实衡量某条帖子被实际渲染用于展示的次数。如果某个关注你账号的用户错过了你的帖子，这不计为一次展现。
+
+Engagement API 提供 14 种独立的互动[指标类型](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#available-metrics)，每一种都代表用户在看到某条帖子时可以采取的一种具体操作。这些操作包括转发、点赞、回复、点击诸如 #hashtags、链接和媒体等实体、关注作者以及查看作者的个人资料。所有这些单独的操作都会汇总到一个名为 Engagements 的综合互动指标中。
+
+<div id="owned-and-unowned-x-content">
+  ##### 自有与非自有 X 内容
+</div>
+
+Engagement API 明确区分自有和非自有帖子。自有帖子是指从你的账号发布的帖子，或你已获得权限以请求其 Engagement 数据的帖子。与其他 X API 一样，你通过让其他 X 用户/账号向你共享访问令牌，从而授权你代表他们发起 API 请求来获得权限。获取这些令牌的一种常见方式是通过 [“使用 X 登录”流程](/zh/resources/fundamentals/authentication#log-in-with-x)。
+
+`/totals` 端点为自有和非自有帖子都提供参与度数据。对于非自有帖子，你可以请求在帖子展示页面上公开可见的参与度指标：Favorite（点赞）、Retweet（转发）和 Reply（回复）。对于这些指标，Engagement API 的优势在于可以以自动化的方式大规模获取这些指标。对于自有帖子，`/totals` 端点还会提供 Impression（展示次数）和（总）Engagement（参与度）指标。
+
+`/28hr` 和 `/historical` 端点仅为自有帖子提供指标，这意味着在向这些端点发起请求时，你必须携带用户上下文。
+
+<div id="total-and-time-series-engagement-data">
+  ##### 总量与时间序列参与度数据
+</div>
+
+`/totals` 端点顾名思义，只提供各参与度类型的汇总总计。其数值表示自帖子发布以来截至当前的最新累计总量。如果某个帖子刚发布，而你多次请求它的指标，这些总量通常会在每次请求时发生变化。
+
+`/28hr` 和 `/historical` 端点可以同时提供汇总总量和时间序列数据。在请求时间序列数据时，可以将参与度指标汇总为按天或按小时的数据。   
+
+有关如何使用 `/28hr` 和 `/historical` 端点请求时间序列数据，请参阅我们关于[参与度分组](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings)的文档。
+
+<div id="endpoints-and-example-use-cases">
+  #### 端点和示例用例
+</div>
+
+鉴于前文讨论的这些特性和差异，每个具体端点通常对应不同类型的用例。为帮助你判断哪个端点最适合你的特定用例，下面列出了一些示例用户表述以及最能满足该表述的端点。
+
+<div id="totals">
+  ##### **/totals**
+</div>
+
+* 我只需要访问部分指标类型（展示次数、互动量、点赞、转发、引用帖子、回复和视频观看次数）。
+* 我需要获取任意帖子（而不仅仅是由我发布的帖子）的基础互动数据。
+* 我想将自己的表现与竞争对手进行比较。
+* 我想跟踪某个话题标签或活动的基础互动统计数据，其中包含并非由我发布的帖子。
+* 我不需要按天或按小时拆分的数据，只需要在发起请求时获取当时的总量。
+* 我需要一个可以在报告或仪表板中展示的单一指标，且不打算自己存储任何数据。
+* 我想在页面加载时展示数据，只需发起一次请求并获得响应。
+* 我需要每天访问数十万甚至数百万条帖子的相关数据。
+   
+
+<div id="28hr">
+  ##### **/28hr**
+</div>
+
+* 我需要访问全部 17 种指标类型。
+* 我想展示最近 28 小时内发布的帖子的数据。
+* 我有一个每天运行一次的任务，用来获取我关心的数据，并且只需要获取过去一天的数据。
+* 我需要按天或按小时细分的指标。
+* 我想在仪表板中展示按小时细分的活动时间序列。
+* 我每天需要对数十万条帖子拥有较高的访问级别。
+* 我具备存储能力，可以每天刷新一次数据并维护一个滚动累积计数。
+   
+
+<div id="historical">
+  ##### **/historical**
+</div>
+
+* 我需要访问全部 17 种指标类型。
+* 我需要获取最早可追溯到 2014 年 9 月的帖子历史数据。
+* 我希望展示用于对比不同活动的详细历史分析。
+* 我需要按天或按小时细分的指标。
+* 我不需要对 Engagement API 的高访问配额，每天只需要为数百或数千条帖子获取数据。
+
+<div id="engagement-api-key-characteristics">
+  ### Engagement API 关键特性
+</div>
+
+* **RESTful API**，提供 JSON 数据，支持带有 JSON 请求体的 POST 请求。
+* **请求类型：** 客户端应用可以发起以下类型的请求：
+  * **总互动数（Total engagements）** -- 向 /totals 端点发起 HTTP POST 请求
+  * **过去 28 小时互动数（Last 28-hour engagements）** -- 向 /28hr 端点发起 HTTP POST 请求
+  * **历史互动数（Historical engagements）** -- 向 /historical 端点发起 HTTP POST 请求
+* **OAuth 认证：**
+  * [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)：对于那些通过 [3-legged OAuth](https://developer.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) 授权了你的应用的用户所拥有的帖子，可以获取所有可用指标。你在发起请求时必须使用该用户的访问令牌（Access Tokens）。[](/zh/resources/fundamentals/authentication)
+  * [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#oauth-2-0)：部分指标（转发、引用帖子、回复、点赞和视频播放次数）适用于任何公开帖子。 
+* **请求元数据和结构：** 请求数据是一个 JSON 对象，由帖子 ID 数组、互动类型数组以及互动分组结构组成。
+* **每个请求可包含的帖子数量：**
+  * /totals 端点：250 个帖子 ID
+  * /28hr 端点：25 个帖子 ID
+  * /historical 端点：25 个帖子 ID
+* **互动指标可用性：**
+  * **/totals** -- 自帖子发布以来的指标总计。展示次数（Impressions）和互动次数（Engagements）对最近 90 天内发布的帖子可用，而转发、引用帖子、回复、点赞和视频播放次数对所有帖子都可用。
+  * **/28hr** -- 自请求发起时间起过去 28 小时的数据。
+  * **/historical** -- 从 2014 年 9 月 1 日开始的任意 28 天时间段的数据。
+* **指标类型：** 每个请求包含一个 [Metric Types](http://support.gnip.com/apis/engagement_api/overview.html#EngagementTypes) 数组。这些指标的可用性取决于端点类型，并且如果是从 /totals 端点请求，还取决于帖子是否获得用户授权。
+  * /totals 端点：
+    * 所有帖子：点赞（Favorites）、转发（Retweets）、引用帖子（Quote Tweets）、回复（Replies）和视频播放次数（Video Views）
+    * 需要 OAuth 1.0a 用户上下文：展示次数（Impressions）、互动次数（Engagements）、点赞（Favorites）、回复（Replies）和转发（Retweets）
+  * /28hr 和 /historical 端点（需要使用帖子所有者的访问令牌的 OAuth 1.0a 用户上下文）：展示次数（Impressions）、互动次数（Engagements）、点赞（Favorites）、回复（Replies）、转发（Retweets）、URL 点击（URL Clicks）、标签点击（Hashtag Clicks）、详情点击（Detail Click）、永久链接点击（Permalink Clicks）、媒体点击（Media Clicks）、应用安装尝试（App Install Attempts）、应用打开（App Opens）、帖子邮件转发（Post Emails）、视频播放次数（Video Views）和媒体播放次数（Media Views）
+* **互动分组：** 每个请求包含一个 [Engagement Groupings](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings) 数组。通过这些分组，你可以自定义返回指标的组织方式。每个请求最多可以包含三个分组。指标可以按以下值进行组织：
+  * 所有端点：帖子 ID、互动类型
+  * /28hr 和 /historical 端点：如果指定以下附加分组，这些端点会提供时间序列数据：互动日期（Engagement Day）、互动小时（Engagement Hour）
+* **集成要求：** 你的团队将负责以下事项。
+  * 创建并维护一个客户端应用，用于向 Engagement API 发送 HTTP 请求，并返回请求中包含的帖子 ID 的互动指标。
+* **限制**
+* 视频播放次数仅适用于发布不超过 1800 天的帖子。
+
+<div id="authenticating-with-the-engagement-api">
+  ### 使用 Engagement API 进行认证
+</div>
+
+> **请注意**： 
+>
+> 在你开始使用该 API 之前，X 需要先为你的开发者应用启用对 Engagement API 的访问。为此，请务必将你打算用于认证的应用 ID 提供给你的客户经理或技术支持团队。
+
+Engagement API 提供两种可用的认证方法：[OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 和 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。 
+
+**OAuth 2.0 Bearer Token**（也称为“application-only”）允许你访问公开可见的互动指标。使用这种认证方法，在向 [/totals endpoint](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-totals) 发出请求时，你可以获取任何公开可见帖子在 Favorites（即 Likes）、Retweets、Quote Tweets、Replies 和视频播放量上的汇总计数。 
+
+**OAuth 1.0a**（也称为“user context”）允许你代表某个用户发出请求，并访问该用户所属的私有互动指标。 
+
+此认证方法在以下情况下是必需的：
+
+* 所有发往 [/28hr endpoint](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-28hr) 和 [/historical endpoint](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-historical) 的请求
+* 访问以下任一私有指标：Impressions、Engagements、Media Views、Media Engagements、URL Clicks、Hashtag Clicks、Detail Expands、Permalink Clicks、App Install Attempts、App Opens、Email Post、User Follows 和 User Profile Clicks
+
+当使用 OAuth 1.0a 发送请求时，你需要包含拥有相关帖子或受保护资源的用户的访问令牌（Access Token 和 Secret）。如果在请求受保护的用户数据时没有提供正确的用户访问令牌，Engagement API 会返回 `403 Forbidden` 错误。
+
+即使你是代表拥有这些帖子的用户进行认证，Engagement API 也不允许你获取[受保护帖子](https://help.x.com/en/safety-and-security/public-and-protected-tweets)的互动数据。尝试这样做会返回 `400 Bad Request` 错误，并附带消息 `"Tweet ID(s) are unavailable"`。
+
+如果你代表自己的 X 账号发送请求（换句话说，即拥有该开发者应用的账号），你可以直接在 [developer portal](https://developer.x.com/en/portal/projects-and-apps) 的该开发者应用 “Keys and tokens” 选项卡下生成所需的访问令牌。
+
+如果你是代表其他任何用户发出请求，则需要使用三方 OAuth 流程来获取所需的访问令牌。有关如何执行此操作的更多信息，请参阅以下文档：[OAuth 1.0a: how to obtain a user’s access tokens](/zh/resources/fundamentals/authentication#oauth-1-0a-2)。
+
+如需更多示例（包括如何使用 OAuth 1.0a 进行认证），请查看 [XDevelopers 提供的 Engagement API 示例 Python 代码](https://github.com/xdevplatform/enterprise-scripts-python/tree/master/Engagement-API)。
+
+<div id="recent-changes-to-the-engagement-api">
+  ### Engagement API 的最新变更
+</div>
+
+Engagement API 提供了极其重要的曝光和互动指标，使你能够监控自己在 X 上活动的表现。为了持续支持基于我们数据做出营销决策，我们很高兴分享 Engagement API 的最新变更，这些变更让整个 X 平台上的指标更加一致。 
+
+我们最近对 Engagement API 进行了更新，使其使用与 X 分析仪表板（analytics.x.com）相同的指标聚合方法。我们在推出这些新指标时，尽量采用审慎的方式来减少对 API 的破坏性变更，并于 2017 年 10 月 9 日部署了第一批更新。这些变更提升了你或你的客户在 X 上各个监测渠道之间的数据一致性。下面是这些变更的详细说明：
+
+|     |     |
+| :--- | :--- |
+| **Metric** | **Change** |
+| engagements | 我们已更新汇总到整体 engagements 的指标，使其与帖子分析仪表板保持一致。Engagements 衡量“人们与此帖子互动的次数”。<br /><br />对于包含视频或 GIF 等媒体的帖子，engagements 指标将不再包含媒体观看次数。媒体观看次数现在可以通过一个新的指标 *media&#95;views* 获取。 |
+| media&#95;clicks* | 此指标已被一个名为“*media&#95;engagements*”的新指标所取代。 |
+| video&#95;views | 自 2018 年 7 月 6 日起，此指标可通过 [/totals](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement) 端点用于“非自有”（unowned）帖子。这意味着你可以通过仅应用程序身份验证（app-only authentication）访问**所有**帖子的 视频观看次数。<br /><br />你只能请求不超过 1800 天历史的 video views。如果你尝试请求某个超过 1800 天的帖子的 video views，你会收到如下返回：<br /><br />&quot;unsupported&#95;for&#95;video&#95;views&#95;tweet&#95;ids&quot;: [&quot;TWEET&#95;ID&quot;]<br /><br />**请注意**，它与 media&#95;views 不同，video&#95;views 依赖 MRC 标准：至少有 50% 的视频画面在可视区域内且持续至少两秒。  <br /><br />**另外，**请注意，你可能会看到 X 自有平台（移动应用和网站）中显示的 video views 指标与通过 /28hr 和 /historical 端点获取的数值之间存在差异。<br /><br />* X 用户界面中显示并通过 /totals 端点提供的 video views，会将某个视频在所有帖子中出现时产生的观看数进行聚合。这意味着 UI 中显示的指标包含该视频在被转发或在其他帖子中再次发布时产生的所有观看次数。<br />* 通过 /28hr 和 /historical 端点提供的 video views 只包含你为其获取指标的特定帖子所产生的观看次数。 |
+| media&#95;views | 这包括你媒体的所有观看次数（自动播放和点击播放），统计范围涵盖视频、Vine、GIF 和图片。<br /><br />**请注意**，带图片的帖子在分析仪表板中不会显示 media&#95;views 指标，但在 Engagement API 中会返回。 |
+| media&#95;engagements* | 这包括你媒体在视频、Vine、GIF 和图片上的点击次数。此指标取代 *media&#95;clicks*。 |
+| quote&#95;tweets | 自 2020 年 7 月 7 日起，此指标可通过 /totals 端点用于“非自有”（unowned）帖子。这意味着你可以通过仅应用程序身份验证（app-only authentication）访问所有帖子的引用帖子计数。 |
+
+<div id="interpreting-the-metrics">
+  ### 解读指标
+</div>
+
+**注意：** 你可能会发现，部分 X 网页仪表板上报告的数据与 Engagement API 报告的数据不一致。出现这种差异的原因是，网页仪表板通常只展示在所选时间范围内发生的互动和/或展示次数。例如，某个网页仪表板可能只展示某个日历月内帖子产生的互动，而 Engagement API 则可能会展示超出该月范围、但仍在你请求的时间范围内发生的互动。在这类情况下，应将 Engagement API 视为权威数据来源。
+ 
+
+<div id="impressions-and-engagement-data">
+  #### 展示次数和互动数据
+</div>
+
+Engagement API 提供**自然**展示次数和互动数据。
+
+展示次数表示某个帖子在 X 平台上以自然曝光形式被查看的总次数。在推广或付费环境中看到的帖子所产生的展示次数**不**包括在内。
+
+互动表示某个帖子在**自然**和**推广**环境中被观众进行互动的总次数。互动包括但不限于转发、点赞、回复、URL 点击、话题标签点击、提及点击以及媒体播放/查看等。有关包含的互动行为的完整列表，请参阅 Engagement Data 部分。 
+
+要计算基础互动率，请使用你正在分析的时间段内，某个帖子产生的互动总次数除以同一时间段内该帖子的展示总次数。
+
+展示次数和互动数据只能针对自有 @handle 的帖子，或已授权你的应用查看其帖子详细信息的 @handle 的帖子进行获取。Engagement API 会在内部根据合同约定的 @handle 配额上限跟踪已被请求的唯一 @handle 数量。建议你也在整个月内在客户端一侧跟踪 @handle 请求用量。  
+
+<div id="video-metrics">
+  #### 视频指标
+</div>
+
+在 X 中，有几种不同的指标用于表示媒体的曝光次数。第一种是我们的视频观看量指标，它依赖于 MRC 标准：至少有 50% 的视频画面在可视区域内且持续时间不少于两秒。第二种是 Media Views，它包括你的媒体在视频、Vine、GIF 和图片中的所有观看（自动播放和点击播放）。
+
+视频观看量指标可通过 /28hour 和 /historical 端点获取自有帖子（owned Posts）的数据，也可通过 /totals 端点获取所有非自有帖子（unowned Posts）的数据。 
+
+尽管 X 用户界面中的视频观看量指标采用同样的 MRC 标准，但请注意，你可能会看到 X 自有并运营的平台（移动应用和网站）中展示的视频观看量指标，与通过不同 Engagement API 端点获得的数值之间存在差异。
+
+* 由 /totals 端点和 X 用户界面提供的视频观看量，会展示给定视频在所有发布该视频的帖子中的聚合观看次数。这意味着，通过 /totals 提供并在 X UI 中显示的该指标，包括该视频在被转发（Retweet）或在其他单独帖子中再次发布时产生的所有观看量总和。
+* 由 /28hour 和 /historical Engagement API 端点提供的视频观看量，只包含由你正在拉取指标的那个特定帖子所产生的观看次数。 
+   
+
+请注意，我们不会为发布时间超过 1800 天的帖子提供视频观看量数据。取而代之的是，我们会返回一个对象，列出那些超过 1800 天的帖子。你仍然会在另一个单独的对象中，收到为你请求的帖子提供的所有其他指标。以下是一个响应示例：
+
+```json
+{
+  "unsupported_for_video_views_tweet_ids": [
+    "479311209565413376",
+    "477139122520219648"
+  ],
+  "grouping name": {
+    "479311209565413376": {
+      "favorites": "69",
+      "impressions": "1692",
+      "retweets": "142",
+      "video_views": "0"
+    },
+    "477139122520219648": {
+      "favorites": "10",
+      "impressions": "1023",
+      "retweets": "6",
+      "video_views": "0"
+    },
+    "1397568983931392004": {
+      "favorites": "268",
+      "impressions": "26803",
+      "retweets": "56",
+      "video_views": "17902"
+    }
+  }
+}
+```
+
+Media Views 指标仅对自有帖子提供，并且只能通过 /28hour 和 /historical 端点获取。
+
+<div id="engagement-api-groupings">
+  ### Engagement API 分组
+</div>
+
+分组可以对返回的互动指标进行自定义归类。每个请求最多可以包含 3 个分组。你可以按以下一个或多个值对指标进行分组：
+
+*以下三个端点均支持：*
+
+* tweet.id
+* engagement.type
+   
+
+*`/28hr` 和 `/historical` 端点可以提供时间序列指标，因此还支持：*
+
+* engagement.day
+* engagement.hour
+
+分组会按顺序依次应用，因此你可以通过调整 `group_by` 值的顺序来改变期望的结果格式。包含四个 `group_by` 值的分组仅支持以下两种格式之一：
+
+```bash
+"group_by": [
+    "tweet.id",
+    "engagement.type",
+    "engagement.day",
+    "engagement.hour"
+  ]
+```
+
+或者
+
+```bash
+"group_by": [
+    "engagement.type",
+    "tweet.id",
+    "engagement.day",
+    "engagement.hour"
+]
+```
+
+例如，如果你想生成各类指标的总计值，请在请求中加入如下所示的 “groupings” 规范（有关如何构建请求的更多信息，请参阅 [API Reference](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement) 页面）：
+
+```json
+{
+  "engagement_types": [
+    "favorites",
+    "replies",
+    "retweets"
+  ],
+  "groupings": {
+    "Grand Totals": {
+      "group_by": [
+        "engagement.type"
+      ]
+    }
+  }
+}
+```
+
+使用这种分组方式时，Engagement API 返回的 JSON 响应会包含一个名为 `"Grand Totals"` 的根级属性，其中按指标类型给出了总计：
+
+```json
+{
+  "Grand Totals": {
+    "favorites": "12",
+    "replies": "2",
+    "retweets": "2"
+  }
+}
+```
+
+要为单条帖子生成按帖子 id 分组的 4 小时时间序列指标，请求中将包含如下 Grouping 规范：
+
+```json
+{
+  "start": "2016-02-10T17:00:00Z",
+  "end": "2016-02-10T21:00:00Z",
+  "tweet_ids": [
+    "697506383516729344"
+  ],
+  "engagement_types": [
+    "impressions",
+    "engagements"
+  ],
+  "groupings": {
+    "Tweets_MetricType_TimeSeries": {
+      "group_by": [
+        "tweet.id",
+        "engagement.type",
+        "engagement.hour"
+      ]
+    }
+  }
+}
+```
+
+通过这种分组方式，Engagement API 的 JSON 响应会包含一个根级别的 `"Tweets_MetricType_TimeSeries"` 属性，其中的指标数据先按帖子 id、再按指标类型进行划分，并包含相应的每小时时间序列：
+
+```json
+{
+  "Tweets_MetricType_TimeSeries": {
+    "697506383516729344": {
+      "impressions": {
+        "2016-02-10": {
+          "17": "551",
+          "18": "412",
+          "19": "371",
+          "20": "280"
+        }
+      },
+      "engagements": {
+        "2016-02-10": {
+          "17": "8",
+          "18": "6",
+          "19": "3",
+          "20": "0"
+        }
+      }
+    }
+  }
+}
+```
+
+<div id="frequently-asked-questions">
+  ## 常见问题解答
+</div>
+
+`Enterprise`
+
+<div id="engagement-api">
+  ### Engagement API
+</div>
+
+<AccordionGroup>
+  <Accordion title="如何获取 Engagement API 的访问权限？">
+    对 Engagement API 的访问是通过 Enterprise 订阅提供的。请填写 [此表单](/zh/x-api/enterprise-gnip-2.0/enterprise-gnip)与我们的销售团队取得联系。
+  </Accordion>
+
+  <Accordion title="我的使用量是如何按“@handle”进行跟踪的？">
+    如果你的合同中包含可与 Engagement API 一起使用的唯一 handle 数量上限，内部的 X 系统会跟踪使用 Engagement API 查询的帖子中，其所有者为已认证用户的唯一数量。客户也应在客户端跟踪这一唯一数量。目前，没有用于查看 Engagement API @handle 使用情况的 usage API 或 UI。如果请求的 @handle 数量超过合同约定的数量，系统不会阻止超量使用。在结算月结束时，系统会将查询到的唯一 @handle 数量与合同约定数量进行比较，并根据合同条款收取超量费用。
+  </Accordion>
+
+  <Accordion title="我可以查看 Engagement API 的 @handle 使用情况吗？">
+    目前，没有用于查看 Engagement API @handle 使用情况的 usage API 或 UI。如果请求的 @handle 数量超过合同约定的数量，系统不会阻止超量使用。在结算月结束时，系统会将查询到的唯一 @handle 数量与合同约定数量进行比较，并根据合同条款收取超量费用。
+
+    **返回负载中的 `engagements` 元数据字段不等于所有各类互动指标总和。这是为什么？**
+
+    这是预期行为。`engagements` 元数据字段可能并不总是与 API 返回的各个互动指标总和相对应。这是因为 `engagements` 元数据字段中可能包含了一些在负载中没有单独拆分为具体指标的额外交互。换句话说，把所有不同的互动指标总和加在一起，可能不会等于负载中返回给你的 `engagements` 指标字段的值。
+
+    你可以将 `engagements` 元数据字段理解为对该帖子的任何点击或交互。
+     
+
+    **当帖子实际上没有 URL 时，负载响应中的 `url_clicks` 字段仍然返回了一个数字。这是怎么回事？**
+
+    这可能是因为帖子中包含了类似 hashtag 的内容（会创建指向其他页面的链接），当用户点击这些内容时，会被计为一次 URL 点击。
+     
+  </Accordion>
+
+  <Accordion title="为什么我无法获取某条特定帖子的互动数据？">
+    你可能无法获取某条特定帖子的互动数据，原因包括但不限于：
+
+    * 你请求的帖子 ID 在你用于代表第三方获取数据的认证令牌权限范围内不可用。
+    * 你在 /totals 端点中请求的帖子 ID 早于 90 天，因此无法返回展示或互动指标。
+    * 你请求的帖子 ID 不再可用，通常说明该帖子已被删除或因其他原因不再公开可见。
+
+    在上述任一情况下，请参考你可能会收到的不同[错误消息](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#error-messages)。
+  </Accordion>
+
+  <Accordion title="如何在使用 Engagement API 时处理速率限制？">
+    当你向 Engagement API 发起请求时，可以使用响应头中返回的 `x-per-minute-limit` 和 `x-per-minute-remaining` 信息来监控你的使用量。
+
+    `x-per-minute-limit` 告诉你你的配额上限是多少，`x-per-minute-remaining` 告诉你还剩余多少次调用。
+  </Accordion>
+</AccordionGroup>
+
+<div id="error-troubleshooting-guide">
+  ### 错误排查指南
+</div>
+
+<AccordionGroup>
+  <Accordion title="我在进行身份验证时遇到了问题">
+    请务必查看我们关于使用 Engagement API 进行[身份验证的指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#authentication)。
+  </Accordion>
+
+  <Accordion title="我已经提供了正确的 consumer key 和 secret，以及 access token 和 access token secret，但仍然返回以下错误。我该怎么办？">
+    ```bash
+    [
+        Your account could not be authenticated. Reason: Unknown Authorization Type;
+    ]
+    ```
+
+    请确保在尝试对 /totals 端点进行身份验证时不要使用任何访问令牌或密钥。因为如果你包含了这些令牌，并尝试获取与这些令牌不关联的帖子内容，就很可能会收到如下错误：
+
+    ```bash
+    [
+        Forbidden to access tweets: 1054424731825229824;
+    ]
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<div id="still-cant-find-what-youre-looking-for">
+  ### 仍然找不到所需内容？
+</div>
+
+<AccordionGroup>
+  <Accordion title="我有一个尚未得到解答的问题">
+    请联系技术支持团队，我们会尽快回复您。
+  </Accordion>
+</AccordionGroup>
+
+<div id="api-reference">
+  ## API 参考
+</div>
+
+<div id="post-insightsengagement">
+  ### **POST insights/engagement**
+</div>
+
+<div id="methods">
+  #### **Methods**
+</div>
+
+| Method | Description |
+| :--- | :--- |
+| [POST /insights/engagement/totals](#Totals) | 检索一组帖子的总展示次数和总互动量。 |
+| [POST /insights/engagement/historical](#Historical) | 检索一组帖子在某一时间段内（最长 4 周，可追溯至 2014 年 9 月 1 日）的展示次数和互动量。 |
+| [POST /insights/engagement/28hr](#api-28hr) | 检索一组帖子在过去 28 小时内的展示次数和互动量。 |
+
+<div id="authentication">
+  #### **认证**
+</div>
+
+Engagement API 要求使用 HTTPS，并同时支持 User Context 和 Application-Only OAuth。大多数对 Engagement API 的请求都需要使用 3-Legged OAuth（一种特定版本的 User Context），这意味着你需要使用已经由你的 Twitter 客户经理为 Engagement API 访问注册并批准的应用的 consumer key 和 secret，以及帖子所有者的 access token 和 access token secret 来调用该端点。以下请求需要这种类型的 OAuth：
+
+* 任何对 /totals 的请求，用于获取 Impressions 和 Engagements 指标类型，这些指标仅限于自有帖子
+* 任何对 /28hr 的请求
+* 任何对 /historical 的请求
+
+某些对 Engagement API 的请求可以使用 Application-Only OAuth 来执行，这意味着你只需要提供 consumer key 和 secret，或一个 Bearer Token。以下请求可以使用此类型的 OAuth 执行：
+
+* 任何对 /totals 的请求，用于获取 Favorites、Replies、Retweets 或 Video Views 指标类型，这些指标可针对任意帖子检索
+
+对于任何请求，你都需要通过 [developer.x.com](https://developer.x.com/en/portal/dashboard) 上提供的应用管理控制台设置一个 Twitter 应用以及相应的 API key。
+
+请注意——如果你已在 developer.x.com 上登录你的 Twitter 帐户，你可以通过 [Twitter app dashboard](https://developer.x.com/en/apps) 查看和编辑现有的 [Twitter apps](/zh/resources/fundamentals/developer-apps)。
+
+设置应用后，你的应用 ID 需要由客户代表批准，你的应用才能向 Engagement API 发出请求。访问令牌（Access Token）必须用于表示“当前用户”，代表其他用户发起的请求必须使用有效的令牌进行签名。请确保在准备 OAuth 签名基字符串之前，在 URL 和 POST 请求体中[正确编码保留字符](https://tools.ietf.org/html/rfc3986)。
+
+有关如何开始使用 OAuth 的更多信息，请访问以下链接：
+
+* [OAuth 概览](/zh/resources/fundamentals/authentication)
+* [使用 3 Legged OAuth（也称为 User Context）](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)
+* [使用 Application-Only OAuth](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)
+
+<div id="post-insightsengagementtotals">
+  #### **POST /insights/engagement/totals**
+</div>
+
+`totals` 端点用于一次性检索最多 250 条帖子的当前总展示量和总互动量。
+
+|                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **请求方法**        | HTTP POST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **URL**         | `https://data-api.x.com/insights/engagement/totals`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **内容类型**        | `application/json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **压缩**          | Gzip。要使用 Gzip 压缩发起请求，请在连接请求中添加 Accept-Encoding 请求头。  <br />该请求头应如下所示：  <br />  <br />`Accept-Encoding: gzip`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **POST 请求格式**   | 请求可以作为 POST 请求发送，其中请求体是一个包含一组帖子 ID 和所需分组方式的 JSON 对象。POST 请求体被格式化为一个数组，其中包含 `tweets`、`engagements` 和 `groupings` 对象。每个请求最多可包含 250 个帖子 ID。  <br />  <br />示例 POST 请求体如下所示：  <br />  <br /><br />  &#123;<br />    &quot;tweet&#95;ids&quot;: [<br />        &quot;Tweet ID 1&quot;,<br />        &quot;Tweet ID 2&quot;,<br />        &quot;Tweet ID 3&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;favorites&quot;,<br />        &quot;quote&#95;tweets&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **帖子ID**        | 一个数组，其中包含要查询互动数据的帖子的 Tweet ID。请注意，你只能请求由当前认证的 @handle 创建的帖子的相关数据。每个请求最多可包含 250 条帖子，并且 Tweet ID 必须以字符串形式表示。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **互动指标类型**      | 一个数组，包含要查询的互动指标类型。Totals 端点仅支持以下互动类型：`impressions`、`engagements`、`favorites`、`retweets`、`quote_tweets`、`replies`、`video_views`。  <br />`/totals` 端点支持：对于在过去 90 天内创建的帖子，获取 `impressions` 和 `engagements`；对于任意帖子，获取 `favorites`、`retweets`、`quote_tweets`、`replies` 和 `video_views`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **分组方式**        | Engagement API 的结果可以以不同的分组方式返回，以便更好地满足你的需求。每个请求最多可包含 3 个分组。  <br />  <br />对于每个分组，你可以定义一个自定义分组名称，以便在你的应用中更容易引用此分组类型。  <br />  <br />在定义了分组名称之后，你可以选择按 `tweet.id` 和/或 `engagement.type` 进行分组。  <br />  <br />分组会按定义顺序依次生效，因此你可以通过更改 group&#95;by 值的顺序来改变结果格式。下面是一个示例分组，它会按帖子 ID 和指标类型分别显示指标：  <br />  <br /><br />  &quot;groupings&quot;: &#123;<br />      &quot;my grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;<br />        ]<br />      &#125;<br />    &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **POST 请求大小限制** | 单次请求最多可包含 250 个帖子 ID。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **响应格式**        | JSON。你需要在请求头中将响应格式指定为 JSON。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **速率限制**        | 根据您的访问级别，您将按分钟受到速率限制，具体数值以合同约定为准。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **示例请求（公开指标）**  | curl --request POST <br />  --url [https://data-api.x.com/insights/engagement/totals](https://data-api.x.com/insights/engagement/totals) <br />  --header &#39;accept-encoding: gzip&#39; <br />  --header &#39;authorization: Bearer &#39; <br />  --header &#39;content-type: application/json&#39; <br />  --data &#39;&#123;<br />                &quot;tweet&#95;ids&quot;: [<br />                    &quot;1070059276213702656&quot;,&quot;1021817816134156288&quot;,&quot;1067094924124872705&quot;<br />                ],<br />                &quot;engagement&#95;types&quot;: [<br />                    &quot;favorites&quot;,&quot;retweets&quot;,&quot;replies&quot;,&quot;quote&#95;tweets&quot;,&quot;video&#95;views&quot;<br />                ],<br />                &quot;groupings&quot;: &#123;<br />                    &quot;perTweetMetricsUnowned&quot;: &#123;<br />                        &quot;group&#95;by&quot;: [<br />                            &quot;tweet.id&quot;, <br />                            &quot;engagement.type&quot;<br />                        ]<br />                    &#125;<br />                &#125;<br />            &#125;&#39; <br />  --verbose <br />  --compressed                                                                                                                                                                                                                                                                                                                                                 |
+| **请求示例**        | curl --request POST <br />  --url [https://data-api.x.com/insights/engagement/totals](https://data-api.x.com/insights/engagement/totals) <br />  --header &#39;accept-encoding: gzip&#39; <br />  --header &#39;authorization: OAuth oauth&#95;consumer&#95;key=&quot;consumer-key-for-app&quot;,oauth&#95;nonce=&quot;generated-nonce&quot;,oauth&#95;signature=&quot;generated-signature&quot;,oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;generated-timestamp&quot;,oauth&#95;token=&quot;access-token-for-authed-user&quot;, oauth&#95;version=&quot;1.0&quot;&#39; <br />  --header &#39;content-type: application/json&#39; <br />  --data &#39;&#123;<br />                &quot;tweet&#95;ids&quot;: [<br />                    &quot;1060976163948904448&quot;,&quot;1045709644067471360&quot;<br />                ],<br />                &quot;engagement&#95;types&quot;: [<br />                    &quot;favorites&quot;,&quot;replies&quot;,&quot;retweets&quot;,&quot;video&#95;views&quot;,&quot;impressions&quot;,&quot;engagements&quot;<br />                ],<br />                &quot;groupings&quot;: &#123;<br />                    &quot;perTweetMetricsOwned&quot;: &#123;<br />                        &quot;group&#95;by&quot;: [<br />                            &quot;tweet.id&quot;,<br />                            &quot;engagement.type&quot;<br />                        ]<br />                    &#125;<br />                &#125;<br />            &#125;&#39; <br />  --verbose <br />  --compressed |
+| **示例响应（公开指标）**  | &#123;<br />  &quot;perTweetMetricsUnowned&quot;: &#123;<br />    &quot;1021817816134156288&quot;: &#123;<br />      &quot;favorites&quot;: &quot;530&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;79&quot;,<br />      &quot;replies&quot;: &quot;147&quot;,<br />      &quot;retweets&quot;: &quot;323&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;,<br />    &quot;1067094924124872705&quot;: &#123;<br />      &quot;favorites&quot;: &quot;1360&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;29&quot;,<br />      &quot;replies&quot;: &quot;56&quot;,<br />      &quot;retweets&quot;: &quot;178&quot;,<br />      &quot;video&#95;views&quot;: &quot;5754512&quot;<br />    &#125;,<br />    &quot;1070059276213702656&quot;: &#123;<br />      &quot;favorites&quot;: &quot;69&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;5&quot;,<br />      &quot;replies&quot;: &quot;7&quot;,<br />      &quot;retweets&quot;: &quot;26&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;<br />  &#125;<br />&#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **示例响应**        | &#123;<br />  &quot;perTweetMetricsOwned&quot;: &#123;<br />    &quot;1045709644067471360&quot;: &#123;<br />      &quot;engagements&quot;: &quot;2&quot;,<br />      &quot;favorites&quot;: &quot;0&quot;,<br />      &quot;impressions&quot;: &quot;47&quot;,<br />      &quot;replies&quot;: &quot;0&quot;,<br />      &quot;retweets&quot;: &quot;8&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;5&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;,<br />    &quot;1060976163948904448&quot;: &#123;<br />      &quot;engagements&quot;: &quot;4&quot;,<br />      &quot;favorites&quot;: &quot;0&quot;,<br />      &quot;impressions&quot;: &quot;148&quot;,<br />      &quot;replies&quot;: &quot;1&quot;,<br />      &quot;retweets&quot;: &quot;9&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;2&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;<br />  &#125;<br />&#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **已不可用的帖子 ID**  | 对于包含已不可用的帖子 ID（例如已被删除）的查询，所有可用的帖子 ID 都会返回相应的数据，而不可用的帖子 ID 会在名为 `unavailable_tweet_ids` 的数组中列出。例如：  <br /><br />  &#123;<br />    &quot;start&quot;: &quot;2015-11-17T22:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-11-19T02:00:00Z&quot;,<br />    &quot;unavailable&#95;tweet&#95;ids&quot;: [<br />        &quot;323456789&quot;<br />    ],<br />    &quot;group1&quot;: &#123;<br />     &quot;423456789&quot;: &#123;<br />      &quot;favorites&quot;: &quot;67&quot;,<br />      &quot;replies&quot;: &quot;8&quot;,<br />      &quot;retweets&quot;: &quot;26&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;2&quot;<br />     &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+
+<div id="post-insightsengagement28hr">
+  #### **POST /insights/engagement/28hr**
+</div>
+
+28 小时端点可用于在过去 28 小时内为最多 25 条帖子组成的集合获取展示次数和互动次数。该端点还支持请求所有受支持的各项指标的数据。有关支持的指标的完整列表，请参见 [指标可用性](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#EngagementTypes)。
+
+|                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :-------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **请求方式**        | HTTP POST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **URL**         | `https://data-api.x.com/insights/engagement/28hr`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **内容类型**        | `application/json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **压缩方式**        | Gzip。要使用 Gzip 压缩发起请求，请在连接请求中发送 Accept-Encoding 请求头。  <br />该请求头应如下所示：  <br />  <br />`Accept-Encoding: gzip`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **POST 请求格式**   | 请求可以以 POST 请求方式发送，其中请求体是一个 JSON 对象，包含一组帖子 ID 和所需的分组方式。POST 的格式为一个包含 `tweets`、`engagements` 和 `groupings` 对象的数组。每个请求最多可包含 25 个帖子 ID。  <br />  <br />示例 POST 请求体如下所示：  <br />  <br /><br />  &#123;<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;Tweet ID 1&quot;,<br />       &quot;Tweet ID 2&quot;,<br />       &quot;Tweet ID 3&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;url&#95;clicks&quot;,<br />        &quot;detail&#95;expands&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;,<br />          &quot;engagement.hour&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **帖子ID**        | 一个数组，其中包含要查询互动数据的帖子对应的 Tweet ID。请注意，您只能请求由当前认证的 @handle 创建的帖子的相关数据。28 小时端点每个请求最多支持 25 条帖子，并且 Tweet ID 必须以字符串形式提供。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **互动指标类型**      | 一个数组，其中包含要查询的互动指标类型。  <br />  <br />在 28 小时端点中，`impressions`、`engagements`，以及所有单独的互动类型都属于受支持的指标。有关受支持互动指标的完整列表，请参见 [Engagement Data](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#AvailableData)。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **分组方式**        | 来自 Engagement API 的结果可以按照不同的分组方式返回，以最符合你的需求。每个请求最多可以包含 3 个分组。  <br />  <br />对于每个分组，你可以自定义一个分组名称，以便在你的应用程序中更容易引用这种分组类型。一旦你定义了一个分组名称，你可以选择按以下一个或多个值进行分组：  <br />`tweet.id`  <br />`engagement.type`  <br />`engagement.day`  <br />`engagement.hour`  <br />分组会按顺序依次生效，因此你可以通过改变 group&#95;by 值的顺序来改变期望的结果格式。下面是一个示例分组，它会按帖子 ID、指标类型和日期对指标进行分组，示例如下：<br /><br />  &quot;groupings&quot;: &#123;<br />    &quot;my grouping name&quot;: &#123;<br />      &quot;group&#95;by&quot;: [<br />        &quot;tweet.id&quot;,<br />        &quot;engagement.type&quot;,<br />        &quot;engagement.day&quot;<br />      ]<br />    &#125;<br />  &#125;<br /><br />  <br />包含 4 个 `group_by` 项的分组只有在使用以下两种顺序之一时才有效。在单个分组中包含 4 个 `group_by` 项且顺序不是以下两种之一的请求将返回错误。此外，每个请求只允许包含一个带有 4 个 `group_by` 项的分组。  <br /><br />&quot;group&#95;by&quot;: [<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.type&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]<br /><br />&quot;group&#95;by&quot;: [<br />    &quot;engagement.type&quot;,<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **POST 请求大小限制** | 单次请求最多可包含 25 个帖子 ID。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **响应格式**        | JSON。请求头中应将响应格式指定为 JSON。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **速率限制**        | 系统将按分钟对您的请求进行速率限制，具体限制数值将根据您的访问级别在合同中予以约定。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **请求示例**        | curl -X POST &quot;[https://data-api.x.com/insights/engagement/28hr](https://data-api.x.com/insights/engagement/28hr)&quot; <br />  -H &#39;Accept-Encoding: gzip&#39; <br />  -H &#39;Authorization OAuth oauth&#95;consumer&#95;key=&quot;consumer-key-for-app&quot;,oauth&#95;nonce=&quot;generated-nonce&quot;,oauth&#95;signature=&quot;generated-signature&quot;,oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;generated-timestamp&quot;,oauth&#95;token=&quot;access-token-for-authed-user&quot;, oauth&#95;version=&quot;1.0&quot;&#39; <br />  -d &#39;&#123;<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;123456789&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;hourly-time-series&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;,<br />          &quot;engagement.day&quot;,<br />          &quot;engagement.hour&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;&#39;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **响应示例**        | &#123;<br />&quot;start&quot;:&quot;2015-09-14T17:00:00Z&quot;,<br />&quot;end&quot;:&quot;2015-09-15T22:00:00Z&quot;,<br />&quot;hourly-time-series&quot;:&#123;<br />&quot;123456789&quot;:&#123;<br />&quot;曝光量&quot;:&#123;<br />&quot;2015-09-14&quot;:&#123;<br />&quot;17&quot;:&quot;551&quot;,<br />&quot;18&quot;:&quot;412&quot;,<br />&quot;19&quot;:&quot;371&quot;,<br />&quot;20&quot;:&quot;280&quot;,<br />&quot;21&quot;:&quot;100&quot;,<br />&quot;22&quot;:&quot;19&quot;,<br />&quot;23&quot;:&quot;6&quot;<br />&#125;,<br />&quot;2015-09-15&quot;:&#123;<br />&quot;00&quot;:&quot;5&quot;,<br />&quot;01&quot;:&quot;2&quot;,<br />&quot;02&quot;:&quot;7&quot;,<br />&quot;03&quot;:&quot;3&quot;,<br />&quot;04&quot;:&quot;1&quot;,<br />&quot;05&quot;:&quot;0&quot;,<br />&quot;06&quot;:&quot;0&quot;,<br />&quot;07&quot;:&quot;0&quot;,<br />&quot;08&quot;:&quot;0&quot;,<br />&quot;09&quot;:&quot;0&quot;,<br />&quot;10&quot;:&quot;0&quot;,<br />&quot;11&quot;:&quot;0&quot;,<br />&quot;12&quot;:&quot;0&quot;,<br />&quot;13&quot;:&quot;0&quot;,<br />&quot;14&quot;:&quot;0&quot;,<br />&quot;15&quot;:&quot;0&quot;,<br />&quot;16&quot;:&quot;0&quot;,<br />&quot;17&quot;:&quot;0&quot;,<br />&quot;18&quot;:&quot;0&quot;,<br />&quot;19&quot;:&quot;0&quot;,<br />&quot;20&quot;:&quot;0&quot;,<br />&quot;21&quot;:&quot;0&quot;<br />&#125;<br />&#125;,<br />&quot;engagements&quot;:&#123;<br />&quot;2015-09-14&quot;:&#123;<br />&quot;17&quot;:&quot;0&quot;,<br />&quot;18&quot;:&quot;0&quot;,<br />&quot;19&quot;:&quot;0&quot;,<br />&quot;20&quot;:&quot;0&quot;,<br />&quot;21&quot;:&quot;0&quot;,<br />&quot;22&quot;:&quot;0&quot;,<br />&quot;23&quot;:&quot;0&quot;<br />&#125;,<br />&quot;2015-09-15&quot;:&#123;<br />&quot;00&quot;:&quot;0&quot;,<br />&quot;01&quot;:&quot;0&quot;,<br />&quot;02&quot;:&quot;0&quot;,<br />&quot;03&quot;:&quot;0&quot;,<br />&quot;04&quot;:&quot;0&quot;,<br />&quot;05&quot;:&quot;0&quot;,<br />&quot;06&quot;:&quot;0&quot;,<br />&quot;07&quot;:&quot;0&quot;,<br />&quot;08&quot;:&quot;0&quot;,<br />&quot;09&quot;:&quot;0&quot;,<br />&quot;10&quot;:&quot;0&quot;,<br />&quot;11&quot;:&quot;0&quot;,<br />&quot;12&quot;:&quot;0&quot;,<br />&quot;13&quot;:&quot;0&quot;,<br />&quot;14&quot;:&quot;0&quot;,<br />&quot;15&quot;:&quot;0&quot;,<br />&quot;16&quot;:&quot;0&quot;,<br />&quot;17&quot;:&quot;0&quot;,<br />&quot;18&quot;:&quot;0&quot;,<br />&quot;19&quot;:&quot;0&quot;,<br />&quot;20&quot;:&quot;0&quot;,<br />&quot;21&quot;:&quot;0&quot;<br />&#125;<br />&#125;<br />&#125;<br />&#125;<br />&#125; |
+| **不可用帖子 ID**    | 对于包含已不可用（例如已被删除）帖子 ID 的查询，将为所有可用的帖子 ID 返回对应的数据，而不可用的帖子 ID 将在名为 `unavailable_tweet_ids` 的数组中列出。例如：  <br /><br />  &#123;<br />    &quot;start&quot;: &quot;2015-11-17T22:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-11-19T02:00:00Z&quot;,<br />    &quot;unavailable&#95;tweet&#95;ids&quot;: [<br />        &quot;323456789&quot;<br />    ],<br />    &quot;group1&quot;: &#123;<br />     &quot;423456789&quot;: &#123;<br />      &quot;favorites&quot;: &quot;67&quot;,<br />      &quot;replies&quot;: &quot;8&quot;,<br />      &quot;retweets&quot;: 26<br />     &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+
+<div id="post-insightsengagementhistorical">
+  #### **POST /insights/engagement/historical**
+</div>
+
+历史端点可以在任意最长为 4 周的时间范围内，为最多 25 条帖子组成的集合检索曝光量和互动量。目前，无法通过 API 请求早于 2014 年 9 月 1 日的历史数据。历史端点还支持为所有受支持的单项指标请求数据。有关受支持指标的完整列表，请参阅 [Metric Availability](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#EngagementTypes)。
+
+|                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **请求方法**        | HTTP POST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **URL**         | `https://data-api.x.com/insights/engagement/historical`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **内容类型**        | `application/json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **压缩**          | Gzip。若要使用 Gzip 压缩发起请求，请在连接请求中发送 Accept-Encoding 请求头。  <br />该请求头应如下所示：  <br />  <br />`Accept-Encoding: gzip`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **POST 请求格式**   | 请求可以通过 POST 请求发送，请求体为一个 JSON 对象，包含一组帖子 id 和期望的分组方式。POST 的格式为一个数组，其中包含 `tweets`、`engagements` 和 `groupings` 对象。每个请求最多可以包含 25 个帖子 id。每个请求都可以指定自定义的开始和结束日期，时间跨度最长为四周。  <br />  <br /><br />  &#123;<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;帖子 ID 1&quot;,<br />       &quot;帖子 ID 2&quot;,<br />       &quot;帖子 ID 3&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;url&#95;clicks&quot;,<br />        &quot;detail&#95;expands&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;,<br />          &quot;engagement.hour&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **开始和结束日期**     | 可以在请求中通过 `start` 和 `end` 字段指定自定义的开始和结束日期。开始日期和结束日期之间的时间跨度不得超过 4 周。目前可用的最早开始日期是 2014 年 9 月 1 日。不支持将结束日期设置为将来时间。如果未提供 Start 和 End 日期参数，API 将默认使用截至当前时间的前 4 周。  <br />  <br />Engagement API 能返回数据的最低粒度为小时。对于任何使用 Start 或 End 值且不恰好落在整点边界上的请求，请求将默认对齐到最近的、包含该时间点的整点小时。例如，请求 &quot;start&quot;:&quot;2015-07-01T12:24:00Z&quot; 和 &quot;end&quot;:&quot;2015-07-10T08:37:00Z&quot; 将默认调整为 &quot;start&quot;:&quot;2015-07-01T12:00:00Z&quot;,&quot;end&quot;:&quot;2015-07-10T09:00:00Z&quot;。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **帖子 ID**       | 一个数组，其中包含要查询互动数据的帖子 ID。请注意，您只能请求由当前认证的 @handle 创建的帖子数据。4 周历史端点每次请求最多支持 25 条帖子，且帖子 ID 必须表示为字符串。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **互动指标类型**      | 一个数组，其中包含要查询的互动指标类型。  <br />  <br />对于 4 周历史数据端点，`impressions`、`engagements` 以及所有单独的互动类型都是支持的指标。有关所有受支持互动指标的完整列表，请参阅 [Engagement Data](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#AvailableData)。  <br />  <br />**注意：**目前，对于 2015 年 9 月 15 日之前的查询，有三个指标将显示为 0：`favorites`、`replies` 和 `retweets`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **分组**          | 来自 Engagement API 的结果可以以不同的分组形式返回，以更好地满足你的需求。每个请求最多可以包含 3 个分组。  <br />  <br />对于每个分组，你可以自定义一个分组名称，以便在你的应用中更容易引用这一分组类型。一旦定义了分组名称，你可以选择按以下一个或多个值进行分组：  <br />`tweet.id`  <br />`engagement.type`  <br />`engagement.day`  <br />`engagement.hour`  <br />分组会按顺序依次生效，因此你可以通过更改 `group&#95;by` 值的顺序来改变期望的结果格式。下面是一个示例分组，它会按帖子 ID、指标类型和日期来区分指标，示例如下：<br /><br />  &quot;groupings&quot;: &#123;<br />    &quot;my grouping name&quot;: &#123;<br />      &quot;group&#95;by&quot;: [<br />        &quot;tweet.id&quot;,<br />        &quot;engagement.type&quot;,<br />        &quot;engagement.day&quot;<br />      ]<br />    &#125;<br />  &#125;<br /><br />  <br />包含 4 个 `group_by` 项的分组只有在使用以下两种顺序之一时才有效。在单个分组中包含 4 个 `group_by` 项但不符合以下任一顺序的请求将返回错误。此外，每个请求中只允许存在一个包含 4 个 `group_by` 项的分组。  <br /><br />&quot;group&#95;by&quot;: [<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.type&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]<br /><br />&quot;group&#95;by&quot;: [<br />    &quot;engagement.type&quot;,<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]                                                                                                                                                                                                        |
+| **POST 请求大小限制** | 一次请求最多可包含 25 个帖子 ID。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **响应格式**        | JSON。你在请求头中应将响应格式指定为 JSON。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **频率限制**        | 你将受到按分钟计算的速率限制，具体额度将根据你的访问级别以合同约定为准。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **请求示例**        | curl -XPOST &quot;[https://data-api.x.com/insights/engagement/historical](https://data-api.x.com/insights/engagement/historical)&quot; <br />  -H &#39;Accept-Encoding: gzip&#39; <br />  -H &#39;Authorization OAuth oauth&#95;consumer&#95;key=&quot;consumer-key-for-app&quot;,oauth&#95;nonce=&quot;generated-nonce&quot;,oauth&#95;signature=&quot;generated-signature&quot;,oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;generated-timestamp&quot;,oauth&#95;token=&quot;access-token-for-authed-user&quot;, oauth&#95;version=&quot;1.0&quot;&#39; <br />  -d &#39;&#123;<br />    &quot;start&quot;: &quot;2015-08-01&quot;,<br />    &quot;end&quot;: &quot;2015-08-15&quot;,<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;123456789&quot;,<br />       &quot;223456789&quot;,<br />       &quot;323456789&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;url&#95;clicks&quot;,<br />        &quot;detail&#95;expands&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;types-by-tweet-id&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;&#39; |
+| **示例响应**        | &#123;<br />    &quot;start&quot;: &quot;2015-08-01T00:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-08-15T00:00:00Z&quot;,<br />    &quot;types-by-tweet-id&quot;: &#123;<br />      &quot;123456789&quot;: &#123;<br />        &quot;impressions&quot;: &quot;0&quot;,<br />        &quot;engagements&quot;: &quot;0&quot;,<br />        &quot;url&#95;clicks&quot;: &quot;0&quot;,<br />        &quot;detail&#95;expands&quot;: &quot;0&quot;<br />      &#125;,<br />      &quot;223456789&quot;: &#123;<br />        &quot;impressions&quot;: &quot;788&quot;,<br />        &quot;engagements&quot;: &quot;134&quot;,<br />        &quot;url&#95;clicks&quot;: &quot;30&quot;,<br />        &quot;detail&#95;expands&quot;: &quot;1323&quot;<br />      &#125;,<br />      &quot;323456789&quot;: &#123;<br />        &quot;impressions&quot;: &quot;4&quot;,<br />        &quot;engagements&quot;: &quot;0&quot;,<br />        &quot;url&#95;clicks&quot;: &quot;2&quot;,<br />        &quot;detail&#95;expands&quot;: &quot;0&quot;<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                      |
+| **不可用的帖子 ID**   | 对于包含已不可用的帖子 ID（例如已被删除）的查询，将为所有可用的帖子 ID 返回相应数据，而不可用的帖子 ID 则会在名为 `unavailable_tweet_ids` 的数组中列出。例如：<br /><br />&#123;<br />    &quot;start&quot;: &quot;2015-11-17T22:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-11-19T02:27:50Z&quot;,<br />    &quot;unavailable&#95;tweet&#95;ids&quot;: [<br />        &quot;323456789&quot;<br />    ],<br />    &quot;group1&quot;: &#123;<br />     &quot;423456789&quot;: &#123;<br />      &quot;favorites&quot;: &quot;67&quot;,<br />      &quot;replies&quot;: &quot;8&quot;,<br />      &quot;retweets&quot;: 26<br />     &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+
+<div id="response-codes">
+  #### **响应代码**
+</div>
+
+| Status | Text | Description |
+| :--- | :--- | :--- |
+| 200 | OK  | 请求已成功。 |
+| 400 | Bad Request | 通常是由于请求中包含无效的 JSON，或请求未发送任何 JSON 负载而返回此响应。 |
+| 401 | Unauthorized | 由于凭证无效，HTTP 身份验证失败。请检查你的 OAuth 密钥和令牌。 |
+| 404 | Not Found | 在请求发送到的 URL 上未找到该资源，很可能是因为使用了不正确的 URL。 |
+| 429 | Too Many Requests | 你的应用已超出 API 请求限制。 |
+| 500 | Internal Server Error | Gnip 端发生错误。请使用指数退避策略重试请求。 |
+| 502 | Proxy Error | Gnip 端发生错误。请使用指数退避策略重试请求。 |
+| 503 | Service Unavailable | Gnip 端发生错误。请使用指数退避策略重试请求。 |
+
+<div id="error-messages">
+  #### **错误消息**
+</div>
+
+在各种场景下，Engagement API 会返回特定情境的错误消息，你的应用应该具备处理这些错误的能力。下表列出了这些错误消息的常见示例，以及你应如何理解它们。请注意，在许多情况下，Engagement API 会在返回 200 OK 响应的同时，对可用数据返回部分结果，并在其中附带特定错误消息以提供更多信息。
+
+| Error Message | Description |
+| :--- | :--- |
+| `"errors":["Your account could not be authenticated. Reason: Access token not found"]` | 请求中的身份验证部分出现错误。“Reason” 字段应提供有助于排查错误的信息。如果你无法自行解决，请将完整错误信息（包括 “Reason”）发送给我们的支持团队。 |
+| `"errors":["1 Tweet ID(s) are unavailable"],"unavailable_tweet_ids": ["TWEET_IDS"]` | 你请求的一个或多个 Tweet ID 已不再可用，通常表示这些帖子已被删除，或因其他原因不再公开可见。 |
+| `"errors":["Impressions & engagements for tweets older than 90 days (*TIME_PERIOD*) are not supported"],"unsupported_for_impressions_engagements_tweet_ids":[*TWEET_IDS*]` | 你在 /totals 端点中请求的一个或多个 Tweet ID 所对应的帖子早于 90 天，因此无法返回其展示量或互动指标。 |
+| `"errors":["Forbidden to access tweets: *TWEET_IDS*"]` | 基于你用于代表第三方检索数据的身份验证令牌（Access Token），你请求的一个或多个 Tweet ID 对应的帖子不可访问。 |

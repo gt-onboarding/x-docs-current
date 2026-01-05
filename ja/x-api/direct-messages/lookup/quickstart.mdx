@@ -1,0 +1,174 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["ダイレクトメッセージ クイックスタート", "DM クイックスタート", "DM ルックアップ クイックスタート", "ダイレクトメッセージ チュートリアル", "DM チュートリアル"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-direct-message-endpoints">
+  ## ダイレクトメッセージ管理エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、HTTP リクエストの作成および送信ツールである Postman を使用して、ダイレクトメッセージエンドポイントへの最初のリクエストを行う方法を説明します。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ガイドをご覧ください。
+
+Python ベースの例を確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub リポジトリをご覧ください。さらに、公式の [X Developer Platform software development kits (SDKs)](/ja/x-api/tools-and-libraries/sdks) も、これらのダイレクトメッセージエンドポイントをサポートするように更新される予定です。  
+
+<Note>
+  **前提条件**
+
+  このガイドを完了するには、リクエストを認証するための [keys and tokens](/ja/resources/fundamentals/authentication) 一式が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページを開き、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-building-direct-message-lookup-requests">
+  ### ダイレクトメッセージの参照リクエストを構築する手順
+</div>
+
+この例では、1 回のリクエストで新しいグループ会話を作成し、その会話に最初のメッセージを追加します。その後、作成した会話に 2 件目のメッセージを追加します。
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ 1: ツールまたはライブラリを使い始める
+</div>
+
+Direct Message 管理エンドポイントの利用を開始するにあたり、ここではプロセスを簡略化するために Postman ツールを使用します。XDevelopers による X API v2 リクエストのサンプルコレクションを用いて、新しい Direct Message を作成し、Direct Message 会話イベントを一覧表示するための 6 つのエンドポイントを確認していきます。
+
+コレクションの大部分はあらかじめ入力されていますが、これらの API リクエストを実行するために作成した X アプリに基づいて、いくつか補完する必要がある情報があります。まずはコレクションを読み込む／更新するところから始めましょう。
+
+X API v2 Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Manage Direct Messages」フォルダーに移動します。このフォルダーの Authorization タブには、可能な限り事前に情報が入力されています。X アプリの認証情報を指定するために、いくつかの設定を更新する必要があります。
+
+このフォルダーには、新しい Direct Message を作成するための 3 つのエンドポイントも含まれています。また、「Direct Message lookup」フォルダーには、送受信メッセージや会話参加者の参加・離脱などを含む Direct Message 会話イベントを取得するために利用できる 3 つのエンドポイントが用意されている点にも注意してください。
+
+グループ会話の作成は X API v2 の新機能であるため、この例ではその機能に焦点を当てます。「New group DM and conversation」の例を使用します。このリクエストを使って、Direct Message のグループ会話を作成します。
+
+次のステップでは、エンドポイントに対して認証を行います。
+
+<div id="step-two-authenticate-your-request">
+  #### Step two: Authenticate your request
+</div>
+
+X API へ正しくリクエストを送信するには、その操作を行う権限があることを確認する必要があります。このエンドポイントへのリクエストを正常に行うために、ここでは [OAuth 2.0 Authorization Code Flow with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用します。Postman 内でアクセストークンを生成できます。 
+
+Postman では、認証方法をフォルダー単位またはリクエスト単位で設定できます。ここではフォルダー単位で認証情報を設定します。「Mange Direct Messages」フォルダーに移動し、「Authorization」タブを選択して、Type が「OAuth 2.0」に設定されていること、「Add auth data to」が「Request Headers」に設定されていることを確認します。「Current Token」セクションで、「Header Prefix」が Bearer に設定されていることを確認してください。  
+
+新しいトークンを設定および生成するには:
+
+1. 「DM lookup」などの Token Name を作成します。
+
+2. **Grant Type** が Authorization Code (with PKCE) に設定されていることを確認します。
+
+3. **Callback URL** を設定します。[v2 Dev Portal](https://developer.x.com/en/portal/dashboard) のアプリケーションに設定されている Callback URL と完全に一致するように Callback URL を更新する必要があります。この例で使用している X App では、Callback URL は [https://www.example.com.](https://www.example.com/) に設定されています（完全一致する必要があるため、[https://example.com](https://example.com) では動作しない点に注意してください）。 
+
+4. **Auth URL** が [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize) に設定されていることを確認します。
+
+5. **Access Token URL** が [https://api.x.com/2/oauth2/token.](https://api.x.com/2/oauth2/token) に設定されていることを確認します。\
+   **Client ID** - Developer Portal から OAuth 2.0 Client ID をコピーして貼り付けます。\
+   **Client Secret** - 機密クライアントである App タイプを使用している場合にのみ必要です。その場合、Developer Portal から OAuth 2.0 Client Secret をコピーして貼り付けます。 
+
+6. **Scope** が dm.read dm.write tweet.read users.read に設定されていることを確認します。
+
+7. **State** が「state」に設定されていることを確認します。
+
+8. **Client Authentication** が Send as Basic Auth header に設定されていることを確認します。
+
+9. 「Get New Access Token」と表示されている箇所をクリックし、「Sign-in with X」プロセスの一部として「Authorize app」をクリックします。
+
+10. 「Proceed」ボタンをクリックし、その後「Use Token」をクリックしてトークンを生成します。 
+
+11. 「Save」ボタンをクリックして、これらの設定内容を保存します。
+
+X にログインしていないというメッセージが表示される場合があります。このエラーが発生した場合は、Postman 内で、代理でポストしようとしている X アカウントにログインする必要があります。
+
+これでフォルダー単位で OAuth 2.0 の設定が完了したので、各サンプルの「Authorization」タブに移動し、Type が「Inherit auth from parent」に設定されていることを確認します。 
+
+このトークンはまもなく有効期限が切れる点に注意してください。有効期限が切れた場合は、「Get New Access Token」ボタンをクリックして再生成する必要があります。これをクリックすると「Sign-in with X」プロセスが再度実行され、新しいトークンが生成されてリクエストに使用できるようになります。
+
+<div id="step-three-retrieve-direct-messages-conversation-events">
+  #### ステップ3: ダイレクトメッセージ会話イベントを取得する
+</div>
+
+このエンドポイントでダイレクトメッセージの会話イベントを取得するには、会話IDを指定する必要があります。会話IDはエンドポイントパスの一部です: [https://api.x.com/2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events](https://api.x.com/2/dm\\_conversations/:dm\\_conversation\\_id/dm\\_events)
+
+Postman で「Params」タブに移動し、取得したい会話の ID を &quot;Path Variables&quot; セクションに入力します。
+
+設定は次のようになります:
+
+|                      |                       |
+| :------------------- | :-------------------- |
+| **Key**              | **Value**             |
+| `dm_conversation_id` | `1228393702244134912` |
+
+この会話を指定すると、最終的なパスは [https://api.x.com/2/dm&#95;conversations/1582103724607971328/dm&#95;events](https://api.x.com/2/dm\\_conversations/1582103724607971328/dm\\_events) となります。
+
+&quot;Send&quot; ボタンをクリックすると、レスポンスにはデフォルトのダイレクトメッセージオブジェクトのフィールドである id、text、event&#95;type が含まれます。また、結果数と、利用可能な場合にさらにイベントを取得するために使用されるページネーション用トークンを含む &quot;meta&quot; オブジェクトも含まれます。
+
+```
+{
+   "data": [
+       {
+           "event_type": "MessageCreate",
+           "id": "1580705921830768647",
+           "text": "hello to you two, this is a new group conversation."
+       }
+   ],
+   "meta": {
+       "result_count": 1,
+       "next_token": "18LAA5FFPEKJA52G0G00ZZZZ",
+       "previous_token": "1BLC45FFPEKJA52G0S00ZZZZ"
+   }
+}
+```
+
+追加のフィールドを取得したい場合は、リクエスト内でそれらのフィールドを [field](/ja/x-api/fundamentals/fields) パラメーターおよび/または [expansion](/ja/x-api/fundamentals/expansions) パラメーターとして指定する必要があります。
+
+この演習では、dm&#95;event オブジェクトの追加のフィールドセットをリクエストします。
+
+1. デフォルトのダイレクトメッセージオブジェクトのフィールドである id、text、event&#95;type
+
+2. 追加のダイレクトメッセージオブジェクトのフィールド: dm&#95;conversation&#95;id, created&#95;at, sender&#95;id, attachments, participant&#95;ids, referenced&#95;tweets
+
+Postman で &quot;Params&quot; タブに移動し、&quot;Query Params&quot; テーブルに次の key:value ペアを追加します。
+
+|                     |                                                                                                               |
+| :------------------ | :------------------------------------------------------------------------------------------------------------ |
+| Key                 | Value                                                                                                         |
+| dm&#95;event.fields | dm&#95;conversation&#95;id,created&#95;at,sender&#95;id,attachments,participant&#95;ids,referenced&#95;tweets |
+
+これで、&quot;Send&quot; ボタンの横に次の URL が表示されるはずです。
+
+[https://api.x.com/2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events?dm&#95;event.fields=id,text,event&#95;type,dm&#95;conversation&#95;id,created&#95;at,sender&#95;id,attachments,participant&#95;ids,referenced&#95;tweets](https://api.x.com/2/dm\\_conversations/:dm\\_conversation\\_id/dm\\_events?dm\\_event.fields=id,text,event\\_type,dm\\_conversation\\_id,created\\_at,sender\\_id,attachments,participant\\_ids,referenced\\_tweets)
+
+<div id="step-four-make-your-request-and-review-your-response">
+  #### ステップ4: リクエストを送信してレスポンスを確認する
+</div>
+
+準備がすべて整ったら、再度「Send」ボタンをクリックすると、次のようなレスポンスが返ってきます。このレスポンスには、利用可能なすべての `dm_event` フィールドが含まれている点に注意してください。
+
+```
+{
+   "data": [
+       {
+           "text": "hello to you two, this is a new group conversation.",
+           "id": "1580705921830768647",
+           "dm_conversation_id": "1580705921830768643",
+           "event_type": "MessageCreate",
+           "sender_id": "17200003",
+           "created_at": "2022-10-13T23:43:54.000Z"
+       }
+   ],
+   "meta": {
+       "result_count": 1,
+       "next_token": "18LAA5FFPEKJA52G0G00ZZZZ",
+       "previous_token": "1BLC45FFPEKJA52G0S00ZZZZ"
+   }
+}
+```

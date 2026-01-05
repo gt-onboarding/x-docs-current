@@ -1,0 +1,174 @@
+---
+title: Explora las Publicaciones y menciones de un usuario con la X API v2
+description: "Los endpoints de la cronología de las Publicaciones de un usuario y de la cronología de menciones de un usuario permiten a los desarrolladores recuperar las Publicaciones públicas creadas por un usuario o en las que se le menciona."
+sidebarTitle: Explora las Publicaciones de un usuario
+mode: wide
+keywords: ["user timeline", "user mentions", "tweet timeline", "mention timeline", "user posts", "tutorial", "API tutorial", "user tweets"]
+---
+
+<div id="introduction">
+  ## Introducción
+</div>
+
+Si bien el [endpoint de búsqueda reciente](/es/x-api/posts/search/introduction) solo te permite obtener Publicaciones publicadas en los últimos 7 días, los endpoints de cronología de Publicaciones de usuario y de cronología de menciones de usuario te permiten recuperar Publicaciones y menciones anteriores a esos 7 días, para un usuario autorizado (usando el id de usuario). Los desarrolladores pueden usar estos endpoints para estudiar temas, entidades y sentimiento en las Publicaciones de la cronología o de las menciones de un usuario. En este tutorial, te mostraremos cómo explorar las Publicaciones y menciones de un usuario usando los endpoints de cronología de Publicaciones de usuario y de cronología de menciones de usuario.
+ 
+
+<div id="prerequisites">
+  ## Requisitos previos
+</div>
+
+* Para poder usar los endpoints de la cronología de publicaciones de usuario y de la cronología de menciones de usuario, necesitarás tener una cuenta de desarrollador válida. 
+* También necesitarás tener un [Proyecto](/es/resources/fundamentals/projects) creado.
+* Debes haber [creado una cuenta](https://developer.x.com/en/portal/petition/essential/basic-info) de desarrollador y haber activado la [nueva experiencia del portal para desarrolladores](https://developer.x.com/en/portal/opt-in.html). 
+* Puedes acceder con claves y tokens activos para una aplicación de desarrollador que esté asociada a un [Proyecto](/es/resources/fundamentals/projects) creado en el [portal para desarrolladores](/es/resources/fundamentals/developer-portal).
+* Un Bearer Token de tu Aplicación en el [portal para desarrolladores de X](/es/resources/fundamentals/developer-portal).
+* Si no tienes una cuenta de desarrollador aprobada, puedes [solicitar una](https://developer.x.com/en/apply-for-access).
+
+<div id="approved-developer-account">
+  ## Cuenta de desarrollador aprobada
+</div>
+
+Si aún no tienes una cuenta, puedes [solicitarla](https://developer.x.com/en/apply-for-access).
+
+<div id="create-a-project-and-connect-an-app">
+  ## Crear un Proyecto y conectar una App
+</div>
+
+En el [portal para desarrolladores](https://developer.x.com/en/portal/dashboard), haz clic en &quot;Create a new Project&quot;.
+
+<Frame>
+  <img src="/images/projects.png.twimg.1920.png" />
+</Frame>
+
+Asígnale un nombre, selecciona el caso de uso adecuado y proporciona una descripción del Proyecto. A continuación, puedes crear una nueva App o conectar una [App](/es/resources/fundamentals/developer-apps) existente (una App es un contenedor para tus claves de API que necesitas para realizar una solicitud HTTP a la X API).
+
+<Frame>
+  <img src="/images/add-your-app.png.twimg.1920.png" />
+</Frame>
+
+Haz clic en &quot;Create a new App instead&quot; y asígnale un nombre a tu App para crear una nueva App.
+
+<Frame>
+  <img src="/images/last-step-name-your-app.png.twimg.1920.png" />
+</Frame>
+
+Una vez que hagas clic en &quot;Complete&quot;, obtendrás tus claves de API y el Bearer Token que luego podrás usar para conectarte a los nuevos endpoints en la X API v2.
+
+<Frame>
+  <img src="/images/here-are-your-keys.png.twimg.1920.png" />
+</Frame>
+
+Haz clic en el (+) junto a API key, API secret key y Bearer Token y copia estos valores en un lugar seguro en tu equipo local. Los necesitarás para realizar las llamadas a la API en el siguiente paso.
+
+Nota: Las claves en la captura de pantalla anterior están ocultas, pero en tu propio portal para desarrolladores podrás ver los valores reales de la API key, API secret key y Bearer Token.
+ 
+
+<div id="how-to-get-the-user-id-for-a-user-to-use-in-the-user-tweet-timeline-and-user-mention-timeline-endpoints">
+  ## Cómo obtener el id de usuario para usarlo en los endpoints user Tweet timeline y user mention timeline
+</div>
+
+Los endpoints user Tweet timeline y user mention timeline te permiten obtener Publicaciones a partir del id de usuario. Para obtener el id de usuario a partir de un nombre de usuario, puedes utilizar el nuevo [user lookup endpoint v2](/es/x-api/users/lookup/quickstart/user-lookup). Reemplaza USER&#95;NAME por el nombre de usuario que elijas y XXXX por tu propio Bearer Token que obtuviste más arriba.
+
+```bash
+  curl --request GET 'https://api.x.com/2/users/by/username/USER_NAME --header 'Authorization: Bearer XXXXXX'
+```
+
+Verás el id de usuario en la respuesta, como se muestra a continuación:
+
+```json
+{
+   "data": {
+       "id": "2244994945",
+       "name": "Developers",
+       "username": "XDevelopers"
+   }
+}
+```
+
+<div id="connecting-to-the-user-tweet-timeline-and-user-mention-timeline-endpoints">
+  ## Conexión a los endpoints de cronología de Publicaciones del usuario y de menciones del usuario
+</div>
+
+Para obtener la cronología de Publicaciones del usuario, ejecuta el siguiente comando curl en tu terminal (asegúrate de reemplazar USER&#95;ID por el ID de usuario que elijas y XXXX por tu propio Bearer Token que obtuviste anteriormente)
+
+```bash
+curl --request GET 'https://api.x.com/2/users/USER_ID/tweets' --header 'Authorization: Bearer XXXXXX'
+```
+
+Verás que la respuesta JSON a estas solicitudes contiene el `id` y el texto de las Publicaciones de forma predeterminada (ejemplo a continuación).
+
+```yaml
+{
+   "id": "1334200897081987072",
+   "text": "👀 If you are new to the X API v2, check out this step-by-step guide to making your first request https://t.co/4rZqThpSbp"
+}
+```
+
+Si deseas que se devuelvan campos adicionales como parte de la respuesta (como información del usuario, campos adicionales de Publicación como anotaciones de contexto, etc.), tendrás que especificar esos campos explícitamente en tu solicitud. Consulta la [guía sobre cómo usar campos y expansiones](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) para aprender a hacerlo.
+
+También puedes obtener estas Publicaciones usando el lenguaje de programación que prefieras. Consulta nuestro código de ejemplo en Python, Node (JavaScript), Java y Ruby para los endpoints de la cronología de Publicaciones del usuario y de la cronología de menciones del usuario en nuestro [repositorio de GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+
+<div id="exploring-the-users-posts">
+  ## Exploración de las Publicaciones del usuario
+</div>
+
+Una vez que sabes cómo obtener Publicaciones mediante los endpoints de cronología de Publicaciones de usuario y de cronología de menciones de usuario, puedes empezar a explorar sus Publicaciones. Por ejemplo, si quisieras identificar entidades con nombre propio comunes presentes en las menciones de un usuario, puedes hacer lo siguiente:
+
+En la solicitud de la API, especifica que quieres que se devuelva el objeto context&#95;annotations en las respuestas de Publicaciones:
+
+```bash
+curl --request GET 'https://api.x.com/2/users/USER_ID/mentions?tweet.fields=context_annotations' --header 'Authorization: Bearer XXXXXX'
+```
+
+En la respuesta, podrás ver si hay entidades con nombre presentes en las menciones. Aquí tienes un ejemplo:
+
+```json
+{
+   "domain": {
+       "id": "47",
+       "name": "Brand",
+       "description": "Marcas y empresas"
+   },
+   "entity": {
+       "id": "783214",
+       "name": "X"
+   }
+}
+```
+
+Si quisieras ver qué entidades populares aparecen en tus menciones, podrías llevar un recuento de entidades populares analizando cada Publicación en las menciones.
+
+Si quisieras explorar la URL de la imagen de vista previa para todas las Publicaciones en tu cronología que contienen contenido multimedia, puedes hacer lo siguiente:
+
+En la solicitud a la API, especifica que quieres la preview&#95;image&#95;url en los campos tweet.media y las expansiones attachments.media&#95;keys
+
+```bash
+curl --request GET 'https://api.x.com/2/users/2244994945/mentions?max_results=100&media.fields=preview_image_url&expansions=attachments.media_keys' --header 'Authorization: Bearer XXXXXX'
+```
+
+En la respuesta, verás preview&#95;image&#95;url dentro del objeto includes, como se muestra a continuación:
+
+```json
+{
+   "includes": {
+       "media": [
+           {
+               "media_key": "16_1334657439640121344",
+               "preview_image_url": "https://pbs.twimg.com/tweet_video_thumb/EoWn3rqU8AAtFWL.jpg",
+               "type": "animated_gif"
+           }
+       ]
+   }
+}
+```
+
+Una vez que comprendas cómo navegar por las Publicaciones de un usuario, también puedes usar otras APIs y servicios para hacer más con las Publicaciones. A continuación se muestran algunos recursos útiles para cuando uses los endpoints de timeline de Publicaciones de usuario y de timeline de menciones de usuario.
+
+<div id="resources">
+  ## Recursos
+</div>
+
+* Obtén más información sobre los [endpoints de la cronología de Publicaciones del usuario y de la cronología de menciones del usuario](/es/x-api/posts/timelines/introduction).
+* Consulta la [referencia de la API para el endpoint de la cronología de Publicaciones del usuario](/es/x-api/posts/user-posts-timeline-by-user-id) para obtener más información sobre lo que está disponible.
+* Consulta la [referencia de la API para el endpoint de la cronología de menciones del usuario](/es/x-api/posts/user-mention-timeline-by-user-id) para obtener más información sobre lo que está disponible.
+* Inspírate leyendo nuestros otros [tutoriales](/es/tutorials).

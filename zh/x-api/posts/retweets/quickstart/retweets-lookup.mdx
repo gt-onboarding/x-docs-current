@@ -1,0 +1,138 @@
+---
+title: 转推查找
+sidebarTitle: 转推查找
+keywords: ["转推查找", "转推快速入门", "获取转推", "转推教程", "转推指南", "转推示例"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-retweets-lookup-endpoint">
+  ### 开始使用 Retweets 查询端点
+</div>
+
+本快速入门指南将帮助你使用 [Postman](/zh/tutorials/postman-getting-started) 向 Retweets 查询端点发送你的第一个请求。如果你希望查看不同编程语言的示例代码，请访问我们在 GitHub 上的 [X API v2 sample code](https://github.com/xdevplatformTwitter-API-v2-sample-code) 仓库。
+
+<div id="prerequisites">
+  #### 前提条件
+</div>
+
+要完成本指南，你需要一组用于对请求进行认证的 [keys and tokens](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+* [注册开发者账号](https://developer.x.com/en/apply-for-access)并通过审批。
+* 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 以及关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+* 前往你的 App 的“Keys and tokens”页面以生成所需的凭证。请确保将所有凭证保存在安全的位置。
+
+<div id="steps-to-build-a-retweets-lookup-request">
+  #### 构建转推查找请求的步骤
+</div>
+
+**第一步：选择工具或库**
+
+有多种工具、代码示例和库可用于向此端点发出请求,但在这里我们将使用 Postman 工具来简化操作流程。
+
+要将 X API v2 Postman 集合加载到您的环境中,请单击以下按钮:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  在 Postman 中添加 X API v2
+</Button>
+
+在 Postman 中加载 X API v2 集合后,导航至&quot;Retweets&quot;文件夹并选择&quot;Retweeted by&quot;。
+
+**步骤二：验证请求身份**
+
+要正确向 X API 发出请求,您需要验证是否具有相应权限。为此,此端点要求您使用以下身份验证方法之一对请求进行身份验证:[OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 或 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)。
+
+为简单起见,我们将在此请求中使用 OAuth 2.0 应用仅模式,但如果您想请求私有[指标](/zh/x-api/fundamentals/metrics)或转发,则需要使用其他身份验证方法之一。
+
+要使用 OAuth 2.0 应用仅模式,您必须将密钥和令牌添加到 Postman,具体来说是[应用访问令牌](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)(也称为应用仅 Bearer Token)。您可以在 Postman 右上角选择名为&quot;X API v2&quot;的环境,然后将密钥和令牌添加到&quot;initial value&quot;和&quot;current value&quot;字段中(点击环境下拉菜单旁边的眼睛图标)来完成此操作。
+
+如果您正确完成了此操作,这些变量将自动拉取到请求的授权选项卡中。
+
+**步骤三：指定一个帖子**
+
+使用此端点时,您必须指定要获取其转发用户的帖子 ID。您可以通过在 X 上导航到该帖子并提取 URL 末尾的数字代码来找到帖子的 ID。例如,以下 URL 的帖子 ID 为 1354143047324299264。
+
+[https://x.com/TwitterDev/status/1354143047324299264](https://x.com/TwitterDev/status/1354143047324299264)
+
+在 Postman 中,导航到&quot;Params&quot;选项卡,将此用户名输入到 id 路径变量的&quot;Value&quot;列(位于该部分底部),确保用户名前后不包含任何空格。
+
+|        |                |
+| :----- | :------------- |
+| **键名** | **值**          |
+| `id`   | 要获取其转推用户的帖子 id |
+
+**第四步:确定并指定您想要检索的字段**
+
+如果您在第三步后点击&quot;发送&quot;按钮,响应中将返回默认的[用户对象](/zh/x-api/fundamentals/data-dictionary#user)字段:id、name 和 username。
+
+如果您希望获取除 id、name 和 username 之外的其他字段,需要在请求中通过 [fields](/zh/x-api/fundamentals/fields) 和/或 [expansions](/zh/x-api/fundamentals/expansions) 参数指定这些字段。
+
+在本练习中,我们将请求来自不同对象的三组额外字段:
+
+1. 主要用户对象中的附加 user.created&#95;at 字段。
+2. 为返回的用户，其关联的置顶帖子对象的默认字段为：id 和 text。
+3. 关联的帖子对象中新增的 tweet.created&#95;at 字段。
+
+在 Postman 中,导航至&quot;Params&quot;选项卡,然后将以下键值对添加到&quot;Query Params&quot;表格中:
+
+|              |                         |                      |
+| :----------- | :---------------------- | :------------------- |
+| **键**        | **值**                   | **返回字段**             |
+| user.fields  | created&#95;at          | user.created&#95;at  |
+| 扩展字段         | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at          | tweet.created&#95;at |
+
+现在您应该能在&quot;发送&quot;按钮旁边看到以下 URL：
+
+`https://api.x.com/2/tweets/1354143047324299264/retweeted_by?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**步骤五：发送请求并查看响应**
+
+在完成所有设置后，点击“Send”按钮，你将收到一个与下方示例类似的响应：
+
+```
+{
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "现在，拥有600个或更多关注者的每个人都可以主持一个Space。\n\n根据我们所学到的，这些账户由于其现有受众，可能会有良好的主持体验。在将创建Space的能力带给所有人之前，我们专注于几件事情。🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+}
+```

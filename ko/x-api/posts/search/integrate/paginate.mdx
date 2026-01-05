@@ -1,0 +1,130 @@
+---
+title: 페이지네이션
+sidebarTitle: 페이지네이션
+keywords: ["검색 페이지네이션", "페이지네이션 가이드", "결과 페이지 탐색", "페이지네이션 토큰", "검색 페이지네이션", "next 토큰"]
+---
+
+<div id="recent-search-pagination">
+  ### 최근 검색의 페이지네이션
+</div>
+
+<div id="introduction">
+  #### 소개
+</div>
+
+검색 쿼리는 일반적으로 단일 API 응답에 담을 수 있는 것보다 더 많은 게시물과 매칭됩니다. 그런 경우, 데이터는 여러 &#39;페이지&#39;에 걸쳐 반환됩니다. 페이지네이션은 전체 데이터 세트를 가져오기 위해 이러한 모든 페이지를 순차적으로 요청하는 방법을 의미합니다.
+
+다음은 최근 검색 페이지네이션의 기본 사항입니다:
+
+* recent search 엔드포인트는 쿼리에 대해 최소 한 페이지의 응답을 반환하며, 추가 페이지가 있을 경우 JSON 응답에 next&#95;token을 제공합니다. 일치하는 게시물을 모두 받기 위해, 응답에 토큰이 더 이상 포함되지 않을 때까지 이 과정을 반복할 수 있습니다.
+
+* next&#95;token은 만료되지 않습니다. 동일한 next&#95;token 값을 사용하는 여러 요청은, 요청 시점과 관계없이 동일한 결과를 받게 됩니다.
+
+* 게시물은 UTC(협정 세계시) 시간대를 기준으로 최신순(역순 연대순)으로 제공됩니다. 이는 개별 페이지 내에서도, 여러 페이지에 걸쳐서도 마찬가지입니다:
+  * 첫 번째 응답의 첫 번째 게시물은 쿼리와 일치하는 게시물 중 가장 최근 게시물입니다.
+  * 마지막 응답의 마지막 게시물은 쿼리와 일치하는 게시물 중 가장 오래된 게시물입니다.
+
+* max&#95;results 요청 파라미터를 사용하면 응답당 반환되는 게시물 수를 설정할 수 있습니다. 기본값은 게시물 10개이며, 최대 100개까지 설정할 수 있습니다. 
+
+* 모든 페이지네이션 구현에는 응답 페이로드에서 next&#95;token을 파싱하고, 이를 &#39;다음 페이지&#39; 검색 요청에 포함하는 과정이 필요합니다. 이러한 &#39;다음 페이지&#39; 요청을 구성하는 방법에 대한 자세한 내용은 아래를 참조하세요.
+   
+
+recent search 엔드포인트는 두 가지 기본 사용 패턴을 지원하도록 설계되었습니다:
+
+* **Get historical** - 관심 있는 기간 동안의 일치하는 게시물을 요청하는 패턴입니다. 이러한 요청은 일반적으로 과거 데이터 연구를 지원하기 위한 일회성 요청입니다. 검색 요청은 start&#95;time 및 end&#95;time 요청 파라미터를 기반으로 할 수 있습니다. recent search 엔드포인트는 가장 최근에 일치한 게시물부터 시작하여, 최신순(역순 연대순)으로 게시물을 응답합니다. 
+
+* **Polling** - 마지막으로 수신한 게시물 이후에 게시된, 일치하는 게시물을 요청하는 패턴입니다. 이러한 사용 사례는 종종 거의 실시간(near-real-time)에 초점을 두며, 관심 있는 새 게시물을 모니터링하기 위한 빈번한 요청이 특징입니다. recent search 엔드포인트는 &#39;polling&#39; 패턴을 지원하기 위해 since&#95;id 요청 파라미터를 제공합니다. 게시물 ID 기반으로 탐색하는 데 도움이 되도록 until&#95;id 요청 파라미터도 사용할 수 있습니다.
+   
+
+다음으로, 히스토리컬 모드에 대해 설명합니다. 이는 recent search 엔드포인트의 기본 모드이며, 페이지네이션의 기본 개념을 보여 줍니다. 그 다음으로는 폴링 사용 사례의 예를 설명합니다. 폴링으로 인해 페이지네이션이 발생하는 경우, 검색 요청을 관리하기 위한 추가 단계가 필요합니다.
+ 
+
+<div id="retrieving-historical-data">
+  #### 과거 데이터 조회
+</div>
+
+이 섹션에서는 start&#95;time 및 end&#95;time 요청 매개변수를 사용하여 관심 있는 기간(현재는 최근 7일로 제한) 동안의 게시물을 조회하는 방법을 설명합니다. 과거 데이터 요청은 일반적으로 연구 및 분석을 위한 일회성 요청입니다. 
+
+특정 기간의 데이터를 요청하는 방식은 recent search 엔드포인트의 기본 동작입니다. 검색 요청에서 start&#95;time, end&#95;time 또는 since&#95;id 요청 매개변수를 지정하지 않으면 end&#95;time은 기본적으로 &quot;현재&quot;(실제로는 쿼리 시점 기준 30초 전)로, start&#95;time은 기본적으로 7일 전으로 설정됩니다.
+
+엔드포인트는 가장 최근 게시물부터 시작하여 게시물을 시간 역순으로 정렬한 첫 번째 &#39;페이지&#39;를 응답으로 반환합니다. 응답 JSON 페이로드에는 추가 데이터 페이지가 있는 경우 next&#95;token도 포함됩니다. 일치하는 전체 게시물 집합을 페이지 수와 관계없이 모두 수집하려면 next&#95;token이 더 이상 제공되지 않을 때까지 요청을 반복해서 보내야 합니다. 
+
+예를 들어, 지난 1주일 동안 키워드 snow가 포함된 게시물에 대한 초기 요청은 다음과 같습니다:
+
+[https://api.x.com/2/tweets/search/recent?query=snow](https://api.x.com/2/tweets/search/recent?query=snow)
+
+응답에는 가장 최근의 게시물 10개와 함께 JSON 응답의 &quot;meta&quot; 속성이 포함됩니다:
+
+```
+"meta": {
+        "newest_id": "1204860593741553664",
+        "oldest_id": "1204860580630278147",
+        "next_token": "b26v89c19zqg8o3fobd8v73egzbdt3qao235oql",
+        "result_count": 10
+    }
+```
+
+다음 10개의 게시물을 가져오려면 이 next&#95;token을 원래 요청에 추가합니다. 요청은 다음과 같습니다:
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;next&#95;token=b26v89c19zqg8o3fobd8v73egzbdt3qao235oql](https://api.x.com/2/tweets/search/recent?query=snow\&next_token=b26v89c19zqg8o3fobd8v73egzbdt3qao235oql)
+
+next&#95;token을 찾고 이를 이후 요청에 포함하는 과정을, 모든(또는 일정 개수의) 게시물을 수집하거나 정해진 횟수만큼 요청을 보낼 때까지 반복할 수 있습니다. 데이터 충실도(쿼리와 일치하는 모든 결과를 수집하는 것)가 사용 사례에서 핵심이라면, 간단한 &quot;request.next&#95;token이 null이 될 때까지 반복&quot;하는 설계로 충분합니다.
+
+<div id="polling-and-listening-use-cases">
+  #### 폴링 및 리스닝 사용 사례
+</div>
+
+이 섹션에서는 `since_id` 요청 매개변수를 사용해 recent search 엔드포인트를 폴링(polling)하여 최근 게시물을 가져오는 방법을 설명합니다. 
+
+폴링 사용 사례에서는 “관심 있는 새로운 게시물이 있는지?”라는 쿼리를 지속적이고 빈번하게 수행합니다. 시간 기준으로 요청을 보내는 과거 데이터 사용 사례와 달리, 폴링 사용 사례에서는 일반적으로 게시물 ID를 기준으로 요청을 보냅니다.
+
+폴링 사용 패턴의 핵심은 모든 새로운 게시물이 X 플랫폼에서 일반적으로 오름차순으로 ‘emitted(방출/생성)’되는 [고유 ID](/ko/resources/fundamentals/x-ids)를 갖는다는 점입니다. 한 게시물의 ID가 다른 게시물보다 작다면, 그 게시물이 더 먼저 게시되었다는 의미입니다.
+
+recent search 엔드포인트는 게시물 ID를 기준으로 게시물 아카이브를 탐색하는 기능을 지원합니다. 이 엔드포인트의 응답에는 `oldest_id` 및 `newest_id` 게시물 ID가 포함됩니다. 폴링 모드에서는 지금까지 받은 ID 중 가장 크고(최신인) ID를 `since_id`로 설정해 요청을 보냅니다. 
+
+예를 들어, 눈(snow)에 대한 새로운 게시물을 5분마다 조회하고, 마지막으로 받은 게시물의 게시물 ID가 10000이라고 가정해 보겠습니다. 폴링할 시점의 요청은 다음과 같습니다.
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;since&#95;id=10000](https://api.x.com/2/tweets/search/recent?query=snow\&since_id=10000)
+
+다음으로, 마지막 요청 이후에 게시물 7개가 게시되었다고 가정해 보겠습니다. 이 모든 게시물이 단일 데이터 ‘페이지’에 들어가기 때문에 `next_token`은 없습니다. 응답에는 가장 최근(최신) 게시물의 게시물 ID가 제공됩니다.
+
+```
+"meta": {
+        "newest_id": "12000",
+        "oldest_id": "10005",
+        "result_count": 7
+    }
+```
+
+다음 폴링 쿼리를 만들기 위해, 이 newest&#95;id 값은 다음 since&#95;id 파라미터를 설정하는 데 사용됩니다:
+
+`https://api.x.com/2/tweets/search/recent?query=snow&since_id=12000`
+
+추가 데이터가 있고 next 토큰이 제공되는 경우, 결과의 첫 페이지에서 나온 newest&#95;id 값만 필요합니다. 각 데이터 페이지에는 newest&#95;id 및 oldest&#95;id 값이 포함되지만, 다음에 정기적으로 수행할 폴링 요청에는 첫 페이지에서 제공된 값만 필요합니다. 따라서 폴링 방식을 구현하거나 ID 범위로 게시물을 검색하는 경우 페이지네이션 로직은 약간 더 복잡해집니다. 
+
+이제 일치하는 게시물이 18개 더 생겼다고 가정해 봅시다. 이 엔드포인트는 이 5분 구간에 대한 전체 데이터 페이지와, 이 기간의 다음 데이터 페이지를 요청하기 위한 next&#95;token이 포함된 초기 응답을 반환합니다. 또한 5분 후 다음 폴링 간격에 사용할 최신 게시물 ID도 포함합니다.
+
+```
+"meta": {
+        "newest_id": "13800",
+        "oldest_id": "12500",
+        "next_token": "fnsih9chihsnkjbvkjbsc",
+        "result_count": 10
+    }
+```
+
+이 5분 구간 동안의 모든 일치하는 데이터를 수집하려면, 이전 요청과 동일한 since&#95;id 값을 사용하여 next&#95;token을 다음 요청에 전달합니다.
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;since&#95;id=12000&amp;next&#95;token=fnsih9chihsnkjbvkjbsc](https://api.x.com/2/tweets/search/recent?query=snow\&since\\_id=12000\&next\\_token=fnsih9chihsnkjbvkjbsc)
+
+```
+"meta": {
+        "newest_id": "12300",
+        "oldest_id": "12010",
+        "result_count": 8
+    }
+```
+
+두 번째 응답에는 나머지 8개의 게시물이 포함되어 있으며 `next_token`은 제공되지 않습니다. `newest_id` 값(12300)은 업데이트하지 않고, 대신 첫 번째 응답의 `newest_id` 값을 기반으로 다음 요청의 `since_id` 값을 설정합니다:
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;since&#95;id=13800](https://api.x.com/2/tweets/search/recent?query=snow\&since_id=13800)

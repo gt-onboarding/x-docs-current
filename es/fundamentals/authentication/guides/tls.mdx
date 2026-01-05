@@ -1,0 +1,40 @@
+---
+title: Conexión con X API mediante TLS
+sidebarTitle: TLS
+keywords: ["TLS", "SSL", "HTTPS", "conexión segura", "conexión TLS", "conexión cifrada", "seguridad de la API"]
+---
+
+import { Button } from "/snippets/es/button.mdx";
+
+Se requieren conexiones TLS para acceder a los endpoints de X API. La comunicación a través de TLS preserva la privacidad y la seguridad del usuario al proteger la información entre el usuario y X API mientras la información se transmite a través de la Internet pública. Las conexiones a X API requieren TLS en su versión 1.2.
+
+
+<div id="verification">
+  ## Verificación
+</div>
+
+<div id="use-an-up-to-date-root-store">
+  ### Usa un almacén de certificados raíz actualizado
+</div>
+
+Es importante que tu aplicación o biblioteca utilice un almacén de certificados raíz confiable y actualizado al verificar el certificado de X. Cuando sea posible, usar el almacén raíz proporcionado por tu sistema operativo puede ser el enfoque más sencillo. Como alternativa, el [almacén raíz de Mozilla (NSS)](https://www.mozilla.org/en-US/about/governance/policies/security-group/certs/) se mantiene de forma pública y transparente. cURL también proporciona [una versión de este almacén en formato PEM](https://curl.haxx.se/docs/caextract.html).
+
+Actualmente, X emite la mayoría de nuestros certificados desde [DigiCert High Assurance EV Root CA](https://www.digicert.com/digicert-root-certificates.htm), pero esto no es cierto para el 100% de los certificados relacionados con X y puede dejar de serlo en el futuro, por lo que confiar únicamente en las autoridades raíz de DigiCert que se usan actualmente puede provocar problemas con tu aplicación más adelante.
+
+<div id="check-crls-and-the-ocsp-status">
+  ### Comprobar las CRL y el estado de OCSP[](#check-crls-and-the-ocsp-status "Permalink to this headline")
+</div>
+
+Muchas aplicaciones no comprueban la Lista de Revocación de Certificados (CRL) para los certificados devueltos o dependen del sistema operativo para hacerlo. Asegúrate de que tu aplicación o biblioteca TLS esté configurada para exigir la verificación mediante CRL y OCSP (Online Certificate Status Protocol) antes de aceptar el certificado de X.
+
+<div id="cdns">
+  ### CDNs[](#cdns "Enlace permanente a este encabezado")
+</div>
+
+Cuando muestres Publicaciones que contengan contenido multimedia, usa el atributo `media_url_https` para las URL HTTPS que se utilizarán al mostrar imágenes. En el futuro, todas las URL servidas desde endpoints de la API proporcionarán rutas HTTPS.
+
+<div id="provide-an-indication-of-security-status">
+  ## Muestra un indicador del estado de seguridad
+</div>
+
+Si es posible, deberías mostrar algún indicador del estado actual de la conexión entre tu aplicación y X. Algunos navegadores web lo hacen mostrando un icono de candado, mientras que otros indican el estado actual de la conexión mediante mensajes descriptivos.
