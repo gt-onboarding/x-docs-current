@@ -1,20 +1,20 @@
 ---
 title: クイックスタート
 sidebarTitle: クイックスタート
-keywords: ["activity API quickstart", "X Activity API quickstart", "activity quickstart", "activity tutorial", "activity guide"]
+keywords: ["activity API クイックスタート", "X Activity API クイックスタート", "activity クイックスタート", "activity チュートリアル", "activity ガイド"]
 ---
 
-このガイドでは、X Activity API のエンドポイントを使用してイベントを購読し、受信する方法を説明します。一般的な手順は次の 3 つです。
+このガイドでは、X Activity API エンドポイントを使用してイベントを購読し、受信する方法を説明します。通常、次の 3 つの手順で構成されます。
 
-1. フィルタリング対象としたいユーザーのイベントについて、そのユーザーの User ID を特定する
+1. フィルタリングしたいイベントの対象となるユーザーの User ID を特定する
 2. そのユーザーに対して、フィルタリングしたいイベント種別のサブスクリプションを作成する
-3. webhook または永続的な HTTP ストリーム接続を使用してイベントを受信する
+3. Webhook または永続的な HTTP ストリーミング接続を使用してイベントを受信する
 
 <div id="getting-user-ids">
   ## ユーザーIDの取得
 </div>
 
-サブスクリプションを作成する前に、フィルタリングしたいアカウントのユーザーIDを確認しておく必要があります。この例では XDevelopers のハンドルを使用します。ユーザーIDは、次のようないくつかの方法で調べることができます。
+サブスクリプションを作成する前に、絞り込み対象とするアカウントのユーザーIDを知っておく必要があります。この例では、XDevelopers のハンドルを使用します。ユーザーIDを調べる方法はいくつかあり、たとえば次のとおりです。
 
 **ユーザー名からユーザーIDを調べる：**
 
@@ -22,13 +22,13 @@ keywords: ["activity API quickstart", "X Activity API quickstart", "activity qui
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" "https://api.x.com/2/users/by/username/xdevelopers"
 ```
 
-**自分のユーザーIDを取得する：**
+**自分のユーザーIDを取得する:**
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
 ```
 
-どちらのエンドポイントもユーザー情報を返し、その中にはサブスクリプションフィルターで使用できる `id` フィールドが含まれます。JSON レスポンスの例を以下に示します。
+両方のエンドポイントは、`id` フィールドを含むユーザー情報を返し、この `id` をサブスクリプションフィルターで利用できます。以下に JSON レスポンスの例を示します。
 
 ```json
 {
@@ -45,9 +45,9 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
   ## サブスクリプションの作成
 </div>
 
-次のステップはサブスクリプションを作成することです。この例では、XDevelopers のプロフィール自己紹介文の更新イベントを購読します。そのために、JSON ボディで `user_id` と `event_type` を指定します。このケースでは、`event_type` は `ProfileBioUpdate` です。
+次のステップはサブスクリプションを作成することです。この例では、XDevelopers の自己紹介文の更新イベントを購読します。そのために、JSON 本文内で `user_id` と `event_type` を渡します。このケースでは、`event_type` は `ProfileBioUpdate` です。
 
-X Developer のユーザー ID `2244994945` と、任意のタグを指定します:
+ここでは、X Developer のユーザー ID `2244994945` と、任意のタグを渡します。
 
 ```json
 {
@@ -59,7 +59,7 @@ X Developer のユーザー ID `2244994945` と、任意のタグを指定しま
 }
 ```
 
-XAA 関連のすべてのエンドポイントでは、認可のために developer portal から取得した [Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/overview#bearer-token-also-known-as-app-only) を使用します。
+XAA に関連するすべてのエンドポイントでは、認可のために developer portal で取得した [Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/overview#bearer-token-also-known-as-app-only) を使用します。
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -74,7 +74,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   }'
 ```
 
-リクエストが正常に処理されると、サブスクリプションが作成されます。
+リクエストが正常に完了すると、サブスクリプションが作成されます。
 
 ```json
 {
@@ -101,13 +101,13 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   ## イベントの取得
 </div>
 
-サブスクリプションを作成すると、[webhooks](https://docs.x.com/x-api/webhooks/introduction) または永続的な HTTP ストリーム経由でイベントを受信できます。この例では、永続的な HTTP ストリームを開きます。
+サブスクリプションを作成したら、[webhooks](https://docs.x.com/x-api/webhooks/introduction) または常時接続の HTTP ストリームを介してイベントを受信できます。この例では、常時接続の HTTP ストリームを開きます。
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/activity/stream
 ```
 
-Xdevelopers のアカウントがプロフィールの自己紹介文を更新すると、そのイベントはストリームを通じて配信されます。
+Xdevelopers のアカウントがプロフィールの自己紹介文を更新すると、そのイベントがストリーム経由で送信されます：
 
 ```json
 {
@@ -130,10 +130,10 @@ Xdevelopers のアカウントがプロフィールの自己紹介文を更新�
   ## サブスクリプション管理
 </div>
 
-X Activity API には、標準的なCRUD操作を通じてサブスクリプションを管理するためのエンドポイントが提供されています。
+X Activity API は、標準的なCRUD操作を通じてサブスクリプションを管理するためのエンドポイントを提供します。
 
 <div id="create-subscription">
-  ### サブスクリプションを作成
+  ### サブスクリプションの作成
 </div>
 
 イベントを受信するための新しいサブスクリプションを作成します。
@@ -152,12 +152,12 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   }'
 ```
 
-**注意：**
+**注意:**
 
-* `tag` フィールドは任意です。これはイベントの配信時に識別する際に役立ちます。
-* `webhook_id` フィールドも任意です。Webhook のセットアップ方法については、[webhook docs](https://docs.x.com/x-api/webhooks/introduction) を参照してください。`webhook_id` が指定されている場合、イベントは開いているストリームに加えて、指定された webhook にも配信されます。
+* `tag` フィールドは任意です。配信時にイベントを識別するために使用できます。
+* `webhook_id` フィールドも任意です。webhook のセットアップ方法については、[webhook ドキュメント](https://docs.x.com/x-api/webhooks/introduction) を参照してください。`webhook_id` が指定されている場合、ストリームが開いているときは、そのストリームへの配信に加えて、指定された webhook にもイベントが配信されます。
 
-**レスポンス：**
+**レスポンス:**
 
 ```json
 {
@@ -177,10 +177,10 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 
 
 <div id="list-subscriptions">
-  ### サブスクリプションの一覧取得
+  ### サブスクリプションの一覧
 </div>
 
-アプリケーションの現在有効なサブスクリプションをすべて取得します。
+アプリのすべての有効なサブスクリプションを取得します。
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -222,7 +222,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   ### サブスクリプションを削除する
 </div>
 
-サブスクリプションを削除するには：
+サブスクリプションを削除するには、次のようにします。
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -243,16 +243,16 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 }
 ```
 
-`total_subscriptions` は、削除操作の完了後にアプリに関連付けられている残りのサブスクリプション数を示します。
+`total_subscriptions` は、削除操作の後にアプリに関連付けられている残りのサブスクリプション数を示します。
 
 
 <div id="update-subscription">
   ### サブスクリプションの更新
 </div>
 
-PUT エンドポイントでは、サブスクリプションの配信方法またはタグを更新できます。
+PUT エンドポイントを使用すると、サブスクリプションの配信方法またはタグを更新できます。
 
-`filter` または `event_type` を更新する場合は、既存のサブスクリプションを削除して新しいものを追加する必要があります。
+`filter` または `event_type` を更新する場合は、既存のサブスクリプションを削除して新しいサブスクリプションを追加する必要があります。
 
 ```
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -264,7 +264,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   }'
 ```
 
-**レスポンス：**
+**レスポンス:**
 
 ```json
 {

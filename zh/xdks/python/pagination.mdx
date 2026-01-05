@@ -3,18 +3,18 @@ title: 分页
 sidebarTitle: 分页
 ---
 
-X API 对返回多页结果的端点使用分页机制（例如时间线、搜索等）。每个 API 调用的响应都会包含一个 `meta` 对象，其中带有 `result_count`、`previous_token` 和 `next_token`。XDK 会负责基于 `next_token` 自动发起多次 API 调用，这样开发者只需指定期望获取的数据量，而无需手动多次调用。
+X API 在那些会返回多页结果的端点上（例如时间线、搜索等）使用分页机制。每个 API 调用的响应中都会包含一个带有 `result_count`、`previous_token` 和 `next_token` 的 `meta` 对象。XDK 会自动处理基于 `next_token` 的多次 API 调用，这样开发者只需要指定希望获取的数据量，而不必自己处理多次调用。
 SDK 通过以下方式简化了这一过程：
 
 - **内置迭代器**：使用生成器函数无缝获取多页数据。
-- **显式令牌处理**：在需要时可通过传递 `pagination_token` 实现灵活的手动控制。
-- **最大结果数限制**：在每次调用中遵守 `max_results` 参数设置（受 API 上限约束，例如搜索最多 100 条）。
+- **显式 Token 处理**：在需要时通过传入 `pagination_token`，实现灵活的手动控制。
+- **最大结果数限制**：每次调用遵守 `max_results`（受 API 限制，例如搜索最多 100 条）。
 
 <div id="automatic-pagination-recommended">
   ## 自动分页（推荐）
 </div>
 
-在分页响应对象上使用 `iterate()` 方法，以惰性方式获取所有结果。
+对分页响应使用 `iterate()` 方法，以惰性方式获取全部结果。
 **示例：分页搜索**
 
 ```python
@@ -34,14 +34,14 @@ print(f"帖子总数：{len(all_posts)}")
 
 * 迭代器会自动处理 `next_token`。
 * 当没有 `next_token` 时自动停止。
-* 支持根据速率限制进行退避，以避免 429 错误。
+* 支持基于速率限制的退避机制，以避免出现 429 错误。
 
 
 <div id="manual-pagination">
   ## 手动分页
 </div>
 
-如果你需要基于某些自定义逻辑（例如逐页处理）来控制结果，可以像下面所示那样继续使用 `next_token` 手动进行分页：
+如果你出于某些自定义逻辑的需要（例如逐页处理）而希望对结果有更精细的控制，可以像下面所示继续使用 `next_token` 手动进行分页：
 
 ```python
 # 获取第一页 - search_recent 返回一个迭代器
@@ -69,7 +69,7 @@ if next_token:
 
 **提示**：
 
-* 始终指定 `max_results` 以优化请求（默认值因端点而异）。
+* 始终指定 `max_results` 以优化结果（默认值因端点而异）。
 * 监控 `meta.result_count` 以便调试。
 * 对于非常大的查询，考虑使用异步迭代以避免阻塞。
-  如需使用 Python XDK 的详细代码示例，请参阅我们的 [代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/python)。
+  如需查看使用 Python XDK 的详细代码示例，请访问我们的 [代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/python)。

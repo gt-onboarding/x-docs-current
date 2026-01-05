@@ -1,24 +1,24 @@
 ---
 title: v1 a v2
 sidebarTitle: v1 a v2
-keywords: ["migración de v1.1 a v2", "migración de publicaciones de una Lista", "migrar publicaciones de una Lista", "publicaciones de una Lista estándar a v2", "publicaciones de una Lista de v1 a v2", "guía de migración"]
+keywords: ["migración de v1.1 a v2", "migración de publicaciones de Listas", "migrar publicaciones de Listas", "publicaciones de Listas de estándar a v2", "publicaciones de Listas de v1 a v2", "guía de migración"]
 ---
 
 import { Button } from '/snippets/es/button.mdx';
 
 <div id="list-posts-lookup-standard-v11-compared-to-x-api-v2">
-  ### Consulta de Publicaciones de Listas: v1.1 estándar en comparación con X API v2
+  ### Búsqueda de Publicaciones de una Lista: v1.1 estándar en comparación con X API v2
 </div>
 
-Si has estado usando el endpoint v1.1 estándar [GET lists/statuses](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-statuses), el objetivo de esta guía es ayudarte a comprender las similitudes y diferencias entre los endpoints v1.1 estándar y de X API v2.
+Si has estado utilizando el endpoint estándar v1.1 [GET lists/statuses](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-statuses), el objetivo de esta guía es ayudarte a comprender las similitudes y diferencias entre los endpoints de la v1.1 estándar y de X API v2.
 
 * **Similitudes**
   * Métodos de autenticación
   * Límites de frecuencia
 * **Diferencias**
   * URLs de los endpoints
-  * Requisitos de la Aplicación y el Proyecto
-  * Límites de objetos de datos por solicitud
+  * Requisitos de App y Proyecto
+  * Límites en la cantidad de objetos de datos por solicitud
   * Formatos de datos de respuesta
   * Parámetros de solicitud
 
@@ -28,47 +28,47 @@ Si has estado usando el endpoint v1.1 estándar [GET lists/statuses](https://dev
 
 **Autenticación**
 
-Ambas versiones del endpoint admiten el [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication#oauth-2-0). Por lo tanto, si antes utilizabas uno de los endpoints estándar de v1.1 de consulta de Publicaciones de Lista, puedes seguir usando el mismo método de autenticación si migras a la versión de X API v2.
+Ambas versiones del endpoint son compatibles con el [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication#oauth-2-0). Por lo tanto, si antes utilizabas uno de los endpoints estándar v1.1 de consulta de Publicaciones de una List, puedes seguir utilizando el mismo método de autenticación si migras a la versión de X API v2.
 
-Según la biblioteca/paquete de autenticación que elijas, la autenticación App only (solo Aplicación) probablemente sea la forma más sencilla de comenzar y se puede configurar con un encabezado de solicitud sencillo. Para aprender a generar un Token de acceso App only (solo Aplicación), consulta [esta guía de App only](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only).
+Según la biblioteca o el paquete de autenticación que elijas, la autenticación de solo aplicación probablemente sea la forma más sencilla de empezar y puede configurarse mediante un encabezado de solicitud simple. Para aprender a generar un Token de acceso de solo aplicación, consulta [esta guía de autenticación de solo aplicación](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only).
 
 **Límites de frecuencia**
 
 |     |     |
 | :--- | :--- |
-| **Estándar v1.1** | **X API v2** |
-| /1.1/lists/statuses.json<br /><br />900 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />900 solicitudes por ventana de 15 minutos con solo Aplicación | /2/lists/:id/tweets<br /><br />900 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />900 solicitudes por ventana de 15 minutos con OAuth 2.0 Authorization Code con PKCE<br /><br />900 solicitudes por ventana de 15 minutos con solo Aplicación |
+| **Standard v1.1** | **X API v2** |
+| /1.1/lists/statuses.json<br /><br />900 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />900 solicitudes por ventana de 15 minutos con autenticación de solo aplicación | /2/lists/:id/tweets<br /><br />900 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />900 solicitudes por ventana de 15 minutos con OAuth 2.0 Authorization Code con PKCE<br /><br />900 solicitudes por ventana de 15 minutos con autenticación de solo aplicación |
 
 <div id="differences">
   #### Diferencias
 </div>
 
-**URLs de endpoints**
+**URL de endpoints**
 
 * Endpoints estándar v1.1:
   * GET https://api.x.com/1.1/lists/statuses.json
-    (Búsqueda de Publicaciones en una Lista especificada)
+    (Búsqueda de Publicaciones de una lista específica)
 * Endpoint de X API v2:
   * GET https://api.x.com/2/lists/:id/tweets
-    (Búsqueda de Publicaciones en una Lista especificada)
+    (Búsqueda de Publicaciones de una lista específica)
 
-**Requisitos de Aplicación y Proyecto**
+**Requisitos de la Aplicación y el Proyecto**
 
-Los endpoints de X API v2 requieren que uses credenciales de una [developer App](/es/resources/fundamentals/developer-apps) que esté asociada con un [Project](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de Aplicaciones independientes o Aplicaciones asociadas con un Proyecto.
+Los endpoints de X API v2 requieren que uses credenciales de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que esté asociada con un [Proyecto](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de aplicaciones independientes o aplicaciones asociadas con un proyecto.
 
 **Límites de objetos de datos por solicitud**
 
-El endpoint estándar v1.1 /lists/statuses permite devolver hasta 5000 Publicaciones por solicitud. Los nuevos endpoints v2 permiten devolver hasta 100 Publicaciones por solicitud. De forma predeterminada, se devolverán 100 objetos de usuario; para cambiar la cantidad de resultados tendrás que pasar un parámetro de consulta max&#95;results= con un número entre 1 y 100; luego puedes pasar el next&#95;token devuelto en el cuerpo de la respuesta al parámetro de consulta pagination&#95;token en tu siguiente solicitud.
+El endpoint estándar v1.1 /lists/statuses permite devolver hasta 5000 Publicaciones por solicitud. Los nuevos endpoints v2 permiten devolver hasta 100 Publicaciones por solicitud. De forma predeterminada, se devolverán 100 objetos de usuario; para cambiar la cantidad de resultados, deberás pasar un parámetro de consulta max&#95;results= con un número entre 1 y 100; después puedes pasar el next&#95;token devuelto en el cuerpo de la respuesta al parámetro de consulta pagination&#95;token en tu siguiente solicitud.
 
 **Formato de datos de la respuesta**
 
-Una de las mayores diferencias entre las versiones de endpoints estándar v1.1 y X API v2 es cómo seleccionas qué campos se devuelven en tu payload.
+Una de las diferencias más importantes entre las versiones de endpoints estándar v1.1 y X API v2 es cómo seleccionas qué campos se devuelven en tu carga útil.
 
-Para los endpoints estándar, recibes muchos de los campos de la respuesta de forma predeterminada y luego tienes la opción de usar parámetros para identificar qué campos adicionales o conjuntos de campos deben devolverse en el payload.
+Para los endpoints estándar, recibes muchos de los campos de la respuesta de forma predeterminada y luego tienes la opción de usar parámetros para identificar qué campos adicionales o conjuntos de campos deben devolverse en la carga útil.
 
-La versión de X API v2 solo entrega de forma predeterminada los campos id y text de la Publicación. Para solicitar cualquier campo u objeto adicional, necesitarás usar los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions). Cualquier campo de Publicación que solicites desde este endpoint se devolverá en el objeto principal de la Publicación. Cualquier campo de objeto expandido se devolverá en un objeto includes dentro de tu respuesta. Luego puedes hacer coincidir cualquier objeto expandido con el objeto principal de la Publicación haciendo coincidir los IDs del objeto principal y de los objetos expandidos. 
+La versión de X API v2 solo entrega los campos id y text de la Publicación de forma predeterminada. Para solicitar campos u objetos adicionales, deberás usar los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions). Cualquier campo de Publicación que solicites desde este endpoint se devolverá en el objeto principal de la Publicación. Cualquier campo de objeto expandido se devolverá en un objeto includes dentro de tu respuesta. Luego puedes hacer coincidir cualquier objeto expandido con el objeto principal de la Publicación haciendo coincidir los id del objeto principal y de los objetos expandidos. 
 
-A continuación se muestran ejemplos de posibles campos de Publicación y expansiones:
+A continuación, se muestran ejemplos de posibles campos de Publicación y expansiones:
 
 * attachments
 
@@ -87,22 +87,22 @@ A continuación se muestran ejemplos de posibles campos de Publicación y expans
 | **Endpoint** | **Expansión** |
 | /2/lists/:id/tweets | author&#95;id |
 
-Te recomendamos leer más sobre estos nuevos parámetros en sus respectivas guías o consultando nuestra guía sobre [cómo usar fields y expansions](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions). 
+Te recomendamos leer más sobre estos nuevos parámetros en sus respectivas guías o leyendo nuestra guía sobre [cómo usar fields y expansiones](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions). 
 
-También hemos preparado una [guía de migración de formato de datos](/es/x-api/migrate/data-format-migration) que puede ayudarte a relacionar los campos estándar v1.1 con los campos v2 más recientes. Esta guía también te proporcionará el parámetro específico de expansión y de campo que necesitarás pasar con tu solicitud v2 para devolver campos específicos. 
+También hemos preparado una [guía de migración de formato de datos](/es/x-api/migrate/data-format-migration) que puede ayudarte a mapear campos estándar v1.1 a los campos más recientes de v2. Esta guía también te proporcionará el parámetro específico de expansión y de campo que deberás pasar con tu solicitud v2 para devolver campos específicos. 
 
-Además de los cambios en cómo solicitas ciertos campos, X API v2 también introduce nuevos diseños JSON para los objetos devueltos por las APIs, incluidos los objetos de [Post](/es/x-api/fundamentals/data-dictionary#tweet) y de [user](/es/x-api/fundamentals/data-dictionary#user).
+Además de los cambios en cómo solicitas ciertos campos, X API v2 también introduce nuevos diseños JSON para los objetos devueltos por las API, incluidos los objetos de [Publicación](/es/x-api/fundamentals/data-dictionary#tweet) y de [usuario](/es/x-api/fundamentals/data-dictionary#user).
 
-* En el nivel raíz de JSON, los endpoints estándar devuelven objetos de Publicación en un array **statuses**, mientras que X API v2 devuelve un array **data**. 
+* En el nivel raíz de JSON, los endpoints estándar devuelven objetos de Publicación en una matriz **statuses**, mientras que X API v2 devuelve una matriz **data**. 
 
-* En lugar de hacer referencia a &quot;statuses&quot; Retweeted y Quoted, el JSON de X API v2 hace referencia a Publicaciones Retweeted y Quoted. Muchos campos heredados y obsoletos, como **contributors** y **user.translator&#95;type**, se están eliminando. 
+* En lugar de hacer referencia a &quot;statuses&quot; Retweeted y Quoted, el JSON de X API v2 hace referencia a Publicaciones retuiteadas y citadas. Muchos campos heredados y obsoletos, como **contributors** y **user.translator&#95;type**, se están eliminando. 
 
 * En lugar de usar tanto **favorites** (en el objeto de Publicación) como **favourites** (en el objeto de usuario), X API v2 usa el término **like**.
 
-* X está adoptando la convención de que los valores JSON sin valor (por ejemplo, **null**) no se escriben en el payload. Los atributos de Publicación y de usuario solo se incluyen si tienen valores no nulos.
+* X está adoptando la convención de que los valores JSON sin contenido (por ejemplo, **null**) no se escriben en la carga útil. Los atributos de Publicación y de usuario solo se incluyen si tienen valores no nulos.
    
 
-**Parámetros de la solicitud**
+**Parámetros de solicitud**
 
 Los siguientes parámetros de solicitud estándar v1.1 tienen equivalentes en X API v2:
 

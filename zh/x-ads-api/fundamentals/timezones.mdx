@@ -1,15 +1,15 @@
 ---
 title: 时区
-keywords: ["时区", "时区管理", "时区处理", "时区格式", "时区转换", "时区设置"]
+keywords: ["时区", "时区划分", "时区处理", "时区格式", "时区转换", "时区设置"]
 ---
 
 <div id="timezones-accounts-and-billing">
   ## 时区、账户和结算
 </div>
 
-Datetime 值始终以 UTC 时间返回（由 datetime 值末尾的 Z 表示）。在 POST 或 PUT 命令中，可以使用任意时区来指定 Datetime，并采用 ISO 8601 标准的时区格式。时间使用 [ISO-8601](http://en.wikipedia.org/wiki/ISO_8601) 的一个子集来表示。更具体地说，我们日期格式对应的 strptime 字符串为 `%Y-%m-%dT%l:%M:%S%z`。广告主账户的时区决定了正式结算数据被冻结时所对应的实际时间。
+Datetime 值始终以 UTC 时间返回（由 datetime 值末尾的 Z 标识）。在使用 ISO 8601 标准时区格式的 POST 或 PUT 命令中，可以使用任意时区来指定 datetime 值。时间使用 [ISO-8601](http://en.wikipedia.org/wiki/ISO_8601) 的一个子集来表示。更具体地说，我们日期格式的 strptime 字符串为 `%Y-%m-%dT%l:%M:%S%z`。广告主账户的时区决定了官方结算数据被冻结时所依据的实际时间。
 
-在账户级别查询 API（[GET accounts](/zh/x-ads-api/campaign-management#accounts)）时，你会得到类似如下的时区信息：
+在按账户级别查询 API（[GET accounts](/zh/x-ads-api/campaign-management#accounts)）时，你将会看到类似如下的时区信息：
 
 ```json
     {
@@ -34,24 +34,24 @@ Datetime 值始终以 UTC 时间返回（由 datetime 值末尾的 Z 表示）�
     }
 ```
 
-这包括两个时区值：`timezone`（概览参见 [维基百科上的时区条目](https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones)）和 `timezone_switch_at`。请注意，`timezone_switch_at` 以 UTC 时区（+00:00）提供，但它始终表示所指定时区中的午夜时间。
+其中包含两个时区值：`timezone`（概览请参阅 [维基百科上的时区条目](https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones)）和 `timezone_switch_at`。请注意，`timezone_switch_at` 以 UTC 时区（+00:00）给出，但始终表示指定时区中的午夜时间。
 
-广告主的时区不能通过 API 编辑。该属性由 X 的客户经理在合同/结算层面为广告主进行设置。
+广告主的时区无法通过 API 修改。该属性由 X 的客户经理在合同/结算层面为广告主进行设置。
 
-在创建报告并查询我们的分析端点时，请注意 `timezone_switch_at` 的值，因为在账号从 America/Los&#95;Angeles 时区切换到新的本地值的那一天，会存在一个数据空档期。
+在创建报表和查询我们的分析类端点时，请注意 `timezone_switch_at` 的取值，因为在账户从 America/Los&#95;Angeles 时区切换到新的本地时区的那一天会出现一个时间间隙。
 
 <div id="specifying-datetime-values-with-timezone">
   ### 使用时区指定日期时间值
 </div>
 
-日期时间值始终以 UTC 时间返回（由日期时间值末尾的 `Z` 表示）。在 POST 或 PUT 请求中，可以使用任意时区来指定日期时间，并采用 [ISO 8601 标准](http://en.wikipedia.org/wiki/ISO_8601)中定义的时区格式。例如，`2017-07-10T08:00:00-0800` 是一个可接受的输入值，并会被自动转换为 UTC 时间 `2017-07-10T16:00:00Z`。
+日期时间值始终以 UTC 时间返回（由日期时间值末尾的 `Z` 表示）。在 POST 或 PUT 命令中，可以使用任意时区来指定日期时间值，但必须采用 [ISO 8601 标准](http://en.wikipedia.org/wiki/ISO_8601) 中的时区格式。例如，`2017-07-10T08:00:00-0800` 是一个可接受的输入值，并会自动转换为 UTC 值 `2017-07-10T16:00:00Z`。
 
-在将 `granularity` 设为 `DAY` 或 `TOTAL` 的情况下使用 analytics 端点时，`start_time` 值必须指定为账户持有人本地时区中目标日期的午夜时间。应使用的时区偏移量是当前日期的偏移量，而不是目标日期当天的偏移量。比如，对于一个时区为 America/Los&#95;Angeles、当前处于太平洋夏令时的广告账户，其 UTC 偏移量是 -0700。因此，在 analytics 请求中，时间应指定为：`start_time=2017-05-21T07:00:00Z` 或 `start_time=2017-05-21T00:00:00-0700`。如果广告账户位于 Asia/Tokyo（其偏移量始终为 +09:00），则应指定为：`start_time=2017-05-20T15:00:00Z` 或 `start_time=2017-05-21T00:00:00+0900`。
+在使用 `granularity` 为 `DAY` 或 `TOTAL` 的 analytics 端点时，`start_time` 值必须指定为账号持有者本地时区中目标日期的午夜时间。所使用的时区偏移应为当前这一天的偏移，而不是目标日期那一天的偏移。例如，对于位于 America/Los&#95;Angeles 的广告账号，在太平洋夏令时间期间，UTC 偏移为 -0700。因此，在 analytics 请求中，时间应指定为：`start_time=2017-05-21T07:00:00Z` 或 `start_time=2017-05-21T00:00:00-0700`。如果广告账号位于 Asia/Tokyo，其偏移始终为 +09:00，则应指定为：`start_time=2017-05-20T15:00:00Z` 或 `start_time=2017-05-21T00:00:00+0900`。
 
 <div id="accepted-utc-offset-formats">
   ### 支持的 UTC 偏移量格式
 </div>
 
-请参阅 [ISO 8601 时区标识](http://en.wikipedia.org/wiki/ISO_8601#Time_zone_designators)。
+参见 [ISO 8601 时区标识符](http://en.wikipedia.org/wiki/ISO_8601#Time_zone_designators)。
 
 支持：`Z`、`-HHMM`、`+HHMM`、`-HH:MM`、`+HH:MM`、`-HH`、`+HH`

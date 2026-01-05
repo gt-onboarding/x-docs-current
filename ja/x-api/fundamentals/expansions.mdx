@@ -1,13 +1,13 @@
 ---
 title: Expansions
-keywords: ["expansions", "オブジェクトの展開", "オブジェクト展開", "入れ子になったオブジェクト", "関連オブジェクト", "ユーザーの展開", "メディアの展開", "ポストの展開"]
+keywords: ["expansions", "expand objects", "object expansion", "nested objects", "related objects", "expand users", "expand media", "expand tweets"]
 ---
 
-expansions を使用すると、開発者はペイロード内で参照されているオブジェクトを展開して取得できます。展開可能なオブジェクトは ID で参照されます。たとえば、[Posts lookup](/ja/x-api/posts/lookup/introduction) のペイロードで返される `referenced_tweets.id` および `author_id` フィールドは、完全なオブジェクトに展開できます。特定のポストを投稿したユーザーや、そのポストに含まれているメディア、投票、場所に関するフィールドを取得したい場合は、そのデータをレスポンスで受け取るために、リクエスト内で関連する `expansions` クエリパラメータを指定する必要があります。現在、ポスト、ユーザー、List、Space、およびダイレクトメッセージイベントオブジェクトを返す v2 エンドポイントは、すべて expansions をサポートしています（以下の例を参照）。
+expansions を使用すると、開発者はペイロード内で参照されているオブジェクトを展開できます。展開可能なオブジェクトは ID によって参照されます。たとえば、[Posts lookup](/ja/x-api/posts/lookup/introduction) のペイロードで返される `referenced_tweets.id` と `author_id` フィールドは、完全なオブジェクトへ展開できます。そのポストを投稿したユーザーに関連するフィールドや、そのポストに含まれているメディア、投票、場所に関連するフィールドをリクエストしたい場合は、レスポンスでそのデータを受け取るために、リクエスト内で関連する `expansions` クエリパラメータを指定する必要があります。現在、ポスト、ユーザー、リスト、Space、ダイレクトメッセージイベントオブジェクトを返す v2 エンドポイントは、すべて expansions をサポートしています（以下の例を参照してください）。
 
-リクエストに `expansions` を含めると、その展開されたオブジェクトのデフォルトのフィールドが同じレスポンス内に含まれます。これにより、別々のリクエストを行うことなく、同じレスポンスで追加のデータを取得できます。展開されたオブジェクトに関連する追加の[フィールド](/ja/x-api/fundamentals/fields)をリクエストしたい場合は、その展開されたオブジェクトに対応するフィールドパラメータと、レスポンスで受け取りたいフィールドのカンマ区切りリストを指定できます。なお、フィールドはクエリで指定した順序で返されるとは限りません。
+リクエストに expansion を含めると、その展開されたオブジェクトのデフォルトフィールドを同じレスポンス内に含めます。これにより、別々のリクエストを行うことなく、同じレスポンスで追加のデータを返すことができます。展開されたオブジェクトに関連する追加の[フィールド](/ja/x-api/fundamentals/fields)をリクエストしたい場合は、その展開対象オブジェクトに対応するフィールドパラメータと、レスポンスで受け取りたいフィールドのカンマ区切りリストを指定できます。なお、フィールドはクエリで指定した順序どおりに返されるとは限りません。
 
-以下のポストのペイロードには、展開可能な関連オブジェクトを参照する ID が含まれています。たとえば、ポストを投稿したユーザーの `author_id`、*参照先*ポストの `id`、およびメディア添付用の `media_key` などです。
+次のポストペイロードには、展開可能な関連オブジェクトの参照 ID が含まれており、ポストを投稿したユーザーの `author_id`、*参照されている* ポストの `id`、メディア添付用の `media_key` などがあります。
 
 ```json
 {
@@ -29,65 +29,65 @@ expansions を使用すると、開発者はペイロード内で参照されて
 ```
 
 <div id="available-expansions-for-post-payloads">
-  ### ポストペイロードで利用可能な expansions
+  ### ポストペイロードで使用可能なexpansions
 </div>
 
-| Expansion                      | Description                                                                        |
+| Expansion                      | 説明                                                                        |
 |:--------------------------------|:------------------------------------------------------------------------------------|
-| `author_id`                    | ポストの投稿者を表すユーザーオブジェクトを返します                               |
-| `referenced_tweets.id`         | このポストが参照しているポストオブジェクト（リポスト、引用ポスト、返信のいずれか）を返します |
+| `author_id`                    | ポストの作成者を表すuserオブジェクトを返します                               |
+| `referenced_tweets.id`         | このポストが参照しているポスト（リポスト、引用ポスト、または返信）を表すポストオブジェクトを返します |
 | `edit_history_tweet_ids`       | ポストの編集履歴に含まれるポストオブジェクトを返します                        |
-| `in_reply_to_user_id`          | このリクエスト対象のポストが返信しているポストの投稿者を表すユーザーオブジェクトを返します |
-| `attachments.media_keys`       | ポストに含まれる画像、動画、GIF を表すメディアオブジェクトを返します  |
-| `attachments.poll_ids`         | ポストに含まれる投票に関するメタデータを含む投票オブジェクトを返します        |
-| `geo.place_id`                 | ポストでタグ付けされた位置情報に関するメタデータを含む場所オブジェクトを返します     |
-| `entities.mentions.username`   | ポスト内でメンションされているユーザーを表すユーザーオブジェクトを返します                          |
-| `referenced_tweets.id.author_id` | 参照されているポストの投稿者を表すユーザーオブジェクトを返します                      |
+| `in_reply_to_user_id`          | このポストが返信している相手のポスト作成者を表すuserオブジェクトを返します |
+| `attachments.media_keys`       | ポストに含まれる画像、動画、GIFを表すメディアオブジェクトを返します  |
+| `attachments.poll_ids`         | ポストに含まれる投票のメタデータを含むpollオブジェクトを返します        |
+| `geo.place_id`                 | ポストでタグ付けされた場所に関するメタデータを含むplaceオブジェクトを返します     |
+| `entities.mentions.username`   | ポストでメンションされたユーザーを表すuserオブジェクトを返します                          |
+| `referenced_tweets.id.author_id` | 参照されているポストの作成者を表すuserオブジェクトを返します                      |
 
 <div id="available-expansion-for-user-payloads">
-  ### ユーザーペイロードで利用可能なエクスパンション
+  ### ユーザーペイロードで利用可能な拡張
 </div>
 
 | Expansion          | Description                                               |
 |:--------------------|:-----------------------------------------------------------|
-| `pinned_tweet_id`  | ユーザープロフィールの最上部にピン留めされているポストを表すポストオブジェクトを返します |
+| `pinned_tweet_id`  | ユーザーのプロフィールの先頭に固定されているポストを表す Post オブジェクトを返します |
 
 <div id="available-expansions-for-direct-message-event-payloads">
-  ### ダイレクトメッセージイベントペイロードで利用可能なexpansions
+  ### ダイレクトメッセージイベントペイロードで利用可能な expansions
 </div>
 
 | Expansion                | Description                                                              |
 |:--------------------------|:--------------------------------------------------------------------------|
-| `attachments.media_keys` | ダイレクトメッセージに添付されたメディアオブジェクトを返します             |
-| `referenced_tweets.id`   | ダイレクトメッセージ内で参照されているポストオブジェクトを返します            |
-| `sender_id`              | ダイレクトメッセージの作成者であり、会話に参加者を招待したユーザーを表す User オブジェクトを返します |
-| `participant_ids`        | 会話に参加または退出した参加者を表す User オブジェクトを返します |
+| `attachments.media_keys` | ダイレクトメッセージに添付された Media オブジェクトを返します             |
+| `referenced_tweets.id`   | ダイレクトメッセージ内で参照された Post オブジェクトを返します            |
+| `sender_id`              | ダイレクトメッセージの作成者および会話への参加を招待したユーザーを表す User オブジェクトを返します |
+| `participant_ids`        | 会話に参加または退出したユーザーを表す User オブジェクトを返します |
 
 <div id="available-expansions-for-spaces-payloads">
-  ### Spaces ペイロードで利用可能な expansions
+  ### Spaces のペイロードで利用可能な expansions
 </div>
 
 | Expansion          | Description                                               |
 |:--------------------|:-----------------------------------------------------------|
 | `invited_user_ids` | 招待されたアカウントを表す User オブジェクトを返します |
-| `speaker_ids`      | Space で発言したアカウントを表す User オブジェクトを返します |
+| `speaker_ids`      | Space 中に発言したアカウントを表す User オブジェクトを返します |
 | `creator_id`       | Space を作成したアカウントを表す User オブジェクトを返します |
-| `host_ids`         | ホストに設定されたアカウントを表す User オブジェクトを返します |
+| `host_ids`         | ホストとして設定されたアカウントを表す User オブジェクトを返します |
 | `topics_ids`       | 作成者によって設定されたトピックの説明を返します |
 
 <div id="available-expansion-for-lists-payloads">
-  ### リストのペイロードで利用可能な拡張
+  ### List ペイロードで利用可能な Expansion
 </div>
 
 | Expansion   | Description                                                    |
 |:-------------|:----------------------------------------------------------------|
-| `owner_id`  | リストを作成および管理しているアカウントを表す User オブジェクトを返します |
+| `owner_id`  | List を作成し管理しているアカウントを表す User オブジェクトを返します |
 
 <div id="expanding-the-media-object">
-  ## メディアオブジェクトの拡張
+  ## メディアオブジェクトの展開
 </div>
 
-次のリクエストでは、デフォルトのポストフィールドに加えて、`geo.place_id` の展開も含めるよう指定しています。
+次のリクエストでは、デフォルトのポストフィールドに加えて `geo.place_id` の expansion を含めるよう指定しています。
 
 **サンプルリクエスト**
 
@@ -95,7 +95,7 @@ expansions を使用すると、開発者はペイロード内で参照されて
 {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
 ```
 
-**レスポンスの例**
+**レスポンス例**
 
 ```
 {`{
@@ -122,7 +122,7 @@ expansions を使用すると、開発者はペイロード内で参照されて
   ## Pollオブジェクトの展開
 </div>
 
-次のリクエストでは、デフォルトのポストフィールドに加えて `attachments.poll_ids` の expansion を含めるようにリクエストしています。
+次のリクエストでは、デフォルトのポストのフィールドに加えて Pollオブジェクトを含めるために、`attachments.poll_ids` のexpansionsを指定しています。
 
 **サンプルリクエスト**
 
@@ -167,15 +167,15 @@ expansions を使用すると、開発者はペイロード内で参照されて
   ## Place オブジェクトの展開
 </div>
 
-次のリクエストでは、デフォルトのポストフィールドに加えて `geo.place_id` を expansions として指定して取得しています。
+次のリクエストでは、デフォルトのポストのフィールドに加えて `geo.place_id` の expansion を含めるように指定しています。
 
-**サンプルリクエスト**
+**リクエスト例**
 
 <CodeBlock language="bash">
   {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
 </CodeBlock>
 
-**サンプルレスポンス**
+**レスポンス例**
 
 ```s
 {`{

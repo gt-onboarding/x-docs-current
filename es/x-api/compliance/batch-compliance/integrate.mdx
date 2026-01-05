@@ -1,30 +1,30 @@
 ---
 title: Guía de integración
 sidebarTitle: Guía de integración
-keywords: ["integración de cumplimiento por lotes", "integración de cumplimiento en lotes", "integración de trabajos de cumplimiento", "configuración de cumplimiento por lotes"]
+keywords: ["integración de cumplimiento por lotes", "integración batch de cumplimiento", "integración de jobs de cumplimiento", "configuración del cumplimiento por lotes"]
 ---
 
 import { Button } from '/snippets/es/button.mdx';
 
 <div id="working-with-resumable-uploads">
-  ## Trabajar con subidas reanudables
+  ## Trabajar con cargas reanudables
 </div>
 
-Al usar los endpoints de Batch Compliance, los desarrolladores pueden subir por lotes grandes volúmenes de datos de X y determinar qué acción se necesita para garantizar que sus conjuntos de datos reflejen la intención del usuario y el estado actual del contenido en X. Subir grandes cantidades de datos a un servidor remoto es una operación relativamente sencilla cuando los sistemas y la conectividad son estables y confiables. Sin embargo, esto no siempre es así. Algunos entornos pueden imponer un tiempo de espera de conexión, lo que corta efectivamente la conexión entre tu aplicación y el servidor de carga después de un período de tiempo determinado; también puedes encontrarte con problemas de conexión, por ejemplo, cuando intentas subir un archivo grande desde tu computadora portátil a través de una conexión Wi‑Fi. En estas circunstancias, es preferible subir porciones más pequeñas de ese archivo a la vez, en lugar de mantener una única conexión continua.
+Al utilizar los endpoints de batch compliance, los desarrolladores pueden cargar por lotes grandes volúmenes de datos de X y determinar qué acciones son necesarias para garantizar que sus conjuntos de datos reflejen la intención del usuario y el estado actual del contenido en X. Cargar grandes volúmenes de datos en un servidor remoto es una operación relativamente sencilla cuando los sistemas y la conectividad son estables y fiables. Sin embargo, no siempre es así. Algunos entornos pueden imponer un tiempo de espera de conexión, lo que corta la conexión entre tu aplicación y el servidor de carga después de un período de tiempo determinado; también puedes encontrarte con problemas de conexión, por ejemplo, cuando intentas cargar un archivo grande desde tu portátil a través de una conexión wifi. En estas circunstancias, es preferible cargar porciones más pequeñas de ese archivo a la vez, en lugar de tener una única conexión continua.
 
-Los endpoints de Batch Compliance de X se basan en Google Cloud Storage para procesar archivos grandes. Este tipo de almacenamiento está optimizado para varias aplicaciones; Cloud Storage admite una técnica para gestionar archivos grandes llamada subidas reanudables.
+Los endpoints de batch compliance de X se basan en Google Cloud Storage para procesar archivos grandes. Este tipo de almacenamiento está optimizado para diversas aplicaciones; Cloud Storage admite una técnica para gestionar archivos grandes llamada cargas reanudables.
 
-Si la subida falla en algún momento, Google Cloud Storage puede reanudar la operación desde donde se interrumpió.
+Si la carga falla en algún momento, Google Cloud Storage puede reanudar la operación desde donde se interrumpió.
 
 <div id="creating-a-resumable-job">
-  ### Crear una tarea reanudable
+  ### Creación de un trabajo reanudable
 </div>
 
 <div id="step-one">
   #### Paso uno:
 </div>
 
-Primero, tendrás que crear una tarea de cumplimiento y especificar si subirás ids de Publicación o ids de usuario (usando el parámetro type). Además, añade resumable al cuerpo y establécelo en true. Asegúrate de reemplazar el $APP&#95;ACCESS&#95;TOKEN que aparece a continuación con tu Token de acceso de solo Aplicación.
+Primero, tendrás que crear un trabajo de cumplimiento y especificar si subirás Post IDs o user IDs (usando el parámetro type). Además, agrega resumable al cuerpo y establécelo en true. Asegúrate de reemplazar $APP&#95;ACCESS&#95;TOKEN que aparece a continuación por tu Token de acceso de solo Aplicación.
 
 ```
 curl --request POST \
@@ -58,7 +58,7 @@ Anota el valor de upload&#95;url; lo necesitarás en los siguientes pasos.
   #### Paso dos:
 </div>
 
-A continuación, debes iniciar la carga reanudable. Para hacerlo, realiza una solicitud **POST** a `upload_url` del paso anterior y asegúrate de incluir los siguientes encabezados:
+A continuación, deberás iniciar la carga reanudable. Para hacerlo, realiza una solicitud **POST** al `upload_url` del paso anterior y asegúrate de incluir los siguientes encabezados:
 
 Content-Type: text/plain
 
@@ -74,21 +74,21 @@ curl --request POST \
  'x-goog-resumable: start
 ```
 
-Si esta llamada se realiza correctamente, recibirás un código de estado 201. Luego, en los encabezados de la respuesta, copia el valor del encabezado Location, que tendrá un aspecto similar al siguiente:
+Si esta solicitud se completa correctamente, recibirás un código de respuesta 201. Luego, en los encabezados de la respuesta, copia el valor del encabezado Location, que tendrá un aspecto similar a este:
 
 ```
 https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submission/1202726487847104512_1430227686685757442?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210824%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210824T175707Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-goog-resumable&X-Goog-Signature=890d958f9c7dcb7f238e4971b59da5afc5b8329fb197c67b5930fe0f9dfe180afe2d4bec341111809b88ccfab46ab1f81f4242abc1af7b67c6e8977c52e6d486f5f43ce6a37a7a6530d25f15e2bcd9bb54655fe4ee22b26f8886ba71b67b7b11afd1198d658d1b6f0c41260f55260a260e1be0239977feba43dce40bc0e8e6293a4a3a3f7ee0afc74d3d2f7f2d3d514f108d5887a52ac85760385e5b9bb67cd26bfcf6b1c19151ea8111e217a29407722dc0dc9ab373334e88c18159546237ec9334f9a1e33717dc82800c6a45bba82706d5aece84ecdf3fcac52b21c8a3085a639047cf2707a8b9e4c296fc7cf05edbb110f07b89e38f0f5ea77e8b313cade7&upload_id=ADPycds-_Ow7aqcpbG4XguXSVAgd_2fy-XiDA2qm-It9PCwBlZhF4e2bfOAQzEmRJ4T_l6jU6LfYdfrKa_KlFFBOyx3PjYzrxQ
 ```
 
-A continuación, puedes subir los ID de Publicaciones o de usuarios a esta ubicación siguiendo a partir del paso dos de la [guía de inicio rápido](/es/x-api/compliance/batch-compliance#getting-started-with-the-batch-compliance-endpoints).
+A continuación, puedes subir los id de tus Publicaciones o usuarios a esta ubicación, comenzando desde el paso dos de [la guía de inicio rápido](/es/x-api/compliance/batch-compliance#getting-started-with-the-batch-compliance-endpoints).
 
-Debido a su complejidad técnica, las cargas reanudables se utilizan mejor mediante código. Esta guía utilizará Node.js con la [biblioteca de peticiones needle](https://www.npmjs.com/package/needle).
+Debido a su complejidad técnica, las cargas reanudables se utilizan mejor mediante código. En esta guía utilizaremos Node.js con la [biblioteca de peticiones needle](https://www.npmjs.com/package/needle).
 
 <div id="install-the-dependencies">
   ### Instala las dependencias
 </div>
 
-Antes de continuar, debes tener instalado un entorno de Node.js; puedes obtener Node.js desde su sitio web oficial. Una vez instalado, Node.js incluye una utilidad llamada npm; asegúrate de que tanto Node como npm estén instalados ejecutando el siguiente comando y verifica que no genere un error.
+Antes de continuar, debes tener instalado un entorno de Node.js; puedes obtener Node.js desde su sitio web. Una vez instalado, Node.js incluirá una utilidad llamada npm; asegúrate de que tanto Node.js como npm estén instalados ejecutando el siguiente comando y comprobando que no produzca ningún error.
 
 `$ npm -v
 6.4.1`
@@ -97,13 +97,13 @@ Un número de versión similar a este indica que tu entorno está listo (ten en 
 
 `$ npm install -g needle`
 
-Ya está todo listo; no se requiere ninguna configuración adicional.
+Con esto es suficiente; no se requiere ninguna configuración adicional.
 
 <div id="request-a-resumable-destination">
   #### Solicitar un destino reanudable
 </div>
 
-Al crear un nuevo trabajo, establece el parámetro `resumable` en `true` para obtener un destino que admita una carga reanudable. En el payload de respuesta, recibirás un valor `upload&#95;url`.
+Al crear un trabajo nuevo, establece el parámetro `resumable` en `true` para obtener un destino que admita una carga reanudable. En el payload de la respuesta recibirás un valor para `upload&#95;url`.
 
 ```
 "upload_url":\
@@ -114,9 +114,9 @@ Al crear un nuevo trabajo, establece el parámetro `resumable` en `true` para ob
   #### Prepara el código para subir un archivo
 </div>
 
-De forma predeterminada, la biblioteca creará un nuevo destino de carga a partir de una ubicación de carga (llamada bucket) y el nombre del archivo que deseas subir. Dado que los endpoints de cumplimiento por lotes (batch compliance) crean su propio destino, tendremos que indicarle a la biblioteca que ya contamos con una ubicación preparada para aceptar nuestra carga.
+De forma predeterminada, la biblioteca creará un nuevo destino de carga a partir de una ubicación de carga (llamada bucket) y el nombre del archivo que deseas subir. Como los endpoints de batch compliance crean su propio destino, necesitaremos indicarle a la biblioteca que ya tenemos una ubicación lista para aceptar nuestra carga. 
 
-Debemos pasar este valor a la biblioteca de carga, junto con el nombre del archivo que contiene los datos que se van a subir. Crea un archivo y asígnale el nombre ***twitter-upload.js***. Agrega el siguiente código:
+Deberás pasar este valor a la biblioteca de carga, junto con el nombre del archivo que contiene los datos que se van a subir. Crea un archivo y asígnale el nombre ***twitter-upload.js***. Agrega el siguiente código:
 
 ```
 const needle = require('needle');
@@ -208,10 +208,10 @@ requestResumableSession(uploadURL).then(result => console.log('Carga completada'
 
 Guarda el archivo donde tenga más sentido. A continuación, en tu línea de comandos, invoca el script y pasa dos parámetros:
 
-1. El primero será la ubicación del archivo (con los IDs de Publicaciones o Usuarios) que deseas cargar.
-2. El segundo será la URL de carga que obtuviste en la respuesta del endpoint de cumplimiento.
+1. El primero será la ubicación del archivo (con los IDs de la Publicación o del Usuario) que deseas subir.
+2. El segundo será la URL de carga que recibimos de la respuesta del endpoint de cumplimiento.
 
-Asegúrate de que la URL esté entre comillas dobles y haz lo mismo con el nombre de tu archivo si contiene espacios u otros caracteres:
+Asegúrate de que la URL esté entre comillas dobles y haz lo mismo con el nombre del archivo si contiene espacios u otros caracteres:
 
 ```
 node twitter-upload.js compliance_upload.txt\
@@ -224,8 +224,8 @@ Verás una salida similar a esta:
 Upload not completed, resuming
 Initiating upload`
 
-Puedes pausar la carga en cualquier momento pulsando Ctrl + C o cerrando la ventana de la línea de comandos. Podrás reanudar la carga desde donde la dejaste cuando ejecutes el mismo comando más tarde. Una vez que el archivo se haya cargado por completo, verás el siguiente mensaje:
+Puedes pausar la carga en cualquier momento presionando Ctrl + C o cerrando la línea de comandos. Podrás reanudar la carga desde donde la dejaste cuando ejecutes el mismo comando más adelante. Una vez que el archivo se haya cargado por completo, verás el siguiente mensaje:
 
 `Upload complete`
 
-En este punto, podrás usar el [endpoint de estado de cumplimiento](/es/x-api/compliance/get-compliance-job) para comprobar el estado de tu trabajo de cumplimiento y podrás descargar el resultado de la tarea de cumplimiento cuando esté completo.
+En este punto, podrás usar el [endpoint de estado de cumplimiento](/es/x-api/compliance/get-compliance-job) para comprobar el estado de tu tarea de cumplimiento y podrás descargar el resultado de cumplimiento cuando haya finalizado.

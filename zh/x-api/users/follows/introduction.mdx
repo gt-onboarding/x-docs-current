@@ -1,22 +1,22 @@
 ---
-title: 简介
-sidebarTitle: 简介
-keywords: ["关注", "关注者", "关注中", "关注关系", "网络分析", "用户关系", "关注查询", "管理关注"]
+title: 引言
+sidebarTitle: 引言
+keywords: ["关注", "粉丝", "关注中", "关注关系", "网络分析", "用户关系", "关注关系查询", "管理关注关系"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
 
-我们提供两类端点，帮助你查询、创建和删除关注关系：`follows lookup` 和 `manage follows`。
+我们提供两组端点组，帮助你查询、创建和删除关注关系：follows lookup 和 manage follows。
 
 <div id="follows-lookup">
-  ### 关注关系查找
+  ### 关注关系查询
 </div>
 
-仅向拥有 [Enterprise 访问权限](/zh/x-api/getting-started/about-x-api) 的用户开放
+仅对具有 [Enterprise access](/zh/x-api/getting-started/about-x-api) 的用户开放
 
-关注关系查找端点可让你探索和分析用户之间的关系，这有时也称为网络分析。具体来说，有两个 REST 端点会返回 [user 对象](/zh/x-api/fundamentals/data-dictionary#user)，用于表示指定用户正在关注谁，或者谁正在关注指定用户。
+关注关系查询端点可让你探索和分析用户之间的关系，这有时也称为网络分析。具体来说，有两个 REST 端点会返回 [user objects](/zh/x-api/fundamentals/data-dictionary#user)，表示某个指定用户正在关注的用户，或正在关注该指定用户的用户。
 
-你可以使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)、[仅应用](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 或 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 对该端点进行身份验证。你每次最多可请求 1,000 个用户，并且会提供分页令牌，用于在大型结果集中进行翻页。
+你可以在调用这些端点时使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication)、[App only](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 或 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 进行身份验证。每次请求最多可返回 1,000 个用户，并会提供分页令牌，用于遍历大型结果集。
  
 
 <div id="manage-follows">
@@ -25,20 +25,20 @@ import { Button } from '/snippets/zh/button.mdx';
 
 管理关注相关的端点可让你关注或取消关注用户。
 
-由于你是代表某个用户发起请求，因此必须使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 或 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 对这些端点进行身份验证，并使用与你所代表的用户关联的用户访问令牌。你可以使用 [三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)（OAuth 1.0a）或 [Authorization Code with PKCE 授权流程](/zh/resources/fundamentals/authentication#how-to-connect-to-endpoints-using-oauth-2-0-authorization-code-flow-with-pkce))（OAuth 2.0）生成该用户访问令牌。
+由于你是代表某个用户发起请求，必须使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 或 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 对这些端点进行身份验证，并使用与你所代表的该用户关联的用户访问令牌（user Access Tokens）。你可以使用 [3-legged OAuth flow](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)（OAuth 1.0a）或者 [Authorization Code with PKCE grant flow](/zh/resources/fundamentals/authentication#how-to-connect-to-endpoints-using-oauth-2-0-authorization-code-flow-with-pkce))（OAuth 2.0）来生成该用户访问令牌。
 
-对于每个已通过身份验证的用户，你每天最多可以代表其执行 400 次关注操作；并且在你所有已通过身份验证的用户中，每个应用每天最多可以执行 1,000 次此类操作。例如，如果你有五个已通过身份验证的用户，你可以使用其中两个用户分别执行每天 400 次关注操作（每用户上限），总计 800 次操作，剩余的 200 次操作（每应用）则需要在另外三个用户之间分配。此限制不适用于取消关注端点，该端点单独有每天 500 次操作（每应用）的限制。
+对于每个已认证用户，你每天最多可以代表其执行 400 次关注操作；在所有已认证用户中，单个应用每天最多可以执行 1,000 次关注操作。例如，如果你有五个已认证用户，可以使用其中两个用户各自每天关注 400 个用户（每个用户上限），总计 800 次操作，然后需要在剩余三个用户之间分配剩余的 200 次操作（应用级别上限）。此限制不适用于取消关注端点，后者有单独的每天 500 次操作（每个应用）的限制。
 
 <Note>
   **账号设置**
 
   要访问这些端点，你需要：
 
-  * 一个已通过审批的 [开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
-  * 使用位于某个 [项目](/zh/resources/fundamentals/projects) 中的 [开发者应用](/zh/resources/fundamentals/developer-apps) 的密钥和令牌进行身份验证。 
+  * 一个已获批准的 [开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * 使用位于某个 [项目](/zh/resources/fundamentals/projects) 中的 [开发者应用](/zh/resources/fundamentals/developer-apps) 所提供的密钥和令牌进行身份验证。
 </Note>
 
-在我们的 [入门指南](/zh/x-api/getting-started/getting-access) 中了解更多关于如何获取 X API v2 端点访问权限的信息。
+在我们的 [入门指南](/zh/x-api/getting-started/getting-access) 中了解更多关于获取 X API v2 端点访问权限的信息。
 
 <div class="flex space-x-2">
   <Button href="/zh/x-api/users/follows/quickstart">

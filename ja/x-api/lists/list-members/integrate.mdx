@@ -1,7 +1,7 @@
 ---
-title: インテグレーションガイド
-sidebarTitle: インテグレーションガイド
-keywords: ["リストメンバー連携", "リストメンバー ガイド", "リストメンバー セットアップ", "リストメンバーシップ連携", "リストメンバー連携ガイド"]
+title: 統合ガイド
+sidebarTitle: 統合ガイド
+keywords: ["リストメンバーの統合", "リストメンバーガイド", "リストメンバーのセットアップ", "リストメンバーシップの統合", "リストメンバー統合ガイド"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
@@ -10,100 +10,100 @@ import { Button } from '/snippets/ja/button.mdx';
   ## 統合ガイド
 </div>
 
-このページでは、List members エンドポイントをシステムに統合する際に理解しておくべき、いくつかのツールと重要な概念を紹介します。ページは次のセクションで構成されています。
+このページでは、List メンバー関連エンドポイントをシステムに統合する際に知っておくべき、いくつかのツールと重要な概念について説明します。本ページは次のセクションで構成されています。
 
-* [Helpful tools](#helpful)
+* [便利なツール](#helpful)
 * 重要な概念
-* [Authentication](#authentication)
-* [developer portal、プロジェクト、アプリ](#portal)
+* [認証](#authentication)
+* [Developer Portal、プロジェクト、アプリ](#portal)
 * [レート制限](#limits)
 * [フィールドと expansions](#fields)
 * [ページネーション](#pagination)
 
 <div id="helpful-tools">
-  ### 役立つツール
+  ### 便利なツール
 </div>
 
-このエンドポイントを統合する際に役立つ重要な概念について説明する前に、次のツールに慣れておくことをおすすめします。
+このエンドポイントを統合する際に役立つ主要な概念の説明に入る前に、まずは次のツールに慣れておくことをおすすめします。
 
 <div id="postman">
   #### Postman
 </div>
 
-Postman は、エンドポイントのテストに使える便利なツールです。各 Postman リクエストには、どのような項目を利用できるかをすばやく把握できるよう、すべてのパスパラメータとボディパラメータが含まれています。Postman コレクションについて詳しくは、「[Using Postman](/ja/tutorials/postman-getting-started)」ページをご覧ください。 
+Postman は、エンドポイントをテストするのに使用できる優れたツールです。各 Postman リクエストには、利用可能な項目をすばやく把握できるよう、すべてのパスパラメータおよびボディパラメータが含まれています。Postman コレクションの詳細については、[&quot;Using Postman&quot;](/ja/tutorials/postman-getting-started) ページをご覧ください。 
 
 <div id="code-samples">
   #### コードサンプル
 </div>
 
-お好みのプログラミング言語でこのエンドポイントを利用するコードをすぐに試したい場合は、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)に、出発点として利用できるさまざまなコードサンプルを用意しています。
+お好みのプログラミング言語のコードでこのエンドポイントを試してみたいですか？[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で、出発点として利用できるさまざまなコードサンプルを用意しています。
 
 <div id="third-party-libraries">
   #### サードパーティライブラリ
 </div>
 
-コミュニティが提供する [サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview) を活用して、手早く始めましょう。適切なバージョンタグを確認することで、v2 エンドポイントに対応したライブラリを見つけることができます。
+コミュニティ製の [サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview) を活用して、開発を始めてください。適切なバージョンタグを確認することで、v2 エンドポイントに対応したライブラリを見つけることができます。
 
 <div id="key-concepts">
-  ### 主要な概念
+  ### 重要な概念
 </div>
 
 <div id="authentication">
   #### 認証
 </div>
 
-すべての X API v2 エンドポイントでは、「キーとトークン」とも呼ばれる一連の認証情報を使ってリクエストを認証する必要があります。Lists の **lookup** エンドポイントに対するリクエストの認証には、OAuth 1.0a User Context、OAuth 2.0 Authorization Code with PKCE、または App only のいずれかを使用できます。ただし、Lists の **manage** エンドポイントには、OAuth 1.0a User Context もしくは OAuth 2.0 で認証しなければなりません。 
+すべての X API v2 エンドポイントでは、「キーとトークン」とも呼ばれる一連の認証情報を使用してリクエストを認証する必要があります。リストの **lookup** エンドポイントに対するリクエストの認証には、OAuth 1.0a User Context、OAuth 2.0 Authorization Code with PKCE、または App only のいずれかを使用できます。ただし、リストの **manage** エンドポイントを利用する場合は、OAuth 1.0a User Context もしくは OAuth 2.0 で認証しなければなりません。 
 
-[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) では、リクエストを成功させるために、API Key とユーザーアクセストークンのセットを使用する必要があります。アクセストークンは、リクエストを代行して行う対象ユーザーに関連付けられている必要があります。別のユーザーのアクセストークンのセットを生成したい場合は、そのユーザーが [3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用してあなたの App を承認しなければなりません。
+[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) では、一連の API キーとユーザー アクセストークンを使用してリクエストを正常に実行する必要があります。アクセストークンは、あなたが代理でリクエストを送信するユーザーに関連付けられている必要があります。別のユーザーのアクセストークンを生成したい場合、そのユーザーは [3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用してあなたの App を承認する必要があります。
 
-OAuth 1.0a は扱いが難しい場合がある点に注意してください。この認証方法に慣れていない場合は、[library](/ja/x-api/tools-and-libraries/overview)（ライブラリ）を使用するか、Postman のようなツールを利用するか、あるいは OAuth 2.0 もしくは App only を使用してリクエストを認証することをおすすめします。
+OAuth 1.0a は扱いが難しい場合があることに注意してください。この認証方法に不慣れな場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) を使用するか、Postman のようなツールを利用するか、OAuth 2.0 もしくは App only を利用してリクエストを認証する方法をお勧めします。
 
-[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや、複数デバイス間にまたがる認可フローをより細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、粒度の細かいスコープを個別に選択できます。 
+[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや複数デバイス間にまたがる認可フローをより細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、きめ細かなスコープを選択できます。 
 
 自分の App で OAuth 2.0 を有効にするには、developer portal の App 設定セクションにある App の認証設定で OAuth 2.0 を有効化する必要があります。
 
-[App only](/ja/resources/fundamentals/authentication#oauth-2-0) では、リクエストと一緒に [App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡すだけで済みます。App only Access Token は、開発者アプリ内で直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。
+[App only](/ja/resources/fundamentals/authentication#oauth-2-0) では、リクエストに [App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡すだけで済みます。App only アクセストークンは、開発者アプリ内で直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。
 
-[App only](/ja/resources/fundamentals/authentication#oauth-2-0) では、リクエストと一緒に [App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡すだけで済みます。App only Access Token は、開発者アプリ内で直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。
+[App only](/ja/resources/fundamentals/authentication#oauth-2-0) では、リクエストに [App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡すだけで済みます。App only アクセストークンは、開発者アプリ内で直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。
 
 <div id="developer-portal-projects-and-developer-apps">
-  #### developer portal、プロジェクト、および開発者アプリ
+  #### Developer portal、プロジェクト、および開発者アプリ
 </div>
 
-X API v2 エンドポイントで使用できる認証情報一式を取得するには、[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内で[プロジェクト](/ja/resources/fundamentals/projects)を設定し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成します。その後、開発者アプリ内で自分のキーとトークンを確認できます。
+X API v2 エンドポイントで利用できる一連の認証情報を取得するには、まず [開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info) し、そのアカウント内に [プロジェクト](/ja/resources/fundamentals/projects) を設定し、そのプロジェクト内に [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成する必要があります。その後、開発者アプリ内でキーとトークンを確認できます。
  
 
 <div id="rate-limits">
   #### レート制限
 </div>
 
-毎日、何千もの開発者が X API にリクエストを送信しています。これらの大量のリクエストを管理するために、各エンドポイントごとに[レート制限](/ja/x-api/fundamentals/rate-limits)が設定されており、アプリまたは認証済みユーザーに代わって行えるリクエスト数が制限されています。
+毎日、何万もの開発者が X API にリクエストを送信しています。これら膨大なリクエストを管理するために、各エンドポイントには[レート制限](/ja/x-api/fundamentals/rate-limits)が設けられており、あなたのアプリや認証済みユーザーに代わって行えるリクエスト数には上限があります。 
 
-Lookup（GET）エンドポイントにはアプリレベルとユーザーレベルの両方のレート制限があり、manage（POST/DELETE）エンドポイントにはユーザーレベルのレート制限があります。アプリレベルのレート制限とは、開発者であるあなたが、任意の開発者アプリ（API Key と API Secret Key、または App-only Access Token のいずれかを使用していると想定）から、一定期間内にそのエンドポイントへ送信できるリクエスト数に上限があることを意味します。ユーザーレベルのレート制限とは、あなたがリクエストを送信している対象の認証済みユーザーが、任意の開発者アプリを通じて行える List のルックアップ回数に上限があることを意味します。
+Lookup（GET）エンドポイントには App レベルとユーザーレベルの両方のレート制限が、manage（POST/DELETE）エンドポイントにはユーザーレベルのレート制限が適用されます。App レベルのレート制限とは、開発者であるあなたが、任意の App（API Key と API Secret Key、または App のみのアクセストークンを使用していると想定）から、一定期間内にこのエンドポイントへ送信できるリクエスト数に上限があることを意味します。ユーザーレベルのレート制限とは、あなたがリクエストを代行している認証済みユーザーが、任意の開発者アプリを通じて List のルックアップを実行できる回数に上限があることを意味します。
 
 以下の表は、各エンドポイントのレート制限を示しています。
 
 |     |     |     |
 | :--- | :--- | :--- |
-| **Endpoint** | **HTTP method** | **Rate limit** |
-| /2/lists/:id/members | GET | 900 requests per 15 minutes |
-| /2/users/:id/list&#95;memberships | GET | 75 requests per 15 minutes |
-| /2/lists/:id/members | POST | 300 requests per 15 minutes |
-| /2/lists/:id/members/:user&#95;id | DELETE | 300 requests per 15 minutes |
+| **エンドポイント** | **HTTP メソッド** | **レート制限** |
+| /2/lists/:id/members | GET | 15 分あたり 900 リクエスト |
+| /2/users/:id/list&#95;memberships | GET | 15 分あたり 75 リクエスト |
+| /2/lists/:id/members | POST | 15 分あたり 300 リクエスト |
+| /2/lists/:id/members/:user&#95;id | DELETE | 15 分あたり 300 リクエスト |
 
 <div id="fields-and-expansions">
-  #### フィールドと expansions
+  #### フィールドとexpansions
 </div>
 
-X API v2 の GET エンドポイントでは、`fields` と `expansions` と呼ばれる一連のツールを使って、API から返してほしいデータを正確に選択できます。`expansions` パラメータを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、List メンバーをルックアップする場合、次のような [expansions](/ja/x-api/fundamentals/expansions) を取得できます。
+X API v2 の GET エンドポイントでは、`fields` と `expansions` と呼ばれる一連の機能を使用して、API から返したいデータを正確に選択できます。`expansions` パラメータを使うと、ペイロード内で参照されているオブジェクトを展開できます。たとえば、List メンバーを取得する場合、次のような [expansions](/ja/x-api/fundamentals/expansions) を指定できます。
 
 * `pinned_tweet_id`
 
-`fields` パラメータを使用すると、受け取りたいさまざまなデータオブジェクト内のどの[フィールド](/ja/x-api/fundamentals/fields)を返すかを正確に選択できます。List メンバーのルックアップは、主にユーザーオブジェクトを返します。デフォルトでは、ユーザーオブジェクトは id、name、username フィールドを返します。`user.created_at` や `user.description` のような追加のフィールドを受け取るには、user.fields パラメータを使用してそれらを明示的にリクエストする必要があります。 
+`fields` パラメータを使うと、受け取りたいさまざまなデータオブジェクト内のどの [fields](/ja/x-api/fundamentals/fields) を取得するかを正確に指定できます。List メンバーのルックアップでは、主にユーザーオブジェクトが返されます。デフォルトでは、ユーザーオブジェクトは id、name、username フィールドを返します。`user.created_at` や `user.description` などの追加フィールドを受け取るには、`user.fields` パラメータを使用して明示的にリクエストする必要があります。 
 
-[fields と expansions](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) の使い方に関するガイドも用意しています。
+[fields とexpansions](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) の使い方に関するガイドも用意しています。
 
- 以下の表は、各ルックアップエンドポイントで利用できるフィールドと expansions を示しています。
+以下の表は、各ルックアップエンドポイントで利用可能なフィールドとexpansionsを示しています。
 
 |     |     |     |
 | :--- | :--- | :--- |
@@ -115,4 +115,4 @@ X API v2 の GET エンドポイントでは、`fields` と `expansions` と呼�
   #### ページネーション
 </div>
 
-membership/members の取得では、大量のデータが返される可能性があります。常に一貫性があり、高いパフォーマンスの結果を返すために、ページネーションを使用します。ページネーションは、単一のレスポンスで返せる量を超える結果を返す X API v2 エンドポイントに用意されている機能です。このような場合、データは一連の「ページ」に分割されて返されます。結果を[ページネーションでたどる方法](/ja/x-api/fundamentals/pagination)について、詳しくはこちらをご覧ください。
+membership/members を取得すると、多くのデータが返される可能性があります。任意の時点で一貫性があり、高いパフォーマンスで結果を返せるようにするため、ページネーションを使用します。ページネーションは、1 回のレスポンスで返せる量を超える結果を返す X API v2 エンドポイントの機能です。そのような場合、データは一連の「ページ」として返されます。結果の[ページネーション方法の詳細はこちら](/ja/x-api/fundamentals/pagination)を参照してください。

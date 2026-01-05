@@ -1,114 +1,114 @@
 ---
-title: インテグレーションガイド
-sidebarTitle: インテグレーションガイド
+title: 連携ガイド
+sidebarTitle: 連携ガイド
 keywords: ["ユーザー検索連携", "ユーザー連携ガイド", "ユーザー検索のセットアップ", "ユーザー連携", "ユーザー検索の実装"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-このページでは、users lookup エンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと重要な概念について説明します。内容は次のような複数のセクションに分かれています。
+このページでは、Users lookup エンドポイントをシステムに統合する際に理解しておくべき、いくつかのツールと主要な概念について説明します。ページの内容は、次の複数のセクションに分かれています。
 
 * [便利なツール](#helpful)
-* 重要な概念
+* 主要な概念
 * [認証](#authentication)
-* [developer portal、プロジェクト、アプリ](#portal)
+* [Developer portal、プロジェクト、アプリ](#portal)
 * [レート制限](#limits)
-* [フィールドと expansions](#fields)
+* [フィールドとexpansions](#fields)
 * [エッジケース](#edge)
 
 <div id="helpful-tools">
-  ### 便利なツール
+  ### 役立つツール
 </div>
 
-このエンドポイントの統合に役立つ重要な概念の説明に入る前に、以下のツールに慣れておくことをおすすめします。
+このエンドポイントの統合に役立ついくつかの主要な概念を説明する前に、次のツールに慣れておくことをおすすめします。
 
 <div id="postman">
   #### Postman
 </div>
 
-Postman は、エンドポイントのテストに役立つ優れたツールです。各 Postman リクエストには、利用可能な内容をすばやく理解できるよう、すべてのパスおよびボディパラメータが含まれています。Postman コレクションについて詳しくは、「[Using Postman](/ja/tutorials/postman-getting-started)」ページをご覧ください。 
+Postman は、エンドポイントのテストに使える非常に便利なツールです。各 Postman リクエストには、利用可能な項目をすばやく把握できるよう、すべてのパスパラメータおよびボディパラメータが含まれています。Postman コレクションについて詳しくは、「[Using Postman](/ja/tutorials/postman-getting-started)」ページをご覧ください。 
 
 <div id="code-samples">
   #### コードサンプル
 </div>
 
-お好みのプログラミング言語でこのエンドポイントを使い始めたい場合は、ベースとして利用できるさまざまなコードサンプルを[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で提供しています。
+お好みのプログラミング言語でこのエンドポイントをセットアップしたい場合は、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)に、出発点として利用できる複数のコードサンプルを用意しています。
 
 <div id="third-party-libraries">
   #### サードパーティライブラリ
 </div>
 
-コミュニティ製の[サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)を活用して、スムーズに導入を始めましょう。該当するバージョンタグを確認することで、v2 エンドポイントに対応したライブラリを見つけることができます。
+X 開発者コミュニティが提供している[サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)を活用して、スムーズに開発を始めましょう。v2 エンドポイントに対応したライブラリかどうかは、適切なバージョンタグを目印に探すことで確認できます。
 
 <div id="key-concepts">
-  ### 基本的な概念
+  ### 主要な概念
 </div>
 
 <div id="authentication">
   #### 認証
 </div>
 
-すべての X API v2 エンドポイントに対するリクエストは、キーとトークンとも呼ばれる一連の認証情報を使って[認証](/ja/resources/fundamentals/authentication)する必要があります。これらのエンドポイントへのリクエストを認証するには、OAuth 1.0a User Context、App only、または OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。 
+すべての X API v2 エンドポイントでは、リクエストを[認証](/ja/resources/fundamentals/authentication)する際に、キーとトークンとも呼ばれる一連の認証情報が必要です。これらのエンドポイントへのリクエストを認証するには、OAuth 1.0a User Context、App only、または OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。 
 
-[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) では、API キー、ユーザーのアクセストークン、およびその他いくつかのパラメータを使用して[認可ヘッダーを作成](/ja/resources/fundamentals/authentication#authorizing-a-request)し、それをリクエストに付与する必要があります。アクセストークンは、あなたが代わりにリクエストを行うユーザーにひも付いている必要があります。別のユーザーのアクセストークンのセットを生成したい場合、そのユーザーが [3-legged OAuth flow](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用してあなたのアプリを認可する必要があります。 
+[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) では、API Keys、ユーザーの Access Tokens、その他いくつかのパラメータを使用して[認可ヘッダーを作成](/ja/resources/fundamentals/authentication#authorizing-a-request)し、それをリクエストに付与する必要があります。Access Tokens は、リクエストを代行して行う対象ユーザーに紐づいている必要があります。別のユーザー用の Access Tokens セットを生成したい場合は、そのユーザーに [3-legged OAuth フロー](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用して App を認可してもらう必要があります。 
 
-OAuth 1.0a は扱いが難しい場合があります。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview)を利用するか、Postman のようなツールを使用するか、OAuth 2.0 を使用してリクエストを認証することを推奨します。これらのエンドポイントからポストや非公開メトリクスをリクエストしたい場合は、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE のいずれかを使用する必要があります。これにより、そのコンテンツを所有するユーザーから適切な権限を得ていることが保証されます。
+OAuth 1.0a は扱いが難しい場合がある点に注意してください。この認証方式に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview)を使用するか、Postman のようなツールを使用するか、OAuth 2.0 を使用してリクエストを認証することを推奨します。これらのエンドポイントからポストや非公開メトリクスを取得したい場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE のいずれかを使用する必要があります。これにより、そのコンテンツの所有ユーザーから適切な権限が付与されていることが保証されます。
  
 
-[App only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) では、リクエストに [App only アクセストークン](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を付与するだけで済みます。App only アクセストークンは、開発者アプリ内から直接生成するか、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成できます。
+[App only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) では、リクエストに [App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を付与するだけで済みます。App only Access Token は、開発者アプリ内から直接生成するか、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成できます。
 
-[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや、複数デバイス間での認可フローをより細かく制御することを可能にします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する細かなスコープを選択できます。 
+[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや、複数デバイス間にまたがる認可フローを、より細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、細分化されたスコープを個別に選択できます。 
 
-アプリで OAuth 2.0 を有効にするには、developer portal の App settings セクションにあるアプリの認証設定で OAuth 2.0 を有効化する必要があります。
+アプリで OAuth 2.0 を有効にするには、developer portal の App 設定セクションにある App の認証設定で OAuth 2.0 を有効にする必要があります。
 
-**注意**
+**注意事項**
 
-次のフィールドをリクエストする場合、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必須です。 
+以下のフィールドをリクエストする場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必須です。 
 
 * tweet.fields.non&#95;public&#95;metrics
 * tweet.fields.promoted&#95;metrics
 * tweet.fields.organic&#95;metrics
 
 <div id="developer-portal-projects-and-developer-apps">
-  #### Developer portal、プロジェクト、および開発者アプリ
+  #### 開発者ポータル、プロジェクト、および開発者アプリ
 </div>
 
-X API v2 のエンドポイントで利用できる一連の認証情報を取得するには、まず[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を作成し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。その後、開発者アプリ内で自分のキーとトークンを確認できます。 
+X API v2 エンドポイントで利用できる認証情報一式を取得するには、まず[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を作成し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。これらの手順を完了すると、開発者アプリ内で自分のキーとトークンを確認できます。 
  
 
 <div id="rate-limits">
   #### レート制限
 </div>
 
-毎日、何千人もの開発者が X API にリクエストを送信しています。これら大量のリクエストを管理するために、各エンドポイントには[レート制限](/ja/x-api/fundamentals/rate-limits)が設定されており、あなたのアプリ、または認証済みユーザーに代わって行えるリクエスト数が制限されています。 
+毎日、何千人もの開発者が X API にリクエストを送信しています。これらの大量のリクエストを管理するために、各エンドポイントには [レート制限](/ja/x-api/fundamentals/rate-limits) が設定されており、あなたのアプリまたは認証済みユーザーに代わって送信できるリクエスト数が制限されています。 
 
-ユーザー取得エンドポイントには、アプリレベルとユーザーレベルの両方でレート制限が適用されます。ただし、認証済みユーザー取得エンドポイントはユーザーレベルのみでレート制限されています。
+ユーザー取得エンドポイントには、アプリレベルとユーザーレベルの両方のレート制限が適用されます。ただし、認証済みユーザー取得エンドポイントにはユーザーレベルのレート制限のみが適用されます。
 
-アプリレベルのレート制限とは、開発者であるあなたが、このエンドポイントに対して任意の App から（あなたが使用しているキーとトークンによって識別されます）一定期間内に送信できるリクエスト数に上限があることを意味します。ユーザーレベルのレート制限とは、あなたがリクエストを代行している認証済みユーザーが、このエンドポイントに対して、どの開発者アプリ経由であっても一定期間内に実行できる回数に上限があることを意味します。
+アプリレベルのレート制限は、開発者であるあなたが、このエンドポイントに対して一定期間内に任意のアプリ（使用しているキーとトークンによって識別されます）から送信できるリクエスト数が制限されることを意味します。ユーザーレベルのレート制限は、あなたが代理してリクエストを送信する認証済みユーザーが、どの開発者アプリを通じても、一定期間内に実行できるリクエストの回数に上限があることを意味します。
 
-以下の表は、各エンドポイントのレート制限を示しています。
+以下の表は、各エンドポイントに設定されているレート制限を示しています。
 
 |     |     |     |
 | :--- | :--- | :--- |
-| **Endpoint** | **HTTP method** | **Rate limit / Level** |
-| /2/users | GET | 900 requests per 15 minutes / App and User |
-| /2/users/:id | GET | 900 requests per 15 minutes / App and User |
-| /2/users/by | GET | 900 requests per 15 minutes / App and User |
-| /2/users/by/username/:username | GET | 900 requests per 15 minutes / App and User |
-| /2/users/me | GET | 75 requests per 15 minutes / User |
+| **エンドポイント** | **HTTP メソッド** | **レート制限 / レベル** |
+| /2/users | GET | 15 分あたり 900 リクエスト / アプリおよびユーザー |
+| /2/users/:id | GET | 15 分あたり 900 リクエスト / アプリおよびユーザー |
+| /2/users/by | GET | 15 分あたり 900 リクエスト / アプリおよびユーザー |
+| /2/users/by/username/:username | GET | 15 分あたり 900 リクエスト / アプリおよびユーザー |
+| /2/users/me | GET | 15 分あたり 75 リクエスト / ユーザー |
 
 <div id="fields-and-expansions">
   #### フィールドと expansions
 </div>
 
-X API v2 では、fields と expansions と呼ばれる一連のツールを使用して、API から返してほしいデータを正確に選択できます。`expansions` パラメーターを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは、`pinned_tweet_id` の expansion を使用できます。
+X API v2 では、`fields` と `expansions` と呼ばれる一連のツールを使って、API から返したいデータを正確に選択できます。`expansions` パラメータを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは、`pinned_tweet_id` の expansion を使用できます。
 
-`fields` パラメーターを使用すると、受信したい各種データオブジェクト内のどの[フィールド](/ja/x-api/fundamentals/fields)を取得するかを正確に選択できます。これらのエンドポイントは主にユーザーオブジェクトを返します。デフォルトでは、ユーザーオブジェクトは `id`、`name`、`username` フィールドを返します。`user.created_at` や `user.location` などの追加フィールドを受信するには、`fields` パラメーターを使ってそれらを明示的にリクエストする必要があります。インテグレーションでの利用を検討すべき重要なフィールドとして、ポストの投票データ、メトリクス、アノテーション、会話 ID などのフィールドがあります。
+`fields` パラメータを使用すると、さまざまなデータオブジェクト内のどの[フィールド](/ja/x-api/fundamentals/fields)を受け取りたいかを正確に指定できます。これらのエンドポイントは主にユーザーオブジェクトを返します。デフォルトでは、user オブジェクトは `id`、`name`、`username` フィールドを返します。`user.created_at` や `user.location` のような追加のフィールドを受け取るには、`fields` パラメータを使って明示的にリクエストする必要があります。連携実装時に利用を検討すべき重要なフィールドとしては、ポストの投票（Poll）データ、メトリクス、アノテーション、および会話 ID に関するフィールドがあります。
 
-[X API v2 データ辞書](/ja/x-api/fundamentals/data-dictionary)に、[fields と expansions の使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)に関するガイドを用意しています。
+[X API v2 データ辞書](/ja/x-api/fundamentals/data-dictionary)には、[fields と expansions の使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)に関するガイドを掲載しています。
 
 <div id="edge-cases">
-  #### 特殊なケース
+  #### 例外的なケース
 </div>
 
-* リポストではポスト本文が一部だけに切り詰められます。短期的な回避策としては、参照されているポストを `expansions` で展開し、その展開結果から全文を取得してください。これは不具合であり、今後修正する予定です。
+* リポストではポスト本文が切り詰められることがあります。当面の回避策としては、参照されているポストを `expansions` で展開し、その中から完全な本文を取得してください。これは既知のバグであり、今後修正を予定しています。

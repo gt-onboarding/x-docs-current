@@ -1,17 +1,17 @@
 ---
 title: 集成指南
 sidebarTitle: 集成指南
-keywords: ["屏蔽集成", "屏蔽用户集成", "屏蔽指南", "屏蔽集成指南", "屏蔽设置", "屏蔽用户设置"]
+keywords: ["屏蔽功能集成", "屏蔽用户集成", "屏蔽功能指南", "屏蔽功能集成指南", "屏蔽功能设置", "屏蔽用户设置"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
 
-本页介绍了在将 blocks 端点集成到你的系统时，你需要了解的若干工具和关键概念。我们将本页内容划分为几个不同的小节：
+本页介绍在将 Blocks 端点集成到你的系统时需要了解的若干工具和关键概念。我们将本页内容分为以下几个部分：
 
-* [辅助工具](#helpful)
+* [实用工具](#helpful)
 * 关键概念
 * [身份验证](#authentication)
-* [Developer portal、项目和应用](#portal)
+* [开发者门户、项目和应用](#portal)
 * [速率限制](#limits)
 * [字段和扩展字段](#fields)
 * [分页](#pagination)
@@ -20,74 +20,74 @@ import { Button } from '/snippets/zh/button.mdx';
   ### 实用工具
 </div>
 
-在介绍一些有助于你集成此端点的关键概念之前，建议你先熟悉以下工具：
+在我们深入介绍有助于你集成此端点的一些关键概念之前，建议你先熟悉以下工具：
 
 <div id="postman">
   #### Postman
 </div>
 
-Postman 是一款非常好用的 API 端点测试工具。每个 Postman 请求都包含所有路径和请求体参数，帮助你快速了解可以使用的内容。要进一步了解我们的 Postman 集合，请访问我们的[《使用 Postman》](/zh/tutorials/postman-getting-started)页面。 
+Postman 是一个非常适合用于测试 API 端点的工具。每个 Postman 请求都会包含所有路径和请求体参数，帮助你快速了解可用的参数和选项。要进一步了解我们的 Postman 集合，请访问我们的[《使用 Postman》](/zh/tutorials/postman-getting-started)页面。 
 
 <div id="code-samples">
   #### 代码示例
 </div>
 
-想用你常用的编程语言写点代码来开始使用这个 endpoint 吗？我们在 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 上提供了多种代码示例，你可以将它们作为起步参考。
+想用你喜欢的编程语言，通过代码来使用这个 endpoint 吗？你可以在我们的 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 找到多种可作为起点的代码示例。
 
 <div id="third-party-libraries">
   #### 第三方库
 </div>
 
-借助我们社区提供的[第三方库](/zh/x-api/tools-and-libraries/overview)来帮助你入门。你可以通过查看相应的版本标签来找到适用于 v2 端点的库。
+利用我们社区提供的[第三方库](/zh/x-api/tools-and-libraries/overview)来帮助你快速入门。你可以通过查找相应的版本标签，找到适用于 v2 端点的库。
 
 <div id="key-concepts">
-  ### 关键概念
+  ### 核心概念
 </div>
 
 <div id="authentication">
   #### 身份验证
 </div>
 
-所有 X API v2 端点都要求你使用一组凭证（也称为密钥和令牌）对请求进行身份验证。你可以使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE 来对发往这些端点的请求进行身份验证。 
+所有 X API v2 端点都要求你使用一组凭证（也称为密钥和令牌）对请求进行身份验证。你可以使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE 来对发送到这些端点的请求进行身份验证。 
 
-[OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 要求你使用你的 API 密钥、用户访问令牌，以及其他一些参数来[创建授权请求头](/zh/resources/fundamentals/authentication#authorizing-a-request)，然后将其随请求一起发送。访问令牌必须与由你代为发起请求的用户相关联。如果你想为另一位用户生成一组访问令牌，他们必须使用 [三方 OAuth 流程](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) 授权你的 App。 
+[OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 要求你使用 API Keys、用户访问令牌以及少量其他参数来[创建授权头](/zh/resources/fundamentals/authentication#authorizing-a-request)，然后将其随请求一同发送。访问令牌必须与你代表其发起请求的用户关联。如果你希望为另一位用户生成一组访问令牌，该用户必须通过[三方 OAuth 流程](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens)授权你的 App。 
 
-请注意，OAuth 1.0a 相对较难使用。如果你对这种身份验证方法不熟悉，我们建议你使用某个[库](/zh/x-api/tools-and-libraries/overview)、使用 Postman 这类工具，或者使用 OAuth 2.0 来对请求进行身份验证。
+请注意，OAuth 1.0a 可能比较难用。如果你不熟悉这种身份验证方式，建议你使用[库](/zh/x-api/tools-and-libraries/overview)、使用 Postman 之类的工具，或使用 OAuth 2.0 来对请求进行身份验证。
 
-[OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 允许你对应用的权限范围（scope）以及跨多设备的授权流程进行更精细的控制。OAuth 2.0 允许你选择特定的细粒度权限范围（scope），以在代表用户时获得特定的权限。 
+[OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 允许你对应用的权限范围（scope）以及跨多设备的授权流程进行更精细的控制。OAuth 2.0 允许你选择特定的细粒度权限范围（scope），从而代表用户获得相应的具体权限。 
 
-要在你的 App 中启用 OAuth 2.0，你必须在开发者门户中进入该 App 的设置，在其中的身份验证设置里将其启用。
+要在你的应用中启用 OAuth 2.0，你必须在开发者门户中该 App 的设置部分找到其身份验证设置，并在其中启用它。
 
 <div id="developer-portal-projects-and-developer-apps">
   #### 开发者门户、项目和开发者应用
 </div>
 
-要获取可用于 X API v2 端点的一套身份验证凭据，你必须先[注册开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)，在该账号下设置一个[项目](/zh/resources/fundamentals/projects)，并在该项目中创建一个[开发者应用](/zh/resources/fundamentals/developer-apps)。然后你可以在该开发者应用中找到你的密钥和令牌。
+要获取一组可用于 X API v2 端点的身份验证凭证，你必须先[注册开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)，在该账号下设置一个[项目](/zh/resources/fundamentals/projects)，然后在该项目中创建一个[开发者应用](/zh/resources/fundamentals/developer-apps)。接下来，你可以在开发者应用中找到你的密钥和令牌。
  
 
 <div id="rate-limits">
   #### 速率限制
 </div>
 
-每天都有成千上万的开发者向 X API 发起请求。为了帮助管理如此海量的请求，我们在每个端点上都设置了[速率限制](/zh/x-api/fundamentals/rate-limits)，用来限制你代表你的应用或某个已认证用户所能发起的请求次数。 
+每天都有成千上万的开发者向 X API 发起请求。为了帮助管理如此巨大的请求量，每个端点都会设置 [速率限制](/zh/x-api/fundamentals/rate-limits)，限制你代表应用或代表已认证用户所能发起的请求次数。 
 
-这些端点采用用户级速率限制，这意味着你代表其发起请求的已认证用户，在任意开发者应用中对该端点的调用次数都是有限的。对每个端点，使用 POST 和 DELETE 方法时的用户速率限制为每 15 分钟 50 个请求。然而，当使用 GET 方法时，速率限制仅为每 15 分钟 15 个请求。
+这些端点采用用户级别的速率限制，这意味着，你代表其发起请求的已认证用户，在任何开发者应用中对该端点的调用次数都有上限。对于同时支持 POST 和 DELETE 方法的每个端点，用户级别的速率限制为每 15 分钟 50 次请求。而对于使用 GET 方法时，速率限制仅为每 15 分钟 15 次请求。
  
 
 <div id="fields-and-expansions">
   #### 字段和扩展字段
 </div>
 
-X API v2 的 GET 端点允许你使用称为字段（fields）和扩展字段（expansions）的一组工具，精确选择希望从 API 返回的哪些数据。`expansions` 参数允许你展开在响应负载中被引用的对象。例如，此端点允许你获取以下[扩展字段](/zh/x-api/fundamentals/expansions)：
+X API v2 的 GET 端点允许用户通过一组称为字段和扩展字段的工具，精确选择希望从 API 返回的哪些数据。`expansions` 参数允许你将响应负载中引用的对象展开为完整对象。例如，此端点允许你获取以下[扩展字段](/zh/x-api/fundamentals/expansions)：
 
 * pinned&#95;tweet&#95;id
 
-**fields** 参数允许你精确选择希望接收的不同数据对象中的哪些[字段](/zh/x-api/fundamentals/fields)。这些端点主要返回 Post 对象。默认情况下，Post 对象只返回 **id** 和 **text** 字段。要接收其他字段，例如 **tweet.created&#95;at** 或 **tweet.entities**，你必须通过 **fields** 参数显式请求这些字段。你在集成中可能希望考虑使用的一些重要字段包括投票数据、指标、Post 标注以及会话 ID 字段。
+**fields** 参数允许你在不同的数据对象中，精确选择希望接收的哪些[字段](/zh/x-api/fundamentals/fields)。这些端点主要返回帖子（Post）对象。默认情况下，Post 对象仅返回 **id** 和 **text** 字段。要接收其他字段，例如 **tweet.created&#95;at** 或 **tweet.entities**，你必须使用 **fields** 参数显式请求这些字段。在你的集成中，你可能希望考虑使用的一些重要字段包括投票数据、指标数据、帖子标注以及会话 ID 字段。
 
-我们在 [X API v2 数据字典](/zh/x-api/fundamentals/data-dictionary)中新增了一篇关于如何[同时使用字段和扩展字段](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)的指南。
+我们在 [X API v2 数据字典](/zh/x-api/fundamentals/data-dictionary)中增加了一篇指南，介绍如何[结合使用字段和扩展字段](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)。
 
 <div id="pagination">
   #### 分页
 </div>
 
-Blocks 查询可能会返回大量数据。为确保在任何时候不会返回过多结果，我们使用分页。详细了解如何[对结果进行分页。](/zh/x-api/fundamentals/pagination)
+Blocks 查询可能返回大量数据。为避免单次返回的结果过多，我们使用分页机制。详细了解如何[对结果进行分页。](/zh/x-api/fundamentals/pagination)

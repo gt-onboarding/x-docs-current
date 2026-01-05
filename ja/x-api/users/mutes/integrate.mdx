@@ -1,17 +1,17 @@
 ---
-title: インテグレーションガイド
-sidebarTitle: インテグレーションガイド
-keywords: ["ミュートのインテグレーション", "ユーザーミュート機能のインテグレーション", "ミュートガイド", "ミュートインテグレーションガイド", "ミュート設定", "ユーザーミュート設定"]
+title: 連携ガイド
+sidebarTitle: 連携ガイド
+keywords: ["ミュート機能の連携", "ユーザーのミュート連携", "ミュートガイド", "ミュート連携ガイド", "ミュート機能のセットアップ", "ユーザーのミュート設定"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-このページでは、mutes エンドポイントをシステムに統合する際に理解しておくべきツールや重要な概念について説明します。ページは次のいくつかのセクションに分かれています。
+このページでは、ミュートエンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと重要な概念について説明します。このページは、次のいくつかのセクションで構成されています。
 
 * [便利なツール](#helpful)
 * 重要な概念
 * [認証](#authentication)
-* [Developer portal、プロジェクト、アプリ](#portal)
+* [Developer Portal、プロジェクト、アプリ](#portal)
 * [レート制限](#limits)
 * [フィールドとexpansions](#fields)
 * [ページネーション](#pagination)
@@ -20,80 +20,80 @@ import { Button } from '/snippets/ja/button.mdx';
   ### 便利なツール
 </div>
 
-このエンドポイントの統合に役立ついくつかの重要な概念を説明する前に、まず次のツールに慣れておくことをおすすめします。
+このエンドポイントを統合する際に役立つ主要な概念を説明する前に、まず次の点に慣れておくことをおすすめします。
 
 <div id="postman">
   #### Postman
 </div>
 
-Postman は、エンドポイントをテストするための優れたツールです。各 Postman リクエストには、利用可能な項目をすばやく把握できるように、すべてのパスパラメータおよびボディパラメータが含まれています。Postman コレクションの詳細については、「[Postman の使い方](/ja/tutorials/postman-getting-started)」ページをご覧ください。 
+Postman は、エンドポイントをテストするのに便利な優れたツールです。各 Postman リクエストには、どのような項目を利用できるかをすばやく把握できるよう、すべてのパスおよびボディパラメータが含まれています。Postman コレクションの詳細については、「[Postman の利用方法](/ja/tutorials/postman-getting-started)」ページをご覧ください。 
 
 <div id="code-samples">
   #### コードサンプル
 </div>
 
-お好みのプログラミング言語でこのエンドポイントを利用するためのコードが必要な場合は、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で、出発点として利用できるコードサンプルをいくつか提供しています。
+お好みのプログラミング言語でこのエンドポイントを使い始めたい場合は、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で、ベースとして利用できるコードサンプルを複数公開しています。
 
 <div id="third-party-libraries">
   #### サードパーティライブラリ
 </div>
 
-コミュニティによる [サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview) を活用して、スムーズに開発を始めましょう。適切なバージョンタグを確認することで、v2 エンドポイントに対応したライブラリを見つけることができます。
+コミュニティが提供する [サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview) を活用して、開発を始めましょう。v2 のエンドポイントに対応したライブラリは、適切なバージョンタグを目印に探すことができます。
 
 <div id="key-concepts">
-  ### 主要な概念
+  ### 基本概念
 </div>
 
 <div id="authentication">
   #### 認証
 </div>
 
-すべての X API v2 エンドポイントでは、「キーとトークン」とも呼ばれる一連の認証情報を使ってリクエストを認証する必要があります。これらのエンドポイントへのリクエスト認証には、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。 
+すべての X API v2 エンドポイントでは、「キーとトークン」とも呼ばれる一連の認証情報を使ってリクエストに認証を行う必要があります。これらのエンドポイントへのリクエストを認証する方法としては、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。 
 
-[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) では、API Keys、ユーザーのアクセストークン、およびその他いくつかのパラメータを利用して [Authorization ヘッダーを作成](/ja/resources/fundamentals/authentication#authorizing-a-request) し、それをリクエストに付与する必要があります。アクセストークンは、あなたが代理でリクエストを行うユーザーに紐づいていなければなりません。別のユーザー用のアクセストークンを生成したい場合、そのユーザーは [3-legged OAuth フロー](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使ってあなたのアプリを認可する必要があります。 
+[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) では、API キー、ユーザーのアクセストークン、およびいくつかの追加パラメータを使用して、リクエストと一緒に送信する[認可ヘッダーを作成](/ja/resources/fundamentals/authentication#authorizing-a-request)する必要があります。アクセストークンは、あなたが代理としてリクエストを送信する対象ユーザーに関連付けられている必要があります。別のユーザー用のアクセストークン一式を生成したい場合は、そのユーザーが [3-legged OAuth フロー](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用してあなたの App を認可する必要があります。 
 
-OAuth 1.0a は利用が難しい場合がある点に注意してください。この認証方式に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) を利用するか、Postman のようなツールを使用するか、または OAuth 2.0 を使ってリクエストを認証することを推奨します。
+なお、OAuth 1.0a は扱いが難しい場合があります。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) を利用するか、Postman のようなツールを使用するか、あるいは OAuth 2.0 を使用してリクエストを認証することをお勧めします。
 
-[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや、複数デバイス間にまたがる認可フローをより細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、きめ細かいスコープを個別に選択できます。 
+[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや、複数デバイス間にまたがる認可フローをより細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与するきめ細かいスコープを個別に選択できます。 
 
-アプリで OAuth 2.0 を有効にするには、developer portal の App settings セクション内にあるアプリの Authentication settings で OAuth 2.0 を有効化する必要があります。
+App で OAuth 2.0 を有効にするには、Developer Portal の App 設定セクションにある、その App の認証設定で OAuth 2.0 を有効にする必要があります。
 
 <div id="developer-portal-projects-and-developer-apps">
-  #### developer portal、プロジェクト、および開発者アプリ
+  #### 開発者ポータル、プロジェクト、開発者アプリ
 </div>
 
-X API v2 のエンドポイントで使用できる認証情報のセットを取得するには、まず[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を作成し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。これらを行うと、開発者アプリからキーとトークンを取得できます。
+X API v2 のエンドポイントで利用できる認証情報一式を取得するには、[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を設定し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。その後、開発者アプリ内でキーとトークンを確認できます。
  
 
 <div id="rate-limits">
   #### レート制限
 </div>
 
-毎日、何千人もの開発者が X API にリクエストを送信しています。こうした大量のリクエストを管理するために、各エンドポイントには [レート制限](/ja/x-api/fundamentals/rate-limits) が設定されており、アプリや認証済みユーザーに代わって行えるリクエスト数が制限されています。 
+毎日、何千人もの開発者が X API にリクエストを送信しています。これらの膨大なリクエストを管理するために、各エンドポイントには [レート制限](/ja/x-api/fundamentals/rate-limits) が設定されており、アプリや認証済みユーザーに代わって行えるリクエスト数が制限されています。 
 
-これらのエンドポイントはユーザーレベルでレート制限されており、リクエストを送信している認証済みユーザーは、どの開発者アプリ経由であっても、そのエンドポイントを呼び出せる回数が一定数に制限されます。
+これらのエンドポイントはユーザーレベルでレート制限されています。つまり、リクエストを送信する際に代理となる認証済みユーザーごとに、そのエンドポイントを呼び出せる回数が制限されており、どの開発者アプリからのリクエストであっても共通です。
 
-POST メソッドおよび DELETE メソッドについては、ユーザーあたり・エンドポイントあたり 15 分間に 50 回というユーザー単位のレート制限があります。ただし、GET メソッドの場合、このレート制限は 15 分間に 15 回のみです。
+POST メソッドと DELETE メソッドが対象となるユーザーごとのレート制限は、エンドポイントごとに 15 分あたり 50 リクエストです。一方、GET メソッドの場合、レート制限は 15 分あたり 15 リクエストのみです。
  
 
 <div id="fields-and-expansions">
-  #### フィールドとexpansions
+  #### フィールドと expansions
 </div>
 
-X API v2 の GET エンドポイントでは、fields と expansions と呼ばれる一連のツールを使用して、API から返したいデータを正確に選択できます。`expansions` パラメータを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは次の [expansions](/ja/x-api/fundamentals/expansions) を取得できます。
+X API v2 の GET エンドポイントでは、`fields` と `expansions` という一連のパラメータを使用して、API から返したいデータを正確に選択できます。`expansions` パラメータを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは次のような [expansions](/ja/x-api/fundamentals/expansions) を利用できます。
 
 * pinned&#95;tweet&#95;id
 
-**fields** パラメータを使用すると、受け取りたいさまざまなデータオブジェクト内のどの[フィールド](/ja/x-api/fundamentals/fields)を返すかを正確に指定できます。このエンドポイントは主に User オブジェクトを返します。デフォルトでは、User オブジェクトには **id**、**name**、**username** フィールドが含まれます。**user.created&#95;at** や **user.entities** などの追加フィールドを受け取るには、**fields** パラメータを使用してそれらを明示的に指定する必要があります。
+**fields** パラメータを使用すると、受信したい各種データオブジェクト内のどの[フィールド](/ja/x-api/fundamentals/fields)を含めるかを正確に選択できます。このエンドポイントが主に返すのは User オブジェクトです。デフォルトでは、User オブジェクトは **id**、**name**、**username** フィールドを返します。**user.created&#95;at** や **user.entities** などの追加フィールドを受け取るには、**fields** パラメータを使ってそれらを明示的にリクエストする必要があります。 
 
-[X API v2 データ辞書](/ja/x-api/fundamentals/data-dictionary)には、[fields と expansions](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)を組み合わせて使用するためのガイドを追加しています。
+[X API v2 データディクショナリ](/ja/x-api/fundamentals/data-dictionary)には、[fields と expansions](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) を組み合わせて使用する方法に関するガイドも掲載しています。
 
 <div id="pagination">
   #### ページネーション
 </div>
 
-ミュートのルックアップでは、大量のデータが返される可能性があります。常に一貫性があり高パフォーマンスな結果を返すために、ページネーションを使用します。ページネーションは、単一のレスポンスで返せる件数を超える結果を返す X API v2 エンドポイントで利用される機能です。その場合、データは一連の「ページ」に分割されて返されます。詳しくは、結果を[ページネーションで取得する方法](/ja/x-api/fundamentals/pagination)をご覧ください。
+ミュートのルックアップでは、大量のデータが返される可能性があります。常に一貫性があり、高いパフォーマンスで結果を返せるようにするため、ページネーションを使用します。ページネーションは、1 回のレスポンスで返せる件数を超える結果を返す X API v2 エンドポイントの機能です。その場合、データは一連の「ページ」に分割されて返されます。ページネーションを使用して結果を取得する方法の詳細については、[こちら](/ja/x-api/fundamentals/pagination)をご覧ください。
 
 <Note>
-  **注意:** ユーザーが [X](https://x.com/) 上でミュート操作を行う場合、15 分あたり 200 リクエストという制限があります。
+  **注意:** ユーザーが [X](https://x.com/) 上でミュートした場合、15 分あたり 200 リクエストの上限があります。
 </Note>

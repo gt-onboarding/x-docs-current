@@ -1,17 +1,17 @@
 ---
-title: Guía de inicio rápido
-sidebarTitle: Guía de inicio rápido
-keywords: ["chunked upload", "media upload", "chunked media", "video upload", "large file upload", "chunked upload guide"]
+title: Inicio rápido
+sidebarTitle: Inicio rápido
+keywords: ["carga por partes", "carga de contenido multimedia", "contenido multimedia por partes", "carga de video", "carga de archivos grandes", "guía de carga por partes"]
 ---
 
-Esta guía te ayudará a realizar tus primeras solicitudes para cargar contenido multimedia usando los endpoints de carga de contenido multimedia de X API v2.
+Esta guía te ayudará a realizar tus primeras solicitudes de carga de contenido multimedia usando los endpoints de carga de contenido multimedia de la X API v2.
 
-En esta guía se usan los endpoints `POST /2/media/upload` con carga segmentada para cargar un video, lo que requiere un flujo de trabajo diferente al de las cargas de una única imagen.
+Para esta guía, se usan los endpoints de carga por partes `POST /2/media/upload` para cargar un video, lo que requiere un flujo de trabajo diferente al de las cargas de imágenes individuales.
 
-Para cargas de video o segmentadas, debes:
+Para cargas de video o por partes, debes:
 
 1. Inicializar la carga usando el comando `INIT`
-2. Cargar cada segmento de bytes usando el comando `APPEND`
+2. Cargar cada fragmento de bytes usando el comando `APPEND`
 3. Completar la carga usando el comando `FINALIZE`
 
 <Note>
@@ -22,17 +22,17 @@ Para cargas de video o segmentadas, debes:
   ## Autenticación
 </div>
 
-Para poder ejecutar los ejemplos proporcionados en esta guía, deberás utilizar autenticación con [OAuth 2](/es/resources/fundamentals/authentication/oauth-2-0/overview).
+Para poder ejecutar los ejemplos proporcionados en esta guía, deberás usar la autenticación con [OAuth 2](/es/resources/fundamentals/authentication/oauth-2-0/overview).
 
-Puedes encontrar tus `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_KEY` y `ACCESS_TOKEN` en la App dentro de tu Proyecto, en el [panel del portal para desarrolladores](https://developer.x.com/en/portal/projects-and-apps).
+Puedes encontrar tus `CONSUMER_KEY`, `CONSUMER_SECRET`, `ACCESS_KEY` y `ACCESS_TOKEN` en la App de tu Proyecto en el [panel del portal para desarrolladores](https://developer.x.com/en/portal/projects-and-apps).
 
 <div id="step-1-post-mediaupload-init">
-  ## Paso 1 : POST media/upload (INIT)
+  ## Paso 1: POST media/upload (INIT)
 </div>
 
-La solicitud del comando `INIT` se utiliza para iniciar una sesión de carga de archivos. Devuelve un `media_id` que se debe usar para ejecutar todas las solicitudes posteriores. El siguiente paso después de una respuesta exitosa del comando `INIT` es el comando `APPEND`.
+La solicitud del comando `INIT` se utiliza para iniciar una sesión de carga de archivos. Devuelve un `media_id` que se debe usar para ejecutar todas las solicitudes posteriores. El siguiente paso después de una respuesta satisfactoria del comando `INIT` es el comando `APPEND`.
 
-Consulta las [mejores prácticas](/es/x-api/media/quickstart/best-practices) para conocer las restricciones y requisitos de los archivos de contenido multimedia.
+Consulta [Mejores prácticas](/es/x-api/media/quickstart/best-practices) para conocer las restricciones y requisitos sobre archivos de contenido multimedia.
 
 **Ejemplo de solicitud**
 
@@ -47,7 +47,7 @@ curl --location 'https://api.x.com/2/media/upload' \
 ```
 
 <Note>
-  **Nota:** Cuando realices solicitudes HTTP en bruto, la solicitud debe estar en formato POST `multipart/form-data` o `application/x-www-form-urlencoded`.
+  **Nota:** Cuando realices solicitudes HTTP directas, la solicitud debe realizarse como una POST con formato `multipart/form-data` o `application/x-www-form-urlencoded`.
 </Note>
 
 **Respuesta de ejemplo**
@@ -63,21 +63,21 @@ curl --location 'https://api.x.com/2/media/upload' \
 }
 ```
 
-La respuesta devuelve los identificadores del contenido multimedia `id` (string) y `media_key` (string). El archivo debe haberse cargado por completo antes de que transcurran `expires_after_secs` segundos.
+La respuesta proporciona los identificadores de contenido multimedia `id` (cadena) y `media_key` (cadena). El archivo completo debe cargarse antes de que transcurran `expires_after_secs` segundos.
 
 <div id="step-2-post-mediaupload-append">
   ## Paso 2 : POST media/upload (APPEND)
 </div>
 
-El comando `APPEND` se utiliza para subir un fragmento (rango consecutivo de bytes) del archivo de contenido multimedia. Por ejemplo, un archivo de 3 MB se puede dividir en 3 fragmentos de 1 MB y subirse usando 3 solicitudes del comando `APPEND`. Una vez que se ha subido el archivo completo, el siguiente paso es llamar al comando `FINALIZE`.
+El comando `APPEND` se usa para subir un fragmento (rango consecutivo de bytes) del archivo de contenido multimedia. Por ejemplo, un archivo de 3 MB se podría dividir en 3 fragmentos de 1 MB y subirse usando 3 solicitudes del comando `APPEND`. Después de subir el archivo completo, el siguiente paso es llamar al comando `FINALIZE`.
 
 <Info>
-  Subir un archivo de contenido multimedia en fragmentos pequeños presenta varias ventajas:
+  Existen varias ventajas de subir un archivo de contenido multimedia en fragmentos pequeños:
 
-  * Mayor fiabilidad y tasas de éxito en condiciones de red con ancho de banda bajo
+  * Mayor confiabilidad y tasas de éxito en condiciones de red con poco ancho de banda
   * Las subidas se pueden pausar y reanudar
-  * Los fragmentos de archivo se pueden volver a intentar de forma individual
-  * Posibilidad de ajustar el tamaño de los fragmentos para adaptarse a las condiciones cambiantes de la red, por ejemplo, en clientes móviles
+  * Los fragmentos de archivo se pueden volver a intentar individualmente
+  * Posibilidad de ajustar el tamaño de los fragmentos para adaptarse a las condiciones de red cambiantes, por ejemplo, en clientes móviles
 </Info>
 
 **Ejemplo de solicitud**
@@ -92,21 +92,21 @@ curl --location 'https://api.x.com/2/media/upload' \
     --form 'media=@/path/to/your/media/file.mp4'
 ```
 
-`segment_index` es un índice ordenado del fragmento de archivo. Debe estar entre 0 y 999, inclusive. El primer segmento tiene índice 0, el segundo segmento tiene índice 1, y así sucesivamente. Continúa cargando los fragmentos del archivo hasta que todos se hayan cargado.
+`segment_index` es un índice ordenado del fragmento de archivo. Debe estar entre 0 y 999 inclusive. El primer segmento tiene índice 0, el segundo segmento tiene índice 1 y así sucesivamente. Continúa subiendo los fragmentos del archivo hasta que se hayan subido todos.
 
 <Note>
-  **Nota:** Al realizar solicitudes HTTP sin procesar, la solicitud debe estar en formato POST `multipart/form-data`.
+  **Nota:** Al hacer solicitudes HTTP sin procesar, la solicitud debe ser una POST con formato `multipart/form-data`.
 </Note>
 
 <Note>
-  **Nota:** Se devolverá un HTTP 2XX con un cuerpo de respuesta vacío cuando la carga se complete correctamente.
+  **Nota:** Se devolverá un código HTTP 2XX con un cuerpo de respuesta vacío cuando la subida se haya realizado correctamente.
 </Note>
 
 <div id="step-3-post-mediaupload-finalize">
   ## Paso 3 : POST media/upload (FINALIZE)
 </div>
 
-El comando `FINALIZE` se debe llamar después de que se haya subido todo el archivo de contenido multimedia usando comandos `APPEND`. Si, y solo si, la respuesta del comando `FINALIZE` contiene un campo `processing_info`, también puede ser necesario usar un comando `STATUS` y esperar a que indique que se completó correctamente antes de continuar con la creación de la Publicación.
+El comando `FINALIZE` debe invocarse después de cargar el archivo multimedia completo usando comandos `APPEND`. Si y solo si la respuesta del comando `FINALIZE` contiene un campo `processing_info`, también puede ser necesario usar un comando `STATUS` y esperar a que devuelva éxito antes de continuar con la creación de la Publicación.
 
 **Ejemplo de solicitud**
 
@@ -119,10 +119,10 @@ curl --location --request POST 'https://api.x.com/2/media/upload' \
 ```
 
 <Note>
-  **Nota:** Al realizar solicitudes HTTP sin procesar, la solicitud debe ser de tipo POST con formato `multipart/form-data` o `application/x-www-form-urlencoded`.
+  **Nota:** Cuando realices solicitudes HTTP sin procesar, la solicitud debe estar en formato POST `multipart/form-data` o `application/x-www-form-urlencoded`.
 </Note>
 
-**Ejemplo de respuesta**
+**Respuesta de ejemplo**
 
 ```json
 {
@@ -139,26 +139,26 @@ curl --location --request POST 'https://api.x.com/2/media/upload' \
 }
 ```
 
-La respuesta proporciona un identificador de contenido multimedia en los campos `media_id` (entero de 64 bits) y `media_id_string` (cadena). Usa el `media_id_string` proporcionado en la respuesta de la API en JavaScript y en otros lenguajes que no pueden representar con precisión un entero largo.
+La respuesta proporciona un identificador de contenido multimedia en los campos `media_id` (entero de 64 bits) y `media_id_string` (cadena). Usa el valor de `media_id_string` proporcionado en la respuesta de la API desde JavaScript y otros lenguajes que no pueden representar con precisión un entero largo.
 
-El `media_id` devuelto solo es válido durante `expires_after_secs` segundos. Cualquier intento de usar `media_id` después de este período de tiempo en otras llamadas a la API dará como resultado una respuesta Bad Request (HTTP 4xx).
+El `media_id` devuelto solo es válido durante `expires_after_secs` segundos. Cualquier intento de usar `media_id` después de este período en otras llamadas a la API dará como resultado una respuesta Bad Request (HTTP 4xx).
 
-Si la respuesta contiene un campo `processing_info`, utiliza el comando `STATUS` para consultar el estado de la operación `FINALIZE`. El enfoque de finalización asíncrona se utiliza en los casos en que el procesamiento del contenido multimedia requiere más tiempo. En el futuro, todo el procesamiento de video y GIF animados solo se admitirá mediante finalización asíncrona. Este comportamiento se habilita si una sesión de carga se [inicializó](###INIT) con un parámetro `media_category`, y cuando el tipo de contenido multimedia es video o GIF animado.
+Si la respuesta contiene un campo `processing_info`, usa el comando `STATUS` para sondear el estado de la operación `FINALIZE`. El enfoque de finalización asíncrona se utiliza en los casos en que el procesamiento del contenido multimedia requiere más tiempo. En el futuro, todo el procesamiento de video y GIF animados solo será compatible mediante la finalización asíncrona. Este comportamiento se habilita si una sesión de carga se [inicializó](###INIT) con un parámetro `media_category` y cuando el tipo de contenido multimedia es video o GIF animado.
 
 <Note>
   **Nota:**
-  Si NO se devuelve un campo `processing_info` en la respuesta, entonces el `media_id` está listo para usarse en otros endpoints de la API.
+  Si NO se devuelve un campo `processing_info` en la respuesta, entonces `media_id` está listo para usarse en otros endpoints de la API.
 </Note>
 
 <div id="step-4-get-mediaupload-status">
   ## **Paso 4 : GET media/upload (STATUS)**
 </div>
 
-El comando `STATUS` se utiliza para consultar periódicamente si hay actualizaciones en la operación de procesamiento de contenido multimedia. Cuando la respuesta del comando `STATUS` devuelva `succeeded`, puedes pasar al siguiente paso, que normalmente es crear una Publicación con `media_id`.
+El comando `STATUS` se usa para consultar periódicamente si hay actualizaciones en la operación de procesamiento de contenido multimedia. Una vez que la respuesta del comando `STATUS` haya devuelto `succeeded`, puedes pasar al siguiente paso, que suele ser crear una Publicación con `media_id`.
 
 <Note>
   **Nota:**
-  El comando `STATUS` debe utilizarse **solo y únicamente si** la respuesta del comando `FINALIZE` o de un comando `STATUS` anterior contenía un campo `processing_info`.
+  El comando `STATUS` debe usarse **si y (solo si)** la respuesta del comando `FINALIZE` o de un comando `STATUS` anterior ha contenido un campo `processing_info`.
 </Note>
 
 <div id="example-request">
@@ -186,15 +186,15 @@ curl --location --request GET 'https://api.x.com/2/media/upload?command=STATUS&m
 }
 ```
 
-El cuerpo de la respuesta contiene el campo `processing_info`, que proporciona información sobre el estado actual de la operación de procesamiento del contenido multimedia. Contiene un campo `state` que sigue la siguiente secuencia de estados: `pending` -&gt; `in_progress` -&gt; [`failed` | `succeeded`]. No puedes usar el `media_id` para crear una Publicación u otras entidades antes de que el campo `state` tenga el valor `succeeded`.
+El cuerpo de la respuesta contiene el campo `processing_info`, que proporciona información sobre el estado actual de la operación de procesamiento de contenido multimedia. Contiene un campo `state` cuyo flujo de transición es: `pending` -&gt; `in_progress` -&gt; [`failed` | `succeeded`]. No puedes utilizar el `media_id` para crear una Publicación u otras entidades antes de que el campo `state` se establezca en `succeeded`.
 
 <div id="step-5-post-tweet-with-media">
-  ## Paso 5: Publicar una Publicación con contenido multimedia
+  ## Paso 5 : Publicar una Publicación con contenido multimedia
 </div>
 
-Crea una Publicación utilizando el endpoint `POST /2/tweets`, incluyendo el `media_id` en nombre de un usuario autenticado.
+Crea una Publicación mediante el endpoint `POST /2/tweets`, incluyendo el `media_id` por cuenta de un usuario autenticado.
 
-**Ejemplo de solicitud**
+**Solicitud de ejemplo**
 
 ```bash
 curl --location 'https://api.x.com/2/tweets' \
@@ -229,4 +229,4 @@ curl --location 'https://api.x.com/2/tweets' \
   ## Solución de problemas
 </div>
 
-Si tienes problemas con las API de contenido multimedia, consulta la [categoría Media API](https://devcommunity.x.com/c/x-api/media-apis) en los foros para desarrolladores para encontrar respuestas.
+Si tienes problemas con Media APIs, consulta la [categoría Media API](https://devcommunity.x.com/c/x-api/media-apis) en los foros de desarrolladores para encontrar una respuesta.

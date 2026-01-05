@@ -1,50 +1,49 @@
 ---
 title: 快速入门
 sidebarTitle: 快速入门
-keywords: ["过滤流 Webhook 快速入门", "Webhook 流快速入门", "流式 Webhook 教程", "Webhook 流指南"]
+keywords: ["filtered stream webhooks 快速入门", "webhook 流快速入门", "流 webhook 教程", "webhook 流指南"]
 ---
 
 <div id="getting-started-with-the-filtered-stream-webhooks-api">
-  ## 开始使用 filtered stream webhook API
+  ## 开始使用 filtered stream webhooks API
 </div>
 
-在设置过滤规则方面，v2 filtered stream webhook API 与 [v2 filtered stream endpoint](/zh/x-api/posts/filtered-stream/introduction) 类似。不同之处在于传递匹配你规则的帖子所使用的机制。
+v2 filtered stream webhooks API 在设置过滤规则方面与 [v2 filtered stream endpoint](/zh/x-api/posts/filtered-stream/introduction) 类似。不同之处在于投递符合你规则的帖子（Posts）的机制。
 
-* 对于 v2 filtered stream endpoint，你需要建立一个持久连接，并监听匹配你规则的帖子。
-* 对于这个 filtered stream webhook endpoint，你需要注册你的 webhook，X 会将匹配你规则的帖子发送到你的 webhook。
+* 对于 v2 filtered stream endpoint，你需要建立一个持久连接，并监听符合你规则的帖子。
+* 对于这个 filtered stream webhook endpoint，你需要注册你的 webhook，X 会将符合你规则的帖子发送到你的 webhook。
 
-本指南说明如何使用 filtered stream webhook endpoint 来筛选并接收帖子。整个过程分为 3 个步骤：
+本指南说明如何使用 filtered stream webhooks endpoints 筛选并接收帖子。整个过程包含 3 个步骤：
 
-1. 设置你的 filtered stream 规则
-2. 创建你的 webhook
+1. 设置 filtered stream 规则
+2. 创建 webhook
 3. 将你的 Filtered Stream 实例关联到你的 webhook
 
-一旦你将 Filtered Stream 实例关联到你的 webhook，X 就会把匹配你规则的帖子发送到你的 webhook。
+一旦你将 Filtered Stream 实例关联到你的 webhook，X 就会把符合你规则的帖子发送到你的 webhook。
 
 <div id="setting-up-your-filtered-stream-rules">
   ### 设置过滤流规则
 </div>
 
-过滤流规则由一个或多个运算符组成，这些运算符通过布尔逻辑和括号组合在一起，用于定义哪些帖子会被发送到你的 webhook。过滤流 webhooks API 使用与 [v2 filtered stream endpoint](/zh/x-api/posts/filtered-stream/introduction) 相同的一组端点来创建和管理规则。你可以参考 [这篇详细指南](/zh/x-api/posts/filtered-stream/integrate/build-a-rule)，了解如何构建过滤条件。
+过滤流规则由一个或多个运算符组成，这些运算符通过布尔逻辑和括号组合，用来定义哪些帖子会被投递到你的 webhook。过滤流 webhooks API 使用与 [v2 过滤流端点](/zh/x-api/posts/filtered-stream/introduction) 相同的一组端点来创建和管理规则。请参阅[这份详细指南](/zh/x-api/posts/filtered-stream/integrate/build-a-rule)，了解如何构建过滤规则。
 
 <div id="creating-your-webhook">
   ### 创建 webhook
 </div>
 
-通过向 X API 注册一个可公开访问的 HTTPS URL 来创建 webhook，以接收事件。Webhook 必须能够处理用于 CRC 验证的 GET 请求，以及用于事件负载的 POST 请求。请参阅 [Webhooks 简介文档](/zh/x-api/webhooks/introduction) 了解创建和管理 webhook 的详细步骤。
+在 X API 中注册一个可公开访问的 HTTPS URL，以创建 webhook 用于接收事件。Webhook 必须支持用于 CRC 验证的 GET 请求，以及用于事件负载的 POST 请求。请参阅 [Webhooks 简介文档](/zh/x-api/webhooks/introduction)，了解创建和管理 webhook 的详细步骤。
 
-**注意：** 如果你已经在使用 [Account Activity API (AAA)](/zh/x-api/account-activity/introduction) 的 webhooks，那么在那边设置的 webhooks 在这里完全通用。事实上，如果你的带宽足够，并且能够区分不同来源的事件，你可以在此 API 中复用你为 AAA 使用的同一个 webhook 端点。
+**注意：** 如果你已经在 [Account Activity API (AAA)](/zh/x-api/account-activity/introduction) 中使用了 webhook，那么当时设置的 webhook 在这里也是完全通用的。事实上，如果你的带宽足够并且能够区分不同事件，你可以在此 API 中复用你为 AAA 使用的同一个 webhook 端点。
 
 <div id="linking-your-filtered-stream-instance-to-your-webhook">
   ### 将你的 Filtered Stream 实例关联到 webhook
 </div>
 
-在你设置好规则并创建 webhook 之后，将该 webhook 关联到你的 Filtered Stream 实例。这样可以将匹配的帖子事件路由到你的 webhook URL。
+在规则设置完成并创建好 webhook 之后，将该 webhook 关联到你的 Filtered Stream 实例。这样可以将匹配到的帖子事件路由到你的 webhook URL。
 
 使用以下端点：`POST /2/tweets/search/webhooks/:webhook_id `
 
-你可以包含与流式端点 `/2/tweets/search/stream` 相同的查询参数，例如 expansions、fields 和 media 选项。这样可以自定义事件负载中包含的
-数据。
+你可以包含与流式端点 `/2/tweets/search/stream` 中相同的查询参数，例如 expansions、fields 和 media 选项。这样可以自定义事件负载中包含的数据。
 
 **示例：**
 
@@ -66,9 +65,9 @@ pansions=author_id&user.fields=username,name,id' \
 }
 ```
 
-**提示：** 你可以将多个 webhook 关联到同一个流，以实现冗余，或用于接收不同的字段集。每个关联都可以指定独立的参数。
+**提示：** 你可以将多个 webhook 关联到同一个流，以实现冗余或接收不同的字段集。每个关联都可以指定各自唯一的参数。
 
-一旦将 Filtered Stream 实例关联到你的 webhook 上，就会开始接收到符合你规则的帖子，如下所示：
+一旦你将 Filtered Stream 实例关联到你的 webhook，你就会开始接收符合你规则的帖子，如下所示：
 
 ```json
 {
@@ -102,7 +101,7 @@ pansions=author_id&user.fields=username,name,id' \
   ### 获取与 Filtered Stream 关联的 Webhook
 </div>
 
-获取当前所有与 Filtered Stream 关联的 webhook 列表：
+获取当前与你的 Filtered Stream 关联的所有 webhook 列表：
 
 ```bash
 GET /2/tweets/search/stream/webhooks 
@@ -132,10 +131,10 @@ GET /2/tweets/search/stream/webhooks
 ```
 
 <div id="unlinking-your-webhook-from-filtered-stream">
-  ### 将你的 webhook 与 Filtered Stream 取消关联
+  ### 将 Webhook 与 Filtered Stream 解绑
 </div>
 
-要停止在某个特定 webhook 上接收事件，请使用以下方式将其取消关联：
+要停止在某个特定 webhook 上接收事件，请使用以下方式将其解绑：
 
 ```bash
 DELETE /2/tweets/search/webhooks/:webhook_id

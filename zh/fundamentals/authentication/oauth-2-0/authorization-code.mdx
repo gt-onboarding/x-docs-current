@@ -1,36 +1,36 @@
 ---
 title: 使用 PKCE 的 OAuth 2.0 授权码流程
 sidebarTitle: 使用 PKCE 的 OAuth 2.0 授权码流程
-keywords: ["OAuth 2.0 PKCE", "授权码流程", "PKCE", "OAuth 2.0 流程", "PKCE 流程", "OAuth 2.0 授权", "code challenge"]
+keywords: ["OAuth 2.0 PKCE", "授权码流程", "PKCE", "OAuth 2.0 流程", "PKCE 流程", "OAuth 2.0 授权", "代码质询"]
 ---
 
 <div id="oauth-20-authorization-code-flow-with-pkce">
-  ### 支持 PKCE 的 OAuth 2.0 授权码模式
+  ### 使用 PKCE 的 OAuth 2.0 授权码模式
 </div>
 
 <div id="introduction">
-  #### 简介
+  #### 介绍
 </div>
 
-OAuth 2.0 是一种行业标准的授权协议，可让你对应用的权限范围（scope）进行更精细的控制，并支持跨多设备的授权流程。OAuth 2.0 允许你选择特定的细粒度权限范围（scope），从而代表用户获取相应的特定权限。 
+OAuth 2.0 是一种行业标准的授权协议，可对应用的权限范围进行更精细的控制，并支持在多种设备上完成授权流程。OAuth 2.0 允许你选择特定的细粒度 scope，以便代表用户获取相应的权限。 
 
-要在你的应用中启用 OAuth 2.0，你必须先在开发者门户的 App 设置部分中找到该应用的身份验证设置，并在其中启用 OAuth 2.0。
+要在你的应用中启用 OAuth 2.0，你必须先在开发者门户中该应用的“应用设置”部分的“身份验证设置”中将其启用。
 
 <div id="how-long-will-my-credentials-stay-valid">
-  #### 我的凭证可以保持有效多长时间？
+  #### 我的凭证会保持有效多长时间？
 </div>
 
-默认情况下，你通过 Authorization Code Flow with PKCE 创建的访问令牌的有效期只有两小时，除非你使用了 `offline.access` 权限范围。
+默认情况下，你通过带 PKCE 的授权码流程创建的访问令牌的有效期为两小时，除非你使用了 `offline.access` 权限范围。
 
 <div id="refresh-tokens">
   #### 刷新令牌
 </div>
 
-刷新令牌允许应用在不再次提示用户的情况下，通过刷新令牌流程获取新的访问令牌。
+刷新令牌允许应用通过刷新令牌流程，在不需要再次提示用户授权的情况下获取新的访问令牌。
 
-如果应用了 `offline.access` scope，将会签发一个 OAuth 2.0 刷新令牌。使用该刷新令牌，可以获取新的访问令牌。如果未传递此 scope，我们将不会生成刷新令牌。
+当应用了 `offline.access` 权限范围（scope）时，将签发一个 OAuth 2.0 刷新令牌。使用该刷新令牌，你可以获取新的访问令牌。如果未传入该 scope，我们将不会生成刷新令牌。
 
-下面是一个使用刷新令牌来获取新访问令牌的请求示例：
+使用刷新令牌获取新的访问令牌的请求示例如下：
 
 ```bash
 POST 'https://api.x.com/2/oauth2/token' \
@@ -44,47 +44,47 @@ POST 'https://api.x.com/2/oauth2/token' \
   #### 应用设置
 </div>
 
-你可以将应用的认证方式设置为 OAuth 1.0a 或 OAuth 2.0。你也可以让应用同时使用 OAuth 1.0a 和 OAuth 2.0。
+你可以将应用的身份验证设置为 OAuth 1.0a 或 OAuth 2.0。你也可以让一个应用同时使用 OAuth 1.0a 和 OAuth 2.0。
 
-OAuth 2.0 只能配合 X API v2 使用。如果你选择了 OAuth 2.0，你将在应用的“密钥和令牌”部分看到一个 Client ID。 
+OAuth 2.0 只能用于 X API v2。如果你选择了 OAuth 2.0，你将在应用的“密钥和令牌（Keys and Tokens）”部分看到一个 Client ID。 
 
 <div id="confidential-clients">
   #### 机密客户端
 </div>
 
-[机密客户端](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1) 可以以安全的方式保存凭证，不会将其暴露给未授权方，并且可以安全地向授权服务器进行认证，从而保护你的 client secret。公共客户端通常在浏览器或移动设备上运行，无法安全地使用你的 client secrets。如果你选择的应用类型是机密客户端，将会获得一个 client secret。 
+[机密客户端](https://datatracker.ietf.org/doc/html/rfc6749#section-2.1) 能够以安全的方式保存凭证，在不向未授权方暴露的前提下，与授权服务器安全地进行认证，从而确保你的 client secret 安全。公共客户端通常在浏览器或移动设备上运行，无法安全地使用你的 client secret。 如果你选择的应用类型是机密客户端，你会获得一个 client secret。 
 
-如果你在开发者门户中选择的客户端类型是机密客户端，你也可以看到一个 Client Secret。可选类型包括 Native App、Single page App、Web App、Automated App 或 bot。Native App 和 Single page App 属于公共客户端，而 Web App 和 Automated App 或 bot 属于机密客户端。
+如果你在开发者门户中选择的客户端类型是机密客户端，你也可以看到一个 Client Secret。可选项包括 Native App、Single page App、Web App、Automated App 或 bot。Native App 和 Single page App 属于公共客户端，而 Web App 和 Automated App 或 bot 属于机密客户端。
 
-对于具有有效 Authorization Header 的机密客户端，你不需要在请求中提供 client id。对于使用公共客户端发起的请求，仍然需要在请求体中包含 Client Id。 
+对于具有有效 Authorization Header 的机密客户端，请求中不需要提供 client id。对于使用公共客户端发起的请求，仍然必须在请求体中包含 Client Id。 
 
 <div id="scopes">
   #### 作用域
 </div>
 
-作用域允许你为你的应用设置精细化访问控制，从而确保你的应用只拥有所需的权限。要了解各个作用域与哪些端点对应，请查看我们的[认证映射指南](/zh/resources/fundamentals/authentication/guides/v2-authentication-mapping)。
+作用域允许你为应用设置精细化访问控制，使应用只拥有所需的权限。要了解每个作用域与哪些端点相对应，请查看我们的[身份验证映射指南](/zh/resources/fundamentals/authentication/guides/v2-authentication-mapping)。
 
 |     |     |
 | :--- | :--- |
 | **Scope** | **说明** |
-| tweet.read | 你能够查看的所有帖子，包括受保护账户发布的帖子。 |
-| tweet.write | 代表你发布帖子和转发帖子。 |
-| tweet.moderate.write | 隐藏和取消隐藏对你帖子所作的回复。 |
+| tweet.read | 你可以查看的所有帖子，包括受保护账号发布的帖子。 |
+| tweet.write | 代你发布帖子和转发帖子。 |
+| tweet.moderate.write | 隐藏和取消隐藏对你帖子的回复。 |
 | users.email | 已认证用户的邮箱地址。 |
-| users.read | 你能够查看的任意账户，包括受保护账户。 |
+| users.read | 你可以查看的任何账号，包括受保护账号。 |
 | follows.read | 关注你的人以及你关注的人。 |
-| follows.write | 代表你关注和取消关注用户。 |
-| offline.access | 在你撤销访问权限之前，保持对你账户的访问。 |
-| space.read | 你能够查看的所有 Space。 |
-| mute.read | 你已静音的账户。 |
-| mute.write | 代表你静音和取消静音账户。 |
-| like.read | 你点过赞的帖子以及你可以查看到的点赞记录。 |
-| like.write | 代表你为帖子点赞和取消点赞。 |
-| list.read | 你创建或加入的列表本身，以及这些列表的成员和关注者，包括私密列表。 |
-| list.write | 代表你创建和管理列表。 |
-| block.read | 你已拉黑的账户。 |
-| block.write | 代表你拉黑和取消拉黑账户。 |
-| bookmark.read | 获取已认证用户已加书签的帖子。 |
+| follows.write | 代你关注和取消关注他人。 |
+| offline.access | 在你撤销访问权限前保持对你账号的访问。 |
+| space.read | 你可以查看的所有 Space。 |
+| mute.read | 你已静音的账号。 |
+| mute.write | 代你静音和取消静音账号。 |
+| like.read | 你点过赞的帖子以及你可以查看的点赞记录。 |
+| like.write | 代你为帖子点赞和取消点赞。 |
+| list.read | 你创建或加入的列表，以及这些列表的成员和关注者，包括私密列表。 |
+| list.write | 代你创建和管理列表。 |
+| block.read | 你已拉黑的账号。 |
+| block.write | 代你拉黑和取消拉黑账号。 |
+| bookmark.read | 获取已认证用户加了书签的帖子。 |
 | bookmark.write | 为帖子添加书签和移除书签。 |
 | media.write | 上传媒体。 |
 
@@ -92,19 +92,19 @@ OAuth 2.0 只能配合 X API v2 使用。如果你选择了 OAuth 2.0，你将�
   #### 速率限制
 </div>
 
-在大多数情况下，速率限制与使用 OAuth 1.0a 进行身份验证时相同，帖子查询和用户查询除外。对于帖子查询和用户查询，在使用 OAuth 2.0 时，我们会将每个应用的限制从每 15 分钟 300 次请求提高到 900 次请求。要了解更多信息，请务必查看我们的[速率限制文档](/zh/resources/fundamentals/rate-limits)。
+在大多数情况下，基于 OAuth 2.0 的速率限制与使用 OAuth 1.0a 进行认证时相同，但帖子查询和用户查询除外。对于帖子查询和用户查询，在使用 OAuth 2.0 时，我们将每个应用的速率限制从每 15 分钟 300 次请求提高到 900 次请求。要了解更多信息，请务必查看我们的[速率限制文档](/zh/resources/fundamentals/rate-limits)。
 
 <div id="grant-types">
-  #### 授权方式
+  #### 授权类型
 </div>
 
-在本次初始发布阶段，我们仅提供带有 [PKCE](https://oauth.net/2/pkce/) 的 [授权码（authorization code）](https://oauth.net/2/grant-types/authorization-code/) 和 [刷新令牌（refresh token）](https://oauth.net/2/grant-types/refresh-token/) 作为受支持的 [授权方式（grant types）](https://oauth.net/2/grant-types/)。未来我们可能会提供更多授权方式。
+在本次初始发布中，我们仅支持带有 [PKCE](https://oauth.net/2/pkce/) 的 [authorization code](https://oauth.net/2/grant-types/authorization-code/) 以及 [refresh token](https://oauth.net/2/grant-types/refresh-token/) 这两种 [授权方式（grant types）](https://oauth.net/2/grant-types/)。未来我们可能会提供更多授权方式。
 
 <div id="oauth-20-flow">
   #### OAuth 2.0 流程
 </div>
 
-OAuth 2.0 使用的流程与我们当前使用的 OAuth 1.0a 流程类似。你可以在我们[关于此主题的文档](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)中查看示意图和详细说明。 
+OAuth 2.0 使用的流程与我们当前使用的 OAuth 1.0a 非常相似。你可以在我们的[相关主题文档](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)中查看流程图和详细说明。 
 
 <div id="glossary">
   #### 术语表
@@ -112,45 +112,45 @@ OAuth 2.0 使用的流程与我们当前使用的 OAuth 1.0a 流程类似。你�
 
 |     |     |
 | :--- | :--- |
-| **术语** | **说明** |
-| 授权类型（Grant types） | OAuth 框架为不同用例规范了多种授权类型，并提供了创建新授权类型的框架。示例包括 authorization code、client credentials、device code 和 refresh token。 |
-| 机密客户端（Confidential client） | 机密客户端是指能够与授权服务器安全进行身份验证的应用，例如可以安全保管其注册的 client secret。 |
-| 公共客户端（Public client） | 公共客户端无法使用注册的 client secret，例如在浏览器或移动设备中运行的应用程序。 |
-| 授权码流程（Authorization code flow） | 由机密客户端和公共客户端使用，用授权码来交换访问令牌。 |
-| PKCE | 对授权码流程（authorization code flow）的扩展，用于防止多种攻击，并使公共客户端也能够安全地执行 OAuth 交换。 |
-| Client ID | 可以在开发者门户中“密钥和令牌”部分的 “Client ID” 标题下找到。如果你没有看到这一项，请直接联系我们的团队。生成 authorize URL 时需要使用 Client ID。 |
-| Redirect URI | 你的回调 URL。你需要满足[精确匹配校验](https://datatracker.ietf.org/doc/html/rfc6749#section-10.6) 的要求。 |
-| Authorization code | 允许应用代表用户调用 API。也称为 auth&#95;code。一旦应用所有者从用户处收到已批准的 auth&#95;code，该 auth&#95;code 的有效期为 30 秒。你必须在 30 秒内将其交换为访问令牌，否则 auth&#95;code 将过期。 |
-| Access token | 访问令牌是应用代表用户发起 API 请求时所使用的令牌。 |
-| Refresh token | 允许应用通过 refresh token flow 在不再次提示用户的情况下获取新的访问令牌。 |
-| Client Secret | 如果你选择的应用类型是机密客户端，你将在应用的“密钥和令牌”部分的 “Client ID” 下获得一个 “Client Secret”。 |
+| **Term** | **描述** |
+| Grant types | OAuth 框架针对不同用例定义了多种授权类型（grant type），并提供了创建新授权类型的框架。例如 authorization code、client credentials、device code 和 refresh token 等。 |
+| Confidential client | 机密客户端是指可以与授权服务器安全进行身份验证的应用，例如能够安全保存其注册的 client secret。 |
+| Public client | 公共客户端无法使用注册的 client secret，例如在浏览器或移动设备中运行的应用。 |
+| Authorization code flow | 由机密客户端和公共客户端使用，用于将授权码交换为访问令牌的流程。 |
+| PKCE | authorization code flow 的一种扩展，用于防止多种攻击，并使公共客户端能够安全地执行 OAuth 授权码交换。 |
+| Client ID | 可以在开发者门户中“密钥和令牌”部分的“Client ID”标题下找到。如果你没有看到这一项，请直接与我们的团队联系。生成 authorize URL 时需要使用 Client ID。 |
+| Redirect URI | 你的回调 URL。你需要启用[精确匹配校验](https://datatracker.ietf.org/doc/html/rfc6749#section-10.6)。 |
+| Authorization code | 允许应用代表用户调用 API。也称为 auth&#95;code。一旦应用所有者从用户处收到获批的 auth&#95;code，auth&#95;code 的有效期为 30 秒。你必须在 30 秒内将其交换为访问令牌，否则 auth&#95;code 将过期。 |
+| Access token | 访问令牌是应用代表用户发起 API 请求时使用的令牌。 |
+| Refresh token | 允许应用在不再次提示用户的情况下，通过 refresh token 流程获取新的访问令牌。 |
+| Client Secret | 如果你选择的应用类型是机密客户端，在应用的“密钥和令牌”部分会在“Client ID”下方提供一个“Client Secret”。 |
 
 <div id="parameters">
   #### 参数
 </div>
 
-要构建 OAuth 2.0 授权 URL，你需要确保在授权 URL 中包含以下参数。 
+要构建 OAuth 2.0 授权 URL，你需要在授权 URL 中包含以下参数。 
 
 |     |     |
 | :--- | :--- |
 | **Parameter** | **Description** |
-| response&#95;type | 你需要将其指定为 `"code"`，以表明这是授权码类型。 |
-| client&#95;id | 可以在开发者门户中标题为 &quot;Client ID&quot; 的位置找到。 |
-| redirect&#95;uri | 你的回调 URL。该值必须与在你的应用设置中定义的某个 Callback URL 完全匹配。对于 OAuth 2.0，你的回调 URL 需要通过[精确匹配校验](https://datatracker.ietf.org/doc/html/rfc6749#section-10.6)。 |
-| state | 你提供的随机字符串，用于防范[CSRF 攻击](https://auth0.com/docs/protocols/state-parameters)。该字符串长度最多可以为 500 个字符。 |
-| code&#95;challenge | 一个 [PKCE](https://www.oauth.com/oauth2-servers/pkce/authorization-request/) 参数，即你为每个请求生成的随机秘密字符串。 |
-| code&#95;challenge&#95;method | 指定你用于发起请求的校验方法（S256 或 plain）。 |
+| response&#95;type | 你需要使用单词“code”来指定这是一个授权码（code）。 |
+| client&#95;id | 可以在开发者门户中标题为“Client ID”的位置找到。 |
+| redirect&#95;uri | 你的回调 URL。该值必须与在你的应用设置中定义的某个 Callback URL 精确对应。对于 OAuth 2.0，你的回调 URL 需要通过[精确匹配验证](https://datatracker.ietf.org/doc/html/rfc6749#section-10.6)。 |
+| state | 由你提供的随机字符串，用于防范[CSRF 攻击](https://auth0.com/docs/protocols/state-parameters)。该字符串的长度最多可为 500 个字符。 |
+| code&#95;challenge | [PKCE](https://www.oauth.com/oauth2-servers/pkce/authorization-request/) 参数，为你发出的每个请求生成的随机机密值。 |
+| code&#95;challenge&#95;method | 指定你用来发起请求的方法（S256 或 plain）。 |
 
 <div id="authorize-url">
   #### 授权 URL
 </div>
 
-使用 OAuth 2.0 时，你需要创建一个授权 URL，通过该 URL 让用户以类似于“使用 X 登录”的身份验证流程来完成认证。 
+使用 OAuth 2.0 时，你需要创建一个授权 URL，供用户通过认证流程完成身份验证，其方式类似于使用 X 的“登录”功能。 
 
-你将要创建的 URL 示例如下：
+你要创建的 URL 示例如下：
 
 ```
 https://x.com/i/oauth2/authorize?response_type=code&client_id=M1M5R3BMVy13QmpScXkzTUt5OE46MTpjaQ&redirect_uri=https://www.example.com&scope=tweet.read%20users.read%20account.follows.read%20account.follows.write&state=state&code_challenge=challenge&code_challenge_method=plain
 ```
 
-要让此 URL 正常工作，你需要使用正确的编码方式。请务必查阅我们关于[百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)的文档。
+要让此 URL 正常工作，你需要使用正确的编码方式。请务必查看我们关于[百分号编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)的文档。

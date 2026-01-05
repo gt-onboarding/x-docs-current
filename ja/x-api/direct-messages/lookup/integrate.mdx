@@ -1,103 +1,103 @@
 ---
 title: 連携ガイド
 sidebarTitle: 連携ガイド
-keywords: ["ダイレクトメッセージ連携", "DM 連携", "DM ルックアップ連携", "ダイレクトメッセージ連携ガイド", "DM セットアップ"]
+keywords: ["ダイレクトメッセージ連携", "DM連携", "DMルックアップ連携", "ダイレクトメッセージ連携ガイド", "DM設定"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-Direct Messages エンドポイント v2 では、会話（conversation）と会話イベント（conversation event）が X API のコアオブジェクトとして導入され、1 対 1 の会話とグループ会話が区別されます。1 対 1 の会話には常に 2 人、かつ 2 人のみの参加者が存在する一方、グループ会話には 2 人以上が参加でき、メンバー構成は変動し得ます。   
+Direct Messages の v2 エンドポイントでは、会話と会話イベントが X API の中核オブジェクトとして導入され、1 対 1 会話とグループ会話が区別されます。1 対 1 会話には常に 2 人、かつ 2 人のみの参加者がいますが、グループ会話には 2 人以上が参加でき、参加メンバーは変動する可能性があります。   
 
-このページでは、Direct Messages のルックアップエンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと主要な概念について説明します。内容は次の 2 つのセクションに分かれています。
+このページでは、Direct Messages のルックアップエンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと主要な概念について説明します。ページは次の 2 つのセクションに分かれています。
 
 * 主要な概念
-  * [Direct Message 会話](#direct-message-conversations)
-  * [v1.1 と v2 間で共有される会話およびイベント ID](#shared-conversation-and-event-ids)
+  * [Direct Message の会話](#direct-message-conversations)
+  * [v1.1 と v2 間で共有される会話 ID とイベント ID](#shared-conversation-and-event-ids)
   * [Direct Message イベントのフィールドと expansions](#direct-message-event-fields-and-expansions)
   * [会話イベントの種類](#conversation-event-types)
   * [認証](#authentication)
-  * [developer portal、プロジェクト、アプリ](#developer-portal-projects-and-apps)
+  * [Developer Portal、プロジェクト、アプリ](#developer-portal-projects-and-apps)
   * [レート制限](#rate-limits)
   * [ページネーション](#pagination)
-* [便利なツール](#helpful-tools)
+* [有用なツール](#helpful-tools)
 
 <div id="key-concepts">
-  ### 重要な概念
+  ### 主要な概念
 </div>
 
 <div id="direct-message-conversations">
-  ### ダイレクトメッセージの会話
+  ### ダイレクトメッセージ会話
 </div>
 
-すべてのダイレクトメッセージは、ダイレクトメッセージの会話の一部です。これらの会話は 1 対 1 の会話、またはグループ会話のいずれかです。このリリースでは、ダイレクトメッセージを作成し、ダイレクトメッセージの会話に関連付けられたイベントを取得するために必要な基盤となるエンドポイントを提供します。すべての会話には一意の dm&#95;conversation&#95;id があり、その会話を構成する各イベントには一意の dm&#95;event&#95;id があります。  
+すべてのダイレクトメッセージは、ダイレクトメッセージ会話の一部です。これらの会話は 1 対 1 の会話、またはグループ会話のいずれかです。本リリースでは、ダイレクトメッセージを作成し、ダイレクトメッセージ会話に関連付けられたイベントを取得するために必要な基盤となるエンドポイントを提供します。すべての会話には一意の `dm_conversation_id` があり、その会話を構成するイベントはすべて一意の `dm_event_id` を持ちます。  
 
-ダイレクトメッセージのルックアップエンドポイントは、会話に関連付けられたイベントを取得するためのメソッドを提供します。これらの GET エンドポイントは、会話を構成するメッセージを取得するために使用され、グループ会話の場合は、誰がグループ会話に参加し、離脱したかを把握するためにも使用できます。
+ダイレクトメッセージのルックアップ用エンドポイントは、会話に関連付けられたイベントを取得するためのメソッドを提供します。これらの GET エンドポイントは、会話を構成するメッセージを取得するために使用され、グループ会話の場合は、誰がグループ会話に参加し、離脱したかを把握するためにも使用できます。
 
-このダイレクトメッセージルックアップの初期リリースには、3 つの GET メソッドが含まれます。
+このダイレクトメッセージルックアップの初回リリースには、3 つの GET メソッドが含まれます。
 
-* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - 1 対 1 の会話に関連付けられたダイレクトメッセージイベントを取得します。:participant&#95;id パスパラメータは、このリクエストを行う認証済みユーザーと会話しているアカウントの数値のユーザー ID です。  
+* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - 1 対 1 の会話に関連付けられたダイレクトメッセージイベントを取得します。`:participant_id` パスパラメータは、このリクエストを行う認証済みユーザーと会話しているアカウントの数値のユーザー ID です。  
 
-* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - :dm&#95;conversation&#95;id パスパラメータで指定された、特定の会話 ID に関連付けられたダイレクトメッセージイベントを取得します。1 対 1 およびグループの両方の会話 ID がサポートされています。  
+* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - `:dm_conversation_id` パスパラメータで指定された特定の会話 ID に関連付けられたダイレクトメッセージイベントを取得します。1 対 1 とグループの両方の会話 ID がサポートされています。  
 
-* **GET /2/dm&#95;events** - 認証済みユーザーに関連付けられたダイレクトメッセージイベントを、1 対 1 およびグループ会話の両方を含めて取得します。最大 30 日前までのイベントが利用可能です。  
+* **GET /2/dm&#95;events** - 認証済みユーザーに関連付けられたダイレクトメッセージイベントを、1 対 1 およびグループ会話の両方を含めて取得します。最大 30 日前までのイベントを取得できます。  
 
-これらの GET エンドポイントはすべて、event&#95;types リクエリパラメータを使用して、イベントタイプで dm&#95;events を取得することをサポートします。現在、次の 3 種類の会話イベントタイプがサポートされています。
+これらの GET エンドポイントはすべて、`event_types` リクエストクエリパラメータを使用して、イベントタイプごとに `dm_events` を取得することをサポートしています。現在、サポートされている会話イベントタイプは 3 種類です。
 
-* **MessageCreate** - 新しいダイレクトメッセージが作成されたときに作成されます。このイベントオブジェクトには、メッセージの時刻とテキスト、メッセージを送信したアカウントの ID、会話 ID とイベント ID などが含まれます。 
+* **MessageCreate** - 新しいダイレクトメッセージが作成されたときに生成されます。このイベントオブジェクトには、メッセージの時刻とテキストに加えて、メッセージ送信者のアカウント ID、および会話 ID とイベント ID を含めることができます。 
 
-* **ParticipantsJoin** - 新しい参加者がグループ会話に参加したときに作成されます。この dm&#95;event オブジェクトには、参加した参加者の ID に加えて、created&#95;at の時刻と「招待 (invite)」イベントの sender&#95;id が含まれます。 
+* **ParticipantsJoin** - 新しい参加者がグループ会話に参加したときに生成されます。この `dm_event` オブジェクトには、参加した参加者の ID に加えて、`created_at` の時刻と「招待」イベントの `sender_id` が含まれます。 
 
-* **ParticipantsLeave** - 参加者が会話から離脱したときに作成されます。このイベントオブジェクトには、離脱した参加者の ID と、そのイベントの時刻が含まれます。 
+* **ParticipantsLeave** - 参加者が会話から離脱したときに生成されます。このイベントオブジェクトには、離脱した参加者の ID に加えて、そのイベントの時刻が含まれます。 
 
-詳細については、[Direct Messages lookup API リファレンス](/ja/x-api/direct-messages/get-dm-events-for-a-dm-conversation) を参照してください。
+詳細については、[Direct Messages lookup API References](/ja/x-api/direct-messages/get-dm-events-for-a-dm-conversation) を参照してください。
 
 <div id="shared-conversation-and-event-ids-across-v11-and-v2">
   ### v1.1 と v2 間で共有される会話およびイベント ID
 </div>
 
-重要なポイントとして、会話およびイベントの ID は、X プラットフォームの v1.1 と v2 のバージョン間で共有されているという点があります。これは、両方のバージョンを併用できることを意味します。たとえば、Direct Messages v1.1 エンドポイントには、単一のイベントを返すメソッドやイベントを削除するメソッドがあり、これらはまだ v2 では利用できません。ID は v1.1 と v2 で共通であるため、v2 で取得した ID に基づいて v1.1 リクエストを行ったり、X アプリの会話 URL に表示される会話 ID を参照したりできます。  
+重要なポイントとして、会話とイベントの ID は X プラットフォームの v1.1 と v2 間で共有されています。これは、両バージョンを併用できることを意味します。たとえば、Direct Messages v1.1 エンドポイントには、1 つのイベントを取得するメソッドやイベントを削除するメソッドが提供されていますが、これらのメソッドはまだ v2 では利用できません。ID が v1.1 と v2 で共通であるため、v2 から返された ID に基づいて v1.1 リクエストを送信したり、X アプリケーション上の会話 URL に表示される会話 ID を参照してリクエストを送信したりできます。  
 
 <div id="direct-message-event-fields-and-expansions">
   ### ダイレクトメッセージイベントのフィールドとexpansions
 </div>
 
-X API v2 では、開発者は fields と expansions と呼ばれる一連のツールを使用して、API から取得したいデータを正確に選択できます。たとえば、ダイレクトメッセージのルックアップエンドポイントは、次の dm&#95;events フィールドをサポートします。 
+X API v2 では、fields と expansions と呼ばれる一連のツールを使用して、API レスポンスに含めたいデータを正確に指定できます。たとえば、ダイレクトメッセージのルックアップエンドポイントは、次の dm&#95;events フィールドをサポートします。 
 
-* id、event&#95;type、text は、MessageCreate イベントのデフォルトです。 
+* id、event&#95;type、text は MessageCreate イベントのデフォルトです。 
 
-* id、event&#95;type、participant&#95;ids は、ParticipantsJoin および ParticipantsLeave イベントのデフォルトです。
+* id、event&#95;type、participant&#95;ids は ParticipantsJoin および ParticipantsLeave イベントのデフォルトです。
 
-* dm&#95;conversation&#95;id と created&#95;at は、すべてのイベントで利用できます。
+* dm&#95;conversation&#95;id と created&#95;at はすべてのイベントで利用可能です。
 
-* attachments と referenced&#95;tweets は、MessageCreate イベントで利用できます。 
+* attachments と referenced&#95;tweets は MessageCreate イベントで利用可能です。 
 
-* sender&#95;id は、MessageCreate および ParticipantsJoin イベントで利用できます。 
+* sender&#95;id は MessageCreate および ParticipantsJoin イベントで利用可能です。 
 
-* participant&#95;ids は、ParticipantsJoin および ParticipantsLeave イベントで利用できます。 
+* participant&#95;ids は ParticipantsJoin および ParticipantsLeave イベントで利用可能です。 
 
 さらに、ダイレクトメッセージのルックアップエンドポイントは、次の [expansions](/ja/x-api/fundamentals/expansions) をサポートします。
 
-* sender&#95;id - メッセージを送信したユーザー、または会話に誰かを招待したユーザーに対応する User オブジェクトを展開します。 
+* sender&#95;id - メッセージを送信したユーザー、または会話に誰かを招待したユーザーに関連付けられた User オブジェクトを展開します。 
 
-* referenced&#95;tweets.id - ダイレクトメッセージのテキストにポストへのリンクが含まれている場合、そのポストに対応する Post オブジェクトを展開します。 
+* referenced&#95;tweets.id - ダイレクトメッセージのテキストにポストへのリンクが含まれている場合に、そのポストに対応する Post オブジェクトを展開します。 
 
-* attachments.media&#95;keys - ダイレクトメッセージにメディアの添付が含まれている場合、そのメディアに対応する Media オブジェクトを展開します。 
+* attachments.media&#95;keys - ダイレクトメッセージにメディアの添付が含まれている場合に、そのメディアに対応する Media オブジェクトを展開します。 
 
-* participant&#95;ids - グループ会話に参加した、または退出したユーザーに対応する User オブジェクトを展開します。
+* participant&#95;ids - グループ会話に参加または退出したユーザーに関連付けられた User オブジェクトを展開します。
 
-expansions にはポスト、ユーザー、メディアオブジェクトが含まれるため、tweet.fields、user.fields、media.fields のリクエストクエリパラメータも使用できます。詳しくは、[フィールドとexpansionsの使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)に関するガイドを参照してください。
+expansions にはポスト、ユーザー、メディアオブジェクトが含まれるため、tweet.fields、user.fields、media.fields の各リクエストクエリパラメータも使用できます。詳しくは、[fields と expansions の使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)に関するガイドを参照してください。
 
 <div id="conversation-event-types">
   ### 会話イベントタイプ
 </div>
 
-以下は、ダイレクトメッセージにおける MessageCreate、ParticipantsJoin、ParticipantsLeave イベントタイプの JSON オブジェクト例です。 
+以下は、ダイレクトメッセージにおける MessageCreate、ParticipantsJoin、ParticipantsLeave の各イベントタイプの JSON オブジェクト例です。 
 
-利用可能な dm&#95;event オブジェクトのフィールド: id, text, event&#95;type, dm&#95;conversation&#95;id, created&#95;at, sender&#95;id, attachments, referenced&#95;tweets, participant&#95;ids。これらのフィールドをリクエストで指定する方法の詳細については、Fields and Expansion セクションを参照してください。 
+利用可能な dm&#95;event オブジェクトのフィールドは次のとおりです: id, text, event&#95;type, dm&#95;conversation&#95;id, created&#95;at, sender&#95;id, attachments, referenced&#95;tweets, participant&#95;ids。これらのフィールドをリクエストで指定する方法の詳細については、「Fields and Expansion」セクションを参照してください。 
 
 MessageCreate イベントの例: 
 
-すべての dm&#95;event フィールドを指定した場合、シンプルなテキストのダイレクトメッセージに対するレスポンスは次のとおりです。 
+すべての dm&#95;event フィールドを指定した場合の、シンプルなテキストのダイレクトメッセージに対するレスポンスは次のとおりです。 
 
 `{
     "text": "Hi everyone.",
@@ -110,7 +110,7 @@ MessageCreate イベントの例: 
 
 ParticipantsJoin イベントの例:
 
-すべての dm&#95;event フィールドを指定した場合、ある参加者が会話に参加したときのレスポンスは次のとおりです:
+すべての dm&#95;event フィールドを指定した場合の、参加者が会話に参加したときのレスポンスは次のとおりです:
 
 `{
     "participant_ids": [
@@ -125,7 +125,7 @@ ParticipantsJoin イベントの例:
 
 ParticipantsLeave イベントの例:
 
-すべての dm&#95;event フィールドを指定した場合、ある参加者が会話から退出したときのレスポンスは次のとおりです:
+すべての dm&#95;event フィールドを指定した場合の、参加者が会話から退出したときのレスポンスは次のとおりです:
 
 `{
     "participant_ids": [
@@ -141,55 +141,55 @@ ParticipantsLeave イベントの例:
   ### 認証
 </div>
 
-すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使ってリクエストを認証する必要があります。すべてのダイレクトメッセージは非公開であり、それらにアクセスするにはユーザーによる認可が必要です。
+すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使用して、リクエストを認証する必要があります。すべてのダイレクトメッセージは非公開であり、アクセスするにはユーザー認可が必要です。 
 
-これらのダイレクトメッセージエンドポイントでは、[OAuth 2.0 Authorization Flow with PKCE](/ja/x-api/posts/manage-tweets) または [1.0a User Context](/ja/resources/fundamentals/authentication) を使用する必要があります。つまり、リクエストを成功させるには、一連の API キーとユーザーのアクセストークンを使用しなければなりません。アクセストークンは、あなたが代わりにリクエストを行う対象ユーザーにひも付いている必要があります。別のユーザー用のアクセストークンを生成したい場合は、そのユーザーが [3-legged OAuth flow](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使ってアプリを認可または認証する必要があります。
+これらのダイレクトメッセージエンドポイントでは、[OAuth 2.0 Authorization Flow with PKCE](/ja/x-api/posts/manage-tweets) または [1.0a User Context](/ja/resources/fundamentals/authentication) を使用する必要があります。つまり、API キーとユーザーのアクセストークンのセットを使用してリクエストを正常に行う必要があります。アクセストークンは、あなたが代理でリクエストを行うユーザーと紐づいていなければなりません。他のユーザー向けのアクセストークンを生成したい場合、そのユーザーは、[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用してあなたのアプリを認可または認証する必要があります。
 
-OAuth のユーザーコンテキストは扱いが難しい場合があります。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) や Postman のようなツールを使用して、リクエストを正しく認証することをおすすめします。
+OAuth のユーザーコンテキストは扱いが難しい場合があります。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) や Postman のようなツールを使用して、リクエストを正しく認証することをおすすめします。 
 
-[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用すると、アプリケーションのスコープや、複数デバイスにまたがる認可フローをより細かく制御できます。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する細かなスコープを選択できます。ダイレクトメッセージのルックアップエンドポイントには、次のスコープが必要です: dm.read, post.read, user.read
+[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや複数デバイス間での認可フローを、より細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、きめ細かいスコープを選択できます。ダイレクトメッセージのルックアップエンドポイントには、次のスコープが必要です: dm.read, post.read, user.read
 
-アプリで OAuth 2.0 を有効にするには、developer portal の App settings セクション内にある Authentication settings で有効化する必要があります。
+アプリで OAuth 2.0 を有効にするには、developer portal の App 設定セクションにある App の認証設定で有効化する必要があります。
 
 <div id="developer-portal-projects-and-developer-apps">
-  ### developer portal、プロジェクト、開発者アプリ
+  ### Developer portal、プロジェクト、および開発者アプリ
 </div>
 
-X API v2 エンドポイントで利用できる一連の認証情報を取得するには、承認済みの開発者アカウントを保有し、そのアカウント内にプロジェクトを作成し、そのプロジェクト内に開発者アプリを作成する必要があります。キーとトークンは、開発者アプリから確認できます。 
+X API v2 のエンドポイントで動作する一連の認証情報を取得するには、承認済みの開発者アカウントを取得し、そのアカウント内にプロジェクトを作成し、そのプロジェクト内に開発者アプリを作成する必要があります。その後、開発者アプリ内でキーとトークンを確認できます。 
 
 <div id="rate-limits">
   ### レート制限
 </div>
 
-毎日何万もの開発者が X API へリクエストを送信しています。こうした大量のリクエストを管理するために、各エンドポイントにはレート制限が設けられており、あなたのアプリまたは認証済みユーザーに代わって行えるリクエスト数が制限されています。 
+毎日、何万人もの開発者が X API にリクエストを送信しています。これらの膨大なリクエスト数を管理するため、各エンドポイントにはレート制限が設けられており、アプリや認証済みユーザーに代わって行えるリクエスト数には上限があります。 
 
-Direct Message のルックアップエンドポイントにはユーザー単位のレート制限があります。つまり、あなたが代理でリクエストを送信する認証済みユーザーは、あなたの X アプリを使って行えるリクエスト数が一定数に制限されます。GET メソッドには 15 分あたり 300 リクエストのユーザーレート制限があります。これらのレート制限は GET エンドポイント間で共有されています。 
+Direct Message 参照エンドポイントにはユーザーレベルのレート制限があり、これは、リクエストを送信する際に代理している認証済みユーザーが、その X アプリを使って行えるリクエスト数に上限があることを意味します。GET メソッドには、15 分あたり 300 リクエストというユーザー単位のレート制限があります。これらのレート制限は、GET エンドポイント間で共有されます。 
 
 <div id="pagination">
   ### ページネーション
 </div>
 
-これらのエンドポイントは、レスポンスを迅速に返すためにページネーションを使用しています。1回のレスポンスで送信できる件数（最大 100 イベント）を超える結果がある場合は、ページネーションを行う必要があります。`max_results` パラメータを使用して 1 ページあたりに返す結果数を指定し、`pagination_token` パラメータを使用して次のページの結果を取得します。詳細については、[ページネーションガイド](/ja/x-api/fundamentals/pagination)を参照してください。
+これらのエンドポイントでは、レスポンスを迅速に返すためにページネーションを利用しています。1 回のレスポンスで送信できる件数（最大 100 件のイベント）を超える結果がある場合は、ページネーションを行う必要があります。`max_results` パラメーターを使用して 1 ページあたりに返す結果数を指定し、`pagination_token` パラメーターを使用して次のページの結果を取得します。詳細については、[ページネーションガイド](/ja/x-api/fundamentals/pagination)を参照してください。
 
 **便利なツール**
 
-Direct Messages のルックアップエンドポイントを扱う際に、ぜひ活用してほしい便利なツールをいくつか紹介します。 
+Direct Messages ルックアップエンドポイントを扱う際に、ぜひ活用していただきたい便利なツールをいくつか紹介します。 
 
 ****Postman****
 
-Postman は、エンドポイントをテストするのに非常に便利なツールです。各 Postman リクエストには、利用可能な内容をすばやく理解できるよう、すべてのパスパラメータおよびボディパラメータが含まれています。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ページをご覧ください。 
+Postman は、エンドポイントを試すために利用できる優れたツールです。各 Postman リクエストには、利用可能な項目をすばやく理解できるよう、すべてのパスおよびボディパラメーターが含まれています。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ページをご覧ください。 
 
 ****コードサンプル****
 
-v2 Direct Messages エンドポイント向けの Python のサンプルコードは、[X API v2 sample code GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code) リポジトリで提供しています。&quot;Manage-Direct-Messages&quot; フォルダーには POST メソッドの例が、&quot;Direct-Messages-lookup&quot; フォルダーには GET メソッドの例が含まれています。
+v2 Direct Messages エンドポイント向けの Python サンプルコードは、[X API v2 sample code GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code) リポジトリで提供しています。&quot;Manage-Direct-Messages&quot; フォルダーには POST メソッドの例が、&quot;Direct-Messages-lookup&quot; フォルダーには GET メソッドの例が含まれています。
 
 ****XDev Software Development Kits (SDKs)****
 
-これらの[ライブラリ](/ja/x-api/tools-and-libraries/overview)は v2 Direct Messages エンドポイントに対応するよう更新中で、間もなく利用可能になる予定です。
+これらの [ライブラリ](/ja/x-api/tools-and-libraries/overview) は v2 Direct Messages エンドポイントに対応するよう更新中で、まもなく利用可能になる予定です。
 
-* [X API Java SDK](https://github.com/xdevplatform/twitter-api-java-sdk) - X API v2 向けの公式 Java SDK
-* [X API TypeScript/JavaScript SDK](https://github.com/xdevplatform/twitter-api-typescript-sdk) - X API v2 向けの公式 TS/JS SDK
+* [X API Java SDK](https://github.com/xdevplatform/twitter-api-java-sdk) - X API v2 用の公式 Java SDK
+* [X API TypeScript/JavaScript SDK](https://github.com/xdevplatform/twitter-api-typescript-sdk) - X API v2 用の公式 TS/JS SDK
 
-**サードパーティ製ライブラリ**
+**サードパーティライブラリ**
 
-コミュニティによって開発された[サードパーティ製ライブラリ](/ja/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2)は増え続けています。これらのライブラリは、導入をスムーズに進めるのに役立つよう設計されており、そのいくつかはまもなく v2 Direct Messages エンドポイントをサポートする予定です。適切なバージョンタグを確認することで、v2 エンドポイントと連携するライブラリを見つけることができます。
+コミュニティによって開発された [サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2) が増え続けています。これらのライブラリは、すぐに利用を開始できるように設計されており、そのいくつかは近いうちに v2 Direct Messages エンドポイントをサポートする予定です。v2 エンドポイントに対応したライブラリは、適切なバージョンタグを確認することで見つけることができます。

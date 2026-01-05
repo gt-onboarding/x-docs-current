@@ -1,44 +1,44 @@
 ---
 title: 集成指南
 sidebarTitle: 集成指南
-keywords: ["用户查找集成", "用户集成指南", "用户查找设置", "用户集成", "用户查找实现"]
+keywords: ["user lookup integration", "users integration guide", "user lookup setup", "users integration", "user lookup implementation"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
 
-本页面介绍了在将 users lookup 端点集成到你的系统时，需要了解的一些工具和关键概念。我们将本页面划分为以下几个部分：
+本页介绍在将 users lookup 端点集成到你的系统时，需要了解的若干工具和关键概念。我们将本页内容划分为以下几个部分：
 
 * [实用工具](#helpful)
 * 关键概念
-* [身份验证](#authentication)
+* [认证](#authentication)
 * [开发者门户、项目和应用](#portal)
 * [速率限制](#limits)
 * [字段和扩展字段](#fields)
-* [特殊情况](#edge)
+* [边界情况](#edge)
 
 <div id="helpful-tools">
   ### 实用工具
 </div>
 
-在我们深入介绍有助于你集成该端点的一些关键概念之前，建议你先熟悉以下工具：
+在深入介绍一些有助于你集成此端点的关键概念之前，我们建议你先熟悉以下工具：
 
 <div id="postman">
   #### Postman
 </div>
 
-Postman 是一款非常适合用来测试端点的工具。每个 Postman 请求都会包含路径和请求体中的所有参数，帮助你快速了解可用的内容。要进一步了解我们的 Postman 集合，请访问我们的[“使用 Postman”](/zh/tutorials/postman-getting-started)页面。 
+Postman 是一款非常好用的端点测试工具。每个 Postman 请求都会包含所有路径参数和请求体参数，帮助你快速了解可用的内容。要进一步了解我们的 Postman 集合，请访问我们的「[使用 Postman](/zh/tutorials/postman-getting-started)」页面。 
 
 <div id="code-samples">
   #### 代码示例
 </div>
 
-想用你常用的编程语言写点代码来对接这个 endpoint 吗？我们在 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code)上提供了多种代码示例，你可以将它们作为起点来使用。
+想要用你熟悉的编程语言，通过一些代码来配置这个 endpoint 吗？我们在 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code)上提供了多种代码示例，你可以将其作为起点使用。
 
 <div id="third-party-libraries">
   #### 第三方库
 </div>
 
-利用社区提供的[第三方库](/zh/x-api/tools-and-libraries/overview)，帮助你快速上手。你可以通过查找对应的版本标签，找到适用于 v2 端点的库。
+利用我们社区提供的[第三方库](/zh/x-api/tools-and-libraries/overview)来帮助你快速入门。你可以通过查看相应的版本标签，找到适用于 v2 端点的库。
 
 <div id="key-concepts">
   ### 关键概念
@@ -48,22 +48,22 @@ Postman 是一款非常适合用来测试端点的工具。每个 Postman 请求
   #### 身份验证
 </div>
 
-所有 X API v2 端点都要求使用一组凭证（也称为密钥和令牌）对请求进行[身份验证](/zh/resources/fundamentals/authentication)。你可以使用 OAuth 1.0a 用户上下文、App only，或 OAuth 2.0 Authorization Code with PKCE 来对这些端点的请求进行身份验证。 
+所有 X API v2 端点都要求使用一组凭证（也称为密钥和令牌）对请求进行[身份验证](/zh/resources/fundamentals/authentication)。你可以使用 OAuth 1.0a 用户上下文、仅应用（App only）或 OAuth 2.0 Authorization Code with PKCE 来对发送到这些端点的请求进行身份验证。 
 
-[OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2)要求你使用 API Key、用户访问令牌（Access Token）以及少量其他参数来[创建授权头](/zh/resources/fundamentals/authentication#authorizing-a-request)，然后将该授权头随请求一起发送。访问令牌必须与你代表其发起请求的用户关联。如果你想为另一位用户生成一组访问令牌，该用户必须使用[三方 OAuth 流程](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens)授权你的 App。 
+[OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 要求你使用 API Key、用户访问令牌（Access Token）以及其他一些参数来[创建授权头](/zh/resources/fundamentals/authentication#authorizing-a-request)，然后随请求一起发送。访问令牌必须与你代表其发起请求的用户关联。如果你想为另一位用户生成一组访问令牌，该用户必须通过[三方 OAuth 流程](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens)授权你的 App。 
 
-请注意，OAuth 1.0a 使用起来可能比较复杂。如果你不熟悉这一身份验证方法，我们建议你使用[库](/zh/x-api/tools-and-libraries/overview)、Postman 之类的工具，或者使用 OAuth 2.0 来对请求进行身份验证。如果你想从这些端点请求某条帖子或私有指标数据，你需要使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE，以确保你拥有内容所属用户授予的适当权限。
+请注意，OAuth 1.0a 使用起来可能比较复杂。如果你对这种身份验证方式不熟悉，我们建议你使用某个[库](/zh/x-api/tools-and-libraries/overview)、Postman 等工具，或者使用 OAuth 2.0 来为请求执行身份验证。如果你希望从这些端点请求某条帖子或其私有指标，你需要使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE，以确保你拥有内容所属用户授予的适当权限。
  
 
-[App only](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 只要求你在请求中携带一个 [App only Access Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。你可以直接在开发者应用中生成 App only Access Token，或者使用 [POST oauth2/token](/zh/resources/fundamentals/authentication#post-oauth2-token) 端点生成。 
+[仅应用（App only）](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 只要求你在请求中携带一个[仅应用访问令牌（App only Access Token）](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。你可以直接在某个开发者应用内生成仅应用访问令牌，或者通过 [POST oauth2/token](/zh/resources/fundamentals/authentication#post-oauth2-token) 端点生成。
 
-[OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 允许对应用的 scope（权限范围）以及跨多个设备的授权流程进行更精细的控制。OAuth 2.0 允许你选择特定的细粒度 scope，从而代表用户获取相应的具体权限。 
+[OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 允许你对应用的权限范围（scope）以及跨多个设备的授权流程进行更精细的控制。OAuth 2.0 允许你选择特定的细粒度权限范围，从而代表用户获取对应的特定权限。 
 
-要在你的 App 中启用 OAuth 2.0，必须在开发者门户的 App 设置部分中，在该 App 的身份验证设置里将其启用。
+要在你的 App 中启用 OAuth 2.0，你必须在开发者门户的 App 设置部分中找到该 App 的身份验证设置，并在那里将其启用。
 
 **请注意**
 
-如果你要请求以下字段，则必须使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code： 
+如果你正在请求以下字段，则需要使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code： 
 
 * tweet.fields.non&#95;public&#95;metrics
 * tweet.fields.promoted&#95;metrics
@@ -73,42 +73,42 @@ Postman 是一款非常适合用来测试端点的工具。每个 Postman 请求
   #### 开发者门户、项目和开发者应用
 </div>
 
-要获取可用于 X API v2 端点的一组身份验证凭证，你必须先[注册开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)，在该账号下创建一个[项目](/zh/resources/fundamentals/projects)，并在该项目中创建一个[开发者应用](/zh/resources/fundamentals/developer-apps)。然后，你可以在该开发者应用中找到你的密钥和令牌。 
+要获取一组可用于调用 X API v2 端点的身份验证凭证，你必须先[注册开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)，然后在该账号下创建一个[项目](/zh/resources/fundamentals/projects)，并在该项目中创建一个[开发者应用](/zh/resources/fundamentals/developer-apps)。之后，你可以在开发者应用中找到你的密钥和令牌。 
  
 
 <div id="rate-limits">
   #### 速率限制
 </div>
 
-每天都有成千上万的开发者向 X API 发起请求。为了帮助管理如此庞大的请求量，我们在每个端点上设置了[速率限制](/zh/x-api/fundamentals/rate-limits)，用来限制你代表你的应用或代表已认证用户所能发起的请求数量。 
+每天都有成千上万的开发者向 X API 发起请求。为了帮助管理如此巨大的请求量，我们在每个端点上都设置了[速率限制](/zh/x-api/fundamentals/rate-limits)，以限制你代表你的应用或代表已认证用户所能发起的请求次数。
 
-用户查找端点在 App 级和用户级都会受到速率限制。不过，已认证用户查找端点仅在用户级受到速率限制。
+用户查询端点在应用级和用户级都会受到速率限制。然而，已认证用户查询端点仅在用户级受到速率限制。
 
-App 级速率限制意味着你作为开发者，在给定时间段内，从任一特定 App（由你正在使用的密钥和令牌所标识）向该端点只能发起一定数量的请求。用户级速率限制意味着，你代表其发起请求的已认证用户，在所有开发者应用中只允许执行一定次数的调用。
+应用级速率限制意味着你作为开发者，在给定的一段时间内，从任意一个给定的开发者应用（由你使用的密钥和令牌所确定）调用该端点时，只能发起一定数量的请求。用户级速率限制意味着，你代表其发起请求的已认证用户，在任意开发者应用中，只能执行一定次数的请求。
 
-下表展示了各个端点对应的速率限制。
+下表显示了每个端点的速率限制。
 
 |     |     |     |
 | :--- | :--- | :--- |
 | **端点** | **HTTP 方法** | **速率限制 / 级别** |
-| /2/users | GET | 每 15 分钟 900 次请求 / App 和用户 |
-| /2/users/:id | GET | 每 15 分钟 900 次请求 / App 和用户 |
-| /2/users/by | GET | 每 15 分钟 900 次请求 / App 和用户 |
-| /2/users/by/username/:username | GET | 每 15 分钟 900 次请求 / App 和用户 |
-| /2/users/me | GET | 每 15 分钟 75 次请求 / 用户 |
+| /2/users | GET | 每 15 分钟 900 次请求 / 应用级和用户级 |
+| /2/users/:id | GET | 每 15 分钟 900 次请求 / 应用级和用户级 |
+| /2/users/by | GET | 每 15 分钟 900 次请求 / 应用级和用户级 |
+| /2/users/by/username/:username | GET | 每 15 分钟 900 次请求 / 应用级和用户级 |
+| /2/users/me | GET | 每 15 分钟 75 次请求 / 用户级 |
 
 <div id="fields-and-expansions">
   #### 字段和扩展字段
 </div>
 
-X API v2 允许用户通过一组称为字段和扩展字段的工具，精确选择希望从 API 返回的具体数据。`expansions` 参数允许你展开响应载荷中被引用的对象。例如，此端点允许你使用 `pinned_tweet_id` 扩展字段。
+X API v2 允许用户使用称为字段和扩展字段的一组工具，精确选择希望从 API 返回的哪些数据。`expansions` 参数允许你将载荷中被引用的对象展开。例如，此端点允许你使用 `pinned_tweet_id` 扩展字段。
 
-`fields` 参数允许你选择希望在不同数据对象中接收的精确[字段](/zh/x-api/fundamentals/fields)。这些端点主要返回用户对象。默认情况下，用户对象会返回 `id`、`name` 和 `username` 字段。要接收其他字段（例如 `user.created_at` 或 `user.location`），你必须通过 `fields` 参数显式请求这些字段。你在集成中可能希望考虑使用的一些重要字段包括帖子投票数据、指标、注释以及会话 ID 字段。
+`fields` 参数允许你选择希望接收的不同数据对象中的具体[字段](/zh/x-api/fundamentals/fields)。这些端点主要返回用户对象。默认情况下，用户对象会返回 `id`、`name` 和 `username` 字段。若要接收诸如 `user.created_at` 或 `user.location` 之类的其他字段，你必须通过 `fields` 参数显式请求这些字段。在集成中，你可能希望考虑使用的一些重要字段包括帖子投票（poll）数据、指标（metrics）、标注（annotations）以及会话 ID 字段。
 
-我们在 [X API v2 数据字典](/zh/x-api/fundamentals/data-dictionary)中添加了一篇关于[如何使用字段和扩展字段](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)的指南。
+我们在 [X API v2 数据字典](/zh/x-api/fundamentals/data-dictionary) 中添加了一个关于[如何使用字段和扩展字段](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)的指南。
 
 <div id="edge-cases">
-  #### 边界情况
+  #### 边缘情况
 </div>
 
-* 对于转发的帖子，其文本会被截断。短期的解决方法是展开被引用的帖子，并从扩展结果中获取完整文本。这是一个已知缺陷，我们会在未来修复。
+* 转发的帖子文本会被截断。临时的解决方案是展开被引用的帖子，并从扩展数据中获取完整文本。这是一个已知问题，我们会在后续修复。

@@ -1,7 +1,7 @@
 ---
 title: ミュートの取得
 sidebarTitle: ミュートの取得
-keywords: ["ミュート取得の移行", "v1.1 から v2 へのミュート取得", "ミュート取得のマイグレーション", "Standard v1.1 から v2 へのミュート移行", "ミュート機能の移行"]
+keywords: ["ミュート取得の移行", "v1.1 から v2 へのミュート取得", "ミュート取得を移行", "Standard v1.1 から v2 へのミュート", "ミュート機能の移行"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
@@ -10,7 +10,7 @@ import { Button } from '/snippets/ja/button.mdx';
   ### ミュートのルックアップ: Standard v1.1 と X API v2 の比較
 </div>
 
-Standard v1.1 の [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-ids) および [GET mutes/users/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-list) エンドポイントを使用している場合、このガイドは、Standard v1.1 と X API v2 のミュートのルックアップエンドポイントの共通点と相違点を理解するのに役立ちます。
+Standard v1.1 の [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-ids) と [GET mutes/users/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-list) エンドポイントを利用している場合、このガイドでは、Standard v1.1 と X API v2 のミュートのルックアップエンドポイントの共通点と相違点を理解できるように説明します。
 
 * **共通点**
   * 認証
@@ -21,7 +21,7 @@ Standard v1.1 の [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-
 
   * アプリとプロジェクトの要件
 
-  * レスポンスデータ形式
+  * レスポンスデータの形式
 
   * リクエストパラメータ
 
@@ -31,73 +31,73 @@ Standard v1.1 の [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-
 
 **認証**
 
-standard v1.1 と X API v2 の mutes lookup エンドポイントは、どちらも [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) を使用します。したがって、以前に standard v1.1 の mutes lookup エンドポイントのいずれかを使用していた場合は、X API v2 版へ移行しても同じ認証方法を引き続き使用できます。 
+Standard v1.1 と X API v2 の両方のミュートルックアップエンドポイントは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) を使用します。したがって、以前に Standard v1.1 のミュートルックアップエンドポイントのいずれかを使用していた場合、X API v2 の対応エンドポイントへ移行しても、同じ認証方法を引き続き使用できます。 
 
 <div id="differences">
-  #### Differences
+  #### 違い
 </div>
 
-**Endpoint URLs**
+**エンドポイント URL**
 
-* Standard v1.1 endpoints:
+* standard v1.1 エンドポイント:
   * GET https://api.x.com/1.1/mutes/users/ids.json
     (指定したユーザーがミュートしているユーザー ID のリスト)
   * GET https://api.x.com/1.1/mutes/users/lists.json
     (指定したユーザーによってミュートされているユーザーのリスト)
-* X API v2 endpoint:
+* X API v2 エンドポイント:
   * GET https://api.x.com/2/users/:id/muting
     (指定したユーザー ID によってミュートされているユーザーのリスト)
      
 
-**Users per request limits**
+**1 リクエストあたりのユーザー数の上限**
 
-Standard v1.1 のエンドポイントでは、1 回のリクエストで最大 5,000 ユーザーまで取得できます。新しい v2 エンドポイントでは、1 回のリクエストで最大 1,000 ユーザーまで取得できます。1,000 ユーザーを最大まで取得するには、クエリパラメータとして max&#95;results=1000 を指定する必要があります。その後、レスポンスペイロードで返される next&#95;token を、次のリクエストの pagination&#95;token クエリパラメータに指定できます。
+standard v1.1 エンドポイントでは、1 リクエストあたり最大 5,000 ユーザーまで返すことができます。新しい v2 エンドポイントでは、1 リクエストあたり最大 1,000 ユーザーまで返すことができます。1,000 ユーザーを上限まで取得するには、クエリパラメータとして max&#95;results=1000 を指定する必要があります。その後、レスポンスペイロードで返される next&#95;token を、次のリクエストで pagination&#95;token クエリパラメータに渡します。
  
 
-**App and Project requirements**
+**アプリとプロジェクトの要件**
 
-X API v2 エンドポイントでは、リクエストを認証する際に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) と、それに関連付けられた [プロジェクト](/ja/resources/fundamentals/developer-apps) の認証情報を使用する必要があります。すべての X API v1.1 エンドポイントでは、単体のアプリ、またはプロジェクトに関連付けられたアプリの認証情報を使用できます。
+X API v2 エンドポイントでは、リクエストを認証する際に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) の認証情報を使用する必要があります。この開発者アプリは [プロジェクト](/ja/resources/fundamentals/developer-apps) に関連付けられている必要があります。すべての X API v1.1 エンドポイントでは、スタンドアロンのアプリ、またはプロジェクトに関連付けられたアプリのいずれかの認証情報を使用できます。
 
-**Response data format**
+**レスポンスデータ形式**
 
-Standard v1.1 と X API v2 のエンドポイントバージョンの最大の違いの 1 つは、ペイロードでどのフィールドを返すかをどのように選択するかという点です。
+standard v1.1 と X API v2 のエンドポイントバージョンの最大の違いの 1 つは、どのフィールドをペイロードに含めて返すかを選択する方法です。
 
-Standard エンドポイントでは、多くのレスポンスフィールドがデフォルトで返され、さらにパラメータを使用して、どのフィールド、またはどのフィールドセットをペイロードで返すべきかを指定することができます。
+standard エンドポイントでは、多くのレスポンスフィールドがデフォルトで返され、そのうえで、どのフィールド、あるいはどのフィールドセットをペイロードに含めるかをパラメータで指定できます。
 
-X API v2 のエンドポイントでは、デフォルトで返されるのは user の id、name、username フィールドのみです。追加のフィールドやオブジェクトを要求するには、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) パラメータを使用する必要があります。このエンドポイントから要求したユーザーフィールドはすべて、プライマリの user オブジェクト内で返されます。展開されたポストオブジェクトとそのフィールドは、レスポンス内の includes オブジェクトで返されます。その後、user と展開されたポストオブジェクトの両方に含まれる ID を照合することで、展開されたオブジェクトを user オブジェクトに対応付けることができます。 
+X API v2 のバージョンでは、デフォルトで返されるのは user id、name、username フィールドのみです。追加のフィールドやオブジェクトをリクエストするには、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) パラメータを使用する必要があります。このエンドポイントからリクエストしたユーザーフィールドは、すべてプライマリの user オブジェクトに含まれて返されます。展開されたポストオブジェクトとそのフィールドは、レスポンス内の includes オブジェクトに含まれて返されます。その後、user と展開されたポストオブジェクトの両方に含まれる ID を照合することで、展開されたオブジェクトを user オブジェクトに対応付けることができます。 
 
-これらの新しいパラメータの詳細については、それぞれのガイド、または [fields と expansions の使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) に関するガイドを参照することをお勧めします。 
+これらの新しいパラメータについて詳細を知るには、それぞれのガイド、または [fields と expansions の使用方法](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) に関するガイドを参照することをお勧めします。 
 
-また、Standard v1.1 のフィールドを新しい v2 のフィールドにマッピングする際に役立つ [データフォーマット移行ガイド](/ja/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2) も用意しています。このガイドでは、特定のフィールドを返すために v2 のリクエストで指定する必要がある、expansions および fields パラメータも説明しています。 
+また、standard v1.1 のフィールドを新しい v2 のフィールドにマッピングするのに役立つ [データ形式マイグレーションガイド](/ja/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2) も用意しています。このガイドでは、特定のフィールドを返すために v2 のリクエストで指定する必要がある、具体的な expansion および field パラメータも確認できます。 
  
 
-特定のフィールドの要求方法の変更に加えて、X API v2 では、API が返すオブジェクト、特に [Post](/ja/x-api/fundamentals/data-dictionary#tweet) オブジェクトや [user](/ja/x-api/fundamentals/data-dictionary#user) オブジェクトに対して、新しい JSON デザインも導入しています。
+特定のフィールドのリクエスト方法の変更に加えて、X API v2 では、[Post](/ja/x-api/fundamentals/data-dictionary#tweet) や [user](/ja/x-api/fundamentals/data-dictionary#user) オブジェクトなど、API によって返されるオブジェクト向けに新しい JSON 設計も導入しています。
 
-* JSON のルートレベルでは、Standard エンドポイントはポストオブジェクトを statuses 配列で返しますが、X API v2 は data 配列で返します。 
-* Retweeted および Quoted の「statuses」を参照する代わりに、X API v2 の JSON では、リツイートされたポストおよび引用ポストを参照します。contributors や user.translator&#95;type など、多くのレガシーおよび非推奨フィールドは削除されます。 
-* ポストオブジェクトの favorites と user オブジェクトの favourites の両方を使用する代わりに、X API v2 では like という用語を使用します。 
-* X では、値を持たない JSON 値 (たとえば null) はペイロードに書き込まない、という規則を採用しています。ポストおよび user の属性は、null 以外の値を持つ場合にのみ含まれます。 
+* JSON のルートレベルでは、standard エンドポイントは Post オブジェクトを statuses 配列で返しますが、X API v2 は data 配列で返します。 
+* Retweeted および Quoted の「statuses」を参照する代わりに、X API v2 の JSON では Retweeted および Quoted ポストを参照します。contributors や user.translator&#95;type など、多くのレガシーおよび非推奨フィールドは削除されます。 
+* Post オブジェクト内の favorites と、user オブジェクト内の favourites の両方を使用する代わりに、X API v2 では like という用語を使用します。 
+* X では、値が存在しない JSON 値（例: null）はペイロードに書き出さないという規約を採用しています。Post および user の属性は、null ではない値がある場合にのみ含まれます。 
    
 
-また、[Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) に、次のような新しいフィールドセットも追加しました。
+また、[Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) に次のような新しいフィールド群も追加しました。
 
 * [conversation&#95;id](/ja/x-api/fundamentals/conversation-id) フィールド
-* context と entities を含む、2 つの新しい [annotations](/ja/x-api/fundamentals/post-annotations) フィールド
+* context と entities を含む 2 つの新しい [annotations](/ja/x-api/fundamentals/post-annotations) フィールド
 * 複数の新しい [metrics](/ja/x-api/fundamentals/metrics) フィールド 
-* 特定のポストに誰が返信できるかを示す、新しい reply&#95;setting フィールド
+* 新しい reply&#95;setting フィールド。特定のポストに誰が返信できるかを示します
 
-**Request parameters**
+**リクエストパラメータ**
 
-次の Standard v1.1 リクエストパラメータには、X API v2 における対応パラメータがあります。
+次の standard v1.1 リクエストパラメータには、X API v2 における同等のものが存在します：
 
 | **Standard** | **X API v2** |
 | :--- | :--- |
-| stringify&#95;ids | 同等の機能なし |
+| stringify&#95;ids | 対応する項目はありません |
 | cursor | pagination&#95;token |
-| skip&#95;status | 同等の機能なし |
+| skip&#95;status | 対応する項目はありません |
 
-また、X API v2 ではサポートされていない、Standard v1.1 の Mutes lookup リクエストパラメータのセットもあります:
+また、X API v2 ではサポート**されていない**標準 v1.1 の Mutes lookup リクエストパラメータのセットもあります。
 
 | Standard | Comment |
 | :--- | :--- |
-| include&#95;entities | このパラメータは、ポストのペイロードから entities ノードを削除するために使用します。これは、追加指定型の fields と expansions の機能に置き換えられました。 |
+| include&#95;entities | このパラメータは、ポストのペイロードから entities ノードを削除するために使用されます。これは追加のフィールドと expansions の機能に置き換えられています。 |

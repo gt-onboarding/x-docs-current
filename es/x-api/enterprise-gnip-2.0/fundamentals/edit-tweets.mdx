@@ -1,21 +1,21 @@
 ---
 title: Editar Publicaciones
-keywords: ["editar tweets enterprise", "enterprise editar tweets", "editar publicaciones enterprise", "ediciones de tweets enterprise", "editar metadatos enterprise"]
+keywords: ["editar publicaciones enterprise", "enterprise editar publicaciones", "editar publicaciones enterprise", "ediciones de publicaciones enterprise", "editar metadatos enterprise"]
 ---
 
-Los endpoints de Enterprise se han actualizado para proporcionar metadatos de Publicaciones editadas. La función &#95;Edit Posts&#95; se introdujo por primera vez para pruebas internas entre empleados de X el 1 de septiembre de 2022. A partir de esa fecha, las Publicaciones elegibles podían editarse durante 30 minutos y hasta 5 veces. *Todos los objetos de las Publicaciones creadas desde el 29 de septiembre de 2022* incluyen metadatos de edición de la Publicación, incluso si la Publicación nunca se editó. Cada vez que se edita una Publicación, se crea un nuevo ID de Publicación. El historial de edición de una Publicación se puede describir encadenando estos ID, comenzando con el ID original. Además, si se elimina cualquier Publicación de la cadena de edición, todas las Publicaciones de esa cadena también se eliminan.
+Los endpoints de Enterprise se han actualizado para proporcionar metadatos de Publicaciones editadas. La funcionalidad &#95;Edit Posts&#95; se introdujo por primera vez para pruebas entre empleados de X el 1 de septiembre de 2022. A partir de esa fecha, las Publicaciones elegibles podían editarse durante 30 minutos y hasta 5 veces. *Todos los objetos de Publicaciones creadas desde el 29 de septiembre de 2022* incluyen metadatos de edición de la Publicación, incluso si la Publicación nunca se editó. Cada vez que se edita una Publicación, se crea un nuevo ID de Publicación. El historial de edición de una Publicación puede describirse encadenando estos IDs, comenzando con el ID original. Además, si alguna Publicación de la cadena de edición se elimina, todas las Publicaciones de esa cadena también se eliminan.
 
-Estos metadatos se incluyen automáticamente. No se necesitan parámetros de solicitud para incluir el historial de ediciones disponible como parte del objeto de la Publicación.
+Estos metadatos se incluyen automáticamente. No se necesitan parámetros en la solicitud para incluir el historial de edición disponible como parte del objeto de la Publicación.
 
-Con estos nuevos metadatos, un desarrollador puede determinar:
+Con estos nuevos metadatos, un desarrollador puede averiguar:
 
-* Si una Publicación podía editarse en el momento de su creación. Algunas Publicaciones, como aquellas con encuestas o Publicaciones programadas, no se pueden editar.
-* Las Publicaciones se pueden editar durante 30 minutos y pueden editarse hasta 5 veces. Para las Publicaciones editables, puedes ver si aún queda tiempo para editarla y cuántas ediciones adicionales son posibles.
-* Si estás viendo una versión editada de una Publicación. En la mayoría de los casos, la API devolverá la versión más reciente de una Publicación, a menos que se solicite una versión anterior específica por ID de la Publicación.
+* Si una Publicación era elegible para edición en el momento de su creación. Algunas Publicaciones, como aquellas con encuestas o Publicaciones programadas, no se pueden editar.
+* Que las Publicaciones son editables durante 30 minutos y se pueden editar hasta 5 veces. Para las Publicaciones editables, puedes ver si aún queda tiempo para editar y cuántas ediciones más son posibles.
+* Si estás viendo una versión editada de una Publicación. En la mayoría de los casos, la API devolverá la versión más reciente de una Publicación, a menos que se solicite una versión anterior específica mediante el ID de Publicación.
 
 Se han añadido tres nuevos atributos de la Publicación en el nivel raíz:
 
-* **edit&#95;history** - Proporciona todos los ID de Publicación asociados con el historial de edición de la Publicación. El atributo &quot;initial&#95;tweet&#95;id&quot; indica la Publicación original y el atributo &quot;edit&#95;tweet&#95;ids&quot; es un array que proporciona todos los ID asociados con su historial de edición. Si la Publicación no se ha editado, este array contendrá un único ID.
+* **edit&#95;history** - Proporciona todos los IDs de Publicaciones asociados con el historial de edición de la Publicación. El atributo &quot;initial&#95;tweet&#95;id&quot; indica la Publicación original y el atributo &quot;edit&#95;tweet&#95;ids&quot; es un array que proporciona todos los IDs asociados con su historial de edición. Si la Publicación no ha sido editada, este array contendrá un único ID.
 
 ```
 "edit_history": {
@@ -24,7 +24,7 @@ Se han añadido tres nuevos atributos de la Publicación en el nivel raíz:
   }
 ```
 
-* **edit&#95;controls** - Proporciona atributos que indican cuándo termina la ventana de edición de 30 minutos y cuántas ediciones posibles quedan.
+* **edit&#95;controls** - Proporciona atributos que indican cuándo termina la ventana de edición de 30 minutos y cuántas ediciones potenciales restan.
 
 ```
 "edit_controls": {  
@@ -33,26 +33,26 @@ Se han añadido tres nuevos atributos de la Publicación en el nivel raíz:
   }
 ```
 
-* **editable** - Indica si una Publicación era apta para edición cuando se creó. 
+* **editable** - Indica si una Publicación era apta para ser editada cuando se creó. 
 
 &quot;editable&quot;: true
 
-La mayoría de las Publicaciones son aptas para edición. Sin embargo, los siguientes tipos de Publicaciones no lo son: 
+La mayoría de las Publicaciones son aptas. Sin embargo, los siguientes tipos de Publicaciones no lo son: 
 
-* La Publicación es promocionada
+* La Publicación está promocionada
 * La Publicación tiene una encuesta
-* La Publicación es una respuesta en un hilo de otro usuario
-* La Publicación es un Retweet (ten en cuenta que las Quote Tweets sí se pueden editar)
+* La Publicación es una respuesta en un hilo de otra persona
+* La Publicación es un Retweet (ten en cuenta que las Publicaciones citadas sí son aptas para edición)
 * La Publicación es nullcast
 * Publicación de Comunidad
 * Publicación de Superfollow
 * Publicación colaborativa
 
-**Atributos de ejemplo para una Publicación no editada**
+**Ejemplo de atributos para una Publicación no editada**
 
-El JSON siguiente muestra los metadatos de edición que se incluyen para una Publicación creada después de que se añadió la función de edición de Publicaciones. Este ejemplo es para una Publicación que no tiene historial de edición. 
+El JSON siguiente resalta los metadatos de edición que se incluyen para una Publicación publicada después de que se añadiera la función de edición de Publicaciones. Este ejemplo es para una Publicación que no tiene historial de edición. 
 
-Ten en cuenta que el array `"edit_tweet_ids"` tiene un único id.
+Ten en cuenta que el array `"edit_tweet_ids"` tiene un solo id.
 
 ```
 {
@@ -74,9 +74,9 @@ Ten en cuenta que el array `"edit_tweet_ids"` tiene un único id.
 
 **Atributos de ejemplo para una Publicación editada**
 
-El JSON siguiente resalta los metadatos de edición que se incluyen para una Publicación creada después de que se incorporó la función de edición de Publicaciones. Este ejemplo corresponde a una Publicación que ha tenido una sola edición. 
+El siguiente JSON destaca los metadatos de edición que se incluyen para una Publicación creada después de que se añadió la función de editar Publicaciones. Este ejemplo corresponde a una Publicación que solo se ha editado una vez. 
 
-Ten en cuenta que el array `"edit_tweet_ids"` tiene dos id, uno para la Publicación original y otro para la actualización editada.
+Ten en cuenta que el array `"edit_tweet_ids"` contiene dos ids, uno para la Publicación original y otro para la versión editada.
 
 ```
 {
@@ -96,9 +96,9 @@ Ten en cuenta que el array `"edit_tweet_ids"` tiene dos id, uno para la Publicac
 }
 ```
 
-**Compatibilidad con cumplimiento normativo**
+**Compatibilidad con el cumplimiento normativo**
 
-El [Compliance Firehose](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse) y el endpoint de [batch compliance](/es/x-api/compliance/batch-compliance/introduction) de v2 se han actualizado para ofrecer compatibilidad con la edición de Publicaciones: 
+El [Compliance Firehose](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse) y el [endpoint de cumplimiento por lotes](/es/x-api/compliance/batch-compliance/introduction) de v2 se han actualizado para admitir la edición de Publicaciones: 
 
 Se ha añadido un nuevo tipo de evento &quot;tweet&#95;edit&quot; al Compliance Firehose.
 

@@ -1,14 +1,14 @@
 在本指南中，我们将带你逐步了解如何使用 Python 调用新的 Community Notes 端点。 
 
-要使用 Community Notes 端点，请确认你拥有一个[有效的 X 开发者账号](https://developer.x.com/)，并且已按照 Community Notes 指南注册成为一名 [Community Notes AI Note Writer](https://communitynotes.x.com/guide/en/api/overview)。获批后，请确保你已经获取了在下文示例中使用所需的正确 API 密钥和令牌。你可以查阅[此基础知识部分](https://docs.x.com/resources/fundamentals/developer-apps#keys-and-tokens)，了解如何获取你的密钥和令牌——请保存你的 API key、API secret、access token 和 token secret，因为我们将在本指南的示例中使用它们。Community Notes 端点支持 OAuth 1.0 和 2.0 身份验证。在本指南中，我们将使用 OAuth 1.0。
+要使用 Community Notes 端点，请确保你拥有一个[有效的 X 开发者账户](https://developer.x.com/)，并且已在 Community Notes 指南中注册为 [Community Notes AI Note Writer](https://communitynotes.x.com/guide/en/api/overview)。获得批准后，请确保你拥有正确的 API 密钥和令牌，以便在下方示例中使用。请参阅[此基础知识部分](https://docs.x.com/resources/fundamentals/developer-apps#keys-and-tokens)了解如何获取你的密钥和令牌——请保存你的 API key、API secret、access token 和 token secret，因为我们将在本指南的示例中使用它们。Community Notes 端点支持 OAuth 1.0 和 2.0 认证。在本指南中，我们将使用 OAuth 1.0。
 
 <div id="search-for-x-posts-that-are-eligible-to-receive-a-community-note">
-  ## 搜索有资格接收 Community Note 的 X 帖子
+  ## 搜索符合接收 Community Note 条件的 X 帖子
 </div>
 
-开发者可以使用 `GET https://api.x.com/2/notes/search/posts_eligible_for_notes` 端点，检索有资格接收 Community Note 的 X 帖子列表。要使用这些端点，你必须指定 test&#95;mode 参数，并将其设置为 true。
+开发者可以使用 `GET https://api.x.com/2/notes/search/posts_eligible_for_notes` 端点，检索符合接收 Community Note 条件的 X 帖子列表。要使用这些端点，你必须提供一个 test&#95;mode 参数，并将其设置为 true。
 
-**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回类似如下的错误：
+**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回类似以下的错误消息：
 
 ```json
 {
@@ -23,9 +23,9 @@
 }
 ```
 
-你可以使用 `max&#95;results` 参数指定每次请求返回的最多帖子数量。默认情况下会返回 10 条帖子，每次请求最多可以检索 100 条帖子。如果你需要更多结果，请在请求中传入 `pagination&#95;token`。
+你可以通过 `max_results` 参数指定每个请求返回的帖子最大数量。默认情况下，会返回 10 条帖子，每个请求最多可以检索 100 条帖子。如果你想获取更多结果，请在请求中传入 `pagination_token`。
 
-下面的代码将调用搜索端点，返回符合添加 Community Notes 条件的帖子：
+下面的代码将调用搜索接口，返回符合使用 Community Notes 条件的帖子：
 
 ```python
 from requests_oauthlib import OAuth1Session
@@ -57,7 +57,7 @@ except Exception as e:
    print(f"Request failed: {e}")
 ```
 
-响应类似如下：
+响应将类似如下：
 
 ```json
 {
@@ -92,18 +92,18 @@ except Exception as e:
 }
 ```
 
-你可以使用上面响应中的 Post ID 来撰写一条 Community Note。
+你可以使用上面响应返回的帖子 ID 来撰写一条 Community Note。
 
-默认情况下，你会获得帖子 id、文本以及编辑历史记录。如果你需要更多字段，可以使用 [fields](https://docs.x.com/x-api/fundamentals/fields) 和 [expansions](https://docs.x.com/x-api/fundamentals/expansions)。
+默认情况下，响应中会返回帖子 id、文本以及编辑历史。如果你需要额外的字段，可以使用 [fields](https://docs.x.com/x-api/fundamentals/fields) 和 [expansions](https://docs.x.com/x-api/fundamentals/expansions)。
 
 
 <div id="search-for-community-notes-that-have-been-written-on-x-posts">
-  ## 搜索已添加到 X 帖子上的 Community Notes
+  ## 搜索已在 X 帖子上撰写的 Community Notes
 </div>
 
-类似地，开发者可以使用 GET [https://api.x.com/2/notes/search/notes&#95;written](https://api.x.com/2/notes/search/notes_written) 来检索由当前认证用户撰写的 Community Notes 列表。此端点同样需要使用 test&#95;mode 参数。当 test&#95;mode 被设置为 true 时，将返回该用户撰写的所有测试笔记。
+类似地，开发者可以使用 GET [https://api.x.com/2/notes/search/notes&#95;written](https://api.x.com/2/notes/search/notes_written) 来获取由当前通过身份验证的用户撰写的 Community Notes 列表。此端点同样需要提供 test&#95;mode 参数。当 test&#95;mode 设置为 true 时，会返回该用户撰写的所有测试笔记。
 
-**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回类似如下的错误：
+**注意：** 目前 test&#95;mode 只能设置为 true，否则这些端点将返回类似如下的错误：
 
 ```json
 {
@@ -118,9 +118,9 @@ except Exception as e:
 }
 ```
 
-你可以使用 `max_results` 参数指定每个请求返回的 Note 最大数量。默认情况下，每个请求会返回 10 条 Note，每个请求最多可检索 100 条 Note。如果你需要更多结果，请传入 `pagination_token`。
+你可以使用 `max_results` 参数指定每次请求返回的 Note 最大数量。默认情况下，每次请求返回 10 条 Note，单次请求最多可以检索 100 条 Note。如果你需要更多结果，请传入 `pagination_token`。
 
-下面的代码将调用搜索端点，返回写在 X 帖子上的 Note：
+下面的代码将调用搜索端点，返回附加在 X 帖子上的 Note：
 
 ```python
 from requests_oauthlib import OAuth1Session
@@ -153,7 +153,7 @@ except Exception as e:
    print(f"Request failed: {e}")
 ```
 
-响应类似如下：
+响应大致如下：
 
 ```json
 {
@@ -192,12 +192,12 @@ except Exception as e:
 
 
 <div id="manage-community-notes">
-  ## 管理 Community Notes
+  ## 管理社区注释（Community Notes）
 </div>
 
-开发者可以使用 POST [https://api.x.com/2/notes](https://api.x.com/2/notes) 端点在 X 帖子上提交 Community Notes。与前面提到的端点类似，该端点同样支持 test&#95;mode 查询参数。当 test&#95;mode 设置为 true 时，所提交的注释仅用于测试，不会公开展示。
+开发者可以使用 POST [https://api.x.com/2/notes](https://api.x.com/2/notes) 端点，为 X 帖子提交社区注释。与前面介绍的端点类似，该端点同样支持 `test_mode` 查询参数。当 `test_mode` 设置为 true 时，提交的注释仅用于测试，不会公开可见。
 
-**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回如下错误：
+**注意：** 目前，`test_mode` 只能设置为 true，否则这些端点会返回如下错误：
 
 ```json
 {
@@ -212,14 +212,14 @@ except Exception as e:
 }
 ```
 
-为此，您需要在此端点的请求正文中提供要为其提交 Community Note 的 *post&#95;id*，以及创建备注所需的信息，包括：
+为此，你需要在该端点的请求体中提供你想要提交 Community Note 的 *post&#95;id*，以及创建注释所需的以下信息：
 
-* *text*：备注的文本内容，长度至少为 1 个字符且最多为 280 个字符（URL 计为单个字符），并且必须包含一个来源 URL
+* *text*：注释的文本内容，长度至少为 1 个字符且最多为 280 个字符（每个 URL 按 1 个字符计数），并且必须包含一个来源 URL
 * *classification*：可以是 misinformed&#95;or&#95;potentially&#95;misleading 或 not&#95;misleading 之一
-* *misleading&#95;tags*：一个非空标签列表，其值可以是 &quot;disputed&#95;claim&#95;as&#95;fact&quot;、&quot;factual&#95;error&quot;、&quot;manipulated&#95;media&quot;、&quot;misinterpreted&#95;satire&quot;、&quot;missing&#95;important&#95;context&quot;、&quot;outdated&#95;information&quot; 或 &quot;other&quot; 之一。仅当 classification 字段的类型为 misinformed&#95;or&#95;potentially&#95;misleading 时才需要该字段。
+* *misleading&#95;tags*：一个非空标签列表，其取值可以是 &quot;disputed&#95;claim&#95;as&#95;fact&quot;、&quot;factual&#95;error&quot;、&quot;manipulated&#95;media&quot;、&quot;misinterpreted&#95;satire&quot;、&quot;missing&#95;important&#95;context&quot;、&quot;outdated&#95;information&quot; 或 &quot;other&quot;。仅当 classification 的类型为 misinformed&#95;or&#95;potentially&#95;misleading 时才需要该字段。
 * *trustworthy&#95;sources*：一个布尔值，用于指示是否在 “text” 中提供了可信来源。
 
-下面是对此端点的示例请求。
+下面是对此端点的一个请求示例。
 
 ```python
 from requests_oauthlib import OAuth1Session
@@ -283,7 +283,7 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
   ## 错误排查
 </div>
 
-以下列出了在使用 Community Notes 端点时常见的错误信息及相应的解决方案：
+以下是使用 Community Notes 端点时的一些常见错误信息及对应的解决方法：
 
 <div id="401-unauthorized">
   ### 401 未经授权
@@ -298,11 +298,11 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**说明**：当请求未通过正确的身份验证时，将返回此错误
+**说明**：当请求未正确进行身份验证时，会返回此错误
 
 
 <div id="403-forbidden">
-  ### 403 禁止
+  ### 403 Forbidden（禁止访问）
 </div>
 
 ```json
@@ -314,7 +314,7 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**解释**：当用户尚未被开通使用此端点的权限时会返回此错误
+**说明**：当用户尚未开通使用此 endpoint 的权限时会返回此错误
 
 
 <div id="400-invalid-request-test_mode">
@@ -334,7 +334,7 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**说明**：当用户在将 `test_mode` 设置为 false 的情况下尝试发起请求时，会返回此错误
+**解释**：当用户在将 `test_mode` 设置为 false 的情况下尝试发出请求时，会返回此端点
 
 
 <div id="400-invalid-request-duplicate-note">
@@ -361,4 +361,4 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
   ## 资源
 </div>
 
-你可以在我们的 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code)中找到其他编程语言的代码示例。你也可以通过我们的 [Postman 集合](https://www.postman.com/xapidevelopers)开始使用这些 API 端点。如果你对这些端点有任何技术问题，欢迎在 [X 开发者社区支持论坛](https://devcommunity.x.com/)与我们联系。
+你可以在我们的 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 上找到使用其他编程语言编写的代码示例。你也可以通过我们的 [Postman 集合](https://www.postman.com/xapidevelopers) 开始使用这些 API 端点。如果你在使用这些端点时遇到任何技术问题，欢迎在 [X 开发者社区支持论坛](https://devcommunity.x.com/) 与我们联系。

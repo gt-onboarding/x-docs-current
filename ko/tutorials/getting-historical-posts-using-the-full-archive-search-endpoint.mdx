@@ -1,5 +1,5 @@
 ---
-title: v2 전체 아카이브 검색 엔드포인트를 사용해 과거 게시물 가져오기
+title: v2 전체 아카이브 검색 엔드포인트를 사용하여 과거 게시물 가져오기
 mode: wide
 keywords: ["전체 아카이브 검색", "과거 검색", "과거 트윗", "아카이브 검색", "검색 튜토리얼", "과거 데이터", "전체 아카이브"]
 ---
@@ -8,38 +8,41 @@ keywords: ["전체 아카이브 검색", "과거 검색", "과거 트윗", "아�
   ## 소개
 </div>
 
-v2에서 제공되는 [Search Posts 엔드포인트](/ko/x-api/posts/search/introduction)는
-여러분이 만든 검색 쿼리를 기반으로 관심 있는 주제와 관련된 게시물을
-수신할 수 있도록 해 줍니다. v2 Search Posts에는 서로 다른 두 가지 엔드포인트가
-있습니다. 승인된 계정을 가진 모든 개발자가 사용할 수 있고 최대 7일 전까지의
-게시물을 검색할 수 있는 최근 검색(recent search)과,
+v2에서 제공하는 [Search Posts endpoints](/ko/x-api/posts/search/introduction)를
+사용하면, 직접 정의한 검색 쿼리를 기반으로 관심 있는 주제와 관련된 게시물을
+받을 수 있습니다. v2 Search Posts에는 서로 다른 두 개의 endpoint가
+제공됩니다. 승인된 계정을 보유한 모든 개발자가 사용할 수 있고 최대 7일 전까지의
+게시물을 검색할 수 있는 최근 검색(recent search) endpoint와,
 [Academic Research product track](https://developer.x.com/en/products/x-api/early-access/guide#na_2)에
 승인된 연구자만 사용할 수 있으며 2006년 3월까지 거슬러 올라가는 전체 게시물
-아카이브를 검색할 수 있는 전체 아카이브 검색(full-archive search)이 있습니다.
+아카이브를 검색할 수 있는 전체 아카이브 검색(full-archive search) endpoint입니다.
 
-제공되는 전체 검색 기능은
+검색 기능 전체는
 [검색 개요 페이지](/ko/x-api/posts/search/introduction)에서 확인할 수 있습니다.
 
-이러한 Search Posts 엔드포인트는 종단 연구(longitudinal study)나
-과거의 주제나 이벤트를 분석하는 데 사용하는 등, 학술 연구자를 위한
-가장 일반적인 사용 사례 중 하나를 지원합니다.
+이 Search Posts endpoints는 학술 연구자들이 가장 자주 사용하는 활용 사례 중
+하나를 지원합니다. 연구자들은 이를 종단(longitudinal) 연구나
+과거 주제 또는 이벤트 분석 등에 사용할 수 있습니다.
 
 이 튜토리얼은 공개 X 데이터의 전체 이력을 검색하기 위해
-full-archive search 엔드포인트를 사용하려는 연구자에게 단계별 가이드를
-제공합니다. 또한 위치 정보가 포함된(geo-tagged) 게시물을 조회하는 것과 같이
-데이터셋을 구축하는 여러 가지 방법과, 쿼리에 대해 사용 가능한 게시물을
-페이지네이션하는 방법을 보여 줍니다.
+full-archive search endpoint를 사용하려는 연구자들을 위한 단계별 가이드를
+제공합니다. 또한 위치(geo) 태그가 포함된 게시물을 검색하는 것과 같이
+데이터셋을 구축하는 다양한 방법과, 특정 쿼리에 대해 사용 가능한 게시물을
+페이지를 넘기며 조회하는 방법을 보여줍니다.
 
 <div id="prerequisites">
-  ### 사전 준비 사항
+  ### 사전 요구 사항
 </div>
 
-현재 이 엔드포인트는
-[Academic Research product track](https://developer.x.com/en/solutions/academic-research/products-for-researchers)의 일부로만 제공됩니다.
-이 엔드포인트를 사용하려면
-[액세스 권한을 신청](https://developer.x.com/en/portal/petition/academic/is-it-right-for-you)해야 합니다.
-이 트랙의
-[신청 절차와 요구 사항](https://developer.x.com/en/solutions/academic-research/application-info)에 대해 더 알아보세요.
+현재 이 endpoint는
+[Academic Research product track](https://developer.x.com/en/solutions/academic-research/products-for-researchers)
+의 일부로만 제공됩니다.
+이 endpoint를 사용하려면
+[액세스 권한을 신청](https://developer.x.com/en/portal/petition/academic/is-it-right-for-you)
+해야 합니다.
+이 트랙에 대한
+[신청 절차와 요구 사항](https://developer.x.com/en/solutions/academic-research/application-info)
+을 자세히 알아보세요.
 
 <div id="connect-an-app-to-the-academic-project">
   ### 학술 프로젝트에 앱 연결하기
@@ -47,43 +50,44 @@ full-archive search 엔드포인트를 사용하려는 연구자에게 단계별
 
 Academic Research 제품 트랙 사용 승인을 받으면
 [developer portal](https://developer.x.com/en/portal/dashboard)에서
-학술 [프로젝트](/ko/resources/fundamentals/projects)를 볼 수 있습니다. &quot;Projects and Apps&quot;
+Academic [Project](/ko/resources/fundamentals/projects)를 확인할 수 있습니다. &quot;Projects and Apps&quot;
 섹션에서 &quot;Add App&quot;을 클릭해
-[X 앱](/ko/resources/fundamentals/developer-apps)을 프로젝트에 연결합니다.
+[X App](/ko/resources/fundamentals/developer-apps)을 프로젝트에 연결합니다.
 
 [](https://res.cloudinary.com/practicaldev/image/fetch/s--gHFOyuDc--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/i/gb7aevhqyfvfjznd0pnd.png)
 
-![이 이미지는 아직 앱이 추가되지 않은 Academic 프로젝트가 developer portal에 표시된 화면입니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-1.png.twimg.1920.png)
+![이 이미지는 아직 App이 추가되지 않은 Academic Project가 developer portal에 표시된 모습을 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-1.png.twimg.1920.png)
 
-그런 다음, 아래에 표시된 것처럼 기존 앱을 선택해 프로젝트에 연결할 수 있습니다.
+그런 다음, 아래와 같이 기존 App을 선택해 프로젝트에 연결할 수 있습니다.
 
-![이 이미지는 Academic 프로젝트에 앱을 추가하려고 할 때 나타나는 페이지를 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-2.png.twimg.1920.png)
+![이 이미지는 Academic Project에 App을 추가하려고 할 때 표시되는 페이지를 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-2.png.twimg.1920.png)
 
-또는 새 앱을 생성하고 이름을 지정한 후 완료를 클릭해
-새 앱을 Academic 프로젝트에 연결할 수도 있습니다.
+또는 새 App을 생성해 이름을 지정한 뒤 완료를 클릭하여, 새 App을 Academic Project에
+연결할 수도 있습니다.
 
-![이 이미지는 새 앱의 이름을 입력하거나 기존 앱을 선택할 수 있는 페이지를 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-3.png.twimg.1920.png)
+![이 이미지는 새 App의 이름을 입력하거나, 기존 App을 선택할 수 있는 페이지를 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-3.png.twimg.1920.png)
 
-이 과정을 통해 API 키와
+이렇게 하면 API 키와
+이후 전체 보관 검색 엔드포인트에 연결하는 데 사용할
 [Bearer Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)을
-발급받을 수 있으며, 이를 사용해 전체 아카이브 검색 엔드포인트에 연결할 수 있습니다.
+얻게 됩니다.
 
-![이 이미지는 새 앱을 생성한 후 표시되는, 키와 토큰이 표시된 페이지를 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-4.png.twimg.1920.png)
+![이 이미지는 새 App을 생성한 후 키와 토큰이 표시되는 페이지를 보여줍니다](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-4.png.twimg.1920.png)
 
 **참고**
 
-위 스크린샷의 키는 숨겨져 있지만, 여러분의 developer portal에서는
+위 스크린샷에서는 키가 숨겨져 있지만, 본인의 developer portal에서는
 API Key, API Secret Key, Bearer Token의 실제 값을 볼 수 있습니다.
-전체 아카이브 검색 엔드포인트를 호출하는 데 필요하므로, 이 키들과 Bearer Token을
-반드시 저장해 두십시오.
+이 키들과 Bearer Token은 전체 보관 검색 엔드포인트를 호출하는 데 필요하므로
+반드시 저장해 두세요.
 
 <div id="connecting-to-the-full-archive-search-endpoint">
   ### 전체 아카이브 검색 엔드포인트에 연결하기
 </div>
 
-아래 cURL 명령은 @XDevelopers 핸들의 과거 게시물을 가져오는 방법을 보여줍니다.
-$BEARER&#95;TOKEN을 자신의 Bearer Token으로 바꾸고, 전체 요청을 터미널에
-붙여넣은 다음 &quot;Return&quot; 키를 누르세요.
+아래 cURL 명령어는 @XDevelopers 계정에서 과거 게시물을 가져오는 방법을 보여줍니다.
+`$BEARER_TOKEN`을 자신의 Bearer Token으로 바꾼 뒤, 전체 요청을 터미널에
+붙여넣고 Enter 키를 누르십시오.
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers' --header 'Authorization: Bearer $BEARER_TOKEN'
@@ -91,9 +95,9 @@ curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers
 
 응답 JSON이 표시됩니다.
 
-기본적으로 가장 최근 게시물 10개만 반환됩니다. 한 요청당 10개보다 더 많은
-게시물을 요청하려면, 아래와 같이 max&#95;results 매개변수를 사용해 요청당
-최대 500개의 게시물까지 설정할 수 있습니다.
+기본적으로 가장 최근 게시물 10개만 반환됩니다. 한 요청에서 10개보다
+많은 게시물을 가져오려면, 아래와 같이 `max_results` 매개변수를 사용해
+요청당 최대 500개까지 반환되도록 설정할 수 있습니다:
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers&max_results=500' --header 'Authorization: Bearer $BEARER_TOKEN'
@@ -101,39 +105,39 @@ curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers
 
 ###
 
-쿼리 구성하기
+쿼리 작성하기
 
-위의 예제 호출에서 볼 수 있듯이, `query` 매개변수를 사용해
-검색하려는 데이터를 지정할 수 있습니다. 예를 들어 *covid* 또는
-*coronavirus*라는 단어를 포함하는 모든 게시물을 가져오려면
+위의 예시 요청에서 볼 수 있듯이, `query` 매개변수를 사용하여
+검색하려는 데이터를 지정할 수 있습니다. 예를 들어 *covid*라는 단어 또는
+*coronavirus*라는 단어를 포함하는 모든 게시물을 가져오려는 경우,
 괄호 안에서 OR 연산자를 사용할 수 있으며, 쿼리는
-`(covid OR coronavirus)`처럼 작성할 수 있고, 이에 따른 API 호출은 다음과 같은 형태가 됩니다:
+`(covid OR coronavirus)`가 될 수 있고, 이에 따라 API 호출은 다음과 같은 형태가 됩니다:
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=(covid%20OR%20coronavirus)&max_results=500' --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-마찬가지로, 리포스트가 아닌 *covid19*라는 단어를 포함하는 모든 게시물을
-원한다면, is:retweet 연산자에 논리 부정(-)을 함께 사용해 covid19 -is:retweet
-와 같은 쿼리를 만들 수 있으며, 이때 API 호출은 다음과 같습니다:
+마찬가지로, 리포스트가 아닌 *covid19*라는 단어를 포함한 모든 게시물을
+원한다면, is:retweet 연산자에 논리 NOT(기호 -로 표현됨)을 함께 사용할 수
+있습니다. 따라서 쿼리는 covid19 -is:retweet가 되고, API 호출은 다음과 같습니다:
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=covid19%20-is:retweet&max_results=500' --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-전체 아카이브 검색 엔드포인트에서 지원되는 연산자 전체 목록은
-[이 가이드를 참고하세요](/ko/x-api/posts/search/integrate/build-a-query).
+전체 아카이브 검색 엔드포인트에서 지원되는 연산자 목록은
+[이 가이드](/ko/x-api/posts/search/integrate/build-a-query)에서 모두 확인할 수 있습니다.
 
 <div id="using-the-start_time-and-end_time-parameters-to-get-historical-posts">
-  ### start&#95;time 및 end&#95;time 매개변수를 사용해 과거 게시물 가져오기
+  ### start&#95;time 및 end&#95;time 파라미터를 사용해 과거 게시물 가져오기
 </div>
 
-full-archive search endpoint를 사용할 경우, 기본적으로 최근 30일 동안의
+전체 아카이브 검색 엔드포인트를 사용할 때 기본적으로 최근 30일 동안의
 게시물이 반환됩니다. 30일보다 더 이전의 게시물을 가져오려면
-API 호출에서 start&#95;time 및 end&#95;time 매개변수를 사용할 수 있습니다.
-이 매개변수는 예를 들어 2020-12-21T13:00:00.00Z와 같은 유효한 RFC3339
-date-time 형식이어야 합니다. 따라서 2020년 12월 한 달 동안 XDevelopers
-계정의 모든 게시물을 가져오려면, API 호출은 다음과 같습니다.
+API 호출에서 start&#95;time 및 end&#95;time 파라미터를 사용할 수 있습니다.
+이 파라미터들은 예를 들어 2020-12-21T13:00:00.00Z와 같은 유효한
+RFC3339 날짜-시간 형식이어야 합니다. 따라서 2020년 12월 한 달 동안
+XDevelopers 계정에서 작성된 모든 게시물을 가져오려면 API 호출은 다음과 같습니다:
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:XDevelopers&start_time=2020-12-01T00:00:00.00Z&end_time=2021-01-01T00:00:00.00Z' --header 'Authorization: Bearer $BEARER_TOKEN'
@@ -141,16 +145,18 @@ curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:XDevelopers
 
 ###
 
-위치 태그가 포함된 과거 게시물 가져오기
+지오태그된 과거 게시물 가져오기
 
-위치 태그가 포함된 게시물은 도시, 주, 국가 등과 같은 지리 정보를 포함하고 있는 게시물을 의미합니다.
+지오태그된 게시물이란 도시, 주, 국가 등과 같은 지리 정보를 포함하는
+게시물을 말합니다.
 
 <div id="using-hasgeo-operator">
-  #### has:geo 연산자 사용
+  #### has:geo 연산자 사용하기
 </div>
 
-위치 정보(geo 데이터)가 포함된 게시물을 가져오려면 has:geo 연산자를 사용할 수 있습니다.
-예를 들어, 다음 cURL 요청은 @XDevelopers 계정에서 위치 정보가 포함된 게시물만 가져옵니다.
+geo 데이터가 포함된 게시물을 가져오려면 has:geo 연산자를 사용할 수 있습니다.
+예를 들어, 다음 cURL 요청은 geo 데이터가 있는 @XDevelopers 계정의
+게시물만 가져옵니다.
 
 ```
 curl --request GET
@@ -159,10 +165,10 @@ curl --request GET
 ```
 
 <div id="using-place_country-operator">
-  #### place&#95;country 연산자 사용하기
+  #### place&#95;country 오퍼레이터 사용
 </div>
 
-마찬가지로 `place&#95;country` 연산자를 사용하여, geo 데이터가 포함된 게시물을 특정 국가의 게시물만으로 제한할 수 있습니다. 아래 cURL 명령은 미국에서 작성된 @XDevelopers 계정의 모든 게시물을 가져옵니다:
+마찬가지로 place&#95;country 오퍼레이터를 사용하여 위치 정보(geo 데이터)가 있는 게시물을 특정 국가의 게시물로 제한할 수 있습니다. 아래 cURL 명령은 미국에서 작성된 @XDevelopers 계정의 모든 게시물을 가져옵니다:
 
 ```
 curl --request GET
@@ -170,24 +176,25 @@ curl --request GET
 --hbasheader 'Authorization: Bearer XXXXX'
 ```
 
-국가는 위에서 ISO 알파-2 문자 코드로 지정됩니다. 유효한 ISO 코드는 [여기](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)에서 확인할 수 있습니다.
+국가는 위에서 ISO 알파-2 문자 코드를 사용해 지정됩니다. 유효한 ISO
+코드는 [여기](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)에서 확인할 수 있습니다.
 
 <div id="getting-more-than-500-historical-posts-using-the-next_token">
-  ### next&#95;token을 사용하여 500개를 초과하는 과거 게시물 가져오기
+  ### next&#95;token을 사용하여 500개 이상의 과거 게시물 가져오기
 </div>
 
-위에서 언급했듯이, 기본적으로 전체 보관 검색 endpoint에 대한 한 번의
-요청으로는 최대 500개의 게시물만 가져올 수 있습니다. 쿼리 결과가 500개를
-초과하는 경우, JSON 응답에 next&#95;token이 포함되며, 이를 API 호출에
-추가해서 이 쿼리에 대한 다음 게시물들을 가져올 수 있습니다. 이 next&#95;token은
-JSON 응답의 meta 객체에 포함되며, 대략 다음과 같은 형태입니다:
+앞에서 언급했듯이, 기본적으로 전체 아카이브 검색 엔드포인트에 대한 한 번의 요청으로
+최대 500개의 게시물만 가져올 수 있습니다. 쿼리 결과로 500개를 초과하는 게시물이
+존재하는 경우, JSON 응답에는 next&#95;token이 포함되며, 이 토큰을 API 호출에
+이어 붙여 이 쿼리에 대한 다음 게시물을 가져올 수 있습니다. 이 next&#95;token은
+JSON 응답의 meta 객체에 포함되어 있으며, 대략 다음과 같은 형태입니다:
 
 ```
 { "newest_id": "12345678...", "oldest_id": "12345678...", "result_count": 500,
 "nebashxt_token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }
 ```
 
-따라서 다음으로 조회 가능한 게시물을 가져오려면 이 meta 객체의 next&#95;token 값을 가져와, 아래 예시처럼 전체 아카이브 검색 엔드포인트에 대한 API 호출에서 next&#95;token 값으로 지정하면 됩니다(이때 Bearer Token은 본인의 것을 사용하고, next&#95;token 값에는 이전 API 호출에서 받은 Next Token 값을 사용해야 합니다).
+따라서 다음으로 이용 가능한 게시물을 가져오려면 이 meta 객체의 next&#95;token 값을 가져와, 아래에 표시된 것처럼 전체 아카이브 검색 endpoint에 대한 API 호출에서 next&#95;token 파라미터 값으로 사용하면 됩니다. 이때 Bearer Token은 본인의 것을 사용하고, 이전 API 호출에서 받은 next&#95;token 값을 사용해야 합니다.
 
 ```
 curl --request GET
@@ -195,22 +202,17 @@ curl --request GET
 --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-이러한 방식으로 next&#95;token이 있는지 계속 확인하고, 수집하려는 게시물
-개수에 아직 도달하지 않았다면 각 요청마다 새로운 next&#95;token으로
-full-archive 엔드포인트를 계속 호출할 수 있습니다. full-archive search 엔드포인트는
-전체 [Post cap](/ko/x-api/fundamentals/post-cap), 즉 X API에서
-[프로젝트](/ko/resources/fundamentals/projects)당 월별로 가져올 수 있는
-게시물 개수에 포함된다는 점을 기억하세요. 결과를 페이지네이션할 때 코드 로직을
-신중하게 구성하여, 의도치 않게 Post cap을 소진하지 않도록 하세요.
+이러한 방식으로 next&#95;token이 사용 가능한지 계속 확인할 수 있고, 아직 수집하려는 게시물의 목표 개수에 도달하지 않았다면 각 요청마다 새 next&#95;token을 사용하여 full-archive endpoint를 계속 호출할 수 있습니다. full-archive search endpoint 호출은
+[Post cap](/ko/x-api/fundamentals/post-cap), 즉 X API에서 각
+[Project](/ko/resources/fundamentals/projects)별로 한 달에 가져올 수 있는 게시물 수에 포함된다는 점을 기억하십시오. 따라서 결과를 페이지네이션(paging)할 때 코드 로직을 주의 깊게 설계하여, 의도치 않게 Post cap을 소진해 버리지 않도록 하십시오.
 
-아래는 full-archive search 엔드포인트를 사용할 때 도움이 될 수 있는 몇 가지
-자료입니다. 여러분의 의견을 듣고 싶습니다. 이 엔드포인트에 대해 질문이 있으면
-[@XDevelopers](https://x.com/XDevelopers)나
-[community forums](https://devcommunity.x.com/)로 문의해 주세요.
+아래는 full-archive search endpoint를 사용할 때 도움이 될 수 있는 몇 가지 리소스입니다. 여러분의 의견을 듣고 싶습니다. 이 endpoint와 관련된 질문이 있다면
+[@XDevelopers](https://x.com/XDevelopers) 또는
+[community forums](https://devcommunity.x.com/)를 통해 문의해 주십시오.
 
 <div id="additional-resources">
-  ### 추가 리소스
+  ### 추가 자료
 </div>
 
 * [전체 아카이브 검색 엔드포인트 API 레퍼런스](/ko/x-api/posts/full-archive-search)
-* [검색 쿼리 작성 기본 개념 알아보기](/ko/x-api/posts/search/integrate/build-a-query)
+* [검색 쿼리 작성 기본 개념 익히기](/ko/x-api/posts/search/integrate/build-a-query)

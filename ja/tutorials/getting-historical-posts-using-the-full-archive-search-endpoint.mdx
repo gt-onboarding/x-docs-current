@@ -1,93 +1,93 @@
 ---
 title: v2 フルアーカイブ検索エンドポイントを使用して過去のポストを取得する
 mode: wide
-keywords: ["フルアーカイブ検索", "過去データ検索", "過去のポスト", "アーカイブ検索", "検索チュートリアル", "履歴データ", "フルアーカイブ"]
+keywords: ["フルアーカイブ検索", "過去ポスト検索", "過去のポスト", "アーカイブ検索", "検索チュートリアル", "履歴データ", "フルアーカイブ"]
 ---
 
 <div id="introduction">
   ## はじめに
 </div>
 
-v2 の [Search Posts エンドポイント](/ja/x-api/posts/search/introduction)を使うと、
+v2 における[Search Posts エンドポイント](/ja/x-api/posts/search/introduction)を使うと、
 作成した検索クエリに基づいて、関心のあるトピックに関連するポストを取得できます。
 v2 Search Posts には 2 種類のエンドポイントがあり、
-承認済み開発者アカウントを持つすべての開発者が利用でき最大過去 7 日分のポストを検索できる
+承認済みアカウントを持つすべての開発者が利用でき、最大 7 日前までのポストを検索できる
 recent search と、
-特定の条件を満たす場合にのみ利用できる full-archive search です。
-full-archive search は、
-[Academic Research product track](https://developer.x.com/en/products/x-api/early-access/guide#na_2)
-に承認された研究者だけが利用でき、
-2006 年 3 月までさかのぼるポストの全アーカイブを検索できます。
+[Academic Research プロダクトトラック](https://developer.x.com/en/products/x-api/early-access/guide#na_2)
+に承認された研究者のみが利用でき、2006 年 3 月までさかのぼるすべてのポストのアーカイブを検索できる
+full-archive search です。
 
 検索機能の全体像は
-[search overview ページ](/ja/x-api/posts/search/introduction)
+[検索概要ページ](/ja/x-api/posts/search/introduction)
 で確認できます。
 
 これらの Search Posts エンドポイントは、
-縦断的研究や、過去のトピックやイベントの分析などに利用できることから、
-学術研究者にとって代表的なユースケースの 1 つをカバーしています。
+縦断的研究や過去のトピックやイベントの分析などに利用される、
+学術研究者にとって最も一般的なユースケースの 1 つに対応するものです。
 
-このチュートリアルでは、研究者向けに、
-public X データの完全な履歴を検索するために
-full-archive search エンドポイントを利用する手順を、ステップバイステップで解説します。
-また、ジオタグ付きポストを取得するといった方法で
-データセットを構築するさまざまな手法や、
-クエリに対して利用可能なポストをページングしながら取得する方法も紹介します。
+本チュートリアルでは、研究者向けに、
+full-archive search エンドポイントを使用して公開 X データの
+全履歴を検索するためのステップバイステップのガイドを提供します。
+また、ジオタグ付きポストを取得するなど、
+データセットを構築するさまざまな方法や、
+クエリに対して利用可能なポストをページングして取得する方法も説明します。
 
 <div id="prerequisites">
   ### 前提条件
 </div>
 
 現在、このエンドポイントは
-[Academic Research product track](https://developer.x.com/en/solutions/academic-research/products-for-researchers)
+[Academic Research プロダクトトラック](https://developer.x.com/en/solutions/academic-research/products-for-researchers)
 の一部としてのみ利用できます。
 このエンドポイントを使用するには、
-[アクセス申請](https://developer.x.com/en/portal/petition/academic/is-it-right-for-you)
-を行う必要があります。
-このトラックに関する
-[申請プロセスと要件の詳細](https://developer.x.com/en/solutions/academic-research/application-info)
-をご覧ください。
+[アクセスを申請](https://developer.x.com/en/portal/petition/academic/is-it-right-for-you)
+する必要があります。
+このトラックの
+[申請方法および要件の詳細](https://developer.x.com/en/solutions/academic-research/application-info)
+をご確認ください。
 
 <div id="connect-an-app-to-the-academic-project">
-  ### アカデミックプロジェクトにアプリを接続する
+  ### 学術用プロジェクトにアプリを接続する
 </div>
 
 Academic Research プロダクトトラックの利用が承認されると、
-[developer portal](https://developer.x.com/en/portal/dashboard) の「Projects and Apps」セクションに
-アカデミック用の[プロジェクト](/ja/resources/fundamentals/projects)が表示されます。「Projects and Apps」
-セクションで「Add App」をクリックして、
+[開発者ポータル（developer portal）](https://developer.x.com/en/portal/dashboard) に Academic
+[Project](/ja/resources/fundamentals/projects) が表示されます。&quot;Projects and Apps&quot;
+セクションから &quot;Add App&quot; をクリックして、
 [X App](/ja/resources/fundamentals/developer-apps) をプロジェクトに接続します。
 
 [](https://res.cloudinary.com/practicaldev/image/fetch/s--gHFOyuDc--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://dev-to-uploads.s3.amazonaws.com/i/gb7aevhqyfvfjznd0pnd.png)
 
-![この画像は、developer portal 上で、まだ App が追加されていないアカデミックプロジェクトを表示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-1.png.twimg.1920.png)
+![この画像は、まだアプリが追加されていない Academic Project が developer portal 上に表示されている様子を示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-1.png.twimg.1920.png)
 
-次に、既存の App を選択してプロジェクトに接続することができます（下図参照）。
+次に、既存のアプリを選択してプロジェクトに接続することができます
+（下図のとおり）。
 
-![この画像は、アカデミックプロジェクトに App を追加しようとしたときに表示されるページを示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-2.png.twimg.1920.png)
+![この画像は、Academic Project にアプリを追加しようとしたときに表示されるページを示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-2.png.twimg.1920.png)
 
-または、新しい App を作成して名前を付け、「Complete」をクリックすることで、新しい
-App をアカデミックプロジェクトに接続することもできます。
+または、新しいアプリを作成して名前を付け、「Complete」をクリックして、
+新しいアプリを Academic Project に接続することもできます。
 
-![この画像は、新しい App の名前を入力するページ、あるいは既存の App を選択できるページを示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-3.png.twimg.1920.png)
+![この画像は、新しいアプリの名前を入力するページ、または既存のアプリを選択できるページを示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-3.png.twimg.1920.png)
 
-これにより API キーと
-[Bearer Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) が発行され、これらを使用して
-full-archive search エンドポイントに接続できるようになります。
+これにより、API キーと
+[Bearer Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)
+を取得でき、それらを使用して full-archive search エンドポイントに接続できるようになります。
 
-![この画像は、新しい App を作成した後に表示され、キーとトークンが表示されているページを示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-4.png.twimg.1920.png)
+![この画像は、新しいアプリを作成した後に表示される、キーとトークンが表示されているページを示しています](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/tutorials/getting-historical-tweets-using-the-full-archive-search-endpoint/dev-portal-4.png.twimg.1920.png)
 
 **注意**
 
-上記のスクリーンショットではキーは非表示になっていますが、実際の developer portal
-では、API Key、API Secret Key、Bearer Token の実際の値を確認できます。
-これらのキーと Bearer Token は保存しておいてください。full-archive search エンドポイントを呼び出す際に必要になります。
+上のスクリーンショットではキーは非表示になっていますが、実際には
+developer portal 上で API Key、API Secret Key、および Bearer Token の値を
+確認できます。これらのキーと Bearer Token は、full-archive search エンドポイントを
+呼び出す際に必要になるため、必ず保存しておいてください。
 
 <div id="connecting-to-the-full-archive-search-endpoint">
   ### フルアーカイブ検索エンドポイントへの接続
 </div>
 
-以下の cURL コマンドは、@XDevelopers アカウントから過去のポストを取得する方法を示しています。`$BEARER_TOKEN` を自身の Bearer Token に置き換え、リクエスト全体をターミナルに貼り付けて「Return」キーを押してください。
+以下の cURL コマンドは、@XDevelopers アカウントから過去のポストを取得する方法を示しています。`$BEARER&#95;TOKEN` を自分の Bearer Token に置き換え、リクエスト全体をターミナルに貼り付けて Enter キーを押してください。
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers' --header 'Authorization: Bearer $BEARER_TOKEN'
@@ -95,7 +95,7 @@ curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers
 
 レスポンス JSON が表示されます。
 
-デフォルトでは、直近のポストのみが 10 件返されます。1 回のリクエストで 10 件より多くのポストが必要な場合は、以下のように `max_results` パラメータを使用して、リクエストごとに最大 500 件のポストまで取得できます。
+デフォルトでは、直近のポストが最大 10 件まで返されます。1 回のリクエストで 10 件以上のポストを取得したい場合は、以下のように `max_results` パラメータを使用し、1 リクエストあたり最大 500 件のポストまで指定できます。
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers&max_results=500' --header 'Authorization: Bearer $BEARER_TOKEN'
@@ -103,38 +103,39 @@ curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:xdevelopers
 
 ###
 
-クエリを構築する
+クエリの構築
 
-上記の呼び出し例のとおり、`query` パラメータを使用すると、
-検索したいデータを指定できます。たとえば、*covid* という語または
-*coronavirus* という語を含むすべてのポストを取得したい場合は、
-丸かっこ内で OR 演算子を使用し、クエリを
-`(covid OR coronavirus)` のように指定します。この場合、API 呼び出しは次のようになります。
+前述の呼び出し例のとおり、`query` パラメータを使用すると、
+検索したいデータを指定できます。たとえば、「*covid*」という単語または
+「*coronavirus*」という単語を含むすべてのポストを取得したい場合は、
+括弧内で OR 演算子を使用し、クエリを
+`(covid OR coronavirus)` のように指定できます。この場合、API 呼び出しは
+次のようになります。
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=(covid%20OR%20coronavirus)&max_results=500' --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-同様に、*covid19* という単語を含み、リポストではないすべてのポストが必要な場合は、is:retweet オペレーターに論理否定演算子（- で表されます）を組み合わせて使用できます。そのため、クエリは covid19 -is:retweet となり、実際の API 呼び出しは次のようになります。
+同様に、再ポストではない *covid19* という単語を含むすべてのポストを取得したい場合は、論理否定（- で表されます）とともに is:retweet オペレーターを使用できます。この場合、クエリは covid19 -is:retweet となり、API 呼び出しは次のようになります。
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=covid19%20-is:retweet&max_results=500' --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-フルアーカイブ検索エンドポイントでサポートされている演算子の一覧については、
+フルアーカイブ検索エンドポイントでサポートされているすべての演算子の一覧については、
 [このガイド](/ja/x-api/posts/search/integrate/build-a-query)
 を参照してください。
 
 <div id="using-the-start_time-and-end_time-parameters-to-get-historical-posts">
-  ### start&#95;time と end&#95;time パラメータを使用して過去のポストを取得する
+  ### start&#95;time パラメータと end&#95;time パラメータを使用して過去のポストを取得する
 </div>
 
-full-archive search エンドポイントを使用する場合、デフォルトでは直近 30 日間の
-ポストが返されます。30 日よりも前のポストを取得したい場合は、
-API 呼び出しで start&#95;time と end&#95;time パラメータを使用できます。これらの
-パラメータは有効な RFC3339 日時形式で指定する必要があります（例:
-2020-12-21T13:00:00.00Z）。したがって、2020 年 12 月の 1 か月間に
-XDevelopers アカウントから投稿されたすべてのポストを取得したい場合、API 呼び出しは次のようになります。
+full-archive search エンドポイントを使用する場合、デフォルトでは直近30日間の
+ポストが返されます。30日より前のポストを取得したい場合は、
+API 呼び出しで start&#95;time パラメータと end&#95;time パラメータを使用できます。これらの
+パラメータは有効な RFC3339 の日時形式である必要があり、例えば
+2020-12-21T13:00:00.00Z のように指定します。したがって、2020年12月の1か月分について
+XDevelopers アカウントのすべてのポストを取得したい場合、API 呼び出しは次のようになります。
 
 ```bash
 curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:XDevelopers&start_time=2020-12-01T00:00:00.00Z&end_time=2021-01-01T00:00:00.00Z' --header 'Authorization: Bearer $BEARER_TOKEN'
@@ -142,17 +143,17 @@ curl --request GET 'https://api.x.com/2/tweets/search/all?query=from:XDevelopers
 
 ###
 
-過去の位置情報付きポストを取得する
+ジオタグ付きの過去ポストの取得
 
-位置情報付きのポストとは、市区町村、州、国などの地理情報が関連付けられているポストのことです。
+ジオタグ付きポストとは、都市、州、国などの地理情報が紐付けられているポストのことを指します。
 
 <div id="using-hasgeo-operator">
-  #### has:geo オペレーターの使用
+  #### has:geo 演算子の使用
 </div>
 
-位置情報データを含むポストを取得したい場合は、has:geo オペレーターを使用できます。
-たとえば、次の cURL リクエストでは、@XDevelopers アカウントからのポストのうち、
-位置情報データを含むものだけを取得します。
+geo データを含むポストを取得したい場合は、has:geo 演算子を使用できます。
+たとえば、次の cURL リクエストは、
+geo データを含む @XDevelopers アカウントのポストのみを取得します。
 
 ```
 curl --request GET
@@ -161,10 +162,10 @@ curl --request GET
 ```
 
 <div id="using-place_country-operator">
-  #### place&#95;country オペレーターの使用
+  #### place&#95;country 演算子を使用する
 </div>
 
-同様に、`place&#95;country` オペレーターを使用して、ジオデータを持つポストを特定の国のものに限定できます。以下の cURL コマンドは、@XDevelopers ハンドルによる、アメリカ合衆国からのすべてのポストを取得します。
+同様に、`place&#95;country` 演算子を使用すると、位置情報データを持つポストを特定の国に絞り込むことができます。以下の cURL コマンドは、米国内から投稿された @XDevelopers アカウントのすべてのポストを取得します。
 
 ```
 curl --request GET
@@ -172,20 +173,20 @@ curl --request GET
 --hbasheader 'Authorization: Bearer XXXXX'
 ```
 
-国は、上記の ISO alpha-2 文字コードで指定します。有効な ISO コードは[こちら](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)で確認できます。
+国は上記で ISO alpha-2 の2文字コードを使って指定します。有効な ISO コードは[こちら](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)で確認できます。
 
 <div id="getting-more-than-500-historical-posts-using-the-next_token">
-  ### next&#95;token を使用して 500 件以上の過去のポストを取得する
+  ### next&#95;token を使用して 500 件を超える過去のポストを取得する
 </div>
 
-上で説明したとおり、フルアーカイブ検索エンドポイントへのクエリでは、デフォルトでは 1 回のリクエストで取得できるポストは最大 500 件までです。クエリの条件に合致するポストが 500 件を超える場合、JSON レスポンスには next&#95;token が含まれます。この next&#95;token を API コールに付加することで、そのクエリに対して次のページのポストを取得できます。next&#95;token は JSON レスポンス内の meta オブジェクトに含まれており、次のような形式になります。
+前述のとおり、デフォルトではフルアーカイブ検索エンドポイントへのクエリ 1 件につき、1 回のリクエストで取得できるポストは最大 500 件までです。クエリに対して 500 件を超えるポストが存在する場合、JSON レスポンスには next&#95;token が含まれます。この next&#95;token を API 呼び出しに付加することで、そのクエリについて次に取得可能なポストを取得できます。この next&#95;token は JSON レスポンスの meta オブジェクト内に含まれており、次のような形式になります。
 
 ```
 { "newest_id": "12345678...", "oldest_id": "12345678...", "result_count": 500,
 "next_token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" }
 ```
 
-したがって、次のポストを取得するには、この meta オブジェクトの next&#95;token の値を使用し、その値を、以下に示すようにフルアーカイブ検索エンドポイントへの API 呼び出しで指定する next&#95;token の値として設定します（Bearer Token にはご自身のものを使用し、前回の API 呼び出しで取得した Next Token の値を使用します）。
+したがって、次のポストを取得するには、この meta オブジェクトから取得した next&#95;token の値を使用し、以下の例に示すように、フルアーカイブ検索エンドポイントへの API コールで next&#95;token として指定します（実際には、ご自身の Bearer Token と、直前の API コールで取得した next&#95;token の値を使用します）。
 
 ```
 curl --request GET
@@ -193,13 +194,13 @@ curl --request GET
 --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-このようにして、`next_token` が利用可能かどうかを確認し続け、収集したいポスト数にまだ達していない場合は、各リクエストごとに新しい `next_token` を指定して full-archive エンドポイントを呼び出し続けることができます。full-archive search エンドポイントでの利用は、合計の
-[ポスト上限](/ja/x-api/fundamentals/post-cap)、つまり X API から 1 か月あたりに取得できる
-[プロジェクト](/ja/resources/fundamentals/projects) ごとのポスト数にカウントされる点に注意してください。そのため、結果をページングする際は、意図せずにポスト上限を使い切ってしまわないよう、コードのロジックに注意してください。
+このようにして、`next_token` が利用可能かどうかを確認し続け、収集したいポスト数にまだ到達していない場合は、各リクエストで新しい `next_token` を指定して full-archive エンドポイントを呼び続けることができます。full-archive search エンドポイントは、合計の
+[Post cap](/ja/x-api/fundamentals/post-cap)、言い換えると X API から 1 か月あたりの
+[Project](/ja/resources/fundamentals/projects) ごとに取得できるポスト数にカウントされることに注意してください。そのため、結果のページング処理を行う際には、意図せず Post cap を使い切ってしまわないよう、コード ロジックに注意してください。
 
-以下は、full-archive search エンドポイントを使用する際に役立つリソースです。ぜひフィードバックをお寄せください。このエンドポイントに関する質問があれば、
-[@XDevelopers](https://x.com/XDevelopers) もしくは
-[コミュニティフォーラム](https://devcommunity.x.com/) までお問い合わせください。
+以下は、full-archive search エンドポイントを使用する際に役立つリソースです。皆さまからのフィードバックをお待ちしています。このエンドポイントに関するご質問は、
+[@XDevelopers](https://x.com/XDevelopers) または
+[community forums](https://devcommunity.x.com/) までお寄せください。
 
 <div id="additional-resources">
   ### 追加リソース

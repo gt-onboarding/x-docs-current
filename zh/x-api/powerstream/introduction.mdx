@@ -4,39 +4,39 @@ sidebarTitle: 介绍
 keywords: ["powerstream", "powerstream API", "real-time streaming", "streaming rules", "filtered stream", "enterprise streaming", "GNIP powerstream"]
 ---
 
-Powerstream 是我们速度最快的实时流式传输 API，用于访问公开的 X 数据。与以往的 GNIP Powertrack API 类似，它通过规则，基于关键词、运算符和元数据来过滤帖子。一旦与 Powerstream 端点建立持久的 HTTP 连接，你就可以开始实时接收匹配的帖子。
+Powerstream 是我们用于访问 X 公共数据的速度最快的实时流式 API。它类似于传统的 GNIP Powetrack API，使用规则根据关键词、运算符和元数据来过滤帖子。一旦与 Powerstream 端点建立了持续的 HTTP 连接，就可以开始以近乎实时的方式接收匹配的帖子。
 
-当前，Powerstream 最多支持 1,000 条规则，每条规则最多可以包含 2048 个字符。
+目前，Powerstream 支持最多 1,000 条规则，每条规则最长可以为 2,048 个字符。
 
 <div id="key-features">
-  ## 主要特性：
+  ## 关键功能：
 </div>
 
-* **实时数据传输**：以接近实时的方式获取与您的规则匹配的数据。
-* **精确过滤**：使用带运算符的布尔查询，精准过滤出您所需的数据。
+* **实时数据投递**：在接近实时的情况下获取与您的规则匹配的数据。
+* **精确过滤**：使用带运算符的布尔查询，筛选出完全符合您需求的数据。
 * **传输方式**：通过 HTTP/1.1 分块传输编码（chunked transfer encoding）返回 JSON 响应。
-* **本地数据中心支持**：仅从本地数据中心获取帖子，通过避免复制延迟来降低网络延迟。
+* **本地数据中心支持**：仅从本地数据中心获取帖子，以避免复制延迟，从而降低时延。
 
 <Note>
-  Powerstream API 是一项高级产品，仅在特定的 Enterprise 方案中提供。
+  Powerstream API 是一项高级付费服务，仅在特定 Enterprise 计划下提供。
 
-  如果您有兴趣使用 Powerstream，或想进一步了解我们的 Enterprise 产品，请通过提交 [Enterprise Request Form](/zh/forms/enterprise-api-interest) 联系我们的销售团队。
-  我们很乐意与您探讨 Powerstream 如何支持您的业务需求。
+  如果您有兴趣使用 Powerstream 或进一步了解我们的 Enterprise 产品，请通过提交 [Enterprise 请求表单](/zh/forms/enterprise-api-interest) 联系我们的销售团队。
+  我们很乐意与您讨论 Powerstream 如何支持您的业务需求。
 </Note>
 
 <div id="authentication">
   ## 身份验证
 </div>
 
-Powerstream API 端点使用 OAuth 2.0 Bearer Token。将其添加到 `Authorization: Bearer <token>` 请求头中即可开始调用这些端点。
+Powerstream API 端点使用 OAuth 2.0 Bearer Token。将其以 `Authorization: Bearer &lt;token&gt;` 的形式添加到请求头中后，即可开始使用这些端点。
 
 <div id="quick-start">
   ## 快速开始
 </div>
 
-本节演示如何使用 Python 搭配 `requests` 库快速上手 PowerStream 端点。通过 `pip install requests` 安装该库。所有示例都使用 OAuth 2.0 Bearer Token 进行认证。将 `YOUR_BEARER_TOKEN` 替换为你的实际令牌（请安全存储，例如通过 `os.getenv('BEARER_TOKEN')`）。
+本节演示如何在 Python 中使用 `requests` 库快速开始调用 PowerStream 端点。通过 `pip install requests` 进行安装。所有示例都使用 OAuth 2.0 Bearer Token 认证。将 `YOUR_BEARER_TOKEN` 替换为你的实际令牌（请安全存储，例如通过 `os.getenv('BEARER_TOKEN')`）。
 
-我们将通过代码片段来介绍每个端点。假定在文件顶部已有以下导入：
+我们将通过代码片段介绍每个端点。假定你已经在文件开头添加了以下导入：
 
 ```python
 import requests
@@ -61,10 +61,10 @@ headers = {
 ```
 
 <div id="1-create-rules-post-rules">
-  ### 1. 创建规则（POST /rules）
+  ### 1. 创建规则 (POST /rules)
 </div>
 
-添加规则来过滤你的流式数据。
+添加规则以过滤你的流数据。
 
 ```python
 data = {
@@ -91,7 +91,7 @@ else:
   ### 2. 删除规则 (POST /rules)
 </div>
 
-根据 id（建议）或 value 删除规则。
+通过 ID（推荐）或 value 删除规则。
 
 ```python
 data = {
@@ -114,13 +114,13 @@ else:
    print(f"Error {response.status_code}: {response.text}")
 ```
 
-**提示**：要删除所有规则，先通过 GET 请求获取它们，提取其中的 id，然后批量删除。
+**提示**：要删除所有规则，先通过 GET 请求获取这些规则，提取其中的 id，再批量删除。
 
 <div id="3-get-rules-get-rules">
   ### 3. 获取规则 (GET /rules)
 </div>
 
-获取所有当前生效的规则。
+获取所有当前启用的规则。
 
 ```python
 response = requests.get(rules_url, headers=headers)
@@ -137,10 +137,10 @@ else:
 ```
 
 <div id="4-powerstream-get-stream">
-  ### 4. PowerStream (GET /stream)
+  ### 4. PowerStream（GET /stream）
 </div>
 
-连接到该流以获取实时帖子。使用 `stream=True` 逐行读取。实现重连逻辑以提高健壮性。
+连接到流以获取实时帖子数据。使用 `stream=True` 进行逐行读取。实现重连逻辑以提高可靠性。
 
 ```python
 stream_url = base_url
@@ -166,7 +166,7 @@ def main():
   #### 本地数据中心支持
 </div>
 
-为优化时延，Powerstream 提供了一个选项，只获取在建立连接所在本地数据中心中产生或创建的帖子。这样可以避免复制延迟，相比来自其他数据中心的帖子实现更快的投递。要启用此功能，请在流端点后追加查询参数 `?localDcOnly=true`（例如：`/2/powerstream?localDcOnly=true`）。你所连接的数据中心会同时在流的初始数据负载以及响应的 HTTP 头中被标明。
+为了优化延迟，Powerstream 提供了一个选项，只获取在建立连接所在本地数据中心中发出或创建的帖子。这样可以避免复制滞后，相比来自其他数据中心的帖子实现更快速的投递。要启用此功能，请在流端点后追加查询参数 `?localDcOnly=true`（例如：`/2/powerstream?localDcOnly=true`）。你所连接的数据中心会在流的初始数据负载中以及响应的 HTTP 头部中标示。
 
 在代码中使用方式如下：
 
@@ -175,14 +175,14 @@ def main():
 stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
 ```
 
-如果启用了 `localDcOnly` 参数，则在流首次建立连接时，响应中会包含以下响应头，用于指示正在使用的本地数据中心：
+如果启用了 `localDcOnly` 参数，当流首次建立连接时，响应头中会包含以下响应头，用于指示正在使用的本地数据中心：
 
 ```bash
 'x-powerstream-datacenter': 'atla',
 'x-powerstream-localdconly': 'true'
 ```
 
-除此之外，它还会发送一个初始数据负载，用于指定数据中心：
+除此之外，它还会发送一个初始数据载荷，用于指定数据中心：
 
 ```bash
 {
@@ -193,38 +193,38 @@ stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
 ```
 
 <Note>
-  **提示：** 为降低延迟，请从不同的地理位置建立连接（例如，一个在美国东海岸靠近亚特兰大，另一个在美国西海岸靠近波特兰），并为每个连接启用 `localDcOnly=true`。这样可以更快速地访问各自数据中心中的帖子。然后在你这边对这些流进行聚合，以合并跨数据中心的数据。
+  **提示：** 为了优化延迟，请从不同的地理位置建立连接（例如，一个靠近美国东海岸的亚特兰大，另一个靠近美国西海岸的波特兰），并为每个连接启用 `localDcOnly=true`。这样可以更快速地访问各自数据中心中的帖子。请在你端将这些流进行聚合，以合并跨数据中心的数据。
 </Note>
 
 <div id="operators">
   ## 运算符
 </div>
 
-要设置过滤规则，你可以使用关键字和运算符。请查看下方可用运算符列表。
+要设置过滤规则，可以使用关键字和运算符。请参阅下方可用运算符列表。
 
 <div id="field-based-operators">
-  ### 字段级运算符
+  ### 字段运算符
 </div>
 
 <div id="user-operators">
-  #### 用户类运算符
+  #### 用户运算符
 </div>
 
-| 运算符 | 概要 | 示例 |
+| 运算符 | 摘要 | 示例 |
 |----------|---------|---------|
 | `from:` | 匹配来自特定用户的帖子 | `from:xdevelopers` 或 `from:123456` |
 | `to:` | 匹配发给特定用户的帖子 | `to:jvaleski` |
-| `retweets_of:` | 匹配转发特定用户帖子生成的帖子 | `retweets_of:xdevelopers` |
+| `retweets_of:` | 匹配转发特定用户帖子 的帖子 | `retweets_of:xdevelopers` |
 
 <div id="content-operators">
   #### 内容运算符
 </div>
 
-| 运算符 | 摘要 | 示例 |
+| 运算符 | 概要 | 示例 |
 |----------|---------|---------|
-| `contains:` | 匹配包含特定文本/关键字的帖子 | `contains:hello` 或 `contains:-2345.432` |
-| `url_contains:` | 匹配 URL 中包含特定文本的帖子 | `url_contains:"com/willplayforfood"` |
-| `lang:` | 匹配特定语言的帖子 | `lang:en` |
+| `contains:` | 匹配包含特定文本或关键词的帖子 | `contains:hello` 或 `contains:-2345.432` |
+| `url_contains:` | 匹配其 URL 中包含特定文本的帖子 | `url_contains:"com/willplayforfood"` |
+| `lang:` | 匹配使用特定语言的帖子 | `lang:en` |
 
 <div id="entity-operators">
   #### 实体运算符
@@ -233,35 +233,35 @@ stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
 | 运算符 | 说明 | 示例 |
 |----------|---------|---------|
 | `has:` | 匹配包含特定实体的帖子（可选值：mentions、geo、links、media、lang、symbols、images、videos） | `has:images`, `has:geo`, `has:mentions` |
-| `is:` | 匹配具有特定类型或属性的帖子（可选值：retweet、reply） | `is:retweet`, `is:reply` |
+| `is:` | 匹配特定类型或具有特定属性的帖子（可选值：retweet、reply） | `is:retweet`, `is:reply` |
 
 <div id="location-operators">
   #### 位置运算符
 </div>
 
-| 运算符 | 概要 | 示例 |
+| Operator | Summary | Example |
 |----------|---------|---------|
-| `place:` | 匹配来自特定地点/位置的帖子 | `place:"Belmont Central"`, `place:02763fa2a7611cf3` |
-| `bounding_box:` | 匹配位于某个地理边界框内的帖子 | `bounding_box:[-112.424083 42.355283 -112.409111 42.792311]` |
-| `point_radius:` | 匹配位于某点一定半径范围内的帖子 | `point_radius:[-111.464973 46.371179 25mi]`, `point_radius:[-111.464973 46.371179 15km]` |
+| `place:` | 匹配来自特定地点或位置的帖子 | `place:"Belmont Central"`, `place:02763fa2a7611cf3` |
+| `bounding_box:` | 匹配位于地理边界框内的帖子 | `bounding_box:[-112.424083 42.355283 -112.409111 42.792311]` |
+| `point_radius:` | 匹配位于某个点一定半径范围内的帖子 | `point_radius:[-111.464973 46.371179 25mi]`, `point_radius:[-111.464973 46.371179 15km]` |
 
 <div id="advancedcontent-operators">
   #### 高级/内容运算符
 </div>
 
-| 运算符 | 概要 | 示例 |
+| Operator | Summary | Example |
 |----------|---------|---------|
-| `bio:` | 匹配个人简介中包含特定内容的用户所发布的帖子（使用短语匹配） | N/A |
-| `bio_name:` | 匹配个人简介中包含特定名称的用户所发布的帖子（使用短语匹配） | N/A |
+| `bio:` | 匹配来自个人简介中包含特定内容的用户所发布的帖子（使用短语匹配） | N/A |
+| `bio_name:` | 匹配来自个人简介中包含特定姓名的用户所发布的帖子（使用短语匹配） | N/A |
 
 <div id="additional-operators">
-  #### 附加运算符
+  #### 其他运算符
 </div>
 
 | Operator | Summary | Example |
 |----------|---------|---------|
-| `retweets_of_status_id:` | 匹配特定帖子的转发 | `retweets_of_status_id:1234567890123456789` |
-| `in_reply_to_status_id:` | 匹配对特定帖子的回复 | `in_reply_to_status_id:1234567890123456789` |
+| `retweets_of_status_id:` | 匹配针对特定帖子的转发 | `retweets_of_status_id:1234567890123456789` |
+| `in_reply_to_status_id:` | 匹配针对特定帖子的回复 | `in_reply_to_status_id:1234567890123456789` |
 
 <div id="non-field-operators">
   ### 非字段运算符
@@ -274,7 +274,7 @@ stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
 | 运算符 | 说明 | 示例 |
 |----------|---------|---------|
 | `@` | 提及运算符 | `@username` |
-| 短语匹配 | 匹配精确短语 | `"exact phrase"` |
+| 短语匹配 | 匹配完全相同的短语 | `"exact phrase"` |
 
 <div id="logical-operators">
   #### 逻辑运算符
@@ -283,15 +283,15 @@ stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
 | 运算符 | 说明 | 示例 |
 |----------|---------|---------|
 | `OR` | 表达式之间的逻辑“或” | `x OR facebook` |
-| 空格/AND | 表达式之间的逻辑“与” | `x facebook`（两个词语都必须同时出现） |
-| `()` | 复杂表达式的分组 | `(x OR facebook) iphone` |
+| 空格/AND | 表达式之间的逻辑“与” | `x facebook`（两个词都必须出现） |
+| `()` | 对复杂表达式进行分组 | `(x OR facebook) iphone` |
 | `-` | 否定/排除 | `x -facebook`（包含 x 但不包含 facebook） |
 
 <div id="responses">
   ## 响应
 </div>
 
-Powestream API 的载荷格式与传统 GNIP PowerTrack API 相同。示例 JSON 响应如下所示：
+Powestream API 的有效负载格式与旧版 GNIP PowerTrack API 相同。示例 JSON 响应如下：
 
 ```json
 [
@@ -393,6 +393,6 @@ Powestream API 的载荷格式与传统 GNIP PowerTrack API 相同。示例 JSON
   ## 限制与最佳实践
 </div>
 
-* 速率限制：规则管理为 50 次请求/24 小时内；对流式传输本身没有限制（但适用连接数限制）。
-* 重新连接：断开连接后请采用指数退避重连策略。
+* 速率限制：规则管理为 50 次请求/24 小时；流没有限制（但受连接数限制）。
+* 重新连接：在断开连接后使用指数退避重连策略。
 * 监控：使用 `Connection: keep-alive` 请求头。

@@ -4,7 +4,7 @@ sidebarTitle: "StreamClient"
 ---
 
 Este módulo proporciona un cliente para interactuar con los endpoints de streaming de la X API.
-Las operaciones de streaming en tiempo real devuelven generadores que van entregando datos a medida que llegan.
+Las operaciones de streaming en tiempo real devuelven generadores que emiten datos a medida que llegan.
 Las conexiones de streaming se gestionan automáticamente con una lógica de reintentos con backoff exponencial para una gestión robusta.
 
 <div id="streamclient">
@@ -15,7 +15,7 @@ Las conexiones de streaming se gestionan automáticamente con una lógica de rei
 
 <Badge color="gray">Bases: object</Badge>
 
-Cliente de streaming para operaciones de streaming
+Cliente de streaming para operaciones de flujo de datos
 
 <div id="constructors">
   ## Constructores
@@ -35,19 +35,19 @@ Cliente de streaming para operaciones de streaming
   ### `get_rule_counts`
 </div>
 
-Obtener recuentos de reglas del flujo
-Obtiene el recuento de reglas en el conjunto de reglas activo del flujo filtrado.
+Obtener el conteo de reglas del filtered stream
+Obtiene la cantidad de reglas en el conjunto de reglas activo del filtered stream.
 
 <div id="parameters">
   #### Parámetros
 </div>
 
 <ParamField path="path.rules_count_fields" type="List or None" default="None">
-Una lista separada por comas de campos RulesCount que se mostrarán.
+Una lista separada por comas de campos de RulesCount que se mostrarán.
 </ParamField>
 
 <div id="returns">
-  #### Devuelve
+  #### Valores devueltos
 </div>
 
 `GetRuleCountsResponse` - Datos de la respuesta
@@ -57,14 +57,14 @@ Una lista separada por comas de campos RulesCount que se mostrarán.
 </div>
 
 Obtener reglas del flujo
-Obtiene el conjunto de reglas activas o un subconjunto de ellas para el flujo filtrado.
+Obtiene el conjunto de reglas activas o un subconjunto de reglas del flujo filtrado.
 
 <div id="parameters">
   #### Parámetros
 </div>
 
 <ParamField path="path.ids" type="List or None" default="None">
-Una lista de ID de reglas separados por comas.
+Una lista separada por comas de IDs de reglas.
 </ParamField>
 
 <ParamField path="path.max_results" type="int or None" default="None">
@@ -75,9 +75,7 @@ El número máximo de resultados.
 Este valor se establece proporcionando el `next_token` devuelto en una solicitud para paginar los resultados.
 </ParamField>
 
-<div id="returns">
-  #### Devuelve
-</div>
+#### Devuelve
 
 `IteratorGetRulesResponse`
 
@@ -85,43 +83,12 @@ Este valor se establece proporcionando el `next_token` devuelto en una solicitud
   ### `labels_compliance`
 </div>
 
-Transmitir etiquetas de Publicaciones (streaming)
-Transmite todos los eventos de etiquetado aplicados a Publicaciones.
-Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
-Cada elemento entregado representa un único punto de datos del flujo.
+Transmisión de etiquetas de Publicaciones (Streaming)
+Transmite todos los eventos de etiquetado aplicados a las Publicaciones.
+Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
+Cada elemento emitido representa un único dato del stream.
 La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
-Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
-
-<div id="parameters">
-  #### Parámetros
-</div>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-El número de minutos de backfill solicitado.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán las etiquetas de las Publicaciones.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente a partir de la cual se proporcionarán las etiquetas de las Publicaciones.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintentos, tiempos de espera y callbacks.
-</ParamField>
-
-<div id="likes_compliance">
-  ### `likes_compliance`
-</div>
-
-Transmitir datos de cumplimiento de Likes (streaming)
-Transmite todos los datos de cumplimiento relacionados con Likes para usuarios.
-Este es un endpoint de streaming que proporciona datos en tiempo real a medida que están disponibles.
-Cada elemento emitido representa un único punto de datos del stream.
-La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
-Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin que el cliente tenga que intervenir.
 
 <div id="parameters">
   #### Parámetros
@@ -132,7 +99,38 @@ El número de minutos de backfill solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua a partir de la cual se proporcionarán los eventos de Likes Compliance.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán las etiquetas de la Publicación.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente a partir de la cual se proporcionarán las etiquetas de la Publicación.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+StreamConfig opcional para personalizar el comportamiento de reintentos, los tiempos de espera y los callbacks.
+</ParamField>
+
+<div id="likes_compliance">
+  ### `likes_compliance`
+</div>
+
+Transmite datos de cumplimiento de Me gusta (streaming)
+Transmite todos los datos de cumplimiento relacionados con los Me gusta de los usuarios.
+Este es un endpoint de streaming que proporciona datos en tiempo real a medida que van estando disponibles.
+Cada elemento emitido representa un único punto de datos del flujo.
+La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
+Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+El número de minutos de backfill solicitados.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán los eventos de Likes Compliance.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
@@ -147,12 +145,12 @@ StreamConfig opcional para personalizar el comportamiento de reintentos, los tie
   ### `likes_firehose`
 </div>
 
-Transmitir todos los Likes (Streaming)
-Transmite en tiempo real todos los Likes públicos.
-Este es un endpoint de streaming que entrega datos en tiempo real a medida que se van generando.
-Cada elemento emitido representa un único punto de datos del flujo.
-La conexión se gestiona automáticamente con lógica de reintento con backoff exponencial.
-Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+Transmitir todos los Me gusta (streaming)
+Transmite en tiempo real todos los Me gusta públicos.
+Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
+Cada elemento emitido representa un único punto de datos del stream.
+La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
+Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
 <div id="parameters">
   #### Parámetros
@@ -167,27 +165,27 @@ El número de minutos de backfill solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua hasta la cual se proporcionarán los Likes.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana para la que se proporcionarán los Me gusta.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente para la que se proporcionarán las Publicaciones.
 </ParamField>
 
 <ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
-Una lista separada por comas de campos LikeWithTweetAuthor para mostrar.
+Una lista de campos LikeWithTweetAuthor, separados por comas, que se devolverán.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos para expandir.
+Una lista de campos, separados por comas, que se expandirán.
 </ParamField>
 
 <ParamField path="path.user_fields" type="List or None" default="None">
-Una lista separada por comas de campos de usuario para mostrar.
+Una lista de campos de User, separados por comas, que se devolverán.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación para mostrar.
+Una lista de campos de Tweet, separados por comas, que se devolverán.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
@@ -198,12 +196,12 @@ StreamConfig opcional para personalizar el comportamiento de reintentos, los tie
   ### `likes_sample10`
 </div>
 
-Flujo de Likes muestreados (streaming)
-Transmite en tiempo real una muestra del 10 % de Likes públicos.
-Este es un endpoint de streaming que entrega datos en tiempo real a medida que estén disponibles.
+Transmisión de Likes de muestra (streaming)
+Transmite en tiempo real una muestra del 10&nbsp;% de los Likes públicos.
+Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
 Cada elemento emitido representa un único punto de datos del stream.
 La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
-Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin intervención por parte del cliente.
+Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
 <div id="parameters">
   #### Parámetros
@@ -218,27 +216,27 @@ El número de minutos de backfill solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua para la que se proporcionarán los Me gusta.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua hasta la cual se proporcionarán los Me gusta.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente para la que se proporcionarán las Publicaciones.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
 </ParamField>
 
 <ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
-Una lista separada por comas de campos LikeWithTweetAuthor que se mostrarán.
+Una lista separada por comas de campos de LikeWithTweetAuthor para mostrar.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos que se expandirán.
+Una lista separada por comas de campos que se van a expandir.
 </ParamField>
 
 <ParamField path="path.user_fields" type="List or None" default="None">
-Una lista separada por comas de campos de usuario que se mostrarán.
+Una lista separada por comas de campos de User para mostrar.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación que se mostrarán.
+Una lista separada por comas de campos de publicaciones para mostrar.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
@@ -249,65 +247,10 @@ StreamConfig opcional para personalizar el comportamiento de reintento, los tiem
   ### `posts`
 </div>
 
-Transmitir Publicaciones filtradas (Streaming)
-Transmite en tiempo real las Publicaciones que coinciden con el conjunto de reglas activo.
-Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
-Cada elemento emitido representa un único punto de datos del stream.
-La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
-Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
-
-<div id="parameters">
-  #### Parámetros
-</div>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-El número de minutos de backfill solicitados.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán las Publicaciones.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista de campos de Publicación, separados por comas, que se mostrarán.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-Una lista de campos, separados por comas, que se expandirán.
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-Una lista de campos de contenido multimedia, separados por comas, que se mostrarán.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-Una lista de campos de encuesta, separados por comas, que se mostrarán.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-Una lista de campos de usuario, separados por comas, que se mostrarán.
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-Una lista de campos de lugar, separados por comas, que se mostrarán.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintentos, tiempos de espera y callbacks.
-</ParamField>
-
-<div id="posts_compliance">
-  ### `posts_compliance`
-</div>
-
-Transmitir datos de cumplimiento de Publicaciones (streaming)
-Transmite todos los datos de cumplimiento relacionados con Publicaciones.
-Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
-Cada elemento emitido representa un único dato del flujo.
+Transmitir Publicaciones filtradas (streaming)
+Transmite Publicaciones en tiempo real que coinciden con el conjunto de reglas activo.
+Este es un endpoint de streaming que produce datos en tiempo real a medida que están disponibles.
+Cada elemento generado representa un único punto de datos del flujo.
 La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
 Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
@@ -315,55 +258,16 @@ Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin in
   #### Parámetros
 </div>
 
-<ParamField path="path.partition" type="int">
-El número de partición.
-</ParamField>
-
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
 El número de minutos de backfill solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua desde la cual se proporcionarán los eventos de cumplimiento de Publicaciones (Post Compliance).
+AAAA-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán las Publicaciones.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán los eventos de cumplimiento de Publicaciones.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-Objeto StreamConfig opcional para personalizar el comportamiento de reintentos, los tiempos de espera y las devoluciones de llamada.
-</ParamField>
-
-<div id="posts_firehose">
-  ### `posts_firehose`
-</div>
-
-Transmitir todas las Publicaciones (streaming)
-Transmite todas las Publicaciones públicas en tiempo real.
-Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
-Cada elemento emitido representa un único punto de datos del flujo.
-La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
-Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
-
-<div id="parameters">
-  #### Parámetros
-</div>
-
-<ParamField path="path.partition" type="int">
-El número de partición.
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-El número de minutos de backfill solicitados.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua hasta la cual se proporcionarán las Publicaciones.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
+AAAA-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
@@ -379,7 +283,7 @@ Una lista separada por comas de campos de contenido multimedia para mostrar.
 </ParamField>
 
 <ParamField path="path.poll_fields" type="List or None" default="None">
-Una lista separada por comas de campos de encuesta para mostrar.
+Una lista separada por comas de campos de encuestas para mostrar.
 </ParamField>
 
 <ParamField path="path.user_fields" type="List or None" default="None">
@@ -391,19 +295,19 @@ Una lista separada por comas de campos de lugar para mostrar.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintentos, tiempos de espera y funciones de callback.
+StreamConfig opcional para personalizar el comportamiento de reintentos, los timeouts y los callbacks.
 </ParamField>
 
-<div id="posts_firehose_en">
-  ### `posts_firehose_en`
+<div id="posts_compliance">
+  ### `posts_compliance`
 </div>
 
-Transmitir Publicaciones en inglés (streaming)
-Transmite en tiempo real todas las Publicaciones públicas en inglés.
+Transmitir datos de cumplimiento de Publicaciones (streaming)
+Transmite todos los datos de cumplimiento relacionados con Publicaciones.
 Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
-Cada elemento entregado representa un único dato del stream.
+Cada elemento emitido representa un dato individual del flujo.
 La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
-Si el stream se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
 <div id="parameters">
   #### Parámetros
@@ -415,6 +319,100 @@ El número de partición.
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
 El número de minutos de backfill solicitados.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán los eventos de cumplimiento de Publicaciones.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán los eventos de cumplimiento de Publicaciones.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+StreamConfig opcional para personalizar la política de reintentos, los tiempos de espera y los callbacks.
+</ParamField>
+
+<div id="posts_firehose">
+  ### `posts_firehose`
+</div>
+
+Transmite todas las Publicaciones (streaming)
+Transmite en tiempo real todas las Publicaciones públicas.
+Este es un endpoint de streaming que entrega datos en tiempo real conforme están disponibles.
+Cada elemento emitido representa un único punto de datos del flujo.
+La conexión se gestiona automáticamente e incluye lógica de reintentos con backoff exponencial.
+Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.partition" type="int">
+El número de partición.
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+La cantidad de minutos de backfill solicitados.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán las Publicaciones.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+Una lista separada por comas de campos de Publicación que se mostrarán.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+Una lista separada por comas de campos que se expandirán.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+Una lista separada por comas de campos de contenido multimedia que se mostrarán.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+Una lista separada por comas de campos de encuesta que se mostrarán.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+Una lista separada por comas de campos de usuario que se mostrarán.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+Una lista separada por comas de campos de lugar que se mostrarán.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+StreamConfig opcional para personalizar el comportamiento de reintentos, los tiempos de espera y los callbacks.
+</ParamField>
+
+<div id="posts_firehose_en">
+  ### `posts_firehose_en`
+</div>
+
+Transmitir Publicaciones en inglés (streaming)
+Transmite en tiempo real todas las Publicaciones públicas en inglés.
+Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
+Cada elemento entregado representa un único punto de datos del flujo.
+La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
+Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención por parte del cliente.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.partition" type="int">
+El número de partición.
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+La cantidad de minutos de backfill solicitada.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
@@ -430,7 +428,7 @@ Una lista separada por comas de campos de Publicación para mostrar.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos a expandir.
+Una lista separada por comas de campos para expandir.
 </ParamField>
 
 <ParamField path="path.media_fields" type="List or None" default="None">
@@ -450,19 +448,19 @@ Una lista separada por comas de campos de lugar para mostrar.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintento, los tiempos de espera y los callbacks.
+StreamConfig opcional para personalizar el comportamiento de reintentos, tiempos de espera y callbacks.
 </ParamField>
 
 <div id="posts_firehose_ja">
   ### `posts_firehose_ja`
 </div>
 
-Transmitir Publicaciones en japonés (streaming)
+Transmitir Publicaciones en japonés (Streaming)
 Transmite en tiempo real todas las Publicaciones públicas en japonés.
 Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
-Cada elemento entregado representa un único punto de datos del flujo.
-La conexión se gestiona automáticamente con lógica de reintento con backoff exponencial.
-Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención por parte del cliente.
+Cada elemento entregado representa un único punto de datos del stream.
+La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
+Si el stream se desconecta, el SDK se reconectará automáticamente sin intervención del cliente.
 
 <div id="parameters">
   #### Parámetros
@@ -477,15 +475,15 @@ El número de minutos de backfill solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán las Publicaciones.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua hasta la cual se proporcionarán las publicaciones.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las publicaciones.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación que se mostrarán.
+Una lista separada por comas de campos de publicación que se mostrarán.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
@@ -516,70 +514,11 @@ StreamConfig opcional para personalizar el comportamiento de reintento, los tiem
   ### `posts_firehose_ko`
 </div>
 
-Transmisión de Publicaciones en coreano (streaming)
+Flujo de Publicaciones en coreano (streaming)
 Transmite en tiempo real todas las Publicaciones públicas en coreano.
-Este es un endpoint de streaming que proporciona datos en tiempo real a medida que están disponibles.
-Cada elemento proporcionado representa un único punto de datos del flujo.
+Este es un endpoint de streaming que entrega datos en tiempo real a medida que se encuentran disponibles.
+Cada elemento entregado representa un único punto de datos del flujo.
 La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
-Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
-
-<div id="parameters">
-  #### Parámetros
-</div>
-
-<ParamField path="path.partition" type="int">
-El número de partición.
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-La cantidad de minutos de backfill solicitada.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua para la que se proporcionarán las Publicaciones.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente para la que se proporcionarán las Publicaciones.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación para mostrar.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos para expandir.
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-Una lista separada por comas de campos de contenido multimedia para mostrar.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-Una lista separada por comas de campos de encuesta para mostrar.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-Una lista separada por comas de campos de usuario para mostrar.
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-Una lista separada por comas de campos de lugar para mostrar.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintento, los tiempos de espera y las funciones de callback.
-</ParamField>
-
-<div id="posts_firehose_pt">
-  ### `posts_firehose_pt`
-</div>
-
-Flujo de Publicaciones en portugués (streaming)
-Transmite en tiempo real todas las Publicaciones públicas en portugués.
-Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
-Cada elemento entregado representa un único dato del flujo.
-La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
 Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
 <div id="parameters">
@@ -595,97 +534,50 @@ El número de minutos de backfill solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua para la que se proporcionarán las Publicaciones.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana hasta la cual se proporcionarán las Publicaciones.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente para la que se proporcionarán las Publicaciones.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación que se mostrarán.
+Una lista de campos de Publicación, separados por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos que se expandirán.
+Una lista de campos, separados por comas, para expandir.
 </ParamField>
 
 <ParamField path="path.media_fields" type="List or None" default="None">
-Una lista separada por comas de campos de contenido multimedia que se mostrarán.
+Una lista de campos de contenido multimedia, separados por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.poll_fields" type="List or None" default="None">
-Una lista separada por comas de campos de encuesta que se mostrarán.
+Una lista de campos de encuesta, separados por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.user_fields" type="List or None" default="None">
-Una lista separada por comas de campos de usuario que se mostrarán.
+Una lista de campos de usuario, separados por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.place_fields" type="List or None" default="None">
-Una lista separada por comas de campos de lugar que se mostrarán.
+Una lista de campos de lugar, separados por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintentos, los tiempos de espera y los callbacks.
+StreamConfig opcional para personalizar el comportamiento de reintentos, tiempos de espera y callbacks.
 </ParamField>
 
-<div id="posts_sample">
-  ### `posts_sample`
+<div id="posts_firehose_pt">
+  ### `posts_firehose_pt`
 </div>
 
-Transmitir Publicaciones muestreadas (streaming)
-Transmite en tiempo real una muestra del 1 % de las Publicaciones públicas.
-Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
-Cada elemento emitido representa un único punto de datos del flujo.
-La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
-Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
-
-<div id="parameters">
-  #### Parámetros
-</div>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-La cantidad de minutos de backfill solicitados.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación que se mostrarán.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos que se expandirán.
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-Una lista separada por comas de campos de contenido multimedia que se mostrarán.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-Una lista separada por comas de campos de encuesta que se mostrarán.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-Una lista separada por comas de campos de usuario que se mostrarán.
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-Una lista separada por comas de campos de lugar que se mostrarán.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-StreamConfig opcional para personalizar el comportamiento de reintentos, los tiempos de espera y las devoluciones de llamada.
-</ParamField>
-
-<div id="posts_sample10">
-  ### `posts_sample10`
-</div>
-
-Transmite un 10 % de Publicaciones muestreadas (streaming)
-Transmite en tiempo real una muestra del 10 % de las Publicaciones públicas.
-Este es un endpoint de streaming que emite datos en tiempo real a medida que van estando disponibles.
-Cada elemento emitido representa un único punto de datos del flujo.
-La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
+Transmitir Publicaciones en portugués (streaming)
+Transmite en tiempo real todas las Publicaciones públicas en portugués.
+Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
+Cada elemento entregado representa un único dato del flujo.
+La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
 Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
 <div id="parameters">
@@ -709,38 +601,144 @@ YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se prop
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-Una lista separada por comas de campos de Publicación para mostrar.
+Una lista de campos de Publicación, separada por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-Una lista separada por comas de campos para expandir.
+Una lista de campos que se expandirán, separada por comas.
 </ParamField>
 
 <ParamField path="path.media_fields" type="List or None" default="None">
-Una lista separada por comas de campos de contenido multimedia para mostrar.
+Una lista de campos de contenido multimedia, separada por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.poll_fields" type="List or None" default="None">
-Una lista separada por comas de campos de encuesta para mostrar.
+Una lista de campos de encuesta, separada por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.user_fields" type="List or None" default="None">
-Una lista separada por comas de campos de usuario para mostrar.
+Una lista de campos de usuario, separada por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.place_fields" type="List or None" default="None">
-Una lista separada por comas de campos de lugar para mostrar.
+Una lista de campos de lugar, separada por comas, para mostrar.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
 StreamConfig opcional para personalizar el comportamiento de reintentos, los tiempos de espera y los callbacks.
 </ParamField>
 
+<div id="posts_sample">
+  ### `posts_sample`
+</div>
+
+Transmitir Publicaciones de muestra (streaming)
+Transmite en tiempo real una muestra del 1% de las Publicaciones públicas.
+Este es un endpoint de streaming que devuelve datos en tiempo real a medida que se van haciendo disponibles.
+Cada elemento devuelto representa un único dato del flujo.
+La conexión se gestiona automáticamente con lógica de reintento con backoff exponencial.
+Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+La cantidad de minutos de backfill solicitados.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+Una lista de campos de Publicación separados por comas que se mostrarán.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+Una lista de campos separados por comas que se van a expandir.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+Una lista de campos de contenido multimedia separados por comas que se mostrarán.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+Una lista de campos de Encuesta separados por comas que se mostrarán.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+Una lista de campos de Usuario separados por comas que se mostrarán.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+Una lista de campos de Lugar separados por comas que se mostrarán.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+StreamConfig opcional para personalizar el comportamiento de reintento, los tiempos de espera (timeouts) y los callbacks.
+</ParamField>
+
+<div id="posts_sample10">
+  ### `posts_sample10`
+</div>
+
+Transmite una muestra del 10&nbsp;% de Publicaciones (streaming)
+Transmite en tiempo real una muestra del 10&nbsp;% de Publicaciones públicas.
+Este es un endpoint de streaming que entrega datos en tiempo real a medida que están disponibles.
+Cada elemento entregado representa un único punto de datos del flujo.
+La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
+Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.partition" type="int">
+El número de partición.
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+El número de minutos de backfill solicitados.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana hasta la cual se proporcionarán las Publicaciones.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más reciente hasta la cual se proporcionarán las Publicaciones.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+Una lista separada por comas de campos de Publicación a mostrar.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+Una lista separada por comas de campos a expandir.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+Una lista separada por comas de campos de contenido multimedia a mostrar.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+Una lista separada por comas de campos de encuesta a mostrar.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+Una lista separada por comas de campos de usuario a mostrar.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+Una lista separada por comas de campos de lugar a mostrar.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+StreamConfig opcional para personalizar el comportamiento de los reintentos, los tiempos de espera y los callbacks.
+</ParamField>
+
 <div id="update_rules">
   ### `update_rules`
 </div>
 
-Actualizar reglas del flujo
+Actualizar las reglas del flujo
 Agrega o elimina reglas del conjunto de reglas activo del flujo filtrado.
 
 <div id="parameters">
@@ -757,9 +755,9 @@ Cuerpo de la solicitud
 
 Transmitir datos de cumplimiento de usuarios (streaming)
 Transmite todos los datos de cumplimiento relacionados con usuarios.
-Este es un endpoint de streaming que genera datos en tiempo real a medida que están disponibles.
-Cada elemento generado representa un único dato del flujo.
-La conexión se gestiona automáticamente con una lógica de reintentos con backoff exponencial.
+Este es un endpoint de streaming que emite datos en tiempo real a medida que están disponibles.
+Cada elemento emitido representa un único punto de datos del flujo.
+La conexión se gestiona automáticamente con lógica de reintentos con backoff exponencial.
 Si el flujo se desconecta, el SDK se volverá a conectar automáticamente sin intervención del cliente.
 
 <div id="parameters">
@@ -771,11 +769,11 @@ El número de partición.
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-El número de minutos de backfill solicitados.
+La cantidad de minutos de relleno histórico solicitados.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más antigua a partir de la cual se proporcionarán los eventos de User Compliance.
+YYYY-MM-DDTHH:mm:ssZ. La marca de tiempo UTC más temprana a partir de la cual se proporcionarán los eventos de User Compliance.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">

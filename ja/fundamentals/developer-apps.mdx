@@ -1,7 +1,7 @@
 ---
 title: アプリ
 icon: wrench
-keywords: ["Xアプリ", "開発者アプリ", "APIキー", "OAuth", "認証", "アプリ管理", "developer portal", "APIクレデンシャル", "アクセストークン", "OAuth 1.0a", "OAuth 2.0", "APIキーとシークレット", "クライアントID", "クライアントシークレット", "アプリの権限", "コールバックURL"]
+keywords: ["Xアプリ", "開発者アプリ", "APIキー", "OAuth", "認証", "アプリ管理", "developer portal", "API認証情報", "アクセストークン", "OAuth 1.0a", "OAuth 2.0", "APIキーとシークレット", "クライアントID", "クライアントシークレット", "アプリの権限", "コールバックURL"]
 ---
 
 <div id="overview">
@@ -10,55 +10,55 @@ keywords: ["Xアプリ", "開発者アプリ", "APIキー", "OAuth", "認証", "
 
 既存のアプリがある場合は、[developer portal の App ページ](https://developer.x.com/en/portal/projects-and-apps)から表示、編集、削除できます。
 
-X API および X Ads API にアクセスするには、各リクエストに必ず含める必要がある一連の [authentication](/ja/resources/fundamentals/authentication) に関する認証情報、いわゆるキーとトークンが必要です。これらの認証情報は、利用する特定のエンドポイントで求められる認証の種類に応じて、さまざまな形式を取る場合があります。
+X API および X Ads API にアクセスするには、各リクエストに必ず含める必要がある一連の[認証](/ja/resources/fundamentals/authentication)情報（キーとトークンとも呼ばれます）が必要です。これらの認証情報は、利用する特定のエンドポイントで求められる認証方式の種類によって、さまざまな形式を取ります。
 
-ここでは、アプリで生成できる各種認証情報と、その利用方法を説明します。
+ここでは、アプリで生成できる各種認証情報と、その利用方法について説明します。
 
-* **[API Key and Secret](/ja/resources/fundamentals/authentication#api-key-and-secret)：** アプリにとってのユーザー名とパスワードに相当します。[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) を必要とするリクエストの認証や、ユーザーのアクセストークンや App Access Token などの他のトークンを生成するために使用します。
+* **[API Key and Secret](/ja/resources/fundamentals/authentication#api-key-and-secret)：** アプリのユーザー名とパスワードに相当するものです。[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) を必要とするリクエストの認証や、ユーザーのアクセストークンや App Access Token など、他のトークンを生成するために使用します。
 
-* **[Access Token and Secret](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)：** 一般的に、アクセストークンは、あなたがリクエストを代理して送信しているユーザーを表します。developer portal から生成できるアクセストークンは、そのアプリを所有しているユーザーを表します。[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) を必要とするリクエストの認証に使用します。別のユーザーを代理してリクエストを送信したい場合は、そのユーザーに認可してもらうために 3-legged OAuth フローを使用する必要があります。
+* **[Access Token and Secret](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)：** 一般的に、アクセストークンは、あなたがリクエストを行う対象となるユーザーを表します。developer portal から生成できるものは、そのアプリの所有者であるユーザーを表します。[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) を必要とするリクエストの認証に使用します。別のユーザーの代わりにリクエストを行いたい場合は、そのユーザーからの承認を得るために 3-legged OAuth フローを使用する必要があります。
 
-* **[Client ID and Client Secret](/ja/resources/fundamentals/authentication#oauth-2-0)：** これらの認証情報は、OAuth 2.0 認証を用いてユーザーのアクセストークンを取得するために使用されます。OAuth 1.0a と同様に、ユーザーのアクセストークンは、非公開のユーザーアカウント情報を提供するリクエストや、別のアカウントを代理してアクションを実行するリクエストの認証に使用されますが、クライアントアプリケーションがユーザーに対して持つアクセス権をより細かく制御できる詳細なスコープを備えています。
+* **[Client ID and Client Secret](/ja/resources/fundamentals/authentication#oauth-2-0)：** これらの認証情報は、OAuth 2.0 認証を用いてユーザーのアクセストークンを取得するために使用されます。OAuth 1.0a と同様に、ユーザーアクセストークンは、非公開のユーザーアカウント情報を取得するリクエストや、他のアカウントの代わりに操作を行うリクエストの認証に使用されますが、クライアントアプリケーションがユーザーに対して持つアクセス権限を、より細かいスコープで厳密に制御できる点が異なります。
 
-* **[App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)：** X 上で一般公開されている情報を返すエンドポイントに対してリクエストを送信する際に、このトークンを使用します。
+* **[App only Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)：** X 上で公開されている情報を返すエンドポイントに対してリクエストを行う際に、このトークンを使用します。
 
-X API リクエストに必要なキーとトークンを生成できることに加えて、アクセス[permissions](/ja/resources/fundamentals/developer-apps#app-permissions) を設定し、アプリのユースケースや目的を記述し、[callback URL](/ja/resources/fundamentals/developer-apps#callback-urls) を定義し、[management dashboard](https://developer.x.com/en/portal/projects-and-apps) 内からアプリの開発環境に関連するその他の設定を変更することもできます。
+X API リクエストに必要なキーとトークンを生成できるだけでなく、[権限](/ja/resources/fundamentals/developer-apps#app-permissions)の設定、アプリのユースケースや目的の記載、[callback URL](/ja/resources/fundamentals/developer-apps#callback-urls) の定義、そしてアプリの開発環境に関連するその他の設定の変更も、[管理ダッシュボード](https://developer.x.com/en/portal/projects-and-apps)から行うことができます。
 
 <div id="apps-and-projects">
   ### アプリとプロジェクト
 </div>
 
-X Developer Platform 上での作業をユースケースごとに整理するために、アプリと[プロジェクト](/ja/resources/fundamentals/projects)を使用できます。各プロジェクトには、Free X API プランでは 1 つのアプリ、Basic プランでは最大 2 つのアプリ、Pro プランでは最大 3 つのアプリを含めることができます。
+アプリと[プロジェクト](/ja/resources/fundamentals/projects)をユースケースに応じて活用することで、X Developer Platform 上での作業を整理できます。各プロジェクトには、Free X API プランでは 1 つのアプリ、Basic プランでは最大 2 つのアプリ、Pro プランでは最大 3 つのアプリを含めることができます。
 
-新しい [X API v2](/ja/x-api/introduction) エンドポイントにアクセスする場合は、プロジェクトに関連付けられたアプリのキーとトークンを使用する必要があります。
+新しい [X API v2](/ja/x-api/introduction) エンドポイントへアクセスする場合は、プロジェクトに紐付いたアプリのキーとトークンを使用する必要があります。
 
-プロジェクト導入前に作成したアプリは、「Standalone Apps」というセクションに表示されます。Standalone Apps はプロジェクト構造の外側にあるアプリです。Standalone App をプロジェクトに関連付けると、そのアプリは v2 エンドポイントへのリクエストを送信できるようになります。
+プロジェクト機能の導入前に作成されたアプリがある場合、それらは「Standalone Apps」というセクションに表示されます。Standalone Apps は、プロジェクト構造の外側にあるアプリです。「Standalone App」をプロジェクトに紐付けると、そのアプリは v2 エンドポイントへのリクエストを送信できるようになります。
 
 <div id="developer-portal-dashboard">
-  ### developer portal のダッシュボード
+  ### Developer portal ダッシュボード
 </div>
 
-アカウントに関連付けられているアプリを管理するには、[ダッシュボード](https://developer.x.com/content/developer-twitter/en/apps)にアクセスできます。詳細については、[developer portal](/ja/resources/fundamentals/developer-portal) に関するドキュメントページをご覧ください。ダッシュボードでは、開発者は次の作業を簡単かつ迅速に実行できます。
+[ダッシュボードにアクセス](https://developer.x.com/content/developer-twitter/en/apps)すると、ご自身のアカウントに関連付けられているアプリを管理できます。詳しくは、[developer portal](/ja/resources/fundamentals/developer-portal) に関するドキュメントページをご覧ください。ダッシュボードでは、開発者は次の作業をすばやく簡単に行うことができます。
 
-* 既存のスタンドアロンアプリと、それに関連付けられている App ID を表示する。
-* 新しいプロジェクト、アプリ、またはスタンドアロンアプリを作成する。
-* 未使用のプロジェクトまたはアプリを削除する。
-* アプリ名、説明、ウェブサイト、コールバックURL、および[権限](/ja/resources/fundamentals/developer-apps#app-permissions)の更新を含む、特定のアプリの設定を確認または更新する。
-* API Key &amp; Secret、App Access Token、アプリ所有者のユーザーアクセストークンなどのアプリ固有の認証情報を再生成する。
+* 既存の Standalone Apps と、それらに関連付けられた App ID を表示できます。
+* 新しいプロジェクト、アプリ、または Standalone App を作成できます。
+* 未使用のプロジェクトまたはアプリを削除できます。
+* 特定のアプリの設定（名前、説明、Web サイト、コールバック URL、[permissions](/ja/resources/fundamentals/developer-apps#app-permissions) などの更新を含む）を確認または更新できます。
+* API Key &amp; Secret、App Access Token、アプリ所有者のユーザーアクセストークンなど、アプリ固有の認証情報を再生成できます。
 
 <div id="signing-up-for-access">
   ### アクセスの登録
 </div>
 
-既存の X アプリがある場合、developer.x.com 上で X アカウントにログインしていれば、X の [App dashboard](https://developer.x.com/content/developer-twitter/en/portal/projects-and-apps) からアプリを表示および編集できます。なお、developer.x.com 上で以前に作成されたすべてのアプリを管理するために、新たにアカウント登録を行う必要は**ありません**。
+既に X アプリがある場合、developer.x.com で X アカウントにログインしていれば、X の [App dashboard](https://developer.x.com/content/developer-twitter/en/portal/projects-and-apps) からアプリを表示および編集できます。なお、以前に developer.x.com 上で作成されたすべてのアプリを管理するために、新たにアカウント登録を行う必要は**ありません**。
 
-新しい X アプリを作成する必要がある場合は、[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)している必要があります。[team account](/ja/resources/fundamentals/developer-portal#team-management) のメンバーである場合は、新しいアプリを作成するために admin ロールが割り当てられている必要があります。
+新しい X アプリを作成する必要がある場合は、事前に[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)している必要があります。[team account](/ja/resources/fundamentals/developer-portal#team-management) のメンバーである場合は、新しいアプリを作成するために管理者ロールが割り当てられていなければなりません。
 
 <div id="automated-account-labeling-for-bots">
-  ### ボット向け自動アカウントラベルの付与
+  ### ボット用自動アカウントラベル
 </div>
 
-ボットアカウントに「自動アカウント」ラベルを追加すると、X を利用しているユーザーに、そのボットが自動化されたアカウントであることを知らせることができます。これらのボットは、X API を通じてプログラムされたアクションを実行します。ボットに自動アカウントラベルを追加することで、オーディエンスとの信頼関係を構築し、アカウントの信頼性を高めるとともに、スパム的なボットと差別化できます。これにより、X 上のユーザーは、ボットとやり取りする際に、あなたのアカウントの目的をよりよく理解できるようになります。
+ボットアカウントに自動アカウントラベルを追加すると、X 上のユーザーに、そのボットが自動化されたアカウントであることを知らせることができます。これらのボットは、X API を通じてプログラムされたアクションを実行します。ボットに自動アカウントラベルを追加することで、オーディエンスとの信頼関係を構築し、アカウントの信頼性や正当性を高め、スパム的なボットと差別化できます。これにより、X 上の人々は、ボットとやりとりする際に、あなたのアカウントの目的をよりよく理解できるようになります。
 
 ボットアカウントにラベルを付与するには、次の手順に従ってください。
 
@@ -66,9 +66,9 @@ X Developer Platform 上での作業をユースケースごとに整理する�
 2. 「あなたのアカウント」を選択します
 3. 「自動化」を選択します
 4. 「アカウントの管理」を選択します
-5. 次に、ボットを実行している X アカウントを選択します
+5. 次に、ボットアカウントを運用している X アカウントを選択します
 6. パスワードを入力してログインします
-7. 最後に、アカウントにラベルが適用されたことを示す確認メッセージが表示されます。
+7. 最後に、ラベルがあなたのアカウントに適用されたことを示す確認が表示されます。
 
 ***
 
@@ -80,20 +80,20 @@ X Developer Platform 上での作業をユースケースごとに整理する�
   ### はじめに
 </div>
 
-[X App dashboard](https://developer.x.com/en/portal/projects-and-apps) を使用すると、開発者は次の作業をすばやく簡単に実行できます。
+[X App ダッシュボード](https://developer.x.com/en/portal/projects-and-apps)では、開発者は次の作業を迅速かつ簡単に行うことができます。
 
-* 既存のアプリや[プロジェクト](/ja/resources/fundamentals/projects)、およびそれらに関連付けられた App ID を表示できます。
-* 新しいプロジェクトまたはスタンドアロンのアプリを作成できます。
-* プロジェクト、アプリ、またはスタンドアロンのアプリを削除できます。
-* 特定のアプリの設定ページを開くことができます。設定画面では、アプリの詳細、キーとトークン、権限を確認できます。
-* アプリのユーザー認証設定を更新し、OAuth 1.0a または OAuth 2.0 のどちらかを使用するように構成できます。
+* 既存のアプリと[プロジェクト](/ja/resources/fundamentals/projects)、およびそれらに関連付けられている App ID を表示できます。
+* 新しいプロジェクトまたはスタンドアロンアプリを作成できます。
+* プロジェクト、アプリ、またはスタンドアロンアプリを削除できます。
+* 特定のアプリをクリックして、その設定画面を開くことができます。設定画面では、アプリの詳細、キーとトークン、権限を確認できます。
+* アプリのユーザー認証設定を更新し、OAuth 1.0a または OAuth 2.0 のいずれかを使用するように設定できます。
 
 <Note>
-  **Note:**
+  **注:**
 
-  すべてのアプリのキーとトークンは Developer Portal 上では表示できなくなっており、生成後は安全に保存しておく必要があります。キーとトークンの保管には、パスワードマネージャーの使用を推奨します。
+  すべてのアプリのキーとトークンは、Developer Portal 上では表示できなくなっているため、生成時に安全な場所へ保存しておく必要があります。キーとトークンの保管には、パスワードマネージャーの使用を推奨します。
 
-  どのアプリの資格情報かを突き止めるのに役立つ API キーのヒントを表示できます。
+  資格情報と対応するアプリを照合する際に役立つ、API キーのヒントを表示できます。
 </Note>
 
 <div id="app-settings">
@@ -101,63 +101,63 @@ X Developer Platform 上での作業をユースケースごとに整理する�
 </div>
 
 <div id="app-details">
-  #### アプリ詳細
+  #### アプリの詳細
 </div>
 
-ここでは、アプリアイコン、アプリ名、アプリの説明、自分のウェブサイトの URL、[コールバック URL/リダイレクト URI](/ja/resources/fundamentals/developer-apps#callback-urls)、利用規約の URL、プライバシーポリシーの URL、組織名、組織の URL、そしてアプリの目的またはユースケースを編集できます。
+ここでは、アプリアイコン、アプリ名、アプリの説明、ウェブサイトの URL、[コールバック URL / リダイレクト URI](/ja/resources/fundamentals/developer-apps#callback-urls)、利用規約の URL、プライバシーポリシーの URL、組織名、組織の URL、およびアプリの目的やユースケースを編集できます。
 
-OAuth 2.0 と OAuth 1.0a は、ユーザーが X を使ってアプリにサインインできるようにする認証方法です。また、認証されたユーザーに代わってアプリが特定のリクエストを行うことも可能にします。アプリでは、どちらか一方、または両方の方法を有効にできます。
+OAuth 2.0 と OAuth 1.0a は、ユーザーが X アカウントを使ってアプリにサインインできるようにする認証方法です。これらを利用することで、認証済みユーザーに代わってアプリが特定のリクエストを実行できるようになります。アプリでは、いずれか一方、または両方の方法を有効にできます。
 
-この情報を常に最新の状態に保つことは重要です。アプリ名とウェブサイトの URL は、アプリケーションによってプログラムで作成されたポストのメタデータ内で、ソースとして表示されます。X アプリのユースケースを変更した場合は、[Developer Terms](https://developer.x.com/content/developer-twitter/en/developer-terms/agreement-and-policy) に準拠していることを確実にするために、必ずこれらの設定でユースケースを更新してください。
+この情報を最新の状態に保つことは重要です。アプリ名とウェブサイトの URL は、アプリによってプログラムを通じて作成されたポストのメタデータ内で、ソースとして表示されます。X アプリのユースケースを変更した場合は、[Developer Terms](https://developer.x.com/content/developer-twitter/en/developer-terms/agreement-and-policy) に準拠していることを確保するため、必ずこれらの設定内のユースケースも更新してください。
 
-アプリケーションに「suspended」と表示されているタグがある場合、これはアプリが [automation rules](https://help.x.com/en/rules-and-policies/twitter-automation) などの X の [developer terms](https://developer.x.com/en/developer-terms.html) の 1 つ以上に違反していることを意味します。Developer Platform のポリシーチームは、アプリ所有者の X アカウントに設定されているメールアドレス宛てに開発者と連絡を取ります。このメールアドレスを確認するには、[X アカウント設定](https://x.com/settings/your_twitter_data/account) を確認してください。停止に関する通知メールは「Application suspension notice」といった件名でこのメールアドレスに送信され、次に何を行うべきかに関する具体的な情報が記載されます。停止への対応について X チームと連携するには、メールに記載された具体的な指示を確認するか、[platform help form](https://help.x.com/forms/platform) をご利用ください。
+アプリケーションに「suspended」というタグが表示されている場合は、アプリが X の [developer terms](https://developer.x.com/en/developer-terms.html)（たとえば [automation rules](https://help.x.com/en/rules-and-policies/twitter-automation) など）の 1 つ以上に違反していることが原因です。Developer Platform のポリシーチームは、アプリ所有者の X アカウントに登録されているメールアドレスを通じて開発者と連絡を取ります。このメールアドレスを確認するには、[X アカウント設定](https://x.com/settings/your_twitter_data/account) を確認してください。アプリ停止に関する通知メールは、「Application suspension notice」に類似したタイトルでこのメールアドレス宛てに送信され、次に行うべき対応についての具体的な情報が記載されています。停止への対応で X チームと連携するには、具体的な手順についてメールを確認するか、[platform help form](https://help.x.com/forms/platform) をご利用ください。
 
 <div id="keys-and-tokens">
   #### キーとトークン
 </div>
 
-プロジェクト内のアプリ、またはスタンドアロンのアプリから、次のトークンを表示、再生成、失効させることができます。
+プロジェクト内の App、またはスタンドアロンの App で、以下のトークンを表示、再生成、または無効化することができます。
 
 * [API Key (Consumer Key) と API Secret (Consumer Secret)](/ja/resources/fundamentals/authentication#api-key-and-secret)
 * [App Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)
 * [User Access Token と Access Token Secret](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) -
-  developer portal 上で利用できる Access Token と Secret は、そのアプリを所有しているユーザーに紐づきます。
+  developer portal 内で利用可能な Access Token と Secret は、その App の所有ユーザーに関連付けられています。
 
-**注意** - 別のユーザー（つまり、そのアプリを所有しているユーザー以外）の代わりにリクエストを行いたい場合は、[OAuth 1.0a 3-legged OAuth フロー](https://developer.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) か、OAuth 2.0 の [Authorization Code with PKCE フロー](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使用して、ユーザー用 Access Token 一式を生成する必要があります。その後、API へのリクエストでは、これらのユーザー固有のトークンを使用します。
+**ご注意ください** - 別のユーザー（つまり、その App の所有者ではないユーザー）に代わってリクエストを行いたい場合は、[OAuth 1.0a 3-legged OAuth フロー](https://developer.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) または OAuth 2.0 の [Authorization Code with PKCE フロー](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用して、そのユーザーのアクセストークン一式を生成する必要があります。生成したユーザー専用トークンを用いて、API へのリクエストを行ってください。
 
 <div id="user-authentication-settings">
   #### ユーザー認証設定
 </div>
 
-アプリの認証設定として、OAuth 1.0a または OAuth 2.0 を選択できます。OAuth 2.0 は X API v2 でのみ使用できます。OAuth 2.0 では、ユーザーに代わって行使できる権限を細かく指定できる、きめ細かなスコープを選択できます。OAuth 1.0a は X API v1.1 および v2 で使用でき、より大まかなスコープによる広範な認可を行います。
+アプリの認証設定として、OAuth 1.0a か OAuth 2.0 のいずれかを選択できます。OAuth 2.0 は X API v2 でのみ使用可能です。OAuth 2.0 では、ユーザーに代わって特定の権限を付与するための、より細かなスコープを選択できます。OAuth 1.0a は X API v1.1 および v2 で使用でき、より大まかなスコープによる広範な認可を行います。
 
 <div id="oauth-10a-application-user-permissions">
   #### OAuth 1.0a アプリケーションユーザー権限
 </div>
 
-あなたがアプリの所有者である場合、アプリの権限（読み取り専用、読み取りと書き込み、または読み取り・書き込み・ダイレクトメッセージ）を変更できます。これにより、X API を通じてアクセスできるリソースやイベントが制御されます（注：一部のリソースには、X からの追加の許可が必要です）。
+あなたがアプリの所有者であれば、アプリの権限レベル（読み取り専用、読み取りと書き込み、または読み取り・書き込みおよびダイレクトメッセージ）を変更できます。これは、X API を通じてアクセスできるリソースやイベントの範囲を制御します（注: 一部のリソースには、X からの追加の許可が直接必要になります）。
 
-このページでは、アプリがユーザーのメールアドレスを要求できるかどうかの設定をオン／オフすることもできます（これには、「App details」ページに、利用規約の URL とプライバシーポリシーの URL が設定されている必要があります）。
+このページでは、アプリがユーザーのメールアドレスを要求できるかどうかも切り替えることができます（これには、「App details」ページに利用規約（Terms of Service）URL とプライバシーポリシー（Privacy Policy）URL が設定されている必要があります）。
 
 <div id="oauth-20-type-of-app">
   #### OAuth 2.0 アプリの種類
 </div>
 
-ユーザー認証方法として OAuth 2.0 を選択した場合、作成するアプリの種類を選択する必要があります。選択肢は、Native アプリ、Single page アプリ、Web アプリ、Automated アプリまたはボットです。Native アプリと Single page アプリはパブリッククライアントであり、Web アプリと Automated アプリまたはボットはコンフィデンシャルクライアントです。
+ユーザー認証方式として OAuth 2.0 を選択した場合、作成するアプリの種類を選択する必要があります。選択できるのは、Native App、Single page App、Web App、Automated App または bot です。Native App と Single page App はパブリッククライアント、Web App と Automated App または bot は機密クライアントに分類されます。
 
-コンフィデンシャルクライアントは、認可サーバーに対して安全に認証を行い、クライアントシークレットを安全に保持します。パブリッククライアントは通常、ブラウザ内またはモバイルデバイス上で動作するアプリケーションであり、クライアントシークレットを保持・利用することができません。コンフィデンシャルクライアントとなる種類のアプリを選択した場合、クライアントシークレットが付与されます。
+機密クライアントは認可サーバーと安全に認証を行い、クライアントシークレットを安全に保護します。パブリッククライアントは通常、ブラウザやモバイルデバイス上で動作するアプリケーションであり、クライアントシークレットを利用できません。機密クライアントに該当する種類のアプリを選択した場合、クライアントシークレットが提供されます。
 
 ***
 
 <div id="app-permissions">
-  ## アプリの権限
+  ## アプリ権限
 </div>
 
 <div id="oauth-10a-app-permissions">
   ### OAuth 1.0a アプリ権限
 </div>
 
-アプリ権限は、OAuth 1.0a によるアプリケーションとユーザー間の認証で付与されるアクセスレベルを表します。アプリ権限は、[X App](/ja/resources/fundamentals/developer-apps) の設定内でアプリケーションごとに設定します。
+アプリ権限は、OAuth 1.0a によるアプリケーションとユーザーの認証におけるアクセスレベルを表します。アプリ権限は、[X App](/ja/resources/fundamentals/developer-apps) の設定でアプリケーションごとに構成します。
 
 利用可能な権限レベルは 3 種類あります。
 
@@ -165,29 +165,29 @@ OAuth 2.0 と OAuth 1.0a は、ユーザーが X を使ってアプリにサイ�
 2. 読み取りおよび書き込み
 3. 読み取り、書き込み、およびダイレクトメッセージへのアクセス
 
-ユーザーのメールアドレスの取得をリクエストするための追加の権限もあり、これは上記 3 つのいずれのレベルとも組み合わせることができます。
+追加の権限として、ユーザーのメールアドレスの閲覧をリクエストするものがあります。これは上記 3 つのいずれのレベルとも組み合わせることができます。
 
-権限レベルが変更された場合、すでに発行済みのその X アプリ向けユーザートークンはすべて無効化し、トークンが更新された権限を引き継ぐように、ユーザーにアプリを再認可してもらう必要があります。
+権限レベルが変更された場合、その X アプリに対してすでに発行されているユーザートークンはすべて破棄し、トークンが更新された権限を引き継ぐように、ユーザーにアプリを再承認してもらう必要があります。
 
-ベストプラクティスとしては、アプリケーションやサービスが必要とするユーザーアカウントデータへのアクセスについて、*必要最小限の権限レベルだけ*をリクエストするようにしてください。
+推奨される実践としては、アプリケーションやサービスが必要とするユーザーアカウントデータへのアクセスは、*必要最小限のレベルのアクセス* のみにとどめることです。
 
 <div id="read-only">
   ### 読み取り専用
 </div>
 
-この権限レベルでは、ユーザーのポスト、ホームタイムライン、プロフィール情報など、X リソースへの読み取りアクセスのみが許可されます。ユーザーのダイレクトメッセージを読むことはできず、いかなる要素やオブジェクトの更新も行えません。
+この権限レベルでは、ユーザーのポスト、ホームタイムライン、プロフィール情報などを含む X リソースへの読み取りアクセスが許可されます。ユーザーのダイレクトメッセージを閲覧することはできず、いかなる要素やオブジェクトを更新することもできません。
 
 <div id="read-and-write">
   ### 読み取りと書き込み
 </div>
 
-この権限レベルでは、X リソースへの読み取りおよび書き込みアクセスが許可されます。読み取りアクセスに加えて、ポストの作成、ユーザーのフォロー、ユーザーのプロフィール情報の一部の更新を行うことができます。また、認証ユーザーに代わって返信を非表示にすることもできます。この権限レベルでは、ダイレクトメッセージ（読み取り、書き込み、削除を含む）には一切アクセスできません。
+この権限レベルでは、X リソースへの読み取りおよび書き込みアクセスが許可されます。読み取りアクセスに加えて、ポストを作成したり、ユーザーをフォローしたり、ユーザーのプロフィール情報の一部を更新したりできます。また、認証済みユーザーに代わって返信を非表示にすることもできます。この権限レベルでは、ダイレクトメッセージ（読み取り、書き込み、削除を含む）へのいかなるアクセスも許可されません。
 
 <div id="read-write-and-access-direct-messages">
-  ### ダイレクトメッセージの読み取り・書き込み・アクセス
+  ### ダイレクトメッセージの読み取り、書き込み、アクセス
 </div>
 
-この権限レベルでは、上記のすべてにアクセスできるほか、ユーザーに代わってダイレクトメッセージを読み取り、送信および削除できます。
+この権限レベルには、上記のすべてに加えて、ユーザーに代わってダイレクトメッセージを読み取り、書き込み、削除する権限が含まれます。
 
 * [POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages](/ja/x-api/direct-messages/send-a-new-message-to-a-dm-conversation)
 * [POST /2/dm&#95;conversations/](/ja/x-api/direct-messages/create-a-new-dm-conversation)
@@ -197,29 +197,29 @@ OAuth 2.0 と OAuth 1.0a は、ユーザーが X を使ってアプリにサイ�
 * [GET /2/dm&#95;events](/ja/x-api/direct-messages/get-recent-dm-events)
 
 <div id="determining-permissions">
-  ### 権限の確認
+  ### 権限レベルの確認
 </div>
 
-すべての認証済み API リクエストは、HTTP レスポンス内に `x-access-level` ヘッダーを含めて返します。このヘッダーの値によって、現在使用されている権限レベルが示されます。取り得る値は `read`、`read-write`、`read-write-directmessages` です。
+認証済みのすべての API リクエストは、HTTP レスポンス内に `x-access-level` ヘッダーを返します。ヘッダーの値は、現在使用されている権限レベルを示します。取り得る値は read、read-write、read-write-directmessages です。
 
 ***
 
 <div id="callback-urls">
-  ## コールバック URL
+  ## Callback URLs
 </div>
 
-OAuth 1.0a User Context と OAuth 2.0 Authorization Code with PKCE の認証方法を使用すると、特定のサインインフローを完了したさまざまな X ユーザーに代わって、開発者はリクエストを送信できます。現在、ユーザーに開発者のアプリケーションを認可してもらうために利用できるフローは次の 2 種類です。
+OAuth 1.0a User Context と OAuth 2.0 Authorization Code with PKCE の認証方式を利用すると、特定のサインインフローを完了したさまざまな X ユーザーの代理でリクエストを送信できます。現在、ユーザーがあなたのアプリケーションを認可できるフローは次の 2 つです。
 
 * [OAuth 2.0 authorization code flow with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)
-* [OAuth 1.0a 3-legged OAuth flow](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)（および個別の [Sign in with X flow](/ja/resources/fundamentals/authentication#log-in-with-x)）
+* [OAuth 1.0a 3-legged OAuth flow](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)（および、別個のフローとして [Sign in with X flow](/ja/resources/fundamentals/authentication#log-in-with-x)）
 
-ユーザーがこれらのフローを進める際、X へのログインと開発者のアプリへの認可に成功した後に遷移するための Web ページまたは場所が必要になります。この遷移先の Web ページまたは場所は、コールバック URL と呼ばれます。
+ユーザーがこれらのフローを進める際、ログインに成功し、開発者のアプリに対する認可を付与した後に遷移する Web ページまたは場所が必要になります。この後続の Web ページまたは場所は、callback URL（コールバック URL）と呼ばれます。
 
-開発者が、自分のアプリを利用するユーザーがこれらのフローを実行できるように設定する際には、前述のフローを構成する認証エンドポイントへのリクエストに、コールバック URL を渡す必要があります。たとえば、OAuth 1.0a User Context を使用する開発者は、[GET oauth/request&#95;token](/ja/resources/fundamentals/authentication#post-oauth-request-token) エンドポイントへのリクエスト時に `callback_url` パラメータを渡さなければなりません。同様に、OAuth 2.0 Authorization Code with PKCE を使用する開発者は、GET oauth2/authorize エンドポイントへのリクエストに `redirect_uri` パラメータを渡す必要があります。
+これらのフローをユーザーが利用できるように設定する際、開発者は前述のフローを構成する認証エンドポイントへのリクエストに、callback URL を必ず渡さなければなりません。たとえば、OAuth 1.0a User Context を使用する開発者は、[GET oauth/request&#95;token](/ja/resources/fundamentals/authentication#post-oauth-request-token) エンドポイントへのリクエスト時に `callback_url` パラメータを渡す必要があります。同様に、OAuth 2.0 Authorization Code with PKCE を使用する開発者は、GET oauth2/authorize エンドポイントへのリクエストに `redirect_uri` パラメータを渡す必要があります。
 
-これらのパラメータを使用することに加えて、開発者は、そのコールバック URL が [App](/ja/resources/fundamentals/developer-apps) のコールバック URL 許可リストにも追加されていることを確認する必要があります。この許可リストは、[developer portal](/ja/resources/fundamentals/developer-portal) のアプリ設定ページで確認できます。
+これらのパラメータを使用することに加えて、開発者は callback URL が [App](/ja/resources/fundamentals/developer-apps) の callback URL 許可リストにも追加されていることを確認する必要があります。これは [developer portal](/ja/resources/fundamentals/developer-portal) の App 設定ページで確認できます。
 
-正しく設定されていれば、これらのフローの一環としてユーザーが X へのサインインに成功した後、ユーザーはコールバック URL にリダイレクトされます。
+正しく設定されていれば、これらのフローの一環として、ユーザーは X へのサインインに成功した後に callback URL へリダイレクトされます。
 
 <div id="things-to-keep-in-mind">
   ### 注意すべき点
@@ -229,21 +229,21 @@ OAuth 1.0a User Context と OAuth 2.0 Authorization Code with PKCE の認証方�
 
 **クエリパラメータをHTTPエンコードする**
 
-`callback_url` または `redirect_uri` パラメータとしてコールバックURLをクエリパラメータで渡す場合は、URLをHTTPエンコードしていることを必ず確認してください。
+`callback_url` パラメータまたは `redirect_uri` パラメータとしてコールバックURLをクエリパラメータで渡すため、URLをHTTPエンコードしていることを必ず確認してください。
 
 **コールバックURLの制限**
 
-X Apps ダッシュボードでは、コールバックURLは最大 10 件までという厳格な上限があります。コールバックURLは、Apps ダッシュボードに追加した許可リスト登録済みのコールバックURLと、認可フローで指定するパラメータの値が常に完全に一致している必要があります。
+X Apps ダッシュボードには、コールバックURLを10個までという厳格な上限があります。コールバックURLは、Apps ダッシュボードに追加した許可リストに登録済みのコールバックURLと、認可フローで指定するパラメータが常に完全一致している必要があります。
 
-コールバックURLにリクエスト固有のデータを含めたい場合は、`state` パラメータを使用して、ユーザーがリダイレクトされた後に含まれるデータを保持できます。`state` パラメータ自体にデータをエンコードしてもかまいませんし、このパラメータをセッションIDとして使用し、サーバー側に状態を保存することもできます。
+コールバックURLにリクエスト固有のデータを含めたい場合は、`state` パラメータを使用して、ユーザーがリダイレクトされた後に含めるデータを保存できます。`state` パラメータ自体にデータをエンコードすることもできますし、サーバー側に状態を保存するためのセッションIDとしてこのパラメータを使用することもできます。
 
-**localhost をコールバックURLとして使用しない**
+**コールバックURLとしてlocalhostを使用しない**
 
 localhost の代わりに、ローカル環境ではカスタムホスト、または http(s)://127.0.0.1 を使用してください。
 
 **カスタムプロトコルURL**
 
-モバイルディープリンクを活用したい場合は、twitter://callback/path のようにパスおよびドメイン部を持つカスタムプロトコルURLを利用できます。ただし、使用できないプロトコルの一覧があり、それらは避ける必要があります。使用できないプロトコルの一覧は以下で確認できます。
+モバイルのディープリンク機能を利用したい場合は、twitter://callback/path のようなパスとドメイン部分を持つカスタムプロトコルURLを使用できます。ただし、使用できないプロトコルのリストが存在し、それらは避ける必要があります。使用を禁止しているプロトコルの一覧は以下で確認できます。
 
 **使用できないプロトコル**
 
@@ -268,10 +268,10 @@ localhost の代わりに、ローカル環境ではカスタムホスト、ま�
 | `hcp` | `sip` |
 
 <div id="error-example">
-  ### エラーの例
+  ### エラー例
 </div>
 
-developer portal のアプリ設定に正しく登録されていないコールバック URL を使用した場合、次のエラーメッセージが返されます。
+developer portal 上のアプリ設定に正しく登録されていない callback URL を使用した場合、次のエラーメッセージが返されます。
 
 **OAuth 1.0a**
 
@@ -308,6 +308,6 @@ developer portal のアプリ設定に正しく登録されていないコール
 
 **トラブルシューティング**
 
-エラーが発生した場合は、認証リクエストで使用しているコールバックURLがHTTPエンコードされており、かつそのURLが、リクエストで使用しているキーとトークンに対応するAppの許可リストに追加されているコールバックURLと一致していることを確認してください。
+エラーが発生した場合は、認証リクエストで使用しているコールバック URL が HTTP エンコード（URL エンコード）されていること、また、その URL が、リクエストで使用しているキーとトークンに紐づくアプリの許可リストに追加されているコールバック URL と一致していることを確認してください。
 
 ***

@@ -3,18 +3,18 @@ title: Paginación
 sidebarTitle: Paginación
 ---
 
-La X API utiliza paginación para los endpoints que devuelven varias páginas de resultados (por ejemplo, timelines, búsquedas, etc.). La respuesta de cada llamada a la API incluye un objeto `meta` con `result_count`, `previous_token` y `next_token`. El XDK se encarga de hacer múltiples llamadas a la API usando el `next_token` para que los desarrolladores solo tengan que especificar cuántos resultados necesitan, sin tener que hacer múltiples llamadas.
-El SDK simplifica esto con:
+La X API usa paginación para endpoints que devuelven múltiples páginas de resultados (por ejemplo, timelines, búsquedas, etc.). Cada respuesta de llamada a la API incluye un objeto `meta` con `result_count`, `previous_token` y `next_token`. El XDK se encarga de realizar múltiples llamadas a la API usando el `next_token` para que los desarrolladores solo tengan que especificar cuánta información necesitan sin tener que hacer múltiples llamadas.
+El XDK simplifica esto con:
 
-- **Iteradores integrados**: Usa funciones generadoras para obtener varias páginas de forma continua.
-- **Manejo explícito de tokens**: Para contar con un control manual flexible cuando sea necesario, pasando `pagination_token` según se requiera.
-- **Cumplimiento de resultados máximos**: Respeta `max_results` por llamada (hasta los límites de la API, por ejemplo, 100 para búsquedas).
+- **Iteradores integrados**: Usa funciones generadoras para una obtención fluida de múltiples páginas.
+- **Gestión explícita de tokens**: Para un control manual flexible cuando sea necesario, permitiendo pasar `pagination_token` según se requiera.
+- **Aplicación del límite de resultados**: Respeta `max_results` por llamada (hasta los límites de la API, por ejemplo, 100 para búsquedas).
 
 <div id="automatic-pagination-recommended">
-  ## Paginación automática (recomendado)
+  ## Paginación automática (recomendada)
 </div>
 
-Usa el método `iterate()` en las respuestas paginadas para obtener todos los resultados de manera diferida.
+Usa el método `iterate()` sobre respuestas paginadas para obtener todos los resultados de forma diferida.
 **Ejemplo: búsqueda paginada**
 
 ```python
@@ -33,7 +33,7 @@ print(f"Total de publicaciones: {len(all_posts)}")
 ```
 
 * El iterador maneja `next_token` automáticamente.
-* Se detiene cuando no hay ningún `next_token` disponible.
+* Se detiene cuando ya no hay `next_token`.
 * Admite backoff por límite de frecuencia para evitar errores 429.
 
 
@@ -41,7 +41,7 @@ print(f"Total de publicaciones: {len(all_posts)}")
   ## Paginación manual
 </div>
 
-Si necesitas controlar los resultados para aplicar alguna lógica personalizada (por ejemplo, procesarlos página por página), puedes seguir utilizando `next_token` y hacer la paginación manualmente como se muestra a continuación:
+Si necesitas controlar los resultados para alguna lógica personalizada (por ejemplo, procesar página por página), todavía puedes usar `next_token` y hacer la paginación manualmente como se muestra a continuación:
 
 ```python
 # Get first page - search_recent returns an Iterator
@@ -69,7 +69,7 @@ if next_token:
 
 **Consejos**:
 
-* Especifica siempre `max_results` para optimizar la paginación (el valor predeterminado varía según el endpoint).
-* Supervisa el valor de `meta.result_count` para depuración.
-* Para consultas muy grandes, considera usar iteración asíncrona para evitar bloqueos.
-  Para ver ejemplos de código más detallados con Python XDK, visita nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).
+* Especifica siempre `max_results` para optimizar (el valor predeterminado varía según el endpoint).
+* Supervisa `meta.result_count` para tareas de depuración.
+* Para consultas muy grandes, considera la iteración asincrónica para evitar bloqueos.
+  Para obtener ejemplos de código detallados que usan el Python XDK, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).

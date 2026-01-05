@@ -3,7 +3,7 @@ title: "Paginación"
 sidebarTitle: "Paginación"
 ---
 
-El SDK proporciona utilidades de paginación genéricas que puedes usar con cualquier endpoint que devuelva respuestas paginadas. Los métodos devuelven respuestas simples; luego las envuelves con un paginador.
+El SDK proporciona utilidades genéricas de paginación que puedes usar con cualquier endpoint que devuelva respuestas paginadas. Los métodos devuelven respuestas sin procesar; debes envolverlos con un paginador.
 
 <div id="basic-pagination">
   ### Paginación básica
@@ -16,7 +16,7 @@ import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform
 
 const client: Client = new Client({ bearerToken: 'your-bearer-token' });
 
-// Encapsula cualquier endpoint de lista con la tipificación adecuada
+// Envuelve cualquier endpoint de lista con el tipo adecuado
 const followers: UserPaginator = new UserPaginator(
   async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
     const res = await client.users.getFollowers('<userId>', {
@@ -63,7 +63,7 @@ import { UserPaginator, Schemas } from '@xdevplatform/xdk';
 
 await followers.fetchNext();          // primera página
 while (!followers.done) {
-  await followers.fetchNext();        // páginas posteriores
+  await followers.fetchNext();        // páginas siguientes
 }
 
 const userCount: number = followers.users.length;  // todos los usuarios recuperados
@@ -90,7 +90,7 @@ import { Schemas } from '@xdevplatform/xdk';
 
 for await (const user of followers) {
   const typedUser: Schemas.User = user;
-  console.log(typedUser.username);  // acceso con tipado completo
+  console.log(typedUser.username);  // acceso con tipos completos
 }
 ```
 
@@ -145,8 +145,8 @@ try {
   }
 } catch (err: unknown) {
   if (followers.rateLimited) {
-    console.error('Límite de frecuencia alcanzado, se requiere backoff');
-    // aplicar backoff / reintentar más tarde
+    console.error('Límite de frecuencia alcanzado, es necesario esperar');
+    // esperar / reintentar más tarde
   } else {
     console.error('Error de paginación:', err);
     throw err;
@@ -161,7 +161,7 @@ try {
   }
 } catch (err) {
   if (followers.rateLimited) {
-    // aplicar backoff / reintentar más tarde
+    // esperar / reintentar más tarde
   } else {
     throw err;
   }
@@ -171,5 +171,5 @@ try {
 </CodeGroup>
 
 <Info>
-Para ejemplos de código detallados usando el XDK de JavaScript/TypeScript, consulta nuestro [repositorio de ejemplos en GitHub](https://github.com/xdevplatform/samples/tree/main/javascript).
+Para obtener ejemplos de código detallados que utilizan el XDK de JavaScript/TypeScript, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/javascript).
 </Info>

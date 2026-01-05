@@ -3,23 +3,23 @@ title: Autenticación
 sidebarTitle: Autenticación
 ---
 
-La X API requiere autenticación para todos los endpoints. El XDK admite tres métodos de autenticación:
+X API requiere autenticación para todos los endpoints. El XDK admite tres métodos de autenticación:
 
 1. Bearer Token (solo aplicación)
 2. OAuth 2.0 con PKCE
-3. OAuth 1.0a (Contexto de usuario)
+3. OAuth 1.0a (contexto de usuario)
 
-- **Bearer Token**: Úsalo para acceso de solo lectura en endpoints que admiten autenticación de aplicación (por ejemplo, búsqueda de publicaciones, endpoints de streaming).
-- **OAuth 2.0 PKCE**: Autenticación segura para acceso autorizado por el usuario basado en scopes (por ejemplo, obtener las métricas non_public de las publicaciones del usuario autenticado).
-- **OAuth 1.0a**: Autenticación heredada para operaciones específicas de usuario (por ejemplo, publicar en nombre de un usuario, gestionar listas).
+- **Bearer Token**: Úsalo para acceso de solo lectura en endpoints que admiten autenticación de aplicación (por ejemplo, búsqueda de Publicaciones, endpoints de streaming).
+- **OAuth 2.0 PKCE**: Autenticación segura para acceso autorizado por el usuario basado en scopes (por ejemplo, obtener las métricas non_public de las Publicaciones del usuario autenticado).
+- **OAuth 1.0a**: Autenticación heredada para operaciones específicas de usuario (por ejemplo, publicar en nombre de un usuario, administrar Listas).
 
-Obtén las credenciales en el [X Developer Portal](https://developer.x.com/en/portal/dashboard). Necesitarás una cuenta de desarrollador aprobada y una aplicación con los permisos apropiados (por ejemplo, Lectura + Escritura).
+Obtén credenciales en el [portal para desarrolladores de X](https://developer.x.com/en/portal/dashboard). Necesitarás una cuenta de desarrollador aprobada y una aplicación con permisos adecuados (por ejemplo, Lectura + Escritura).
 
 <div id="creating-a-client">
   ## Crear un Client
 </div>
 
-Todos los flujos de autenticación crean una instancia de `Client`:
+Todos los flujos de autenticación crean una instancia de `Client`.
 
 ```python
 from xdk import Client
@@ -27,13 +27,13 @@ from xdk import Client
 
 
 <div id="1-bearer-token-app-only">
-  ### 1. Bearer Token (solo de aplicación)
+  ### 1. Bearer Token (solo de Aplicación)
 </div>
 
 Para operaciones de solo lectura sin contexto de usuario.
 **Pasos**:
 
-1. En el portal para desarrolladores, genera un Bearer Token para tu aplicación.
+1. En el portal para desarrolladores, genera un Bearer Token para tu Aplicación.
 2. Pásalo al `Client`.
    **Ejemplo**:
 
@@ -58,10 +58,10 @@ for page in client.posts.search_recent(query="python", max_results=10):
   ### 2. OAuth 2.0 con PKCE (Contexto de usuario)
 </div>
 
-Este ejemplo muestra cómo usar OAuth 2.0 con Proof Key for Code Exchange (PKCE). Utiliza este flujo para obtener acceso específico de un usuario (por ejemplo, para publicar en nombre de un usuario, subir contenido multimedia para un usuario, etc.).
+Este ejemplo muestra cómo usar OAuth 2.0 con Proof Key for Code Exchange (PKCE). Úsalo para acceso específico de usuario (por ejemplo, para publicar en nombre de un usuario, subir contenido multimedia para un usuario, etc.).
 **Pasos**:
 
-1. En el portal para desarrolladores, registra tu App con un URI de redirección (por ejemplo, `http://localhost:8080/callback`).
+1. En el portal para desarrolladores, registra tu aplicación con un URI de redirección (por ejemplo, `http://localhost:8080/callback`).
 2. Obtén el Client ID (no se necesita secreto para PKCE).
 3. Inicia el flujo, dirige al usuario a la URL de autenticación y gestiona el callback.
    **Ejemplo** (usando un servidor web para el callback):
@@ -94,7 +94,7 @@ client = Client(bearer_token=access_token)
 # client = Client(token=tokens)
 ```
 
-**Renovación del token** (automática en el SDK para sesiones de larga duración):
+**Actualización del token** (automática en el SDK para sesiones prolongadas):
 
 ```python
 # Si el token de acceso expira, actualízalo usando el refresh_token almacenado
@@ -113,8 +113,8 @@ client = Client(bearer_token=tokens["access_token"])
 Para aplicaciones heredadas o casos de uso específicos que requieren autenticación OAuth 1.0a:
 **Pasos**:
 
-1. En el Developer Portal, obtén tu API Key y API Secret.
-2. Si ya tienes tokens de acceso, úsalos directamente. De lo contrario, completa el flujo de OAuth 1.0a para obtenerlos.
+1. En el portal para desarrolladores, obtén tu API Key y tu API Secret.
+2. Si ya dispones de tokens de acceso, utilízalos directamente. De lo contrario, completa el flujo de OAuth 1.0a para obtenerlos.
 3. Crea una instancia de OAuth1 y pásala al Client.
    **Ejemplo** (con tokens de acceso existentes):
 
@@ -168,7 +168,7 @@ response = client.users.get_me()
 
 **Nota**:
 
-* Nunca incluyas secretos directamente en el código en producción; usa variables de entorno o administradores de secretos (por ejemplo, `os.getenv("X_BEARER_TOKEN")`).
-* Para PKCE, asegúrate de usar HTTPS para los URI de redirección en producción.
-* El SDK valida los tokens y lanza `xdk.AuthenticationError` en caso de error.
-  Para ver ejemplos de código detallados que utilizan el XDK de Python, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).
+* Nunca incluyas secretos directamente en el código en producción; usa variables de entorno o gestores de secretos (por ejemplo, `os.getenv("X_BEARER_TOKEN")`).
+* Para PKCE, asegúrate de usar HTTPS para las URL de redirección en producción.
+* El SDK valida los tokens y genera `xdk.AuthenticationError` en caso de errores.
+  Para ver ejemplos de código detallados con el XDK de Python, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).

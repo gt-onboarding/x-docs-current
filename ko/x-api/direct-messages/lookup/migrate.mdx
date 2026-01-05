@@ -1,50 +1,50 @@
 ---
 title: 마이그레이션 가이드
 sidebarTitle: 마이그레이션 가이드
-keywords: ["다이렉트 메시지 마이그레이션", "DM 마이그레이션", "v1.1에서 v2로 DM 조회", "DM 마이그레이션 가이드", "DM 조회 마이그레이션"]
+keywords: ["다이렉트 메시지 마이그레이션", "DM 마이그레이션", "v1.1에서 v2로의 DM 조회", "DM 마이그레이션 가이드", "DM 조회 마이그레이션"]
 ---
 
 import { Button } from '/snippets/ko/button.mdx';
 
 <div id="comparing-v11-and-v2-direct-message-event-lookup-endpoints">
-  ## v1.1과 v2 Direct Message 이벤트 조회 엔드포인트 비교
+  ## v1.1 및 v2 다이렉트 메시지 이벤트 조회 엔드포인트 비교
 </div>
 
-v1.1과 v2 버전의 Direct Messages 엔드포인트는 모두 Direct Message 이벤트를 조회하는 메서드를 제공합니다. 이 가이드는 두 버전 간의 차이를 이해하고 v2로 마이그레이션하는 데 필요한 정보를 제공하기 위한 것입니다. 
+v1.1과 v2 버전의 다이렉트 메시지 엔드포인트는 모두 다이렉트 메시지 이벤트를 조회하는 메서드를 제공합니다. 이 가이드는 두 버전 간의 차이를 이해하고 v2로 마이그레이션하는 데 필요한 정보를 제공하기 위한 것입니다. 
 
-두 버전 간 주요 차이점 중 하나는 v1.1은 1:1 대화만 지원하는 반면, v2는 그룹 대화 지원을 도입했다는 점입니다. 이로 인한 결과 중 하나는 v1.1은 &quot;message created&quot; 이벤트만 지원하는 반면, v2는 대화에 참가자가 참여하거나 나가는 것과 관련된 이벤트도 지원한다는 점입니다. 실제로 v2의 근본적인 업데이트 중 하나는 dm&#95;conversations를 핵심 API 객체로 확립한 것입니다.   
+두 버전 간의 주요 차이점은 v1.1은 1:1 대화만 지원하는 반면 v2는 그룹 대화를 지원한다는 점입니다. 이로 인한 결과 중 하나는 v1.1은 &quot;message created&quot; 이벤트만 지원하는 반면, v2는 대화에 참가자가 참여하거나 나가는 것과 관련된 이벤트도 지원한다는 것입니다. 사실 v2의 근본적인 업데이트 중 하나는 dm&#95;conversations를 핵심 API 오브젝트로 확립한 것입니다.   
 
-v1.1에서는 Direct Messages를 조회하기 위한 엔드포인트가 두 개 있습니다(v1.1에서 지원되는 이벤트 유형은 새 메시지뿐입니다).
+v1.1에서는 다이렉트 메시지를 조회하기 위한 엔드포인트가 두 개 있습니다(다시 말해, v1.1에서 지원되는 이벤트 유형은 새 메시지뿐입니다).
 
 * GET direct&#95;messages/events/show - ID로 단일 이벤트를 조회합니다. 
 
-* GET direct&#95;messages/events/list - 인증된 사용자가 주고받은 1:1 Direct Messages를 최대 30일 치까지 조회합니다. 이 메서드는 그룹 대화의 메시지는 조회할 수 없다는 점에 유의하세요. 
+* GET direct&#95;messages/events/list - 인증된 사용자가 주고받은 1:1 다이렉트 메시지를 최대 30일간 조회합니다. 이 메서드는 그룹 대화의 메시지는 조회할 수 없다는 점에 유의하십시오. 
 
-이번 v2 릴리스에는 Direct Message 대화 이벤트를 조회하기 위한 GET 메서드가 세 가지 있습니다. 
+v2에서는 다이렉트 메시지 대화 이벤트를 조회하기 위한 GET 메서드가 세 개 제공됩니다. 
 
-* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - 1:1 대화와 연관된 Direct Message 이벤트를 조회합니다. :participant&#95;id 경로 매개변수는 이 요청을 수행하는 인증된 사용자와 대화를 나누고 있는 계정의 User ID입니다. 
+* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - 1:1 대화와 관련된 다이렉트 메시지 이벤트를 조회합니다. :participant&#95;id 경로 매개변수는 이 요청을 수행하는 인증된 사용자와 대화를 나누고 있는 계정의 사용자 ID입니다. 
 
-* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - :dm&#95;conversation&#95;id 경로 매개변수로 지정된 특정 대화 ID와 연관된 Direct Message 이벤트를 조회합니다. 이 메서드는 1:1 대화와 그룹 대화 모두를 지원합니다. 
+* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - :dm&#95;conversation&#95;id 경로 매개변수로 지정된 특정 대화 ID와 관련된 다이렉트 메시지 이벤트를 조회합니다. 이 메서드는 1:1 및 그룹 대화를 모두 지원합니다. 
 
-* **GET /2/dm&#95;events** - 사용자와 연관된 Direct Message 이벤트를 조회하며, 여기에는 1:1 대화와 그룹 대화가 모두 포함됩니다. 최대 30일 전의 이벤트까지 조회할 수 있습니다.  
+* **GET /2/dm&#95;events** - 1:1 및 그룹 대화를 모두 포함하여, 특정 사용자와 관련된 다이렉트 메시지 이벤트를 조회합니다. 최대 30일 전까지의 이벤트를 조회할 수 있습니다.  
 
-중요한 점은 대화와 이벤트 ID가 X 플랫폼의 v1.1 및 v2 버전 간에 공유된다는 것입니다. 이는 두 버전을 함께 사용할 수 있음을 의미합니다. 예를 들어, Direct Messages v1.1 엔드포인트는 단일 이벤트를 반환하고 이벤트를 삭제하는 메서드를 제공하는데, 이러한 메서드는 아직 v2에서 제공되지 않습니다. ID가 v1.1과 v2에서 공통이므로, v2에서 제공되는 ID를 기반으로 v1.1 요청을 수행하거나, X 애플리케이션의 대화 URL에 표시된 대화 ID를 참고해 요청을 수행할 수 있습니다.
+중요한 점은 대화 및 이벤트 ID가 X 플랫폼의 v1.1 및 v2 버전 전반에서 공유된다는 것입니다. 이는 두 버전을 함께 사용할 수 있음을 의미합니다. 예를 들어, 다이렉트 메시지 v1.1 엔드포인트는 단일 이벤트를 반환하고 이벤트를 삭제하는 메서드를 제공하는데, 이러한 메서드는 아직 v2에서는 제공되지 않습니다. ID가 v1.1과 v2 전체에서 공통이므로, v2에서 제공된 ID를 기반으로 v1.1 요청을 수행하거나, X 애플리케이션의 대화 URL에 표시된 대화 ID를 참조하여 요청을 보낼 수 있습니다.
 
-다음 표는 v1.1과 v2 Direct Message 이벤트 조회 엔드포인트의 근본적인 측면을 비교한 것입니다. 여기에서 공유하는 X API v2 특성은 모든 Direct Message 조회 엔드포인트에 공통적으로 적용됩니다.
+다음 표는 v1.1 및 v2 다이렉트 메시지 이벤트 조회 엔드포인트의 기본적인 측면을 비교합니다. 여기에서 공유하는 X API v2 특성은 모든 다이렉트 메시지 조회 엔드포인트에 공통적으로 적용됩니다.
 
 |     |     |     |
 | :--- | :--- | :--- |
 | **Description** | **Standard v1.1** | **X API v2** |
 | Host domain | https://api.x.com | https://api.x.com |
-| Endpoint root path | [/1.1/direct&#95;messages](https://api.x.com/1.1/direct_messages) | [/2/dm&#95;conversations](https://api.x.com/2/users/:id/dm_conversations)<br /><br />Direct Message 대화가 핵심 API 객체로 도입되었습니다.   <br /><br />이 엔드포인트는 MessageCreate, ParticipantsJoin, ParticipantLeave 이벤트를 조회합니다. |
+| Endpoint root path | [/1.1/direct&#95;messages](https://api.x.com/1.1/direct_messages) | [/2/dm&#95;conversations](https://api.x.com/2/users/:id/dm_conversations)<br /><br />다이렉트 메시지 대화가 기본적인 API 오브젝트로 도입되었습니다.   <br /><br />이 엔드포인트는 MessageCreate, ParticipantsJoin, ParticipantLeave 이벤트를 조회합니다. |
 | HTTP methods supported | GET | GET |
 | Supports Group Direct Messages |     | ✔   |
 | Event types supported | message&#95;create | MessageCreate, ParticipantsJoin, ParticipantsLeave |
 | [Authentication](/ko/resources/fundamentals/authentication) | OAuth 1.0a User Context | OAuth 1.0a User Context<br /><br />OAuth 2 User Context (scopes: dm.read, tweet.read, user.read) |
 | X API v2 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/authentication)의 자격 증명 사용 필요 |     | ✔   |
-| 기본 요청 [rate limits](/ko/x-api/fundamentals/rate-limits)*  <br />*모든 요청에는 사용자 토큰이 필요함 |     | GET 요청: 15분당 300회 요청<br /><br />요청 한도는 세 엔드포인트 전체에 걸쳐 적용됩니다 |
+| 기본 요청 [rate limits](/ko/x-api/fundamentals/rate-limits)*  <br />*모든 요청에는 사용자 토큰이 필요함 |     | GET 요청: 15분당 300회 요청<br /><br />요청 한도는 세 엔드포인트에 공통으로 적용됩니다 |
 
-다음 표는 v2 GET 메서드를 v1.1 버전과 비교한 것입니다. 이 v2 기능은 그룹 대화를 지원함으로써 사용 가능한 기능을 확장합니다. 
+다음 표들은 v2 GET 메서드를 v1.1 버전과 비교한 것입니다. 이러한 v2 엔드포인트는 그룹 대화를 지원함으로써 사용 가능한 기능을 확장한다는 점에 유의하십시오. 
 
 **특정 1:1 대화의 모든 메시지 가져오기 **
 
@@ -54,31 +54,31 @@ Path: GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events
 
 |     |     |     |
 | :--- | :--- | :--- |
-| **Description** | **표준 v1.1** | **X API v2** |
-| Endpoint path | GET <br /><br />/1.1/direct&#95;messages/events/list | GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events |
-| How much event history is available | 30일 | 제한 없음 |
-| Default request [rate limits](/ko/x-api/fundamentals/rate-limits) | 15분당 15회 요청 | 15분당 300회 요청  <br />요청 한도는 세 개의 GET 엔드포인트 전체에 걸쳐 적용됩니다 |
+| **설명** | **Standard v1.1** | **X API v2** |
+| 엔드포인트 경로 | GET <br /><br />/1.1/direct&#95;messages/events/list | GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events |
+| 사용 가능한 이벤트 기록 기간 | 30일 | 제한 없음 |
+| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) | 15분당 15개 요청 | 15분당 300개 요청  <br />요청 한도는 세 개의 GET 엔드포인트 전체에 적용됩니다. |
 
-**대화 ID로 모든 메시지 가져오기**
+**대화 ID별로 모든 메시지 가져오기**
 
-Path: GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events
-
-|     |     |     |
-| :--- | :--- | :--- |
-| **Description** | **표준 v1.1** | **X API v2** |
-| Endpoint path | 지원되지 않습니다. v1.1은 일대일 대화의 메시지만 반환할 수 있으며, 대화 ID별로 이벤트를 조회하는 기능은 없습니다. | GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events |
-| How much event history is available | 30일 | 제한 없음 |
-| Supports group conversations |     | ✔   |
-| Default request [rate limits](/ko/x-api/fundamentals/rate-limits) | 15분당 15회 요청 | 15분당 300회 요청  <br />요청 한도는 세 개의 GET 엔드포인트 전체에 걸쳐 적용됩니다 |
-
-**인증된 사용자의 모든 대화(일대일 및 그룹 대화 모두)에 대한 전체 이벤트 가져오기**
-
-Path: GET /2/dm&#95;events
+경로: GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events
 
 |     |     |     |
 | :--- | :--- | :--- |
-| **Description** | **표준 v1.1** | **X API v2** |
-| Endpoint path | GET /1.1/direct&#95;messages/events/list  <br />  <br />v1.1은 일대일 대화의 메시지만 반환할 수 있습니다. | GET /2/dm&#95;events |
-| How much event history is available | 30일 | 30일 |
-| Supports group conversations |     | ✔   |
-| Default request [rate limits](/ko/x-api/fundamentals/rate-limits) | 15분당 15회 요청 | 15분당 300회 요청  <br />요청 한도는 세 개의 GET 엔드포인트 전체에 걸쳐 적용됩니다 |
+| **설명** | **Standard v1.1** | **X API v2** |
+| 엔드포인트 경로 | 지원되지 않습니다. V1.1은 일대일 대화의 메시지만 반환할 수 있으며, 대화 ID로 이벤트를 조회하는 기능은 제공되지 않습니다. | GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events |
+| 사용 가능한 이벤트 기록 기간 | 30일 | 제한 없음 |
+| 그룹 대화 지원 여부 |     | ✔   |
+| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) | 15분당 15개 요청 | 15분당 300개 요청  <br />요청 한도는 세 개의 GET 엔드포인트 전체에 적용됩니다. |
+
+**인증된 사용자의 일대일 및 그룹 대화 전반에 걸친 모든 이벤트 가져오기**
+
+경로: GET /2/dm&#95;events
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **설명** | **Standard v1.1** | **X API v2** |
+| 엔드포인트 경로 | GET /1.1/direct&#95;messages/events/list  <br />  <br />V1.1은 일대일 대화의 메시지만 반환할 수 있습니다. | GET /2/dm&#95;events |
+| 사용 가능한 이벤트 기록 기간 | 30일 | 30일 |
+| 그룹 대화 지원 여부 |     | ✔   |
+| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) | 15분당 15개 요청 | 15분당 300개 요청  <br />요청 한도는 세 개의 GET 엔드포인트 전체에 적용됩니다. |

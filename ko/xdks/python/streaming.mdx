@@ -3,7 +3,7 @@ title: 스트리밍
 sidebarTitle: 스트리밍
 ---
 
-X API는 [Filtered Stream Endpoint](https://docs.x.com/x-api/posts/filtered-stream/introduction)와 같은 엔드포인트를 통해 실시간 데이터를 지원하며, 발생하는 즉시 조건에 맞는 게시물을 전달합니다. 이를 위해서는 지속적인 HTTP 연결을 맺어야 합니다.
+X API는 [Filtered Stream Endpoint](https://docs.x.com/x-api/posts/filtered-stream/introduction)와 같은 엔드포인트를 통해 실시간 데이터 전송을 지원하며, 게시물이 발생하는 즉시 일치하는 게시물을 전달합니다. 이를 위해서는 지속적인 HTTP 연결을 유지해야 합니다.
 
 <div id="setup-and-basic-streaming">
   ## 설정 및 기본 스트리밍
@@ -66,7 +66,7 @@ asyncio.run(main())
   ## 규칙 관리
 </div>
 
-규칙은 키워드, 사용자 등과 같은 조건을 기준으로 어떤 데이터를 수집할지에 대한 필터를 정의합니다. 규칙을 구성하는 방법은 [이 가이드](https://docs.x.com/x-api/posts/filtered-stream/integrate/build-a-rule)를 참고하세요.
+규칙은 원하는 특정 데이터(예: 키워드, 사용자 등)를 찾을 때 사용할 필터를 정의합니다. 규칙 작성 방법은 [이 가이드](https://docs.x.com/x-api/posts/filtered-stream/integrate/build-a-rule)를 참고하세요.
 **규칙 추가**:
 
 ```python
@@ -94,7 +94,7 @@ request_body = UpdateRulesRequest(**delete_rules)
 response = client.stream.update_rules(body=request_body)
 ```
 
-**규칙 조회**:
+**규칙 목록**:
 
 ```python
 # get_rules는 Iterator를 반환하므로 이를 반복 처리합니다
@@ -109,15 +109,15 @@ for page in client.stream.get_rules():
     break  # 모든 페이지를 가져오려면 break를 제거하세요
 ```
 
-자세한 규칙 구문은 [X Streaming Rules 문서](https://developer.x.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule)를 참고하세요.
+규칙 구문 전체는 [X Streaming Rules 문서](https://developer.x.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule)에서 확인하세요.
 
 
 <div id="troubleshooting">
   ## 문제 해결
 </div>
 
-- **403 Forbidden**: 인증 정보가 잘못됐거나 권한이 부족합니다.
-- **420 Enhance Your Calm**: rate limit에 걸렸습니다. 잠시 기다렸다가 다시 시도하세요.
-- **No Data**: `get_rules()`로 규칙을 확인하고, 일치하는 게시물이 존재하는지 확인하세요.
-Python XDK를 사용하는 자세한 코드 예시는 [코드 샘플 GitHub 저장소](https://github.com/xdevplatform/samples/tree/main/python)를 참조하세요.
-더 많은 예제와 API 레퍼런스는 인라인 docstring(예: `help(client.tweets.search_recent)`) 또는 소스에 포함된 자동 생성 스텁을 참고하세요. 피드백은 [GitHub 저장소](https://github.com/xdevplatform/xdk/tree/main/xdk/python)를 통해 보내주세요.
+- **403 Forbidden**: 인증이 잘못되었거나 권한이 부족합니다.
+- **420 Enhance Your Calm**: 요청이 rate limit에 도달했습니다. 잠시 대기한 뒤 다시 시도하세요.
+- **No Data**: `get_rules()`로 규칙을 확인하고, 해당 규칙과 일치하는 게시물이 실제로 존재하는지 확인하세요.
+Python XDK를 사용한 자세한 코드 예제는 [code samples GitHub 리포지토리](https://github.com/xdevplatform/samples/tree/main/python)를 참고하세요.
+추가 예제와 API 레퍼런스는 인라인 docstring(예: `help(client.tweets.search_recent)`)이나 소스에 포함된 자동 생성 스텁을 참조하세요. 의견은 [GitHub 리포지토리](https://github.com/xdevplatform/xdk/tree/main/xdk/python)를 통해 보내주세요.

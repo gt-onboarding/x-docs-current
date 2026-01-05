@@ -1,95 +1,95 @@
 ---
-keywords: ["Account Activity API", "AAA", "webhooks", "eventos de la cuenta", "actividad de usuario", "eventos en tiempo real", "suscripciones a la actividad", "eventos de webhook"]
+keywords: ["Account Activity API", "AAA", "webhooks", "eventos de la cuenta", "actividad del usuario", "eventos en tiempo real", "suscripciones a la actividad", "eventos de webhook"]
 ---
 
 <div id="v2-account-activity-api">
-  # API de actividad de la cuenta v2
+  # API de actividad de cuenta v2
 </div>
 
 <Note>
-  La API de actividad de la cuenta v2 ya está disponible en [**Pro**](https://developer.x.com/en/portal/products).
+  La API de actividad de cuenta v2 ya está disponible en [**Pro**](https://developer.x.com/en/portal/products).
 </Note>
 
 <div id="overview">
   ## Descripción general
 </div>
 
-La API Account Activity (AAA) ofrece una forma de recibir eventos en tiempo real relacionados con cuentas de usuario de X mediante webhooks. Al suscribir cuentas de usuario específicas a un webhook preconfigurado, tu aplicación puede recibir notificaciones de diversas actividades, como Publicaciones, Mensajes Directos, Me gusta, seguimientos, bloqueos y más, de una o varias de tus cuentas propias o suscritas a través de una única conexión.\
-Esta API se usa comúnmente para crear aplicaciones que necesitan reaccionar de forma instantánea a las acciones de los usuarios o mantener un estado actualizado en función de la actividad del usuario. Recibirás todas las actividades relacionadas que se indican a continuación para cada suscripción de usuario en el webhook que hayas registrado:
+La Account Activity API (AAA) proporciona una forma de recibir eventos en tiempo real relacionados con cuentas de usuario de X mediante webhooks. Al suscribir cuentas de usuario específicas a un webhook preconfigurado, tu aplicación puede recibir notificaciones de diversas actividades, como Publicaciones, Mensajes Directos, Me gusta, seguimientos, bloqueos y más, desde una o varias de tus cuentas propias o suscritas a través de una única conexión.\
+Esta API se utiliza comúnmente para crear aplicaciones que necesitan reaccionar de forma instantánea a las acciones de los usuarios o mantener el estado actualizado en función de la actividad del usuario. Recibirás todas las actividades relacionadas que se indican a continuación para cada suscripción de usuario en tu registro de webhook:
 
 <div id="activity-types">
   ## Tipos de actividad
 </div>
 
 * **Publicaciones** (del usuario)
-* **Eliminaciones de Publicaciones** (del usuario)
-* **@menciones** (al usuario)
+* **Eliminaciones de publicaciones** (del usuario)
+* **@menciones** (del usuario)
 * **Respuestas** (al usuario o del usuario)
-* **Republicaciones** (del usuario o relacionadas con el usuario)
-* **Publicaciones citadas** (del usuario o relacionadas con el usuario)
-* **Republicaciones de Publicaciones citadas** (del usuario o relacionadas con el usuario)
-* **Me gusta** (del usuario o relacionados con el usuario)
-* **Nuevos seguimientos** (del usuario o hacia el usuario)
-* **Dejar de seguir** (del usuario o hacia el usuario)
-* **Bloqueos** (del usuario o hacia el usuario)
-* **Desbloqueos** (del usuario o hacia el usuario)
-* **Silenciamientos** (del usuario o hacia el usuario)
-* **Anulaciones de silencio** (del usuario o hacia el usuario)
+* **Reposts** (del usuario o al usuario)
+* **Publicaciones citadas** (del usuario o al usuario)
+* **Reposts de publicaciones citadas** (del usuario o al usuario)
+* **Me gusta** (del usuario o al usuario)
+* **Seguir** (del usuario o al usuario)
+* **Dejar de seguir** (del usuario o al usuario)
+* **Bloqueos** (del usuario o al usuario)
+* **Desbloqueos** (del usuario o al usuario)
+* **Silenciamientos** (del usuario o al usuario)
+* **Dejar de silenciar** (del usuario o al usuario)
 * **Mensajes Directos enviados** (por el usuario)
 * **Mensajes Directos recibidos** (por el usuario)
-* **Indicadores de escritura** (para el usuario)
-* **Confirmaciones de lectura** (para el usuario)
+* **Indicadores de escritura** (al usuario)
+* **Confirmaciones de lectura** (al usuario)
 * **Revocaciones de suscripción** (por el usuario)
 
-**Nota**: No entregamos datos de la cronología de inicio (home timeline) a través de la Account Activity API. Usa el endpoint de cronología de Publicaciones de usuario por ID de usuario para obtener estos datos.
+**Nota**: No entregamos datos del timeline de inicio a través de la Account Activity API. Usa el endpoint User Posts timeline by User ID para obtener estos datos.
 
 <div id="feature-summary">
   ## Resumen de características
 </div>
 
-| Nivel | Precio | Número de suscripciones únicas | Número de webhooks |
+| Plan | Precio | Número de suscripciones únicas | Número de webhooks |
 | :----- | :----- | :----- | :----- |
 | Pro | 5000 USD / mes | 3 | 1 |
-| Enterprise | [Comunícate con el equipo de ventas](/es/enterprise/forms/enterprise-api-interest) | 5000+ | 5+ |
+| Enterprise | [Contacta con el equipo de ventas](/es/enterprise/forms/enterprise-api-interest) | 5000+ | 5+ |
 
-Este documento se centra en gestionar las suscripciones de usuarios asociadas con tus webhooks mediante los endpoints de la Account Activity API v2.
+Este documento se centra en la gestión de suscripciones de usuario asociadas a tus webhooks mediante los endpoints de la API Account Activity v2.
 
 <div id="manage-subscriptions">
   ## Administrar suscripciones
 </div>
 
-La Account Activity API proporciona mensajes JSON a través de webhooks cada vez que se produzcan eventos asociados con cuentas de X suscritas a tu servicio. X envía esas actividades a tu webhook registrado. En los siguientes pasos, aprenderás cómo configurar y administrar suscripciones para cuentas de usuario.
+La API Account Activity proporciona mensajes JSON basados en webhooks cada vez que hay eventos asociados a cuentas de X suscritas a tu servicio. X entrega esas actividades a tu webhook registrado. En los siguientes pasos, aprenderás cómo configurar y administrar suscripciones para cuentas de usuario.
 
 <Warning>
-  Actualmente, Account Activity API v2 no es compatible con User Auth 2.0. Estamos trabajando para resolverlo y actualizaremos nuestra documentación cuando sea compatible con OAuth 2.0.
+  Actualmente, la API Account Activity v2 no es compatible con User Auth 2.0. Estamos trabajando para solucionar esto y actualizaremos nuestra documentación cuando se admita OAuth 2.0.
 </Warning>
 
 <div id="1-create-an-x-app">
-  ### 1. Crea una aplicación de X
+  ### 1. Crear una Aplicación de X
 </div>
 
-Crea una aplicación de X con una cuenta de desarrollador aprobada desde el [portal para desarrolladores](https://developer.x.com/en/portal/products/enterprise). Si creas la aplicación en nombre de tu empresa, utiliza una cuenta corporativa de X.
+Crea una Aplicación de X con una cuenta de desarrollador aprobada en el [portal para desarrolladores](https://developer.x.com/en/portal/products/enterprise). Si creas la aplicación en nombre de tu empresa, utiliza una cuenta corporativa de X.
 
 * Habilita “Read, Write, and Access direct messages” en la pestaña de permisos de la página de tu aplicación.
-* En la pestaña &quot;Keys and Access Tokens&quot;, anota la **Consumer Key (API Key)**, **Consumer Token (API Secret)** y **Bearer Token** de tu aplicación.
+* En la pestaña &quot;Keys and Access Tokens&quot;, anota la **Consumer Key (API Key)**, el **Consumer Token (API Secret)** y el **Bearer Token** de tu aplicación.
 * Genera el **Access Token** y el **Access Token Secret** de tu aplicación. Estos son necesarios para suscribirte a cuentas de usuario.
-* Consulta [Obtaining Access Tokens](https://developer.x.com/en/docs/authentication) si no estás familiarizado con X Sign-in y los contextos de usuario.
-* Anota el id numérico de tu aplicación en la página &quot;Apps&quot; del portal para desarrolladores. Este es necesario al solicitar acceso a la Account Activity API.
+* Revisa [Obtaining Access Tokens](https://developer.x.com/en/docs/authentication) si no estás familiarizado con X Sign-in y los contextos de usuario.
+* Anota el id numérico de tu aplicación en la página &quot;Apps&quot; del portal para desarrolladores. Esto es necesario al solicitar acceso a Account Activity API.
 
 <div id="2-get-account-activity-api-access">
-  ### 2. Obtener acceso a Account Activity API
+  ### 2. Obtener acceso a la API Account Activity
 </div>
 
-La Account Activity API está disponible únicamente en el nivel Enterprise. Envía una solicitud de acceso a Enterprise a través del [portal para desarrolladores](https://developer.x.com/en/portal/products/enterprise).
+La API Account Activity está disponible solo en el nivel Enterprise. Envía una solicitud para obtener acceso a Enterprise a través del [portal para desarrolladores](https://developer.x.com/en/portal/products/enterprise).
 
 <div id="3-register-a-webhook">
   ### 3. Registrar un webhook
 </div>
 
-Para recibir eventos de Account Activity, debes registrar un webhook con una URL HTTPS accesible públicamente. Consulta la documentación de la API de Webhooks v2 para obtener detalles sobre cómo desarrollar una aplicación consumidora de webhooks, registrar un webhook, protegerlo y gestionar los Challenge-Response Checks (CRC).
+Para recibir eventos de Account Activity, debes registrar un webhook con una URL HTTPS accesible públicamente. Consulta la documentación de la API de Webhooks v2 para obtener más detalles sobre cómo desarrollar una aplicación consumidora de webhooks, registrar un webhook, protegerlo y manejar los Challenge-Response Checks (CRC).
 
 * Asegúrate de que tu webhook esté configurado para manejar solicitudes POST con cargas de eventos codificadas en JSON.
-* Obtén el **webhook&#95;id** de la respuesta de registro del webhook, ya que se requiere para gestionar las suscripciones.
+* Obtén el **webhook&#95;id** de la respuesta de registro del webhook, ya que se requiere para administrar las suscripciones.
 
 <div id="4-validate-setup">
   ### 4. Validar la configuración
@@ -97,47 +97,47 @@ Para recibir eventos de Account Activity, debes registrar un webhook con una URL
 
 Para validar que tu aplicación y webhook estén configurados correctamente:
 
-* Suscribe una cuenta de usuario a tu webhook (consulta &quot;Adding a Subscription&quot; más abajo).
+* Suscribe una cuenta de usuario a tu webhook (consulta &quot;Agregar una suscripción&quot; a continuación).
 * Marca como favorita una Publicación de una de las cuentas de X a las que tu aplicación está suscrita.
-* Deberías recibir un payload favorite&#95;events mediante una solicitud POST a la URL de tu webhook.
+* Deberías recibir un payload `favorite_events` mediante una solicitud POST a la URL de tu webhook.
 * **Nota**: La entrega de eventos puede tardar hasta 10 segundos en comenzar después de agregar una suscripción.
 
 <div id="important-notes">
   ### Notas importantes
 </div>
 
-* **Autenticación**: Al suscribir usuarios, usa la consumer key, consumer secret, el access token y el access token secret de la cuenta del usuario.
-* **Mensajes directos**: Todos los Mensajes directos entrantes y salientes (enviados mediante POST /2/dm&#95;conversations/with/:participant&#95;id/messages) se entregan a través de webhooks para mantener tu aplicación informada de toda la actividad de MD.
+* **Autenticación**: Cuando suscribas usuarios, usa la consumer key, consumer secret, access token y access token secret de la cuenta del usuario.
+* **Mensajes Directos**: Todos los Mensajes Directos entrantes y salientes (enviados mediante POST /2/dm&#95;conversations/with/:participant&#95;id/messages) se entregan mediante webhooks para mantener tu aplicación informada de toda la actividad de Mensajes Directos.
 * **Duplicación de eventos**:
-  * Si dos usuarios suscritos están en la misma conversación de MD, tu webhook recibe eventos duplicados (uno por usuario). Usa el campo for&#95;user&#95;id para distinguirlos.
+  * Si dos usuarios suscritos están en la misma conversación de Mensajes Directos, tu webhook recibe eventos duplicados (uno por usuario). Usa el campo for&#95;user&#95;id para distinguirlos.
   * Si varias aplicaciones comparten la misma URL de webhook y el mismo usuario, los eventos se envían varias veces (una por aplicación).
-  * Tu aplicación debe deduplicar los eventos utilizando el event ID para manejar duplicados ocasionales.
+  * Tu aplicación debe deduplicar los eventos usando el ID del evento para manejar duplicados ocasionales.
 * **Código de ejemplo**: Consulta [Account Activity API Setup](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master) para ver una aplicación web que muestra eventos de webhook.
 
 <div id="managing-subscribed-users-v2-api">
-  ## Administración de usuarios suscritos (API v2)
+  ## Gestión de usuarios suscritos (API v2)
 </div>
 
-Una vez que tengas registrado un webhook con un `webhook_id` válido, puedes administrar las suscripciones de usuarios para recibir la actividad de sus cuentas. Usa los siguientes endpoints para añadir, ver o eliminar suscripciones.
+Una vez que tengas registrado un webhook con un webhook&#95;id válido, puedes administrar las suscripciones de usuarios para recibir la actividad de sus cuentas. Usa los siguientes endpoints para agregar, ver o eliminar suscripciones.
 
 <div id="adding-a-subscription">
   ### [Agregar una suscripción](https://docs.x.com/x-api/account-activity/subscribes-the-provided-application-to-all-events-for-the-provided-user-context-for-all-message-types)
 </div>
 
 **Endpoint**: POST /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all
-**Description**: Suscribe al usuario autenticado para que reciba eventos a través del webhook especificado.
-**Authentication**: OAuthUser (se requiere flujo OAuth de tres patas, que representa al usuario que se suscribe).
+**Descripción**: Suscribe al usuario autenticado para que reciba eventos mediante el webhook especificado.
+**Autenticación**: OAuthUser (se requiere flujo OAuth de tres patas, que representa al usuario que se está suscribiendo).
 
 * **Consumer Key**: p. ej., xvz1evFS...
-* **Access Token**: p. ej., 370773112-GmHxMAgYyLbN...
+* **Token de acceso**: p. ej., 370773112-GmHxMAgYyLbN...
 
-**Path Parameters**:
+**Parámetros de ruta**:
 
-| Parameter      | Description                                              |
-| :------------- | :------------------------------------------------------- |
-| webhook&#95;id | El ID del webhook con el que se asociará la suscripción. |
+| Parámetro      | Descripción                                                  |
+| :------------- | :----------------------------------------------------------- |
+| webhook&#95;id | El ID del webhook con el que se debe asociar la suscripción. |
 
-**Request**:
+**Solicitud**:
 bash
 
 ```
@@ -147,7 +147,7 @@ curl --request POST --url 'https://api.twitter.com/2/account_activity/webhooks/:
 
 **Respuestas**:
 
-* **Correcto (200 OK)**:
+* **Correcta (200 OK)**:
 * json
 
 ```
@@ -160,11 +160,11 @@ curl --request POST --url 'https://api.twitter.com/2/account_activity/webhooks/:
 
 * **Error (400 Bad Request)**:
 
-| Motivo                      | Descripción                                                                          |
-| :-------------------------- | :----------------------------------------------------------------------------------- |
-| WebhookIdInvalid            | El webhook&#95;id proporcionado no se encontró o no está asociado con la aplicación. |
-| DuplicateSubscriptionFailed | Ya existe una suscripción para este usuario con el webhook&#95;id especificado.      |
-| SubscriptionLimitExceeded   | La aplicación ha alcanzado su límite de suscripciones entre todos los webhooks.      |
+| Reason                      | Description                                                                             |
+| :-------------------------- | :-------------------------------------------------------------------------------------- |
+| WebhookIdInvalid            | El webhook&#95;id proporcionado no se ha encontrado o no está asociado a la aplicación. |
+| DuplicateSubscriptionFailed | Ya existe una suscripción de este usuario para el webhook&#95;id especificado.          |
+| SubscriptionLimitExceeded   | La aplicación ha alcanzado su límite de suscripciones en todos los webhooks.            |
 
 ###
 
@@ -173,15 +173,15 @@ curl --request POST --url 'https://api.twitter.com/2/account_activity/webhooks/:
 </div>
 
 **Endpoint**: GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all
-**Description**: Verifica si el usuario autenticado está suscrito al webhook especificado.
-**Authentication**: OAuthUser (se requiere flujo OAuth de tres patas).
-**Path Parameters**:
+**Descripción**: Comprueba si el usuario autenticado está suscrito al webhook especificado.
+**Autenticación**: OAuthUser (se requiere flujo OAuth de tres patas).
+**Parámetros de ruta**:
 
-| Parameter      | Description                              |
+| Parámetro      | Descripción                              |
 | :------------- | :--------------------------------------- |
 | webhook&#95;id | El ID del webhook que se va a comprobar. |
 
-**Request**:
+**Solicitud**:
 bash
 
 ```
@@ -191,7 +191,7 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
 
 **Respuestas**:
 
-* **Correcto (200 OK)**:
+* **Correcta (200 OK)**:
 * json
 
 ```
@@ -204,28 +204,28 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
 
 * **Error (400 Bad Request)**:
 
-| Motivo           | Descripción                                                                               |
-| :--------------- | :---------------------------------------------------------------------------------------- |
-| WebhookIdInvalid | El webhook&#95;id proporcionado no se ha encontrado o no está asociado con la aplicación. |
+| Reason           | Description                                                                          |
+| :--------------- | :----------------------------------------------------------------------------------- |
+| WebhookIdInvalid | El webhook&#95;id proporcionado no se encontró o no está asociado con la aplicación. |
 
 ###
 
 <div id="removing-subscriptions">
-  ### [Removing Subscriptions](https://docs.x.com/x-api/account-activity/deactivates-a-subscription-for-the-specified-webhook-and-user-id)
+  ### [Eliminación de suscripciones](https://docs.x.com/x-api/account-activity/deactivates-a-subscription-for-the-specified-webhook-and-user-id)
 </div>
 
 **Endpoint**: DELETE /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all
-**Description**: Desactiva la suscripción para un ID de usuario específico, lo que detiene la entrega de eventos al webhook.
-**Authentication**: OAuth2 de solo Aplicación (Bearer Token).
+**Description**: Desactiva la suscripción para un id de usuario específico y detiene la entrega de eventos al webhook.
+**Authentication**: Bearer Token OAuth2 de solo aplicación (App only).
 
-* **Bearer Token**: p. ej., AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...
+* **Bearer Token**: por ejemplo, AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...
 
-**Parámetros de ruta**:
+**Path Parameters**:
 
 | Parameter      | Description                                        |
 | :------------- | :------------------------------------------------- |
-| webhook&#95;id | El ID del webhook que contiene la suscripción.     |
-| user&#95;id    | El ID numérico del usuario al que se dará de baja. |
+| webhook&#95;id | El id del webhook que contiene la suscripción.     |
+| user&#95;id    | El id numérico del usuario al que se dará de baja. |
 
 **Request**:
 bash
@@ -248,25 +248,25 @@ curl --request DELETE --url 'https://api.twitter.com/2/account_activity/webhooks
 }
 ```
 
-* **Error (400 Solicitud no válida)**:
+* **Error (400 Bad Request)**:
 
 | Reason               | Description                                                                                   |
 | :------------------- | :-------------------------------------------------------------------------------------------- |
 | SubscriptionNotFound | No existe ninguna suscripción para el user&#95;id especificado en el webhook&#95;id indicado. |
-| WebhookIdInvalid     | El webhook&#95;id proporcionado no se encontró o no está asociado a la aplicación.            |
+| WebhookIdInvalid     | El webhook&#95;id proporcionado no se encontró o no está asociado con la aplicación.          |
 
 <div id="viewing-all-subscriptions">
   ### [Ver todas las suscripciones](https://docs.x.com/x-api/account-activity/get-a-list-of-the-current-all-activity-type-subscriptions-for-the-specified-webhook)
 </div>
 
 **Endpoint**: GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list
-**Description**: Obtiene una lista de todos los id de usuario que actualmente están suscritos al webhook especificado.
-**Authentication**: OAuth2 App Only Bearer Token.
+**Description**: Obtiene una lista de todos los identificadores de usuario que están suscritos actualmente al webhook especificado.
+**Authentication**: Bearer Token de OAuth2 solo de Aplicación.
 **Path Parameters**:
 
-| Parameter      | Description                                            |
-| :------------- | :----------------------------------------------------- |
-| webhook&#95;id | El id del webhook cuyas suscripciones se van a listar. |
+| Parameter      | Description                                                               |
+| :------------- | :------------------------------------------------------------------------ |
+| webhook&#95;id | El identificador del webhook del que se quieren listar las suscripciones. |
 
 **Request**:
 bash
@@ -304,13 +304,13 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
 ###
 
 <div id="subscriptions-count">
-  ### [Subscriptions Count](https://docs.x.com/x-api/account-activity/get-a-count-of-subscriptions-that-are-currently-active-on-your-account)
+  ### [Cantidad de suscripciones](https://docs.x.com/x-api/account-activity/get-a-count-of-subscriptions-that-are-currently-active-on-your-account)
 </div>
 
 **Endpoint**: GET /2/account&#95;activity/subscriptions/count
-**Description**: Devuelve la cantidad total de suscripciones activas y el límite aprovisionado para la aplicación que se está autenticando.
-**Authentication**: OAuth2 App Only Bearer Token.
-**Request**:
+**Descripción**: Devuelve la cantidad total de suscripciones activas y el límite aprovisionado para la aplicación que se autentica.
+**Autenticación**: OAuth2 de solo aplicación con Bearer Token.
+**Solicitud**:
 bash
 
 ```
@@ -320,8 +320,8 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/subscriptio
 
 **Respuestas**:
 
-* **Correcto (200 OK)**:
-* JSON
+* **Correcta (200 OK)**:
+* json
 
 ```
 {
@@ -335,29 +335,29 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/subscriptio
 ```
 
 <div id="replay">
-  ## [Repetición](https://docs.x.com/x-api/account-activity/request-activity-replay)
+  ## [Replay](https://docs.x.com/x-api/account-activity/request-activity-replay)
 </div>
 
-AAAv2 proporciona funcionalidad de repetición que te permite recuperar eventos pasados para un intervalo de tiempo especificado y volver a enviarlos a tu webhook. Esto es útil para recuperar eventos perdidos debido a tiempos de inactividad.
+AAAv2 proporciona funcionalidad de replay que te permite recuperar eventos pasados para un intervalo de tiempo específico y volver a entregarlos a tu webhook. Esto es útil para recuperar eventos perdidos debido a períodos de inactividad.
 
 **Endpoint**: POST /2/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all
 
-**Descripción**: Inicia una tarea de repetición
+**Descripción**: Inicia un trabajo de replay
 
-**Autenticación**: OAuth2 Bearer Token de solo aplicación (App-only)
+**Autenticación**: OAuth2 solo de Aplicación con Bearer Token
 
 **Parámetros de ruta**:
 
-| Parámetro      | Descripción                                           |
-| :------------- | :---------------------------------------------------- |
-| webhook&#95;id | El ID del webhook en el que se iniciará la repetición |
+| Parámetro      | Descripción                                    |
+| :------------- | :--------------------------------------------- |
+| webhook&#95;id | El ID del webhook con el que iniciar el replay |
 
 **Parámetros de consulta**:
 
-| Parámetro     | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| from&#95;date | La marca de tiempo UTC más antigua (de inicio) a partir de la cual se proporcionarán los eventos; debe estar en el formato &quot;yyyymmddhhmm&quot;. La marca de tiempo tiene granularidad de minutos y es inclusiva (es decir, 12:00 incluye el minuto 00). Los tiempos válidos deben estar dentro de las últimas 24 horas, en hora UTC, y no ser más recientes que 31 minutos antes del momento actual. Se recomienda que from&#95;date y to&#95;date estén dentro de un intervalo de aproximadamente 2 horas. |
-| to&#95;date   | La marca de tiempo UTC más reciente (de fin) hasta la cual se proporcionarán los eventos; debe estar en el formato &quot;yyyymmddhhmm&quot;. La marca de tiempo tiene granularidad de minutos y es exclusiva (es decir, 12:30 no incluye el minuto 30 de la hora). Los tiempos válidos deben estar dentro de las últimas 24 horas, en hora UTC, y no ser más recientes que 10 minutos antes del momento actual.                                                                                                  |
+| Parámetro     | Descripción                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| from&#95;date | La marca de tiempo UTC más antigua (de inicio) a partir de la cual se proporcionarán los eventos; debe estar en formato ‘yyyymmddhhmm’. La marca de tiempo tiene granularidad de minutos y es inclusiva (es decir, 12:00 incluye el minuto 00). Los tiempos válidos deben estar dentro de las últimas 24 horas, en hora UTC, y no más recientes que 31 minutos antes del momento actual. Se recomienda que from&#95;date y to&#95;date estén dentro de ~2 horas. |
+| to&#95;date   | La marca de tiempo UTC más reciente (de finalización) hasta la cual se proporcionarán los eventos; debe estar en formato ‘yyyymmddhhmm’. La marca de tiempo tiene granularidad de minutos y es exclusiva (es decir, 12:30 no incluye el minuto 30 de la hora). Los tiempos válidos deben estar dentro de las últimas 24 horas, en hora UTC, y no más de 10 minutos antes del momento actual.                                                                     |
 
 **Respuestas**:
 
@@ -377,22 +377,22 @@ AAAv2 proporciona funcionalidad de repetición que te permite recuperar eventos 
 
 Errores:
 
-| Reason              | Description                                                                          |
-| :------------------ | :----------------------------------------------------------------------------------- |
-| QueryParamInvalid   | from&#95;date es anterior en más de 24 horas a la hora actual.                       |
-| QueryParamInvalid   | from&#95;date es más reciente que to&#95;date.                                       |
-| QueryParamInvalid   | from&#95;date está en el futuro.                                                     |
-| QueryParamInvalid   | to&#95;date está en el futuro.                                                       |
-| QueryParamInvalid   | from&#95;date o to&#95;date no tienen el formato correcto.                           |
-| CrcValidationFailed | Se recibió una respuesta incorrecta de la URL del webhook durante la validación CRC. |
-| ReplayConflictError | Ya hay un trabajo de repetición en curso para el webhook especificado.               |
-| WebhookIdInvalid    | El webhook&#95;id proporcionado no es válido o no está asociado con la aplicación.   |
+| Motivo              | Descripción                                                                             |
+| :------------------ | :-------------------------------------------------------------------------------------- |
+| QueryParamInvalid   | from&#95;date es anterior a la hora actual por más de 24 horas.                         |
+| QueryParamInvalid   | from&#95;date es más reciente que to&#95;date.                                          |
+| QueryParamInvalid   | from&#95;date está en el futuro.                                                        |
+| QueryParamInvalid   | to&#95;date está en el futuro.                                                          |
+| QueryParamInvalid   | from&#95;date o to&#95;date no tienen el formato correcto.                              |
+| CrcValidationFailed | Se recibió una respuesta incorrecta de la URL del webhook durante la validación de CRC. |
+| ReplayConflictError | Ya hay un trabajo de reproducción en curso para el webhook especificado.                |
+| WebhookIdInvalid    | El webhook&#95;id proporcionado no es válido o no está asociado con la aplicación.      |
 
 <div id="job-completed-messages">
   ### Mensajes de trabajos completados
 </div>
 
-Cuando tu trabajo de reproducción se complete correctamente, X enviará el siguiente evento de finalización del trabajo. En cuanto recibas este evento, el trabajo habrá terminado de ejecutarse y podrás enviar otro.
+Una vez que tu trabajo de replay se complete correctamente, X enviará el siguiente evento de finalización de trabajo. Cuando recibas este evento, el trabajo habrá terminado de ejecutarse y podrás enviar otro.
 
 ```
 {
@@ -405,7 +405,7 @@ Cuando tu trabajo de reproducción se complete correctamente, X enviará el sigu
 }
 ```
 
-En caso de que tu job no se complete correctamente, devolveremos el siguiente mensaje para indicarte que vuelvas a intentar tu Replay Job. Una vez que recibas este evento, el job habrá terminado de ejecutarse y podrás enviar otro.
+En caso de que tu trabajo no se complete correctamente, te devolveremos el siguiente mensaje recomendándote que vuelvas a intentar tu Replay Job. Una vez que recibas este evento, el trabajo habrá terminado de ejecutarse y podrás enviar otro.
 
 ```
 {
@@ -424,10 +424,10 @@ En caso de que tu job no se complete correctamente, devolveremos el siguiente me
 
 | Objeto | Detalles |
 | :----- | :----- |
-| for&#95;user&#95;id | Identifica la suscripción de usuario a la que está asociado el evento. |
-| is&#95;blocked&#95;by | (Condicional) Solo se muestra para eventos de mención de Publicación si el usuario que menciona está bloqueado por el usuario suscrito. |
+| for&#95;user&#95;id | Identifica la suscripción de usuario con la que el evento está relacionado. |
+| is&#95;blocked&#95;by | (Condicional) Se muestra solo para eventos de mención de Publicación si el usuario que menciona está bloqueado por el usuario suscrito. |
 | source | El usuario que realiza la actividad (por ejemplo, el usuario que sigue, bloquea o silencia). |
-| target | El usuario al que se aplica la actividad (por ejemplo, el usuario al que siguen, bloquean o silencian). |
+| target | El usuario al que se aplica la actividad (por ejemplo, el usuario que es seguido, bloqueado o silenciado). |
 
 <div id="available-activities">
   ### Actividades disponibles
@@ -435,26 +435,26 @@ En caso de que tu job no se complete correctamente, devolveremos el siguiente me
 
 | Tipo de mensaje | Detalles |
 | :----- | :----- |
-| tweet&#95;create&#95;events | Evento de creación de Publicación para Publicaciones, Retweets, respuestas, @menciones, Publicaciones citadas o Retweets de Publicaciones citadas. |
-| favorite&#95;events | Evento de Me gusta con usuario y destinatario. |
-| follow&#95;events | Evento de seguir con usuario y destinatario. |
-| unfollow&#95;events | Evento de dejar de seguir con usuario y destinatario. |
-| block&#95;events | Evento de bloqueo con usuario y destinatario. |
-| unblock&#95;events | Evento de desbloqueo con usuario y destinatario. |
-| mute&#95;events | Evento de silenciar con usuario y destinatario. |
-| unmute&#95;events | Evento de dejar de silenciar con usuario y destinatario. |
-| user&#95;event | Evento de revocación cuando un usuario elimina la autorización de la Aplicación (la suscripción se elimina automáticamente). |
+| tweet&#95;create&#95;events | Estado de la publicación para publicaciones, Retweets, respuestas, @menciones, publicaciones citadas o Retweets de publicaciones citadas. |
+| favorite&#95;events | Evento de me gusta con usuario y destino. |
+| follow&#95;events | Evento de seguir con usuario y destino. |
+| unfollow&#95;events | Evento de dejar de seguir con usuario y destino. |
+| block&#95;events | Evento de bloquear con usuario y destino. |
+| unblock&#95;events | Evento de desbloquear con usuario y destino. |
+| mute&#95;events | Evento de silenciar con usuario y destino. |
+| unmute&#95;events | Evento de dejar de silenciar con usuario y destino. |
+| user&#95;event | Eventos de revocación cuando un usuario elimina la autorización de la Aplicación (la suscripción se elimina automáticamente). |
 | direct&#95;message&#95;events | Estado de DM para mensajes enviados o recibidos. |
-| direct&#95;message&#95;indicate&#95;typing&#95;events | Evento de indicación de escritura en DM con usuario y destinatario. |
-| direct&#95;message&#95;mark&#95;read&#95;events | Evento de lectura de DM con usuario y destinatario. |
-| tweet&#95;delete&#95;events | Notificación de Publicaciones eliminadas para fines de cumplimiento. |
-| spaces&#95;events | Actualmente no es compatible. Próximamente. |
+| direct&#95;message&#95;indicate&#95;typing&#95;events | Evento de escritura de DM con usuario y destino. |
+| direct&#95;message&#95;mark&#95;read&#95;events | Evento de lectura de DM con usuario y destino. |
+| tweet&#95;delete&#95;events | Aviso de publicaciones eliminadas para fines de cumplimiento normativo. |
+| spaces&#95;events | Actualmente no se admite. Próximamente. |
 
 <div id="payload-examples">
   ## Ejemplos de payloads
 </div>
 
-A continuación se muestran ejemplos de payload para cada evento de Account Activity.
+A continuación se muestran ejemplos de payloads para cada evento de Account Activity.
 
 <div id="tweet_create_events-posts-retweets-replies-quotetweets">
   ### tweet&#95;create&#95;events (Publicaciones, Retweets, Respuestas, Citas de publicaciones)
@@ -840,11 +840,11 @@ A continuación se muestran ejemplos de payload para cada evento de Account Acti
   ## Compatibilidad con publicaciones de formato largo
 </div>
 
-La V2 Account Activity API ahora admite publicaciones de **formato largo**, que son publicaciones que superan los 280 caracteres. Cuando una publicación de formato largo se incluye en un payload de tweet&#95;create&#95;events, el campo text contiene los primeros 140 caracteres (o menos) y el campo truncated se establece en true. El contenido completo de la publicación se entrega en el objeto extended&#95;tweet, que incluye:
+La Account Activity API v2 ahora admite publicaciones **de formato largo**, que son publicaciones que superan los 280 caracteres. Cuando una publicación de formato largo se incluye en un payload de tweet&#95;create&#95;events, el campo text contiene los primeros 140 caracteres (o menos) y el campo truncated se establece en true. El contenido completo de la publicación se entrega en el objeto extended&#95;tweet, que incluye:
 
 * full&#95;text: El texto completo de la publicación, incluidos todos los caracteres más allá del límite de 280 caracteres.
-* entities: Cualquier entidad (por ejemplo, hashtags, URLs, menciones de usuarios, símbolos) que aparezca en el texto completo, incluidas las que aparezcan después del carácter 280.
-* display&#95;text&#95;range: El rango de caracteres que se debe mostrar, teniendo en cuenta el texto completo.
+* entities: Cualquier entidad (por ejemplo, hashtags, URL, menciones de usuarios, símbolos) que aparezca en el texto completo, incluidas las que se encuentran después del carácter 280.
+* display&#95;text&#95;range: El rango de caracteres que se deben mostrar, teniendo en cuenta el texto completo.
 
 Esto garantiza que las aplicaciones puedan procesar todo el contenido de las publicaciones de formato largo, incluidas las menciones u otras entidades que aparezcan más adelante en el texto. A continuación se muestra un ejemplo de payload de tweet&#95;create&#95;events para una publicación de formato largo:
 
@@ -924,10 +924,10 @@ Esto garantiza que las aplicaciones puedan procesar todo el contenido de las pub
 ```
 
 <div id="account-activity-api-migrating-from-legacy-enterprise-to-v2">
-  ## Migración de la API de actividad de la cuenta de Legacy Enterprise a v2
+  ## Migración de Account Activity API de Enterprise heredado a v2
 </div>
 
-Consulta nuestra [guía de migración](https://docs.x.com/x-api/account-activity/migrate/overview)!
+Consulta nuestra [guía de migración](https://docs.x.com/x-api/account-activity/migrate/overview).
 
 <div id="frequently-asked-questions">
   ## Preguntas frecuentes
@@ -935,29 +935,29 @@ Consulta nuestra [guía de migración](https://docs.x.com/x-api/account-activity
 
 **¿Cuáles son las ventajas de usar la Account Activity API?**
 
-La Account Activity API usa webhooks, lo que entrega datos en tiempo real sin requerir una conexión abierta (a diferencia de las API de streaming) ni sondeos frecuentes (a diferencia de las API REST). Los beneficios incluyen:
+La Account Activity API utiliza webhooks, enviando datos en tiempo real sin requerir una conexión abierta (a diferencia de las API de streaming) ni sondeos frecuentes (a diferencia de las API REST). Sus ventajas incluyen:
 
-* **Velocidad**: Entrega datos a la velocidad de X.
-* **Simplicidad**: Proporciona todos los eventos de la cuenta a través de una única conexión de webhook, incluidas Publicaciones, @menciones, Respuestas, Reposts, Quote Tweets, Me gusta, DM, Follows, Blocks y Mutes.
+* **Velocidad**: Entrega los datos a la velocidad de X.
+* **Simplicidad**: Proporciona todos los eventos de cuenta a través de una única conexión de webhook, incluidas Publicaciones, @menciones, respuestas, reposts, Publicaciones citadas, Me gusta, DMs, follows, blocks y mutes.
 * **Escala**: Admite todas las actividades para cuentas gestionadas sin límites de frecuencia ni topes de eventos (nivel Enterprise).
 
 **Necesito entornos de desarrollo, staging y producción para la Account Activity API, ¿es esto posible?**
 
-¡Sí! Puedes registrar varias URL de webhook y administrar las suscripciones por separado a través de la [V2 Webhooks API](https://docs.x.com/x-api/webhooks/introduction).
+Sí! Puedes registrar varias URL de webhook y gestionar las suscripciones por separado mediante la [V2 Webhooks API](https://docs.x.com/x-api/webhooks/introduction).
 
-**¿Tienen alguna guía paso a paso sobre cómo comenzar a usar la Account Activity API?**
+**¿Tienen alguna guía paso a paso sobre cómo empezar a usar la Account Activity API?**
 
-¡Sí! Consulta la [guía de introducción a Webhooks](https://docs.x.com/x-api/webhooks/introduction) y la [Account Activity API Sample Application](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py).
+Sí! Consulta la guía [Getting Started with Webhooks](https://docs.x.com/x-api/webhooks/introduction) y la [Account Activity API Sample Application](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py).
 
-**¿Qué autenticación debo usar con la Account Activity API?**
+**¿Qué autenticación tengo que usar con la Account Activity API?**
 
-Los requisitos de autenticación se especifican por endpoint. Consulta la [sección de Autenticación](https://developer.x.com/en/docs/authentication) para obtener más detalles.
+Los requisitos de autenticación se especifican por endpoint. Revisa la [sección de autenticación](https://developer.x.com/en/docs/authentication) para más detalles.
 
 **¿Recibiré actividades duplicadas si estoy suscrito a usuarios que interactúan entre sí?**
 
-Sí. Si tu aplicación tiene suscripciones para el Usuario A y el Usuario B, y el Usuario A menciona al Usuario B en una Publicación, tu webhook recibe dos eventos (uno por usuario). Usa el campo for&#95;user&#95;id para identificar la suscripción.
+Sí. Si tu aplicación tiene suscripciones para el usuario A y el usuario B, y el usuario A menciona al usuario B en una Publicación, tu webhook recibe dos eventos (uno por usuario). Utiliza el campo for&#95;user&#95;id para identificar la suscripción.
 
-**Cuando creo una suscripción a mi webhook, ¿puedo reemplazar la** /all/ **parte del endpoint con otros objetos de datos de actividad de la cuenta para limitar las actividades entregadas?**
+**Cuando creo una suscripción a mi webhook, ¿puedo reemplazar la parte** /all/ **del endpoint con otros objetos de datos de actividad de la cuenta para limitar las actividades entregadas?**
 
 No. El producto /all/ es la única opción y entrega todos los tipos de eventos compatibles.
 
@@ -966,16 +966,16 @@ No. El producto /all/ es la única opción y entrega todos los tipos de eventos 
 El límite de webhooks se establece a nivel de cuenta, no por aplicación. Por ejemplo, con tres webhooks y dos aplicaciones, podrías usar dos webhooks para una aplicación y uno para la otra, pero no tres por aplicación.
 
 <div id="account-activity-api-reference-index">
-  ## Índice de referencia de la API Account Activity
+  ## Índice de referencia de la API de Account Activity
 </div>
 
-| Propósito | Endpoint V2 |
+| Propósito | Endpoint de V2 |
 | :----- | :----- |
 | Suscribe una aplicación a los eventos de una cuenta | POST /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
-| Devuelve la cantidad actual de suscripciones activas | GET /2/account&#95;activity/subscriptions/count |
-| Verifica si un webhook está suscrito a una cuenta | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
-| Devuelve una lista de las suscripciones activas actuales | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list |
+| Devuelve el número de suscripciones activas actualmente | GET /2/account&#95;activity/subscriptions/count |
+| Comprueba si un webhook está suscrito a una cuenta | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
+| Devuelve una lista de suscripciones activas actualmente | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list |
 | Desactiva una suscripción usando OAuth solo de la aplicación | DELETE /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all |
-| Crea un trabajo de reproducción (replay) | POST /2/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all |
+| Crea un job de repetición (replay) | POST /2/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all |
 
-Para los endpoints de gestión de webhooks (registrar, ver, validar, eliminar), consulta la [documentación de la API Webhooks V2](https://docs.x.com/x-api/webhooks/introduction)
+Para los endpoints de gestión de webhooks (registrar, ver, validar, eliminar), consulta la [documentación de la API de Webhooks v2](https://docs.x.com/x-api/webhooks/introduction)

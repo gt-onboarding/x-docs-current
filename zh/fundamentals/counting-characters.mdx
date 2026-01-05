@@ -1,56 +1,56 @@
 ---
-title: 撰写帖子时的字符统计
-sidebarTitle: 字符统计
+title: 撰写帖子时的字符计数
+sidebarTitle: 字符计数
 icon: text-size
-keywords: ["字符计数", "帖子长度", "280 个字符", "字符限制", "Unicode", "表情符号字符", "中日韩字符", "URL 长度", "帖子撰写", "twitter-text", "字符编码", "UTF-8"]
+keywords: ["字符计数", "帖子长度", "280 个字符", "字符限制", "Unicode", "emoji 字符", "CJK 字符", "URL 长度", "帖子撰写", "twitter-text", "字符编码", "UTF-8"]
 ---
 
-本页介绍在撰写帖子以及在整个 X API 中如何处理字符。若需了解实现的更多细节，X 提供了一个开源的 [twitter-text](http://github.com/twitter/twitter-text) 库，可在 [GitHub](https://github.com/twitter) 上获取。
+本页介绍在撰写帖子以及在整个 X API 中如何计算和处理字符。有关实现细节的更多信息，X 提供了开源的 [twitter-text](http://github.com/twitter/twitter-text) 库，可在 [GitHub](https://github.com/twitter) 上获取。
 
 <div id="background">
   ## 背景
 </div>
 
-X 起初是一个基于 SMS 的文本服务。这使得最初的帖子长度被限制为 140 个字符（部分原因是 SMS 的字符上限为 160 个字符，其中 20 个字符预留给命令和用户名）。随着 X 的发展，最大帖子长度增加到了 280 个字符——依然简短精炼，但也能提供更多表达空间。
+X 最初是一项基于 SMS 的文本服务。这使得单条帖子的初始长度被限制为 140 个字符（部分原因是 SMS 本身的 160 字符限制，其中 20 个字符保留给命令和用户名）。随着 X 的发展，单条帖子的最大长度增加到了 280 个字符——仍然简短精炼，但能够表达更多内容。
 
 <div id="definition-of-a-character">
   ## 字符的定义
 </div>
 
-在大多数情况下，一条帖子的文本内容最多可以包含 280 个字符（或 [Unicode](https://unicode.org/) 字形）。一些字形会按多个字符计数。
+在大多数情况下，帖子中的文本内容最多可以包含 280 个字符或 [Unicode](https://unicode.org/) 字形。一些字形会被计为多个字符。
 
-我们将某个字形按一个或多个字符计数的情况称为它的权重。哪些字符具有大于一个字符的权重，其精确定义可以在 [twitter-text 帖子解析库](https://github.com/twitter/twitter-text)的[配置文件](https://github.com/twitter/twitter-text/tree/master/config)中找到。
+我们将一个字形被计为一个或多个字符称为它的权重。哪些字符具有大于一个字符的权重，其精确定义可以在 [twitter-text 帖子解析库](https://github.com/twitter/twitter-text)的[配置文件](https://github.com/twitter/twitter-text/tree/master/config)中找到。
 
-当前版本的配置文件定义了默认的双字符权重，以及四个采用不同权重的 [Unicode 码点](https://unicode.org/charts/About.html)范围。目前，这些范围内的码点都按单个字符计数。
+当前版本的配置文件定义了默认权重为两个字符，以及四个具有不同权重的 [Unicode 码点](https://unicode.org/charts/About.html)范围。目前，这些范围内的所有码点都被计为单个字符。
 
-* 第一个范围覆盖 Latin-1 代码页中的字符（U+0000–U+10FF）。
-* 第二个范围是通用标点，直到并包括零宽连接符（用于组合表情符号和其他字形）（U+2000–U+200D）。
-* 第三个范围是通用标点，但不包括 U+200E 和 U+200F，它们是 Unicode 方向标记（U+2010–U+201F）。
-* 最后一个范围覆盖引号字符（U+2032–U+2037）。
+* 第一个范围涵盖 Latin-1 代码页中的字符（U+0000 - U+10FF）。
+* 第二个范围是通用标点符号，直到并包括零宽连接符（用于组合表情符号和其他字形）（U+2000-U+200D）。
+* 第三个范围是通用标点符号，但不包括 U+200E 和 U+200F，这两个是 Unicode 方向标记（U+2010-U+201F）。
+* 最后一个范围涵盖引号字符（U+2032-U+2037）。
 
-使用 twitter-text 库计算出的帖子文本和长度示例，可在该库的 [validate.yml](https://github.com/twitter/twitter-text/blob/master/conformance/validate.yml) 测试配置文件中找到。
+由 twitter-text 库计算的帖子文本及其长度示例可以在该库的 [validate.yml](https://github.com/twitter/twitter-text/blob/master/conformance/validate.yml) 测试配置文件中找到。
 
 **示例**
 
 | 显示的字符 | 长度 | 描述 | Unicode 序列 |
 |:---------------------|:--------|:-------------|:------------------|
 | a | 1 | 拉丁小写字母 a | U+0061 |
-| á | 1 | 带尖音符的拉丁小写字母 a | U+00E1 |
+| á | 1 | 带锐音符的拉丁小写字母 a | U+00E1 |
 | ӑ | 1 | 带短音符的西里尔小写字母 a | U+04D1 |
-| Ồ | 1 | 带抑扬符和尖音符的拉丁小写字母 o | U+1ED2 |
+| Ồ | 1 | 带抑扬符和锐音符的拉丁小写字母 o | U+1ED2 |
 
 <div id="emojis">
   ## 表情符号
 </div>
 
-由 [twemoji](https://twemoji.x.com/) 支持的表情符号，无论是否带有组合修饰符，始终算作两个字符。这包括被 [Fitzpatrick 肤色修饰符](https://emojipedia.org/modifiers/)或[性别修饰符](https://blog.emojipedia.org/unicode-and-the-emoji-gender-gap/)修改的表情符号，即使它们由远多于两个的 Unicode 码位组成。表情符号的权重在 twitter-text 中通过一个正则表达式来定义，该表达式会匹配由一个或多个 Unicode 零宽连接符（U+200D）连接的标准表情符号序列。
+由 [twemoji](https://twemoji.x.com/) 支持的表情符号始终计为两个字符，无论是否包含组合修饰符。这包括经过 [Fitzpatrick 肤色](https://emojipedia.org/modifiers/) 或 [性别修饰符](https://blog.emojipedia.org/unicode-and-the-emoji-gender-gap/) 修改的表情符号，即便其底层由明显更多的 Unicode 码点组成。表情符号的权重由 twitter-text 中的一个正则表达式定义，该表达式会匹配由标准表情符号与一个或多个 Unicode 零宽连接符（U+200D）组合而成的序列。
 
 **示例**
 
 | 显示的表情符号 | 长度 | 描述 | Unicode 序列 |
 |:-----------------|:--------|:-------------|:------------------|
 | 👾 | 2 | 已知表情符号的默认长度 | -- |
-| 🙋🏽 | 2 | 带肤色修饰符的表情符号 | 🙋 U+1F64B, 🏽 U+1F3FD |
+| 🙋🏽 | 2 | 带有肤色修饰符的表情符号 | 🙋 U+1F64B, 🏽 U+1F3FD |
 | 👨‍🎤 | 2 | 使用组合字形（零宽连接符）的表情符号序列 | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [🎤 U+1F3A4](https://emojipedia.org/emoji/%F0%9F%8E%A4/) |
 | 👨‍👩‍👧‍👦 | 2 | 使用多个组合字形（零宽连接符）的表情符号序列 | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👩 U+1F469](https://emojipedia.org/emoji/%F0%9F%91%A9/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👧 U+1F467](https://emojipedia.org/emoji/%F0%9F%91%A7/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👦 U+1F466](https://emojipedia.org/emoji/%F0%9F%91%A6/) |
 
@@ -58,7 +58,7 @@ X 起初是一个基于 SMS 的文本服务。这使得最初的帖子长度被�
   ## 中文 / 日文 / 韩文字形
 </div>
 
-在 CJK（中文 / 日文 / 韩文）语言中使用的字形也算作两个字符。因此，仅由 CJK 文本组成的帖子最多只能包含 140 个此类字符。
+在 CJK（中 / 日 / 韩）语言中使用的字形也按两个字符计算。因此，仅由 CJK 文本构成的帖子，这类字形的数量最多为 140 个。
 
 <div id="entity-objects">
   ## 实体对象
@@ -66,11 +66,11 @@ X 起初是一个基于 SMS 的文本服务。这使得最初的帖子长度被�
 
 帖子可以包含[实体对象](/zh/x-api/fundamentals/data-dictionary)，其中有些会影响帖子的长度。
 
-URL：[所有 URL 都会被转换为 t.co 链接](https://developer.x.com/content/developer-twitter/en/docs/basics/tco)。这意味着 URL 的长度由 [twitter-text 配置文件](https://github.com/twitter/twitter-text/tree/master/config)中的 `transformedURLLength` 参数定义。目前，在帖子中任意一个 URL 的长度都按 23 个字符计算，即使该 URL 的实际长度本来会更短。
+URL： [所有 URL 都会被统一转换为 t.co 链接](https://developer.x.com/content/developer-twitter/en/docs/basics/tco)。这意味着 URL 的长度由 [twitter-text 配置文件](https://github.com/twitter/twitter-text/tree/master/config)中的 `transformedURLLength` 参数定义。当前，一个帖子中的 URL 长度为 23 个字符，即使该 URL 实际上会更短。
 
-回复：在回复帖开头自动填充的 @名称不会计入字符上限。新的非回复帖子如果以 @提及 开头则会计入字符上限，用户在帖子正文中手动添加的 @提及 也会计入字符上限。
+回复：在回复帖子开头自动填充的 @name 不计入字符限制。新的非回复帖子如果以 @mention 开头则会计数，用户在帖子正文中明确添加的 @mention 也会计数。
 
-媒体：附加到帖子的媒体，如果是从官方客户端发布，将表示为一个 pic.x.com URL，其字符计数为 0。
+媒体：附加到帖子的媒体，如果是从官方客户端发布，则会表示为 pic.x.com URL，其字符长度计为 0。
 
 有关实体对象的更多信息，请参阅[开发者文档](/zh/x-api/fundamentals/data-dictionary)。
 
@@ -78,17 +78,17 @@ URL：[所有 URL 都会被转换为 t.co 链接](https://developer.x.com/conten
   ## X 字符编码
 </div>
 
-X API 的端点只接受 UTF-8 编码的文本。所有其他编码都必须在将文本发送到 API 之前转换为 UTF-8。
+X API 端点只接受 UTF-8 编码的文本。将文本发送到 API 之前，所有其他编码都必须先转换为 UTF-8。
 
-X 使用文本的规范化形式 C（Normalization Form C，NFC）来计算帖子长度。
+X 使用文本的标准化形式 C（Normalization Form C，NFC）版本来计算帖子长度。
 
-例如：单词 &quot;café&quot;。有两种字节序列在视觉上看起来和读起来相同，但使用的字节数不同：
+例如单词 “café”：有两种字节序列在视觉上看起来、读起来都相同，但使用的字节数量不同：
 
 |     | | |
 |:-----|:---|:---|
-| café | 0x63 0x61 0x66 0xC3 0xA9 | 使用 &quot;é&quot; 字符，即“组合字符”。 |
-| café | 0x63 0x61 0x66 0x65 0xCC 0x81 | 使用组合变音符号，其叠加在 &quot;e&quot; 上方 |
+| café | 0x63 0x61 0x66 0xC3 0xA9 | 使用字符 “é”，即“组合字符”。 |
+| café | 0x63 0x61 0x66 0x65 0xCC 0x81 | 使用组合变音符，其叠加在 “e” 上。 |
 
-规范化形式 C 优先使用完全组合字符（如 café 示例中的 0xC3 0xA9），而不是长形式版本（0x65 0xCC 0x81）。
+标准化形式 C 更倾向于使用完全组合的字符（café 示例中的 0xC3 0xA9），而不是长形式版本（0x65 0xCC 0x81）。
 
-X 统计的是文本中的码点数量，而不是 UTF-8 字节数。café 示例中的 0xC3 0xA9 是一个码点（U+00E9），在 UTF-8 中被编码为两个字节，而 0x65 0xCC 0x81 是两个码点，被编码为三个字节。
+X 统计的是文本中的码点数量，而不是 UTF-8 字节数。café 示例中的 0xC3 0xA9 是一个码点（U+00E9），在 UTF-8 中被编码为两个字节，而 0x65 0xCC 0x81 则是两个码点，被编码为三个字节。

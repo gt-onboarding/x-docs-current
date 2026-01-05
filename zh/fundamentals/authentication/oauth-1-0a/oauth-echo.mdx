@@ -1,7 +1,7 @@
 ---
-title: OAuth Echo
-sidebarTitle: OAuth Echo
-keywords: ["OAuth Echo", "OAuth Echo 测试", "OAuth 验证", "回显测试", "OAuth 1.0a Echo", "验证 OAuth"]
+title: OAuth 回显
+sidebarTitle: OAuth 回显
+keywords: ["OAuth 回显", "OAuth 回显测试", "OAuth 验证", "回显测试", "OAuth 1.0a 回显", "验证 OAuth"]
 ---
 
 import { Button } from "/snippets/zh/button.mdx";
@@ -13,36 +13,36 @@ import { Button } from "/snippets/zh/button.mdx";
 
 OAuth Echo 是一种在与 API 交互时，将 OAuth 授权安全地委托给第三方的机制。
 
-此交互涉及四方：
+在这一交互过程中涉及四方：
 
-* **用户（User）**，通过某个已授权的 X 应用使用 X
-* **消费者（Consumer）**，即尝试与第三方媒体提供方（例如图片分享网站）交互的 X 应用
-* **委托方（Delegator）**，即第三方媒体提供方
-* **服务提供方（Service Provider）**，也就是 X 本身
+* **用户（User）**：通过某个已授权的 X 应用使用 X 的人
+* **消费者（Consumer）**：即试图与第三方媒体提供方（例如照片分享网站）交互的 X 应用
+* **委托方（Delegator）**：即第三方媒体提供方
+* **服务提供方（Service Provider）**：也就是 X 本身
      
 
-本质上，就是为委托方准备一个请求，由它代表某个应用和用户发送给 X API。将原本会作为已签名 OAuth 请求发送的内容放入一个 HTTP 头中，然后在完成中间操作后，要求委托方向 X 发送该请求。
+本质上，你需要为委托方准备一个请求，让其代表某个应用及其用户向 X API 发送。把本应作为已签名 OAuth 请求的内容放入一个 HTTP 头中，并在完成中间处理操作后，请求委托方将该请求发送到 X。
 
-下面是一个示例：用户希望上传一张照片。消费者会通过一个 POST 调用委托方的上传接口。这个 POST 应该包含图像本身，但还应当在 HTTP 头中包含两个附加项：
+例如：用户想上传一张照片。消费者将使用 POST 请求，在委托方上调用上传操作。该 POST 请求应包含图片，同时还应额外在 HTTP 头中包含以下两项：
 
-* `x-auth-service-provider` —— 实际上，这是进行身份委托时要发送到的服务端地址（“realm”）—— 对于 X，将其设置为 https://api.x.com/1.1/account/verify_credentials.json。基于 iOS5 的 X 集成会在此 URL 中添加一个额外的 `application_id` 参数，该参数也会用于计算 `x-verify-credentials-authorization` 中使用的 `oauth_signature`。
-* `x-verify-credentials-authorization` —— 消费者应创建调用 https://api.x.com/1.1/account/verify_credentials.json 所需的全部 OAuth 参数，并将其放入 HTTP 头中（例如，应类似于：OAuth oauth\_consumer\_key=”...”, oauth\_token=”...”, oauth\_signature\_method=”...”, oauth\_signature=”...”, oauth\_timestamp=”...”, oauth\_nonce=”...”, oauth_version=”...” ）。
+* `x-auth-service-provider` —— 实际上，这是应将身份委托发送到的域（realm）——在 X 的场景下，应设置为 https://api.x.com/1.1/account/verify_credentials.json。基于 iOS5 的 X 集成会在此 URL 中添加一个额外的 `application_id` 参数，该参数也会用于计算 `x-verify-credentials-authorization` 中使用的 `oauth_signature`。
+* `x-verify-credentials-authorization` —— 消费者应创建调用 https://api.x.com/1.1/account/verify_credentials.json 所需的全部 OAuth 参数，并将其放入 HTTP 头中（例如，看起来应类似于 `OAuth oauth_consumer_key=”...”, oauth_token=”...”, oauth_signature_method=”...”, oauth_signature=”...”, oauth_timestamp=”...”, oauth_nonce=”...”, oauth_version=”...”`）。
      
 
-请记住，整个交互过程必须在 `oauth_timestamp` 仍然有效的时间窗口内完成。
+请记住，整个事务过程需要在 `oauth_timestamp` 仍然有效的时间范围内完成。
 
-或者，也可以不在头中发送这两个参数，而是在 POST 中以 `x_auth_service_provider` 和 `x_verify_credentials_authorization` 的形式发送——在这种情况下，请记得对参数进行转义，并将其包含在 OAuth 签名基字符串中——与对任意请求中的参数进行编码的方式类似。为了尽可能让各个操作相互独立，最佳做法是使用 HTTP 头。
+或者，也可以不在头中发送这两个参数，而是在 POST 中以 `x_auth_service_provider` 和 `x_verify_credentials_authorization` 的形式发送——在这种情况下，请记得对参数进行转义，并将其包含在 OAuth 签名基字符串中——方式类似于对任意请求中的参数进行编码。为了尽可能将各个操作区分开，最好还是使用 HTTP 头。
 
-此时，委托方（Delegator）的目标是：在保存媒体之前，验证用户的身份是否属实。一旦委托方通过其上传方法接收到上述所有数据，它应临时存储图像，然后构造一个调用，指向 `x-auth-service-provider` 头中指定的端点——在本例中为 https://api.x.com/1.1/account/verify_credentials.json，并使用消费者在 `x-verify-credentials-authorization` 头中提供的同一个 OAuth 认证头。
+此时，委托方（Delegator）的目标，是在保存媒体之前，验证用户确实是其声称的身份。一旦委托方通过其上传方法接收到上述所有数据，就应临时存储该图片，然后构造一次调用，请求 `x-auth-service-provider` 头中指定的端点——在本例中为 https://api.x.com/1.1/account/verify_credentials.json，并使用消费者在 `x-verify-credentials-authorization` 头中提供的同一个 OAuth 认证头发起调用。
  
 
 <div id="oauth-echo-best-practices">
   #### OAuth Echo 最佳实践
 </div>
 
-使用 `x-auth-service-provider` 提供的 URL 来执行查找，_不要_ 使用硬编码的值。比如，在 Apple iOS 中，系统会为所有 OAuth 请求添加一个额外的 application_id 参数，并且在 OAuth Echo 的每个阶段都应确保保留该参数。
+使用 `x-auth-service-provider` 提供的 URL 发起查询，_不要_ 使用硬编码的值。比如在 Apple iOS 中，会在所有 OAuth 请求中添加一个额外的 `application_id` 参数，并且在 OAuth Echo 的每个阶段都应保留该参数。
 
-在 OAuth 授权部分，将 `x-verify-credentials-authorization` 中的 header 值取出，在调用服务提供方时将其放入单独的 Authorization 头中。为确保正确无误，请确认 `x-auth-service-provider` 中的值是否符合预期。
+在 OAuth 授权部分，从 `x-verify-credentials-authorization` 中获取头部的值，并将其放入一次单独请求的 `Authorization` 头中，用于向服务提供者发起调用。为确保正确性，请确认 `x-auth-service-provider` 中的值符合预期。
 
-* 如果服务提供方返回 HTTP 200，则表示成功。Delegator 应永久存储该图片，生成一个 URL，并将其返回。
-* 如果服务提供方没有返回 HTTP 200，则丢弃该图片，并向 Consumer 返回一个错误。
+* 如果服务提供者返回 HTTP 200，则表示一切正常。Delegator 应永久存储该图像，生成一个 URL，并将其返回。
+* 如果服务提供者没有返回 HTTP 200，则应丢弃该图像，然后向 Consumer 返回一个错误。

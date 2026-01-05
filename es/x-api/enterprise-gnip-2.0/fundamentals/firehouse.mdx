@@ -1,13 +1,13 @@
 ---
 title: API de Compliance Firehose
-keywords: ["compliance firehose", "API Firehose", "API de compliance", "enterprise firehose", "flujo de compliance", "firehose"]
+keywords: ["compliance firehose", "firehose API", "compliance API", "enterprise firehose", "compliance stream", "firehose"]
 ---
 
 > **Ten en cuenta**
 >
-> Hemos lanzado una nueva herramienta de compliance para X API v2 llamada [batch compliance](/es/x-api/compliance/batch-compliance). Esta nueva herramienta te permite cargar grandes conjuntos de datos de IDs de Publicación o de usuario para recuperar su estado de compliance y así determinar qué datos requieren acción para que tus conjuntos de datos cumplan con las políticas de compliance.
+> Hemos lanzado una nueva herramienta de compliance para X API v2 llamada [batch compliance](/es/x-api/compliance/batch-compliance). Esta nueva herramienta te permite cargar grandes conjuntos de datos de ID de Publicación o de usuario para recuperar su estado de compliance y así determinar qué datos requieren una acción para que tus conjuntos de datos cumplan con los requisitos de compliance.
 
-> Además, tanto batch compliance como compliance firehose se han actualizado para admitir ediciones de Publicaciones. Para compliance firehose se añadió un nuevo evento `tweet_edit`. Consulta la documentación de [Compliance Data Objects](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) para más detalles. Obtén más información sobre cómo funciona la metainformación de edición de Publicaciones en la página [Fundamentos de edición de Publicaciones](/es/x-api/fundamentals/edit-posts).
+> Además, tanto batch compliance como compliance firehose se han actualizado para admitir ediciones de Publicaciones. En el caso de compliance firehose, se agregó un nuevo evento `tweet_edit`. Consulta la documentación de [Compliance Data Objects](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) para obtener más detalles. Obtén más información sobre cómo funcionan los metadatos de Edit Post en la página [Edit Posts fundamentals](/es/x-api/fundamentals/edit-posts).
 
 <div id="overview">
   ## Descripción general
@@ -15,62 +15,62 @@ keywords: ["compliance firehose", "API Firehose", "API de compliance", "enterpri
 
 `Enterprise`
 
-Uno de los valores fundamentales de X es defender y respetar la voz de los usuarios. Esto incluye respetar sus expectativas e intención cuando eliminan, modifican o editan el contenido que deciden compartir en X. Consideramos que esto es de importancia crítica para la salud a largo plazo de una de las plataformas públicas de información en tiempo real más grandes del mundo. X pone los controles en manos de sus usuarios, dándoles la posibilidad de controlar su propia experiencia en X. Consideramos que las empresas que reciben datos de X tienen la responsabilidad de respetar las expectativas y la intención de los usuarios finales.
+Uno de los valores fundamentales de X es defender y respetar la voz de los usuarios. Esto incluye respetar sus expectativas e intención cuando eliminan, modifican o editan el contenido que deciden compartir en X. Creemos que esto es de importancia crítica para la salud a largo plazo de una de las mayores plataformas públicas de información en tiempo real del mundo. X pone controles en manos de sus usuarios, dando a cada persona la capacidad de controlar su propia experiencia en X. Consideramos que las empresas que reciben datos de X tienen la responsabilidad de respetar las expectativas y la intención de los usuarios finales.
 
-Para obtener más información sobre los tipos de eventos de cumplimiento que son posibles en la plataforma de X, consulta nuestro artículo [Respetar la intención del usuario en X](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#honoring-user-intent-on-twitter).
+Para obtener más información sobre los tipos de eventos de cumplimiento que son posibles en la plataforma X, consulta nuestro artículo [Honoring User Intent on X](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#honoring-user-intent-on-twitter).
 
-Cualquier desarrollador o empresa que consuma datos de X a través de una API tiene la obligación de hacer todos los esfuerzos razonables para respetar los cambios en el contenido de los usuarios. Esta obligación se extiende a eventos del usuario como eliminaciones, modificaciones y cambios en las opciones para compartir contenido (por ejemplo, cuando el contenido pasa a estar protegido o retenido). Esto también incluye cuando los usuarios editan sus Publicaciones. Consulta el texto específico en la [Política para desarrolladores](https://developer.x.com/en/developer-terms/policy) y/o en tu Acuerdo de datos de X para comprender cómo esta obligación afecta tu uso de los datos de X.
+Cualquier desarrollador o empresa que consuma datos de X mediante una API tiene la obligación de hacer todos los esfuerzos razonables para respetar los cambios en el contenido de los usuarios. Esta obligación se extiende a eventos de usuario como eliminaciones, modificaciones y cambios en las opciones de uso compartido (por ejemplo, cuando el contenido pasa a estar protegido o retenido). Esto también incluye cuando los usuarios editan sus Publicaciones. Consulta el texto específico de la [Developer Policy](https://developer.x.com/en/developer-terms/policy) y/o de tu X Data Agreement para entender cómo esta obligación afecta tu uso de los datos de X.
 
-X ofrece las siguientes soluciones que proporcionan información sobre estos eventos de cumplimiento de usuarios y sobre si una Publicación o Usuario específico está disponible públicamente o no. A continuación, se presenta una breve descripción de las soluciones y sus patrones generales de integración:
+X ofrece las siguientes soluciones que proporcionan información sobre estos eventos de cumplimiento de usuario y sobre si una Publicación o un Usuario determinados están disponibles públicamente o no. A continuación se presenta una breve descripción general de las soluciones y de sus patrones de integración generales:
 
 <div id="get-statuseslookup-and-get-userslookup">
   #### GET statuses/lookup y GET users/lookup
 </div>
 
-* Formato: API REST. Ver: [GET statuses/lookup](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) y [GET users/lookup](https://developer.x.com/en/docs/x-api/v1/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup).
+* Formato: API REST. Consulte: [GET statuses/lookup](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) y [GET users/lookup](https://developer.x.com/en/docs/x-api/v1/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup).
 
-* Estos endpoints siempre devuelven la última versión de cualquier edición de una Publicación. Todos los objetos de Publicación que describen Publicaciones creadas después de que se introdujo la función de edición incluirán metadatos de edición de Publicación. Esto se aplica incluso a Publicaciones que no fueron editadas.
+* Estos endpoints siempre devuelven la versión más reciente de cualquier Publicación editada. Todos los objetos de Publicación que describen Publicaciones creadas después de que se introdujo la función de edición incluirán metadatos de edición de la Publicación; esto es así incluso para Publicaciones que no fueron editadas. 
 
-* Para todas las Publicaciones, las solicitudes de Publicaciones realizadas más de 30 minutos después de su creación representarán el estado final de todas las Publicaciones.
+* Para todas las Publicaciones, las solicitudes realizadas más de 30 minutos después de su creación representarán el estado final de dichas Publicaciones. 
 
-* Entregan información de disponibilidad para Publicaciones o Usuarios específicos, según lo definido por quien realiza la llamada como parte de la solicitud de API.
+* Entregan información de disponibilidad para Publicaciones o Usuarios específicos definidos por quien realiza la llamada como parte de la solicitud de API.
 
-* Se pueden usar para comprobaciones puntuales ad hoc sobre el estado de disponibilidad actual de un grupo específico de Publicaciones o Usuarios.
+* Se pueden usar para verificaciones puntuales ad hoc sobre el estado de disponibilidad actual de un grupo específico de Publicaciones/Usuarios.
 
-* Son ideales para clientes que necesitan una forma de comprobar el estado actual de una Publicación o Usuario específico en un momento determinado.
+* Son ideales para clientes que necesitan una forma de comprobar el estado actual de una Publicación o Usuario específicos en un momento dado.
 
-* Estas APIs proporcionan un mecanismo útil que pueden utilizar los clientes que necesitan comprobar la disponibilidad de un elemento de Contenido, por ejemplo, cuando:
-  1. Muestran Publicaciones
-  2. Interactúan con una o varias Publicaciones o Usuarios de forma 1:1
-  3. Distribuyen Contenido de X a un tercero mediante una descarga de archivo permitida
-  4. Almacenan Publicaciones durante períodos prolongados
+* Estas APIs proporcionan un mecanismo útil que los clientes pueden usar cuando necesitan comprobar la disponibilidad de una pieza de Contenido, por ejemplo cuando:
+  1. Se muestran Publicaciones
+  2. Se interactúa con una(s) Publicación(es) o Usuario(s) de forma 1:1
+  3. Se distribuye Contenido de X a un tercero mediante una descarga de archivo permitida
+  4. Se almacenan Publicaciones durante períodos prolongados
 
 <div id="compliance-firehose-enterprise-only">
-  #### Compliance Firehose (solo para Enterprise)
+  #### Firehose de cumplimiento (solo Enterprise)
 </div>
 
 * Formato: API de streaming. Consulta: [Compliance Firehose](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#api-reference).
-* Entrega un flujo en tiempo real de [actividades de cumplimiento](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) en X. Estas actividades incluyen cuando se editan las Publicaciones.
+* Entrega un flujo en tiempo real de [actividades de cumplimiento](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) en X. Estas actividades incluyen la edición de Publicaciones. 
 * Puede utilizarse para mantener el estado de cumplimiento de un conjunto de datos almacenados a medida que se producen nuevos eventos de cumplimiento en la plataforma.
-* Ideal para clientes que consumen y almacenan grandes volúmenes de datos de X durante largos periodos de tiempo.
+* Ideal para clientes que consumen y almacenan grandes volúmenes de datos de X durante períodos prolongados.
 
 <div id="guides">
   ## Guías
 </div>
 
 <div id="compliance-best-practices">
-  ### **Prácticas recomendadas de cumplimiento**
+  ### **Mejores prácticas de cumplimiento normativo**
 </div>
 
 <div id="recommendations-best-practices">
   #### **Recomendaciones y mejores prácticas**
 </div>
 
-* **Cree esquemas de almacenamiento de datos que almacenen el ID numérico de la Publicación y el ID del Usuario**: Los mensajes de los usuarios requieren que se tomen medidas sobre todas las Publicaciones de ese Usuario. Por lo tanto, dado que todos los mensajes de cumplimiento se entregan solo por ID numérico, es importante diseñar esquemas de almacenamiento que mantengan la relación entre la Publicación y el Usuario basándose en IDs numéricos. Los consumidores de datos deberán supervisar los eventos de cumplimiento tanto por ID de Publicación como por ID de Usuario y poder actualizar el almacén de datos local de forma adecuada.
+* **Cree esquemas de almacenamiento de datos que guarden el ID numérico de la Publicación y el ID del Usuario**: Los mensajes de los usuarios requieren que se tomen medidas en todas las Publicaciones de ese Usuario. Por lo tanto, dado que todos los mensajes de cumplimiento se entregan únicamente mediante IDs numéricos, es importante diseñar esquemas de almacenamiento que mantengan la relación entre Publicación y Usuario basándose en IDs numéricos. Los consumidores de datos deberán supervisar los eventos de cumplimiento tanto por ID de Publicación como por ID de Usuario y poder actualizar el almacén de datos local de forma adecuada.
 
-* **Cree esquemas que contemplen todos los estados de cumplimiento**: Dependiendo de cómo se aborden las actividades de cumplimiento en distintas aplicaciones, puede ser necesario agregar otros metadatos al almacén de datos. Por ejemplo, los consumidores de datos pueden decidir agregar metadatos a una base de datos existente para facilitar la restricción de la visualización de contenido en países afectados por un mensaje `status_withheld`.
+* **Cree esquemas que contemplen todos los estados de cumplimiento**: Dependiendo de cómo se gestionen las actividades de cumplimiento en distintas aplicaciones, puede ser necesario agregar otros metadatos al almacén de datos. Por ejemplo, los consumidores de datos pueden decidir agregar metadatos a una base de datos existente para facilitar la restricción de la visualización de contenido en los países afectados por un mensaje status&#95;withheld.
 
-* **Gestión de eliminaciones de Retweets**: Los Retweets son un tipo especial de Publicación en la que el mensaje original está anidado en un objeto dentro del Retweet. En este caso, hay dos IDs de Publicación referenciados en un Retweet: el ID del Retweet y el ID del mensaje original (incluido en el objeto anidado). Cuando se elimina un mensaje original, se emite un mensaje de eliminación de Publicación para el ID original. Los eventos de eliminación de Publicaciones normalmente desencadenan eventos de eliminación para todos los Retweets. Sin embargo, en algunos casos no se envían todos y los sistemas cliente deben ser tolerantes ante eliminaciones de Retweets incompletas. La eliminación del ID original debería ser suficiente para eliminar todos los Retweets posteriores. Es una práctica recomendada hacer referencia al ID de la Publicación original al almacenar Retweets y eliminar todos los Retweets referenciados al recibir eventos de eliminación de Publicaciones.
+* **Gestión de eliminaciones de Retweets**: Los Retweets son un tipo especial de Publicación en la que el mensaje original está anidado en un objeto dentro del Retweet. En este caso, hay dos IDs de Publicación referenciados en un Retweet: el ID del Retweet y el ID del mensaje original (incluido en el objeto anidado). Cuando se elimina un mensaje original, se emite un mensaje de eliminación de Publicación para el ID original. Los eventos de eliminación de Publicación normalmente desencadenan eventos de eliminación para todos los Retweets. Sin embargo, en algunos casos no se envían todos y los sistemas de cliente deben ser tolerantes frente a eliminaciones de Retweets incompletas. La eliminación del ID original debería ser suficiente para eliminar todos los Retweets posteriores. Es una buena práctica hacer referencia al ID de Publicación original al almacenar Retweets y eliminar todos los Retweets referenciados cuando se reciban eventos de eliminación de Publicaciones.
 
 <div id="compliance-data-objects">
   ### Objetos de datos de cumplimiento
@@ -80,42 +80,42 @@ X ofrece las siguientes soluciones que proporcionan información sobre estos eve
   #### **API de Compliance Firehose**
 </div>
 
-Los posibles tipos de eventos de cumplimiento incluirán eventos de Publicación (o “status”) y eventos de Usuario, para los cuales hay varios tipos descritos a continuación.  
+Los tipos posibles de eventos de compliance incluirán eventos de Publicación (o “status”) y eventos de usuario, para los cuales se describen varios tipos a continuación.  
 
-Tenga en cuenta:
+Ten en cuenta lo siguiente:
 
-* Lea más sobre los estados de la cuenta de usuario [aquí](https://support.x.com/articles/14016) y sobre nuestra política para desarrolladores en relación con las Publicaciones eliminadas [aquí](https://dev.x.com/overview/terms/policy#3.Update_Respect_Users_Control_and_Privacy).
-* El Compliance Firehose se ha actualizado para proporcionar eventos `tweet_edit`. 
-* Varios eventos de eliminación, protección y suspensión de Usuario no son necesariamente permanentes y pueden alternar entre estados indefinidamente. Estos incluyen: user&#95;delete, user&#95;undelete, user&#95;protect, user&#95;unprotect y user&#95;suspend, user&#95;unsuspend.
-* Los user&#95;deletes van seguidos de status&#95;deletes 30 días después solo si el usuario no ha decidido user&#95;undelete su cuenta. Es posible que un user&#95;delete sea revertido por el usuario y que las eliminaciones de todas sus Publicaciones 30 días después no se produzcan.
-* user&#95;suspend es una acción que sigue siendo válida a menos que el usuario sea objeto de un evento user&#95;unsuspend. Estos no están sujetos a ningún cambio en un período de 30 días.
+* Obtén más información sobre los estados de usuario [aquí](https://support.x.com/articles/14016) y sobre nuestra política para desarrolladores en relación con las Publicaciones eliminadas [aquí](https://dev.x.com/overview/terms/policy#3.Update_Respect_Users_Control_and_Privacy).
+* Compliance Firehose se ha actualizado para proporcionar eventos `tweet_edit`. 
+* Varios eventos de eliminación, protección y suspensión de usuario no son necesariamente permanentes y pueden alternar entre estados indefinidamente. Estos incluyen: user&#95;delete, user&#95;undelete, user&#95;protect, user&#95;unprotect y user&#95;suspend, user&#95;unsuspend.
+* Los eventos user&#95;delete son seguidos por status&#95;deletes 30 días después solo si el usuario no ha elegido realizar un user&#95;undelete de su cuenta. Es posible que un user&#95;delete sea revertido por el usuario y que las eliminaciones de todas sus Publicaciones 30 días después no se produzcan.
+* user&#95;suspend es una acción que permanece vigente a menos que el usuario sea objeto de un evento user&#95;unsuspend. Estos no están sujetos a cambios asociados a un período de 30 días.
 
-Consulte la columna ‘Acción recomendada’ para entender cómo procesar cada tipo de evento a fin de respetar la privacidad y la intención del usuario final.
+Consulta la columna &quot;Recommended Action&quot; para entender cómo procesar cada tipo de evento con el fin de respetar la privacidad e intención del usuario final.
 
-| Tipo de mensaje original | Objeto | Permanente (Sí/No) | Acción recomendada |
+| Original Message Type | Object | Permanent (Yes/No) | Recommended Action |
 | :--- | :--- | :--- | :--- |
-| delete | Status | Sí | Eliminar la Publicación asociada. |
-| status&#95;withheld | Status | Sí | Suprimir la Publicación asociada en los países específicos indicados en el mensaje status&#95;withheld. |
-| drop | Status | No  | Quitar la Publicación de la vista pública. |
-| undrop | Status | No  | La Publicación puede mostrarse de nuevo y tratarse como pública. |
-| tweet&#95;edit | Status | Sí | Respetar y, cuando corresponda, mostrar la nueva edición. |
-| user&#95;delete | User | No  | Suprimir o eliminar todas las Publicaciones del usuario asociado. |
+| delete | Status | Yes | Elimina la Publicación asociada. |
+| status&#95;withheld | Status | Yes | Suprime la Publicación asociada en los países específicos indicados en el mensaje status&#95;withheld. |
+| drop | Status | No  | Quita la Publicación de la vista pública. |
+| undrop | Status | No  | El status puede mostrarse de nuevo y tratarse como público. |
+| tweet&#95;edit | Status | Yes | Respeta y, cuando corresponda, muestra la nueva edición. |
+| user&#95;delete | User | No  | Suprime o elimina todas las Publicaciones del usuario asociado. |
 | user&#95;undelete | User | No  | Todas las Publicaciones del usuario asociado pueden mostrarse de nuevo y tratarse como públicas. |
-| user&#95;protect | User | No  | Suprimir o eliminar todas las Publicaciones del usuario asociado. |
+| user&#95;protect | User | No  | Suprime o elimina todas las Publicaciones del usuario asociado. |
 | user&#95;unprotect | User | No  | Todas las Publicaciones del usuario asociado pueden mostrarse de nuevo y tratarse como públicas. |
-| user&#95;suspend | User | No  | Suprimir o eliminar todas las Publicaciones del usuario asociado. |
+| user&#95;suspend | User | No  | Suprime o elimina todas las Publicaciones del usuario asociado. |
 | user&#95;unsuspend | User | No  | Todas las Publicaciones del usuario asociado pueden mostrarse de nuevo y tratarse como públicas. |
-| scrub&#95;geo | User | Sí | Eliminar todos los geodatos proporcionados por X para todas las Publicaciones del usuario anteriores a la Publicación especificada en el mensaje scrub&#95;geomessage. Tenga en cuenta que las Publicaciones posteriores de un usuario pueden contener geodatos que se pueden utilizar. |
-| user&#95;withheld | User | Sí | Suprimir las Publicaciones del usuario asociado en los países específicos indicados en el mensaje user&#95;withheld. |
-| delete | Favorite | Sí | Eliminar el Me gusta/favorito asociado. |
+| scrub&#95;geo | User | Yes | Elimina todos los datos geográficos proporcionados por X para todas las Publicaciones del usuario anteriores a la Publicación especificada en el mensaje scrub&#95;geo. Ten en cuenta que las Publicaciones posteriores de un usuario pueden contener datos geográficos que se pueden usar. |
+| user&#95;withheld | User | Yes | Suprime las Publicaciones del usuario asociado en los países específicos indicados en el mensaje user&#95;withheld. |
+| delete | Favorite | Yes | Elimina el me gusta/favorito asociado. |
 
 <div id="payload-examples">
   #### **Ejemplos de payload**
 </div>
 
-Consulta los siguientes ejemplos de payload para cada evento de cumplimiento descrito en la tabla anterior.
+Consulta los ejemplos de payload a continuación para cada evento de cumplimiento descrito en la tabla anterior.
 
-**Edición de la Publicación**
+**Edición de Publicación**
 
 ```json
 {"tweet_edit":
@@ -129,7 +129,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="post-delete">
-  ##### Eliminación de publicación
+  ##### Publicación eliminada
 </div>
 
 ```json
@@ -168,7 +168,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="drop">
-  ##### Eliminación
+  ##### Descartar
 </div>
 
 ```json
@@ -186,7 +186,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="undrop">
-  ##### Revertir eliminación
+  ##### Deshacer eliminación
 </div>
 
 ```json
@@ -204,7 +204,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="scrub-geo">
-  #### Eliminar datos de ubicación
+  #### Depuración de datos de ubicación
 </div>
 
 ```json
@@ -246,7 +246,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="user-withheld">
-  ##### Usuario oculto
+  ##### Usuario restringido
 </div>
 
 ```json
@@ -265,7 +265,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="user-protect">
-  ##### Proteger usuario
+  ##### Protección de usuario
 </div>
 
 ```json
@@ -278,7 +278,7 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 ```
 
 <div id="user-unprotect">
-  ##### Eliminar protección de usuario
+  ##### Eliminación de la protección del usuario
 </div>
 
 ```json
@@ -303,8 +303,8 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
 }
 ```
 
-<div id="user-unsuspend">
-  ##### Levantamiento de la suspensión de usuario
+<div id="user-undelete">
+  ##### Reactivación de usuario
 </div>
 
 ```json
@@ -320,34 +320,34 @@ Consulta los siguientes ejemplos de payload para cada evento de cumplimiento des
   ### Integración con Compliance Firehose
 </div>
 
-Compliance Firehose es una API de streaming en tiempo real que entrega eventos de cumplimiento que se producen en la plataforma X. Para comprender los eventos de cumplimiento y cómo se generan en X, consulta nuestro artículo [Honrar la intención del usuario en X](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#honoring-user-intent-on-twitter).
+Compliance Firehose es una API de streaming en tiempo real que proporciona eventos de cumplimiento que ocurren en la plataforma X. Para comprender los eventos de cumplimiento y cómo se generan en X, consulta nuestro artículo, [Honoring User Intent on X](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#honoring-user-intent-on-twitter).
 
-Es importante tener en cuenta que los eventos de Publicación y de usuario se entregan de forma independiente y que cada uno debe procesarse por separado (es decir, la eliminación de una Publicación no implica un evento de usuario y viceversa). Varios eventos de usuario no son necesariamente permanentes y pueden alternar entre estados indefinidamente. Estos incluyen: user&#95;delete, user&#95;undelete, user&#95;protect, user&#95;unprotect y user&#95;suspend, user&#95;unsuspend.
+Es importante tener en cuenta que los eventos de Publicación y de Usuario se entregan de forma independiente y que cada uno debe procesarse de manera independiente (es decir, la eliminación de una Publicación no implica un evento de Usuario, y viceversa). Varios eventos de Usuario no son necesariamente permanentes y pueden alternar entre estados indefinidamente. Estos incluyen: user&#95;delete, user&#95;undelete, user&#95;protect, user&#95;unprotect y user&#95;suspend, user&#95;unsuspend.
 
-Los user&#95;deletes van seguidos de status&#95;deletes 30 días después solo si el usuario no ha optado por realizar un user&#95;undelete de su cuenta. Es posible que un user&#95;delete sea revertido por el usuario y que las eliminaciones de todas sus Publicaciones 30 días después no se produzcan.
+Los eventos user&#95;delete van seguidos de eventos status&#95;delete 30 días después, solo si el usuario no ha seleccionado user&#95;undelete para su cuenta. Es posible que un user&#95;delete sea revertido por el usuario y que 30 días después no se produzcan las eliminaciones de todas sus Publicaciones.
 
-User&#95;suspend es una acción que permanece activa a menos que el usuario sea objeto de un evento user&#95;unsuspend. Estos no están sujetos a ningún cambio asociado a un período de 30 días.
+user&#95;suspend es una acción que permanece vigente a menos que el usuario esté sujeto a un evento user&#95;unsuspend. Estos no están sujetos a ningún cambio asociado a un período de 30 días.
 
-Nunca es adecuado mostrar directamente eventos de cumplimiento a los usuarios de tu software ni incorporarlos de otro modo en tus productos o experiencias de cliente. Están destinados únicamente a mantener el cumplimiento y a respetar las acciones de los usuarios de X.
+Nunca es apropiado mostrar eventos de cumplimiento directamente a los usuarios de tu software ni incorporarlos de otro modo en tus productos o experiencias para clientes. Están destinados únicamente a mantener el cumplimiento y respetar las acciones de los usuarios de X.
 
 <div id="integrating-with-the-compliance-firehose">
   #### **Integración con el Compliance Firehose**
 </div>
 
-Para integrar el Compliance Firehose en tu sistema, debes crear una integración que pueda hacer lo siguiente:
+Para integrar el Compliance Firehose en tu sistema, deberás crear una integración que pueda hacer lo siguiente:
 
-1. Establecer una conexión de streaming con cada partición de la API de streaming del Compliance Firehose
-2. Gestionar volúmenes altos de datos: desacoplar la ingesta del stream del procesamiento adicional utilizando procesos asíncronos
-3. Volver a conectarse automáticamente a las particiones del stream cuando se desconecte por cualquier motivo
-4. Procesar los eventos de cumplimiento que sean relevantes para los datos de Publicación y de Usuario que hayas almacenado, de acuerdo con la guía presentada anteriormente
+1. Establecer una conexión de streaming con cada partición de la API de Compliance Firehose
+2. Manejar volúmenes de datos elevados: desacoplar la ingesta del flujo del procesamiento adicional usando procesos asíncronos
+3. Volver a conectarse automáticamente a las particiones del flujo cuando se produzca una desconexión por cualquier motivo
+4. Procesar los eventos de cumplimiento que sean relevantes para los datos de Publicación y Usuario que has almacenado, de acuerdo con las orientaciones presentadas anteriormente
 
 <div id="honoring-user-intent-on-twitter">
-  ### Respetar la intención del usuario en X
+  ### Respetar la intención de los usuarios en X
 </div>
 
-Creemos que respetar la privacidad y la intención de los usuarios de X es fundamental para la salud a largo plazo de una de las plataformas de información pública y en tiempo real más grandes del mundo. X pone los controles de privacidad en manos de sus usuarios, dándoles a las personas la posibilidad de controlar su propia experiencia en X. Como clientes empresariales de los datos de X, tenemos la responsabilidad colectiva de respetar la privacidad y las acciones de los usuarios finales para mantener este entorno de confianza y respeto.
+Creemos que respetar la privacidad y la intención de las personas usuarias de X es de importancia crítica para la salud a largo plazo de una de las plataformas de información pública y en tiempo real más grandes del mundo. X pone los controles de privacidad en manos de sus usuarios, dándoles la capacidad de controlar su propia experiencia en X. Como empresas que consumen datos de X, tenemos una responsabilidad colectiva de respetar la privacidad y las acciones de los usuarios finales para mantener este entorno de confianza y respeto.
 
-Hay diversas cosas que pueden suceder a las Publicaciones y a las cuentas de usuario que afectan la forma en que se muestran en la plataforma. Las acciones que afectan la privacidad y la intención se definen tanto a nivel de Estado (Publicación) como a nivel de Usuario. Estas acciones incluyen:
+Hay una variedad de situaciones que pueden afectar a las Publicaciones y a las cuentas de usuario y que influyen en cómo se muestran en la plataforma. Las acciones que afectan la privacidad y la intención se definen tanto a nivel de Estado (Publicación) como de Usuario. Estas acciones incluyen:
 
 <div id="user">
   #### Usuario
@@ -355,11 +355,11 @@ Hay diversas cosas que pueden suceder a las Publicaciones y a las cuentas de usu
 
 | Acción | Descripción |
 | :--- | :--- |
-| Proteger cuenta | Un usuario de X puede proteger o desproteger su cuenta en cualquier momento. Las cuentas protegidas requieren la aprobación manual, por parte del usuario, de cada persona a la que se le permite ver las Publicaciones de su cuenta.   <br />Para obtener más información, consulta [Acerca de las Publicaciones públicas y protegidas](https://support.x.com/articles/14016-about-public-and-protected-tweets). |
-| Eliminar cuenta | Un usuario de X puede decidir eliminar su cuenta y todos los mensajes de estado asociados en cualquier momento. X conserva la información de la cuenta durante 30 días después de la eliminación en caso de que el usuario decida recuperarla y, en efecto, reactivar la cuenta. |
-| Eliminar datos de ubicación | Un usuario de X puede eliminar todos los datos de ubicación de Publicaciones anteriores en cualquier momento. Esto se conoce como “scrub geo”. |
-| Suspender cuenta | X se reserva el derecho de suspender las cuentas que infrinjan las Reglas de X o si se sospecha que una cuenta ha sido hackeada o comprometida. Las suspensiones de cuenta solo pueden revertirse (levantarse) por X. |
-| Retener cuenta | X se reserva el derecho de restringir de forma reactiva el acceso a cierto contenido en un país específico de vez en cuando. Una cuenta retenida solo puede dejar de estar retenida por X.   <br />Para obtener más información, consulta [Contenido retenido por país](https://support.x.com/articles/20169222-country-withheld-content). |
+| Proteger cuenta | Un usuario de X puede proteger o quitar la protección de su cuenta en cualquier momento. Las cuentas protegidas requieren la aprobación manual por parte del usuario de cada persona a la que se le permite ver las Publicaciones de su cuenta.   <br />Para obtener más información, consulta [Publicaciones públicas y protegidas](https://support.x.com/articles/14016-about-public-and-protected-tweets). |
+| Eliminar cuenta | Un usuario de X puede decidir eliminar su cuenta y todas las Publicaciones asociadas en cualquier momento. X conserva la información de la cuenta durante 30 días después de la eliminación en caso de que el usuario decida recuperarla y, de ese modo, reactivar su cuenta. |
+| Scrub Geo | Un usuario de X puede eliminar todos los datos de ubicación de sus Publicaciones anteriores en cualquier momento. A esto se le conoce como “scrub geo”. |
+| Suspender cuenta | X se reserva el derecho de suspender las cuentas que infrinjan las Reglas de X o si se sospecha que una cuenta ha sido pirateada o comprometida. Solo X puede revertir (levantar la suspensión de) las suspensiones de cuentas. |
+| Retener cuenta | X se reserva el derecho de restringir de manera reactiva el acceso a cierto contenido en un país específico. Solo X puede levantar la retención de una cuenta.   <br />Para obtener más información, consulta [Contenido retenido por país](https://support.x.com/articles/20169222-country-withheld-content). |
 
 <div id="status">
   #### Estado
@@ -367,14 +367,14 @@ Hay diversas cosas que pueden suceder a las Publicaciones y a las cuentas de usu
 
 | Acción | Descripción |
 | :--- | :--- |
-| Eliminar estado | Un usuario de X puede eliminar un estado en cualquier momento. Los estados eliminados no se pueden revertir y se eliminan de forma permanente. |
-| Retener estado | X se reserva el derecho de retener de forma reactiva el acceso a determinado contenido en un país específico, ocasionalmente. Solo X puede levantar la retención de un estado.   <br />Para obtener más información, consulta [Country Withheld Content](https://support.x.com/articles/20169222-country-withheld-content). |
+| Delete Status | Un usuario de X puede eliminar un estado en cualquier momento. Los estados eliminados no se pueden revertir y se eliminan de forma permanente. |
+| Withhold Status | X se reserva el derecho de restringir de forma reactiva el acceso a cierto contenido en un país específico de vez en cuando. Solo X puede levantar la retención de un estado retenido.   <br />Para obtener más información, consulta [Country Withheld Content](https://support.x.com/articles/20169222-country-withheld-content). |
 
 <div id="keeping-track-of-user-and-status-changes">
-  #### Seguimiento de cambios en Usuarios y Estados
+  #### Seguimiento de cambios en User y Status
 </div>
 
-El estado de un Usuario o de un Estado puede cambiar en cualquier momento debido a una de las acciones anteriores, y esto afecta la forma en que se espera que los consumidores de datos de X gestionen la disponibilidad y la privacidad de todo el contenido asociado. Cuando ocurren estas acciones, se envía un mensaje de cumplimiento normativo correspondiente que indica que el estado de un Usuario o de un Estado ha cambiado.
+El estado de un User o de un Status puede cambiar en cualquier momento debido a una de las acciones anteriores, y esto afecta la forma en que se espera que los consumidores de datos de X gestionen la disponibilidad y la privacidad de todo el contenido asociado. Cuando se producen estas acciones, se envía un mensaje de cumplimiento correspondiente que indica que el estado de un User o de un Status ha cambiado.
 
 <div id="api-reference">
   ## Referencia de la API
@@ -390,62 +390,62 @@ El estado de un Usuario o de un Estado puede cambiar en cualquier momento debido
 
 | Método | Descripción |
 | :--- | :--- |
-| [GET /compliance/:stream](#Connect) | Conectar al flujo de datos |
+| [GET /compliance/:stream](#Connect) | Conecta con el flujo de datos |
 
 <div id="authentication">
   #### Autenticación
 </div>
 
-Todas las solicitudes a la API de Compliance Firehose deben usar autenticación básica HTTP, construida a partir de una combinación válida de dirección de correo electrónico y contraseña utilizada para iniciar sesión en tu cuenta en console.gnip.com. Las credenciales deben incluirse en el encabezado Authorization en cada solicitud.
+Todas las solicitudes a la API de Compliance Firehose deben usar autenticación HTTP básica, generada a partir de una combinación válida de dirección de correo electrónico y contraseña que utilices para iniciar sesión en tu cuenta en console.gnip.com. Las credenciales deben incluirse en el encabezado Authorization en cada solicitud.
 
 <div id="get-compliancestream">
   #### GET /compliance/:stream
 </div>
 
-Establece una conexión persistente con el flujo de datos firehose de Compliance, a través del cual se entregarán los eventos de Compliance.
+Establece una conexión persistente con el flujo de datos Compliance firehose, a través del cual se entregarán los eventos de cumplimiento.
 
-|                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Request Method**          | HTTP GET                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| **Connection Type**         | Keep-Alive                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| **URL**                     | Se encuentra en la página de ayuda de la API del flujo en tu panel y tiene una estructura similar a la siguiente:  <br />  <br /><br />[https://gnip-stream.x.com/stream/compliance/accounts/:account&#95;name/publishers/twitter/:stream&#95;label.json?partition=1](https://gnip-stream.x.com/stream/compliance/accounts/:account_name/publishers/twitter/:stream_label.json?partition=1)<br /><br />**Nota:** El parámetro &quot;partition&quot; es obligatorio. Deberás conectarte a las 8 particiones, cada una con un 12,5% del volumen total, para consumir el flujo completo. |
-| **Compression**             | Gzip. Para conectarte al flujo usando compresión Gzip, simplemente envía un encabezado Accept-Encoding en la solicitud de conexión. El encabezado debe tener el siguiente aspecto:  <br />  <br />Accept-Encoding: gzip                                                                                                                                                                                                                                                                                                                                                               |
-| **Character Encoding**      | UTF-8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **Response Format**         | JSON. El encabezado de tu solicitud debe especificar el formato JSON para la respuesta.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| **Rate Limit**              | 10 solicitudes cada 60 segundos.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **Read Timeout**            | Configura un tiempo de espera de lectura en tu cliente y asegúrate de que esté establecido en un valor superior a 30 segundos.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **Support for Tweet edits** | Todas las ediciones de Publicaciones desencadenan un evento de Compliance de tipo &quot;tweet&#95;edit&quot;. Consulta la documentación de [Compliance Data Objects](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) para obtener más detalles.                                                                                                                                                                                                                                                                                                            |
+|                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Request Method**          | HTTP GET                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Connection Type**         | Keep-Alive                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **URL**                     | Se encuentra en la página de ayuda de la API del flujo en tu panel y se asemeja a la siguiente estructura:  <br />  <br /><br />[https://gnip-stream.x.com/stream/compliance/accounts/:account&#95;name/publishers/twitter/:stream&#95;label.json?partition=1](https://gnip-stream.x.com/stream/compliance/accounts/:account_name/publishers/twitter/:stream_label.json?partition=1)<br /><br />**Nota:** El parámetro &quot;partition&quot; es obligatorio. Deberás conectarte a las 8 particiones, cada una con el 12.5% del volumen total, para consumir el flujo completo. |
+| **Compression**             | Gzip. Para conectarte al flujo usando compresión Gzip, simplemente envía un encabezado Accept-Encoding en la solicitud de conexión. El encabezado debe tener el siguiente formato:  <br />  <br />Accept-Encoding: gzip                                                                                                                                                                                                                                                                                                                                                        |
+| **Character Encoding**      | UTF-8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Response Format**         | JSON. El encabezado de tu solicitud debe especificar el formato JSON para la respuesta.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Rate Limit**              | 10 solicitudes cada 60 segundos.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Read Timeout**            | Configura un tiempo de espera de lectura en tu cliente y asegúrate de que esté establecido en un valor superior a 30 segundos.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Support for Tweet edits** | Todas las ediciones de Publicaciones generan un evento de cumplimiento &quot;tweet&#95;edit&quot;. Consulta la documentación de [Compliance Data Objects](/es/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) para más detalles.                                                                                                                                                                                                                                                                                                                        |
 
-**Example Curl Request**
+**Ejemplo de solicitud cURL**
 
-La siguiente solicitud de ejemplo se realiza mediante cURL en la línea de comandos:
+La siguiente solicitud de ejemplo se realiza usando cURL en la línea de comandos:
 
 ```bash
 curl --compressed -v -uexample@customer.com "https://gnip-stream.x.com/stream/compliance/accounts/:account_name/publishers/twitter/:stream_label.json?partition=1"
 ```
 
-*Nota:* la solicitud anterior solo se conecta a `partition=1` del Compliance Firehose; deberás conectarte a las 8 particiones para consumir por completo este stream.
+*Nota:* la solicitud anterior solo se conecta a `partition=1` del Compliance firehose; deberás conectarte a las 8 particiones para consumir por completo este stream.
 
 <div id="response-codes">
   #### Códigos de respuesta
 </div>
 
-Las siguientes respuestas pueden ser devueltas por la API para estas solicitudes. La mayoría de los códigos de error se devuelven con una cadena de texto con detalles adicionales en el cuerpo. Para respuestas distintas de 200, los clientes deben intentar reconectarse.
+Las siguientes respuestas puede devolverlas la API para estas solicitudes. La mayoría de los códigos de error se devuelven con una cadena de texto con detalles adicionales en el cuerpo de la respuesta. Para respuestas distintas de 200, los clientes deben intentar volver a conectarse.
 
 | Status | Text | Definition |
 | :--- | :--- | :--- |
-| 200 | Success | La conexión se abrió correctamente y se enviarán nuevas actividades a medida que vayan llegando. |
-| 401 | Unauthorized | La autenticación HTTP falló debido a credenciales no válidos. Inicia sesión en console.gnip.com con tus credenciales para asegurarte de que las estés usando correctamente en tu solicitud. |
-| 406 | Not Acceptable | Generalmente, esto ocurre cuando tu cliente no incluye correctamente los encabezados para aceptar la codificación gzip desde el flujo, pero también puede ocurrir en otras circunstancias. Contendrá un mensaje JSON similar a: &quot;Esta conexión requiere compresión. Para habilitar la compresión, envía un encabezado &#39;Accept-Encoding: gzip&#39; en tu solicitud y prepárate para descomprimir el flujo a medida que se lea en el lado del cliente.&quot; |
-| 429 | Rate Limited | Tu aplicación ha excedido el límite de solicitudes de conexión. |
-| 503 | Service Unavailable | Problema del servidor de Twitter. Vuelve a conectarte usando un patrón de retroceso exponencial. Si no se ha publicado ningún aviso sobre este problema en la [X API Status Page](https://api.twitterstat.us/), ponte en contacto con el equipo de soporte. |
+| 200 | Success | La conexión se abrió correctamente y las nuevas actividades se enviarán a medida que vayan llegando. |
+| 401 | Unauthorized | La autenticación HTTP falló debido a credenciales no válidas. Inicia sesión en console.gnip.com con tus credenciales para asegurarte de que las estás usando correctamente en tu solicitud. |
+| 406 | Not Acceptable | Generalmente, esto ocurre cuando tu cliente no incluye correctamente los encabezados para aceptar la codificación gzip desde el flujo, pero también puede ocurrir en otras circunstancias. Contendrá un mensaje JSON similar a: &quot;Esta conexión requiere compresión. Para habilitar la compresión, envía un encabezado &#39;Accept-Encoding: gzip&#39; en tu solicitud y asegúrate de poder descomprimir el flujo a medida que se lea en el lado del cliente.&quot; |
+| 429 | Rate Limited | Tu aplicación ha superado el límite de solicitudes de conexión. |
+| 503 | Service Unavailable | Problema del servidor de Twitter. Vuelve a conectarte utilizando un patrón de backoff exponencial. Si no se ha publicado ningún aviso sobre este problema en la [X API Status Page](https://api.twitterstat.us/), contacta con el equipo de soporte. |
 
 <div id="other-recommendations-best-practices">
   #### Otras recomendaciones y mejores prácticas
 </div>
 
-* **Cree esquemas de almacenamiento de datos que guarden el ID numérico de la Publicación y el ID de usuario**: Los mensajes de usuario requieren que se tomen medidas sobre todas las Publicaciones de ese usuario. Por lo tanto, dado que todos los mensajes de cumplimiento se entregan únicamente por ID numérico, es importante diseñar esquemas de almacenamiento que mantengan la relación entre la Publicación y el usuario basándose en IDs numéricos. Los consumidores de datos deberán supervisar los eventos de cumplimiento tanto por el ID de la Publicación como por el ID de usuario y poder actualizar el almacén de datos local de forma adecuada.
+* **Cree esquemas de almacenamiento de datos que almacenen el ID numérico de la Publicación y el ID de usuario**: Los mensajes de usuario requieren que se tomen medidas con respecto a todas las Publicaciones de ese usuario. Por lo tanto, dado que todos los mensajes de cumplimiento se entregan únicamente por ID numérico, es importante diseñar esquemas de almacenamiento que mantengan la relación entre la Publicación y el usuario a partir de ID numéricos. Los consumidores de datos deberán supervisar los eventos de cumplimiento tanto por ID de Publicación como por ID de usuario y poder actualizar adecuadamente el almacén de datos local.
 
-* **Cree esquemas que contemplen todos los estados de cumplimiento**: Dependiendo de cómo se gestionen las actividades de cumplimiento en distintas aplicaciones, puede ser necesario añadir otros metadatos al almacén de datos. Por ejemplo, los consumidores de datos pueden decidir añadir metadatos a una base de datos existente para facilitar la restricción de la visualización del contenido en los países afectados por un mensaje `status_withheld`.
+* **Cree esquemas que aborden todos los estados de cumplimiento**: Dependiendo de cómo se gestionen las actividades de cumplimiento en varias aplicaciones, puede ser necesario agregar otros metadatos al almacén de datos. Por ejemplo, los consumidores de datos pueden decidir agregar metadatos a una base de datos existente para facilitar la restricción de la visualización de contenido en países afectados por un mensaje `status_withheld`.
 
-* **Gestión de eliminaciones de Retuit**: Los Retuits son un tipo especial de Publicación en el que el mensaje original está anidado en un objeto dentro del Retuit. En este caso, hay dos IDs de Publicación referenciados en un Retuit: el ID del Retuit y el ID del mensaje original (incluido en el objeto anidado). Cuando se elimina un mensaje original, se emite un mensaje de eliminación de Publicación para el ID original. No se emiten mensajes de eliminación adicionales para cada uno de los Retuits. La eliminación del ID original debería ser suficiente para eliminar todos los Retuits posteriores.
+* **Gestión de la eliminación de Retweets**: Los Retweets son un tipo especial de Publicación en la que el mensaje original está anidado en un objeto dentro del Retweet. En este caso, se hace referencia a dos ID de Publicación en un Retweet: el ID del Retweet y el ID del mensaje original (incluido en el objeto anidado). Cuando se elimina un mensaje original, se emite un mensaje de eliminación de Publicación para el ID original. Los mensajes de eliminación posteriores NO se emiten para todos los Retweets. La eliminación del ID original debería bastar para eliminar todos los Retweets posteriores.

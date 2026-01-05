@@ -1,15 +1,15 @@
 ---
 title: タイムゾーン
-keywords: ["タイムゾーン", "時間帯", "タイムゾーンの処理", "タイムゾーン形式", "タイムゾーンの変換", "タイムゾーン設定"]
+keywords: ["タイムゾーン", "タイム ゾーン", "タイムゾーン処理", "タイムゾーン形式", "タイムゾーン変換", "タイムゾーン設定"]
 ---
 
 <div id="timezones-accounts-and-billing">
   ## タイムゾーン、アカウント、請求
 </div>
 
-Datetime の値は常に UTC（協定世界時）で返されます（datetime 値の末尾に付く `Z` がそれを示します）。Datetime は、`POST` または `PUT` コマンド内で任意のタイムゾーンを指定して、タイムゾーン付きの ISO 8601 標準形式で指定できます。時刻は [ISO 8601](http://en.wikipedia.org/wiki/ISO_8601) のサブセットを使用して表されます。より具体的には、この日付形式に対応する `strptime` 文字列は `%Y-%m-%dT%l:%M:%S%z` です。請求に用いられる公式な数値が確定する実際の時刻は、広告主アカウントのタイムゾーンによって決定されます。
+Datetime の値は常に UTC（日時値の末尾に付く Z で示されています）で返されます。Datetime は、POST または PUT コマンド内で、タイムゾーン用の ISO 8601 標準形式を使用して任意のタイムゾーンで指定できます。時刻は [ISO-8601](http://en.wikipedia.org/wiki/ISO_8601) のサブセットを用いて表現されます。より具体的には、当社の日付形式に対応する strptime 文字列は `%Y-%m-%dT%l:%M:%S%z` です。広告主アカウントのタイムゾーンによって、請求に用いられる公式な数値が確定する実際の時刻が決まります。
 
-アカウントレベルで API に対して問い合わせを行うとき（[GET accounts](/ja/x-ads-api/campaign-management#accounts)）、次のようなタイムゾーン情報が取得されます。
+アカウントレベルで API をクエリする際（[GET accounts](/ja/x-ads-api/campaign-management#accounts)）には、次のようなタイムゾーン情報が取得されます。
 
 ```json
     {
@@ -34,24 +34,24 @@ Datetime の値は常に UTC（協定世界時）で返されます（datetime �
     }
 ```
 
-ここには次の 2 つのタイムゾーン値が含まれます。`timezone`（概要については [Wikipedia の timezones](https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones) を参照）と `timezone_switch_at` です。`timezone_switch_at` は UTC タイムゾーン（+00:00）で指定されますが、指定されたタイムゾーンにおける午前 0 時を常に表します。
+これには 2つのタイムゾーン値が含まれます。`timezone`（概要については [Wikipedia のタイムゾーン](https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones) を参照）と `timezone_switch_at` です。`timezone_switch_at` は UTC タイムゾーン（+00:00）で指定されますが、常に指定されたタイムゾーンでの深夜 0 時を表します。
 
-広告主のタイムゾーンは API を通じて変更することはできません。この属性は、X の広告主担当アカウントマネージャーによって、契約／課金レベルで設定されます。
+広告主のタイムゾーンは API から変更することはできません。この属性は、X における広告主のアカウントマネージャーによって、契約・請求レベルで設定されます。
 
-アカウントが America/Los&#95;Angeles タイムゾーンから新しいローカルタイムゾーンに切り替わる当日には空白期間が発生するため、レポートの作成やアナリティクス用エンドポイントへのクエリ時には、`timezone_switch_at` の値に注意してください。
+アカウントが America/Los&#95;Angeles タイムゾーンから新しいローカル値に切り替わる当日には空白期間が発生するため、レポートの作成や分析エンドポイントへのクエリを行う際には `timezone_switch_at` の値に注意してください。
 
 <div id="specifying-datetime-values-with-timezone">
-  ### タイムゾーン付きの日時値の指定
+  ### タイムゾーンを指定した日時値の指定方法
 </div>
 
-日時値は常に UTC 時刻（日時値の末尾の `Z` によって示されます）で返されます。日時は、POST または PUT コマンド内で任意のタイムゾーンを用い、タイムゾーンを含む [ISO 8601 standard](http://en.wikipedia.org/wiki/ISO_8601) 形式で指定できます。たとえば、`2017-07-10T08:00:00-0800` は有効な入力値であり、自動的に UTC における値 `2017-07-10T16:00:00Z` に変換されます。
+日時値は常に UTC 時刻（日時値の末尾の `Z` で示されます）で返されます。`POST` または `PUT` コマンドでは、タイムゾーンを表す [ISO 8601 standard](http://en.wikipedia.org/wiki/ISO_8601) 形式を使用することで、任意のタイムゾーンで日時を指定できます。たとえば、`2017-07-10T08:00:00-0800` は有効な入力値であり、自動的に UTC の値 `2017-07-10T16:00:00Z` に変換されます。
 
-`granularity` を `DAY` または `TOTAL` にして analytics エンドポイントを使用する場合、`start_time` の値は、アカウント保有者のローカルタイムゾーンにおける対象日の午前 0 時で指定する必要があります。使用されるタイムゾーンオフセットは、その対象日ではなく「現在の日」のオフセットになります。たとえば、America/Los&#95;Angeles の広告アカウントが Pacific Daylight Time の期間にある場合、UTC オフセットは -0700 です。したがって、analytics リクエストでは、時刻は `start_time=2017-05-21T07:00:00Z` または `start_time=2017-05-21T00:00:00-0700` のように指定する必要があります。広告アカウントが、常にオフセットが +09:00 である Asia/Tokyo にある場合、値は `start_time=2017-05-20T15:00:00Z` または `start_time=2017-05-21T00:00:00+0900` のように指定されます。
+`granularity` が `DAY` または `TOTAL` の analytics エンドポイントを使用する場合、`start_time` の値は、アカウント保有者のローカルタイムゾーンにおける対象日の午前 0 時を指定する必要があります。使用されるタイムゾーンオフセットは、対象日ではなく、現在の日付のオフセットになります。たとえば、America/Los&#95;Angeles にある広告アカウントが Pacific Daylight Savings time（太平洋夏時間）の期間中であれば、UTC オフセットは -0700 です。したがって、analytics リクエストでは、時刻は `start_time=2017-05-21T07:00:00Z` または `start_time=2017-05-21T00:00:00-0700` のように指定する必要があります。広告アカウントが Asia/Tokyo にあり、オフセットが常に +09:00 の場合、値は `start_time=2017-05-20T15:00:00Z` または `start_time=2017-05-21T00:00:00+0900` のように指定します。
 
 <div id="accepted-utc-offset-formats">
-  ### 許容される UTC オフセット形式
+  ### 使用可能な UTC オフセット形式
 </div>
 
-[ISO 8601 のタイムゾーン指定子](http://en.wikipedia.org/wiki/ISO_8601#Time_zone_designators)を参照してください。
+[ISO 8601 のタイムゾーン指定子](http://en.wikipedia.org/wiki/ISO_8601#Time_zone_designators) を参照してください。
 
 サポートされている形式: `Z`, `-HHMM`, `+HHMM`, `-HH:MM`, `+HH:MM`, `-HH`, `+HH`

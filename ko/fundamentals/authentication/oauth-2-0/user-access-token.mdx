@@ -1,28 +1,28 @@
 ---
-title: PKCE를 사용하는 OAuth 2.0 Authorization Code 플로우로 엔드포인트에 연결하는 방법
+title: PKCE를 사용하는 OAuth 2.0 Authorization Code Flow로 엔드포인트에 연결하는 방법
 sidebarTitle: OAuth 2.0 사용자 대신 요청 보내기
 keywords: ["OAuth 2.0 사용자 액세스 토큰", "사용자 액세스 토큰", "OAuth 2.0 사용자 컨텍스트", "사용자 인증", "OAuth 2.0 사용자", "액세스 토큰"]
 ---
 
 <div id="how-to-connect-to-endpoints-using-oauth-20-authorization-code-flow-with-pkce">
-  ### OAuth 2.0 Authorization Code Flow(PKCE 사용)로 엔드포인트에 연결하는 방법
+  ### PKCE를 사용하는 OAuth 2.0 Authorization Code 플로우를 통해 엔드포인트에 연결하는 방법
 </div>
 
 <div id="how-to-connect-to-the-endpoints">
   #### 엔드포인트에 연결하는 방법
 </div>
 
-사용자를 인증하려면 앱에서 인가 플로우를 구현해야 합니다. 이 인가 플로우를 사용하면 사용자를 X의 인가 대화 상자로 이동시킬 수 있습니다. 그러면 기본 X 환경에서 인가 대화 상자를 표시하고, 앱을 대신해 인가를 처리합니다. 사용자는 앱을 승인하거나 권한을 거부할 수 있습니다. 사용자가 선택을 완료하면 X는 사용자를 앱으로 리디렉션하며, 여기서 (사용자가 앱을 승인한 경우) 인가 코드를 액세스 토큰으로 교환하거나, (사용자가 앱을 승인하지 않은 경우) 거부 상황을 처리할 수 있습니다.
+사용자를 인증하려면 앱에 인가 플로우를 구현해야 합니다. 이 인가 플로우를 통해 사용자를 X의 인가 화면으로 보낼 수 있습니다. 그러면 기본 X 사용 환경에서 이 인가 화면을 표시하고, 앱을 대신해 인가를 처리합니다. 사용자는 앱을 승인하거나 권한 부여를 거부할 수 있습니다. 사용자가 선택을 마치면 X가 사용자를 앱으로 리디렉션하며, 여기에서 (사용자가 앱을 승인한 경우) 인가 코드를 액세스 토큰으로 교환하거나, (사용자가 앱을 승인하지 않은 경우) 거부 결과를 처리할 수 있습니다.
 
 <div id="working-with-confidential-clients">
   #### 기밀 클라이언트 사용하기
 </div>
 
-기밀 클라이언트를 사용하는 경우, 토큰 엔드포인트에 요청을 보낼 때 base64 인코딩을 사용해 Authorization 헤더를 생성하기 위해 [basic authentication](https://datatracker.ietf.org/doc/html/rfc2617#section-2) 스킴을 사용해야 합니다.
+기밀 클라이언트로 작업하는 경우, 토큰 엔드포인트에 요청을 보낼 때 [기본 인증](https://datatracker.ietf.org/doc/html/rfc2617#section-2) 방식을 사용하고, Base64 인코딩을 통해 인증 헤더를 생성해야 합니다.
 
-`userid`와 `password`는 자격 증명에서 base64로 인코딩된 문자열 내에서 콜론 문자 하나(&quot;:&quot;)로 구분됩니다.
+자격 증명 문자열에서 `userid`와 `password`는 Base64로 인코딩된 문자열 안에서 콜론 문자 하나(`":"`)로 구분됩니다.
 
-예를 들면 다음과 같습니다:
+예시는 다음과 같습니다:
 
 `-header 'Authorization: Basic V1ROclFTMTRiVWhwTWw4M2FVNWFkVGQyTldNNk1UcGphUTotUm9LeDN4NThKQThTbTlKSXQyZm1BanEzcTVHWC1icVozdmpKeFNlR3NkbUd0WEViUA=='`
 
@@ -30,25 +30,25 @@ keywords: ["OAuth 2.0 사용자 액세스 토큰", "사용자 액세스 토큰",
 
 `Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`
 
-Basic 인증 헤더를 생성하려면, App의 [developer portal](https://developer.x.com/en/portal/dashboard) 내 “Keys and Tokens” 페이지에서 가져올 수 있는 Client ID와 Client Secret에 base64 인코딩을 적용해야 합니다.
+기본 인증 헤더를 생성하려면 앱의 Client ID와 Client Secret에 대해 Base64 인코딩을 수행해야 하며, 이 값들은 [developer portal](https://developer.x.com/en/portal/dashboard)의 앱 &quot;Keys and Tokens&quot; 페이지에서 확인할 수 있습니다.
 
 <div id="steps-to-connect-using-oauth-20">
   #### OAuth 2.0를 사용하여 연결하는 단계
 </div>
 
-**1단계: Authorize URL 구성**
+**1단계: Authorize URL 구성하기**
 
-앱은 앱이 승인받아야 하는 scope를 지정하여 X에 대한 authorize URL을 생성해야 합니다. 예를 들어, 앱이 트윗과 사용자 조회, 팔로우 관리를 해야 한다면 다음 scope를 요청해야 합니다:
+앱은 앱이 승인받아야 하는 scope를 나타내는 authorize URL을 X에 대한 URL로 구성해야 합니다. 예를 들어, 앱이 트윗과 사용자 정보를 조회하고 팔로우를 관리해야 한다면, 다음과 같은 scope를 요청해야 합니다:
 
 `tweet.read%20users.read%20follows.read%20follows.write`
 
-이 URL에는 다른 필수 매개변수 외에도 `code_challenge` 및 state 매개변수가 포함되어야 합니다. 프로덕션 환경에서는 `code_challenge`에 임의의 문자열을 사용해야 합니다.
+해당 URL에는 다른 필수 파라미터와 함께 `code_challenge` 및 state 파라미터도 포함되어야 합니다. 프로덕션 환경에서는 `code_challenge`에 임의의 문자열을 사용해야 합니다.
 
 **2단계: GET oauth2/authorize**
 
-사용자가 인증을 수행해 애플리케이션에 authorization code를 보내도록 합니다. 앱에 대해 OAuth 2.0을 활성화했다면 앱의 “Keys and Tokens” 페이지에서 Client ID를 확인할 수 있습니다.
+사용자가 인증을 거쳐 애플리케이션으로 authorization code를 보내도록 합니다. 앱에 대해 OAuth 2.0을 활성화한 경우, 앱의 “Keys and Tokens” 페이지에서 Client ID를 확인할 수 있습니다.
 
-사용자를 리다이렉트할 예시 URL은 다음과 같습니다:
+사용자를 리디렉트할 예시 URL은 다음과 같습니다:
 
 ```
 https://x.com/i/oauth2/authorize?response_type=code&client_id=M1M5R3BMVy13QmpScXkzTUt5OE46MTpjaQ&redirect_uri=https://www.example.com&scope=tweet.read%20users.read%20follows.read%20follows.write&state=state&code_challenge=challenge&code_challenge_method=plain
@@ -60,9 +60,9 @@ offline&#95;access가 포함된 URL의 예시는 다음과 같습니다:
 https://x.com/i/oauth2/authorize?response_type=code&client_id=M1M5R3BMVy13QmpScXkzTUt5OE46MTpjaQ&redirect_uri=https://www.example.com&scope=tweet.read%20users.read%20follows.read%20offline.access&state=state&code_challenge=challenge&code_challenge_method=plain
 ```
 
-인증이 성공적으로 완료되면, `redirect_uri`로 리디렉트될 때 `auth_code` 파라미터가 포함된 요청을 받게 됩니다. 이때 애플리케이션은 `state` 파라미터를 검증해야 합니다.
+인증에 성공하면 `redirect_uri`로 `auth_code` 매개변수가 포함된 요청을 받게 됩니다. 이때 애플리케이션은 `state` 매개변수를 검증해야 합니다.
 
-클라이언트 리디렉트에서 들어오는 예시 요청은 다음과 같습니다:
+클라이언트 리디렉션에서 전송되는 예시 요청은 다음과 같습니다.
 
 ```
 https://www.example.com/?state=state&code=VGNibzFWSWREZm01bjN1N3dicWlNUG1oa2xRRVNNdmVHelJGY2hPWGxNd2dxOjE2MjIxNjA4MjU4MjU6MToxOmFjOjE
@@ -70,15 +70,15 @@ https://www.example.com/?state=state&code=VGNibzFWSWREZm01bjN1N3dicWlNUG1oa2xRRV
 
 **3단계: POST oauth2/token - 액세스 토큰**
 
-이제 발급받은 authorization code를 사용해 액세스 토큰과 리프레시 토큰을 생성할 수 있습니다(단, `offline.access` 스코프를 요청한 경우에만). 다음 엔드포인트로 POST 요청을 보낼 수 있습니다:
+이제 인가 코드를 사용하여 액세스 토큰과 리프레시 토큰을 발급할 수 있습니다 (`offline.access` 스코프를 요청한 경우에만 해당). 다음 엔드포인트에 POST 요청을 보낼 수 있습니다:
 
 ```
 https://api.x.com/2/oauth2/token
 ```
 
-헤더에서 `Content-Type`을 `application/x-www-form-urlencoded`로 지정해야 합니다. 추가로, 요청에 `code`, `grant_type`, `client_id`, `redirect_uri`, 그리고 `code_verifier`를 포함해야 합니다.
+헤더를 통해 `Content-Type`을 `application/x-www-form-urlencoded`로 전달해야 합니다. 또한 요청에는 `code`, `grant_type`, `client_id`, `redirect_uri`, 그리고 `code_verifier`를 포함해야 합니다.
 
-다음은 퍼블릭 클라이언트를 위한 토큰 요청 예시입니다:
+다음은 퍼블릭 클라이언트에 대한 토큰 요청 예시입니다:
 
 ```json
 curl --location --request POST 'https://api.x.com/2/oauth2/token' \
@@ -90,7 +90,7 @@ curl --location --request POST 'https://api.x.com/2/oauth2/token' \
 --data-urlencode 'code_verifier=challenge'
 ```
 
-다음은 기밀 클라이언트(confidential client)를 사용하는 예제입니다:
+다음은 Confidential Client를 사용하는 예시입니다:
 
 ```json
 curl --location --request POST 'https://api.x.com/2/oauth2/token' \
@@ -104,9 +104,9 @@ curl --location --request POST 'https://api.x.com/2/oauth2/token' \
 
 **4단계: API에 연결하기**
 
-이제 OAuth 2.0을 사용해 엔드포인트에 연결할 준비가 되었습니다. 이를 위해 [Bearer Token 인증](/ko/resources/fundamentals/authentication/oauth-2-0/application-only)을 사용할 때와 동일한 방식으로 API를 요청하면 됩니다. 다만 Bearer Token을 전달하는 대신, 직전 단계에서 생성한 액세스 토큰을 사용해야 합니다. 응답으로는 요청한 엔드포인트에 해당하는 적절한 페이로드가 반환되어야 합니다. 이 요청은 공용 클라이언트와 기밀 클라이언트 모두에서 동일하게 사용됩니다. 
+이제 OAuth 2.0을 사용하여 엔드포인트에 연결할 준비가 되었습니다. 이를 위해 [Bearer Token 인증](/ko/resources/fundamentals/authentication/oauth-2-0/application-only)을 사용할 때와 동일한 방식으로 API에 요청하면 됩니다. 다만 Bearer Token을 보내는 대신, 이전 단계에서 생성한 액세스 토큰을 사용해야 합니다. 응답으로는 요청한 엔드포인트에 해당하는 적절한 페이로드를 확인할 수 있어야 합니다. 이 요청은 공개 클라이언트와 기밀 클라이언트 모두에서 동일합니다. 
 
-아래는 수행하게 될 요청의 예시입니다:
+요청 예시는 다음과 같습니다.
 
 ```json
 curl --location --request GET 'https://api.x.com/2/tweets?ids=1261326399320715264,1278347468690915330' \
@@ -115,9 +115,9 @@ curl --location --request GET 'https://api.x.com/2/tweets?ids=126132639932071526
 
 **5단계: POST oauth2/token - refresh token**
 
-refresh token을 사용하면 애플리케이션이 사용자의 재인증 없이 새로운 액세스 토큰을 얻을 수 있습니다. 다음 엔드포인트에 POST 요청을 보내서 refresh token을 생성할 수 있습니다: [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token) `Content-Type` 헤더에 `application/x-www-form-urlencoded`를 설정해야 합니다. 또한 `refresh_token`을 전달하고, `grant_type`을 `refresh_token`으로 설정하며, `client_id`를 지정해야 합니다.
+refresh token은 애플리케이션이 사용자에게 다시 인증을 요구하지 않고도 새로운 액세스 토큰을 얻을 수 있게 해줍니다. 다음 엔드포인트에 POST 요청을 보내서 refresh token을 생성할 수 있습니다: [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token) 이때 헤더에 `Content-Type`으로 `application/x-www-form-urlencoded`를 추가해야 합니다. 추가로, `refresh_token`을 전달하고, `grant_type`을 `refresh_token`으로 설정하며, `client_id`를 지정해야 합니다.
 
-이 요청은 public client에 대해 사용할 수 있습니다:
+이 요청은 public 클라이언트에서 사용할 수 있습니다:
 
 ```json
 POST 'https://api.x.com/2/oauth2/token' \
@@ -137,17 +137,17 @@ POST 'https://api.x.com/2/oauth2/token' \
 --data-urlencode 'grant_type=refresh_token'
 ```
 
-**6단계: POST oauth2/revoke - 토큰 취소**
+**6단계: POST oauth2/revoke - 토큰 폐기**
 
-토큰 취소(revoke token)는 액세스 토큰이나 리프레시 토큰을 더 이상 유효하지 않게 만듭니다. 이는 클라이언트에서 &quot;로그아웃&quot; 기능을 구현하는 데 사용되며, 더 이상 필요하지 않은 인가 플로우와 관련된 보안 자격 증명을 정리할 수 있도록 해 줍니다. 토큰 취소는 사용자가 아니라 앱이 토큰을 취소하기 위한 것입니다. 앱이 자신에게 부여된 액세스를 프로그래밍 방식으로 취소하려는 경우, 다음 URL로 POST 요청을 보내 토큰 취소 요청을 생성할 수 있습니다:
+revoke 토큰은 액세스 토큰 또는 리프레시 토큰을 무효화합니다. 이는 클라이언트에서 “로그아웃” 기능을 구현하는 데 사용되며, 더 이상 필요하지 않을 수 있는 인가 플로와 관련 보안 자격 증명을 정리할 수 있게 해 줍니다. revoke 토큰은 사용자가 아니라 앱이 토큰을 취소(revoke)하기 위한 것입니다. 앱이 자신에게 부여된 액세스를 프로그래밍 방식으로 취소하려는 경우, 다음 URL로 POST 요청을 보내 revoke 토큰 요청을 생성할 수 있습니다:
 
 ```
 https://api.x.com/2/oauth2/revoke
 ```
 
-헤더의 `Content-Type`을 `application/x-www-form-urlencoded`로 설정하고, 토큰과 `client_id`를 함께 전달해야 합니다.
+요청 헤더에 `Content-Type`을 `application/x-www-form-urlencoded`로 설정하고, 토큰과 `client_id`를 함께 전달해야 합니다.
 
-일부 경우에는 사용자가 앱에 부여한 액세스 권한을 취소하고 싶을 수 있으며, 이때는 [연결된 앱 페이지](https://x.com/settings/connected_apps)를 방문하여 액세스 권한을 취소할 수 있습니다.
+경우에 따라 사용자가 앱에 부여한 접근 권한을 취소하고자 할 수 있습니다. 이때 [연결된 앱 페이지](https://x.com/settings/connected_apps)에 방문하여 해당 앱의 접근 권한을 철회할 수 있습니다.
 
 ```bash
 curl --location --request POST 'https://api.x.com/2/oauth2/revoke' \
@@ -156,7 +156,7 @@ curl --location --request POST 'https://api.x.com/2/oauth2/revoke' \
 --data-urlencode 'client_id=rG9n6402A3dbUJKzXTNX4oWHJ'
 ```
 
-이 요청은 기밀 클라이언트(confidential client)에 대해 동작합니다:
+이 요청은 confidential 클라이언트에서 동작합니다:
 
 ```bash
 curl --location --request POST 'https://api.x.com/2/oauth2/revoke' \

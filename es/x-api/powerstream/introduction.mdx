@@ -1,26 +1,26 @@
 ---
 title: Introducción
 sidebarTitle: Introducción
-keywords: ["powerstream", "powerstream API", "real-time streaming", "streaming rules", "filtered stream", "enterprise streaming", "GNIP powerstream"]
+keywords: ["powerstream", "powerstream API", "transmisión en tiempo real", "reglas de transmisión", "flujo filtrado", "transmisión Enterprise", "GNIP powerstream"]
 ---
 
-Powerstream es nuestra API de streaming en tiempo real más rápida para acceder a datos públicos de X. De forma similar a la API heredada GNIP Powetrack, utiliza reglas para filtrar Publicaciones según palabras clave, operadores y metadatos. Una vez que se establece una conexión HTTP persistente con el endpoint de Powerstream, puedes empezar a recibir Publicaciones que coincidan casi en tiempo real.
+Powerstream es nuestra API de streaming en tiempo real más rápida para acceder a datos públicos de X. Al igual que la API heredada GNIP PowerTrack, utiliza reglas para filtrar Publicaciones según palabras clave, operadores y metadatos. Una vez que se establece una conexión HTTP persistente con el endpoint de Powerstream, puedes empezar a recibir Publicaciones coincidentes en tiempo casi real.
 
-Actualmente, Powerstream admite hasta 1.000 reglas y cada regla puede tener hasta 2048 caracteres.
+Actualmente, Powerstream admite hasta 1.000 reglas y cada regla puede tener hasta 2.048 caracteres.
 
 <div id="key-features">
-  ## Funcionalidades principales:
+  ## Funciones clave:
 </div>
 
 * **Entrega de datos en tiempo real**: Obtén datos que coincidan con tus reglas en tiempo casi real.
 * **Filtrado preciso**: Filtra exactamente los datos que estás buscando utilizando consultas booleanas con operadores.
-* **Entrega**: Respuesta JSON mediante transferencia fragmentada (chunked transfer encoding) en HTTP/1.1.
-* **Compatibilidad con centro de datos local**:  Obtén publicaciones solo del centro de datos local para reducir la latencia, evitando el retraso por replicación.
+* **Entrega**: Respuesta JSON mediante codificación de transferencia segmentada HTTP/1.1 (chunked transfer encoding).
+* **Compatibilidad con centro de datos local**: Recupera publicaciones solo del centro de datos local para reducir la latencia evitando el retardo de replicación.
 
 <Note>
-  La API Powerstream es una oferta premium disponible en planes Enterprise seleccionados.
+  La Powerstream API es una oferta premium disponible en determinados planes Enterprise.
 
-  Si estás interesado en acceder a Powerstream o en obtener más información sobre nuestras ofertas Enterprise, ponte en contacto con nuestro equipo de ventas enviando el [Formulario de solicitud de Enterprise](/es/forms/enterprise-api-interest).
+  Si estás interesado en acceder a Powerstream o en obtener más información sobre nuestras soluciones Enterprise, ponte en contacto con nuestro equipo de Ventas enviando el [Formulario de solicitud para Enterprise](/es/forms/enterprise-api-interest).
   Estaremos encantados de analizar cómo Powerstream puede satisfacer tus necesidades.
 </Note>
 
@@ -28,15 +28,15 @@ Actualmente, Powerstream admite hasta 1.000 reglas y cada regla puede tener hast
   ## Autenticación
 </div>
 
-Los endpoints de la API de Powerstream utilizan OAuth 2.0 con Bearer Token. Incluye el token en el encabezado `Authorization: Bearer <token>` y podrás empezar a usar estos endpoints.
+Los endpoints de la API Powerstream utilizan OAuth 2.0 Bearer Token. Inclúyelo en el encabezado `Authorization: Bearer <token>` para empezar a usar estos endpoints.
 
 <div id="quick-start">
   ## Inicio rápido
 </div>
 
-Esta sección muestra cómo comenzar rápidamente con los endpoints de PowerStream usando Python con la biblioteca `requests`. Instálala con `pip install requests`. Todos los ejemplos usan autenticación OAuth 2.0 Bearer Token. Reemplaza `YOUR_BEARER_TOKEN` con tu token real (almacénalo de forma segura, por ejemplo, mediante `os.getenv('BEARER_TOKEN')`).
+Esta sección te muestra cómo empezar rápidamente a usar los endpoints de PowerStream con Python y la biblioteca `requests`. Instálala con `pip install requests`. Todos los ejemplos usan autenticación OAuth 2.0 Bearer Token. Reemplaza `YOUR_BEARER_TOKEN` por tu token real (almacénalo de forma segura, por ejemplo, mediante `os.getenv('BEARER_TOKEN')`).
 
-Cubriremos cada endpoint con fragmentos de código. Supón que tienes estas importaciones al inicio:
+Cubriremos cada endpoint con fragmentos de código. Supón que tienes estas importaciones al principio:
 
 ```python
 import requests
@@ -61,10 +61,10 @@ headers = {
 ```
 
 <div id="1-create-rules-post-rules">
-  ### 1. Crea reglas (POST /rules)
+  ### 1. Crear reglas (POST /rules)
 </div>
 
-Agrega reglas para filtrar tu flujo.
+Añade reglas para filtrar tu flujo.
 
 ```python
 data = {
@@ -91,7 +91,7 @@ else:
   ### 2. Eliminar reglas (POST /rules)
 </div>
 
-Elimina reglas por id (recomendado) o por valor.
+Elimina reglas por ID (recomendado) o por valor.
 
 ```python
 data = {
@@ -114,7 +114,7 @@ else:
    print(f"Error {response.status_code}: {response.text}")
 ```
 
-**Consejo**: Para eliminar todas las reglas, primero recupéralas con GET, extrae sus id y luego elimínalas en lote.
+**Consejo**: Para eliminar todas las reglas, primero obténlas con GET, extrae sus id y luego elimínalas en bloque.
 
 <div id="3-get-rules-get-rules">
   ### 3. Obtener reglas (GET /rules)
@@ -140,7 +140,7 @@ else:
   ### 4. PowerStream (GET /stream)
 </div>
 
-Conéctate al stream para recibir Publicaciones en tiempo real. Usa `stream=True` para leer línea por línea. Implementa lógica de reconexión para mejorar la resiliencia.
+Conéctate al stream para recibir Publicaciones en tiempo real. Usa `stream=True` para leer línea por línea. Implementa lógica de reconexión para mejorar la robustez.
 
 ```python
 stream_url = base_url
@@ -163,10 +163,10 @@ def main():
 ```
 
 <div id="local-datacenter-support">
-  #### Compatibilidad con centro de datos local
+  #### Compatibilidad con centros de datos locales
 </div>
 
-Para optimizar la latencia, Powerstream ofrece una opción para recuperar únicamente las publicaciones que se originaron o se crearon en el centro de datos local donde se establece la conexión. Esto evita la latencia de replicación, lo que da como resultado una entrega más rápida en comparación con las publicaciones de otros centros de datos. Para habilitarlo, agrega el parámetro de consulta `?localDcOnly=true` al endpoint de stream (por ejemplo, `/2/powerstream?localDcOnly=true`). El centro de datos al que estás conectado se indicará tanto en la carga útil de datos inicial del stream como en un encabezado HTTP de la respuesta.
+Para optimizar la latencia, Powerstream ofrece la opción de recuperar únicamente las publicaciones que se originaron o se crearon en el centro de datos local en el que se establece la conexión. Esto evita el retraso de replicación, lo que da como resultado una entrega más rápida en comparación con las publicaciones de otros centros de datos. Para habilitar esta opción, agrega el parámetro de consulta `?localDcOnly=true` al endpoint del stream (por ejemplo, `/2/powerstream?localDcOnly=true`). El centro de datos al que estás conectado se indicará tanto en la carga útil de datos inicial del stream como en un encabezado HTTP en la respuesta.
 
 Para usarlo en código:
 
@@ -175,14 +175,14 @@ Para usarlo en código:
 stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
 ```
 
-Si el parámetro `localDcOnly` está habilitado, cuando el stream se conecte por primera vez, incluirá las siguientes cabeceras de respuesta, que indican qué centro de datos local se está utilizando:
+Si el parámetro `localDcOnly` está activado, cuando el stream se conecte por primera vez, incluirá los siguientes encabezados de respuesta que indican qué centro de datos local se está utilizando:
 
 ```bash
 'x-powerstream-datacenter': 'atla',
 'x-powerstream-localdconly': 'true'
 ```
 
-Además, también enviará un payload inicial que especifica el centro de datos:
+Además, enviará un payload inicial que especifica el centro de datos:
 
 ```bash
 {
@@ -193,25 +193,25 @@ Además, también enviará un payload inicial que especifica el centro de datos:
 ```
 
 <Note>
-  **Consejo:** Para optimizar la latencia, configura conexiones desde distintas ubicaciones geográficas (por ejemplo, una cerca de Atlanta en la Costa Este de EE. UU. y otra cerca de Portland en la Costa Oeste de EE. UU.), habilitando `localDcOnly=true` en cada una de ellas. Esto proporciona acceso más rápido a las Publicaciones de cada centro de datos correspondiente. Agrega los flujos en tu extremo para combinar los datos de distintos centros de datos.
+  **Consejo:** Para optimizar la latencia, configura conexiones desde diferentes ubicaciones geográficas (por ejemplo, una cerca de Atlanta en la costa este de EE. UU. y otra cerca de Portland en la costa oeste de EE. UU.), habilitando `localDcOnly=true` para cada una. Esto proporciona un acceso más rápido a las publicaciones desde cada centro de datos. Agrega los streams en tu extremo para combinar los datos entre centros de datos.
 </Note>
 
 <div id="operators">
   ## Operadores
 </div>
 
-Para definir reglas para el filtrado, puedes usar palabras clave y operadores. Consulta la lista de operadores disponibles a continuación.
+Para establecer reglas de filtrado, puedes usar palabras clave y operadores. Consulta la lista de operadores disponibles a continuación.
 
 <div id="field-based-operators">
-  ### Operadores por campo
+  ### Operadores basados en campos
 </div>
 
 <div id="user-operators">
   #### Operadores de usuario
 </div>
 
-| Operador | Resumen | Ejemplo |
-|----------|---------|---------|
+| Operador | Descripción | Ejemplo |
+|----------|-------------|---------|
 | `from:` | Coincide con publicaciones de un usuario específico | `from:xdevelopers` o `from:123456` |
 | `to:` | Coincide con publicaciones dirigidas a un usuario específico | `to:jvaleski` |
 | `retweets_of:` | Coincide con reposts de un usuario específico | `retweets_of:xdevelopers` |
@@ -220,11 +220,11 @@ Para definir reglas para el filtrado, puedes usar palabras clave y operadores. C
   #### Operadores de contenido
 </div>
 
-| Operador | Resumen | Ejemplo |
+| Operator | Summary | Example |
 |----------|---------|---------|
-| `contains:` | Coincide con publicaciones que contienen texto o palabras clave específicos | `contains:hello` o `contains:-2345.432` |
-| `url_contains:` | Coincide con publicaciones con direcciones URL que contienen texto específico | `url_contains:"com/willplayforfood"` |
-| `lang:` | Coincide con publicaciones en idiomas específicos | `lang:en` |
+| `contains:` | Devuelve publicaciones que contienen texto o palabras clave específicos | `contains:hello` o `contains:-2345.432` |
+| `url_contains:` | Devuelve publicaciones con URL que contienen texto específico | `url_contains:"com/willplayforfood"` |
+| `lang:` | Devuelve publicaciones en idiomas específicos | `lang:en` |
 
 <div id="entity-operators">
   #### Operadores de entidades
@@ -232,27 +232,27 @@ Para definir reglas para el filtrado, puedes usar palabras clave y operadores. C
 
 | Operador | Resumen | Ejemplo |
 |----------|---------|---------|
-| `has:` | Busca publicaciones que contienen entidades específicas (Opciones: mentions, geo, links, media, lang, symbols, images, videos) | `has:images`, `has:geo`, `has:mentions` |
-| `is:` | Busca publicaciones de tipos específicos o con propiedades específicas (Opciones: retweet, reply) | `is:retweet`, `is:reply` |
+| `has:` | Coincide con publicaciones que contienen entidades específicas (opciones: menciones, geo, enlaces, contenido multimedia, idioma, símbolos, imágenes, videos) | `has:images`, `has:geo`, `has:mentions` |
+| `is:` | Coincide con publicaciones de tipos específicos o con propiedades específicas (opciones: retweet, respuesta) | `is:retweet`, `is:reply` |
 
 <div id="location-operators">
   #### Operadores de ubicación
 </div>
 
-| Operador | Resumen | Ejemplo |
+| Operator | Summary | Example |
 |----------|---------|---------|
-| `place:` | Coincide con publicaciones de lugares o ubicaciones específicos | `place:"Belmont Central"`, `place:02763fa2a7611cf3` |
-| `bounding_box:` | Coincide con publicaciones dentro de un recuadro geográfico delimitado | `bounding_box:[-112.424083 42.355283 -112.409111 42.792311]` |
-| `point_radius:` | Coincide con publicaciones dentro de un radio alrededor de un punto | `point_radius:[-111.464973 46.371179 25mi]`, `point_radius:[-111.464973 46.371179 15km]` |
+| `place:` | Coincide con publicaciones procedentes de lugares o ubicaciones específicos | `place:"Belmont Central"`, `place:02763fa2a7611cf3` |
+| `bounding_box:` | Coincide con publicaciones dentro de un cuadro delimitador geográfico | `bounding_box:[-112.424083 42.355283 -112.409111 42.792311]` |
+| `point_radius:` | Coincide con publicaciones dentro de un radio respecto a un punto | `point_radius:[-111.464973 46.371179 25mi]`, `point_radius:[-111.464973 46.371179 15km]` |
 
 <div id="advancedcontent-operators">
   #### Operadores avanzados/de contenido
 </div>
 
-| Operador | Resumen | Ejemplo |
-|----------|---------|---------|
-| `bio:` | Coincide con publicaciones de usuarios cuya biografía contiene contenido específico (usa coincidencia de frases) | N/D |
-| `bio_name:` | Coincide con publicaciones de usuarios que tienen un nombre específico en la biografía (usa coincidencia de frases) | N/D |
+| Operador | Descripción | Ejemplo |
+|----------|-------------|---------|
+| `bio:` | Coincide con publicaciones de usuarios cuya biografía contiene un contenido específico (usa coincidencia de frases) | N/A |
+| `bio_name:` | Coincide con publicaciones de usuarios cuya biografía contiene un nombre específico (usa coincidencia de frases) | N/A |
 
 <div id="additional-operators">
   #### Operadores adicionales
@@ -260,11 +260,11 @@ Para definir reglas para el filtrado, puedes usar palabras clave y operadores. C
 
 | Operador | Resumen | Ejemplo |
 |----------|---------|---------|
-| `retweets_of_status_id:` | Coincide con los reposts de publicaciones específicas | `retweets_of_status_id:1234567890123456789` |
+| `retweets_of_status_id:` | Coincide con las republicaciones de publicaciones específicas | `retweets_of_status_id:1234567890123456789` |
 | `in_reply_to_status_id:` | Coincide con las respuestas a publicaciones específicas | `in_reply_to_status_id:1234567890123456789` |
 
 <div id="non-field-operators">
-  ### Operadores sin campo
+  ### Operadores sin campos
 </div>
 
 <div id="special-syntax-operators">
@@ -274,24 +274,24 @@ Para definir reglas para el filtrado, puedes usar palabras clave y operadores. C
 | Operador | Resumen | Ejemplo |
 |----------|---------|---------|
 | `@` | Operador de mención | `@username` |
-| Phrase matching | Busca coincidencias de frases exactas | `"exact phrase"` |
+| Coincidencia de frases | Coincide con frases exactas | `"exact phrase"` |
 
 <div id="logical-operators">
   #### Operadores lógicos
 </div>
 
-| Operator | Summary | Example |
+| Operador | Resumen | Ejemplo |
 |----------|---------|---------|
 | `OR` | OR lógico entre expresiones | `x OR facebook` |
-| Space/AND | AND lógico entre expresiones | `x facebook` (ambos términos deben estar presentes) |
-| `()` | Agrupación de expresiones complejas | `(x OR facebook) iphone` |
+| Espacio/AND | AND lógico entre expresiones | `x facebook` (ambos términos deben estar presentes) |
+| `()` | Agrupación para expresiones complejas | `(x OR facebook) iphone` |
 | `-` | Negación/exclusión | `x -facebook` (x pero no facebook) |
 
 <div id="responses">
   ## Respuestas
 </div>
 
-La carga útil de la API de Powestream tiene el mismo formato que la API heredada de GNIP Powertrack. Un ejemplo de respuesta JSON es el siguiente:
+La carga útil de la API Powestream tiene el mismo formato que la API GNIP PowerTrack heredada. Un ejemplo de respuesta JSON es el siguiente:
 
 ```json
 [
@@ -390,9 +390,9 @@ La carga útil de la API de Powestream tiene el mismo formato que la API heredad
 ```
 
 <div id="limits-best-practices">
-  ## Límites y buenas prácticas
+  ## Límites y mejores prácticas
 </div>
 
-* Límites de frecuencia: 50 solicitudes cada 24 h para la gestión de reglas; sin límite en los flujos de datos (pero se aplican límites de conexión).
-* Reconexión: Backoff exponencial en caso de desconexión.
-* Supervisión: Utiliza los encabezados `Connection: keep-alive`.
+* Límites de frecuencia: 50 solicitudes/24 h para la gestión de reglas; sin límite en los flujos de streaming (pero se aplican límites de conexión).
+* Reconexión: Reintentos con backoff exponencial tras desconexiones.
+* Monitorización: Utiliza encabezados `Connection: keep-alive`.

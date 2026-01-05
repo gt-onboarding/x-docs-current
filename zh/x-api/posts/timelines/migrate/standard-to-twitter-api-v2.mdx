@@ -1,7 +1,7 @@
 ---
-title: v1 到 v2
-sidebarTitle: v1 到 v2
-keywords: ["从 v1.1 迁移到 v2", "时间线迁移", "时间线迁移操作", "标准时间线迁移到 v2", "v1 到 v2 时间线迁移", "迁移指南"]
+title: 从 v1 迁移到 v2
+sidebarTitle: 从 v1 迁移到 v2
+keywords: ["从 v1.1 迁移到 v2", "时间线迁移", "迁移时间线", "从标准版时间线迁移到 v2", "从 v1 到 v2 的时间线迁移", "迁移指南"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
@@ -10,34 +10,34 @@ import { Button } from '/snippets/zh/button.mdx';
   ## 标准 v1.1 时间线到 X API v2 时间线
 </div>
 
-如果你一直在使用 v1.1 时间线端点（statuses/user&#95;timeline 和 statuses/mentions&#95;timeline），本指南旨在帮助你理解标准 v1.1 时间线端点与 X API v2 时间线端点之间的相似点和差异，从而将当前集成迁移到新版本。
+如果你一直在使用 v1.1 时间线端点（statuses/user&#95;timeline 和 statuses/mentions&#95;timeline），本指南旨在帮助你理解标准时间线端点与 X API v2 时间线端点之间的相似点和差异，从而将你当前的集成迁移到新版本。
 
 * **相似点：**
-  * 身份验证：
-    * OAuth 1.0a 用户上下文（按时间倒序的主页时间线、用户帖子时间线和用户提及时间线）
+  * 认证：
+    * OAuth 1.0a 用户上下文（倒序主页时间线、用户帖子时间线和用户提及时间线）
     * OAuth 2.0 应用仅模式（用户帖子时间线）
-  * 历史访问限制：用户时间线（用户帖子时间线）可访问最近的 3200 条帖子；提及时间线（用户提及时间线）可访问最近的 800 条提及。
+  * 历史访问限制：用户时间线（用户帖子时间线）最多可访问最近 3200 条帖子；提及时间线（用户提及时间线）最多可访问最近 800 条提及。
   * 支持帖子编辑历史和元数据
   * 速率限制（用户帖子时间线）
-  * 刷新轮询：可以从 since&#95;id 之后检索新结果
+  * 刷新轮询：可以通过 since&#95;id 检索新的结果
   * 通过帖子 ID 遍历时间线
   * 结果规范：
     * 结果顺序：结果按时间倒序返回
     * 可以排除回复（仅限用户帖子时间线）
-    * 可以排除转帖（Retweet）（仅限用户帖子时间线）
+    * 可以排除转发（Retweets）（仅限用户帖子时间线）
 * **差异：**
-  * 新的身份验证方式：
+  * 新的认证方式： 
     * OAuth 2.0 应用仅模式（用户提及时间线）
-    * OAuth 2.0 授权码流程（Authorization Code Flow）配合 PKCE（按时间倒序的主页时间线、用户帖子时间线和用户提及时间线）
-  * 访问要求：X API v2 应用和项目要求
-  * 速率限制（用户提及时间线和按时间倒序的主页时间线）
-  * 不同的请求上限与数据量上限
-  * 额外的分页方法
-    * 每个响应中不同的 max&#95;results（计数）
+    * OAuth 2.0 授权码流程（Authorization Code Flow）配合 PKCE（倒序主页时间线、用户帖子时间线和用户提及时间线）
+  * 访问要求：需要满足 X API v2 应用和项目要求
+  * 速率限制（用户提及时间线和倒序主页时间线）
+  * 不同的请求上限和数据量上限
+  * 新增的分页方式
+    * 每个响应支持不同的 max&#95;results（计数）
   * 响应数据格式
   * 请求参数
-    * 基于请求参数的自定义数据格式，包括 v2 字段和扩展字段
-    * 额外可用数据：指标、帖子注释、投票
+    * 可根据请求参数定制的数据格式，包括 v2 字段和扩展字段
+    * 额外可用的数据：指标、帖子注释、投票
 
 <div id="similarities">
   ### 相似之处
@@ -45,46 +45,46 @@ import { Button } from '/snippets/zh/button.mdx';
 
 **认证**
 
-v1.1 的 statuses/user&#95;timeline 和 X API v2 的用户帖子时间线端点都支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 和 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。因此，如果你迁移到 X API v2 版本，可以继续使用相同的身份验证方式和授权令牌。
+v1.1 的 `statuses/user_timeline` 和 X API v2 的用户帖子时间线端点都支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 和 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。因此，如果你迁移到 X API v2 版本，可以继续使用相同的认证方式和授权令牌。
 
 **历史访问**
 
-v1.1 的 statuses/user&#95;timeline 和 X API v2 的用户帖子时间线端点都会返回最近的 3200 条帖子，包括转帖（Retweet）。
+v1.1 的 `statuses/user_timeline` 和 X API v2 的用户帖子时间线端点都会返回最近的 3200 条帖子，包括转帖（Retweets）。
 
-v1.1 的 statuses/mentions&#95;timeline 和 X API v2 的用户提及时间线端点可以返回最近的 800 条帖子。
+v1.1 的 `statuses/mentions_timeline` 和 X API v2 的用户提及时间线端点可以返回最近的 800 条帖子。
 
 **对帖子编辑历史和元数据的支持**
 
-两个版本都提供用于描述任何编辑历史的元数据。更多详情请参阅 [filtered stream API 参考](/zh/x-api/posts/filtered-stream#api-reference-index) 和 [编辑帖子基础知识页面](/zh/x-api/fundamentals/edit-posts)。 
+这两个版本都会提供描述任何编辑历史的元数据。有关更多详细信息，请参阅 [filtered stream API 参考](/zh/x-api/posts/filtered-stream#api-reference-index) 和 [编辑帖子基础知识页面](/zh/x-api/fundamentals/edit-posts)。 
 
 **速率限制**
 
 |     |     |
 | :--- | :--- |
-| **Standard v1.1** | **X API v2** |
+| **标准 v1.1** | **X API v2** |
 | user&#95;timeline：<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟 900 次请求<br /><br />使用 OAuth 2.0 应用仅模式时，每 15 分钟 1500 次请求 | 用户帖子时间线：<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口 900 次请求<br /><br />使用 OAuth 2.0 应用仅模式时，每 15 分钟窗口 1500 次请求 |
 
-**使用 since&#95;id 进行刷新轮询**
+**使用 since&#95;id 的轮询刷新**
 
-两个版本都允许使用 since&#95;id 轮询获取最新结果。
+这两个版本都允许使用 since&#95;id 轮询获取最新结果。
 
-**通过帖子 ID 遍历时间线**
+**按帖子 ID 遍历时间线**
 
-两个端点都可以基于帖子 ID 的构造方式，使用帖子 ID 的“时间戳”遍历时间线。除以下差异外，其功能总体相同： 
+这两个端点都可以基于帖子 ID 的生成方式，使用帖子 ID 的“时间戳”来遍历时间线。除了以下差异之外，功能基本相同： 
 
 |     |     |
 | :--- | :--- |
-| **Standard timelines v1.1** | **timelines v2** |
-| since&#95;id（不包含）<br /><br />max&#95;id（包含） | since&#95;id（不包含）<br /><br />until&#95;id（同样不包含，而 max&#95;id 是包含的） |
+| **标准时间线 v1.1** | **时间线 v2** |
+| since&#95;id（不包含）<br /><br />max&#95;id（包含） | since&#95;id（不包含）<br /><br />until&#95;id（同样为不包含，相对于之前为包含的 max&#95;id） |
 
 **响应过滤参数**
 
 |     |     |
 | :--- | :--- |
-| **Standard timelines v1.1** | **timelines v2** |
+| **标准时间线 v1.1** | **时间线 v2** |
 | 响应过滤参数：<br /><br />* include&#95;rts<br />* exclude&#95;replies | 响应过滤参数：<br /><br />* exclude=retweets,replies |
 | 示例 <br /><br />https://api.x.com/1.1/statuses/user&#95;timeline.json?user&#95;id=2244994945&amp;include&#95;rts=0&amp;&amp;exclude&#95;replies=1 | 示例：<br /><br />https://api.x.com/2/users/2244994945/tweets?max&#95;results=100&amp;exclude=retweets,replies |
-| 说明：<br /><br />对于 user&#95;timeline：<br /><br />* 使用 include&#95;rts=0 不会改变最近 3200 条帖子的可返回历史上限 | 说明：<br /><br />对于用户帖子时间线：<br /><br />* 使用 exclude=retweets 不会改变最近 3200 条帖子的可返回历史上限<br />* 使用 exclude=replies 会将可返回的历史帖子上限减少到最近 800 条回复 |
+| 说明：<br /><br />对于 user&#95;timeline：<br /><br />* 使用 include&#95;rts=0 不会改变最多返回最近 3200 条历史帖子的限制 | 说明：<br /><br />对于用户帖子时间线：<br /><br />* 使用 exclude=retweets 不会改变最多返回最近 3200 条历史帖子的限制<br />* 使用 exclude=replies 会将可返回的历史帖子上限减少为最近 800 条回复 |
 
 <div id="differences">
   ### 差异
@@ -92,14 +92,14 @@ v1.1 的 statuses/mentions&#95;timeline 和 X API v2 的用户提及时间线端
 
 **身份验证**
 
-**v1.1 的 `statuses/mentions_timeline` 端点仅支持 [OAuth 1.0a User Context](https://developer-staging.x.com/resources/fundamentals/authentication)。X API v2 的用户提及时间线端点同时支持 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication)、[OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 和 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authenticationoauth-2-0/authorization-code "此方法允许已获授权的应用以用户的身份代表用户进行操作。通常用于访问或发布特定用户的公开信息，当你的应用需要了解用户与该端点返回内容之间的关系时非常有用。点击了解如何使用 OAuth 2.0 Authorization Code with PKCE 进行身份验证。") **
+**v1.1 的 `statuses/mentions_timeline` 端点只支持 [OAuth 1.0a User Context](https://developer-staging.x.com/resources/fundamentals/authentication)。X API v2 的用户提及时间线端点支持 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication)、[OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 和 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authenticationoauth-2-0/authorization-code "This method allows an authorized app to act on behalf of the user, as the user. It is typically used to access or post public information for a specific user, and it us useful when your app needs to be aware of the relationship between a user and what this endpoint returns. Click to learn how to authenticate with OAuth 2.0 Authorization Code with PKCE.")**
 
-如果你希望通过 X API v2 用户帖子时间线端点访问私有或推广指标，则需要使用 OAuth 1.0a User Context 或 OAuth 2.0 Authorization Code with PKCE，并传入与你要获取其指标的帖子发布用户对应的用户访问令牌。
+如果你想利用 X API v2 用户帖子时间线端点来访问私有或推广指标，你需要使用 OAuth 1.0a User Context 或 OAuth 2.0 Authorization Code with PKCE，并传入与发布目标帖子的用户相关联的用户访问令牌，以便访问该帖子的指标。
  
 
 **端点 URL**
 
-请注意，X API v2 时间线端点需要一个用户 ID 的路径参数 `:id`。
+请注意，X API v2 时间线端点需要使用 `:id` 作为用户 ID 的路径参数。
 
 * 标准 v1.1 端点：
   * https://api.x.com/1.1/statuses/home&#95;timeline
@@ -112,74 +112,73 @@ v1.1 的 statuses/mentions&#95;timeline 和 X API v2 的用户提及时间线端
 
 **应用和项目要求**
 
-在对请求进行身份验证时，X API v2 端点要求你使用与某个 [developer App](/zh/resources/fundamentals/developer-apps) 关联的 [Project](/zh/resources/fundamentals/projects) 的凭证。所有 X API v1.1 端点都可以使用独立应用或与项目关联应用的凭证。 
+在对请求进行身份验证时，X API v2 端点要求你使用与某个[项目](/zh/resources/fundamentals/projects)关联的[开发者应用](/zh/resources/fundamentals/developer-apps)的凭证。所有 X API v1.1 端点都可以使用独立应用或与项目关联的应用的凭证。 
  
 
 **速率限制**
 
 |     |     |
 | :--- | :--- |
-| **mentions&#95;timeline：**<br /><br />使用 OAuth 1.0a User Context 时，每 15 分钟 75 个请求 | **用户提及时间线：**<br /><br />使用 OAuth 1.0a User Context 时，每 15 分钟窗口 180 个请求  <br />使用 OAuth 2.0 Bearer Token 时，每 15 分钟窗口 450 个请求 |
-| **home&#95;timelime：**<br /><br />每 15 分钟 15 个请求  <br /><br />在主页时间线上最多可获取 800 条帖子 | **反向时间顺序主页时间线：**<br /><br />每 15 分钟 180 个请求<br /><br />你可以返回在过去 7 天内该时间线上创建的每一条帖子，以及不论创建日期的最新 800 条帖子。 |
+| **mentions&#95;timeline：**<br /><br />使用 OAuth 1.0a User Context 时，每 15 分钟最多 75 次请求 | **用户提及时间线：**<br /><br />使用 OAuth 1.0a User Context 时，每 15 分钟窗口最多 180 次请求  <br />使用 OAuth 2.0 Bearer Token 时，每 15 分钟窗口最多 450 次请求 |
+| **home&#95;timelime：**<br /><br />每 15 分钟最多 15 次请求  <br /><br />主页时间线上最多可获取 800 条帖子 | **逆时间顺序主页时间线：**<br /><br />每 15 分钟最多 180 次请求<br /><br />你可以返回过去 7 天内在时间线上创建的所有帖子，以及最近的 800 条帖子（无论创建日期）。 |
 
 **请求限制**
 
 |     |     |
 | :--- | :--- |
 | **标准时间线 v1.1** | **时间线 v2** |
-| 每日请求限制<br /><br />* 在 24 小时内最多 100,000 次请求。 | 无每日请求限制，仅受使用量限制。 |
+| 每日请求限制<br /><br />* 在 24 小时内最多 100,000 次请求。 | 没有每日请求限制，仅受使用量限制。 |
 
 **使用量限制**
 
 |     |     |
 | :--- | :--- |
 | **标准时间线 v1.1** | **时间线 v2** |
-| 使用量仅受请求限制约束<br /><br />* 在 24 小时内最多 100,000 次请求。 | 使用量仅受项目级每月 [Post cap](/zh/x-api/fundamentals/post-cap)（跨多个 v2 端点）限制，具体取决于 [access level](/zh/x-api/getting-started/about-x-api)。<br /><br />* Essential 访问级别每月 500,000 条帖子。<br />* Elevated 访问级别每月 200 万条帖子。<br />* Academic Research 访问级别每月 1,000 万条帖子。 <br /><br />反向时间顺序主页时间线不受每月帖子上限约束。 |
+| 使用量仅受请求限制约束<br /><br />* 在 24 小时内最多 100,000 次请求。 | 使用量仅受项目级每月[帖子上限](/zh/x-api/fundamentals/post-cap)（跨多个 v2 端点）限制，具体取决于[访问级别](/zh/x-api/getting-started/about-x-api)。<br /><br />* Essential 访问级别：每月 500,000 条帖子。<br />* Elevated 访问级别：每月 200 万条帖子。<br />* Academic Research 访问级别：每月 1,000 万条帖子。 <br /><br />逆时间顺序主页时间线不受每月帖子上限限制。 |
 
 **请求参数**
 
 |     |     |
 | :--- | :--- |
 | **Standard timelines v1.1** | **timelines v2** |
-| 必需：user&#95;id 或 screen&#95;name | 必需：在路径参数中指定特定的用户 ID |
-| 可选：<br /><br />count - 设置每个请求返回的最大结果数<br /><br />exclude&#95;replies - 从结果中移除回复<br /><br />Include&#95;rts - 当设置为 0 时，从结果中移除转发<br /><br />trim&#95;user - 从结果中移除重新回填的用户对象<br /><br />tweet&#95;mode - 设置结果返回的数据格式，对于长度超过 140 个字符的帖子，将其设置为 extended<br /><br />since&#95;id - 设置结果中最早的帖子 ID（不包含该 ID）<br /><br />max&#95;id - 设置结果中最新的帖子 ID（包含该 ID） | 可选：<br /><br />max&#95;results - 设置每个请求返回的最大结果数<br /><br />exclude=retweets,replies - 从结果中移除转发或回复<br /><br />tweet.fields - 设置要返回的 Post 对象字段<br /><br />user.fields - 设置要返回的 User 对象字段<br /><br />place.fields - 设置要返回的 place 对象字段<br /><br />media.fields - 设置要返回的 media 对象字段<br /><br />poll.fields - 设置要返回的 poll 对象字段<br /><br />expansions - 设置要返回的扩展字段和数据<br /><br />start&#95;time - 设置结果中最早的 created&#95;at 时间<br /><br />end&#95;time - 设置结果中最新的 created&#95;at 时间<br /><br />since&#95;id - 设置结果中最早的帖子 ID（不包含该 ID）<br /><br />until&#95;id - 设置结果中最新的帖子 ID（不包含该 ID） |
+| Required: user&#95;id or screen&#95;name | Required: 在 path 参数中指定特定的用户 ID |
+| Optional:<br /><br />count - 设置每次请求返回的最大结果数<br /><br />exclude&#95;replies - 从结果中移除回复<br /><br />Include&#95;rts - 当设置为 0 时，从结果中移除转发<br /><br />trim&#95;user - 从结果中移除还原出的 user 对象<br /><br />tweet&#95;mode - 设置结果返回的数据格式，对于长度超过 140 个字符的 Posts，设置为 extended<br /><br />since&#95;id - 设置结果中最早的 Post ID（不包含该值）<br /><br />max&#95;id - 设置结果中最新的 Post ID（包含该值） | Optional:<br /><br />max&#95;results - 设置每次请求返回的最大结果数<br /><br />exclude=retweets,replies - 从结果中移除转发或回复<br /><br />tweet.fields - 设置要返回的 Post 对象字段<br /><br />user.fields - 设置要返回的 User 对象字段<br /><br />place.fields - 设置要返回的 place 对象字段<br /><br />media.fields - 设置要返回的 media 对象字段<br /><br />poll.fields - 设置要返回的 poll 对象字段<br /><br />expansions - 设置要返回的扩展字段和数据<br /><br />start&#95;time - 设置结果中最早的 created&#95;at 时间<br /><br />end&#95;time - 设置结果中最新的 created&#95;at 时间<br /><br />since&#95;id - 设置结果中最早的 Post ID（不包含该值）<br /><br />until&#95;id - 设置结果中最新的 Post ID（不包含该值） |
 
 **响应数据格式**
 
 |     |     |
 | :--- | :--- |
 | **Standard search v1.1** | **Search Posts v2** |
-| [<br />    帖子对象,<br />    帖子对象<br />  ] | <br />  &quot;data&quot;: [id,text,id,text],<br />  &quot;meta&quot;: <br />    &quot;oldest&#95;id&quot;: &quot;1337085692623646724&quot;,<br />    &quot;newest&#95;id&quot;: &quot;1334183616172019713&quot;,<br />    &quot;previous&#95;token&quot;: &quot;77qpymm88g5h9vqkluldpw91lr0qzfz1sqydh841iz48k&quot;,<br />    &quot;result&#95;count&quot;: 10,<br />    &quot;next&#95;token&quot;: &quot;7140dibdnow9c7btw3w29gqolns6a1ipl3kzeae41vsxk&quot;<br />  <br /> |
+| [<br />    tweet object,<br />    tweet object<br />  ] | <br />  &quot;data&quot;: [id,text,id,text],<br />  &quot;meta&quot;: <br />    &quot;oldest&#95;id&quot;: &quot;1337085692623646724&quot;,<br />    &quot;newest&#95;id&quot;: &quot;1334183616172019713&quot;,<br />    &quot;previous&#95;token&quot;: &quot;77qpymm88g5h9vqkluldpw91lr0qzfz1sqydh841iz48k&quot;,<br />    &quot;result&#95;count&quot;: 10,<br />    &quot;next&#95;token&quot;: &quot;7140dibdnow9c7btw3w29gqolns6a1ipl3kzeae41vsxk&quot;<br />  <br /> |
 
 **X API v2 JSON 格式**
 
-X API v2 为 API 返回的对象（包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象）引入了新的 JSON 设计。你可以通过查看我们的 [指南](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 了解更多关于 X API v2 格式，以及如何使用字段和扩展字段，并阅读更完整的 [数据字典](/zh/x-api/fundamentals/data-dictionary)。
+X API v2 为 API 返回的对象（包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象）引入了新的 JSON 设计。你可以通过阅读我们的 [指南](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 了解更多关于 X API v2 格式以及如何使用字段和扩展字段的内容，并查阅更完整的 [数据字典](/zh/x-api/fundamentals/data-dictionary)。
 
-* 在 JSON 根级别，standard 端点在 statuses 数组中返回 Post 对象，而 X API v2 则在 data 数组中返回它们。 
+* 在 JSON 根级别，standard 端点在 statuses 数组中返回 Post 对象，而 X API v2 在 data 数组中返回 Post 对象。 
 * X API v2 JSON 不再引用被转发和被引用的“statuses”，而是引用被转发和被引用的帖子。许多旧版和已弃用字段（例如 contributors 和 user.translator&#95;type）将被移除。 
-* X API v2 不再在 Post 对象和 user 对象中同时使用 favorites，而是统一使用术语 like。 
-* X 采用的约定是：对于没有值的 JSON 字段（例如为 null），不会写入到载荷中。Post 和 user 属性仅在具有非空值时才会被包含。
+* X API v2 不再在 Post 对象和 user 对象中同时使用 favorites，而是统一使用 like 这一术语。 
+* X 采用这样一种约定：没有值的 JSON 字段（例如 null）不会写入载荷。Post 和 user 属性仅在其具有非空值时才会被包含。
    
 
-standard v1.1 与 X API v2 端点版本之间最大的区别之一，是你如何选择在载荷中返回哪些字段。对于 standard 端点，你可以使用多个参数来指定在载荷中返回哪些字段或字段集，而 X API v2 版本将这些不同的参数简化为 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions)。 
+standard v1.1 与 X API v2 端点版本之间最大的差异之一，是你如何选择要在载荷中返回的字段。对于 standard 端点，你可以使用多个参数来指定载荷中会返回哪些字段或字段集，而在 X API v2 版本中，这些不同的参数被简化为 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions)。 
 
-* 字段：X API v2 端点允许你指定响应负载中返回哪些字段。例如，Post、user、Media、Place 和 Poll 对象都有一组可选择返回（或不返回）的字段列表。 
+* 字段：X API v2 端点允许你选择在响应负载中返回哪些字段。例如，Post、user、Media、Place 和 Poll 对象都有一组可选择是否返回的字段列表。
 
-* 扩展字段：用于展开 Post JSON 负载中引用的关联对象。例如，所有转发（Retweet）和回复（Reply）都会引用其他帖子。通过设置 expansions=referenced&#95;tweets.id，这些其他 Post 对象会根据 tweet.fields 的设置进行展开。其他对象（例如用户、投票和媒体）也可以被展开。 
+* 扩展字段：用于展开 Post JSON 负载中引用的关联对象。例如，所有转发（Retweet）和回复（Reply）都会引用其他 Posts。通过设置 expansions=referenced&#95;tweets.id，这些其他 Post 对象会根据 tweet.fields 的设置进行展开。其他对象，例如用户（users）、投票（polls）和媒体（media）也可以被展开。
 
 * conversation&#95;id
 
 * 两个新的 [annotations](/zh/x-api/fundamentals/post-annotations) 字段，包括 context 和 entities
 
-* 若干新的 [metrics](/zh/x-api/fundamentals/metrics) 字段 
-   
+* 若干新的 [metrics](/zh/x-api/fundamentals/metrics) 字段
 
-我们编写了一个[数据格式迁移指南](/zh/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)，可以帮助你将标准版 v1.1 的字段映射到更新的 v2 字段。该指南还会提供在 v2 请求中需要传递的具体扩展字段和字段参数，以返回特定字段。 
+我们整理了一个[数据格式迁移指南](/zh/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)，可以帮助你将 standard v1.1 的字段映射到更新的 v2 字段。该指南还会为你提供在 v2 请求中需要传入的、用于返回特定字段的具体扩展字段和字段参数。
 
 **后续步骤**
 
-[查看我们的 X API v2 Post 查找快速入门指南](/zh/x-api/posts/lookup/quickstart "查看我们的 X API v2 Post 查找快速入门指南")
+[查看我们的 X API v2 Post 查询快速入门指南](/zh/x-api/posts/lookup/quickstart "查看我们的 X API v2 Post 查询快速入门指南")
 
-[查看 v2 Post 查找的 API 参考](/zh/x-api/posts/lookup/migrate/overview "查看 v2 Post 查找的 API 参考")
+[查看 v2 Post 查询的 API 参考](/zh/x-api/posts/lookup/migrate/overview "查看 v2 Post 查询的 API 参考")
 
-[查看我们为时间线端点提供的示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code "查看我们为时间线端点提供的示例代码")
+[查看我们为 timelines 端点提供的示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code "查看我们为 timelines 端点提供的示例代码")

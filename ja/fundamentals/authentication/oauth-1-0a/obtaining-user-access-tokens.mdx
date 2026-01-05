@@ -1,5 +1,5 @@
 ---
-title: 3-legged OAuth フローでアクセストークンを取得する
+title: 3-legged OAuth フローを使用したアクセストークンの取得
 sidebarTitle: ユーザーアクセストークン（3-legged OAuth フロー）
 keywords: ["3-legged OAuth", "ユーザーアクセストークン", "OAuth フロー", "アクセストークンの取得", "OAuth 1.0a フロー", "アクセストークンの生成"]
 ---
@@ -10,17 +10,17 @@ import { Button } from "/snippets/ja/button.mdx";
   ### 3-legged OAuth フローを使用してアクセストークンを取得する
 </div>
 
-別のユーザーに代わって操作を行うには、そのユーザーのアクセストークンを取得する必要があります。アクセストークンは、どの X アカウントの代理でリクエストが実行されているかを指定します。そのため、あなたがこれらを取得するには、まずユーザーからアクセス権を付与してもらう必要があります。これらのトークン自体には有効期限はありませんが、ユーザーがいつでも取り消すことができます。
+他のユーザーに代わって操作を行うには、そのユーザーのアクセストークンを取得する必要があります。アクセストークンは、リクエストがどの X アカウントに代わって行われているかを指定するため、あなたがこれらを取得するには、まず相手ユーザーがあなたにアクセス権を付与する必要があります。これらのトークン自体には有効期限はありませんが、ユーザーがいつでも取り消すことができます。
 
-X では、3-legged OAuth フローを通じてユーザーのアクセストークンを取得できます。このフローでは、ユーザーを X にリダイレクトしてあなたのアプリケーションを承認してもらうことで、アプリケーションが **アクセストークン** とアクセストークンシークレットを取得できるようにします。このフローは、[Log in with X の実装](/ja/resources/fundamentals/authentication/guides/log-in-with-x) で説明されているフローとほぼ同一ですが、次の 2 点が異なります。
+X では 3-legged OAuth フローを通じてユーザーのアクセストークンを取得できます。このフローでは、ユーザーを X にリダイレクトしてアプリケーションを承認してもらうことで、アプリケーションが **access token** と access token secret を取得できます。このフローは、[implementing Log in with X](/ja/resources/fundamentals/authentication/guides/log-in-with-x) で説明しているフローとほぼ同じですが、次の 2 点が異なります。
 
 * [GET oauth/authorize](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authorize) エンドポイントを、[GET oauth/authenticate](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) の代わりに使用します。
-* 以前にアクセスが付与されていた場合でも、ユーザーは **常に** あなたのアプリケーションへのアクセスを承認するよう促されます。
+* 以前にアクセスが許可されていた場合でも、ユーザーには常にアプリケーションへのアクセス許可を求めるプロンプトが表示されます。
    
 
-作業を始める前に、[アプリケーション](/ja/resources/fundamentals/developer-apps) の権限を確認し、コンシューマーキーとコールバック URL を把握しておく必要があります。コールバック URL や外部からアクセス可能な UI がない場合は、認可後にユーザーをリダイレクトするためのウェブブラウザにアクセスしたり埋め込んだりできないアプリケーション向けに用意された方式である [PIN ベースの認可](/ja/resources/fundamentals/authentication/oauth-1-0a/pin-based-oauth) の利用を検討してください。 
+開始する前に、[アプリケーション](/ja/resources/fundamentals/developer-apps) の権限を確認し、コンシューマキーとコールバック URL を把握しておく必要があります。コールバック URL や外部からアクセス可能な UI がない場合は、[PIN-based authorization](/ja/resources/fundamentals/authentication/oauth-1-0a/pin-based-oauth) の利用を検討してください。これは、承認後にユーザーをリダイレクトするための Web ブラウザにアクセスできない、またはそれを埋め込めないアプリケーション向けに設計されています。 
 
-3-legged OAuth フローでのサインイン処理の際に取りうる状態は、次のフローチャートに示されています。
+3-legged サインイン処理における取りうる状態は、次のフローチャートで示されています。
 
 ![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/obtaining-access-tokens.png.twimg.1920.png)
 
@@ -28,15 +28,15 @@ X では、3-legged OAuth フローを通じてユーザーのアクセストー
   #### プロセスの概要
 </div>
 
-概略として、3-legged OAuth のプロセスでは次のことを行います。
+大まかには、3-Legged OAuth プロセスは次のように動作します。
 
-1. コンシューマーアプリケーションがリクエストトークンを取得するためのリクエストを作成する。
-2. ユーザーに認証させ、コンシューマーアプリケーションにリクエストトークンを送信する。
-3. リクエストトークンを、実際に使用可能なユーザーアクセストークンに変換する。
+1. コンシューマーアプリケーションがリクエストトークンを取得できるように、リクエストを作成します。
+2. ユーザーに認証を行わせ、コンシューマーアプリケーションにリクエストトークンを送信します。
+3. リクエストトークンを、実際に利用可能なユーザーアクセストークンに変換します。
 
 **用語の明確化**
 
-以下のガイドでは、同じものを指す異なる用語が登場する場合があります。
+以下のガイドでは、同じものを指すのに異なる用語が使われている場合があります。
 
 **クライアント資格情報:**
 
@@ -54,32 +54,32 @@ X では、3-legged OAuth フローを通じてユーザーのアクセストー
 
 **トークン資格情報:**
 
-* Access token === Token === 結果として得られる `oauth_token`
-* Access token secret === Token Secret === 結果として得られる `oauth_token_secret`
+* アクセストークン === Token === 結果として得られる `oauth_token`
+* アクセストークンシークレット === Token Secret === 結果として得られる `oauth_token_secret`
 
 <div id="walkthrough-steps">
-  #### ウォークスルー手順
+  #### 手順のウォークスルー
 </div>
 
 **ステップ 1: [POST oauth/request&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-request-token)**
 
 コンシューマーアプリケーションがリクエストトークンを取得するためのリクエストを作成します。
 
-このリクエストで一意となるパラメータは `oauth_callback` だけで、これはステップ 2 が完了した際にユーザーをリダイレクトしたい URL を [URL エンコード](/ja/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) した値でなければなりません。残りのパラメータは OAuth 署名プロセスによって追加されます。
+このリクエストで固有のパラメータは `oauth_callback` のみであり、ステップ 2 完了時にユーザーをリダイレクトしたい URL を [URL エンコード](/ja/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) した値である必要があります。残りのパラメータは OAuth 署名処理によって追加されます。
 
-注意: [POST oauth/request&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-request-token) エンドポイントで使用するコールバック URL はすべて、developer portal のアプリ詳細ページにある [開発者アプリ](/ja/resources/fundamentals/developer-apps) の設定で登録しておく必要があります。
+注意: [POST oauth/request&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-request-token) エンドポイントで使用する任意のコールバック URL は、developer portal のアプリ詳細ページにある [開発者アプリ](/ja/resources/fundamentals/developer-apps) の設定内で事前に設定しておく必要があります。
  
 
-**リクエストに含まれるもの:**
+**リクエストに含まれる内容:**
 
 `oauth_callback="https%3A%2F%2FyourCallbackUrl.com"`
 
 `oauth_consumer_key="cChZNFj6T5R0TigYB9yd1w" `
 
-アプリはレスポンスの HTTP ステータスを確認する必要があります。200 以外のステータスコードは失敗を示します。レスポンスボディには `oauth_token`、`oauth_token_secret`、`oauth_callback_confirmed` パラメータが含まれます。アプリは `oauth_callback_confirmed` が true であることを確認し、残り 2 つの値を次のステップ用に保存しておく必要があります。
+アプリはレスポンスの HTTP ステータスを確認する必要があります。200 以外の値は失敗を示します。レスポンスボディには `oauth_token`、`oauth_token_secret`、`oauth_callback_confirmed` パラメータが含まれます。アプリは `oauth_callback_confirmed` が true であることを検証し、残り 2 つの値を次のステップのために保存しておく必要があります。
  
 
-**レスポンスに含まれるもの**
+**レスポンスに含まれる内容**
 
 `oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
 
@@ -92,11 +92,11 @@ X では、3-legged OAuth フローを通じてユーザーのアクセストー
 ユーザーに認証を行ってもらい、コンシューマーアプリケーションにリクエストトークンを送信させます。
  
 
-**ユーザーをリダイレクトする先の URL 例:**
+**ユーザーをリダイレクトするための URL の例:**
 
 `https://api.x.com/oauth/authorize?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
 
-認証が成功すると、`callback_url` は `oauth_token` と `oauth_verifier` パラメータを含むリクエストを受け取ります。アプリケーションは、このトークンがステップ 1 で受け取ったリクエストトークンと一致することを確認する必要があります。
+認証が成功すると、`callback_url` は `oauth_token` と `oauth_verifier` パラメータを含むリクエストを受信します。アプリケーションは、このトークンがステップ 1 で受信したリクエストトークンと一致することを確認する必要があります。
  
 
 **クライアントのリダイレクトからのリクエスト:**
@@ -107,10 +107,10 @@ X では、3-legged OAuth フローを通じてユーザーのアクセストー
 
 リクエストトークンを使用可能なアクセストークンに変換します。
 
-リクエストトークンを使用可能なアクセストークンに変換するには、アプリケーションは [POST oauth/access&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-access-token) エンドポイントに対して、ステップ 2 で取得した `oauth_verifier` の値を含むリクエストを送信する必要があります。リクエストトークンはヘッダーの `oauth_token` 部分にも渡されますが、これは署名プロセスによって追加されています。
+リクエストトークンを使用可能なアクセストークンに変換するには、アプリケーションは [POST oauth/access&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-access-token) エンドポイントに対して、ステップ 2 で取得した `oauth_verifier` の値を含むリクエストを送信する必要があります。リクエストトークンはヘッダー内の `oauth_token` 部分にも渡されますが、これは署名プロセスによって追加されます。
  
 
-**リクエストに含まれるもの:**
+**リクエストに含まれる内容:**
 
 `POST /oauth/access_token`
 
@@ -120,21 +120,21 @@ X では、3-legged OAuth フローを通じてユーザーのアクセストー
 
 `oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY`
 
-成功したレスポンスには `oauth_token`、`oauth_token_secret` パラメータが含まれます。トークンとトークンシークレットは保存し、今後の X API への認証済みリクエストに使用する必要があります。ユーザーを特定するには、[GET account/verify&#95;credentials](/ja/resources/fundamentals/authentication/api-reference) を使用します。
+成功したレスポンスには `oauth_token`、`oauth_token_secret` パラメータが含まれます。トークンとトークンシークレットは保存し、今後 X API への認証済みリクエストに使用する必要があります。ユーザーを特定するには、[GET account/verify&#95;credentials](/ja/resources/fundamentals/authentication/api-reference) を使用します。
  
 
-**レスポンスに含まれるもの:**
+**レスポンスに含まれる内容:**
 
 `oauth_token=7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4`
 
 `oauth_token_secret=PbKfYqSryyeKDWz4ebtY3o5ogNLG11WJuZBc9fQrQo`
 
-**これらの認証情報を、OAuth 1.0a（アプリケーションユーザー）で必要なリクエストに使用する**
+**これらの認証情報を OAuth 1.0a（アプリケーション-ユーザー）を必要とするリクエストで使用する**
 
-これでユーザーのアクセストークンが取得できたので、[POST statuses/update](/ja/x-api/posts/manage-tweets/introduction) などの特定のAPIにアクセスして、ユーザーに代わってポストを作成できるようになりました。
+これでユーザーのアクセストークンを取得できたので、[POST statuses/update](/ja/x-api/posts/manage-tweets/introduction) などの特定のAPIを利用して、ユーザーに代わってポストを作成できるようになります。
  
 
-**リクエスト内容:**
+**リクエストには次の項目が含まれます:**
 
 `POST statuses/update.json`
 
@@ -146,21 +146,21 @@ X では、3-legged OAuth フローを通じてユーザーのアクセストー
   #### サンプルユースケース
 </div>
 
-標準的なフローは Web ベースで、3-legged の OAuth 認可フローを使用します。ここに示しているスクリーンショットはサンプルの一部であり、そのソースコードは [https://github.com/xdevplatform/twauth-web](https://github.com/xdevplatform/twauth-web) で確認できます。
+標準的なフローは Web ベースで、3-legged OAuth 認可フローを使用します。ここで示しているスクリーンショットは、[https://github.com/xdevplatform/twauth-web](https://github.com/xdevplatform/twauth-web) でソースコードを参照できるサンプルの一部です。
 
-アプリケーション内のあるタイミングで、アプリケーションを認可してもらうために X へリダイレクトする必要があります。
+アプリケーション内のある時点で、アプリケーションを認可してもらうために X へリダイレクトする必要があります。
 
 <Frame>
   <img src="/images/twauth-web-2.png" alt="" />
 </Frame>
 
-リクエストトークンを含めて X にリダイレクトすると、ユーザーにはアプリケーションを認可するよう促す画面が表示されます。
+リクエストトークンを付けて X にリダイレクトすると、ユーザーはアプリケーションを認可するよう促されます。
 
 <Frame>
   <img src="/images/twauth-web-3.png" alt="" />
 </Frame>
 
-ユーザーがアプリケーションを認可すると、リクエストトークンを生成した際に指定したコールバック URL へリダイレクトされます。ここで、このユーザーの永続的なアクセストークンを取得し、ローカルに保存します。
+ユーザーがアプリケーションを認可すると、リクエストトークンを生成した際に指定したコールバック URL にユーザーがリダイレクトされます。これを使用して、このユーザーの永続的なアクセストークンを取得し、ローカルに保存します。
 
 <Frame>
   <img src="/images/twauth-web-4.png" alt="" />

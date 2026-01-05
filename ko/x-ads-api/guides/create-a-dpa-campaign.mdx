@@ -3,9 +3,9 @@ title: 'DPA 캠페인 생성 - 단계별 가이드'
 keywords: ["DPA campaign", "dynamic product ads", "DPA", "create DPA campaign", "product ads", "dynamic ads"]
 ---
 
-다음 예시는 twurl을 사용해 앱과 사용자를 설치, 구성하고 인증까지 완료한 상태라고 가정합니다. twurl은 cURL과 유사한 명령줄 도구로, X OAuth 인증을 원활하게 처리합니다. twurl은 Ads API(및 REST API) 기능을 빠르게 테스트하고 디버깅하는 데 매우 유용한 도구입니다. 요청과 응답의 전체 헤더를 확인하려면 -t 옵션을 사용해 호출을 추적하면 됩니다. 이는 cURL의 -v 옵션과 거의 동일합니다.
+다음 예시는 twurl을 사용해 앱과 사용자의 설치, 구성, 승인을 모두 완료했다고 가정합니다. twurl은 cURL과 유사한 명령줄 도구로, X OAuth 인증을 깔끔하게 처리합니다. twurl은 Ads API(및 REST API) 기능을 빠르게 테스트하고 디버깅하는 데 매우 유용한 도구입니다. 요청과 응답의 전체 헤더를 확인하려면 `-t` 옵션을 사용해 호출을 추적(trace)하세요. 이는 cURL의 `-v` 옵션과 대략 동일합니다.
 
-이 예제에서는 Dynamic Product Ads(DPA) 캠페인을 생성합니다.
+이 예시에서는 Dynamic Product Ads(DPA) 캠페인을 생성합니다.
 
 계정 id를 조회합니다.
 
@@ -38,7 +38,7 @@ twurl -H ads-api.x.com /12/accounts/
 ```
 
 funding instrument id를 조회합니다.
-이전 명령에서 가져온 account id를 사용하여 GET accounts/:account&#95;id/funding&#95;instruments API를 호출합니다.
+앞선 단계에서 조회한 account id를 사용해 GET accounts/:account&#95;id/funding&#95;instruments API를 호출합니다.
 
 ```bash
 twurl -H ads-api.x.com /12/accounts/xxxxxx/funding_instruments
@@ -77,10 +77,10 @@ twurl -H ads-api.x.com /12/accounts/xxxxxx/funding_instruments
   ## 1단계: 캠페인 생성
 </div>
 
-캠페인을 생성하고 자금 수단에 연결합니다.
-캠페인의 시작 시간과 예산을 지정합니다.
+캠페인을 생성한 다음 해당 펀딩 인스트루먼트에 연결합니다.
+캠페인의 시작 일시와 예산을 설정합니다.
 
-* 필수 필드: 자금 수단, 캠페인 이름, 예산(총액/일별), 시작 시간, 광고 계정 ID
+* 필수 필드: 펀딩 인스트루먼트, 캠페인 이름, 예산(총액/일별), 시작 일시, Ads 계정 ID
 
 ```bash
 twurl -H ads-api.x.com -d "funding_instrument_id={FUNDING_INSTRUMENT_ID}&name={CAMPAIGN_NAME}&total_budget_amount_local_micro={TOTAL_BUDGET}&daily_budget_amount_local_micro={DAILY_BUDGET}&start_time={START_TIME}" /12/accounts/{ADS_ACCOUNT_ID}/campaigns | jq
@@ -88,13 +88,13 @@ twurl -H ads-api.x.com -d "funding_instrument_id={FUNDING_INSTRUMENT_ID}&name={C
 
 
 <div id="step-2-create-line-item-with-sales-objective">
-  ## 2단계: Sales objective를 사용해 line item 생성
+  ## 2단계: Sales 목표로 라인 아이템 생성
 </div>
 
-캠페인과 연결된 line item을 생성합니다.
+캠페인에 연관된 라인 아이템을 생성합니다.
 
-* 필수 필드: campaign id(1단계에서 생성), product type, placements, objective, goal, entity status, primary web event tag, catalog id, product set id, creative&#95;source, ads&#95;account&#95;id
-* catalog&#95;id와 product&#95;set&#95;id는 Shopping Manager에서 확인할 수 있습니다.
+* 필수 필드: campaign id(1단계에서 가져온 값), product type, placements, objective, goal, entity status, primary web event tag, catalog id, product set id, creative&#95;source, ads&#95;account&#95;id
+* catalog&#95;id 및 product&#95;set&#95;id는 쇼핑 매니저에서 확인할 수 있습니다.
 * creative&#95;source는 항상 DYNAMIC&#95;PRODUCT&#95;CREATIVE여야 합니다.
 * objective는 항상 WEBSITE&#95;CLICKS여야 합니다.
 * goal은 항상 WEBSITE&#95;CONVERSIONS여야 합니다.
@@ -103,7 +103,7 @@ twurl -H ads-api.x.com -d "funding_instrument_id={FUNDING_INSTRUMENT_ID}&name={C
 twurl -H ads-api.x.com -d "campaign_id={CAMPAIGN_ID}&product_type={product_type}&placements={PLACEMENTS}&objective=WEBSITE_CLICKS&goal=WEBSITE_CONVERSIONS&entity_status={entity_status}&primary_web_event_tag={WEB_EVENT_TAG}&catalog_id={catalog_id}&product_set_id={product_set_id}&creative_source=DYNAMIC_PRODUCT_CREATIVE" /12/accounts/{ADS_ACCOUNT_ID}/line_items | jq
 ```
 
-* 이 단계를 완료하면 캠페인을 X의 Ads Manager에서 확인할 수 있습니다.
+* 이 단계를 완료한 후에는 캠페인을 X의 Ads Manager에서 확인할 수 있습니다.
 
 
 <div id="step-3-create-dpa-card">
@@ -113,9 +113,9 @@ twurl -H ads-api.x.com -d "campaign_id={CAMPAIGN_ID}&product_type={product_type}
 DPA 카드를 생성합니다.
 
 * 필수 파라미터: 광고 계정 ID와 URL
-* URL은 [https://twitter.com](https://twitter.com)으로 시작해야 하며, 아래 예시와 같이 추가 UTM 파라미터를 뒤에 붙일 수 있습니다.
+* URL은 반드시 [https://twitter.com](https://twitter.com)으로 시작해야 하며, 아래 예시처럼 뒤에 추가 UTM 파라미터를 붙일 수 있습니다:
   * `https://twitter.com?utm_source=%7B%7Bsite_source%7D%7D`
-* 선택적으로, `creative_type`에 다음 값 중 하나를 지정해 카드 형식을 선택할 수 있습니다: &quot;CAROUSEL&quot;, &quot;SINGLE&quot;, &quot;COLLECTION&quot;. 값을 지정하지 않으면 카드는 캐러셀 카드로 생성됩니다.
+* 선택적으로 `creative_type`에 다음 값 중 하나를 지정하여 카드 형식을 선택할 수 있습니다: &quot;CAROUSEL&quot;, &quot;SINGLE&quot;, &quot;COLLECTION&quot;. 지정하지 않으면 카드는 기본적으로 캐러셀 카드로 생성됩니다.
 
 ```bash
 twurl -X POST -H ads-api.twitter.com -A "Content-Type: application/json" "/12/accounts/{ADS_ACCOUNT_ID}/dynamic_product_cards" -d '{"url": "{URL}", "creative_type": "{CREATIVE_TYPE}"}' | jq
@@ -123,12 +123,12 @@ twurl -X POST -H ads-api.twitter.com -A "Content-Type: application/json" "/12/ac
 
 
 <div id="step-4-create-post">
-  ## Step 4: 게시물 생성
+  ## 4단계: 게시물 생성
 </div>
 
 게시물을 생성합니다.
 
-* 필수 매개변수: 광고 계정 ID, 사용자 ID, 카드 URI(3단계에서 가져온 값), 텍스트, 이름, 동적 제품 광고
+* 필수 매개변수: 광고 계정 ID, 사용자 ID, 카드 URI(3단계에서), 텍스트, 이름 및 dynamic&#95;product&#95;ad
 * dynamic&#95;product&#95;ad는 항상 true로 설정해야 합니다.
 
 ```bash
@@ -137,15 +137,15 @@ twurl -X POST -H "https://ads-api.twitter.com" "/12/accounts/{ADS_ACCOUNT_ID}/tw
 
 
 <div id="step-5-associate-post-with-line-item">
-  ## 5단계: 게시물을 라인 아이템에 연결하기
+  ## 5단계: 게시물을 라인 아이템에 연결
 </div>
 
 게시물을 라인 아이템에 연결합니다.
 
-* 필수 매개변수: 광고 계정 id, 라인 아이템 id(2단계에서 가져온 값), 트윗 id(4단계의 id&#95;str 값)
+* 필수 매개변수: 광고 계정 id, 라인 아이템 id (2단계에서 가져온 값), 트윗 id (4단계의 id&#95;str)
 
 ```bash
 twurl -X POST -H "https://ads-api.twitter.com" "/12/accounts/{ADS_ACCOUNT_ID}/promoted_tweets?line_item_id={line_item_id}&tweet_ids={tweet_id}" | jq
 ```
 
-광고주가 UI에서 카드를 보고자 할 경우, 해당 카드는 UI에서도 확인할 수 있습니다.
+광고주가 UI에서 카드를 보고 싶다면, UI에서도 해당 카드가 표시됩니다.

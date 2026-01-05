@@ -6,13 +6,13 @@ keywords: ["integración de mensajes directos", "integración de MD", "integraci
 
 import { Button } from '/snippets/es/button.mdx';
 
-Los endpoints de Direct Messages v2 introducen las conversaciones y los eventos de conversación como objetos centrales de X API, y establecen una distinción entre conversaciones 1-1 y de grupo. Las conversaciones 1-1 siempre tienen dos, y solo dos, participantes, mientras que las conversaciones de grupo pueden tener dos o más participantes y cuyos miembros pueden cambiar.   
+Los endpoints de Direct Messages v2 introducen las conversaciones y los eventos de conversación como objetos fundamentales de la X API y establecen una distinción entre conversaciones 1-1 y de grupo. Las conversaciones 1-1 siempre tienen dos, y solo dos, participantes, mientras que las conversaciones de grupo pueden tener dos o más participantes y una lista de miembros que puede cambiar.   
 
-Esta página contiene información sobre varias herramientas y conceptos clave que debes conocer al integrar los endpoints de búsqueda de Direct Messages en tu sistema. Hemos dividido la página en dos secciones:
+Esta página contiene información sobre varias herramientas y conceptos clave que debes conocer al integrar los endpoints de consulta de Direct Messages en tu sistema. Hemos dividido la página en dos secciones:
 
 * Conceptos clave
   * [Conversaciones de Direct Messages](#direct-message-conversations)
-  * [IDs de conversación y de evento compartidos entre v1.1 y v2](#shared-conversation-and-event-ids)
+  * [ID de conversación y de evento compartidas entre v1.1 y v2](#shared-conversation-and-event-ids)
   * [Campos y expansiones de eventos de Direct Messages](#direct-message-event-fields-and-expansions)
   * [Tipos de eventos de conversación](#conversation-event-types)
   * [Autenticación](#authentication)
@@ -29,47 +29,47 @@ Esta página contiene información sobre varias herramientas y conceptos clave q
   ### Conversaciones de Mensajes Directos
 </div>
 
-Todos los Mensajes Directos forman parte de una conversación de Mensajes Directos. Estas conversaciones pueden ser de uno a uno o de grupo. Esta versión proporciona los endpoints fundamentales necesarios para crear Mensajes Directos y recuperar eventos asociados con conversaciones de Mensajes Directos. Todas las conversaciones tienen un dm&#95;conversation&#95;id único, y todos los eventos que conforman esa conversación tienen un dm&#95;event&#95;id único.  
+Todos los Mensajes Directos forman parte de una conversación de Mensajes Directos. Estas conversaciones pueden ser uno a uno o de grupo. Este lanzamiento proporciona los endpoints fundamentales necesarios para crear Mensajes Directos y recuperar eventos asociados con conversaciones de Mensajes Directos. Todas las conversaciones tienen un dm&#95;conversation&#95;id único, y los eventos que componen esa conversación tienen todos un dm&#95;event&#95;id único.  
 
-Los endpoints de consulta de Mensajes Directos proporcionan métodos para recuperar eventos asociados con conversaciones. Estos endpoints GET se utilizan para recuperar los mensajes que conforman una conversación y, en el caso de las conversaciones de grupo, se pueden usar para determinar quién se ha unido y quién ha abandonado las conversaciones de grupo.
+Los endpoints de consulta de Mensajes Directos proporcionan métodos para recuperar eventos asociados con conversaciones. Estos endpoints GET se utilizan para recuperar los mensajes que conforman una conversación y, en el caso de conversaciones de grupo, se pueden usar para saber quién se ha unido y quién ha salido de las conversaciones de grupo.
 
 Esta versión inicial de la consulta de Mensajes Directos incluye tres métodos GET:
 
-* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - Recupera eventos de Mensajes Directos asociados con una conversación de uno a uno. El parámetro de ruta :participant&#95;id es el ID de usuario numérico de la cuenta que mantiene la conversación con el usuario autenticado que realiza esta solicitud.  
+* **GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events** - Recupera eventos de Mensajes Directos asociados con una conversación uno a uno. El parámetro de ruta :participant&#95;id es el User ID numérico de la cuenta que mantiene la conversación con el usuario autenticado que realiza esta solicitud.  
 
-* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - Recupera eventos de Mensajes Directos asociados con un ID de conversación específico, según lo indicado por el parámetro de ruta :dm&#95;conversation&#95;id. Se admiten IDs de conversaciones tanto de uno a uno como de grupo.  
+* **GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events** - Recupera eventos de Mensajes Directos asociados con un ID de conversación específico, según lo indicado por el parámetro de ruta :dm&#95;conversation&#95;id. Se admiten tanto los ID de conversaciones uno a uno como de grupo.  
 
-* **GET /2/dm&#95;events** - Recupera eventos de Mensajes Directos asociados con el usuario autenticado, incluidas tanto conversaciones de uno a uno como de grupo. Hay disponibles eventos de hasta los últimos 30 días.  
+* **GET /2/dm&#95;events** - Recupera eventos de Mensajes Directos asociados con el usuario que se autentica, incluidas tanto conversaciones uno a uno como de grupo. Hay disponibles eventos de hasta 30 días de antigüedad.  
 
-Todos estos endpoints GET admiten la recuperación de dm&#95;events por tipo de evento mediante el parámetro de consulta event&#95;types de la solicitud. Actualmente se admiten tres tipos de eventos de conversación:
+Todos estos endpoints GET admiten la recuperación de dm&#95;events por tipo de evento mediante el parámetro de consulta de la solicitud event&#95;types. Actualmente, se admiten tres tipos de eventos de conversación:
 
-* **MessageCreate** - Se crea cuando se genera un nuevo Mensaje Directo. Este objeto de evento puede incluir la hora y el texto del mensaje, junto con el ID de la cuenta de quien envió el mensaje, y los IDs de la conversación y del evento. 
+* **MessageCreate** - Se crea cuando se genera un nuevo Mensaje Directo. Este objeto de evento puede incluir la hora y el texto del mensaje, junto con el ID de la cuenta que envió el mensaje, y los ID de la conversación y del evento. 
 
-* **ParticipantsJoin** - Se crea cuando un nuevo participante se une a una conversación de grupo. Este objeto dm&#95;event incluye el ID del participante que se une, junto con la hora created&#95;at y el sender&#95;id del evento de &quot;invite&quot;. 
+* **ParticipantsJoin** - Se crea cuando un nuevo participante se une a una conversación de grupo. Este objeto dm&#95;event incluye el ID del participante que se une, junto con la hora created&#95;at y el sender&#95;id del evento de &quot;invitación&quot;. 
 
 * **ParticipantsLeave** - Se crea cuando un participante abandona una conversación. Este objeto de evento incluye el ID del participante que se va, junto con la hora del evento. 
 
 Para obtener más información, consulta las [Referencias de la API de consulta de Mensajes Directos](/es/x-api/direct-messages/get-dm-events-for-a-dm-conversation).
 
 <div id="shared-conversation-and-event-ids-across-v11-and-v2">
-  ### IDs compartidos de conversación y de evento entre v1.1 y v2
+  ### IDs de conversación y de evento compartidos entre v1.1 y v2
 </div>
 
-Un concepto importante es que los ID de conversación y de evento se comparten entre las versiones v1.1 y v2 de la plataforma de X. Esto significa que se pueden usar ambas versiones juntas. Por ejemplo, los endpoints de Direct Messages v1.1 proporcionan métodos para retornar un único evento y para eliminar eventos, métodos que aún no están disponibles con v2. Dado que los ID son comunes entre v1.1 y v2, puedes hacer solicitudes a v1.1 basadas en ID proporcionados por v2, o haciendo referencia a los ID de conversación que se muestran en las URL de conversación en la aplicación de X.  
+Un concepto importante es que los IDs de conversación y de evento se comparten entre las versiones v1.1 y v2 de la Plataforma X. Esto significa que se pueden usar ambas versiones a la vez. Por ejemplo, los endpoints de Direct Messages v1.1 proporcionan métodos para obtener un único evento y para eliminar eventos, métodos que aún no están disponibles con v2. Dado que los IDs son comunes entre v1.1 y v2, puedes realizar solicitudes a v1.1 basadas en IDs proporcionados por v2 o haciendo referencia a los IDs de conversación que se muestran en las URLs de conversación en la aplicación de X.  
 
 <div id="direct-message-event-fields-and-expansions">
-  ### Campos de eventos de Mensajes Directos y expansiones
+  ### Campos y expansiones de eventos de Mensaje Directo
 </div>
 
-La X API v2 permite que los usuarios seleccionen exactamente qué datos quieren que la API les devuelva utilizando un conjunto de herramientas llamadas campos y expansiones. Por ejemplo, los endpoints de consulta de Mensajes Directos admiten los siguientes campos de dm&#95;events: 
+La X API v2 permite a los usuarios seleccionar exactamente qué datos quieren que se devuelvan por la API usando un conjunto de herramientas denominado campos y expansiones. Por ejemplo, los endpoints de consulta de Mensajes Directos admiten los siguientes campos de dm&#95;events: 
 
-* id, event&#95;type y text son los valores predeterminados para eventos MessageCreate. 
+* id, event&#95;type y text son los valores predeterminados para los eventos MessageCreate. 
 
-* id, event&#95;type y participant&#95;ids son los valores predeterminados para eventos ParticipantsJoin y ParticipantsLeave.
+* id, event&#95;type y participant&#95;ids son los valores predeterminados para los eventos ParticipantsJoin y ParticipantsLeave.
 
 * dm&#95;conversation&#95;id y created&#95;at están disponibles para todos los eventos.
 
-* attachments y referenced&#95;tweets están disponibles para eventos MessageCreate. 
+* attachments y referenced&#95;tweets están disponibles para eventos de tipo MessageCreate. 
 
 * sender&#95;id está disponible para eventos MessageCreate y ParticipantsJoin. 
 
@@ -77,27 +77,27 @@ La X API v2 permite que los usuarios seleccionen exactamente qué datos quieren 
 
 Además, los endpoints de consulta de Mensajes Directos admiten las siguientes [expansiones](/es/x-api/fundamentals/expansions):
 
-* sender&#95;id - Expande el objeto User asociado con quien envió el mensaje o quien invitó a alguien a la conversación. 
+* sender&#95;id - expande el objeto User asociado con quien envió el mensaje o quien invitó a alguien a la conversación. 
 
-* referenced&#95;tweets.id - Expande el objeto Publicación si el texto del Mensaje Directo incluye un enlace a una Publicación. 
+* referenced&#95;tweets.id - expande el objeto Post si el texto del Mensaje Directo incluye un enlace a una Publicación. 
 
-* attachments.media&#95;keys - Expande el objeto Media si el Mensaje Directo incluye un archivo adjunto de contenido multimedia. 
+* attachments.media&#95;keys - expande el objeto Media si el Mensaje Directo incluye un archivo adjunto de contenido multimedia. 
 
-* participant&#95;ids - Expande el objeto User asociado con quien se unió o abandonó una conversación de grupo.
+* participant&#95;ids - expande el objeto User asociado con quien se unió o salió de una conversación de grupo.
 
-Dado que las expansiones incluyen objetos de tipo Publicación, User y Media, también puedes usar los parámetros de consulta de la solicitud tweet.fields, user.fields y media.fields. Consulta nuestra guía sobre cómo [usar campos y expansiones](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) para obtener más información.
+Dado que las expansiones incluyen objetos de tipo Post, User y Media, también puedes usar los parámetros de consulta de la solicitud tweet.fields, user.fields y media.fields. Consulta nuestra guía sobre cómo [usar campos y expansiones](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) para obtener más información.
 
 <div id="conversation-event-types">
   ### Tipos de eventos de conversación
 </div>
 
-A continuación se muestran objetos JSON de ejemplo para los eventos de mensaje directo de tipo MessageCreate, ParticipantsJoin y ParticipantsLeave. 
+A continuación se muestran objetos JSON de ejemplo para los tipos de eventos de Mensajes Directos MessageCreate, ParticipantsJoin y ParticipantsLeave. 
 
-Campos disponibles del objeto dm&#95;event: id, text, event&#95;type, dm&#95;conversation&#95;id, created&#95;at, sender&#95;id, attachments, referenced&#95;tweets, participant&#95;ids. Consulta la sección Fields and Expansion para obtener más información sobre cómo seleccionar estos campos en tus solicitudes. 
+Campos disponibles del objeto dm&#95;event: id, text, event&#95;type, dm&#95;conversation&#95;id, created&#95;at, sender&#95;id, attachments, referenced&#95;tweets, participant&#95;ids. Consulta la sección Fields and Expansion para obtener más detalles sobre cómo seleccionar estos campos en tus solicitudes. 
 
 Ejemplo de evento MessageCreate: 
 
-Con todos los campos de dm&#95;event especificados, esta es la respuesta para un mensaje directo de texto sencillo: 
+Con todos los campos de dm&#95;event especificados, esta es la respuesta para un Mensaje Directo de texto sencillo: 
 
 `{
     "text": "Hi everyone.",
@@ -141,35 +141,35 @@ Con todos los campos de dm&#95;event especificados, esta es la respuesta para un
   ### Autenticación
 </div>
 
-Todos los endpoints de X API v2 requieren que autentiques tus solicitudes con un conjunto de credenciales, también conocidas como claves y tokens. Todos los Mensajes Directos son privados y requieren autorización de usuario para acceder a ellos. 
+Todos los endpoints de X API v2 requieren que autentiques tus solicitudes con un conjunto de credenciales, también conocidas como claves y tokens. Todos los mensajes directos son privados y requieren autorización de usuario para acceder a ellos. 
 
-Estos endpoints de Mensajes Directos requieren el uso de [OAuth 2.0 Authorization Flow with PKCE](/es/x-api/posts/manage-tweets) o [1.0a User Context](/es/resources/fundamentals/authentication), lo que significa que debes usar un conjunto de claves de API y Tokens de acceso de usuario para realizar una solicitud correctamente. Los Tokens de acceso deben estar asociados con el usuario en cuyo nombre estás realizando la solicitud. Si deseas generar un conjunto de Tokens de acceso para otro usuario, este debe autorizar o autenticar tu Aplicación utilizando el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
+Estos endpoints de mensajes directos requieren el uso de [OAuth 2.0 Authorization Flow with PKCE](/es/x-api/posts/manage-tweets) o [1.0a User Context](/es/resources/fundamentals/authentication), lo que significa que debes usar un conjunto de claves de API y tokens de acceso de usuario para realizar una solicitud exitosa. Los tokens de acceso deben estar asociados con el usuario en cuyo nombre estás realizando la solicitud. Si quieres generar un conjunto de tokens de acceso para otro usuario, ese usuario debe autorizar o autenticar tu Aplicación usando el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
 
-Ten en cuenta que el contexto de usuario de OAuth puede ser complejo de usar. Si no estás familiarizado con este método de autenticación, te recomendamos usar una [biblioteca](/es/x-api/tools-and-libraries/overview) o una herramienta como Postman para autenticar correctamente tus solicitudes. 
+Ten en cuenta que el contexto de usuario de OAuth puede ser complicado de usar. Si no estás familiarizado con este método de autenticación, te recomendamos usar una [biblioteca](/es/x-api/tools-and-libraries/overview) o una herramienta como Postman para autenticar correctamente tus solicitudes. 
 
-[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) permite un mayor control sobre el ámbito de una Aplicación y sobre los flujos de autorización en múltiples dispositivos. OAuth 2.0 te permite elegir ámbitos específicos y granulares que te otorgan permisos concretos en nombre de un usuario. Los endpoints de consulta de Mensajes Directos requieren estos ámbitos: dm.read, post.read, user.read
+[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) permite un mayor control sobre el alcance de una Aplicación y los flujos de autorización en múltiples dispositivos. OAuth 2.0 te permite elegir scopes específicos y detallados que te otorgan permisos concretos en nombre de un usuario. Los endpoints de consulta de mensajes directos requieren estos scopes: dm.read, post.read, user.read
 
-Para habilitar OAuth 2.0 en tu Aplicación, debes activarlo en la configuración de autenticación de tu Aplicación, que se encuentra en la sección de configuración de la Aplicación del portal para desarrolladores.
+Para habilitar OAuth 2.0 en tu Aplicación, debes activarlo en la configuración de autenticación de tu Aplicación, que se encuentra en la sección de configuración de la Aplicación en el portal para desarrolladores.
 
 <div id="developer-portal-projects-and-developer-apps">
   ### Portal para desarrolladores, Proyectos y aplicaciones de desarrollador
 </div>
 
-Para obtener un conjunto de credenciales de autenticación que funcionen con los endpoints de la X API v2, debes contar con una cuenta de desarrollador aprobada, configurar un Proyecto dentro de esa cuenta y crear una aplicación de desarrollador dentro de ese Proyecto. Luego podrás encontrar tus claves y tokens dentro de tu aplicación de desarrollador. 
+Para obtener un conjunto de credenciales de autenticación que funcionen con los endpoints de X API v2, debes tener una cuenta de desarrollador aprobada, crear un Proyecto en esa cuenta y crear una aplicación de desarrollador dentro de ese Proyecto. Luego podrás encontrar tus claves y tokens dentro de tu aplicación de desarrollador. 
 
 <div id="rate-limits">
   ### Límites de frecuencia
 </div>
 
-Cada día, miles de desarrolladores realizan solicitudes a X API. Para ayudar a gestionar el gran volumen de estas solicitudes, se aplican límites de frecuencia a cada endpoint que restringen el número de solicitudes que puedes realizar en nombre de tu Aplicación o en nombre de un usuario autenticado.
+Cada día, muchos miles de desarrolladores realizan solicitudes a la X API. Para ayudar a gestionar el gran volumen de estas solicitudes, se aplican límites de frecuencia a cada endpoint que restringen la cantidad de solicitudes que puedes realizar en nombre de tu Aplicación o de un usuario autenticado. 
 
-Los endpoints de consulta de Mensajes Directos tienen límites de frecuencia a nivel de usuario, lo que significa que el usuario autenticado en cuyo nombre realizas la solicitud solo puede hacer una cierta cantidad de solicitudes con tu Aplicación de X. Hay un límite de frecuencia de usuario de 300 solicitudes cada 15 minutos para los métodos GET. Estos límites de frecuencia se comparten entre los endpoints GET. 
+Los endpoints de consulta de Mensajes Directos tienen límites de frecuencia a nivel de usuario, lo que significa que el usuario autenticado en cuyo nombre realizas la solicitud solo puede hacer una cierta cantidad de solicitudes con tu Aplicación de X. Hay un límite de frecuencia por usuario de 300 solicitudes cada 15 minutos para los métodos GET. Estos límites de frecuencia se comparten entre los endpoints GET. 
 
 <div id="pagination">
   ### Paginación
 </div>
 
-Estos endpoints utilizan paginación para que las respuestas se devuelvan rápidamente. En los casos en los que haya más resultados de los que se pueden enviar en una sola respuesta (hasta 100 eventos), deberás paginar. Usa el parámetro max&#95;results para indicar cuántos resultados se devolverán por página y el parámetro pagination&#95;token para obtener la siguiente página de resultados. Puedes obtener más información en nuestra [guía de paginación](/es/x-api/fundamentals/pagination).
+Estos endpoints utilizan paginación para que las respuestas se devuelvan rápidamente. En los casos en que haya más resultados de los que se pueden enviar en una sola respuesta (hasta 100 eventos), tendrás que paginar. Usa el parámetro max&#95;results para indicar cuántos resultados se devolverán por página y el parámetro pagination&#95;token para obtener la siguiente página de resultados. Puedes obtener más información consultando nuestra [guía de paginación](/es/x-api/fundamentals/pagination).
 
 **Herramientas útiles**
 
@@ -177,13 +177,13 @@ A continuación se muestran algunas herramientas útiles que te recomendamos exp
 
 ****Postman****
 
-Postman es una excelente herramienta que puedes usar para probar un endpoint. Cada solicitud de Postman incluye todos los parámetros de ruta y del cuerpo de la solicitud para ayudarte a comprender rápidamente qué tienes disponible. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra página [Uso de Postman](/es/tutorials/postman-getting-started). 
+Postman es una excelente herramienta que puedes usar para probar un endpoint. Cada solicitud de Postman incluye todos los parámetros de ruta y de cuerpo para ayudarte a comprender rápidamente qué tienes disponible. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra página [Uso de Postman](/es/tutorials/postman-getting-started). 
 
 ****Código de ejemplo****
 
-Hay código de ejemplo en Python para los endpoints v2 de Mensajes Directos disponible en nuestro repositorio de [código de ejemplo de X API v2 en GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code). La carpeta &quot;Manage-Direct-Messages&quot; contiene ejemplos para los métodos POST y la carpeta &quot;Direct-Messages-lookup&quot; contiene ejemplos para los métodos GET.
+El código de ejemplo en Python para los endpoints v2 de Mensajes Directos está disponible en nuestro repositorio de [código de ejemplo de X API v2 en GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code). La carpeta &quot;Manage-Direct-Messages&quot; contiene ejemplos para los métodos POST y la carpeta &quot;Direct-Messages-lookup&quot; contiene ejemplos para los métodos GET.
 
-****Kits de desarrollo de software (SDK) de XDev****
+****XDev Software Development Kits (SDKs)****
 
 Estas [bibliotecas](/es/x-api/tools-and-libraries/overview) se están actualizando para los endpoints v2 de Mensajes Directos y deberían estar listas pronto:
 
@@ -192,4 +192,4 @@ Estas [bibliotecas](/es/x-api/tools-and-libraries/overview) se están actualizan
 
 **Bibliotecas de terceros**
 
-Existe un número creciente de [bibliotecas de terceros](/es/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2) desarrolladas por nuestra comunidad. Estas bibliotecas están diseñadas para ayudarte a empezar, y se espera que varias de ellas den soporte a los endpoints v2 de Mensajes Directos pronto. Puedes encontrar una biblioteca que funcione con los endpoints v2 buscando la etiqueta de versión adecuada.
+Hay un número cada vez mayor de [bibliotecas de terceros](/es/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2) desarrolladas por nuestra comunidad. Estas bibliotecas están diseñadas para ayudarte a comenzar, y se espera que varias de ellas admitan pronto los endpoints v2 de Mensajes Directos. Puedes encontrar una biblioteca que funcione con los endpoints v2 buscando la etiqueta de versión adecuada.

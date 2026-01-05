@@ -3,10 +3,10 @@ title: "分页"
 sidebarTitle: "分页"
 ---
 
-SDK 提供了通用的分页器工具，可用于任何返回分页响应的 endpoint。方法返回的是普通响应；你需要用分页器对其进行封装。
+该 SDK 提供了通用的分页工具，可用于任何返回分页响应的 endpoint。这些方法返回的只是原始响应；你可以再用分页器对其进行封装。
 
 <div id="basic-pagination">
-  ### 基本分页
+  ### 基础分页
 </div>
 
 <CodeGroup dropdown>
@@ -16,7 +16,7 @@ import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform
 
 const client: Client = new Client({ bearerToken: 'your-bearer-token' });
 
-// 使用正确的类型包装任意列表端点
+// 使用合适的类型包装任意列表端点
 const followers: UserPaginator = new UserPaginator(
   async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
     const res = await client.users.getFollowers('<userId>', {
@@ -90,7 +90,7 @@ import { Schemas } from '@xdevplatform/xdk';
 
 for await (const user of followers) {
   const typedUser: Schemas.User = user;
-  console.log(typedUser.username);  // 完整的类型安全访问
+  console.log(typedUser.username);  // 完全类型安全的访问
 }
 ```
 
@@ -103,7 +103,7 @@ for await (const user of followers) {
 </CodeGroup>
 
 <div id="next-page-as-a-new-instance">
-  ### 将下一页作为一个新的实例
+  ### 将下一页作为一个新实例
 </div>
 
 <CodeGroup>
@@ -113,7 +113,7 @@ import { UserPaginator } from '@xdevplatform/xdk';
 
 await followers.fetchNext();
 if (!followers.done) {
-  const page2: UserPaginator = await followers.next(); // 从下一页开始的独立分页器实例
+  const page2: UserPaginator = await followers.next(); // 从下一页开始的独立分页器
   await page2.fetchNext();
   console.log(page2.users.length);  // 第二页中的条目
 }
@@ -141,14 +141,14 @@ import { UserPaginator, Schemas } from '@xdevplatform/xdk';
 try {
   for await (const item of followers) {
     const user: Schemas.User = item;
-    // 处理用户...
+    // 处理 user...
   }
 } catch (err: unknown) {
   if (followers.rateLimited) {
-    console.error('Rate limited, backoff required');
-    // 执行退避 / 稍后重试
+    console.error('已触发速率限制，需要退避');
+    // 退避 / 稍后重试
   } else {
-    console.error('Pagination error:', err);
+    console.error('分页错误：', err);
     throw err;
   }
 }
@@ -161,7 +161,7 @@ try {
   }
 } catch (err) {
   if (followers.rateLimited) {
-    // 执行退避 / 稍后重试
+    // 退避 / 稍后重试
   } else {
     throw err;
   }
@@ -171,5 +171,5 @@ try {
 </CodeGroup>
 
 <Info>
-如需查看使用 JavaScript/TypeScript XDK 的详细代码示例，请访问我们的 [代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/javascript)。
+若要查看使用 Javascript/TypeScript XDK 的详细代码示例，请参阅我们的[代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/javascript)。
 </Info>

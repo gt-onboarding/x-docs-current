@@ -1,15 +1,15 @@
 ---
 title: "字段"
-keywords: ["字段", "帖子字段", "用户字段", "字段参数", "API 字段", "数据字段", "自定义响应", "字段选择"]
+keywords: ["fields", "tweet fields", "user fields", "field parameters", "API fields", "data fields", "customize response", "field selection"]
 ---
 
-X API v2 的各个 endpoint 配备了一组称为 *fields*（字段）的参数，它们允许你从 endpoint 响应中的每个对象中，只选择你所需要的数据。
+X API v2 的端点配备了一组称为 *fields* 的参数，你可以借此只从端点响应中的每个对象中选择所需的数据。
 
-默认情况下，Post 对象只返回 `id` 和 `text` 字段，对于 2022 年 9 月 29 日之后创建的帖子，还会返回 `edit_history_tweet_ids` 字段。如果你需要帖子的创建日期或公开指标，就需要使用 `tweet.fields` 参数来请求这些字段。这样可以提供更高程度的自定义，使你能够根据使用场景只请求所需的字段。例如，你可以在请求中包含如下查询字符串：
+默认情况下，Post 对象只返回 `id` 和 `text` 字段，对于 2022 年 9 月 29 日之后创建的 Post，还会返回 `edit_history_tweet_ids` 字段。如果你需要 Post 的创建日期或公开指标，则需要使用 `tweet.fields` 参数来请求这些字段。通过仅请求与你的使用场景相关的字段，这种方式提供了更高程度的自定义。例如，你可以在请求中包含如下查询字符串：
 
 `?tweet.fields=created_at,public_metrics`
 
-每种对象都有其对应的参数，用于专门请求与该对象关联的字段。以下是当前可用的不同字段参数：
+每个对象都有其对应的参数，用于专门请求与该对象关联的字段。以下是当前可用的不同字段参数：
 
 * [Post](/zh/x-api/fundamentals/data-dictionary#tweet) → `tweet.fields`
 * [User](/zh/x-api/fundamentals/data-dictionary#user) → `user.fields`
@@ -17,15 +17,15 @@ X API v2 的各个 endpoint 配备了一组称为 *fields*（字段）的参数�
 * [Poll](/zh/x-api/fundamentals/data-dictionary#poll) → `poll.fields`
 * [Place](/zh/x-api/fundamentals/data-dictionary#place) → `place.fields`
 
-当使用主要返回某一特定对象的 endpoint 时，只需使用与该对象匹配的字段参数，并在该参数的值中以逗号分隔的列表形式指定所需字段，就可以在响应中获取这些字段。
+当使用主要返回某一特定对象的端点时，只需使用与之匹配的字段参数，并在该参数的值中以逗号分隔的列表形式指定所需字段，即可在响应中获取这些字段。
 
 <div id="example">
   ### 示例
 </div>
 
-如果你使用 [GET /tweets/search/recent](/zh/x-api/posts/recent-search) 端点，你在该响应中主要会收到 [Tweet objects](/zh/x-api/fundamentals/data-dictionary#tweet)。如果不指定任何 fields 参数，你只会收到默认值 `id` 和 `text`。如果你希望在响应中获取返回的帖子所对应的公开指标，你需要在请求中包含 `tweet.fields` 参数，并将其值设置为 `public_metrics`。
+如果你正在使用 [GET /tweets/search/recent](/zh/x-api/posts/recent-search) 端点，你在该响应中主要会收到 [Tweet 对象](/zh/x-api/fundamentals/data-dictionary#tweet)。如果不指定任何字段参数，你只会收到默认的 `id` 和 `text` 值。如果你希望在响应中获取返回帖子对应的公开指标，则需要在请求中包含 `tweet.fields` 参数，并将其值设置为 `public_metrics`。
 
-该请求类似如下所示。如果你想直接使用这个请求，请务必将 `$BEARER_TOKEN` 替换为你的 [Bearer Token](/zh/resources/fundamentals/authentication)，并通过命令行工具发送该请求。
+该请求示例如下。如果你想直接使用此请求，请确保将 `$BEARER_TOKEN` 替换为你的 [Bearer Token](/zh/resources/fundamentals/authentication)，并使用命令行工具发送该请求。
 
 ```bash
 curl --request GET \
@@ -33,7 +33,7 @@ curl --request GET \
   --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-如果你在终端中发送该请求，返回的每条帖子都会包含以下字段：
+如果你在终端中发送此请求，返回的每个帖子都会包含以下字段：
 
 ```
 {
@@ -50,7 +50,7 @@ curl --request GET \
 }
 ```
 
-如果你想从某个 endpoint 返回的主对象所关联的其他对象中获取一组字段，你需要额外添加一个 expansions 参数。比如，如果你仍然使用之前的同一个 GET search/tweets/recent endpoint，并且希望获取作者的个人资料简介，你需要在请求中同时传递 `expansions=author_id` 和 `user.fields=description`。下面是一个示例。如果你想尝试这个请求，请务必在将其粘贴到命令行工具中之前，将 `$BEARER_TOKEN` 替换为你的 [Bearer Token](/zh/resources/fundamentals/authentication)。
+如果你想从某个与端点返回的主对象关联的次级对象中获取一组字段，你需要在请求中额外包含一个 `expansions` 参数。比如，如果你继续使用前面同一个 `GET search/tweets/recent` 端点，并且想获取作者的个人简介，你需要在请求中传入 `expansions=author_id` 和 `user.fields=description`。下面是一个示例，展示该请求可能的样子。如果你想亲自尝试此请求，在将其粘贴到命令行工具之前，请务必将 `$BEARER_TOKEN` 替换为你的 [Bearer Token](/zh/resources/fundamentals/authentication)。
 
 ```bash
   curl --request GET \
@@ -58,7 +58,7 @@ curl --request GET \
   --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-如果你在请求中指定了这些内容，那么每条返回的帖子都会包含以下字段，且相关[用户对象](/zh/x-api/fundamentals/data-dictionary#user)的默认字段和你指定的字段会在 `includes` 中返回。你可以通过匹配 `tweet.author_id` 和 `users.id` 字段，将用户对象映射回对应的帖子。
+如果你在请求中指定了这些字段，那么每条返回的帖子都会包含以下字段，且相关的 [user 对象](/zh/x-api/fundamentals/data-dictionary#user) 的默认字段以及你显式请求的字段将会在 `includes` 中返回。可以通过匹配 `tweet.author_id` 和 `users.id` 字段，将 user 对象映射回对应的帖子。
 
 ```
 {
@@ -88,6 +88,6 @@ curl --request GET \
 }
 ```
 
-请注意，你无法请求特定的子字段（例如 `public_metrics.retweet_count`）。当指定顶层字段（`public_metrics`）时，会返回所有子字段。我们已在每个端点的 API 参考页面的参数表中列出了你可以请求的所有字段。
+请注意，你无法请求特定的子字段（例如 `public_metrics.retweet_count`）。当指定顶级字段（`public_metrics`）时，所有子字段都会随之返回。我们已经在每个 endpoint 的 API 参考文档的参数表中列出了你可以请求的所有可能字段。
 
-完整字段列表参见[对象模型](/zh/x-api/fundamentals/data-dictionary#tweet)。要为并非该端点主要资源的对象请求扩展及其字段，请将 [expansions](/zh/x-api/fundamentals/expansions) 参数与字段一起使用。
+所有字段的完整列表请参阅[对象模型](/zh/x-api/fundamentals/data-dictionary#tweet)。对于不是该端点主要资源的对象，如需展开并请求其字段，请将 [expansions](/zh/x-api/fundamentals/expansions) 参数与字段参数配合使用。

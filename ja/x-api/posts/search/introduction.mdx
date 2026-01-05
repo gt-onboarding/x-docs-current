@@ -1,64 +1,64 @@
 ---
-title: 概要
-sidebarTitle: 概要
-keywords: ["ポストを検索", "ポスト検索", "最近検索", "全アーカイブ検索", "ポスト検索", "検索 API", "検索クエリ", "検索演算子", "履歴検索"]
+title: はじめに
+sidebarTitle: はじめに
+keywords: ["ポストを検索", "ポスト検索", "最近のポスト検索", "全アーカイブの検索", "ポスト検索", "検索 API", "検索クエリ", "検索演算子", "履歴検索"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-特定のトピックやイベントに関する X 上の会話を把握するうえで、ポスト検索は重要な機能です。X 上にも同様の機能はありますが、これらのエンドポイントは、ポストをフィルタリングして取り込む際に、より高い柔軟性と強力な機能を提供するため、リサーチに関連するデータをより簡単に見つけられるようになり、ほぼリアルタイムの「リスニング」アプリケーションを構築したり、関心のあるトピックに関連するポストを探索・分析・活用したりできるようになります。 
+ポストを検索することは、特定のトピックやイベントに関する X 上の会話を見つけ出すための重要な機能です。X 上にも同様の機能はありますが、これらのエンドポイントでは、ポストをフィルタリングおよび取得する際に、より高い柔軟性と機能が提供されるため、リサーチに関連するデータをより簡単に見つけられるほか、ほぼリアルタイムの「リスニング」アプリケーションを構築したり、一般的に特定の関心トピックに関連するポストを探索・分析し、必要に応じてアクションを実行したりできます。 
 
-ポストを検索できるエンドポイントとして、Recent search と full-archive search の 2 つを提供しています。これら 2 つの REST エンドポイントは、特定のトピックに関するポストをフィルタリングするために単一の検索クエリを使用するなど、共通の設計と機能を備えています。これらの検索クエリは、メッセージのキーワード、ハッシュタグ、URL などのポストおよびユーザー属性にマッチする一連のオペレーターによって構成されます。オペレーターは、ブール論理やかっこを用いてクエリに組み合わせることで、クエリのマッチング動作をより細かく調整できます。 
+ポストを検索できるエンドポイントとして、Recent search と full-archive search の 2 つを提供しています。これらの REST エンドポイントは共通の設計と機能を持っており、特定トピック周辺のポストをフィルタリングするために単一の検索クエリを使用する点も共通です。これらの検索クエリは、メッセージのキーワード、ハッシュタグ、URL などのポストおよびユーザー属性にマッチする一連のオペレーターによって構成されます。オペレーターは、ブールロジックやかっこを用いてクエリ内で組み合わせることで、クエリのマッチング動作をより細かく調整できます。 
 
-Recent search と full-archive search の両エンドポイントは、編集されたポストのメタデータを提供します。2022年9月29日以降に作成されたポストについては、ポストが一度も編集されていない場合でも、すべてのオブジェクトにポスト編集メタデータが含まれます。ポストが編集されるたびに、新しいポスト ID が作成されます。ポストの編集履歴は、元の ID から始まるポスト ID の配列として記録されます。
+Recent search と full-archive search の両エンドポイントは、編集済みポストのメタデータを提供します。2022 年 9 月 29 日以降に作成されたすべてのポストオブジェクトには、ポストが一度も編集されていない場合でも、ポスト編集メタデータが含まれます。ポストが編集されるたびに、新しい Post ID が作成されます。ポストの編集履歴は、元の ID から始まる Post ID の配列として記録されます。
 
-これらのエンドポイントは常に最新の編集内容と、その編集履歴を返します。30 分の編集可能時間経過後に収集されたポストは、最終バージョンを表します。Edit Post メタデータの詳細については、[Edit Posts fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。
+これらのエンドポイントは常に、最新の編集内容と、存在する場合はその編集履歴を返します。ポストが 30 分間の編集可能時間を過ぎて収集された場合、そのポストは最終版を表します。Edit Post メタデータの詳細については、[Edit Posts fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。
 
-クエリを設定してポストの受信が始まると、これらのエンドポイントは、時間とポスト ID の両方の範囲で結果をナビゲートすることをサポートします。これは、次の 2 つの一般的なユースケースをサポートするよう設計されています。 
+クエリを設定してポストの受信を開始すると、これらのエンドポイントでは、時間および Post ID の範囲の両方で結果をたどることができます。これは、次の 2 つの一般的なユースケースをサポートするために設計されています。 
 
-* **過去データの取得 (Get historical)**: リアルタイム性にはこだわらず、関心のある期間のデータを取得するリクエストです。単一のリクエストを行い、必要に応じてページネーションを用いてマッチするデータをすべて取得します。これは Search Posts エンドポイントのデフォルトモードです。
-* **ポーリング (Polling)** または **リスニング (listening)**: 「前回のリクエスト以降の新しいポストはあるか？」というモードでリクエストを行います。リクエストは継続的に行われ、一般的に、関心のあるポストをほぼリアルタイムで「リスニング」するユースケースにフォーカスします。
+* **履歴を取得**: リクエストは関心のある期間に対して行われ、データのリアルタイム性には重点を置きません。単一のリクエストが行われ、必要に応じてページネーションを用いて、条件に一致するすべてのデータが返されます。これは Search Posts のデフォルトモードです。
+* **ポーリング**または**リスニング**: リクエストは「前回のリクエスト以降に新しいポストはあるか？」というモードで行われます。リクエストは継続的に実行され、通常は、関心のあるポストをほぼリアルタイムで「リスニング」するユースケースにフォーカスしています。
 
-多くのオペレーターとクエリ制限は [Enterprise access](/ja/x-api/getting-started/about-x-api) 専用であり、追加機能を利用するには、Enterprise access を持つ [プロジェクト](/ja/resources/fundamentals/projects) 内のアプリからのキーとトークンを使用する必要があります。これについての詳細は、以下のエンドポイントセクションで確認できます。
+多くのオペレーターやクエリの上限値は [Enterprise access](/ja/x-api/getting-started/about-x-api) 専用であり、追加機能を利用するには、Enterprise access を持つ [プロジェクト](/ja/resources/fundamentals/projects) 内のアプリのキーとトークンを使用する必要があります。これについては、以下のエンドポイントセクションで詳しく説明しています。
 
-Recent search と full-archive search の両エンドポイントで返されたポストは、月間の [Post cap](/ja/x-api/fundamentals/post-cap) にカウントされます。
+Recent search と full-archive search の両エンドポイントによって返されるポストは、月ごとの [Post cap](/ja/x-api/fundamentals/post-cap) にカウントされます。
 
 **アカウント設定**
 
 これらのエンドポイントにアクセスするには、次が必要です。
 
 * 承認済みの [開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)。
-* [プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) のキーとトークンを使って認証すること。 
+* [プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用して認証すること。 
 
-X API v2 エンドポイントへのアクセス方法の詳細については、[はじめにガイド](/ja/x-api/getting-started/getting-access) をご覧ください。
+X API v2 エンドポイントへのアクセス方法の詳細については、[getting started guide](/ja/x-api/getting-started/getting-access) を参照してください。
 
 <div id="recent-search">
   ## 直近検索
 </div>
 
-recent search エンドポイントを使用すると、直近 1 週間以内に投稿された公開ポストの中から、フィルタリングしたポストにプログラムからアクセスできます。これは、開発者アカウントを持ち、[プロジェクト](/ja/resources/fundamentals/projects) 内の [App](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用しているすべての開発者が利用できます。
+recent search エンドポイントを使用すると、過去 1 週間に投稿された公開ポストをフィルタリングした結果に、プログラムからアクセスできます。このエンドポイントは、開発者アカウントを持ち、[プロジェクト](/ja/resources/fundamentals/projects) 内の [App](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用しているすべての開発者が利用できます。
 
-リクエストの認証には、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)、[OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、または [OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用できます。ただし、プライベートメトリクスや、ポスト結果内のオーガニックメトリクスとプロモーションメトリクスの内訳を取得したい場合は、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE を使用し、対象コンテンツを投稿したユーザーに関連付けられたユーザーのアクセストークンを渡す必要があります。
+リクエストは [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)、[OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) で認証できます。ただし、プライベートメトリクスや、ポスト結果内でのオーガニックメトリクスとプロモーションメトリクスの内訳を取得したい場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE を使用し、対象コンテンツを投稿したユーザーに紐づくユーザーアクセストークンを渡す必要があります。 
 
-このエンドポイントは、1 リクエストあたり最大 100 件のポストを逆時系列で返すことができ、一致した大量のポストをページングするための [ページネーション](/ja/x-api/posts/search/integrate/paginate) トークンが提供されます。
+このエンドポイントは、リクエスト 1 回あたり最大 100 件のポストを新しいものから順に返し、大量の一致するポストをページングするための [ページネーション](/ja/x-api/posts/search/integrate/paginate) トークンを提供します。 
 
-通常アクセスを持つプロジェクトを使用する場合、基本的なセットの [演算子](/ja/x-api/posts/search/integrate/build-a-query) を使用でき、最大 512 文字のクエリを作成できます。Enterprise アクセスを持つプロジェクトを使用する場合は、追加の演算子にアクセスできます。Enterprise アクセスを持つプロジェクトでは、最大 4096 文字のクエリを作成できます。
+通常アクセス権を持つプロジェクトを使用する場合、基本的な [演算子](/ja/x-api/posts/search/integrate/build-a-query) セットを使用でき、最大 512 文字までのクエリを作成できます。Enterprise アクセス権を持つプロジェクトを使用する場合は、追加の演算子にアクセスできます。Enterprise アクセス権を持つプロジェクトでは、最大 4096 文字までのクエリを作成できます。
 
-詳しくは [アクセスレベル](/ja/x-api/getting-started/about-x-api) を参照してください。
+[アクセスレベル](/ja/x-api/getting-started/about-x-api) について詳しくは、こちらをご覧ください。
 
 <div id="full-archive-search">
-  ## 全アーカイブ検索
+  ## フルアーカイブ検索
 </div>
 
-v2 の全アーカイブ検索エンドポイントは、[Pro](/ja/x-api/getting-started/about-x-api "Pro") アクセスと [Enterprise](/ja/x-api/getting-started/about-x-api) アクセスを持つプロジェクトでのみ利用できます。このエンドポイントを使用すると、検索クエリに基づいて、2006 年 3 月に投稿された最初のポストまでさかのぼる完全なアーカイブから公開ポストにプログラムからアクセスできます。
+v2 フルアーカイブ検索エンドポイントは、[Pro](/ja/x-api/getting-started/about-x-api "Pro") アクセスおよび [Enterprise](/ja/x-api/getting-started/about-x-api) アクセスを持つプロジェクトでのみ利用できます。このエンドポイントを使用すると、検索クエリに基づき、2006 年 3 月の最初のポストまでさかのぼる完全なアーカイブから公開ポストにプログラムからアクセスできます。
 
-このエンドポイントへのリクエストは [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) を使って認証でき、[App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) は Pro または Enterprise アクセスを持つプロジェクト内のアプリから発行されたものである必要があります。このエンドポイントでは、他のユーザーの代わりにリクエスト（OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE）を行うことはできないため、非公開の[メトリクス](/ja/x-api/fundamentals/metrics)を取得することはできません。 
+このエンドポイントへのリクエストは [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) を使用して認証できます。また、[App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) は Pro または Enterprise アクセスを持つプロジェクト内のアプリから発行されたものでなければなりません。このエンドポイントでは、他のユーザーの代理としてのリクエスト（OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE）を行うことはできないため、非公開の [メトリクス](/ja/x-api/fundamentals/metrics) を取得することはできません。 
 
-このエンドポイントは、1 回のリクエストで最大 500 件のポストを新しいものから順に返し、大量の一致するポストをページングするための[ページネーション](/ja/x-api/posts/search/integrate/paginate)トークンを提供します。
+このエンドポイントは、1 回のリクエストあたり最大 500 件のポストを新しい順に返すことができ、大量の一致するポストをページングするための [ページネーション](/ja/x-api/posts/search/integrate/paginate) トークンが提供されます。
 
-**注:** tweet.fields パラメータで[注釈](/ja/x-api/fundamentals/post-annotations)をリクエストする場合、max&#95;results パラメータは現在、最大値 100 に制限されています。将来的に変更される可能性はありますが、この制限に留意してください。
+**注:** tweet.fields パラメータを通じて [annotations](/ja/x-api/fundamentals/post-annotations) をリクエストする場合、max&#95;results パラメータは現在、最大値が 100 に制限されています。これは将来変更される可能性がありますが、この制限に留意してください。
 
-このエンドポイントは Pro および Enterprise アクセスが承認されている方のみ利用できるため、検索[演算子](/ja/x-api/posts/search/integrate/build-a-query)の完全なセットにアクセスでき、最大 1024 文字までのクエリを作成できます。
+このエンドポイントは Pro および Enterprise アクセスが承認されたプロジェクトでのみ利用できるため、検索 [オペレーター](/ja/x-api/posts/search/integrate/build-a-query) の全セットを使用でき、最大 1024 文字までのクエリを実行できます。
 
 <Button href="/ja/x-api/posts/search/quickstart/full-archive-search">
   クイックスタート
@@ -73,13 +73,13 @@ v2 の全アーカイブ検索エンドポイントは、[Pro](/ja/x-api/getting
 <br />
 
 <Button href="https://github.com/xdevplatform/search-tweets-python">
-  ポスト検索用 Python クライアント
+  ポスト検索 Python クライアント
 </Button>
 
 <br />
 
 <Button href="https://github.com/xdevplatform/search-tweets-ruby">
-  ポスト検索用 Ruby クライアント
+  ポスト検索 Ruby クライアント
 </Button>
 
 <br />
@@ -100,8 +100,8 @@ v2 の全アーカイブ検索エンドポイントは、[Pro](/ja/x-api/getting
 
 **関連リソース**
 
-[Postman を使ってリクエストを送信する方法を学ぶ](/ja/tutorials/postman-getting-started)
+[Postman を使ってリクエストを送信する方法](/ja/tutorials/postman-getting-started)
 
-[エラーのトラブルシュート](https://developer.x.com/en/support/x-api)
+[エラーのトラブルシューティング](https://developer.x.com/en/support/x-api)
 
 [API リファレンスページを参照](/ja/x-api/posts/recent-search)

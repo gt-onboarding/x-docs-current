@@ -3,13 +3,13 @@ title: "フィールド"
 keywords: ["fields", "tweet fields", "user fields", "field parameters", "API fields", "data fields", "customize response", "field selection"]
 ---
 
-X API v2 の各エンドポイントには *フィールド* と呼ばれる一連のパラメータが用意されており、エンドポイントレスポンス内の各オブジェクトから、必要なデータだけを選択できるようになっています。
+X API v2 のエンドポイントには *フィールド* と呼ばれる一連のパラメーターが用意されており、エンドポイントのレスポンス内に含まれる各オブジェクトから、必要なデータだけを選択して取得できます。
 
-デフォルトでは、Post オブジェクトは `id` と `text` フィールド、そして 2022 年 9 月 29 日以降に作成された Post については `edit_history_tweet_ids` フィールドのみを返します。Post の作成日時や公開メトリクスが必要な場合は、それらをリクエストするために `tweet.fields` パラメータを使用する必要があります。これにより、ユースケースに応じて必要なフィールドだけをリクエストできるため、レスポンスをより柔軟にカスタマイズできます。例えば、次のクエリ文字列をリクエストに含めます。
+デフォルトでは、Post オブジェクトは `id` と `text` フィールドのみを返し、さらに 2022 年 9 月 29 日以降に作成されたポストについては `edit_history_tweet_ids` フィールドも返します。ポストの作成日時や公開メトリクスが必要な場合は、それらを取得するために `tweet.fields` パラメーターを使用する必要があります。これにより、ユースケースに応じて必要なフィールドだけをリクエストでき、より柔軟にカスタマイズすることができます。たとえば、リクエストには次のクエリ文字列を含めます。
 
 `?tweet.fields=created_at,public_metrics`
 
-各オブジェクトには、それぞれのオブジェクトに関連付けられたフィールドを明示的にリクエストするための専用パラメータがあります。現在利用可能なフィールドパラメータは次のとおりです。
+各オブジェクトには、それぞれのオブジェクトに関連付けられたフィールドを個別にリクエストするための固有のパラメーターがあります。現在利用可能なフィールド用パラメーターは次のとおりです。
 
 * [Post](/ja/x-api/fundamentals/data-dictionary#tweet) → `tweet.fields`
 * [User](/ja/x-api/fundamentals/data-dictionary#user) → `user.fields`
@@ -17,15 +17,15 @@ X API v2 の各エンドポイントには *フィールド* と呼ばれる一�
 * [Poll](/ja/x-api/fundamentals/data-dictionary#poll) → `poll.fields`
 * [Place](/ja/x-api/fundamentals/data-dictionary#place) → `place.fields`
 
-特定のオブジェクトを主に返すエンドポイントを使用する場合は、そのオブジェクトに対応するフィールドパラメータを使用し、そのパラメータの値として取得したいフィールドをカンマ区切りのリストで指定するだけで、レスポンスにそれらのフィールドを含めることができます。
+特定のオブジェクトを主に返すエンドポイントを使用する場合は、対応するフィールドパラメーターを使用し、そのパラメーターの値として取得したいフィールドをカンマ区切りのリストで指定することで、レスポンスにそれらのフィールドを含めることができます。
 
 <div id="example">
   ### 例
 </div>
 
-[GET /tweets/search/recent](/ja/x-api/posts/recent-search) エンドポイントを使用している場合、そのレスポンスでは主に [ポストオブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) が返されます。`fields` パラメータを指定しない場合、デフォルトの `id` と `text` のみが返されます。レスポンスで返されるポストの公開メトリクスに関心がある場合は、リクエストに `tweet.fields` パラメータを含め、その値として `public_metrics` を指定します。
+[GET /tweets/search/recent](/ja/x-api/posts/recent-search) エンドポイントを使用している場合、そのレスポンスには主に [ポスト（Tweet）オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) が含まれます。`fields` パラメータを指定しない場合は、デフォルト値である `id` と `text` のみが返されます。レスポンスで返されるポストの公開メトリクスも取得したい場合は、リクエストに `tweet.fields` パラメータを含め、その値として `public_metrics` を指定します。
 
-このリクエストは次のようになります。このリクエストを使用する場合は、`$BEARER_TOKEN` を自分の [Bearer Token](/ja/resources/fundamentals/authentication) に必ず置き換え、使用しているコマンドラインツールから送信してください。
+このリクエストは次のようになります。このリクエストを利用する場合は、必ず `$BEARER_TOKEN` を自身の [Bearer Token](/ja/resources/fundamentals/authentication) に置き換え、使用しているコマンドラインツールから送信してください。
 
 ```bash
 curl --request GET \
@@ -33,7 +33,7 @@ curl --request GET \
   --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-ターミナルからこのリクエストを送信すると、返される各ポストには以下のフィールドが含まれます。
+ターミナルでこのリクエストを送信すると、レスポンスとして返される各ポストには次のフィールドが含まれます。
 
 ```
 {
@@ -50,7 +50,7 @@ curl --request GET \
 }
 ```
 
-エンドポイントによって返されるプライマリオブジェクトに関連付けられたセカンダリオブジェクトから一連のフィールドを取得したい場合は、追加で `expansions` パラメータを指定する必要があります。たとえば、先ほどと同じ `GET search/tweets/recent` エンドポイントを使用していて、ポストの作成者のプロフィール説明を取得したい場合は、リクエストに `expansions=author_id` と `user.fields=description` を指定する必要があります。以下はその例です。このリクエストを試す場合は、コマンドラインツールに貼り付ける前に、`$BEARER_TOKEN` をご自身の [Bearer Token](/ja/resources/fundamentals/authentication) に置き換えてください。
+エンドポイントから返されるプライマリオブジェクトに関連付けられたセカンダリオブジェクトから一連のフィールドを取得したい場合は、追加の `expansions` パラメータを指定する必要があります。たとえば、先ほどと同じ `GET search/tweets/recent` エンドポイントを使用していて、投稿者のプロフィール説明を取得したい場合、リクエストに `expansions=author_id` と `user.fields=description` を含める必要があります。以下は、その例です。このリクエストを試す場合は、コマンドラインツールに貼り付ける前に、`$BEARER_TOKEN` をご自身の [Bearer Token](/ja/resources/fundamentals/authentication) に置き換えてください。
 
 ```bash
   curl --request GET \
@@ -58,7 +58,7 @@ curl --request GET \
   --header 'Authorization: Bearer $BEARER_TOKEN'
 ```
 
-これをリクエスト内で指定すると、配信される各ポストには次のフィールドが含まれ、関連する[ユーザーオブジェクトの](/ja/x-api/fundamentals/data-dictionary#user)デフォルトフィールドおよび指定したフィールドが `includes` 内で返されます。ユーザーオブジェクトは、`tweet.author_id` フィールドと `users.id` フィールドを照合することで、対応するポストとマッピングできます。
+このパラメータをリクエストで指定すると、配信される各ポストには次のフィールドが含まれ、関連する[ユーザーオブジェクト](/ja/x-api/fundamentals/data-dictionary#user)のデフォルトフィールドおよび指定したフィールドが `includes` 内に返されます。ユーザーオブジェクトは、`tweet.author_id` フィールドと `users.id` フィールドを照合することで、対応するポストにマッピングできます。
 
 ```
 {
@@ -88,6 +88,6 @@ curl --request GET \
 }
 ```
 
-特定のサブフィールド（例：`public_metrics.retweet_count`）をリクエストすることはできない点に注意してください。トップレベルのフィールド（`public_metrics`）を指定すると、その配下のサブフィールドはすべて返されます。リクエスト可能なすべてのフィールドは、各エンドポイントのAPIリファレンスページにあるパラメータ表に一覧化されています。
+特定のサブフィールド（例：`public_metrics.retweet_count`）をリクエストとして個別に指定することはできない点に留意してください。トップレベルのフィールド（`public_metrics`）を指定した場合は、すべてのサブフィールドが返されます。各エンドポイントの API リファレンスページのパラメーターテーブルに、リクエスト可能なすべてのフィールドを掲載しています。
 
-利用可能なすべてのフィールドの一覧は、[オブジェクトモデル](/ja/x-api/fundamentals/data-dictionary#tweet) に記載されています。そのエンドポイントの主要なリソースではないオブジェクトのフィールドを展開してリクエストするには、[expansions](/ja/x-api/fundamentals/expansions) パラメータをフィールドと併用してください。
+利用可能なフィールドの全リストは [オブジェクトモデル](/ja/x-api/fundamentals/data-dictionary#tweet) に記載されています。エンドポイントの主要リソースではないオブジェクトのフィールドを展開してリクエストするには、[expansions](/ja/x-api/fundamentals/expansions) パラメータをフィールド指定と組み合わせて使用します。

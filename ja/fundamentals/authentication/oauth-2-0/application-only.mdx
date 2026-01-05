@@ -1,47 +1,47 @@
 ---
 title: アプリ専用認証と OAuth 2.0 Bearer Token
-sidebarTitle: OAuth 2.0 アプリ専用フロー (Bearer Token)
-keywords: ["アプリ専用認証", "OAuth 2.0 アプリ専用フロー", "Bearer Token 認証", "アプリ専用認証", "読み取り専用アクセス", "公開データアクセス"]
+sidebarTitle: OAuth 2.0 アプリ専用フロー（Bearer Token）
+keywords: ["アプリ専用認証", "OAuth 2.0 アプリ専用フロー", "Bearer Token 認証", "アプリ専用認証（app-only auth）", "読み取り専用アクセス", "公開データへのアクセス"]
 ---
 
 <div id="app-only-authentication-and-oauth-20-bearer-token">
-  ### アプリ専用認証と OAuth 2.0 Bearer Token
+  ### アプリのみ認証と OAuth 2.0 Bearer Token
 </div>
 
-X では、特定のユーザーではなく、アプリケーション自身を代表して認証済みリクエストを発行できるようにする機能を提供しています。X の実装は、[OAuth 2 specification](http://tools.ietf.org/html/rfc6749) の [Client Credentials Grant](http://tools.ietf.org/html/rfc6749#section-4.4) フローに基づいています。
+X では、特定のユーザーではなくアプリケーション自身を主体として認証済みリクエストを送信できるようにする仕組みを提供しています。X における実装は、[OAuth 2 specification](http://tools.ietf.org/html/rfc6749) の [Client Credentials Grant](http://tools.ietf.org/html/rfc6749#section-4.4) フローに基づいています。
 
-アプリ専用認証はユーザーコンテキストを一切含まず、アプリケーションが自分自身を代表して API リクエストを行う形態の認証です。この方法は、公開情報への読み取り専用アクセスだけが必要な開発者向けです。 
+アプリのみ認証では、ユーザーコンテキストは一切含まれず、アプリケーションが自分自身のために API リクエストを実行する形式の認証となります。この方法は、公開情報への読み取り専用アクセスだけが必要な開発者向けです。
 
-アプリ専用認証は、アプリのコンシューマー API キー、またはアプリ専用アクセストークン（Bearer Token）を使用して行うことができます。これは、X API へのリクエストは、認証済みユーザーを必要としないものに限定されることを意味します。
+アプリのみ認証は、アプリの consumer API キーを使用するか、アプリのみアクセストークン (Bearer Token) を使用することで行うことができます。これは、X API に対して行えるリクエストは、認証済みユーザーを必要としないものに限られることを意味します。
 
-アプリ専用認証では、次のような操作を実行できます。
+アプリのみ認証を使用すると、次のような操作が可能です:
 
 * ユーザータイムラインの取得
-* 任意のアカウントのフォロー中アカウントおよびフォロワーへのアクセス
-* リスト関連リソースへのアクセス
+* 任意のアカウントのフレンドおよびフォロワーへのアクセス
+* リストのリソースへのアクセス
 * ポストの検索
 
-なお、ユーザーを代表してリクエストを発行するには、[OAuth 1.0a](/ja/resources/fundamentals/authentication/oauth-1-0a/api-key-and-secret) または PKCE を用いた [OAuth 2.0 Authorization Code Flow](/ja/resources/fundamentals/authentication/oauth-2-0/authorization-code) のみが必要です。[API reference](/ja/resources/fundamentals/authentication/api-reference) ページでは、各 API を使用するために必要な認証方法について説明しています。次の操作を行うには、[アクセストークン](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) を用いたユーザー認証（ユーザーコンテキスト）が必要です。
+なお、ユーザーの代わりにリクエストを送信するには、[OAuth 1.0a](/ja/resources/fundamentals/authentication/oauth-1-0a/api-key-and-secret) または PKCE を使用した [OAuth 2.0 Authorization Code Flow](/ja/resources/fundamentals/authentication/oauth-2-0/authorization-code) のみが必要となります。[API reference](/ja/resources/fundamentals/authentication/api-reference) ページでは、各 API を使用するために必要な認証方式について説明しています。次の操作を行うには、[アクセストークン](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) を用いたユーザー認証、ユーザーコンテキストが必要になります:
 
-* ポストやその他のリソースを作成
-* ユーザーを検索
-* 任意の地理情報系エンドポイントを使用
-* ダイレクトメッセージやアカウント資格情報へアクセス
-* ユーザーのメールアドレスを取得
+* ポストやその他のリソースの投稿
+* ユーザーの検索
+* 任意の geo エンドポイントの使用
+* ダイレクトメッセージやアカウント資格情報へのアクセス
+* ユーザーのメールアドレスの取得
 
 <div id="auth-flow">
   #### 認証フロー
 </div>
 
-この方法を利用するには、[App only Access Token](/ja/resources/fundamentals/authentication/oauth-2-0/application-only)（[Bearer Token](/ja/resources/fundamentals/authentication/oauth-2-0/bearer-tokens) とも呼ばれます）を使用する必要があります。`consumer key` と `consumer secret` を [POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) エンドポイントに渡すことで、App only Access Token（Bearer Token）を生成できます。 
+この方法を使用するには、[App only Access Token](/ja/resources/fundamentals/authentication/oauth-2-0/application-only)（[Bearer Token](/ja/resources/fundamentals/authentication/oauth-2-0/bearer-tokens)として知られているもの）を使用する必要があります。[POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) エンドポイントに consumer key と consumer secret を渡すことで、App only Access Token（Bearer Token）を生成できます。 
 
-Application-only 認証フローは次の手順で行われます。
+アプリケーション専用認証フローは、次の手順で行われます。
 
-* アプリケーションは、自身の `consumer key` と `consumer secret` を、特別な形式でエンコードされた認証情報セットに変換します。
-* アプリケーションは、これらの認証情報を [POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) エンドポイントに送信し、[App only Access Token](/ja/resources/fundamentals/authentication/oauth-2-0/application-only) と交換します。
-* REST API にアクセスする際、アプリケーションは App only Access Token を使用して認証します。
+* アプリケーションは、自身の consumer key と consumer secret を、特別な形式の認証情報としてエンコードします。
+* アプリケーションは、[POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) エンドポイントにリクエストを送り、これらの認証情報と引き換えに [App only Access Token](/ja/resources/fundamentals/authentication/oauth-2-0/application-only) を取得します。
+* REST API にアクセスする際、アプリケーションは認証のために App only Access Token を使用します。
 
-リクエストに署名する必要がないため、この方法は標準の OAuth 1.0a モデルよりもはるかに簡単です。
+リクエストに署名する必要がないため、この方法は標準的な OAuth 1.0a モデルよりもはるかに簡単です。
 
 <Frame>
   <img src="/images/auth-5.png.twimg.1920.png" alt="" />
@@ -53,57 +53,57 @@ Application-only 認証フローは次の手順で行われます。
 
 **トークンはパスワードです**
 
-consumer key と consumer secret、そしてアプリ専用のアクセストークン（Bearer Token）そのものは、アプリケーションとしてリクエストを行う権限を付与します。これらの値はパスワードと同等に機密性の高い情報として扱う必要があり、信頼できない第三者と共有したり配布したりしてはいけません。
+consumer key &amp; secret と App only アクセストークン（Bearer Token）自体は、アプリケーションを代表してリクエストを実行するためのアクセス権を付与します。これらの値はパスワードと同程度に機密性の高い情報として扱う必要があり、信頼できない第三者と共有したり配布したりしてはいけません。
 
 **SSL が必須**
 
-すべてのリクエスト（トークンの取得と利用の両方）は、*必ず* HTTPS エンドポイントを使用する必要があります。[Connecting to X API using TLS](/ja/resources/fundamentals/authentication/guides/tls) に記載されているベストプラクティスに従ってください。通信相手（ピア）は**常に**検証してください。
+すべてのリクエスト（トークンの取得と利用の両方）は、*必ず* HTTPS エンドポイントを使用する必要があります。[TLS を使用した X API への接続](/ja/resources/fundamentals/authentication/guides/tls) に記載されているベストプラクティスに従ってください。通信相手（ピア）は**常に**検証されなければなりません。
 
 **ユーザーコンテキストなし**
 
-アプリケーション専用認証を使用してリクエストを発行する場合、「現在のユーザー」という概念は存在しません。そのため、[POST statuses/update](/ja/x-api/posts/creation-of-a-post) のようなエンドポイントは、アプリケーション専用認証では機能しません。ユーザーに代わってリクエストを発行する方法については、[using OAuth](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) を参照してください。
+アプリケーション専用認証を使用してリクエストを発行する場合、「現在のユーザー」という概念は存在しません。そのため、[POST statuses/update](/ja/x-api/posts/creation-of-a-post) のようなエンドポイントは、アプリケーション専用認証では機能しません。ユーザーを代表してリクエストを発行する方法の詳細については、[OAuth の使用](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) を参照してください。
 
 **レート制限**
 
 アプリケーションには 2 種類のレート制限プールがあります。
 
-アクセストークンを持つユーザー（ユーザーコンテキスト）に代わって行われるリクエストは、アプリケーション専用認証で使用されるものとは別のレート制限コンテキストから消費されます。言い換えると、ユーザーに代わって行われるリクエストは、アプリケーション専用認証で利用可能なレート制限には影響せず、アプリケーション専用認証で行われるリクエストも、ユーザーコンテキストでの認証におけるレート制限には影響しません。
+アクセストークンを使用してユーザー（ユーザーコンテキスト）を代表して行うリクエストは、アプリケーション専用認証で使用されるものとは異なるレート制限コンテキストから消費されます。つまり、ユーザーを代表して行うリクエストはアプリ専用認証で利用可能なレート制限からは消費されず、アプリ専用認証で行うリクエストもユーザーコンテキスト認証で使用されるレート制限からは消費されません。
 
-[API Rate Limiting](/ja/x-api/fundamentals/rate-limits) の詳細を確認し、[制限を確認](https://developer.x.com/en/portal/products)してください。
+[API レート制限](/ja/x-api/fundamentals/rate-limits) についてさらに読み、[制限を確認](https://developer.x.com/en/portal/products)してください。
 
 <div id="issuing-application-only-requests">
-  #### アプリのみリクエストの送信
+  #### アプリのみリクエストの発行
 </div>
 
 **ステップ 1: consumer key と consumer secret をエンコードする**
 
-アプリケーションの consumer key と consumer secret を、Bearer Token を取得するための認証情報セットにエンコードする手順は次のとおりです。
+アプリケーションの consumer key と consumer secret を、Bearer Token を取得するための認証情報セットに変換する手順は次のとおりです。
 
-1. consumer key と consumer secret を、[RFC 1738](http://www.ietf.org/rfc/rfc1738.txt) に従って URL エンコードします。執筆時点では、この操作によって consumer key と consumer secret の値は実際には変化しませんが、将来これらの値の形式が変更される可能性があるため、このステップは必ず実行してください。
-2. エンコードされた consumer key、コロン文字 &quot;:&quot;、およびエンコードされた consumer secret を連結し、1 つの文字列にします。
-3. 前のステップで得られた文字列を [Base64 エンコード](http://en.wikipedia.org/wiki/Base64) します。
+1. [RFC 1738](http://www.ietf.org/rfc/rfc1738.txt) に従って consumer key と consumer secret を URL エンコードします。執筆時点では、この操作によって consumer key と consumer secret は実際には変化しませんが、将来的にこれらの値の形式が変更される可能性があるため、このステップも必ず実行する必要があります。
+2. エンコード済みの consumer key、コロン文字「:」、エンコード済みの consumer secret を連結して、1 つの文字列にします。
+3. 前のステップで作成した文字列を [Base64 エンコード](http://en.wikipedia.org/wiki/Base64) します。
 
-以下は、上記の手順を適用した結果を示すサンプル値です。このページで使用している consumer secret はテスト用であり、実際のリクエストには使用できないことに注意してください。
+以下は、このアルゴリズムの結果を示すサンプル値です。このページで使用している consumer secret はテスト用であり、実際のリクエストでは使用できないことに注意してください。
 
-|                                                   |                                                                                             |
-| :------------------------------------------------ | :------------------------------------------------------------------------------------------ |
-| Consumer key（コンシューマーキー）                           | xvz1evFS4wEEPTGEFPHBog                                                                      |
-| Consumer secret（コンシューマーシークレット）                    | L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg                                                   |
-| RFC 1738 エンコード済み<br /><br />consumer key（変化なし）    | xvz1evFS4wEEPTGEFPHBog                                                                      |
-| RFC 1738 エンコード済み<br /><br />consumer secret（変化なし） | L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg                                                   |
-| Bearer Token 認証情報                                 | xvz1evFS4wEEPTGEFPHBog:L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg                            |
-| Base64 エンコード済み Bearer Token 認証情報                  | :: eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw== |
+|                                                               |                                                                                             |
+| :------------------------------------------------------------ | :------------------------------------------------------------------------------------------ |
+| Consumer key                                                  | xvz1evFS4wEEPTGEFPHBog                                                                      |
+| Consumer secret                                               | L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg                                                   |
+| RFC 1738 encoded consumer<br /><br />key (does not change)    | xvz1evFS4wEEPTGEFPHBog                                                                      |
+| RFC 1738 encoded consumer<br /><br />secret (does not change) | L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg                                                   |
+| Bearer Token credentials                                      | xvz1evFS4wEEPTGEFPHBog:L8qq9PZyRg6ieKGEKhZolGC0vJWLw8iEJ88DRdyOg                            |
+| Base64 encoded Bearer Token credentials                       | :: eHZ6MWV2RlM0d0VFUFRHRUZQSEJvZzpMOHFxOVBaeVJnNmllS0dFS2hab2xHQzB2SldMdzhpRUo4OERSZHlPZw== |
 
-**ステップ 2: アプリのみの Access Token（Bearer Token）を取得する**
+**ステップ 2: アプリのみアクセストークン (Bearer Token) を取得する**
 
-ステップ 1 で計算した値は、[POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) へのリクエストを発行して、アプリのみの Access Token と交換する必要があります。
+ステップ 1 で算出した値は、[POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) へのリクエストを送信して、アプリのみアクセストークンと交換する必要があります。
 
 * リクエストは HTTP POST リクエストでなければなりません。
-* リクエストには、値が `Basic <base64 encoded value from step 1>.` の `Authorization` ヘッダーを含める必要があります。
-* リクエストには、値が `application/x-www-form-urlencoded;charset=UTF-8.` の `Content-Type` ヘッダーを含める必要があります。
-* リクエストボディは `grant_type=client_credentials` である必要があります。
+* リクエストには、値 `Basic <base64 encoded value from step 1>.` を持つ `Authorization` ヘッダーを含める必要があります。
+* リクエストには、値 `application/x-www-form-urlencoded;charset=UTF-8.` を持つ `Content-Type` ヘッダーを含める必要があります。
+* リクエストボディは `grant_type=client_credentials` でなければなりません。
 
-**リクエスト例（Authorization ヘッダーは折り返しています）：**
+**リクエスト例 (Authorization ヘッダーは折り返して表示しています):**
 
 ```json
 POST /oauth2/token HTTP/1.1
@@ -118,7 +118,7 @@ Accept-Encoding: gzip
 grant\_type=client\_credentials
 ```
 
-リクエストが正しい形式で送信されていれば、サーバーは JSON エンコードされたペイロードで応答します。
+リクエストが正しくフォーマットされていれば、サーバーは JSON 形式のペイロードを返します。
 
 **レスポンス例:**
 
@@ -133,15 +133,15 @@ Content-Length: 140
 {"token\_type":"bearer","access\_token":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%2FAAAAAAAAAAAAAAAAAAAA%3DAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"}
 ```
 
-アプリケーションは、返されるオブジェクトの `token_type` キーに対応する値が `bearer` であることを確認する必要があります。`access_token` キーに対応する値が、App only アクセストークン (Bearer Token) です。
+アプリケーションは、返されるオブジェクトの `token_type` キーに関連付けられた値が `bearer` であることを確認する必要があります。`access_token` キーに関連付けられた値が、App only アクセストークン（Bearer Token）です。
 
-1 つの App only アクセストークンは、一度に 1 つのアプリケーションに対してのみ有効である点に注意してください。同じ認証情報で `/oauth2/token` に別のリクエストを送信すると、そのトークンが失効するまでは同じトークンが返されます。
+1 つの App only アクセストークンは、ある時点で 1 つのアプリケーションに対してのみ有効であることに注意してください。同じ認証情報で `/oauth2/token` に対して新たにリクエストを送信すると、そのトークンが無効化されるまでは同じトークンが返されます。
 
-**ステップ 3: App only アクセストークン (Bearer Token) で API リクエストを認証する**
+**ステップ 3: App only アクセストークン（Bearer Token）で API リクエストを認証する**
 
-App only アクセストークン (Bearer Token) は、アプリケーション専用認証をサポートする API エンドポイントへのリクエスト発行に利用できます。App アクセストークンを使用するには、通常の HTTPS リクエストを作成し、`Authorization` ヘッダーに `Bearer <base64 bearer token value from step 2>. Signing is not required.` という値を含めます。署名は不要です。
+App only アクセストークン（Bearer Token）は、application-only auth をサポートする API エンドポイントへのリクエストに使用できます。App only アクセストークンを使用するには、通常どおり HTTPS リクエストを作成し、`Authorization` ヘッダーに `Bearer <base64 bearer token value from step 2>. Signing is not required.` の値を含めます。
 
-**リクエスト例 (Authorization ヘッダーは折り返して表示しています):**
+**リクエスト例（Authorization ヘッダーは折り返されています）:**
 
 ```
 GET /1.1/statuses/user\_timeline.json?count=100&screen\_name=twitterapi HTTP/1.1
@@ -152,11 +152,11 @@ Authorization: Bearer AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%2FAAAAAAAAAAAA
 Accept-Encoding: gzip
 ```
 
-**App-only アクセストークン（Bearer Token）の無効化**
+**アプリ専用アクセストークン (Bearer Token) の無効化**
 
-App-only アクセストークンが漏洩した場合や、何らかの理由で無効化する必要が生じた場合は、[POST oauth2/invalidate&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) エンドポイントにリクエストを送信してください。
+アプリ専用アクセストークンが漏洩した場合や、何らかの理由で無効化する必要が生じた場合は、[POST oauth2/invalidate&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) を実行します。
 
-**リクエスト例（Authorization ヘッダー部分は折り返して表示しています）：**
+**リクエスト例（Authorization ヘッダーは折り返して表記しています）：**
 
 ```bash
 POST /oauth2/invalidate_token HTTP/1.1
@@ -186,18 +186,18 @@ Content-Length: 127
   #### よくあるエラーケース
 </div>
 
-このセクションでは、Bearer Token の取得および利用時によく発生するミスについて説明します。考えられるすべてのエラー応答を網羅しているわけではないため、未処理のエラーコードや応答には注意してください。
+このセクションでは、Bearer Token のやり取りおよび利用時によく発生するミスについて説明します。ここで取り上げているのは発生しうるすべてのエラー応答ではないため、未処理のエラーコードやレスポンスには注意してください。
 
-**App-only アクセストークンを取得または失効させるリクエストが無効な場合**
+**App only アクセストークンを取得または取り消すためのリクエストが無効**
 
-次のような試行は:
+次のような試行を行った場合:
 
-* 無効なリクエストで App-only アクセストークン (Bearer Token) を取得しようとした場合（例: `grant_type=client_credentials` を指定しない）。
-* 誤っている、または有効期限切れのアプリ認証情報を使って App-only アクセストークン (Bearer Token) を取得または失効させようとした場合。
-* 誤っている、またはすでに失効済みの App-only アクセストークン (Bearer Token) を再度失効させようとした場合。
-* 短時間に高頻度で App-only アクセストークン (Bearer Token) を取得しようとした場合。
+* 無効なリクエストで App only アクセストークン (Bearer Token) を取得しようとした場合（たとえば、`grant_type=client_credentials` を省略した場合）。
+* 誤った、または有効期限切れのアプリ認証情報を使用して App only アクセストークン (Bearer Token) を取得または取り消そうとした場合。
+* 誤った、またはすでに取り消されている App only アクセストークン (Bearer Token) を無効化しようとした場合。
+* 短時間に頻繁に App only アクセストークン (Bearer Token) を取得しようとした場合。
 
-次の結果を招きます:
+次のような結果になります:
 
 ```json
 HTTP/1.1 403 Forbidden
@@ -209,10 +209,10 @@ Content-Type: application/json; charset=utf-8
 ```
 
 <div id="api-request-contains-invalid-app-only-access-token-bearer-token">
-  #### 無効なアプリ専用アクセストークン（Bearer Token）を含むAPIリクエスト
+  #### API リクエストに無効な App-only アクセストークン（Bearer Token）が含まれている
 </div>
 
-不正または失効したアクセストークンを使用してAPIリクエストを行うと、次のような結果になります。
+誤った、または失効したアクセストークンを使用して API リクエストを行うと、次のような結果になります。
 
 ```json
 HTTP/1.1 401 Unauthorized
@@ -224,10 +224,10 @@ Content-Length: 61
 ```
 
 <div id="app-only-access-token-bearer-token-used-on-endpoint-which-doesnt-support-application-only-auth">
-  #### アプリ専用認証をサポートしていないエンドポイントで使用される App only Access Token (Bearer Token)
+  #### アプリのみ認証用アクセストークン（Bearer Token）を、アプリのみ認証をサポートしていないエンドポイントで使用した場合
 </div>
 
-ユーザーコンテキストを必要とするエンドポイント（`statuses/home_timeline` など）に、App only Access Token (Bearer Token) でリクエストすると、次のような結果になります。
+ユーザーコンテキストを必要とするエンドポイント（`statuses/home_timeline` など）に対して、アプリのみ認証用アクセストークン（Bearer Token）を使用してリクエストすると、次のような結果になります：
 
 ```json
 HTTP/1.1 403 Forbidden

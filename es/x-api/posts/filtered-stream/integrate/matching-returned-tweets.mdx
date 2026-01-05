@@ -1,28 +1,28 @@
 ---
-title: Asociar Publicaciones con reglas
-sidebarTitle: Asociar Publicaciones con reglas
-keywords: ["coincidencia de reglas", "reglas de filtrado", "emparejamiento de reglas", "reglas del flujo", "reglas del flujo filtrado", "etiquetas de reglas"]
+title: Asociar Publicaciones con sus reglas
+sidebarTitle: Asociar Publicaciones con sus reglas
+keywords: ["reglas de coincidencia", "reglas de filtrado", "emparejamiento de reglas", "reglas del flujo", "reglas del flujo filtrado", "etiquetas de reglas"]
 ---
 
 <div id="matching-returned-posts-to-their-associated-rule">
-  ### Coincidencia de las Publicaciones devueltas con su regla asociada
+  ### Asociar las Publicaciones devueltas con su regla correspondiente
 </div>
 
-El endpoint de flujo filtrado te da la posibilidad de tener varias reglas configuradas a través de una única conexión. Antes de empezar a recibir Publicaciones en tu flujo, tendrás que crear una regla que especifique qué tipos de Publicaciones te interesan. 
+El endpoint de flujo filtrado te permite tener varias reglas activas mediante una sola conexión. Antes de empezar a recibir Publicaciones en tu flujo, tendrás que crear una regla que especifique qué tipos de Publicaciones te interesan. 
 
-Cuando especificas tus reglas para hacer coincidir Publicaciones en función de una amplia variedad de atributos, incluidos atributos de usuario, geolocalización, idioma y muchos otros, puedes adjuntar una etiqueta para distinguir esta regla a un nivel superior. Las etiquetas son una buena manera de contextualizar tu regla, especialmente si tienes muchas reglas configuradas. Las reglas de filtrado determinan qué actividad de las Publicaciones se enviará a través de la conexión.
+Cuando especifiques tus reglas para hacer coincidir Publicaciones en función de una gran variedad de atributos, incluidos atributos de usuario, geolocalización, idioma y muchos otros, puedes adjuntar una etiqueta para distinguir esa regla a un nivel más general. Las etiquetas son una buena manera de contextualizar tu regla, especialmente si tienes muchas reglas activas. Las reglas de filtrado determinan qué actividades relacionadas con las Publicaciones se enviarán a través de la conexión.
 
-Si necesitas añadir una nueva regla de filtrado para capturar un tipo diferente de Publicación, o eliminar una regla existente, tu aplicación puede enviar una solicitud al endpoint [POST tweets/search/stream/rules](/es/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules) para hacerlo. Cuando se envía esa solicitud, las reglas de filtrado se modifican automáticamente y los cambios simplemente surten efecto en el flujo de datos sin necesidad de volver a conectar. La mayoría de las nuevas reglas surten efecto en unos 20 segundos o menos. Es poco probable, pero dependiendo de factores externos (por ejemplo, la conectividad de red), puede llevar más tiempo antes de que empieces a recibir Publicaciones que coincidan con ellas. Si no puedes encontrar una regla en el endpoint para listar reglas, asegúrate de que la solicitud de creación de la regla se haya completado correctamente; esto se puede comprobar revisando tus registros en busca de mensajes de error.
+Si necesitas añadir una nueva regla de filtrado para capturar un tipo diferente de Publicación, o eliminar una regla existente, tu aplicación puede enviar una solicitud al endpoint [POST tweets/search/stream/rules](/es/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules) para hacerlo. Cuando se envía esa solicitud, las reglas de filtrado se modifican automáticamente y los cambios simplemente surten efecto en el flujo de datos sin necesidad de volver a conectarte. La mayoría de las nuevas reglas entran en vigor en unos 20 segundos o menos. Es poco probable, pero dependiendo de factores externos (por ejemplo, la conectividad de red), puede tardar más en que empieces a recibir Publicaciones que coincidan con ellas. Si no puedes encontrar una regla en el endpoint para listar reglas, asegúrate de que la solicitud de creación de la regla se haya completado correctamente; esto se puede comprobar revisando tus logs en busca de mensajes de error.
 
 <div id="matching-rules">
   #### Reglas de coincidencia
 </div>
 
-Cuando se entrega una actividad a través de tu conexión de flujo filtrado, en un array matching&#95;rules se indica qué lista de filtros coincidió con la Publicación entregada.
+Cuando una actividad se entrega a través de tu conexión de flujo filtrado, en un array matching&#95;rules se indica qué filtros de tu lista coincidieron con la Publicación entregada.
 
-En el payload de la Publicación hay metadatos de texto adicionales que incluyen el id y la etiqueta de la regla que hicieron que se entregara una Publicación específica. Si varias reglas coinciden con una única Publicación, la actividad se entrega una sola vez e incluye en estos metadatos cada una de las reglas coincidentes. Las reglas de coincidencia proporcionan una forma sencilla de asociar una Publicación específica con reglas específicas, lo que es especialmente útil si tienes muchas reglas distintas. Dado que los datos se entregan a través de un único flujo de esta manera, asegurarte de que tienes un id y una etiqueta únicos es esencial para la coincidencia. 
+En la carga útil de la Publicación hay metadatos de tipo cadena adicionales que incluyen el id de la regla y la etiqueta que provocaron la entrega de una Publicación específica. Si varias reglas coinciden con una sola Publicación, la actividad se entrega una sola vez con cada una de las reglas coincidentes incluida en estos metadatos. Las reglas de coincidencia proporcionan una forma sencilla de asociar una Publicación específica con reglas específicas, lo cual es especialmente útil si tienes muchas reglas distintas. Dado que los datos se entregan a través de un único flujo de esta manera, asegurarte de tener un id y una etiqueta únicos es esencial para la coincidencia. 
 
-**Aquí tienes un ejemplo de cómo aparece el array ”matching&#95;rules” en el payload de la Publicación:**
+**Aquí tienes un ejemplo de cómo aparece el array &quot;matching&#95;rules&quot; en la carga útil de la Publicación:**
 
 ```"matching_rules": [
     {
@@ -40,16 +40,16 @@ En el payload de la Publicación hay metadatos de texto adicionales que incluyen
   #### Etiquetas de reglas
 </div>
 
-En el momento de su creación, cada regla de filtrado puede crearse con una etiqueta. Las etiquetas de reglas no tienen un significado especial, ya que simplemente se tratan como cadenas opacas que se transportan junto con una regla. Se incluirán en los metadatos matching&#95;rules de las actividades devueltas y están pensadas para facilitar la diferenciación de tus reglas a un nivel más alto. 
+En el momento de su creación, cada regla de filtrado puede crearse con una etiqueta. Las etiquetas de reglas no tienen ningún significado especial, ya que simplemente se tratan como cadenas opacas asociadas a una regla. Se incluirán en los metadatos `matching_rules` de las actividades devueltas y están pensadas para facilitar la diferenciación de tus reglas a un nivel más general. 
 
-Las etiquetas proporcionan una forma sencilla de crear agrupaciones lógicas de reglas de filtrado. Por ejemplo, puedes generar un id único para una regla específica como su etiqueta y permitir que tu aplicación haga referencia a ese id dentro de las actividades que procesa, para asociar un resultado con clientes, campañas, categorías u otros grupos relacionados específicos.
+Las etiquetas proporcionan una forma sencilla de crear agrupaciones lógicas de reglas de filtrado. Por ejemplo, puedes generar un ID único para una regla específica como su etiqueta y permitir que tu aplicación haga referencia a ese ID dentro de las actividades que procesa para asociar un resultado con clientes, campañas, categorías u otros grupos relacionados específicos.
 
-Ten en cuenta que las etiquetas no se pueden actualizar en una regla existente y solo se pueden incluir cuando se crea una regla. Para “actualizar” o “cambiar el nombre” de una etiqueta, primero debes eliminar la regla y luego añadirla de nuevo con la etiqueta deseada. La mejor solución es simplemente usar un identificador único como etiqueta, que tu sistema pueda asociar con varios otros datos dentro de tu propia aplicación, todo ello sin tener que cambiar nada en el conjunto de reglas.
+Ten en cuenta que las etiquetas no se pueden actualizar en una regla existente y solo se pueden incluir cuando se crea una regla. Para “actualizar” o “renombrar” una etiqueta, primero debes eliminar la regla y luego añadirla de nuevo con la etiqueta deseada. La mejor solución es simplemente usar un identificador único como tu etiqueta, que tu sistema pueda asociar con varios otros puntos de datos dentro de tu propia aplicación, todo ello sin tener que cambiar nada en el conjunto de reglas.
 
 <div id="filtered-stream-recovery-and-redundancy-features">
-  ### Filtered stream - Características de recuperación y redundancia
+  ### Flujo filtrado: características de recuperación y redundancia
 </div>
 
 <Note>
-  Nota: Estas características de recuperación y redundancia solo están disponibles para quienes tienen acceso a Enterprise.
+  Nota: Estas características de recuperación y redundancia están disponibles únicamente para quienes cuentan con acceso Enterprise.
 </Note>

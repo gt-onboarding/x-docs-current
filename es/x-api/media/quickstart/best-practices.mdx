@@ -1,27 +1,27 @@
 ---
 title: Mejores prácticas
 sidebarTitle: Mejores prácticas
-keywords: ["media upload best practices", "upload media", "media best practices", "image upload", "video upload", "media upload guide"]
+keywords: ["mejores prácticas de carga de contenido multimedia", "cargar contenido multimedia", "mejores prácticas de contenido multimedia", "carga de imágenes", "carga de videos", "guía de carga de contenido multimedia"]
 ---
 
-Hay algunos conceptos importantes que debes entender al usar el endpoint [`POST /2/media/upload`](/es/x-api/media/media-upload). Subir contenido multimedia con OAuth puede ser un poco complicado, así que hemos reunido algunas cosas que debes tener en cuenta, así como un ejemplo funcional de cómo usar este endpoint aquí.
+Hay algunos conceptos importantes que debes comprender al usar el endpoint [`POST /2/media/upload`](/es/x-api/media/media-upload). Cargar contenido multimedia con OAuth puede ser un poco complejo, así que aquí hemos incluido algunos aspectos que debes tener en cuenta, así como un ejemplo funcional de cómo usar este endpoint.
 
 <div id="keep-in-mind">
   ## Ten en cuenta
 </div>
 
 * Puedes adjuntar hasta 4 fotos, 1 GIF animado o 1 vídeo en una Publicación.
-* La imagen enviada debe ser el binario sin procesar de la imagen o binario codificado en base64; no es necesario codificar ni escapar de otra forma el contenido siempre que el Content-Type esté configurado correctamente (en caso de duda: `application/octet-stream`).
-* Al enviar imágenes codificadas en base64, asegúrate de establecer “Content-Transfer-Encoding: base64” en la parte de imagen del mensaje.
-* Los delimitadores de mensajes multiparte deben estar en su propia línea y terminar con un CRLF.
-* Para ver ejemplos funcionales de cómo hacer POST usando este endpoint, recomendamos hacer pruebas con [xurl](https://github.com/xdevplatform/xurl). Además, consulta las [Bibliotecas de X](/es/resources/tools-and-libraries) disponibles.
+* La imagen enviada debe ser el binario sin procesar de la imagen o binario codificado en base64; no es necesario aplicar otra codificación ni escapar el contenido siempre que el Content-Type esté configurado correctamente (en caso de duda: `application/octet-stream`).
+* Al publicar imágenes codificadas en base64, asegúrate de establecer “Content-Transfer-Encoding: base64” en la parte de la imagen del mensaje.
+* Los límites (boundaries) de mensajes multiparte deben ir en su propia línea y terminar con un CRLF.
+* Para ver ejemplos prácticos de cómo hacer solicitudes POST usando este endpoint, recomendamos hacer pruebas con [xurl](https://github.com/xdevplatform/xurl). Además, revisa las [Bibliotecas de X](/es/resources/tools-and-libraries) disponibles.
 * Usa el `media_id_string` proporcionado en la respuesta de la API para JavaScript y cualquier otro lenguaje que no pueda representar con precisión un entero largo.
 
 <div id="media-categories">
   ## Categorías de contenido multimedia
 </div>
 
-El parámetro Media Category define el caso de uso del archivo de contenido multimedia que se va a cargar y puede afectar los límites de tamaño de archivo u otras restricciones aplicadas a la carga de contenido multimedia. Es importante usar la categoría de contenido multimedia correcta al cargar contenido multimedia para evitar problemas al intentar usarlo. Es un valor opcional que se envía en la solicitud INIT como parte del flujo de carga. Si no se especifica la categoría de contenido multimedia, se asume que el contenido multimedia cargado es para una Publicación (`tweet_image`, `tweet_video` o `tweet_gif`), según el tipo de contenido.
+El parámetro de categoría de contenido multimedia define el caso de uso del archivo de contenido multimedia que se va a cargar y puede afectar los límites de tamaño de archivo u otras restricciones aplicadas a las cargas de contenido multimedia. Es importante usar la categoría de contenido multimedia correcta al cargar contenido multimedia para evitar problemas al intentar usarlo. Es un valor opcional que se pasa en la solicitud INIT como parte del flujo de carga. Si no se especifica la categoría de contenido multimedia, se asume que el contenido multimedia cargado es para una Publicación (`tweet_image`, `tweet_video` o `tweet_gif`), según el tipo de contenido.
 
 Las categorías de contenido multimedia más comunes son las siguientes:
 
@@ -33,47 +33,47 @@ Las categorías de contenido multimedia más comunes son las siguientes:
 * `dm_gif`
 * `subtitles`
 
-Si eres un partner de la Ads API, consulta [esta documentación](/es/x-ads-api/creatives#promoted-video) para obtener más información sobre la categoría de contenido multimedia recomendada para video promocionado.
+Si eres socio de la Ads API, consulta [esta documentación](/es/x-ads-api/creatives#promoted-video) para obtener más información sobre la categoría de contenido multimedia recomendada para vídeo promocionado.
 
 <div id="image-specifications-and-recommendations">
-  ## Especificaciones y recomendaciones de imágenes
+  ## Especificaciones y recomendaciones para imágenes
 </div>
 
-Los archivos de imagen deben cumplir con todos los criterios siguientes:
+Los archivos de imagen deben cumplir todos los siguientes criterios:
 
-* **Tipos de contenido multimedia de imagen admitidos**: `JPG`, `PNG`, `GIF`, `WEBP`
+* **Tipos de contenido multimedia de imagen compatibles**: `JPG`, `PNG`, `GIF`, `WEBP`
 * **Tamaño de la imagen**: `<= 5 MB`
-* **Tamaño del GIF animado**: `<= 15 MB`
+* **Tamaño de GIF animado**: `<= 15 MB`
 
-El límite de tamaño de archivo anterior se aplica mediante el endpoint de carga de contenido multimedia. Además, existe un límite de tamaño de archivo independiente, específico de la entidad de producto, que se aplica al llamar a los endpoints de creación de Publicaciones (o similares) con `media_id`. El límite de tamaño de archivo y otras restricciones pueden variar según el parámetro `media_category`.
+El límite de tamaño de archivo anterior se aplica mediante el endpoint de carga de contenido multimedia. Además, hay un límite de tamaño de archivo específico de la entidad de producto, que se aplica al llamar a los endpoints de creación de Publicación (o similares) con `media_id`. El límite de tamaño de archivo y otras restricciones pueden variar según el parámetro `media_category`.
 
 <div id="animated-gif-recommendations">
   ## Recomendaciones para GIF animados
 </div>
 
-Un GIF puede fallar durante la creación de una Publicación incluso si está dentro del límite de tamaño de archivo. Cumple con las siguientes restricciones para mejorar la probabilidad de éxito.
+Un GIF puede producir un error al crear una Publicación incluso si está dentro del límite de tamaño de archivo. Sigue las siguientes restricciones para mejorar el índice de éxito.
 
 * **Resolución**: `<= 1280x1080` (`width` x `height`)
 * **Número de fotogramas**: `<= 350`
 * **Número de píxeles**: `<= 300 millones` (`width` * `height` * `num_frames`)
-* **Tamaño de archivo**: `<= 15 MB`
+* **Tamaño de archivo**: `<= 15MB`
 
-Para procesar GIF más grandes, utiliza el endpoint de [carga fragmentada](/es/x-api/media/quickstart/media-upload-chunked) con el parámetro `media_category`. Esto permite que el servidor procese el archivo GIF de forma asíncrona, lo cual es un requisito para procesar archivos más grandes. Pasa `media_category=tweet_gif` para habilitar el comportamiento de carga asíncrona para Publicaciones con un GIF animado.
+Para procesar GIF de mayor tamaño, usa el endpoint de [carga segmentada](/es/x-api/media/quickstart/media-upload-chunked) con el parámetro `media_category`. Esto permite que el servidor procese el archivo GIF de forma asíncrona, lo cual es un requisito para procesar archivos más grandes. Pasa `media_category=tweet_gif` para habilitar el comportamiento de carga asíncrona para Publicaciones con un GIF animado.
 
 <div id="video-specifications-and-recommendations">
-  ## Especificaciones y recomendaciones de vídeo
+  ## Especificaciones y recomendaciones de video
 </div>
 
-Usa la Ruta asíncrona para subir contenido multimedia.
+Usa Async Path para subir contenido multimedia.
 
 <div id="recommended">
   ### Recomendado
 </div>
 
 * **Códec de video**: `H264 High Profile`
-* **Velocidad de fotogramas**: `30 FPS`, `60 FPS`
-* **Resolución de video**: `1280x720` (horizontal), `720x1280` (vertical), `720x720` (cuadrado). Los usuarios con suscripción pueden subir un video en 1080p y obtener reproducción en 1080p. Los usuarios sin suscripción pueden subir un video en 720p y obtener reproducción en 720p.
-* **Tasa de bits mínima de video**: `5.000 kbps`
+* **Frecuencias de fotogramas**: `30 FPS`, `60 FPS`
+* **Resolución de video**: `1280x720` (horizontal), `720x1280` (vertical), `720x720` (cuadrado). Los usuarios suscritos pueden subir un video en 1080p y obtener reproducción en 1080p. Los usuarios no suscritos pueden subir un video en 720p y obtener reproducción en 720p.
+* **Tasa de bits mínima de video**: `5,000 kbps`
 * **Tasa de bits mínima de audio**: `128 kbps`
 * **Códec de audio**: `AAC LC`
 * **Relación de aspecto**: `16:9` (horizontal o vertical), `1:1` (cuadrado)
@@ -82,9 +82,9 @@ Usa la Ruta asíncrona para subir contenido multimedia.
   ### Avanzado
 </div>
 
-* **Frame rate**: debe ser de `60 FPS` o menos
+* **Frecuencia de fotogramas**: debe ser de `60 FPS` o menos
 * **Dimensiones**: deben estar entre `32x32` y `1280x1024`
-* **Tamaño de archivo**: no debe exceder los `512 MB`
+* **Tamaño del archivo**: no debe superar los `512 MB`
 * **Duración**: debe estar entre `0.5 segundos` y `140 segundos`
 * **Relación de aspecto**: debe estar entre `1:3` y `3:1`
 * **[Relación de aspecto de píxel](https://en.wikipedia.org/wiki/Pixel_aspect_ratio)**: debe ser de `1:1`
@@ -98,9 +98,9 @@ Usa la Ruta asíncrona para subir contenido multimedia.
   ### Información adicional
 </div>
 
-En la tabla siguiente, cada fila representa una recomendación de subida, pero no un requisito. Todas las subidas se procesan para optimizarlas en múltiples plataformas.
+En la tabla siguiente, cada fila representa una recomendación de carga, pero no es obligatoria. Todas las cargas se procesan para su optimización en múltiples plataformas.
 
-| Orientación | Ancho | Alto | Tasa de bits de video | Tasa de bits de audio |
+| Orientación | Ancho | Alto | Tasa de bits de vídeo | Tasa de bits de audio |
 | :--- | :--- | :--- | :--- | :--- |
 | Horizontal | 1280 | 720 | 2048K | 128K |
 | Horizontal | 640 | 360 | 768K | 64K |
@@ -112,10 +112,10 @@ En la tabla siguiente, cada fila representa una recomendación de subida, pero n
 | Cuadrado | 480 | 480 | 768K | 64K |
 | Cuadrado | 240 | 240 | 256K | 32K |
 
-Para ver un ejemplo de cómo subir contenido multimedia, consulta la [documentación sobre la subida segmentada de contenido multimedia](/es/x-api/media/quickstart/media-upload-chunked).
+Para ver un ejemplo de cómo cargar contenido multimedia, consulta la [documentación de carga segmentada de contenido multimedia](/es/x-api/media/quickstart/media-upload-chunked).
 
 <div id="troubleshooting">
   ### Solución de problemas
 </div>
 
-Para resolver problemas con las Media APIs, consulta la [categoría Media API](https://devcommunity.x.com/c/x-api/media-apis) en los foros de desarrolladores para encontrar una respuesta.
+Si tienes problemas con las Media APIs, consulta la [categoría Media API](https://devcommunity.x.com/c/x-api/media-apis) en los foros para desarrolladores para encontrar una respuesta.

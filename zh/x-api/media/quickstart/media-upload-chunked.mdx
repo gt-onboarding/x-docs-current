@@ -1,38 +1,38 @@
 ---
-title: 快速入门
-sidebarTitle: 快速入门
-keywords: ["分块上传", "媒体上传", "分块媒体", "视频上传", "大文件上传", "分块上传指南"]
+title: 快速开始
+sidebarTitle: 快速开始
+keywords: ["chunked upload", "media upload", "chunked media", "video upload", "large file upload", "chunked upload guide"]
 ---
 
-本指南将帮助你通过 X API v2 的媒体上传端点发起首次上传媒体的请求。
+本指南将帮助你通过 X API v2 媒体上传端点发起首次媒体上传请求。
 
-在本指南中，我们使用分块的 `POST /2/media/upload` 端点上传视频，这与上传单张图片相比需要不同的工作流程。
+在本指南中，将使用分片的 `POST /2/media/upload` 端点来上传视频，其工作流与上传单张图片不同，需要进行相应调整。
 
-对于视频或分块上传，你必须：
+对于视频或分片上传，你必须：
 
 1. 使用 `INIT` 命令初始化上传
-2. 使用 `APPEND` 命令上传每个数据分块
+2. 使用 `APPEND` 命令上传每个字节分片
 3. 使用 `FINALIZE` 命令完成上传
 
 <Note>
-  **注意：** 请参阅[此示例代码](https://github.com/xdevplatform/large-video-upload-python)，了解一个使用 Python 编写的示例。
+  **注意：** 请参阅[此示例代码](https://github.com/xdevplatform/large-video-upload-python)，了解使用 Python 编写的示例。
 </Note>
 
 <div id="authentication">
   ## 身份验证
 </div>
 
-要运行本指南中提供的示例，你需要使用 [OAuth 2](/zh/resources/fundamentals/authentication/oauth-2-0/overview) 进行身份验证。
+要运行本指南中提供的示例，你需要使用 [OAuth 2](/zh/resources/fundamentals/authentication/oauth-2-0/overview) 身份验证。
 
-你可以在[开发者门户的项目和应用仪表板](https://developer.x.com/en/portal/projects-and-apps)中，打开你的项目并找到其中的应用，即可看到你的 `CONSUMER_KEY`、`CONSUMER_SECRET`、`ACCESS_KEY`、`ACCESS_TOKEN`。
+你可以在 [开发者门户](https://developer.x.com/en/portal/projects-and-apps) 的仪表板中，打开你的项目并进入其中的 App，找到你的 `CONSUMER_KEY`、`CONSUMER_SECRET`、`ACCESS_KEY`、`ACCESS_TOKEN`。
 
 <div id="step-1-post-mediaupload-init">
-  ## 步骤 1：POST media/upload（INIT）
+  ## 步骤 1：POST media/upload (INIT)
 </div>
 
-`INIT` 命令请求用于发起文件上传会话。该请求会返回一个 `media_id`，后续所有请求都应使用此 `media_id`。`INIT` 命令成功返回后，下一步是执行 `APPEND` 命令。
+`INIT` 命令用于启动一个文件上传会话。它会返回一个 `media_id`，后续所有请求中都应使用该值。`INIT` 命令成功返回之后的下一步是执行 `APPEND` 命令。
 
-有关媒体文件的约束和要求，请参阅[最佳实践](/zh/x-api/media/quickstart/best-practices)。
+关于媒体文件的限制和要求，请参阅[最佳实践](/zh/x-api/media/quickstart/best-practices)。
 
 **请求示例**
 
@@ -47,7 +47,7 @@ curl --location 'https://api.x.com/2/media/upload' \
 ```
 
 <Note>
-  **注意：** 在发送原始 HTTP 请求时，请求必须使用 `multipart/form-data` 或 `application/x-www-form-urlencoded` POST 格式。
+  **注意：** 当发起原始 HTTP 请求时，请求应采用 `multipart/form-data` 或 `application/x-www-form-urlencoded` 两种 POST 编码格式之一。
 </Note>
 
 **示例响应**
@@ -63,24 +63,24 @@ curl --location 'https://api.x.com/2/media/upload' \
 }
 ```
 
-响应中会返回媒体标识符 `id`（字符串）和 `media_key`（字符串）。整个文件必须在 `expires_after_secs` 秒内上传完成。
+响应会返回媒体标识符 `id`（字符串）和 `media_key`（字符串）。必须在 `expires_after_secs` 秒内完成整个文件上传。
 
 <div id="step-2-post-mediaupload-append">
   ## 步骤 2：POST media/upload（APPEND）
 </div>
 
-`APPEND` 命令用于上传媒体文件的一个分块（连续字节范围）。例如，一个 3 MB 的文件可以拆分成 3 个大小为 1 MB 的分块，并通过 3 次 `APPEND` 请求进行上传。在整个文件上传完成后，下一步是调用 `FINALIZE` 命令。
+`APPEND` 命令用于上传媒体文件的一个分块（连续字节范围的数据块）。例如，一个 3 MB 的文件可以拆分成 3 个 1 MB 的分块，并通过 3 次 `APPEND` 请求上传。整个文件上传完成后，下一步是调用 `FINALIZE` 命令。
 
 <Info>
-  以小分块方式上传媒体文件有许多优点：
+  以小分块方式上传媒体文件有多项优势：
 
-  * 在低带宽网络条件下可以提高可靠性和成功率
-  * 可以暂停和恢复上传
-  * 可以对单个文件分块单独重试
-  * 可以根据变化的网络状况（例如蜂窝网络环境中的客户端）调整分块大小
+  * 在低带宽网络环境下可提高可靠性和成功率
+  * 上传可以暂停和恢复
+  * 文件分块可以单独重试
+  * 能够根据不断变化的网络状况（例如在蜂窝网络环境下）调整分块大小
 </Info>
 
-**请求示例**
+**示例请求**
 
 ```bash
 curl --location 'https://api.x.com/2/media/upload' \
@@ -92,21 +92,21 @@ curl --location 'https://api.x.com/2/media/upload' \
     --form 'media=@/path/to/your/media/file.mp4'
 ```
 
-`segment_index` 是文件分片的有序索引。它必须在 0 到 999（含）之间。第一个分片的索引为 0，第二个分片的索引为 1，以此类推。持续上传文件分片，直到所有分片都上传完成。
+`segment_index` 是文件分片的有序索引。它必须在 0 到 999（含）之间。第一个分片的索引为 0，第二个分片的索引为 1，依此类推。继续上传文件分片，直到所有分片都上传完成。
 
 <Note>
-  **注意：** 在发起原始 HTTP 请求时，请求应为使用 `multipart/form-data` 格式的 POST 请求。
+  **Note:** 当发起原始 HTTP 请求时，请求应为 `multipart/form-data` POST 格式。
 </Note>
 
 <Note>
-  **注意：** 上传成功时将返回 HTTP 2XX 状态码，且响应正文为空。
+  **Note:** 成功上传后会返回 HTTP 2XX 状态码，且响应体为空。
 </Note>
 
 <div id="step-3-post-mediaupload-finalize">
-  ## 步骤 3：POST media/upload（FINALIZE）
+  ## 步骤 3 ：POST media/upload（FINALIZE）
 </div>
 
-在使用 `APPEND` 命令上传完整的媒体文件后，应调用 `FINALIZE` 命令。只有当 `FINALIZE` 命令的响应中包含 `processing_info` 字段时，才可能需要使用 `STATUS` 命令，并等待其返回成功状态后再继续创建帖子。
+在使用 `APPEND` 命令将整个媒体文件上传完毕后，应该调用 `FINALIZE` 命令。仅当且仅当 `FINALIZE` 命令的响应中包含 `processing_info` 字段时，可能还需要使用 `STATUS` 命令，并在其返回成功后再继续创建帖子。
 
 **示例请求**
 
@@ -119,7 +119,7 @@ curl --location --request POST 'https://api.x.com/2/media/upload' \
 ```
 
 <Note>
-  **注意：** 当发出原始 HTTP 请求时，请求的 POST 格式应为 `multipart/form-data` 或 `application/x-www-form-urlencoded`。
+  **注意：** 当发起原始 HTTP 请求时，请求的 POST 格式应为 `multipart/form-data` 或 `application/x-www-form-urlencoded` 之一。
 </Note>
 
 **示例响应**
@@ -139,11 +139,11 @@ curl --location --request POST 'https://api.x.com/2/media/upload' \
 }
 ```
 
-响应会在 `media_id`（64 位整数）和 `media_id_string`（字符串）字段中提供一个媒体标识符。对于 JavaScript 及其他无法精确表示长整型的语言，请使用响应中提供的 `media_id_string`。
+The response provides a media identifier in the `media_id` (64-bit integer) and `media_id_string` (string) fields. Use the `media_id_string` provided in the API response from JavaScript and other languages that cannot accurately represent a long integer.
 
-返回的 `media_id` 仅在 `expires_after_secs` 指定的秒数内有效。若在此时间段之后在其他 API 调用中尝试使用该 mediaId，将会收到错误请求（Bad Request，HTTP 4xx）响应。
+返回的 `media_id` 仅在 `expires_after_secs` 指定的秒数内有效。在这段时间之后，如在其他 API 调用中尝试使用该 `media_id`，将会得到 Bad Request（HTTP 4xx）响应。
 
-如果响应中包含 `processing_info` 字段，则使用 `STATUS` 命令轮询 `FINALIZE` 操作的状态。异步 FINALIZE 方式适用于媒体处理需要更多时间的情况。未来，所有视频和动画 GIF 的处理都只会通过异步 FINALIZE 方式来支持。如果上传会话在使用 `media_category` 参数的情况下[初始化](###INIT)，并且媒体类型为视频或动画 GIF，则会启用此行为。
+如果响应中包含 `processing_info` 字段，则使用 `STATUS` 命令轮询 `FINALIZE` 操作的处理状态。异步 finalize 方式适用于媒体处理需要更长时间的情况。将来，所有视频和动画 GIF 的处理都只会通过异步 finalize 方式来支持。如果上传会话在 [初始化](###INIT) 时带有 `media_category` 参数，并且媒体类型为视频或动画 GIF，则会启用此行为。
 
 <Note>
   **注意：**
@@ -154,11 +154,11 @@ curl --location --request POST 'https://api.x.com/2/media/upload' \
   ## **步骤 4：GET media/upload（STATUS）**
 </div>
 
-`STATUS` 命令用于定期轮询媒体处理进度的更新。当 `STATUS` 命令的响应为 `succeeded` 后，你可以继续下一步，通常是使用 `media_id` 创建帖子。
+`STATUS` 命令用于定期轮询媒体处理操作的进度更新。当 `STATUS` 命令的响应返回 `succeeded` 后，你可以继续下一步，通常是使用 `media_id` 创建帖子。
 
 <Note>
   **注意：**
-  仅当且**只当** `FINALIZE` 命令或之前的 `STATUS` 命令的响应中包含 `processing_info` 字段时，才应使用 `STATUS` 命令。
+  **当且仅当** `FINALIZE` 命令或之前的 `STATUS` 命令的响应中包含 `processing_info` 字段时，才应使用 `STATUS` 命令。
 </Note>
 
 <div id="example-request">
@@ -186,13 +186,13 @@ curl --location --request GET 'https://api.x.com/2/media/upload?command=STATUS&m
 }
 ```
 
-响应体包含 `processing_info` 字段，该字段提供有关媒体处理操作当前状态的信息。它包含一个 `state` 字段，其状态流转为：`pending` -&gt; `in_progress` -&gt; [`failed` | `succeeded`]。在 `state` 字段被设置为 `succeeded` 之前，不能使用 `media_id` 创建帖子或其他实体。
+响应正文中包含 `processing_info` 字段，用于提供当前媒体处理操作的状态信息。其中包含一个 `state` 字段，其状态按以下顺序流转：`pending` -&gt; `in_progress` -&gt; [`failed` | `succeeded`]。在 `state` 字段被设置为 `succeeded` 之前，请勿使用该 `media_id` 来创建帖子或其他实体。
 
 <div id="step-5-post-tweet-with-media">
-  ## 步骤 5：发布带媒体的帖子
+  ## 步骤 5：发布包含媒体的帖子
 </div>
 
-使用 `POST /2/tweets` 端点，代表已通过身份验证的用户创建一条包含 `media_id` 的帖子。
+使用 `POST /2/tweets` 端点代表已认证用户创建一个帖子，并包含 `media_id`。
 
 **示例请求**
 
@@ -229,4 +229,4 @@ curl --location 'https://api.x.com/2/tweets' \
   ## 疑难解答
 </div>
 
-如果遇到 Media API 相关问题，可以前往开发者论坛浏览 [Media API 分类](https://devcommunity.x.com/c/x-api/media-apis) 来查找答案。
+如果在使用 Media API 时遇到问题，请前往开发者论坛浏览 [Media API 分类](https://devcommunity.x.com/c/x-api/media-apis) 以查找答案。

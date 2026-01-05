@@ -1,16 +1,16 @@
 ---
 title: 뮤트 조회
 sidebarTitle: 뮤트 조회
-keywords: ["뮤트 조회 마이그레이션", "v1.1에서 v2로 뮤트 조회", "뮤트 조회 마이그레이션", "표준에서 v2 뮤트로", "뮤트 마이그레이션"]
+keywords: ["뮤트 조회 마이그레이션", "v1.1에서 v2로의 뮤트 조회", "뮤트 조회 마이그레이션 가이드", "Standard에서 v2로의 뮤트", "뮤트 마이그레이션"]
 ---
 
 import { Button } from '/snippets/ko/button.mdx';
 
 <div id="mutes-lookup-standard-v11-compared-to-x-api-v2">
-  ### 음소거 조회: Standard v1.1과 X API v2 비교
+  ### 뮤트 조회: 표준 v1.1과 X API v2 비교
 </div>
 
-표준 v1.1 [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-ids) 및 [GET mutes/users/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-list) 엔드포인트를 사용해 왔다면, 이 가이드는 표준 v1.1과 X API v2의 음소거 조회 엔드포인트 간 유사점과 차이점을 이해하는 데 도움을 주기 위한 것입니다.
+표준 v1.1 [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-ids) 및 [GET mutes/users/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-list) 엔드포인트를 사용해 오셨다면, 이 가이드는 표준 v1.1과 X API v2 뮤트 조회 엔드포인트 간의 유사점과 차이점을 이해하는 데 도움이 되도록 작성되었습니다.
 
 * **유사점**
   * 인증
@@ -19,9 +19,9 @@ import { Button } from '/snippets/ko/button.mdx';
 
   * 요청당 사용자 수 제한
 
-  * 앱 및 프로젝트 요건
+  * 앱 및 프로젝트 요구 사항
 
-  * 응답 데이터 포맷
+  * 응답 데이터 형식
 
   * 요청 파라미터
 
@@ -31,64 +31,64 @@ import { Button } from '/snippets/ko/button.mdx';
 
 **인증**
 
-표준 v1.1과 X API v2의 뮤트 조회 엔드포인트는 모두 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2)를 사용합니다. 따라서 이전에 표준 v1.1 뮤트 조회 엔드포인트 중 하나를 사용했다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 그대로 계속 사용할 수 있습니다. 
+표준 v1.1과 X API v2의 mutes lookup 엔드포인트는 모두 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2)를 사용합니다. 따라서 이전에 표준 v1.1 mutes lookup 엔드포인트 중 하나를 사용해 왔다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다. 
 
 <div id="differences">
-  #### 차이점
+  #### Differences
 </div>
 
 **엔드포인트 URL**
 
-* standard v1.1 엔드포인트:
+* Standard v1.1 엔드포인트:
   * GET https://api.x.com/1.1/mutes/users/ids.json
-    (지정된 사용자가 뮤트한 사용자 ID의 목록)
+    (지정된 사용자가 뮤트한 사용자 ID 목록)
   * GET https://api.x.com/1.1/mutes/users/lists.json
-    (지정된 사용자가 뮤트한 사용자들의 목록)
+    (지정된 사용자가 뮤트한 사용자 목록)
 * X API v2 엔드포인트:
   * GET https://api.x.com/2/users/:id/muting
-    (지정된 사용자 ID가 뮤트한 사용자들의 목록)
+    (지정된 사용자 ID가 뮤트한 사용자 목록)
      
 
 **요청당 사용자 수 제한**
 
-standard v1.1 엔드포인트에서는 한 번의 요청으로 최대 5,000명의 사용자를 반환할 수 있습니다. 새로운 v2 엔드포인트에서는 한 번의 요청으로 최대 1,000명의 사용자를 반환할 수 있습니다. 1,000명의 사용자를 모두 반환받으려면 쿼리 매개변수로 max&#95;results=1000을 전달해야 합니다. 그런 다음 응답 페이로드에 반환된 next&#95;token 값을 다음 요청에서 pagination&#95;token 쿼리 매개변수에 전달할 수 있습니다.
+Standard v1.1 엔드포인트는 요청당 최대 5,000명의 사용자를 반환할 수 있습니다. 새로운 v2 엔드포인트는 요청당 최대 1,000명의 사용자를 반환할 수 있습니다. 전체 1,000명의 사용자를 반환하려면 쿼리 파라미터로 max&#95;results=1000을 전달해야 합니다. 그런 다음 응답 페이로드에 반환된 next&#95;token 값을 다음 요청에서 pagination&#95;token 쿼리 파라미터에 전달할 수 있습니다.
  
 
 **App 및 Project 요구 사항**
 
-X API v2 엔드포인트는 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps)의 자격 증명 중 [Project](/ko/resources/fundamentals/developer-apps)에 연결된 것을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 독립 실행형 App 또는 Project에 연결된 App의 자격 증명을 사용할 수 있습니다.
+X API v2 엔드포인트는 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps)의 자격 증명을 사용해야 하며, 이 App은 [Project](/ko/resources/fundamentals/developer-apps)와 연결되어 있어야 합니다. 모든 X API v1.1 엔드포인트는 독립형 App 또는 Project와 연결된 App의 자격 증명을 사용할 수 있습니다.
 
 **응답 데이터 형식**
 
-standard v1.1과 X API v2 엔드포인트 버전 간의 가장 큰 차이점 중 하나는 페이로드에 어떤 필드를 반환할지 선택하는 방식입니다.
+Standard v1.1과 X API v2 엔드포인트 버전 간 가장 큰 차이점 중 하나는 페이로드에서 어떤 필드를 반환할지 선택하는 방식입니다.
 
-standard 엔드포인트에서는 많은 응답 필드를 기본적으로 받게 되며, 그다음 어떤 필드 또는 필드 집합을 페이로드에 반환할지 매개변수를 사용해 지정할 수 있습니다.
+Standard 엔드포인트의 경우, 많은 응답 필드를 기본적으로 받게 되며 이후 파라미터를 사용해 페이로드에 어떤 필드 또는 필드 집합을 반환할지 지정할 수 있습니다.
 
-X API v2 버전에서는 기본적으로 user id, name, username 필드만 제공합니다. 추가 필드나 객체를 요청하려면 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 매개변수를 사용해야 합니다. 이 엔드포인트에서 요청한 모든 user 필드는 기본 user 객체에 포함되어 반환됩니다. 확장된 Post 객체와 필드는 응답 내 includes 객체에 반환됩니다. 그런 다음 user 객체와 확장된 Post 객체 양쪽에 있는 ID를 일치시켜 확장된 객체를 user 객체에 다시 매핑할 수 있습니다. 
+X API v2 버전은 기본적으로 user id, name, username 필드만 제공합니다. 추가 필드나 객체를 요청하려면 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 파라미터를 사용해야 합니다. 이 엔드포인트에서 요청한 모든 user 필드는 기본 user 객체에 포함되어 반환됩니다. 확장된 게시물(Post) 객체와 필드는 응답 내 includes 객체에 반환됩니다. 그런 다음 user와 확장된 게시물 객체 양쪽에 있는 ID를 매칭해, 확장된 객체를 user 객체와 다시 연결할 수 있습니다. 
 
-이 새로운 매개변수에 대해서는 각각의 가이드나 [fields 및 expansions 사용 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에 대한 가이드를 읽어볼 것을 권장합니다. 
+이 새로운 파라미터에 대해서는 각각의 가이드나 [fields 및 expansions 사용 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에 대한 가이드를 참고하시기를 권장합니다. 
 
-또한 standard v1.1 필드를 최신 v2 필드에 매핑하는 데 도움이 되는 [데이터 형식 마이그레이션 가이드](/ko/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)도 준비해 두었습니다. 이 가이드는 특정 필드를 반환하기 위해 v2 요청과 함께 전달해야 하는 expansions 및 field 매개변수를 구체적으로 제공합니다. 
+또한 standard v1.1 필드를 새로운 v2 필드에 매핑하는 데 도움이 되는 [데이터 형식 마이그레이션 가이드](/ko/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)를 제공하고 있습니다. 이 가이드는 특정 필드를 반환하기 위해 v2 요청에 함께 전달해야 하는 expansions 및 field 파라미터를 구체적으로 안내합니다. 
  
 
-특정 필드를 요청하는 방식의 변경에 더해, X API v2는 [Post](/ko/x-api/fundamentals/data-dictionary#tweet) 및 [user](/ko/x-api/fundamentals/data-dictionary#user) 객체를 포함해 API가 반환하는 객체에 대해 새로운 JSON 설계를 도입합니다.
+특정 필드를 요청하는 방식의 변경 외에도, X API v2는 API가 반환하는 객체(예: [Post](/ko/x-api/fundamentals/data-dictionary#tweet) 및 [user](/ko/x-api/fundamentals/data-dictionary#user) 객체)에 대해 새로운 JSON 설계를 도입합니다.
 
-* JSON 루트 레벨에서 standard 엔드포인트는 statuses 배열에 Post 객체를 반환하는 반면, X API v2는 data 배열을 반환합니다. 
-* 리트윗 및 인용 &quot;statuses&quot;를 참조하는 대신, X API v2 JSON은 리트윗 및 인용 트윗을 참조합니다. contributors 및 user.translator&#95;type 같은 많은 레거시 및 사용 중단 필드는 제거됩니다. 
-* Post 객체의 favorites 필드와 user 객체의 favourites 필드를 함께 사용하는 대신, X API v2는 like라는 용어만 사용합니다. 
-* X는 값이 없는 JSON 값(예: null)을 페이로드에 기록하지 않는 관례를 채택하고 있습니다. Post 및 user 속성은 null이 아닌 값을 가질 때만 포함됩니다. 
+* JSON 루트 레벨에서, standard 엔드포인트는 게시물(Post) 객체를 statuses 배열로 반환하는 반면, X API v2는 data 배열로 반환합니다. 
+* Retweeted 및 Quoted &quot;statuses&quot;를 참조하는 대신, X API v2 JSON은 Retweeted 및 Quoted 트윗을 참조합니다. contributors, user.translator&#95;type과 같은 많은 레거시 및 사용 중단 필드는 제거됩니다. 
+* 게시물(Post) 객체의 favorites와 user 객체의 favourites를 둘 다 사용하는 대신, X API v2는 like라는 용어를 사용합니다. 
+* X는 값이 없는 JSON 필드(예: null)는 페이로드에 기록하지 않는 규칙을 채택하고 있습니다. 게시물과 user 속성은 null이 아닌 값을 가진 경우에만 포함됩니다. 
    
 
-또한 다음과 같은 내용을 포함하여 [Post 객체](/ko/x-api/fundamentals/data-dictionary#tweet)에 새로운 필드를 추가했습니다.
+또한 [Post 객체](/ko/x-api/fundamentals/data-dictionary#tweet)에 다음과 같은 새로운 필드 세트를 도입했습니다.
 
 * [conversation&#95;id](/ko/x-api/fundamentals/conversation-id) 필드
-* context 및 entities를 포함한 두 개의 새로운 [annotations](/ko/x-api/fundamentals/post-annotations) 필드
+* context 및 entities를 포함하는 두 개의 새로운 [annotations](/ko/x-api/fundamentals/post-annotations) 필드
 * 여러 개의 새로운 [metrics](/ko/x-api/fundamentals/metrics) 필드 
-* 특정 Post에 누가 답글을 달 수 있는지 보여주는 새로운 reply&#95;setting 필드
+* 특정 게시물에 누가 답글을 달 수 있는지 보여주는 새로운 reply&#95;setting 필드
 
-**요청 매개변수**
+**요청 파라미터**
 
-다음 standard v1.1 요청 매개변수는 X API v2에서 이에 해당하는 매개변수가 있습니다.
+다음 standard v1.1 요청 파라미터에는 X API v2에서 상응하는 파라미터가 있습니다:
 
 | **Standard** | **X API v2** |
 | :--- | :--- |
@@ -96,8 +96,8 @@ X API v2 버전에서는 기본적으로 user id, name, username 필드만 제�
 | cursor | pagination&#95;token |
 | skip&#95;status | 해당 없음 |
 
-또한 X API v2에서는 지원되지 **않는** Standard v1.1 Mutes lookup 요청 매개변수들도 있습니다:
+또한 X API v2에서 지원되지 **않는** 표준 v1.1 Mutes 조회 요청 매개변수들도 있습니다:
 
 | Standard | Comment |
 | :--- | :--- |
-| include&#95;entities | 이 매개변수는 게시물 페이로드에서 entities 노드를 제거하는 데 사용됩니다. 추가적인 필드 및 expansions 기능으로 대체되었습니다. |
+| include&#95;entities | 이 매개변수는 게시물 페이로드에서 entities 노드를 제거하는 데 사용됩니다. 이 기능은 추가적인 필드 및 expansions 기능을 사용하는 방식으로 대체되었습니다. |

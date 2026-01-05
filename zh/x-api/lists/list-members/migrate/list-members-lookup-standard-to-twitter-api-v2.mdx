@@ -1,24 +1,24 @@
 ---
-title: 列表成员查询
-sidebarTitle: 列表成员查询
-keywords: ["列表成员查询迁移", "v1.1 到 v2 的列表成员查询", "迁移到 v2 的列表成员查询", "标准版到 v2 的列表成员查询", "列表成员迁移"]
+title: 列表成员查找
+sidebarTitle: 列表成员查找
+keywords: ["列表成员查找迁移", "v1.1 到 v2 列表成员查找", "迁移列表成员查找", "Standard v1.1 到 v2 列表成员", "列表成员迁移"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
 
 <div id="list-members-lookup-standard-v11-compared-to-x-api-v2">
-  ### 列表成员查询：标准版 v1.1 与 X API v2 对比
+  ### 列表成员查找：标准 v1.1 与 X API v2 的比较
 </div>
 
-如果你一直在使用标准版 v1.1 的 [GET lists/members](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-members) 和 [GET lists/memberships](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-memberships) 端点，本指南旨在帮助你了解标准版 v1.1 与 X API v2 列表成员端点之间的相似之处和差异。
+如果你一直在使用标准 v1.1 的 [GET lists/members](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-members) 和 [GET lists/memberships](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-memberships) 端点，本指南旨在帮助你了解标准 v1.1 与 X API v2 列表成员端点之间的相似之处和差异。
 
 * **相似之处**
-  * 身份验证方式
+  * 认证方式
 * **差异**
   * 端点 URL
   * 速率限制
-  * 应用和项目要求
-  * 每个请求的数据对象数量限制
+  * 应用和项目的要求
+  * 每个请求可返回的数据对象数量限制
   * 响应数据格式
   * 请求参数
 
@@ -28,55 +28,55 @@ import { Button } from '/snippets/zh/button.mdx';
 
 **身份验证**
 
-这两个版本的端点都支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 和 [仅应用（App only）](/zh/resources/fundamentals/authentication#oauth-2-0) 身份验证。因此，如果你之前使用的是标准 v1.1 的 List 成员端点之一，在迁移到 X API v2 版本时，可以继续使用相同的身份验证方式。
+这两个版本的端点都同时支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 和 [仅应用（App only）](/zh/resources/fundamentals/authentication#oauth-2-0)。因此，如果你之前使用的是标准 v1.1 的某个 List 成员端点，在迁移到 X API v2 版本时，可以继续使用相同的身份验证方式。
 
-根据你所使用的身份验证库或包，仅应用（App only）身份验证通常是最容易上手的方式，并且只需通过一个简单的请求头即可完成设置。要了解如何生成仅应用访问令牌，请参阅[此仅应用指南](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
+根据你使用的身份验证库或软件包，仅应用身份验证通常是最简单的入门方式，并且可以通过一个简单的请求头来设置。要了解如何生成仅应用的访问令牌（Access Token），请参阅[此仅应用指南](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。
 
 <div id="differences">
   #### 差异
 </div>
 
-**Endpoint URLs（端点 URL）**
+**Endpoint URL**
 
-* 标准 v1.1 端点：
-  * GET https://api.x.com/1.1/lists/members.json
+* 标准版 v1.1 端点：
+  * GET https://api.x.com/1.1/lists/members.json\
     （查询指定列表的成员）
-  * GET https://api.x.com/1.1/lists/memberships.json
-    （查询某个用户所加入的列表）
+  * GET https://api.x.com/1.1/lists/memberships.json\
+    （查询某个用户所属的列表）
 * X API v2 端点：
-  * GET https://api.x.com/2/lists/:id/members
+  * GET https://api.x.com/2/lists/:id/members\
     （查询指定列表的成员）
 
-  * GET https://api.x.com/2/users/:id/list&#95;memberships
-    （查询某个用户所加入的列表）
+  * GET https://api.x.com/2/users/:id/list&#95;memberships\
+    （查询某个用户所属的列表）
 
 **速率限制**
 
 |     |     |
 | :--- | :--- |
-| **标准 v1.1** | **X API v2** |
-| /1.1/lists/members.json<br /><br />OAuth 1.0a 用户上下文下每 15 分钟窗口 900 次请求<br /><br />仅应用身份下每 15 分钟窗口 15 次请求 | /2/lists/:id/members<br /><br />OAuth 1.0a 用户上下文下每 15 分钟窗口 900 次请求<br /><br />OAuth 2.0 Authorization Code with PKCE 下每 15 分钟窗口 900 次请求<br /><br />仅应用身份下每 15 分钟窗口 900 次请求 |
-| /1.1/lists/memberships.json<br /><br />OAuth 1.0a 用户上下文下每 15 分钟窗口 15 次请求<br /><br />仅应用身份下每 15 分钟窗口 15 次请求 | /2/users/:id/list&#95;memberships<br /><br />OAuth 1.0a 用户上下文下每 15 分钟窗口 15 次请求<br /><br />OAuth 2.0 Authorization Code with PKCE 下每 15 分钟窗口 15 次请求<br /><br />仅应用身份下每 15 分钟窗口 15 次请求 |
+| **标准版 v1.1** | **X API v2** |
+| /1.1/lists/members.json<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 900 次请求<br /><br />仅应用（App only）时，每 15 分钟窗口内 15 次请求 | /2/lists/:id/members<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 900 次请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟窗口内 900 次请求<br /><br />仅应用（App only）时，每 15 分钟窗口内 900 次请求 |
+| /1.1/lists/memberships.json<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 15 次请求<br /><br />仅应用（App only）时，每 15 分钟窗口内 15 次请求 | /2/users/:id/list&#95;memberships<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟窗口内 15 次请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟窗口内 15 次请求<br /><br />仅应用（App only）时，每 15 分钟窗口内 15 次请求 |
 
 **应用和项目要求**
 
-在对请求进行身份验证时，X API v2 端点要求你使用与某个 [developer App](/zh/resources/fundamentals/developer-apps) 关联、并隶属于某个 [Project](/zh/resources/fundamentals/projects) 的凭证。所有 X API v1.1 端点都可以使用来自独立应用或与项目关联的应用的凭证。
+在对请求进行身份验证时，X API v2 端点要求你使用来自某个 [developer App](/zh/resources/fundamentals/developer-apps)，且该 App 隶属于某个 [Project](/zh/resources/fundamentals/projects) 的凭证。所有 X API v1.1 端点都可以使用独立应用或与项目关联的应用的凭证。
 
-**每次请求的数据对象数量限制**
+**每个请求的数据对象数量限制**
 
-标准 v1.1 的 /1.1/lists/members 端点允许你每次请求返回最多 5000 个用户。新的 v2 端点允许你每次请求返回最多 100 个用户。默认会返回 100 个用户对象，如需更改结果数量，你需要传递查询参数 max&#95;results=，其值在 1–100 之间；然后可以将响应负载中返回的 next&#95;token 传递给下一次请求中的 pagination&#95;token 查询参数。
+标准版 v1.1 的 /1.1/lists/members 端点允许你每个请求最多返回 5000 个用户。新的 v2 端点允许你每个请求最多返回 100 个用户。默认情况下，会返回 100 个用户对象；若要更改结果数量，你需要传递查询参数 max&#95;results=，其取值为 1–100 之间的数字；然后可以将响应载荷中返回的 next&#95;token 传递给下一次请求中的 pagination&#95;token 查询参数。
 
-此外，端点 /1.1/lists/memberships 允许你每次请求返回最多 1000 个列表。对于 v2 替代端点，每次请求最多允许返回 100 个列表。默认会返回 100 个列表对象，使用与 /1.1/lists/members 相同方式的查询参数 max&#95;results= 和 pagination&#95;token 来更改结果数量。
+此外，/1.1/lists/memberships 端点允许你每个请求最多返回 1000 个列表。使用 v2 替代端点时，每个请求最多允许返回 100 个列表。默认会返回 100 个列表对象，可像在 /1.1/lists/members 中那样，使用查询参数 max&#95;results= 和 pagination&#95;token 来更改结果数量。
 
 **响应数据格式**
 
-标准 v1.1 与 X API v2 端点版本之间最大的一项差异是：你如何选择要在负载中返回哪些字段。
+标准版 v1.1 与 X API v2 版本端点之间最大的差异之一，是你如何选择在载荷中返回哪些字段。
 
-对于标准端点，你默认会收到许多响应字段，然后可以选择使用参数来指定应在负载中额外返回哪些字段或字段集合。
+对于标准端点，你默认会收到许多响应字段，然后可以选择性地使用参数来指定在载荷中应返回哪些额外字段或字段集。
 
-X API v2 版本 /users/:id/list&#95;memberships 会默认返回列表的 id 和 name 字段。若要请求任何其他字段或对象，你需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数。你从此端点请求的任何列表字段都会返回在主列表对象中。任何扩展对象和字段都会在响应中的 includes 对象中返回。然后，你可以通过匹配主对象和扩展对象中出现的 ID，将任何扩展对象关联回主列表对象。
+X API v2 版本的 /users/:id/list&#95;memberships 会默认返回列表的 id 和 name 字段。若要请求任何其他字段或对象，你需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数。从该端点请求的任何列表字段都会返回在主列表对象中。任何扩展对象及其字段将作为 includes 对象返回在你的响应中。然后你可以通过匹配主对象与扩展对象中出现的 ID，将任何扩展对象关联回主列表对象。 
 
-下面是一些可能的列表字段和扩展字段示例：
+以下是一些可能的列表字段和扩展字段示例：
 
 * created&#95;at
 
@@ -92,23 +92,23 @@ X API v2 版本 /users/:id/list&#95;memberships 会默认返回列表的 id 和 
 
 |     |     |
 | :--- | :--- |
-| **Endpoint（端点）** | **Expansion（扩展字段）** |
+| **Endpoint** | **Expansion** |
 | /2/lists/:id/members | pinned&#95;tweet&#95;id |
 | /2/users/:id/list&#95;memberships | owner&#95;id |
 
-我们鼓励你通过查阅各自的指南，或阅读我们的[如何使用 fields 和 expansions](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 指南，进一步了解这些新参数。 
+我们鼓励你在各自的指南中进一步了解这些新参数，或者阅读我们的 [如何使用 fields 和 expansions](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 指南。 
 
-我们还整理了一份[数据格式迁移指南](/zh/x-api/migrate/data-format-migration)，可帮助你将标准 v1.1 字段映射到新版 v2 字段。该指南还会为你提供在 v2 请求中需要传递的具体 expansion 和 field 参数，以返回特定字段。 
+我们还整理了一份[数据格式迁移指南](/zh/x-api/migrate/data-format-migration)，可帮助你将标准 v1.1 字段映射到更新的 v2 字段。该指南还会告诉你，在 v2 请求中需要传入哪些特定的 expansion 和 field 参数，以便返回特定字段。 
 
-除了你请求某些字段的方式发生变化之外，X API v2 还为 API 返回的对象引入了全新的 JSON 设计，包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象。
+除了你请求某些字段的方式发生变化之外，X API v2 还为 API 返回的对象（包括[帖子](/zh/x-api/fundamentals/data-dictionary#tweet)和[用户](/zh/x-api/fundamentals/data-dictionary#user)对象）引入了新的 JSON 设计。
 
-* 在 JSON 根级别，标准端点会在 statuses 数组中返回 Post 对象，而 X API v2 会返回一个 data 数组。 
+* 在 JSON 根级别，标准端点在 statuses 数组中返回 Post 对象，而 X API v2 在 data 数组中返回 Post 对象。 
 
-* X API v2 的 JSON 不再引用被转发和被引用的 “statuses”，而是引用被转发和被引用的帖子。许多遗留和已弃用的字段（如 contributors 和 user.translator&#95;type）正在被移除。 
+* X API v2 的 JSON 不再将其称为被转发和被引用的 “statuses”，而是称为被转发和被引用的帖子（Retweeted 和 Quoted Tweets）。许多遗留和已弃用字段（例如 contributors 和 user.translator&#95;type）正在被移除。 
 
-* X API v2 不再在 Post 对象中使用 favorites、在 user 对象中使用 favourites，而是统一使用术语 like。 
+* 以往在 Post 对象中使用 favorites，在 user 对象中使用 favourites，X API v2 统一使用术语 like。 
 
-* X 采用的约定是，对于没有取值的 JSON 值（例如 null），不会写入到 payload 中。只有在 Post 和 user 属性具有非空值时，这些属性才会被包含。
+* X 采用的约定是，对于没有取值的 JSON 字段（例如值为 null），不会写入到负载中。只有在 Post 和 user 属性具有非 null 值时才会被包含。
 
 **请求参数**
 
@@ -120,20 +120,20 @@ X API v2 版本 /users/:id/list&#95;memberships 会默认返回列表的 id 和 
 | :--- | :--- |
 | **Standard v1.1** | **X API v2** |
 | list&#95;id | id  |
-| slug | 无等价项 |
-| owner&#95;screen&#95;name | 无等价项 |
-| owner&#95;id | 无等价项 |
+| slug | 无对应项 |
+| owner&#95;screen&#95;name | 无对应项 |
+| owner&#95;id | 无对应项 |
 | count | max&#95;results |
 | cursor | pagination&#95;token |
-| include&#95;entities | 无等价项 |
-| skip&#95;status | 无等价项 |
+| include&#95;entities | 无对应项 |
+| skip&#95;status | 无对应项 |
 
-**列表成员身份查询**
+**列表成员关系查询**
 
 |     |     |
 | :--- | :--- |
 | **Standard v1.1** | **X API v2** |
 | user&#95;id | id  |
-| screen&#95;name | 无等价项 |
+| screen&#95;name | 无对应项 |
 | count | max&#95;results |
 | cursor | pagination&#95;token |
