@@ -1,37 +1,37 @@
 ---
 title: 概要
 sidebarTitle: 概要
-keywords: ["ミュート", "ユーザーをミュート", "ミュート済みアカウント", "ミュートの検索", "ミュートの管理", "ユーザーのミュート"]
+keywords: ["ミュート", "ユーザーのミュート", "ミュート済みアカウント", "ミュートの検索", "ミュートの管理", "ユーザーのミュート設定"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-アカウントをミュートすると、そのアカウントをフォロー解除したりブロックしたりすることなく、そのアカウントのポストをタイムラインから非表示にできます。ミュートされたアカウント側には、あなたがミュートしたことは通知されず、いつでもミュートを解除できます。`manage mutes` エンドポイントを使用することで、開発者はX上の人々にとってより安全な利用体験を提供できます。`manage mutes` を利用した構築例として、特定のトピックについてポストする可能性のあるアカウントを、指定した期間だけミュートできるアプリケーションなどが挙げられます。`mutes lookup` エンドポイントを使うと、あなた自身や認証済みユーザーが誰をミュートしているかを確認できます。これは、ミュートしているアカウントとの関わり方を把握するのに役立ちます。 
+アカウントをミュートすると、そのアカウントをフォロー解除したりブロックしたりすることなく、そのアカウントのポストを自分のタイムラインから非表示にできます。ミュートされたアカウントには、あなたがミュートしたことは通知されず、いつでもミュート解除できます。manage mutes エンドポイントを使うことで、開発者は X 上の人々にとってより安全なエクスペリエンスを構築できます。manage mutes を活用した例としては、特定のトピックについてポストする可能性のあるアカウントを、指定した期間だけミュートできるアプリケーションが挙げられます。mutes lookup エンドポイントを使用すると、あなた自身または認証済みユーザーが誰をミュートしているかを確認できます。これは、ミュートしているアカウントとの関わり方を把握するのに役立ちます。 
 
-`mutes lookup` では非公開情報へのリクエストを行い、`manage mutes` ではユーザーに代わって操作を行うため、これらのエンドポイントは必ず [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用して認証し、あなたのアプリを承認したユーザーに紐づくユーザーコンテキストのアクセストークンを使用する必要があります。これらのアクセストークンは、[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)（OAuth 1.0a）または [Authorization Code with PKCE grant flow](/ja/resources/fundamentals/authentication#how-to-connect-to-endpoints-using-oauth-2-0-authorization-code-flow-with-pkce)（OAuth 2.0）を用いて生成できます。
+mute lookup では非公開情報へのリクエストを行い、また manage mutes ではユーザーに代わって操作を行うため、これらのエンドポイントは必ず [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) か [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかで認証し、あなたのアプリを許可したユーザーに紐づくユーザーアクセストークンを使用する必要があります。これらのアクセストークンは、[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)（OAuth 1.0a）または [Authorization Code with PKCE grant flow](/ja/resources/fundamentals/authentication#how-to-connect-to-endpoints-using-oauth-2-0-authorization-code-flow-with-pkce)（OAuth 2.0）を使用して生成できます。
 
 <div id="mutes-lookup">
   ### ミュートの取得
 </div>
 
-mutes lookup エンドポイントを使用すると、認証されたユーザーがミュートしているアカウントを表示できます。このエンドポイントには、ユーザーごとに 15 分あたり 15 リクエストのレート制限があります。
+ミュートの取得エンドポイントを使用すると、認証済みユーザーがミュートしているアカウントを確認できます。このエンドポイントのレート制限は、ユーザーごとに15分あたり15リクエストです。
 
 <div id="manage-mutes">
-  ### ミュートを管理する
+  ### ミュートの管理
 </div>
 
-ミュート関連エンドポイントを使用すると、認証済みユーザーに代わって指定したアカウントをミュートまたはミュート解除できます。これらのエンドポイントでは、POST と DELETE の 2 つのメソッドが利用できます。POST メソッドではアカウントをミュートでき、DELETE メソッドではアカウントのミュートを解除できます。POST と DELETE の両エンドポイントには、ユーザーあたり 15 分間に 50 リクエストのレート制限があります。
+ミュート管理用エンドポイントを使用すると、認証済みユーザーに代わって指定したアカウントをミュートまたはミュート解除できます。これらのエンドポイントでは、POST と DELETE の 2 つのメソッドが利用できます。POST メソッドではアカウントをミュートし、DELETE メソッドではアカウントのミュートを解除します。POST および DELETE の各エンドポイントには、ユーザーあたり 15 分間に 50 リクエストというレート制限があります。
 
-**注意：** ユーザーが [X](https://x.com/) 上からミュートする場合、15 分あたり 200 リクエストの上限があります。
+**注:** ユーザーが [X](https://x.com/) 上からミュートする場合、15 分間に 200 リクエストという上限があります。
 
-**アカウントの設定**
+**アカウントのセットアップ**
 
-これらのエンドポイントにアクセスするには、次のものが必要です。
+これらのエンドポイントにアクセスするには、次が必要です。
 
 * 承認済みの[開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)
-* [プロジェクト](/ja/resources/fundamentals/projects)内にある[開発者アプリ](/ja/resources/fundamentals/developer-apps)のキーとトークンを使用して認証すること
+* [プロジェクト](/ja/resources/fundamentals/projects)内にある[開発者アプリ](/ja/resources/fundamentals/developer-apps)のキーとトークンを使用した認証
 
-X API v2 エンドポイントへのアクセス方法の詳細については、[はじめにガイド](/ja/x-api/getting-started/getting-access)をご覧ください。
+X API v2 エンドポイントへのアクセス方法について詳しくは、[利用開始ガイド](/ja/x-api/getting-started/getting-access)をご覧ください。
 
 <div className="flex space-x-2">
   <Button href="/ja/x-api/users/mutes/quickstart/manage-mutes-quickstart">

@@ -1,33 +1,33 @@
 ---
 title: Introducción
 sidebarTitle: Introducción
-keywords: ["cumplimiento por lotes", "lote de cumplimiento", "API de cumplimiento por lotes", "trabajos de cumplimiento", "datos de cumplimiento", "comprobación de cumplimiento por lotes"]
+keywords: ["batch compliance", "compliance batch", "batch compliance API", "compliance jobs", "compliance data", "batch compliance check"]
 ---
 
 import { Button } from '/snippets/es/button.mdx';
 
-X está comprometida con nuestra comunidad de desarrolladores que crean con la X API. Como parte de este compromiso, nuestro objetivo es que nuestra API sea abierta y justa para los desarrolladores, segura para las personas en X y beneficiosa para la plataforma X en su conjunto. Es fundamental que cualquier desarrollador que almacene contenido de X sin conexión se asegure de que los datos reflejen la intención del usuario y el estado actual del contenido en X. Por ejemplo, cuando alguien en X elimina una Publicación o su cuenta, protege sus Publicaciones o elimina la información geográfica de sus Publicaciones, es fundamental tanto para X como para nuestros desarrolladores respetar las expectativas e intención de esa persona. Los endpoints de batch compliance proporcionan a los desarrolladores una herramienta sencilla para ayudar a mantener los datos de X en cumplimiento con el [X Developer Agreement and Policy](https://developer.x.com/en/developer-terms/policy). 
+X está comprometido con nuestra comunidad de desarrolladores que crean con la X API. Como parte de este compromiso, nuestro objetivo es que nuestra API sea abierta y equitativa para los desarrolladores, segura para las personas en X y beneficiosa para la plataforma X en su conjunto. Es fundamental que cualquier desarrollador que almacene contenido de X sin conexión se asegure de que los datos reflejen la intención del usuario y el estado actual del contenido en X. Por ejemplo, cuando alguien en X elimina una Publicación o su cuenta, protege sus Publicaciones o elimina la información de geolocalización de sus Publicaciones, es fundamental tanto para X como para nuestros desarrolladores respetar las expectativas y la intención de esa persona. Los endpoints de cumplimiento por lotes proporcionan a los desarrolladores una herramienta sencilla para ayudar a mantener los datos de X en cumplimiento con el [Acuerdo y Política para Desarrolladores de X](https://developer.x.com/en/developer-terms/policy). 
 
-Estos endpoints de batch compliance te permiten cargar grandes conjuntos de datos de IDs de Publicaciones o de usuarios para recuperar su estado de cumplimiento con el fin de determinar qué datos requieren acción para que tus conjuntos de datos cumplan con las normas. Ten en cuenta que el uso de los endpoints de batch compliance está restringido a los casos de uso antes mencionados, y cualquier otro propósito está prohibido y puede dar lugar a medidas de aplicación.
+Estos endpoints de cumplimiento por lotes te permiten cargar grandes conjuntos de datos de id de Publicaciones o de usuarios para recuperar su estado de cumplimiento, a fin de determinar qué datos requieren acción para que tus conjuntos de datos cumplan las normas. Ten en cuenta que el uso de los endpoints de cumplimiento por lotes está restringido a los casos de uso antes mencionados, y cualquier otro propósito está prohibido y puede dar lugar a medidas de aplicación.
 
-Normalmente, hay 4 pasos implicados al trabajar con este endpoint:
+Por lo general, hay 4 pasos involucrados al trabajar con este endpoint:
 
-1. **Create a compliance job**
-   Puedes especificar el tipo de job (con el valor tweets o users) para indicar si el conjunto de datos que quieres cargar contiene IDs de Publicaciones o IDs de usuario. Puedes tener un job concurrente por tipo de job en cualquier momento.
-2. **Upload your dataset to the upload&#95;url**
-   A continuación, cargas tu conjunto de datos como un archivo de texto plano en la upload&#95;url proporcionada, donde cada línea del archivo contiene un solo ID de Publicación o ID de usuario. La upload&#95;url caduca a los 15 minutos.
-3. **(Optional) Check the job status**
-   Puedes comprobar el estado de tu compliance job para ver si está en estado created, in&#95;progress, failed o complete.
-4. **Download the results**
-   Cuando tu job se complete, podrás descargar los resultados utilizando la download&#95;url. La download&#95;url caduca después de una semana (desde que se creó el job).
+1. **Crear un trabajo de cumplimiento**
+   Puedes especificar el tipo de trabajo (con el valor tweets o users) para indicar si el conjunto de datos que quieres cargar contiene id de Publicaciones o id de usuarios. Puedes tener un trabajo concurrente por tipo de trabajo en cualquier momento.
+2. **Cargar tu conjunto de datos en la upload&#95;url**
+   A continuación, cargas tu conjunto de datos como un archivo de texto plano en la `upload_url` proporcionada, donde cada línea del archivo contiene un único id de Publicación o id de usuario. La `upload_url` vence después de 15 minutos.
+3. **(Opcional) Comprobar el estado del trabajo**
+   Puedes comprobar el estado de tu trabajo de cumplimiento para ver si está `created`, `in_progress`, `failed` o `complete`.
+4. **Descargar los resultados**
+   Cuando tu trabajo haya finalizado, puedes descargar los resultados usando la `download_url`. La `download_url` vence después de una semana (desde la creación del trabajo).
 
-   Este resultado contendrá un conjunto de objetos JSON (un objeto por línea). Cada objeto contendrá un ID de Publicación, la fecha de creación de la Publicación (útil para localizar Publicaciones organizadas por fecha), la acción requerida, el motivo de la acción de cumplimiento y la fecha en que el usuario fue suspendido.
+   Este resultado contendrá un conjunto de objetos JSON (un objeto por línea). Cada objeto contendrá un id de Publicación, la fecha de creación de la Publicación (útil para localizar Publicaciones organizadas por fecha), la acción requerida, el motivo de la acción de cumplimiento y la fecha en que se suspendió al usuario.
 
 Recibirás los siguientes tipos de eventos de cumplimiento en tus resultados:
 
 * deleted: indica que la Publicación o la cuenta de usuario se eliminó
 * deactivated: indica que la Publicación o la cuenta de usuario se desactivó
-* scrub&#95;geo: indica que se eliminó la información geográfica asociada con la Publicación o el usuario
+* scrub&#95;geo: indica que se eliminó la información de geolocalización asociada con la Publicación o el usuario
 * protected: indica que la cuenta que hizo la Publicación se volvió privada
 * suspended: indica que la cuenta que hizo la Publicación fue suspendida
 
@@ -36,9 +36,9 @@ Recibirás los siguientes tipos de eventos de cumplimiento en tus resultados:
 Para acceder a estos endpoints, necesitarás:
 
 * Una [cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info) aprobada.
-* Autenticarte utilizando las claves y tokens de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que se encuentra dentro de un [Proyecto](/es/resources/fundamentals/projects). 
+* Autenticarte usando las claves y tokens de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que se encuentra dentro de un [Proyecto](/es/resources/fundamentals/projects). 
 
-Obtén más información sobre cómo acceder a los endpoints de X API v2 en nuestra [guía de primeros pasos](/es/x-api/getting-started/getting-access).
+Obtén más información sobre cómo acceder a los endpoints de X API v2 en nuestra [guía de introducción](/es/x-api/getting-started/getting-access).
 
 <div className="flex space-x-2">
   <Button href="/es/x-api/compliance/batch-compliance/quickstart">

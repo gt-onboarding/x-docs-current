@@ -1,108 +1,108 @@
 ---
 title: 概览
 sidebarTitle: 概览
-keywords: ["搜索迁移", "搜索迁移到 v2", "v1.1 到 v2 搜索迁移", "搜索迁移指南", "迁移搜索功能", "从 Enterprise 迁移到 v2"]
+keywords: ["搜索迁移", "搜索迁移操作", "从 v1.1 到 v2 的搜索", "搜索迁移指南", "迁移搜索", "从 Enterprise 到 v2"]
 ---
 
 <div id="comparing-x-apis-search-posts-endpoints">
   ## 比较 X API 的搜索帖子端点
 </div>
 
-X API v2 的 Search Tweets 端点最终将取代 [标准 v1.1 search/posts](/zh/x-api/posts/search/introduction) 端点和 [Enterprise Search API](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api)。如果你已有使用旧版 X 搜索端点的代码、应用或工具，并正考虑迁移到更新的 X API v2 端点，那么本指南适合你。
+v2 Search Tweets 端点最终将取代 [标准 v1.1 search/posts](/zh/x-api/posts/search/introduction) 端点和 [Enterprise Search API](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api)。如果您已有使用旧版 X 搜索端点的代码、应用或工具，并且正考虑迁移到新版的 X API v2 端点，那么本指南适合您。 
 
-本页包含三个比较表：
+本页包含三张对比表：
 
-* [最近搜索](#recent)
-* [全存档搜索](#full-archive)
+* [近期搜索](#recent)
+* [全量归档搜索](#full-archive)
 * [过滤运算符比较](#operators)
 
 <div id="recent-search-comparison">
-  ### 近期搜索对比
+  ### 近期搜索比较
 </div>
 
-下表比较了各种类型的近期搜索端点：
+下表比较了不同类型的近期搜索端点：
 
-| **说明** | **Standard v1.1** | **X API v2** |
+| **描述** | **Standard v1.1** | **X API v2** |
 | :--- | :--- | :--- |
 | 主机域名 | https://api.x.com | https://api.x.com |
 | 端点路径 | /1.1/search/tweets.json | /2/tweets/search/recent |
 | [Authentication](/zh/resources/fundamentals/authentication) | OAuth 1.0a 用户上下文  <br />OAuth 2.0 应用仅模式 | OAuth 1.0a 用户上下文<br /><br />OAuth 2.0 Authorization Code with PKCE<br /><br />OAuth 2.0 应用仅模式 |
 | 时间戳格式 | YYYYMMDD | YYYY-MM-DDTHH:mm:ssZ  <br />[ISO 8601 / RFC 3339](https://tools.ietf.org/html/rfc3339#section-5.6) |
-| 返回发布时间不早于 | 7 天 | 7 天 |
+| 返回的帖子最久可追溯至 | 7 天 | 7 天 |
 | 支持的 HTTP 方法 | GET | GET |
 | 默认请求速率限制 | 使用 OAuth 1.0a 用户上下文时，每 15 分钟 180 个请求<br /><br />使用 OAuth 2.0 应用仅模式时，每 15 分钟 450 个请求 | **Basic：**<br /><br />使用 OAuth 2.0 应用仅模式时，每 15 分钟 60 个请求<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟 60 个请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟 60 个请求<br /><br />**Pro：**<br /><br />使用 OAuth 2.0 应用仅模式时，每 15 分钟 450 个请求<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟 180 个请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟 180 个请求 |
 | 提供完全展开的 URL |     | ✔   |
-| 每个响应的最大帖子数（默认） | 100（15） | 100（10） |
-| 帖子 JSON 格式 | Standard v1.1 格式 | [X API v2 格式](/zh/x-api/fundamentals/data-dictionary)（由 fields 和 expansions 请求参数决定，与 v1.1 格式不向后兼容）<br /><br />要了解如何从 Standard v1.1 格式迁移到 X API v2 格式，请参阅我们的[数据格式迁移指南](/zh/x-api/migrate/data-format-migration)。 |
+| 每个响应的最大帖子数（默认） | 100 (15) | 100 (10) |
+| 帖子 JSON 格式 | Standard v1.1 格式 | [X API v2 格式](/zh/x-api/fundamentals/data-dictionary)（由 fields 和 expansions 请求参数决定，与 v1.1 格式不向后兼容）<br /><br />若要进一步了解如何从 Standard v1.1 格式迁移到 X API v2 格式，请参阅我们的[数据格式迁移指南](/zh/x-api/migrate/data-format-migration)。 |
 | 支持选择在负载中返回哪些[字段](/zh/x-api/fundamentals/fields) |     | ✔   |
-| 支持请求并接收[注释](/zh/x-api/fundamentals/post-annotations) |     | ✔   |
+| 支持请求和接收[注释](/zh/x-api/fundamentals/post-annotations) |     | ✔   |
 | 支持在帖子对象中请求特定[指标](/zh/x-api/fundamentals/metrics) |     | ✔   |
-| 支持使用 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 运算符和字段 |     | ✔   |
+| 支持 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 运算符和字段 |     | ✔   |
 | 提供帖子编辑历史 | ✔   | ✔   |
 | 帖子数据数组的 JSON 键名 | statuses | data |
 | 分页的 JSON 键名 | search&#95;metadata.next&#95;results | meta.next&#95;token |
 | 支持按时间范围浏览归档内容 | ✔   | ✔   |
 | 基于时间请求的时间粒度 | day | second |
 | 时区 | UTC | UTC |
-| 按时间导航的请求参数 | until | start&#95;time  <br />end&#95;time |
-| 按帖子 ID 导航的请求参数 | since&#95;id   <br />max&#95;id | since&#95;id   <br />until&#95;id |
-| 分页请求参数 | 提供 URL 编码的查询字符串 | next&#95;token |
-| 需要使用与[项目](/zh/resources/fundamentals/projects)关联的[开发者应用](/zh/resources/fundamentals/developer-apps)的凭证 |     | ✔   |
+| 用于按时间导航的请求参数 | until | start&#95;time  <br />end&#95;time |
+| 用于按帖子 ID 导航的请求参数 | since&#95;id   <br />max&#95;id | since&#95;id   <br />until&#95;id |
+| 用于分页的请求参数 | 提供 URL 编码的查询 | next&#95;token |
+| 要求使用与[项目](/zh/resources/fundamentals/projects)关联的[开发者应用](/zh/resources/fundamentals/developer-apps)的凭证 |     | ✔   |
 
 <div id="full-archive-search-comparison">
-  ### 全归档搜索对比
+  ### 全量归档搜索对比
 </div>
 
-下表比较了不同类型的全归档搜索端点：
+下表比较了不同类型的全量归档搜索端点：
 
-| **描述** | **Enterprise** | **X API v2** |
+| **说明** | **Enterprise** | **X API v2** |
 | :--- | :--- | :--- |
 | 主机域名 | https://gnip-api.x.com | https://api.x.com |
 | 端点路径 | /search/fullarchive/accounts/:account&#95;name/:label | /2/tweets/search/all |
-| [身份验证](/zh/resources/fundamentals/authentication) | Basic auth | OAuth 2.0 App-Only |
+| [Authentication](/zh/resources/fundamentals/authentication) | Basic 认证 | OAuth 2.0 App-Only |
 | 时间戳格式 | YYYYMMDDHHMM | YYYY-MM-DDTHH:mm:ssZ  <br />[ISO 8601 / RFC 3339](https://tools.ietf.org/html/rfc3339#section-5.6) |
-| 返回不早于以下时间的帖子 | 自 2006 年 3 月以来的完整归档 | 自 2006 年 3 月以来的完整归档 |
+| 返回的帖子不早于 | 自 2006 年 3 月起的完整归档 | 自 2006 年 3 月起的完整归档 |
 | 支持的 HTTP 方法 | GET  <br />POST | GET |
-| 默认请求速率限制 | 每分钟速率限制会根据合作伙伴情况按合同约定而变化。<br /><br />使用 Basic auth 时为每秒 20 个请求 | 使用 OAuth 2.0 App-Only 时为每 15 分钟 300 个请求<br /><br />使用 OAuth 2.0 App-Only 时为每秒 1 个请求 |
-| 是否提供完全展开的 URL | ✔   | ✔   |
-| 每个响应返回的帖子数量 | 最大值：500  <br />默认值：100 | 最大值：500  <br />默认值：10 |
-| 帖子 JSON 格式 | [Native Enriched 或 Activity Streams](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary) 格式 | [X API v2](/zh/x-api/fundamentals/data-dictionary) 格式（由 fields 和 expansions 请求参数决定） |
-| 是否支持选择在载荷中返回哪些[字段](/zh/x-api/fundamentals/fields) |     | ✔   |
-| 是否支持请求并接收[注解](/zh/x-api/fundamentals/post-annotations) |     | ✔   |
-| 是否支持在帖子对象中请求特定[指标](/zh/x-api/fundamentals/metrics) |     | ✔   |
-| 是否支持 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 运算符和字段 |     | ✔   |
-| 是否提供帖子编辑历史 | ✔   | ✔   |
+| 默认请求速率限制 | 每分钟的速率限制会根据合作伙伴的合同约定而变化。<br /><br />使用 Basic 认证时为每秒 20 个请求 | 使用 OAuth 2.0 App-Only 时为每 15 分钟 300 个请求<br /><br />使用 OAuth 2.0 App-Only 时为每秒 1 个请求 |
+| 提供完全解析后的 URL | ✔   | ✔   |
+| 每个响应中的帖子数量 | 最大值：500  <br />默认值：100 | 最大值：500  <br />默认值：10 |
+| 帖子 JSON 格式 | [Native Enriched or Activity Streams](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary) 格式 | [X API v2](/zh/x-api/fundamentals/data-dictionary) 格式（由 fields 和 expansions 请求参数决定） |
+| 支持选择在响应体中返回哪些 [字段](/zh/x-api/fundamentals/fields) |     | ✔   |
+| 支持请求和接收 [annotations](/zh/x-api/fundamentals/post-annotations) |     | ✔   |
+| 支持在帖子对象中请求特定的 [metrics](/zh/x-api/fundamentals/metrics) |     | ✔   |
+| 支持 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 运算符和字段 |     | ✔   |
+| 提供帖子编辑历史 | ✔   | ✔   |
 | 帖子数据数组的 JSON 键名 | results | data |
 | 分页的 JSON 键名 | **next** | meta.next&#95;token |
-| 基于时间的请求的时间分辨率 | 秒 | 秒 |
+| 基于时间请求的时间分辨率 | 秒 | 秒 |
 | 时区 | UTC | UTC |
-| 是否支持按帖子 ID 浏览归档 |     | ✔   |
-| 按时间导航的请求参数 | fromDate  <br />toDate | start&#95;time  <br />end&#95;time |
-| 按帖子 ID 导航的请求参数 |     | since&#95;id   <br />until&#95;id |
-| 分页请求参数 | next&#95;token | next&#95;token |
-| 是否需要使用具有学术研究访问权限并关联到某个[项目](/zh/resources/fundamentals/projects)的[开发者应用](/zh/resources/fundamentals/developer-apps)的凭证 |     | ✔   |
+| 支持按帖子 ID 浏览归档 |     | ✔   |
+| 按时间浏览的请求参数 | fromDate  <br />toDate | start&#95;time  <br />end&#95;time |
+| 按帖子 ID 浏览的请求参数 |     | since&#95;id  <br />until&#95;id |
+| 分页的请求参数 | next&#95;token | next&#95;token |
+| 需要使用具有 Academic Research 权限的 [Project](/zh/resources/fundamentals/projects) 所关联的 [developer App](/zh/resources/fundamentals/developer-apps) 的凭证 |     | ✔   |
 
 **过滤运算符对比**
 
-搜索帖子功能的四个不同版本（standard、Enterprise 和 v2）在可用运算符方面有所不同，并且在每个版本内运算符的可用级别也不同，详见下文说明。 
+这四种不同版本（standard、enterprise 和 v2）的帖子搜索在可用运算符上有所不同，并且每个版本内部的运算符可用性级别也不同，说明如下。 
 
 Enterprise
 
-* 不存在 Enterprise 运算符的子层级
+* 不存在 enterprise 运算符的子层级
 
 X API v2
 
-* **Free：**在使用任意项目时可用
-* **Basic：**在使用任意项目时可用
-* **Pro：**在使用某个项目时可用
-* **Enterprise：**在使用某个项目时可用
+* **Free：**在使用任意 Project 时可用
+* **Basic：**在使用任意 Project 时可用
+* **Pro：**在使用某个 Project 时可用
+* **Enterprise：**在使用某个 Project 时可用
 
-您可以在各自的指南中了解每一组运算符的更多信息：
+你可以在各自的指南中进一步了解这些运算符集：
 
-* [Enterprise 运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)
-* [X API v2 运算符](/zh/x-api/posts/search/integrate/build-a-query#operators)
+* [Enterprise operators](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)
+* [X API v2 operators](/zh/x-api/posts/search/integrate/build-a-query#operators)
 
-在了解了 X API v2 中不同的运算符级别之后，下面的表格列出了搜索帖子时各运算符的可用性（注意，如果单元格为空，则表示该运算符不可用）：
+在了解了 X API v2 中不同的运算符级别之后，下面的表格展示了搜索帖子时各运算符可用性的对应关系（注意：如果单元格为空，则表示该运算符不可用）：
 
 | 搜索运算符 | Standard | Enterprise | v2  |
 | :--- | :--- | :--- | :--- |
@@ -117,7 +117,7 @@ X API v2
 | url: | 可用 | 可用 | Basic &amp; Pro |
 | retweets&#95;of: |     | 可用 | Basic &amp; Pro |
 | context: |     |     | Basic &amp; Pro |
-| entity: |     |     | Basic &amp; Pro - 仅在最近搜索中可用 |
+| entity: |     |     | Basic &amp; Pro - 仅适用于最近搜索 |
 | conversation&#95;id: |     |     | Basic |
 | place: |     | 可用 | Pro |
 | place&#95;country: |     | 可用 | Pro |
@@ -168,8 +168,8 @@ X API v2
 
 [X API 迁移中心](/zh/x-api/migrate/overview)
 
-[查看这些端点的部分示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code "查看这些端点的部分示例代码")
+[查看这些端点的示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code "查看这些端点的示例代码")
 
-[搜索帖子：Standard v1.1 到 X API v2](/zh/x-api/posts/search/migrate/standard-to-twitter-api-v2)
+[搜索帖子：从 Standard v1.1 迁移到 X API v2](/zh/x-api/posts/search/migrate/standard-to-twitter-api-v2)
 
-[搜索帖子：Enterprise 到 X API v2](/zh/x-api/posts/search/migrate/enterprise-to-twitter-api-v2)
+[搜索帖子：从 Enterprise 迁移到 X API v2](/zh/x-api/posts/search/migrate/enterprise-to-twitter-api-v2)

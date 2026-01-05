@@ -8,15 +8,16 @@ keywords: ["R 编程", "R 教程", "R API", "统计分析", "数据分析", "R �
   ## 介绍
 </div>
 
-本教程将带你逐步了解如何使用 R 编程语言配合 X API v2 完成入门。我们会使用 R 连接到
+本教程将逐步讲解你在开始使用 R 编程语言和 X API v2 时需要了解的内容。通过使用 R 连接到
 [user lookup](/zh/x-api/users/lookup/introduction) 端点，我将演示如何处理
-X API 返回的 JSON。user lookup 是一个 GET 方法，会根据用户 ID 或
-用户名返回关于单个用户或一组用户的信息。
+X API 返回的 JSON。user lookup 端点使用 GET 方法，会根据用户 ID 或
+用户名返回单个用户或一组用户的相关信息。
 
-如果你对它还不熟悉，R 是在时间序列分析、建模、可视化以及其他数据分析等常见数据科学任务中最流行的语言之一，并且经常与 X API 搭配使用。借助 user
+如果你还不熟悉 R，R 是最流行的语言之一，常用于时间序列分析、建模、可视化以及其他
+数据分析等典型数据科学任务，并且经常与 X API 结合使用。借助 user
 lookup 端点，你可以使用
 [user object](/zh/x-api/fundamentals/data-dictionary#user)
-来分析一个人拥有的关注者数量与其个人简介情感分数之间的相关性。user object 也可以用来基于用户资料中公开的位置信息，对一组账号进行地理映射或分布分析。
+来确定一个人拥有的关注者数量与其个人简介情感得分之间的相关性。user object 还可用于根据用户在其个人资料中公开列出的位置信息，对一组账号进行映射或归类。
 
 <div id="getting-started-with-the-x-api">
   ### 开始使用 X API
@@ -27,43 +28,43 @@ lookup 端点，你可以使用
 一个开发者账号。
 
 在你的开发者账号通过审核后，你首先需要创建一个
-[项目](/zh/resources/fundamentals/projects)。项目可以让你根据计划如何使用 X API 来组织你的工作，从而高效管理你对 API 的访问，并监控你的用量。
+[项目](/zh/resources/fundamentals/projects)。项目可以让你根据自己计划如何使用 X API 来组织工作，从而有效管理你对 API 的访问，并监控你的使用情况。
 
-每个项目都包含一个 [App](/zh/resources/fundamentals/developer-apps)，你可以使用它来生成使用 X API 所需的凭证。你可以在文档中的
+每个项目都包含一个 [App](/zh/resources/fundamentals/developer-apps)，你可以通过它生成使用 X API 所需的凭证。你可以在我们文档中的
 [入门](/zh/x-api/getting-started/about-x-api)
 部分了解更多关于如何开始使用 X API 的信息。
 
 <div id="getting-your-r-environment-set-up">
-  ### 设置 R 环境
+  ### 设置你的 R 环境
 </div>
 
-首先，你需要先[下载 R](https://cloud.r-project.org/)，可以在
-[CRAN 官网](https://cran.r-project.org/)上完成。
+首先，你需要[下载 R](https://cloud.r-project.org/)，可以在
+[CRAN 网站](https://cran.r-project.org/)上完成下载。
 
-之后，为了搭建一个使用 R 的开发环境，你可以使用
+之后，为了搭建一个可以使用 R 的环境，你可以使用
 [RStudio](https://www.rstudio.com/)、适用于
-[Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r-pack) 的 R 扩展包，
-或者如果你更熟悉 Python 生态，
-可以使用 [Jupyter Notebook](https://docs.anaconda.com/anaconda/navigator/tutorials/r-lang/)。
+[Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r-pack)
+的 R 扩展包，或者
+[Jupyter Notebook](https://docs.anaconda.com/anaconda/navigator/tutorials/r-lang/)，如果你来自 Python 生态。
 
 <div id="setting-up-your-environment-variable">
   ### 设置环境变量
 </div>
 
-在本文要展示的代码示例中，你需要为你的 Bearer Token 创建一个环境变量。Bearer Token 用于在调用 X API 时进行身份验证，并开始发送请求。首先，将 `your-bearer-token` 替换为你自己的 Bearer Token，你可以在开发者门户中你的应用的“密钥和令牌”部分获取它。在开始编写脚本之前，你需要先在控制台中运行这一行代码。
+在今天将要展示的代码示例中，你需要为你的 Bearer Token 创建一个环境变量。Bearer Token 使你能够对 X API 进行身份验证并开始发起请求。首先，将“your-bearer-token”替换为你自己的 Bearer Token，你可以在开发者门户中你的应用的“密钥和令牌”部分获取它。在开始编写脚本之前，你需要在控制台中运行这一行代码。
 
 ```r
 Sys.setenv(BEARER_TOKEN = "your-bearer-token")
 ```
 
 <div id="making-your-request">
-  ### 发出请求
+  ### 发起请求
 </div>
 
 你可以使用
-[httr](https://cran.r-project.org/web/packages/httr/index.html) 包向 X API 发送 HTTP
-请求。如果你还没有安装它，请在控制台中安装该包。你还需要安装
-[jsonlite](https://cran.r-project.org/web/packages/jsonlite/index.html) 来处理 JSON 对象，以及用于数据
+[httr](https://cran.r-project.org/web/packages/httr/index.html) 包向 X API 发起 HTTP
+请求。如果你尚未安装它，请在控制台中安装该包。你还需要安装
+[jsonlite](https://cran.r-project.org/web/packages/jsonlite/index.html) 以处理 JSON 对象，以及用于数据
 处理的 [dplyr](https://dplyr.tidyverse.org/)。
 
 ```r
@@ -72,7 +73,7 @@ install.packages("jsonlite")
 install.packages("dplyr")
 ```
 
-现在可以开始编写用于连接 API 的 R 脚本。在脚本开头加载 httr、jsonlite 和 dplyr 这几个包。
+现在你可以开始编写 R 脚本以连接到 API。请在文件开头加载 httr、jsonlite 和 dplyr 包。
 
 ```r
 require(httr)
@@ -80,33 +81,33 @@ require(jsonlite)
 require(dplyr)
 ```
 
-在你的代码示例中，第一步是完成与 X API 通信所需的身份验证设置。获取你在应用中生成的
-[Bearer Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)，并将其放入请求头中用于身份验证。在下面的示例中，将 $BEARER&#95;TOKEN 替换为你的 Bearer Token。
+在代码示例中的第一步，是完成访问 X API 所需的认证设置。从你的应用中获取之前生成的
+[Bearer Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)，并将其添加到请求头中用于认证。在下面的示例中，将 $BEARER&#95;TOKEN 替换为你的令牌。
 
 ```r
 bearer_token <- Sys.getenv("$BEARER_TOKEN")
 headers <- c(`Authorization` = sprintf('Bearer %s', bearer_token))
 ```
 
-在完成身份验证配置后，定义你的请求参数。
-默认情况下，响应中会包含每个返回用户的 id、name 和 username。
+在完成身份验证设置之后，先定义你的请求参数。
+默认情况下，响应中会返回每个用户的 id、name 和 username。
 你可以通过添加额外的
 [fields](/zh/x-api/fundamentals/fields) 和
-[expansions](/zh/x-api/fundamentals/expansions) 来调整这一响应负载。
-在本示例中，我们希望获取用户的个人简介（通过 user.fields=description 请求），以及一个用于返回该用户置顶帖子（pinned Post）的扩展字段。
+[expansions](/zh/x-api/fundamentals/expansions) 来调整此负载。
+在本示例中，你需要获取用户的个人简介（通过 user.fields=description 请求），以及一个包含该用户置顶帖子的扩展字段。
 
 ```r
 params <- list(`user.fields` = 'description', `expansions` = 'pinned_tweet_id')
 ```
 
-现在，你已经可以使用你想要获取更多信息的 X 账号（也称为 account）来构造你的 URL 了。使用 readline 方法，使这个示例可以被重复使用。在输入你想要查看的账号后，通过将 $USERNAME 替换为目标 X 账号，把你指定的账号包含在 URL 中。
+现在，你已经可以用想要获取更多信息的 X 账号（handle，也称为 account）来格式化你的 URL。使用 `readline` 方法可以让此示例可重复使用。在输入你想要查看的 handle 之后，通过将 `$USERNAME` 替换为该 X handle 来格式化你的 URL，使其包含你定义的 handle。
 
 ```r
 handle <- readline('$USERNAME')
 url_handle <- sprintf('https://api.x.com/2/users/by?usernames=%s', handle)
 ```
 
-此时，使用 httr 包向你刚刚创建的 URL 发起一个 GET 请求，通过请求头传入我们的认证凭据，并传入你定义的参数。你可以将响应保存为变量 obj 中的文本对象，并将其打印出来，以查看你刚刚发出的请求的结果。
+此时，请使用 httr 包向你刚刚创建的 URL 发起 GET 请求，通过 header 传入我们的认证凭证，并传入你定义的参数。你可以将响应作为文本对象保存在变量 obj 中，然后打印该对象，以查看你所发起请求的结果。
 
 ```r
 response <-
@@ -118,16 +119,16 @@ print(obj)
 ```
 
 <div id="working-with-our-json-payload">
-  ### 处理我们的 JSON 数据
+  ### 处理我们的 JSON 载荷
 </div>
 
-我最喜欢处理 JSON 的方式之一是使用数据框，这样可以轻松访问复杂的嵌套数据。要实现这一点，使用 jsonlite 包中的 fromJSON 方法将文件“扁平化”，使所有字段位于同一对象中。然后，将该对象转换为数据框。现在你就可以查看这个数据框了。
+我最常用的处理 JSON 的方法之一是使用数据框（data frame），它能让你轻松访问复杂的嵌套数据。为此，请使用 jsonlite 包的 fromJSON 方法将文件“展平”，使这些字段处于同一个对象中。然后，把该对象传入数据框中。现在你就可以开始查看这个数据框了。
 
 ```
 json_data <- fromJSON(obj, flatten = TRUE) %>% as.data.frame View(json_data)
 ```
 
-你可以从数据帧中读取数据的各个字段，并将它们拼接成一个字符串，其中包含 handle、用户名和个人简介。
+你可以从数据框中访问数据的字段，并将这些字段拼接成一个包含 handle、用户名和个人简介的字符串。
 
 ```r
 final <-
@@ -139,19 +140,18 @@ final <-
   )
 ```
 
-使用 `cat` 而不是 `print` 来查看该对象，这样你提取的每个字段之间都会带有换行。
+使用 `cat` 而不是 `print` 来查看对象，这样可以在你提取的每个字段之间显示换行。
 
 ```r
 cat(final)
 ```
 
-如果你针对多个 handle 发起了请求，可以很方便地使用循环来访问每个数据帧元素。
+如果你对多个 handle 发起了请求，可以很方便地使用循环来访问每个数据帧元素。
 
 <div id="conclusion">
   ### 结论
 </div>
 
-希望本教程可以成为你使用 R 结合 X API 的起点。接下来，你可以查看我们在
-[v2 sample code](https://github.com/xdevplatform) 中提供的 R 示例，这些示例涵盖最近搜索、
-帖子查询以及用户查询。如果在此过程中遇到任何问题，请务必在
-[forums](https://devcommunity.x.com/) 上与我们交流；如果本教程激发你创造了什么，也欢迎在 [@XDevelopers](https://x.com/XDevelopers) 上发布帖子与我们分享。
+希望本教程可以成为你使用 R 和 X API 的起点。接下来，你可以在我们的
+[v2 sample code](https://github.com/xdevplatform) 中查看基于 R 的示例，这些示例涵盖近期搜索、帖子查找以及用户查找。若在此过程中遇到任何问题，请务必在
+[forums](https://devcommunity.x.com/) 上告诉我们；如果本教程激发你创造新的东西，也欢迎在 [@XDevelopers](https://x.com/XDevelopers) 上发帖子与我们交流。

@@ -1,19 +1,19 @@
 ---
 title: 集成指南
 sidebarTitle: 集成指南
-keywords: ["管理私信集成", "私信管理集成", "发送私信集成", "私信集成指南", "私信集成设置"]
+keywords: ["管理私信集成", "私信管理集成", "私信发送集成", "私信集成指南", "私信设置"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
 
-Direct Messages v2 端点引入了会话和会话事件作为核心 X API 对象，并区分了一对一会话和群组会话。一对一会话始终只有两个、且仅有两个参与者，而群组会话则可以有两个或更多参与者，且成员可以发生变化。   
+Direct Messages v2 端点将会话和会话事件引入为核心 X API 对象，并对一对一会话和群组会话加以区分。一对一会话始终只有两名且仅两名参与者，而群组会话可以有两名或更多参与者，并且成员构成可以发生变化。   
 
-本页介绍了一些在将 Manage Direct Messages 端点集成到你的系统时需要了解的工具和关键概念。我们将本页内容分为两个部分：
+本页提供了一些在你将 Manage Direct Messages 端点集成到系统中时需要了解的工具和关键概念。我们将本页分为两个部分：
 
 * 关键概念
   * [Direct Message 会话](#direct-message-conversations)
 
-  * [v1.1 与 v2 之间共享的会话和事件 ID](#shared-conversation-and-event-ids)
+  * [在 v1.1 和 v2 之间共享会话和事件 ID](#shared-conversation-and-event-ids)
 
   * [包含媒体附件并引用帖子](#including-media-attachments-and-referencing-tweets)
 
@@ -31,12 +31,12 @@ Direct Messages v2 端点引入了会话和会话事件作为核心 X API 对象
   ### 私信会话
 </div>
 
-所有私信（Direct Message）都属于某个私信会话。会话可以是一对一会话，也可以是群组会话。本次发布提供了创建私信以及检索与私信会话相关联的事件所需的基础端点。所有会话都有唯一的 dm&#95;conversation&#95;id，构成该会话的所有事件都有唯一的 dm&#95;event&#95;id。  
+所有私信都属于某个私信会话（Direct Message conversation）。这些会话可以是一对一会话，也可以是群组会话。本次发布提供了用于创建私信以及检索与私信会话关联事件的基础端点。所有会话都有唯一的 dm&#95;conversation&#95;id，构成该会话的所有事件也都有唯一的 dm&#95;event&#95;id。  
 
-Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息并将其添加到会话中：
+“Manage Direct Message” 端点提供了三个用于创建新消息并将其添加到会话中的 POST 方法：
 
-* **POST /2/dm&#95;conversations/with/:participant&#95;id/messages** - 创建一条一对一私信。该方法会将消息添加到现有的一对一会话中，或者创建一个新的一对一会话。:participant&#95;id 路径参数是接收消息账号的用户 ID。
-  下面是一段用于发送一对一私信的 JSON 请求体示例：
+* **POST /2/dm&#95;conversations/with/:participant&#95;id/messages** - 创建一对一私信。该方法会将消息添加到现有的一对一会话，或者创建一个新的会话。:participant&#95;id 路径参数是接收该消息账号的用户 ID。
+  下面是一条用于发送一对一私信的示例 JSON 请求正文：
 
 ```
 {
@@ -44,7 +44,7 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
 }
 ```
 
-* **POST /2/dm&#95;conversations** - 创建一个新的群组会话并向其中添加一条私信（Direct Message）。此类请求需要提供会话参与者列表。请注意，你可以使用相同的参与者列表创建多个会话。这些请求始终会返回一个新的会话 ID。下面是一个用于创建新的群组会话并添加私信（Direct Message）的示例 JSON 请求体。请注意，这需要一个 &quot;conversation&#95;type&quot; 字段，并且该字段必须设置为 &quot;Group&quot;（区分大小写）。
+* **POST /2/dm&#95;conversations** - 创建一个新的群组会话并向其中添加一条私信（Direct Message）。这些请求必须包含会话参与者列表。请注意，你可以使用相同的参与者列表创建多个会话。这些请求将始终返回一个新的会话 ID。下面是一个用于创建新群组会话并添加一条私信的示例 JSON 请求正文。请注意，这需要一个 &quot;conversation&#95;type&quot; 字段，并且该字段必须设置为 &quot;Group&quot;（区分大小写）。
 
 ```
 {
@@ -54,8 +54,8 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
 }
 ```
 
-* **POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages** - 创建一条私信并将其添加到现有会话中。`:dm&#95;conversation&#95;id` 路径参数是要添加消息的会话的 ID。此方法可用于向一对一会话和群组会话添加消息。
-  下面是一个用于向一对一和群组会话发送私信的 JSON 请求体示例：
+* **POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages** - 创建一条私信并将其添加到现有会话中。`:dm&#95;conversation&#95;id` 路径参数是要添加消息的会话 id。此方法可用于向一对一会话和群组会话添加消息。
+  下面是一个用于向一对一会话和群组会话发送私信的 JSON 请求体示例：
 
 ```
 {
@@ -63,25 +63,25 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
 }
 ```
 
-这些 POST 方法支持附加单个媒体对象。POST 请求正文必须至少包含 `text` 或 `attachments` 字段中的一个，或同时包含这两个字段。如果未包含 `attachments` 字段，则必须提供 `text` 字段；如果未包含 `text` 字段，则必须提供 `attachments` 字段。有关更多信息，请参阅下一节。
+这些 POST 方法支持附加单个媒体。POST 请求正文必须包含 `text` 和 `attachments` 字段中的一个或两个。如果未包含 `attachments` 字段，则 `text` 属性为必填项；如果未包含 `text` 字段，则 `attachments` 字段为必填项。有关更多信息，请参阅下一节。
 
-更多信息请参阅 [管理私信 API 参考](/zh/x-api/direct-messages/create-a-new-dm-conversation)。
+如需了解更多信息，请参阅 [Manage Direct Messages API References](/zh/x-api/direct-messages/create-a-new-dm-conversation)。
 
 <div id="shared-conversation-and-event-ids-across-v11-and-v2">
   ### 在 v1.1 和 v2 之间共享的会话和事件 ID
 </div>
 
-一个重要的一点是，会话和事件的 ID 在 X 平台的 v1.1 和 v2 版本之间是共享的。这意味着这两个版本可以结合使用。
+一个重要的概念是，会话和事件 ID 在 X 平台的 v1.1 与 v2 版本之间是共享的。这意味着你可以同时配合使用这两个版本。
 
-例如，Direct Messages v1.1 端点提供了返回单个事件以及删除事件的方法。这些方法在 v2 中尚不可用。由于 ID 在 v1.1 和 v2 之间是通用的，你可以基于 v2 提供的 ID 发起 v1.1 请求，或者使用 X 应用中会话 URL 里显示的会话 ID 来发起 v1.1 请求。  
+例如，Direct Messages v1.1 的端点提供了返回单个事件以及删除事件的方法，而这些方法在 v2 中尚不可用。由于 ID 在 v1.1 和 v2 之间是通用的，你可以基于 v2 返回的 ID 发起 v1.1 请求，或者通过引用 X 应用中会话 URL 中显示的会话 ID 来发起 v1.1 请求。  
 
 <div id="including-media-attachments-and-referencing-posts">
-  ### 包含媒体附件并引用帖子
+  ### 添加媒体附件并引用帖子
 </div>
 
-所有用于管理私信的端点都支持附加一条媒体内容（照片、视频或 GIF）。附加媒体需要使用由 v1.1 [Upload media](https://developer.x.com/en/docs/x-api/v1/media/upload-media/overview) 端点生成的媒体 ID。发送该私信的已认证用户也必须是上传该媒体的用户。媒体上传完成后，在 24 小时内可用于随消息一同发送。
+所有 Manage Direct Message 端点均支持附加一项媒体（照片、视频或 GIF）。附加媒体需要一个由 v1.1 [Upload media](https://developer.x.com/en/docs/x-api/v1/media/upload-media/overview) 端点生成的 media ID。发送 Direct Message 的已认证用户也必须是上传该媒体的用户。媒体上传之后，在 24 小时内可用于随消息一同发送。
 
-为了演示如何包含媒体，下面是一个示例 JSON 请求正文：
+为了说明如何在消息中包含媒体，下面是一个 JSON 请求正文示例：
 
 ```
 {
@@ -90,7 +90,7 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
 }
 ```
 
-生成的 MessageCreate 事件会包含以下元数据：
+生成的 MessageCreate 事件将包含以下元数据：
 
 ```
 {
@@ -102,7 +102,7 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
 }
 ```
 
-也可以在消息文本中加入帖子的 URL，以此将帖子包含在消息中。为了演示如何在消息中包含帖子，下面是一个示例 JSON 请求体：
+你也可以在消息文本中添加帖子 URL 来引用帖子。为说明如何在消息中添加帖子，下面是一个 JSON 请求正文示例：
 
 ```
 {
@@ -110,7 +110,7 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
 }
 ```
 
-生成的 MessageCreate 事件将包含以下元数据：
+生成的 MessageCreate 事件将包含如下元数据：
 
 ```
 {
@@ -126,45 +126,45 @@ Manage Direct Message 端点提供了三个 POST 方法，用于创建新消息�
   ### 身份验证
 </div>
 
-所有 X API v2 端点都要求你使用一组凭证（也称为密钥和令牌）对请求进行身份验证。所有私信（Direct Message）都是私密的，访问它们需要用户授权。
+所有 X API v2 端点都要求你使用一组凭证（也称为密钥和令牌）对请求进行身份验证。所有私信（Direct Messages）都是私密的，并且需要用户授权才能访问。 
 
-这些私信端点需要使用 [OAuth 2.0 Authorization Flow with PKCE](/zh/x-api/posts/manage-tweets) 或 [1.0a User Context](/zh/resources/fundamentals/authentication)，这意味着你必须使用一组 API 密钥和用户访问令牌才能成功发起请求。访问令牌必须与由你代表发起请求的用户相关联。如果你想为另一位用户生成一组访问令牌，该用户必须通过 [三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) 授权或验证你的应用。
+这些私信端点要求使用 [OAuth 2.0 Authorization Flow with PKCE](/zh/x-api/posts/manage-tweets) 或 [1.0a User Context](/zh/resources/fundamentals/authentication)，这意味着你必须使用一组 API 密钥和用户访问令牌才能成功发出请求。访问令牌必须与你代表其发起请求的用户相关联。如果你想为其他用户生成一组访问令牌，他们必须使用 [三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)来授权或验证你的应用。
 
-请注意，OAuth 用户上下文的使用可能会比较棘手。如果你不熟悉这种身份验证方式，我们建议使用某个[库](/zh/x-api/tools-and-libraries/overview)或 Postman 等工具来正确地为你的请求进行身份验证。
+请注意，OAuth 用户上下文可能比较难用。如果你不熟悉这种身份验证方式，我们建议你使用一个[库](/zh/x-api/tools-and-libraries/overview)，或使用 Postman 之类的工具来正确地对请求进行身份验证。 
 
-[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 允许在多个设备之间对应用的 scope 和授权流程进行更精细的控制。OAuth 2.0 允许你选择特定的细粒度 scope，从而代表用户获得特定权限。私信查询端点需要以下 scope：dm.write、dm.read、tweet.read、user.read。
+[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 允许在多个设备上更精细地控制应用的作用域和授权流程。OAuth 2.0 允许你选择特定的细粒度作用域，从而在代表用户操作时获得相应的特定权限。私信查询端点需要以下作用域：dm.write、dm.read、tweet.read、user.read。
 
-要在你的应用中启用 OAuth 2.0，你必须先在开发者门户中该应用设置部分的身份验证设置里将其启用。
+要在你的应用中启用 OAuth 2.0，你必须在开发者门户的应用设置部分中，打开应用的身份验证设置以启用它。
 
 <div id="developer-portal-projects-and-developer-apps">
   ### 开发者门户、项目和开发者应用
 </div>
 
-若要获取一组可用于 X API v2 端点的身份验证凭证，你必须拥有已获批准的开发者账号，在该账号下创建一个项目，并在该项目中创建一个开发者应用。然后，你可以在开发者应用中找到密钥和令牌。 
+要获取一组可用于 X API v2 端点的身份验证凭证，你必须拥有已获批准的开发者账号，在该账号下创建一个项目，并在该项目中创建一个开发者应用。然后，你可以在开发者应用中找到你的密钥和令牌。 
 
 <div id="rate-limits">
   ### 速率限制
 </div>
 
-每天有成千上万的开发者向 X API 发起请求。为了帮助管理如此庞大的请求量，我们在每个端点上都设置了速率限制，用来限制你代表应用或已认证用户所能发起的请求次数。 
+每天有成千上万的开发者向 X API 发起请求。为了帮助管理如此庞大的请求量，我们在每个端点上都设置了速率限制，用于限制你代表应用或代表已认证用户所能发起的请求次数。 
 
-Manage Direct Message 端点在单个用户级别和 X 应用级别都设置了速率限制。这意味着，你代表其发起请求的已认证用户，通过你的 X 应用只能发送一定数量的消息。此外，你的 X 应用每天可以发送的 Direct Message 总数也有上限。 
+Manage Direct Message 端点在用户级和 X 应用级两个层面都设置了速率限制。这意味着，你代表其发起请求的已认证用户，只能通过你的 X 应用发送一定数量的消息。此外，你的 X 应用每天可以发送的 Direct Message 也有上限。 
 
-对于 POST 方法，用户的速率限制为每 15 分钟最多 200 次请求/消息。用户还被限制为每 24 小时最多 1000 条 Direct Message。此外，X 应用每 24 小时的消息上限为 15000 条。这些速率限制在所有 POST 端点之间共享。 
+对于 POST 方法，用户的速率限制为每 15 分钟 200 个请求/消息。用户还被限制为每 24 小时最多发送 1000 条 Direct Message。此外，X 应用每 24 小时最多可以发送 15000 条消息。这些速率限制在所有 POST 端点之间共享。 
 
 **实用工具**
 
-在使用 Direct Messages lookup 端点时，我们鼓励你使用以下一些实用工具： 
+在你使用 Direct Messages lookup 端点时，我们鼓励你使用以下一些实用工具： 
 
 ****Postman****
 
-Postman 是一款非常适合用来测试端点的工具。每个 Postman 请求都包含所有路径参数和请求体参数，帮助你快速了解可用的内容。要进一步了解我们的 Postman collections，请访问我们的 [使用 Postman](/zh/tutorials/postman-getting-started) 页面。 
+Postman 是一个非常适合用来测试端点的工具。每个 Postman 请求都包含所有路径参数和请求体参数，帮助你快速了解可用的内容。要了解更多关于我们的 Postman 集合的信息，请访问我们的 [Using Postman](/zh/tutorials/postman-getting-started) 页面。 
 
-****Code samples****
+****代码示例****
 
-用于 v2 Direct Messages 端点的 Python 示例代码可在我们的 [X API v2 sample code GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code)[](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 仓库中获取。&quot;Manage-Direct-Messages&quot; 文件夹包含 POST 方法的示例，而 &quot;Direct-Messages-lookup&quot; 文件夹包含 GET 方法的示例。
+用于 v2 Direct Messages 端点的 Python 示例代码可以在我们的 [X API v2 sample code GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code)[](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 仓库中找到。&quot;Manage-Direct-Messages&quot; 文件夹包含 POST 方法的示例，而 &quot;Direct-Messages-lookup&quot; 文件夹包含 GET 方法的示例。
 
-**XDev Software Development Kits (SDKs)**
+**XDev 软件开发工具包 (SDK)**
 
 这些[库](/zh/x-api/tools-and-libraries/overview)正在针对 v2 Direct Messages 端点进行更新，很快就会准备就绪：
 
@@ -173,4 +173,4 @@ Postman 是一款非常适合用来测试端点的工具。每个 Postman 请求
 
 **第三方库**
 
-我们社区开发的[第三方库](/zh/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2)数量正在不断增加。这些库旨在帮助你快速上手，并且预计有多款将很快支持 v2 Direct Messages 端点。你可以通过查看合适的版本标签来找到可用于 v2 端点的库。
+我们的社区开发了数量不断增长的[第三方库](/zh/x-api/tools-and-libraries/overview#community-tools-and-libraries-for-v2)。这些库旨在帮助你快速入门，并且预计有多款会很快支持 v2 Direct Messages 端点。你可以通过查看合适的版本标签，找到可与 v2 端点配合使用的库。

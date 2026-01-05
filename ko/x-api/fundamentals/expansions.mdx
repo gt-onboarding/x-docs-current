@@ -1,13 +1,13 @@
 ---
-title: 확장(Expansions)
-keywords: ["expansions", "expand objects", "object expansion", "nested objects", "related objects", "expand users", "expand media", "expand tweets"]
+title: Expansions
+keywords: ["expansions", "객체 확장", "오브젝트 확장", "중첩 객체", "연관 객체", "사용자 확장", "미디어 확장", "게시물 확장"]
 ---
 
-`expansions`를 사용하면 개발자는 페이로드에 포함된 참조 객체를 확장할 수 있습니다. 확장이 가능한 객체는 id로 참조됩니다. 예를 들어, [Posts lookup](/ko/x-api/posts/lookup/introduction) 페이로드에 포함된 `referenced_tweets.id` 및 `author_id` 필드는 전체 객체로 확장될 수 있습니다. 해당 게시물을 작성한 사용자와 관련된 필드나, 그 게시물에 포함된 미디어, 설문조사(poll), 또는 장소(place)와 관련된 필드를 요청하려면, 관련된 `expansions` 쿼리 파라미터를 요청에 함께 전달해야 하며, 그러면 응답에서 해당 데이터를 받을 수 있습니다. 현재 Posts, Users, Lists, Spaces, Direct Message 이벤트 객체를 반환하는 v2 엔드포인트는 모두 `expansions`를 지원합니다(아래 예시 참고).
+expansions를 사용하면 개발자는 페이로드에서 참조된 객체를 확장할 수 있습니다. 확장 가능한 객체는 ID로 참조됩니다. 예를 들어, [Posts 조회](/ko/x-api/posts/lookup/introduction) 페이로드에 반환되는 `referenced_tweets.id` 및 `author_id` 필드는 완전한 객체로 확장될 수 있습니다. 해당 게시물을 작성한 사용자와 관련된 필드나, 해당 게시물에 포함된 미디어, 투표, 장소와 관련된 필드를 요청하려면, 응답에서 그 데이터를 받기 위해 요청에 해당 expansion 쿼리 파라미터를 포함해야 합니다. 현재 게시물, 사용자, 리스트, Spaces, Direct Message 이벤트 객체를 반환하는 v2 엔드포인트는 모두 expansions를 지원합니다(아래 예시 참조).
 
-요청에 `expansions`를 포함하면, 동일한 응답 내에 해당 확장된 객체의 기본 필드가 함께 포함됩니다. 이를 통해 별도의 요청 없이 한 번의 응답으로 더 많은 데이터를 반환할 수 있습니다. 확장된 객체와 관련된 추가 [fields](/ko/x-api/fundamentals/fields)를 요청하려면, 해당 확장된 객체에 연관된 fields 파라미터와, 응답에서 받고자 하는 필드들의 쉼표로 구분된 목록을 함께 포함하면 됩니다. 필드는 쿼리에서 요청한 순서와 항상 동일한 순서로 반환되지는 않을 수 있다는 점에 유의하세요.
+요청에 expansion을 포함하면, 해당 확장된 객체의 기본 필드를 동일한 응답 내에 함께 포함해 반환합니다. 이는 별도의 요청 없이 동일한 응답에서 추가 데이터를 반환하는 데 도움이 됩니다. 확장된 객체와 관련된 추가 [fields](/ko/x-api/fundamentals/fields)를 요청하려면, 해당 확장된 객체와 연관된 필드 파라미터를 포함하고, 응답에서 받고자 하는 필드들을 쉼표로 구분한 목록으로 함께 전달하면 됩니다. 필드는 쿼리에서 요청한 순서와 항상 동일한 순서로 반환되지는 않을 수 있다는 점에 유의하십시오.
 
-아래 Post 페이로드에는 확장할 수 있는 연관 객체에 대한 참조 id가 포함되어 있습니다. 여기에는 게시물을 작성한 사용자의 `author_id`, *referenced* Post의 `id`, 그리고 미디어 첨부에 대한 `media_key`가 포함됩니다.
+아래 게시물 페이로드에는 우리가 확장할 수 있는 연관 객체에 대한 참조 ID가 포함되어 있습니다. 여기에는 게시물을 작성한 사용자의 `author_id`, *참조된* 게시물의 `id`, 미디어 첨부에 대한 `media_key`가 포함됩니다.
 
 ```json
 {
@@ -29,28 +29,28 @@ keywords: ["expansions", "expand objects", "object expansion", "nested objects",
 ```
 
 <div id="available-expansions-for-post-payloads">
-  ### 게시물 페이로드에 사용할 수 있는 expansions
+  ### 게시물 페이로드에 사용할 수 있는 Expansions
 </div>
 
 | Expansion                      | Description                                                                        |
 |:--------------------------------|:------------------------------------------------------------------------------------|
-| `author_id`                    | 게시물 작성자를 나타내는 user 객체를 반환합니다                                |
-| `referenced_tweets.id`         | 이 게시물이 참조하는 게시물 객체를 반환합니다(리트윗, 인용 트윗 또는 답글인 경우) |
-| `edit_history_tweet_ids`       | 게시물의 편집 이력에 포함된 게시물 객체들을 반환합니다                         |
-| `in_reply_to_user_id`          | 현재 요청한 게시물이 답글인 원 게시물 작성자를 나타내는 user 객체를 반환합니다 |
-| `attachments.media_keys`       | 게시물에 포함된 이미지, 동영상, GIF를 나타내는 미디어 객체를 반환합니다   |
-| `attachments.poll_ids`         | 게시물에 포함된 투표의 메타데이터를 담고 있는 poll 객체를 반환합니다         |
-| `geo.place_id`                 | 게시물에 태그된 위치의 메타데이터를 담고 있는 place 객체를 반환합니다      |
-| `entities.mentions.username`   | 게시물에서 멘션된 사용자를 나타내는 user 객체를 반환합니다                   |
-| `referenced_tweets.id.author_id` | 참조된 게시물의 작성자를 나타내는 user 객체를 반환합니다                     |
+| `author_id`                    | 게시물 작성자를 나타내는 user 객체를 반환합니다                                  |
+| `referenced_tweets.id`         | 이 게시물이 참조하고 있는 게시물 객체를 반환합니다(리트윗, 인용 트윗 또는 답글인 경우) |
+| `edit_history_tweet_ids`       | 게시물 편집 기록에 포함된 게시물 객체를 반환합니다                              |
+| `in_reply_to_user_id`          | 요청한 게시물이 답글인 게시물의 작성자를 나타내는 user 객체를 반환합니다        |
+| `attachments.media_keys`       | 게시물에 포함된 이미지, 동영상, GIF를 나타내는 미디어 객체를 반환합니다          |
+| `attachments.poll_ids`         | 게시물에 포함된 투표에 대한 메타데이터를 담고 있는 poll 객체를 반환합니다        |
+| `geo.place_id`                 | 게시물에 태그된 위치에 대한 메타데이터를 담고 있는 place 객체를 반환합니다       |
+| `entities.mentions.username`   | 게시물에서 멘션된 사용자에 대한 user 객체를 반환합니다                          |
+| `referenced_tweets.id.author_id` | 참조된 게시물 작성자에 대한 user 객체를 반환합니다                             |
 
 <div id="available-expansion-for-user-payloads">
-  ### 사용자 페이로드에 사용할 수 있는 Expansion
+  ### 사용자 페이로드에서 사용할 수 있는 확장
 </div>
 
 | Expansion          | Description                                               |
 |:--------------------|:-----------------------------------------------------------|
-| `pinned_tweet_id`  | 사용자 프로필 상단에 고정된 게시물을 나타내는 Post 객체를 반환합니다 |
+| `pinned_tweet_id`  | 사용자 프로필 맨 위에 고정된 게시물을 나타내는 게시물 객체를 반환합니다 |
 
 <div id="available-expansions-for-direct-message-event-payloads">
   ### 다이렉트 메시지 이벤트 페이로드에서 사용 가능한 expansions
@@ -58,10 +58,10 @@ keywords: ["expansions", "expand objects", "object expansion", "nested objects",
 
 | Expansion                | Description                                                              |
 |:--------------------------|:--------------------------------------------------------------------------|
-| `attachments.media_keys` | 다이렉트 메시지에 첨부된 미디어 객체를 반환합니다             |
-| `referenced_tweets.id`   | 다이렉트 메시지에서 참조된 게시물 객체를 반환합니다            |
-| `sender_id`              | 다이렉트 메시지 작성자이자 대화에 참가자를 초대한 사용자를 나타내는 User 객체를 반환합니다 |
-| `participant_ids`        | 대화에 참여했거나 나간 참가자를 나타내는 User 객체를 반환합니다 |
+| `attachments.media_keys` | 다이렉트 메시지에 첨부된 Media 객체를 반환합니다             |
+| `referenced_tweets.id`   | 다이렉트 메시지에서 참조된 Post 객체를 반환합니다            |
+| `sender_id`              | 다이렉트 메시지의 작성자이자 대화에 참가자를 초대한 사용자를 나타내는 User 객체를 반환합니다 |
+| `participant_ids`        | 대화에 참여하거나 나간 참가자를 나타내는 User 객체를 반환합니다 |
 
 <div id="available-expansions-for-spaces-payloads">
   ### Spaces 페이로드에서 사용 가능한 expansions
@@ -76,26 +76,26 @@ keywords: ["expansions", "expand objects", "object expansion", "nested objects",
 | `topics_ids`       | 생성자가 설정한 토픽 설명을 반환합니다 |
 
 <div id="available-expansion-for-lists-payloads">
-  ### 리스트 페이로드에서 사용 가능한 Expansion
+  ### 리스트 페이로드에서 사용할 수 있는 Expansion
 </div>
 
 | Expansion   | Description                                                    |
 |:-------------|:----------------------------------------------------------------|
-| `owner_id`  | 해당 리스트를 생성하고 관리하는 계정을 나타내는 User 객체를 반환합니다 |
+| `owner_id`  | 리스트를 생성하고 관리하는 계정을 나타내는 User 객체를 반환합니다 |
 
 <div id="expanding-the-media-object">
-  ## Media 오브젝트 확장
+  ## Media 객체 확장하기
 </div>
 
 다음 요청에서는 기본 게시물 필드와 함께 반환되도록 `geo.place_id` 확장을 요청합니다:
 
-**요청 예시**
+**샘플 요청**
 
 ```
 {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
 ```
 
-**응답 예시**
+**샘플 응답**
 
 ```
 {`{
@@ -122,7 +122,7 @@ keywords: ["expansions", "expand objects", "object expansion", "nested objects",
   ## Poll 객체 확장하기
 </div>
 
-다음 요청에서는 기본 게시물 필드와 함께 포함되도록 `attachments.poll_ids` 확장을 요청합니다.
+다음 요청에서는 기본 게시물 필드와 함께 반환되도록 `attachments.poll_ids` expansions를 요청합니다:
 
 **샘플 요청**
 
@@ -167,15 +167,15 @@ keywords: ["expansions", "expand objects", "object expansion", "nested objects",
   ## Place 객체 확장하기
 </div>
 
-다음 요청에서는 기본 게시물 필드와 함께 `geo.place_id` expansions를 포함하도록 요청합니다:
+다음 요청에서는 기본 게시물 필드와 함께 포함되도록 `geo.place_id` expansions를 요청합니다:
 
-**샘플 요청**
+**요청 예시**
 
 <CodeBlock language="bash">
   {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
 </CodeBlock>
 
-**샘플 응답**
+**응답 예시**
 
 ```s
 {`{

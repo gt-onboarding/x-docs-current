@@ -3,7 +3,7 @@ title: "ページネーション"
 sidebarTitle: "ページネーション"
 ---
 
-SDK は、ページネーション対応のレスポンスを返すあらゆるエンドポイントで利用できる汎用的なページネーター用ユーティリティを提供します。メソッドは通常のレスポンスを返し、それをページネーターでラップして使用します。
+この SDK には、ページネーション対応のレスポンスを返す任意のエンドポイントで利用できる汎用的な paginator ユーティリティが用意されています。メソッドは通常のレスポンスを返し、そのレスポンスを paginator でラップして使用します。
 
 <div id="basic-pagination">
   ### 基本的なページネーション
@@ -16,7 +16,7 @@ import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform
 
 const client: Client = new Client({ bearerToken: 'your-bearer-token' });
 
-// 任意のリスト系エンドポイントを、適切な型情報付きでラップする
+// 任意の一覧系エンドポイントを適切な型定義でラップする
 const followers: UserPaginator = new UserPaginator(
   async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
     const res = await client.users.getFollowers('<userId>', {
@@ -61,12 +61,12 @@ const followers = new UserPaginator(async (token) => {
 ```typescript manual.ts theme={null}
 import { UserPaginator, Schemas } from '@xdevplatform/xdk';
 
-await followers.fetchNext();          // 1ページ目
+await followers.fetchNext();          // 最初のページ
 while (!followers.done) {
   await followers.fetchNext();        // 2ページ目以降
 }
 
-const userCount: number = followers.users.length;  // 取得済みユーザーの総数
+const userCount: number = followers.users.length;  // 取得済みのすべてのユーザー
 const firstUser: Schemas.User | undefined = followers.users[0];
 const nextToken: string | undefined = followers.meta?.next_token;
 ```
@@ -90,7 +90,7 @@ import { Schemas } from '@xdevplatform/xdk';
 
 for await (const user of followers) {
   const typedUser: Schemas.User = user;
-  console.log(typedUser.username);  // 型安全なアクセス
+  console.log(typedUser.username);  // 型情報付きでアクセス可能
 }
 ```
 
@@ -103,7 +103,7 @@ for await (const user of followers) {
 </CodeGroup>
 
 <div id="next-page-as-a-new-instance">
-  ### 次のページを新しいインスタンスとして扱う
+  ### 次ページを新しいインスタンスとして扱う
 </div>
 
 <CodeGroup>
@@ -113,9 +113,9 @@ import { UserPaginator } from '@xdevplatform/xdk';
 
 await followers.fetchNext();
 if (!followers.done) {
-  const page2: UserPaginator = await followers.next(); // 次のページから開始する独立した Paginator
+  const page2: UserPaginator = await followers.next(); // 次のページから開始する独立した paginator
   await page2.fetchNext();
-  console.log(page2.users.length);  // 2 ページ目の要素
+  console.log(page2.users.length);  // 2ページ目のアイテム
 }
 ```
 
@@ -141,12 +141,12 @@ import { UserPaginator, Schemas } from '@xdevplatform/xdk';
 try {
   for await (const item of followers) {
     const user: Schemas.User = item;
-    // ユーザーを処理...
+    // user を処理する...
   }
 } catch (err: unknown) {
   if (followers.rateLimited) {
-    console.error('レート制限に達しました。バックオフが必要です');
-    // バックオフして後で再試行
+    console.error('レート制限となりました。バックオフが必要です');
+    // バックオフして後で再試行する
   } else {
     console.error('ページネーションエラー:', err);
     throw err;
@@ -161,7 +161,7 @@ try {
   }
 } catch (err) {
   if (followers.rateLimited) {
-    // バックオフして後で再試行
+    // バックオフして後で再試行する
   } else {
     throw err;
   }
@@ -171,5 +171,5 @@ try {
 </CodeGroup>
 
 <Info>
-JavaScript/TypeScript XDK を使用した詳細なコード例については、[コードサンプルの GitHub リポジトリ](https://github.com/xdevplatform/samples/tree/main/javascript)を参照してください。
+JavaScript/TypeScript 用 XDK を使用した詳細なコード例については、[code samples GitHub リポジトリ](https://github.com/xdevplatform/samples/tree/main/javascript)を参照してください。
 </Info>

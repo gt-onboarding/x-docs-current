@@ -1,63 +1,63 @@
 ---
 title: 概要
 sidebarTitle: 概要
-keywords: ["ポスト件数の統合", "ポスト件数の統合", "件数の概要", "件数の統合ガイド", "ポストボリュームの統合"]
+keywords: ["ポスト件数統合", "ポスト件数統合", "件数の概要", "件数統合ガイド", "ポストボリューム統合"]
 ---
 
 <div id="how-to-integrate-with-the-posts-counts-endpoints">
-  ## ポスト件数エンドポイントの統合方法
+  ## ポスト件数エンドポイントとの統合方法
 </div>
 
-このページでは、最新またはフルアーカイブのポスト件数エンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと重要な概念について説明します。ページは次のセクションに分かれています。
+このページでは、最新（recent）または全アーカイブ（full-archive）のポスト件数エンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと重要な概念について説明します。ページの内容は次のセクションに分かれています。
 
 * [便利なツール](#helpful-tools)
-* 主要な概念
+* 重要な概念
   * [認証](#authentication)
-  * [developer portal、プロジェクト、アプリ](#developer-portal)
+  * [Developer Portal、プロジェクト、アプリ](#developer-portal)
   * [レート制限](#rate-limits)
-  * [クエリの作成](#queries)
+  * [クエリの構築](#queries)
   * [ページネーション](#pagination)
 
 <div id="helpful-tools">
-  ### 役立つツール
+  ### 便利なツール
 </div>
 
-いくつかの重要な概念を説明する前に、これらのエンドポイントの動作をテストするために、次のいずれかのツールまたはコードサンプルを利用することをおすすめします。
+いくつかの重要な概念を見ていく前に、これらのエンドポイントの機能をテストし始める際は、次のいずれかのツールまたはコードサンプルを使用することをおすすめします。
 
 <div id="code-samples">
   #### コードサンプル
 </div>
 
-お好みのプログラミング言語のコードからこれらのエンドポイントを利用したい場合のために、出発点として使えるコードサンプルをいくつか用意しています。[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で公開しており、[Python client](https://github.com/xdevplatform/search-tweets-python) などが含まれます。
+お好みのプログラミング言語でこれらのエンドポイントを使ったコードを動かしたい方のために、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で出発点として利用できるさまざまなコードサンプルを公開しています。[Python client](https://github.com/xdevplatform/search-tweets-python) も含まれています。
 
 <div id="libraries">
   #### ライブラリ
 </div>
 
-開発を始める際には、ぜひ多数ある[コミュニティ製のサードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)のいずれかを活用してください。対応するバージョンタグを探すことで、v2 エンドポイントと連携できるライブラリを見つけることができます。
+提供されている多数の [コミュニティ製サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview) を活用して、スムーズに始めましょう。v2 エンドポイントに対応したライブラリは、該当するバージョンタグを確認して探すことができます。
 
 <div id="postman">
   #### Postman
 </div>
 
-Postman は、これらのエンドポイントをテストするのに便利なツールです。各 Postman リクエストには、そのエンドポイントで利用できるすべてのパラメータが含まれているため、どのような項目があるかをすばやく把握できます。Postman コレクションについて詳しくは、[Using Postman](/ja/tutorials/postman-getting-started) のページをご覧ください。
+Postman は、これらのエンドポイントをテストするために活用できる便利なツールです。各 Postman リクエストには、そのエンドポイントで使用可能なすべてのパラメータが含まれており、そこで指定・利用できる内容をすばやく把握するのに役立ちます。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ページをご覧ください。
  
 
 <div id="key-concepts">
-  ### 重要な概念
+  ### 主要な概念
 </div>
 
 <div id="authentication">
   #### 認証
 </div>
 
-すべての X API v2 エンドポイントへのリクエストは、[認証](/ja/resources/fundamentals/authentication) に使用される資格情報（キーとトークンとも呼ばれます）を用いて行う必要があります。 このエンドポイントでは [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0) の使用が必須のため、有効なリクエストを送信するには [Bearer Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡す必要があります。Bearer Token は、開発者アプリ内から直接生成するか、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成できます。
+すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使用して、リクエストを[認証](/ja/resources/fundamentals/authentication)する必要があります。このエンドポイントでは [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0) の使用が必須であり、そのため、リクエストを成功させるには [Bearer Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡さなければなりません。Bearer Token は、開発者アプリ内から直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。
 
 <div id="developer-portal-projects-and-developer-apps">
-  #### developer portal、プロジェクト、および開発者アプリ
+  #### Developer portal、プロジェクト、および開発者アプリ
 </div>
 
-任意の X API v2 エンドポイントを利用するには、[開発者アカウント](/ja/resources/fundamentals/developer-portal) を取得し、そのアカウント内に [プロジェクト](/ja/resources/fundamentals/projects) を作成し、そのプロジェクト内に [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成する必要があります。その開発者アプリ内のキーとトークンは、recent ポスト件数エンドポイントで使用できます。full-archive ポスト件数エンドポイントを利用したい場合、または高度なオペレーターやより長いクエリを使用したい場合は、Enterprise アクセスの承認を受けている必要があります。
+任意の X API v2 エンドポイントを利用するには、[開発者アカウント](/ja/resources/fundamentals/developer-portal)を取得し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を作成し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成している必要があります。その開発者アプリで発行されたキーとトークンは、最近のポスト件数を取得するエンドポイントで利用できます。full-archive ポスト件数エンドポイントを利用したい場合、または高度な演算子やより長いクエリ文字数を利用したい場合は、Enterprise アクセスの承認を受けている必要があります。
 
 詳しくは、Enterprise アクセスに関するセクションをご覧ください。
 
@@ -65,46 +65,46 @@ Postman は、これらのエンドポイントをテストするのに便利な
   #### レート制限
 </div>
 
-毎日、何千もの開発者が X API にリクエストを送信しています。リクエスト量を管理するために、各エンドポイントには [レート制限](/ja/x-api/fundamentals/rate-limits) が設けられており、開発者がアプリまたは認証済みユーザーに代わって行えるリクエスト数が制限されています。
+毎日、何千人もの開発者が X API にリクエストを送信しています。リクエストの量を管理するために、各エンドポイントには[レート制限](/ja/x-api/fundamentals/rate-limits)が設けられており、開発者がアプリまたは認証済みユーザーとして発行できるリクエスト数が制限されています。
 
-このエンドポイントにはアプリレベルのレート制限が適用されます。つまり、開発者であるあなたは、使用している認証情報によって識別される任意のアプリから、このエンドポイントに対して一定期間内に行えるリクエスト数が制限されます。 
+このエンドポイントにはアプリレベルのレート制限が適用されます。つまり、開発者であるあなたは、使用している認証情報によって識別される任意のアプリごとに、このエンドポイントに対して一定期間内に実行できるリクエストの回数が制限されます。 
 
 <div id="building-queries">
   #### クエリの構築
 </div>
 
-これらのエンドポイントの中核となる機能は、単一のクエリを使ってポストをフィルタリングし、返される件数を決定することです。これらのクエリは、メッセージのキーワード、ハッシュタグ、URL などのポストおよびユーザー属性にマッチするオペレーターで構成されます。オペレーターは、ブールロジックや丸括弧と組み合わせてクエリを作成することで、クエリのマッチング動作をより細かく調整できます。
+これらのエンドポイントの中心的な特徴は、単一のクエリを使ってポストをフィルタリングし、あなたに配信される件数を決定する点です。これらのクエリは、メッセージのキーワード、ハッシュタグ、URL などのポストおよびユーザー属性にマッチするオペレーターで構成されます。オペレーターは、ブーリアンロジックや括弧と組み合わせてクエリを作成でき、クエリのマッチング動作をより細かく調整するのに役立ちます。
 
-詳しくは、[クエリの構築方法](/ja/x-api/posts/counts/integrate/build-a-query)のガイドをご覧ください。
+詳しくは、[クエリの構築方法](/ja/x-api/posts/counts/integrate/build-a-query)に関するガイドを参照してください。
 
 <div id="pagination">
   #### ページネーション
 </div>
 
-最近のポスト件数を取得する場合、`next_token` は返されません。これは、粒度に関係なく、直近7日間のポスト件数を1回の API 呼び出しで取得できることを意味します。
+直近のポスト件数については、`next_token` は返されません。つまり、粒度の設定に関係なく、直近7日間のポスト数を1回の API コールで取得できます。
 
-フルアーカイブのポスト件数を取得する場合、直近30日間のデータが返されます。30日より前のデータについては、`next_token` が返され、その `next_token` を使用してページネーションし、追加のデータを取得できます。 
+フルアーカイブのポスト件数については、直近30日分のデータを取得できます。30日より前のデータについては、`next_token` が返されるため、それを使用してページネーションを行い、追加のデータを取得できます。 
 
 <div id="building-queries-for-post-counts">
-  ### ポスト件数のクエリを構築する
+  ### ポスト件数用のクエリを作成する
 </div>
 
-Post counts エンドポイントは、単一のクエリを指定した GET リクエストを受け取り、そのクエリに一致する過去のポスト件数のセットを返します。クエリは、さまざまなポスト属性に対してマッチさせるために使用されるオペレーターで構成されます。 
+ポスト件数エンドポイントは、GET リクエストで 1 つのクエリを受け取り、そのクエリに一致する過去のポスト件数のセットを返します。クエリは、さまざまなポストの属性に一致させるために使用されるオペレーターで構成されます。 
 
 <div id="table-of-contents">
   #### 目次
 </div>
 
-* [クエリの構築](#build)
+* [クエリの作成](#build)
 * [クエリの制限事項](#limits)
-* [オペレーターの利用可否](#availability)
+* [オペレーターの利用可能範囲](#availability)
 * [オペレーターの種類: 単独使用と結合必須](#types)
 * [ブール演算子とグルーピング](#boolean)
-* [演算の順序](#order-of-operations)
+* [演算の優先順位](#order-of-operations)
 * [句読点、ダイアクリティカルマーク、大文字と小文字の区別](#punctuation)
 * [具体性と効率性](#specificity)
 * [引用ポストのマッチング挙動](#quote-tweets)
-* [クエリの反復的な構築](#iterative)
-* [リクエストへのクエリの追加](#adding-a-query)
-* [クエリ例](#examples)
-* [オペレーター一覧](#list)
+* [クエリを反復的に作成する](#iterative)
+* [リクエストにクエリを追加する](#adding-a-query)
+* [クエリの例](#examples)
+* [オペレーターの一覧](#list)

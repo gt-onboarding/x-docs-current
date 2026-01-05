@@ -1,42 +1,42 @@
 ---
 title: Consumo de datos de streaming
 sidebarTitle: Consumo de datos de streaming
-keywords: ["consumo de datos de streaming", "datos de streaming", "procesar flujo de streaming", "manejar flujo de streaming", "procesamiento de flujos de streaming", "consumo de flujos de streaming"]
+keywords: ["consumo de datos de streaming", "datos de streaming", "procesar flujo", "gestionar flujo", "procesamiento de flujos", "consumo de flujos"]
 ---
 
 <div id="building-a-client-to-consume-streaming-data">
-  ### Creación de un cliente para consumir datos de streaming
+  ### Creación de un cliente para consumir datos en streaming
 </div>
 
-Cuando uses un endpoint de streaming, ten en cuenta algunas prácticas recomendadas generales para optimizar su uso.  
+Al usar un endpoint de streaming, hay algunas prácticas recomendadas generales que debes tener en cuenta para optimizar su uso.  
  
 
 <div id="client-design">
   #### Diseño del cliente
 </div>
 
-Al crear una solución con el endpoint de filtro de stream, necesitarás un cliente que pueda hacer lo siguiente:
+Al crear una solución con el endpoint del stream filtrado, necesitarás un cliente que pueda hacer lo siguiente:
 
-1. Establecer una conexión de stream HTTPS con el endpoint de filtro.
-2. Enviar solicitudes POST de forma asíncrona al endpoint de reglas de filtro de stream para añadir y eliminar reglas del stream.
-3. Manejar volúmenes bajos de datos: mantener la conexión de stream, detectando objetos Post y señales de keep-alive.
-4. Manejar volúmenes altos de datos: desacoplar la ingesta del stream del procesamiento adicional usando procesos asíncronos y garantizar que los búferes del lado del cliente se vacíen con regularidad.
-5. Gestionar el seguimiento del consumo de volumen de datos en el lado del cliente.
-6. Detectar desconexiones del stream, evaluarlas y reconectarse al stream automáticamente.
+1. Establecer una conexión HTTPS de streaming con el endpoint del stream filtrado.
+2. Enviar solicitudes POST de forma asíncrona al endpoint de reglas del stream filtrado para agregar y eliminar reglas del stream.
+3. Gestionar volúmenes bajos de datos: mantener la conexión de streaming, detectando objetos Post y señales de keep-alive.
+4. Gestionar volúmenes altos de datos: desacoplar la ingesta del stream del procesamiento adicional mediante procesos asíncronos y garantizar que los búferes del lado del cliente se vacíen con regularidad.
+5. Administrar el seguimiento del consumo de volumen de datos en el lado del cliente.
+6. Detectar desconexiones del stream, evaluar y reconectar al stream automáticamente.
     
 
 <div id="connecting-to-a-streaming-endpoint">
   #### Conectarse a un endpoint de streaming
 </div>
 
-Establecer una conexión con los endpoints de streaming de X API v2 implica realizar una solicitud HTTP de muy larga duración y procesar la respuesta de forma incremental. Conceptualmente, puedes pensar en ello como si estuvieras descargando un archivo infinitamente largo a través de HTTP. Una vez que se ha establecido la conexión, el servidor de X entregará eventos de Publicación a través de ella mientras permanezca abierta.
+Establecer una conexión con endpoints de streaming de X API v2 implica realizar una solicitud HTTP de muy larga duración y procesar la respuesta de forma incremental. Conceptualmente, puedes pensar en ello como descargar un archivo infinitamente largo mediante HTTP. Una vez que se ha establecido la conexión, el servidor de X entregará eventos de Publicación a través de la conexión mientras esta permanezca abierta.
  
 
 <div id="consuming-data">
   #### Consumo de datos
 </div>
 
-Ten en cuenta que los campos individuales de los objetos JSON no están ordenados y que no todos los campos estarán presentes en todas las circunstancias. De manera similar, las actividades por separado no se entregan en un orden específico y es posible que se encuentren mensajes duplicados. Ten presente que, con el tiempo, se pueden agregar nuevos tipos de mensajes y enviarse a través del stream.
+Ten en cuenta que los campos individuales de los objetos JSON no tienen un orden definido y que no todos los campos estarán presentes en todas las circunstancias. Del mismo modo, las actividades independientes no se entregan en orden y es posible que se encuentren mensajes duplicados. Ten en cuenta que, con el tiempo, se pueden añadir nuevos tipos de mensajes y enviarse a través del stream.
 
 Por lo tanto, tu cliente debe tolerar:
 
@@ -44,53 +44,53 @@ Por lo tanto, tu cliente debe tolerar:
 * Campos inesperados o ausentes
 * Publicaciones no ordenadas
 * Mensajes duplicados
-* Nuevos tipos de mensajes arbitrarios que se reciban por el stream en cualquier momento
+* Nuevos tipos arbitrarios de mensajes que llegan por el stream en cualquier momento
 
-Además de los datos relevantes de las Publicaciones y los parámetros de campos que hayas solicitado, en una conexión de stream se pueden entregar los siguientes tipos de mensajes. Ten en cuenta que esta lista puede no ser exhaustiva: se pueden introducir objetos adicionales en los streams. Asegúrate de que tu analizador tolere formatos de mensajes inesperados.
+Además de los datos relevantes de la Publicación y los parámetros de campos solicitados, en una conexión de stream se pueden entregar los siguientes tipos de mensajes. Ten en cuenta que esta lista puede no ser exhaustiva; se pueden introducir objetos adicionales en los streams. Asegúrate de que tu analizador tolere formatos de mensajes inesperados.
  
 
 <div id="buffering">
   #### Almacenamiento en búfer
 </div>
 
-Los endpoints de streaming te enviarán datos tan rápido como estén disponibles, lo que en muchos casos puede dar lugar a volúmenes elevados. Si el servidor de X no puede escribir nuevos datos en el stream de inmediato (por ejemplo, si tu cliente no está leyendo lo suficientemente rápido, consulta [gestión de desconexiones](/es/x-api/posts/filtered-stream#what-is-a-disconnection) para más información), almacenará el contenido en búfer en su extremo para permitir que tu cliente se ponga al día. Sin embargo, cuando este búfer se llena, se iniciará una desconexión forzada para cerrar la conexión, y las Publicaciones almacenadas en el búfer se descartarán y no se reenviarán. Consulta más detalles a continuación.
+Los endpoints de streaming te enviarán datos tan pronto como estén disponibles, lo que en muchos casos puede resultar en volúmenes altos. Si el servidor de X no puede escribir nuevos datos en el stream de inmediato (por ejemplo, si tu cliente no está leyendo con la suficiente rapidez, consulta [manejo de desconexiones](/es/x-api/posts/filtered-stream#what-is-a-disconnection) para más información), almacenará el contenido en búfer de su lado para permitir que tu cliente se ponga al día. Sin embargo, cuando este búfer se llena, se iniciará una desconexión forzada para cerrar la conexión, y las Publicaciones almacenadas en búfer se descartarán y no se reenviarán. A continuación encontrarás más detalles.
 
-Una forma de identificar los momentos en que tu aplicación se está quedando atrás es comparar la marca de tiempo de las Publicaciones que se reciben con la hora actual y hacer un seguimiento de esta diferencia a lo largo del tiempo.
+Una forma de identificar cuándo tu app se está quedando atrás es comparar la marca de tiempo de las Publicaciones que se reciben con la hora actual y hacer un seguimiento de esta diferencia a lo largo del tiempo.
 
-Aunque los atascos en el stream nunca pueden eliminarse por completo debido a la posible latencia e interrupciones en la internet pública, se pueden reducir en gran medida mediante una configuración adecuada de tu aplicación. Para minimizar la aparición de atascos:
+Aunque nunca se pueden eliminar por completo las acumulaciones en el stream debido a la posible latencia e interrupciones en la Internet pública, se pueden reducir en gran medida mediante la configuración adecuada de tu app. Para minimizar la aparición de estas acumulaciones:
 
-* Asegúrate de que tu cliente esté leyendo el stream lo suficientemente rápido. Normalmente no deberías realizar ninguna carga de procesamiento real mientras lees el stream. Lee el stream y pasa la actividad a otro hilo/proceso/almacén de datos para realizar tu procesamiento de forma asíncrona.
-* Asegúrate de que tu centro de datos tenga un ancho de banda de entrada suficiente para admitir grandes volúmenes de datos sostenidos, así como picos significativamente mayores (por ejemplo, de 5 a 10 veces el volumen normal). Para filtered stream, el volumen y el ancho de banda correspondiente que se requiere de tu lado dependen totalmente de qué Publicaciones coincidan con tus reglas.
+* Asegúrate de que tu cliente esté leyendo el stream con la suficiente rapidez. Normalmente no deberías realizar ningún trabajo de procesamiento real mientras lees el stream. Lee el stream y entrega la actividad a otro hilo/proceso/almacén de datos para realizar tu procesamiento de forma asíncrona.
+* Asegúrate de que tu centro de datos tenga un ancho de banda de entrada suficiente para acomodar grandes volúmenes de datos sostenidos, así como picos significativamente mayores (por ejemplo, 5 a 10 veces el volumen normal). Para filtered stream, el volumen y el ancho de banda correspondiente que se requiere de tu lado dependen completamente de qué Publicaciones estén coincidiendo con tus reglas.
    
 
 <div id="usage-tracking-and-rule-management">
   #### Seguimiento de uso y gestión de reglas
 </div>
 
-Dado que las expectativas de los desarrolladores en cuanto a cuál debería ser un volumen de datos “normal” para sus flujos varían, no tenemos una recomendación general para un porcentaje específico de disminución/aumento o un período de tiempo determinado. 
+Dado que las expectativas de los desarrolladores en cuanto a cuál debería ser el volumen de datos “normal” para sus streams varían, no tenemos una recomendación general para un porcentaje específico de disminución/aumento ni para un período de tiempo concreto. 
 
-Considere supervisar los volúmenes de datos de su flujo para detectar desviaciones inesperadas. Una disminución en el volumen de datos puede ser sintomática de un problema diferente al de una desconexión del flujo. En tal situación, un flujo seguiría recibiendo la señal de keep-alive y probablemente algunos datos de nueva actividad. Sin embargo, una cantidad significativamente menor de Publicaciones debería llevarle a investigar si hay algo que esté causando la disminución en el volumen de datos entrantes a su aplicación o red, y a consultar la [página de estado](https://api.twitterstat.us/) para ver si hay avisos relacionados.
+Considera supervisar los volúmenes de datos de tu stream para detectar desviaciones inesperadas. Una disminución en el volumen de datos puede ser sintomática de un problema diferente a una desconexión del stream. En una situación así, el stream seguiría recibiendo la señal de keep-alive y probablemente algunos datos de actividad nuevos. Sin embargo, un número significativamente menor de Publicaciones debería llevarte a investigar si hay algo que esté causando la disminución en el volumen de datos entrantes hacia tu aplicación o red, y a revisar la [página de estado](https://api.twitterstat.us/) para ver si hay avisos relacionados.
 
-Para crear este tipo de supervisión, podría hacer un seguimiento del número de Publicaciones nuevas que espera ver en una cantidad de tiempo determinada. Si el volumen de datos de un flujo cae lo suficiente por debajo del umbral especificado y no se recupera dentro de un período de tiempo establecido, entonces se deberían activar alertas y notificaciones. También puede querer supervisar un gran aumento en el volumen de datos, especialmente si está en el proceso de modificar reglas en un flujo filtrado, o si se produce un evento que provoca un pico en la actividad de Publicaciones.
+Para crear este tipo de supervisión, podrías hacer un seguimiento del número de Publicaciones nuevas que esperas ver en un período de tiempo determinado. Si el volumen de datos de un stream cae lo suficiente por debajo del umbral especificado y no se recupera dentro de un período de tiempo establecido, entonces se deberían activar alertas y notificaciones. También puede ser conveniente supervisar un aumento considerable en el volumen de datos, especialmente si estás en el proceso de modificar reglas en un filtered stream, o si ocurre un evento que produce un pico en la actividad de Publicaciones.
 
-Es importante tener en cuenta que las Publicaciones entregadas a través de filtered stream sí se contabilizan en el volumen mensual total de Publicaciones, y debe realizar un seguimiento y ajustar el consumo para optimizarlo. Si el volumen es alto, considere añadir un operador sample: a cada una de sus reglas para reducir del 100% de coincidencia a sample:50 o sample:25 cuando sea necesario.
+Es importante tener en cuenta que las Publicaciones entregadas a través de filtered stream sí cuentan para el volumen total mensual de Publicaciones, y deberías supervisar y ajustar el consumo para optimizarlo. Si el volumen es alto, considera agregar un operador sample: a cada una de tus reglas para reducir el 100% de coincidencias a sample:50 o sample:25 cuando sea necesario.
 
-Además, le recomendamos implementar medidas dentro de su aplicación que alerten a su equipo si el volumen supera un umbral preestablecido, y posiblemente introducir otras medidas como la eliminación automatizada de reglas que estén generando demasiados datos, o la desconexión completa del flujo en circunstancias extremas.
+Además, te recomendamos implementar medidas dentro de tu aplicación que avisen a tu equipo si el volumen supera un umbral preestablecido, y posiblemente introducir otras medidas, como la eliminación automatizada de reglas que estén generando demasiados datos o la desconexión completa del stream en circunstancias extremas.
  
 
 <div id="responding-to-system-messages">
-  #### Responder a mensajes del sistema
+  #### Responder a los mensajes del sistema
 </div>
 
-Señales de keep-alive
-Al menos cada 20 segundos, el stream enviará una señal de keep-alive, o heartbeat, en forma de un retorno de carro \r\n a través de la conexión abierta para evitar que tu cliente agote el tiempo de espera. La aplicación cliente debe ser tolerante a los caracteres \r\n en el stream.
+Señales de mantenimiento de la conexión (keep-alive)
+Al menos cada 20 segundos, el flujo enviará una señal de mantenimiento de la conexión, o latido (heartbeat), en forma de un retorno de carro \r\n a través de la conexión abierta para evitar que tu cliente agote el tiempo de espera. Tu aplicación cliente debe tolerar los caracteres \r\n en el flujo.
 
-Si tu cliente implementa correctamente un tiempo de espera de lectura en tu biblioteca HTTP, tu aplicación podrá confiar en el protocolo HTTP y en la propia biblioteca HTTP para generar un evento si no se leen datos dentro de este período, y no necesitarás supervisar explícitamente el carácter \r\n.
+Si tu cliente implementa correctamente un tiempo de espera de lectura en tu biblioteca HTTP, tu aplicación podrá confiar en el protocolo HTTP y en tu biblioteca HTTP para generar un evento si no se leen datos dentro de este periodo, y no será necesario supervisar explícitamente el carácter \r\n.
 
-Este evento normalmente será una excepción lanzada u otro tipo de evento, dependiendo de la biblioteca HTTP utilizada. Se recomienda encarecidamente envolver tus métodos HTTP con controladores de errores/eventos para detectar estos timeouts. Cuando se produzca un timeout, tu aplicación debe intentar reconectarse.
+Este evento normalmente será una excepción lanzada u otro tipo de evento, dependiendo de la biblioteca HTTP utilizada. Es muy recomendable envolver tus métodos HTTP con manejadores de errores/eventos para detectar estos tiempos de espera. Cuando se produzca un timeout, tu aplicación debe intentar reconectarse.
 
 Mensajes de error
-Los endpoints de streaming de v2 también pueden entregar mensajes de error dentro del stream. A continuación se muestra el formato básico de estos mensajes, junto con algunos ejemplos. Ten en cuenta que los mensajes entregados podrían cambiar, incorporando nuevos mensajes. Las aplicaciones cliente deben ser tolerantes a los cambios en los payloads de mensajes del sistema.
+Los endpoints de streaming de v2 también pueden entregar mensajes de error dentro del flujo. A continuación se muestra el formato básico de estos mensajes, junto con algunos ejemplos. Ten en cuenta que los mensajes entregados pueden cambiar, incorporando nuevos mensajes. Las aplicaciones cliente deben ser tolerantes a los cambios en los payloads de los mensajes del sistema.
 
 Ten en cuenta que los mensajes de error contendrán enlaces a la documentación que describe cómo resolver el problema.
 
@@ -106,4 +106,4 @@ Formato del mensaje:
 }
 ```
 
-Ten en cuenta que los mensajes de error que indican una desconexión forzada por un búfer lleno pueden no llegar nunca a tu cliente, si la acumulación que provocó la desconexión forzada impide que se transmitan. En consecuencia, tu aplicación no debe depender de estos mensajes para iniciar una reconexión.
+Ten en cuenta que es posible que los mensajes de error que indican una desconexión forzada debido a un búfer lleno nunca lleguen a tu cliente, si la acumulación que provocó la desconexión forzada impide que se entreguen. Por lo tanto, tu aplicación no debe depender de estos mensajes para iniciar una reconexión.

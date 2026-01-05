@@ -1,80 +1,80 @@
 ---
 title: 마이그레이션 가이드
 sidebarTitle: 마이그레이션 가이드
-keywords: ["다이렉트 메시지 관리 마이그레이션", "DM 관리 마이그레이션", "v1.1에서 v2로 다이렉트 메시지 관리 마이그레이션", "DM 마이그레이션 가이드", "DM 관리 마이그레이션"]
+keywords: ["다이렉트 메시지 관리 마이그레이션", "DM 관리 마이그레이션", "v1.1에서 v2로의 DM 관리 마이그레이션", "DM 마이그레이션 가이드", "DM 관리 기능 마이그레이션"]
 ---
 
 import { Button } from '/snippets/ko/button.mdx';
 
 <div id="comparing-v11-and-v2-manage-direct-message-endpoints">
-  ## v1.1 및 v2 다이렉트 메시지 관리 엔드포인트 비교
+  ## v1.1과 v2 Direct Message 관리 엔드포인트 비교
 </div>
 
-v1.1 및 v2 버전의 다이렉트 메시지 엔드포인트는 모두 다이렉트 메시지를 생성하는 메서드를 제공합니다. 이 가이드는 두 버전 간의 차이를 이해하고 v2로 마이그레이션하는 데 필요한 정보를 제공하기 위한 것입니다. 
+Direct Messages 엔드포인트의 v1.1 및 v2 버전 모두 Direct Message를 생성하기 위한 메서드를 제공합니다. 이 가이드는 두 버전 간의 차이점을 이해하고 v2로 마이그레이션하는 데 필요한 정보를 제공하기 위한 것입니다. 
 
-두 버전 간의 주요 차이점 중 하나는 v1.1은 일대일 대화만 지원하는 반면, v2는 그룹 대화를 지원한다는 점입니다. 이로 인해 나타나는 차이 중 하나는 v1.1은 &quot;message created&quot; 이벤트만 지원하는 반면, v2는 참가자가 대화에 참여하거나 떠나는 것과 관련된 이벤트도 지원한다는 것입니다. 또한 v2의 근본적인 업데이트 중 하나는 dm&#95;conversations를 핵심 API 객체로 도입한 것입니다.   
+두 버전 간의 주요 차이점 중 하나는 v1.1은 1:1 대화만 지원하는 반면, v2는 그룹 대화를 지원한다는 점입니다. 이로 인해 v1.1은 &quot;message created&quot; 이벤트만 지원하는 반면, v2는 대화에 참여자가 참여하거나 떠나는 것과 관련된 이벤트도 지원합니다. 실제로 v2의 근본적인 업데이트 중 하나는 dm&#95;conversations를 핵심 API 오브젝트로 확립한 것입니다.   
 
-v1.1에서는 다이렉트 메시지를 관리하기 위한 두 개의 엔드포인트가 있습니다:
+v1.1에서는 Direct Messages를 관리하기 위한 엔드포인트가 두 개 있습니다:
 
-* POST direct&#95;messages/events/new - 일대일 다이렉트 메시지를 생성합니다. 이 v1.1 엔드포인트는 일대일 메시지만 생성할 수 있으며, 그룹 메시지는 지원하지 않습니다.  
+* POST direct&#95;messages/events/new - 1:1 Direct Message를 생성합니다. 이 v1.1 엔드포인트는 1:1 메시지만 생성할 수 있으며, 그룹 메시지는 지원하지 않습니다.  
 
-* DELETE direct&#95;messages/events/destroy - 인증된 사용자의 보기에서 일대일 메시지를 삭제합니다. 
+* DELETE direct&#95;messages/events/destroy - 인증된 사용자의 보기에서 1:1 메시지를 삭제합니다. 
 
-이 v2 릴리스에서는 다이렉트 메시지를 생성하기 위한 POST 메서드가 세 개 있습니다: 
+이번 v2 릴리스에서는 Direct Messages를 생성하기 위한 POST 메서드가 세 가지 있습니다: 
 
-* **POST /2/dm&#95;conversations/with/:participant&#95;id/messages** - 일대일 다이렉트 메시지를 생성합니다. 이 메서드는 기존 일대일 대화에 메시지를 추가하거나 새 대화를 생성합니다. :participant&#95;id 경로 매개변수는 메시지를 수신하는 계정의 사용자 ID입니다. 
+* **POST /2/dm&#95;conversations/with/:participant&#95;id/messages** - 1:1 Direct Message를 생성합니다. 이 메서드는 기존 1:1 대화에 메시지를 추가하거나 새로운 1:1 대화를 생성합니다. :participant&#95;id 경로 파라미터는 메시지를 수신하는 계정의 사용자 ID입니다. 
 
-* **POST /2/dm&#95;conversations** - 새 그룹 대화를 생성하고 여기에 다이렉트 메시지를 추가합니다. 이러한 요청에는 대화 참가자 목록이 필요합니다. 동일한 참가자 목록으로 여러 대화를 생성할 수 있다는 점에 유의하십시오. 이러한 요청은 항상 새로운 대화 ID를 반환합니다. 
+* **POST /2/dm&#95;conversations** - 새 그룹 대화를 생성하고 여기에 Direct Message를 추가합니다. 이러한 요청에는 대화 참가자 목록이 필요합니다. 동일한 참가자 목록으로 여러 대화를 생성할 수 있다는 점에 유의하세요. 이 요청은 항상 새로운 대화 ID를 반환합니다. 
 
-* **POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages** - 다이렉트 메시지를 생성하고 기존 대화에 추가합니다. :dm&#95;conversation&#95;id 경로 매개변수는 메시지가 추가될 대화의 ID입니다. 
+* **POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages** - Direct Message를 생성하고 기존 대화에 추가합니다. :dm&#95;conversation&#95;id 경로 파라미터는 메시지가 추가될 대화의 ID입니다. 
 
-중요한 세부사항으로, 대화 및 이벤트 ID는 X 플랫폼의 v1.1 및 v2 버전에서 공통으로 사용됩니다. 이는 두 버전을 함께 사용할 수 있음을 의미합니다. 예를 들어, 다이렉트 메시지 v1.1 엔드포인트는 단일 이벤트를 반환하고 이벤트를 삭제하는 메서드를 제공하는데, 이러한 메서드는 아직 v2에서 사용할 수 없습니다. ID가 v1.1과 v2 전체에서 공통이므로, v2에서 제공된 ID를 기준으로 v1.1 요청을 하거나, X 애플리케이션의 대화 URL에 표시되는 대화 ID를 참조하여 요청할 수 있습니다.
+중요한 세부 사항은 대화 ID와 이벤트 ID가 X 플랫폼의 v1.1 및 v2 버전 전반에서 공유된다는 점입니다. 이는 두 버전을 함께 사용할 수 있음을 의미합니다. 예를 들어, Direct Messages v1.1 엔드포인트는 단일 이벤트를 반환하고 이벤트를 삭제하는 메서드를 제공하는데, 이는 아직 v2에는 제공되지 않습니다. ID가 v1.1과 v2 전반에서 공통이므로, v2에서 제공된 ID를 기반으로 v1.1 요청을 하거나 X 앱의 대화 URL에 표시되는 대화 ID를 참조하여 요청을 보낼 수 있습니다.
 
-다음 표는 v1.1 및 v2 다이렉트 메시지 관리 엔드포인트의 근본적인 측면을 비교합니다. 여기서 공유하는 X API v2 특성은 모든 다이렉트 메시지 조회 엔드포인트에 공통적으로 적용됩니다.
+다음 표는 v1.1 및 v2 Direct Messages 관리 엔드포인트의 기본적인 측면을 비교합니다. 여기에서 공유하는 X API v2 특성은 모든 Direct Message 조회 엔드포인트에 공통됩니다.
 
 |     |     |     |
 | :--- | :--- | :--- |
 | **Description** | **Standard v1.1** | **X API v2** |
 | Host domain | https://api.x.com | https://api.x.com |
-| Endpoint root path | [/1.1/direct&#95;messages](https://api.x.com/1.1/direct_messages) | [/2/dm&#95;conversations](https://api.x.com/2/users/:id/dm_conversations)<br /><br />다이렉트 메시지 대화가 핵심 API 객체로 도입되었습니다.   <br /><br />이 엔드포인트는 MessageCreate, ParticipantsJoin, ParticipantLeave 이벤트를 조회합니다. |
+| Endpoint root path | [/1.1/direct&#95;messages](https://api.x.com/1.1/direct_messages) | [/2/dm&#95;conversations](https://api.x.com/2/users/:id/dm_conversations)<br /><br />Direct Message 대화가 핵심 API 오브젝트로 도입되었습니다.   <br /><br />이 엔드포인트는 MessageCreate, ParticipantsJoin, ParticipantLeave 이벤트를 조회합니다. |
 | HTTP methods supported | POST | POST |
 | Supports Group Direct Messages |     | ✔   |
 | Event types supported | message&#95;create | MessageCreate, ParticipantsJoin, ParticipantsLeave |
 | [Authentication](/ko/resources/fundamentals/authentication) | OAuth 1.0a User Context | OAuth 1.0a User Context<br /><br />OAuth 2 User Context (scopes: dm.read, dm.write) |
-| Requires the use of credentials from a [developer App](/ko/resources/fundamentals/authentication) associated with a X API v2 [Project](/ko/resources/fundamentals/projects) |     | ✔   |
-| Default request [rate limits](/ko/x-api/fundamentals/rate-limits)*  <br />*All requests require user tokens | 1000 requests per user per 24 hours  <br />15000 requests per app per 24 hours | 200 requests per 15 minutes per user<br /><br />1000 requests per user per 24 hours<br /><br />15000 requests per app per 24 hours<br /><br />이러한 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
+| X API v2 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/authentication)의 자격 증명 사용 필요 |     | ✔   |
+| 기본 요청 [rate limits](/ko/x-api/fundamentals/rate-limits)*  <br />*모든 요청에는 사용자 토큰이 필요합니다 | 사용자당 24시간당 1000개 요청  <br />앱당 24시간당 15000개 요청 | 사용자당 15분당 200개 요청<br /><br />사용자당 24시간당 1000개 요청<br /><br />앱당 24시간당 15000개 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에 걸쳐 공유됩니다. |
 
-다음 표들은 v2 POST 메서드를 v1.1 버전과 비교합니다. 이러한 v2 메서드는 그룹 대화를 지원함으로써 사용 가능한 기능을 확장합니다. 
+다음 표는 v2 POST 메서드를 v1.1 버전과 비교합니다. 이 v2 메서드들은 그룹 대화를 지원함으로써 사용 가능한 기능을 확장합니다. 
 
-**새 일대일 다이렉트 메시지 생성**
+**새로운 1:1 Direct Message 생성**
 
 Path: POST /2/dm&#95;conversations/with/:participant&#95;id/messages
 
 |     |     |     |
 | :--- | :--- | :--- |
 | **설명** | **표준 v1.1** | **X API v2** |
-| 엔드포인트 경로 | POST direct&#95;messages/events/new (message&#95;create) | POST /2/dm&#95;conversations/with/:participant&#95;id/messages |
-| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) | 24시간당 사용자당 1000회 요청  <br />24시간당 앱당 15000회 요청 | 15분당 사용자당 200회 요청<br /><br />24시간당 사용자당 1000회 요청<br /><br />24시간당 앱당 15000회 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
-| 그룹 다이렉트 메시지 지원 |     | ✔   |
+| Endpoint path | POST direct&#95;messages/events/new (message&#95;create) | POST /2/dm&#95;conversations/with/:participant&#95;id/messages |
+| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) | 사용자당 24시간 기준 1000회 요청  <br />앱당 24시간 기준 15000회 요청 | 사용자당 15분 기준 200회 요청<br /><br />사용자당 24시간 기준 1000회 요청<br /><br />앱당 24시간 기준 15000회 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
+| 그룹 Direct Message 지원 |     | ✔   |
 
-**새 그룹 다이렉트 메시지 대화를 만들고 메시지를 추가하기**
+**새 Direct Message 그룹 대화를 생성하고 메시지를 추가하기**
 
-경로: POST /2/dm&#95;conversations
-
-|     |     |     |
-| :--- | :--- | :--- |
-| **설명** | **표준 v1.1** | **X API v2** |
-| 엔드포인트 경로 | 지원되지 않음 | POST /2/dm&#95;conversations |
-| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) |     | 15분당 사용자당 200회 요청<br /><br />24시간당 사용자당 1000회 요청<br /><br />24시간당 앱당 15000회 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
-| 그룹 다이렉트 메시지 지원 |     | ✔   |
-
-**기존 대화 ID로 다이렉트 메시지 추가하기**
-
-경로: POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages
+Path: POST /2/dm&#95;conversations
 
 |     |     |     |
 | :--- | :--- | :--- |
 | **설명** | **표준 v1.1** | **X API v2** |
-| 엔드포인트 경로 | 지원되지 않음 | POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages |
-| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) |     | 15분당 사용자당 200회 요청<br /><br />24시간당 사용자당 1000회 요청<br /><br />24시간당 앱당 15000회 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
-| 그룹 다이렉트 메시지 지원 |     | ✔   |
+| Endpoint path | 지원되지 않음 | POST /2/dm&#95;conversations |
+| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) |     | 사용자당 15분 기준 200회 요청<br /><br />사용자당 24시간 기준 1000회 요청<br /><br />앱당 24시간 기준 15000회 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
+| 그룹 Direct Message 지원 |     | ✔   |
+
+**기존 대화 ID에 Direct Message 추가**
+
+Path: POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **설명** | **표준 v1.1** | **X API v2** |
+| Endpoint path | 지원되지 않음 | POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages |
+| 기본 요청 [요청 한도](/ko/x-api/fundamentals/rate-limits) |     | 사용자당 15분 기준 200회 요청<br /><br />사용자당 24시간 기준 1000회 요청<br /><br />앱당 24시간 기준 15000회 요청<br /><br />이 요청 한도는 모든 dm&#95;conversations POST 엔드포인트에서 공유됩니다. |
+| 그룹 Direct Message 지원 |     | ✔   |

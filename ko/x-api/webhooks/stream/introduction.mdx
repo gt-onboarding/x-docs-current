@@ -1,7 +1,7 @@
 ---
-title: Filtered Stream Webhooks API
+title: Filtered Stream 웹훅 API
 sidebarTitle: 소개
-keywords: ["filtered stream webhooks", "stream webhooks", "webhook stream", "filtered stream webhook", "streaming webhooks", "webhook delivery"]
+keywords: ["filtered stream 웹훅들", "스트림 웹훅", "웹훅 스트림", "filtered stream 웹훅", "스트리밍 웹훅", "웹훅 전달"]
 ---
 
 import { Button } from '/snippets/ko/button.mdx';
@@ -10,39 +10,39 @@ import { Button } from '/snippets/ko/button.mdx';
   ## Overview
 </div>
 
-필터링 스트림 endpoint 그룹은 개발자가 공개 게시물 스트림을 필터링할 수 있도록 해줍니다. 이 endpoint 그룹에는 규칙을 생성 및 관리하고, 해당 규칙을 적용해 일치하는 공개 게시물만 반환하도록 게시물 스트림을 필터링할 수 있게 해주는 여러 endpoint가 포함되어 있습니다. 이 endpoint 그룹을 사용하면 특정 주제와 이벤트를 수신하고, 경쟁과 관련된 대화를 모니터링하며, 트렌드가 어떻게 형성되는지 파악하는 등 다양한 작업을 수행할 수 있습니다.
+filtered stream 엔드포인트 그룹을 사용하면 개발자가 공개 게시물 스트림을 필터링할 수 있습니다. 이 엔드포인트 그룹에는 규칙을 생성·관리하고, 해당 규칙을 적용해 일치하는 공개 게시물만 반환하도록 게시물 스트림을 필터링할 수 있게 해 주는 여러 엔드포인트가 포함되어 있습니다. 이 엔드포인트 그룹을 사용하면 특정 주제와 이벤트를 수신하고, 경쟁과 관련된 대화를 모니터링하며, 트렌드가 어떻게 형성되는지 파악하는 등 다양한 작업을 수행할 수 있습니다.
 
-개발자는 REST [rules endpoint](/ko/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules)를 사용하여, 정의된 기준과 일치하는 게시물을 필터링하기 위한 규칙을 추가하고 제거할 수 있습니다. 이러한 [rules](/ko/x-api/posts/filtered-stream#building-rules-for-filtered-stream)는 메시지 키워드, 해시태그, URL과 같은 게시물 속성과 일치하는 operator를 사용해 생성할 수 있습니다. operator와 규칙 절(rule clause)은 부울 논리와 괄호를 조합하여 필터의 매칭 동작을 더 정교하게 조정할 수 있습니다. 
+개발자는 REST [rules endpoint](/ko/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules)를 사용해 정의된 기준과 일치하는 게시물을 필터링하기 위한 규칙을 추가·삭제할 수 있습니다. 이러한 [규칙](/ko/x-api/posts/filtered-stream#building-rules-for-filtered-stream)은 메시지 키워드, 해시태그, URL과 같은 게시물 속성에 대해 일치하는 연산자를 사용해 생성할 수 있습니다. 연산자와 규칙 절을 불리언 로직과 괄호와 함께 조합해 필터의 매칭 동작을 더욱 정교하게 조정할 수 있습니다. 
 
-규칙 집합을 추가한 후에는 webhook을 등록할 수 있으며, 그러면 X가 JSON 형식의 [Post objects](/ko/x-api/fundamentals/data-dictionary#tweet)를 전송하기 시작합니다. webhook에는 규칙과 일치하는 콘텐츠만 전달됩니다.
+규칙 세트를 추가한 후에는 X가 JSON 형식으로 [Post objects](/ko/x-api/fundamentals/data-dictionary#tweet)를 전송하기 시작할 웹훅을 등록할 수 있습니다. 웹훅에는 규칙과 일치하는 콘텐츠만 수신됩니다.
 
-이 endpoint는 수정된 게시물을 지원합니다. webhook은 하나 이상의 필터와 일치하는 수정된 게시물과 함께, 게시물의 수정 이력(게시물 ID 배열 포함)을 수신하게 됩니다. 수정 이력이 없는 게시물의 경우 이 배열에는 단일 ID가 포함됩니다. 수정된 게시물의 경우 이 배열에는 여러 개의 ID가 포함되며, 수정 순서를 반영하는 오름차순으로 정렬되어 있고, 배열의 마지막 위치에 가장 최신 버전이 위치합니다. 게시물 수정 방식에 대한 자세한 내용은 [Posts edits fundamentals](/ko/x-api/fundamentals/edit-posts) 페이지를 참고하세요. 
+이 엔드포인트는 수정된 게시물을 지원합니다. 웹훅은 하나 이상의 필터와 일치하는 수정된 게시물과 함께, 게시물 id 배열을 포함한 수정 이력을 수신하게 됩니다. 수정 이력이 없는 게시물의 경우 이 배열에는 단일 id가 포함됩니다. 게시물이 수정된 경우 이 배열에는 여러 개의 id가 포함되며, 수정 순서를 반영하는 오름차순으로 정렬되고, 배열의 마지막 위치에 최신 버전이 위치합니다. 게시물 편집이 어떻게 동작하는지에 대한 자세한 내용은 [Posts edits fundamentals](/ko/x-api/fundamentals/edit-posts) 페이지를 참조하세요. 
 
-**참고:** 이 endpoint 그룹은 규칙을 설정하는 방식에서 [v2 filtered stream endpoint](/ko/x-api/posts/filtered-stream/introduction)와 유사합니다. 유일한 차이점은 규칙과 일치하는 게시물이 전달되는 방식입니다.
+**참고:** 이 엔드포인트 그룹은 규칙 설정 방식 측면에서 [v2 filtered stream endpoint](/ko/x-api/posts/filtered-stream/introduction)와 유사합니다. 유일한 차이점은 규칙과 일치하는 게시물의 전송 방식입니다.
 
-* v2 filtered stream endpoint의 경우, 지속 연결을 설정하고 규칙과 일치하는 게시물을 수신 대기해야 합니다.
-* 이 filtered stream webhook endpoint의 경우, webhook을 등록하면 X가 규칙과 일치하는 게시물을 webhook으로 전달합니다.
+* v2 filtered stream endpoint의 경우, 지속적인 연결을 설정하고 규칙과 일치하는 게시물을 수신 대기해야 합니다.
+* 이 filtered stream webhook 엔드포인트의 경우, 웹훅을 등록하면 X에서 규칙과 일치하는 게시물을 웹훅으로 전송합니다.
 
-이를 통해 클라이언트 연결 끊김이나, 서비스의 일반적인 재시작으로 인해 발생하는 서버 측 연결 종료에서 비롯되는 연결 해제를 따로 처리할 필요가 없어집니다. 초당 수백 개의 이벤트를 전달할 수 있으므로, webhook 서버는 이러한 동시 연결 시도를 처리할 수 있어야 합니다.
+이를 통해 클라이언트 중단이나 서비스의 정상 재시작에 따른 서버 측 중단으로 인해 발생하는 연결 끊김을 직접 처리할 필요가 없어집니다. 초당 수백 개의 이벤트를 전송할 가능성이 높기 때문에, 웹훅 서버는 이러한 동시 연결 시도를 처리할 수 있어야 합니다.
 
-이 endpoint는 현재 Enterprise 개발자에게 제공되며, 다음과 같은 구성을 지원합니다:
+이 엔드포인트는 현재 Enterprise 개발자에게 제공되며, 다음과 같은 구성을 지원합니다.
 
 * 프로젝트당 25,000개 이상의 규칙
-* 규칙을 작성할 때 모든 operator 사용 가능
+* 규칙 작성 시 모든 연산자 사용 가능
 * 최대 2048자 길이의 규칙 작성 가능
-* Enterprise 액세스를 위해 [여기](https://developer.x.com/en/products/x-api/enterprise/enterprise-api-interest-form)에서 신청
+* Enterprise 액세스는 [여기](https://developer.x.com/en/products/x-api/enterprise/enterprise-api-interest-form)에서 신청하세요
 
-필터링 스트림에서 반환된 게시물은 월별 [Post cap](/ko/x-api/fundamentals/post-cap)에 포함됩니다.
+filtered stream에서 반환된 게시물은 월별 [Post cap](/ko/x-api/fundamentals/post-cap)에 포함됩니다.
 
 <Note>
   **계정 설정**
 
-  이 endpoint에 액세스하려면 다음이 필요합니다:
+  이 엔드포인트에 액세스하려면 다음이 필요합니다.
 
-  * 승인된 [developer account](https://developer.x.com/en/portal/petition/essential/basic-info)
-  * [Project](/ko/resources/fundamentals/projects) 내에 위치한 [developer App](/ko/resources/fundamentals/developer-apps)의 키와 토큰을 사용한 인증 
+  * 승인된 [개발자 계정](https://developer.x.com/en/portal/petition/essential/basic-info)
+  * [프로젝트](/ko/resources/fundamentals/projects)에 속한 [개발자 앱](/ko/resources/fundamentals/developer-apps)의 키와 토큰을 사용한 인증
 
-  X API v2 endpoint에 대한 액세스 권한을 얻는 방법은 [getting started guide](/ko/x-api/getting-started/getting-access)를 참조하세요.
+  X API v2 엔드포인트에 액세스 권한을 얻는 방법에 대한 자세한 내용은 [시작하기 가이드](/ko/x-api/getting-started/getting-access)를 참조하세요.
 </Note>
 
 <div className="flex">

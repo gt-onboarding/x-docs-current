@@ -1,7 +1,7 @@
 ---
 title: Filtered Stream Webhooks API
 sidebarTitle: 概要
-keywords: ["filtered stream webhooks", "stream webhooks", "webhook stream", "filtered stream webhook", "streaming webhooks", "webhook 配信"]
+keywords: ["filtered stream webhooks", "stream webhooks", "webhook stream", "filtered stream webhook", "streaming webhooks", "webhook delivery"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
@@ -10,39 +10,39 @@ import { Button } from '/snippets/ja/button.mdx';
   ## 概要
 </div>
 
-filtered stream エンドポイントグループを使用すると、開発者は公開ポストのストリームをフィルタリングできます。このエンドポイントグループには、ルールの作成と管理、そしてそれらのルールを適用して条件に一致する公開ポストのみを返すストリームをフィルタリングするための複数のエンドポイントが含まれます。このエンドポイントグループを利用することで、特定のトピックやイベントを継続的に監視したり、大会や競技に関する会話をモニタリングしたり、トレンドがどのように発展していくかを把握したり、その他多くのことが可能になります。
+filtered stream エンドポイントグループは、開発者が公開ポストのストリームをフィルタリングできるようにするエンドポイントグループです。このエンドポイントグループには、ルールを作成および管理し、それらのルールを適用して、一致する公開ポストのみを返すストリームをフィルタリングできる複数のエンドポイントが含まれます。このエンドポイントグループを利用すると、特定のトピックやイベントを監視したり、キャンペーンや競合に関する会話をモニタリングしたり、トレンドがどのように発展するかを把握したり、その他さまざまなことが可能になります。
 
-開発者は REST の [rules エンドポイント](/ja/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules) を使用して、定義した条件に一致するポストをフィルタリングするためのルールを追加および削除できます。これらの [rules](/ja/x-api/posts/filtered-stream#building-rules-for-filtered-stream) は、メッセージのキーワード、ハッシュタグ、URL などのポスト属性にマッチするオペレーターを使って作成できます。オペレーターとルール句は、ブールロジックや括弧と組み合わせることで、フィルタのマッチング動作をより細かく調整できます。 
+開発者は REST の [rules エンドポイント](/ja/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules) を使用して、定義した条件に一致するポストをフィルタリングするためのルールを追加および削除できます。これらの [rules](/ja/x-api/posts/filtered-stream#building-rules-for-filtered-stream) は、メッセージのキーワード、ハッシュタグ、URL などのポスト属性に一致するオペレーターを使って作成できます。オペレーターやルール句は、ブールロジックやかっこで組み合わせることで、フィルタのマッチング動作をより細かく制御できます。 
 
-一連のルールを追加したら、X が JSON 形式で [Post objects](/ja/x-api/fundamentals/data-dictionary#tweet) を配信し始めるように、webhook を登録できます。webhook には、設定したルールに一致するコンテンツのみが配信されます。
+一連のルールを追加したら、X が JSON 形式で [Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) を配信する先として、Webhook を登録できます。Webhook には、ルールに一致するコンテンツのみが配信されます。
 
-このエンドポイントは、編集されたポストをサポートします。webhook は、1 つ以上のフィルタに一致する編集済みポストを、その編集履歴とともに受信します。編集履歴には、ポストの ID の配列が含まれます。編集履歴のないポストの場合、この配列には単一の ID が格納されます。編集されたポストの場合、この配列には複数の ID が含まれ、編集の順序を反映して昇順に並んでおり、配列の最後の要素が最新バージョンになります。ポスト編集の仕組みについて詳しくは、[Posts edits fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。 
+このエンドポイントは編集済みポストをサポートします。Webhook には、1 つ以上のフィルターに一致する編集済みポストが、その編集履歴とともに配信されます。編集履歴には、ポスト ID の配列が含まれます。編集履歴のないポストの場合、この配列には 1 つの ID が格納されます。編集済みポストの場合、この配列には複数の ID が含まれ、編集された順序を反映して昇順に並んでおり、配列の最後の要素が最新バージョンになります。ポストの編集がどのように機能するかの詳細は、[Posts edits fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。 
 
-**注:** このエンドポイントグループは、ルールの設定方法という点で [v2 filtered stream エンドポイント](/ja/x-api/posts/filtered-stream/introduction) と似ています。唯一の違いは、ルールに一致するポストの配信方法です。
+**注:** このエンドポイントグループは、ルールを設定するという点で [v2 filtered stream エンドポイント](/ja/x-api/posts/filtered-stream/introduction) と類似しています。唯一の違いは、ルールに一致したポストの配信方法です。
 
-* v2 filtered stream エンドポイントの場合、永続的な接続を確立し、ルールに一致するポストを受信し続ける必要があります。
-* この filtered stream webhook エンドポイントの場合、webhook を登録すると、X がルールに一致するポストを webhook に配信します。
+* v2 filtered stream エンドポイントの場合は、永続的な接続を確立し、ルールに一致するポストを受信し続ける必要があります。
+* この filtered stream Webhook エンドポイントの場合は、Webhook を登録すると、X がルールに一致するポストを Webhook に配信します。
 
-これにより、クライアント側の切断や、サービスの通常の再起動に伴うサーバー側の切断を処理する必要がなくなります。1 秒あたり数百件のイベントを配信する可能性が高いため、webhook サーバーは、これらの同時接続要求を処理できる必要があります。
+これにより、クライアント側の切断や、サービスの通常の再起動によるサーバー側の切断を処理する必要がなくなります。X では 1 秒あたり数百件のイベントを配信する可能性があるため、Webhook サーバーはこれらの同時接続リクエストを処理できる必要があります。
 
-このエンドポイントは現在、Enterprise 開発者向けに提供されており、次の構成をサポートしています。
+このエンドポイントは現在 Enterprise 開発者向けに提供されており、次の構成をサポートしています。
 
-* プロジェクトあたり 25,000 以上のルール
-* ルールの作成時にすべてのオペレーターを利用可能
-* 最大 2048 文字までのルールを作成可能
-* Enterprise アクセスには[こちら](https://developer.x.com/en/products/x-api/enterprise/enterprise-api-interest-form)から申請してください
+* プロジェクトあたり 25,000 件以上のルール
+* ルール構築時にすべてのオペレーターを使用可能
+* 最大 2048 文字までのルールを構築可能
+* Enterprise アクセスには [こちら](https://developer.x.com/en/products/x-api/enterprise/enterprise-api-interest-form) からお申し込みください
 
-filtered stream から返されるポストは、月間の [Post cap](/ja/x-api/fundamentals/post-cap) にカウントされます。
+filtered stream から返されるポストは、月次の [Post 上限](/ja/x-api/fundamentals/post-cap) にカウントされます。
 
 <Note>
-  **アカウント設定**
+  **アカウントのセットアップ**
 
-  これらのエンドポイントにアクセスするには、次のものが必要です。
+  これらのエンドポイントにアクセスするには、以下が必要です。
 
   * 承認済みの [開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)
-  * [プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用した認証 
+  * [プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用した認証
 
-  X API v2 エンドポイントへのアクセスの取得方法については、[利用開始ガイド](/ja/x-api/getting-started/getting-access)を参照してください。
+  X API v2 エンドポイントへのアクセス方法の詳細は、[はじめにガイド](/ja/x-api/getting-started/getting-access) を参照してください。
 </Note>
 
 <div className="flex">

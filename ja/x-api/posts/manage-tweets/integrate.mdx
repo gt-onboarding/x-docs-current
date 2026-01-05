@@ -1,17 +1,17 @@
 ---
-title: インテグレーションガイド
-sidebarTitle: インテグレーションガイド
-keywords: ["ポスト管理の統合", "ポスト作成の統合", "ポスト投稿の統合", "ポスト管理ガイド", "ポスト作成のセットアップ"]
+title: 連携ガイド
+sidebarTitle: 連携ガイド
+keywords: ["ポスト管理 連携", "ポスト作成 連携", "ポスト投稿 連携", "ポスト管理 ガイド", "ポスト作成 セットアップ"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-このページでは、manage Posts エンドポイントをシステムに統合する際に理解しておくべき、いくつかのツールや主要な概念について説明します。ページは、次のいくつかのセクションに分かれています。
+このページでは、ポスト管理エンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールや重要な概念について説明します。このページは、次のセクションで構成されています。
 
-* [便利なツール](#helpful)
-* 主要な概念
+* [役立つツール](#helpful)
+* 重要な概念
 * [認証](#authentication)
-* [developer portal、プロジェクト、アプリ](#portal)
+* [Developer Portal、プロジェクト、アプリ](#portal)
 * [レート制限](#limits)
 * [ソースラベル](#source)[](#source)[](#source)
 * [プロフィール設定](#settings)
@@ -21,27 +21,27 @@ import { Button } from '/snippets/ja/button.mdx';
   ## 便利なツール
 </div>
 
-このエンドポイントの統合に役立つ重要な概念を説明する前に、まず次のツールに慣れておくことをおすすめします。
+このエンドポイントを統合する際に役立つ重要な概念を説明する前に、まず次のツールに慣れておくことをおすすめします。
 
 <div id="postman">
   ### Postman
 </div>
 
-Postman は、エンドポイントをテストするのに適したツールです。各 Postman リクエストには、利用可能な内容をすばやく把握できるよう、すべてのパスおよびボディパラメータが含まれています。Postman コレクションの詳細については、「[Using Postman](/ja/tutorials/postman-getting-started)」ページをご覧ください。 
+Postman は、エンドポイントを試す際に利用できる便利なツールです。各 Postman リクエストには、何が利用できるかをすばやく把握できるよう、すべてのパスパラメータおよびボディパラメータが含まれています。Postman コレクションの詳細については、[&quot;Using Postman&quot;](/ja/tutorials/postman-getting-started) のページをご覧ください。 
  
 
 <div id="code-samples">
   ### コードサンプル
 </div>
 
-お好みのプログラミング言語でこのエンドポイントを試してみたい場合は、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)に、出発点として利用できるサンプルコードをいくつか用意しています。
+お好みのプログラミング言語でこのエンドポイントを試してみたい方のために、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で、出発点として利用できるサンプルコードをいくつか提供しています。
  
 
 <div id="third-party-libraries">
-  ### サードパーティライブラリ
+  ### サードパーティ製ライブラリ
 </div>
 
-コミュニティが提供する[サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)を活用して、スムーズに開発を開始しましょう。v2 エンドポイントに対応したライブラリは、適切なバージョンタグが付いているものを探すことで見つけられます。
+コミュニティが提供する[サードパーティ製ライブラリ](/ja/x-api/tools-and-libraries/overview)を活用して、利用の開始に役立ててください。適切なバージョンタグを目印にすれば、v2 エンドポイントに対応したライブラリを見つけられます。
  
 
 <div id="key-concepts">
@@ -52,51 +52,51 @@ Postman は、エンドポイントをテストするのに適したツールで
   ### 認証
 </div>
 
-すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使ってリクエストを認証する必要があります。 
+すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使用してリクエストを認証する必要があります。 
 
-ここで説明しているこれらの特定のエンドポイントでは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) を使用する必要があります。つまり、成功するリクエストを行うには、一連の API キーとユーザーのアクセストークンを使用しなければなりません。アクセストークンは、あなたが代理でリクエストを行う対象ユーザーに紐づいている必要があります。別のユーザー向けのアクセストークンを生成したい場合は、そのユーザーが [3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用して、あなたのアプリを承認または認証する必要があります。
+これらの特定のエンドポイントでは [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) を使用する必要があります。つまり、リクエストを正常に送信するには、一連の API キーとユーザーのアクセストークンを使用する必要があります。アクセストークンは、あなたが代理でリクエストを行うユーザーに関連付けられている必要があります。別のユーザー向けのアクセストークンを生成したい場合は、そのユーザーが [3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用してあなたのアプリを承認または認証する必要があります。
 
-OAuth 1.0a は扱いが難しい場合がある点に注意してください。この認証方式に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) を使用するか、Postman のようなツールを利用するか、OAuth 2.0 を使用してリクエストを認証することをおすすめします。
+OAuth 1.0a の利用は難しい場合があることに注意してください。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) を使用するか、Postman のようなツールを利用するか、あるいは OAuth 2.0 を使用してリクエストを認証することをおすすめします。
 
-[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープの制御や、複数デバイス間にまたがる認可フローを、よりきめ細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、きめ細かなスコープを選択できます。 
+[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用すると、アプリケーションのスコープや複数デバイス間にまたがる認可フローを、より細かく制御できます。OAuth 2.0 では、ユーザーに代わって特定の権限を付与するための、粒度の細かいスコープを個別に選択できます。 
 
-アプリで OAuth 2.0 を有効にするには、developer portal のアプリ設定セクションにあるアプリの認証設定で OAuth 2.0 を有効化する必要があります。
+アプリで OAuth 2.0 を有効にするには、developer portal の App 設定セクションにあるアプリの認証設定で OAuth 2.0 を有効にする必要があります。
 
 <div id="developer-portal-projects-and-developer-apps">
-  ### Developer portal、プロジェクト、および開発者アプリ
+  ### Developer portal、Projects、および developer Apps
 </div>
 
-X API v2 のエンドポイントで使用できる認証情報一式を取得するには、[開発者アカウント]/resources/fundamentals/developer-portal)を所持し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を設定し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。これらを用意したら、開発者アプリ内でキーとトークンを確認できます。 
+X API v2 エンドポイントで使用できる一連の認証情報を取得するには、[開発者アカウント](/ja/resources/fundamentals/developer-portal) を保有し、そのアカウント内に [プロジェクト](/ja/resources/fundamentals/projects) を設定し、そのプロジェクト内に [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成している必要があります。これらのキーとトークンは、開発者アプリ内で確認できます。 
  
 
 <div id="rate-limits">
   ### レート制限
 </div>
 
-毎日、何万もの開発者が X API にリクエストを送信しています。これらのリクエストの膨大な量を管理するために、[レート制限](https://developer.x.com/x-api/fundamentals/rate-limits) が各エンドポイントに設定されており、あなたのアプリまたは認証済みユーザーに代わって送信できるリクエスト数が制限されています。
+毎日、何万もの開発者が X API にリクエストを送信しています。これらの膨大なリクエスト量を管理するために、各エンドポイントには [レート制限](https://developer.x.com/x-api/fundamentals/rate-limits) が設けられており、アプリまたは認証済みユーザーに代わって送信できるリクエスト数が制限されています。
 
-これらのエンドポイントはユーザーレベルでレート制限されています。つまり、あなたがリクエストを送信する対象となる認証済みユーザーは、どの開発者アプリからのリクエストであっても、そのエンドポイントを呼び出せる回数が一定数に制限されます。`POST` メソッドには、15 分あたり 200 リクエストのユーザーごとのレート制限があります。`DELETE` メソッドには、15 分あたり 50 リクエストのレート制限があります。さらに、[3 時間あたり 300 リクエスト](https://blog.x.com/developer/en_us/topics/tools/2018/new-developer-requirements-to-protect-our-platform) という上限があり、manage Posts または manage Retweets 権限で作成されたポストも含まれます。
+これらのエンドポイントにはユーザーレベルのレート制限が適用されます。つまり、あなたがリクエストを送信している認証済みユーザーは、どの開発者アプリからであっても、そのエンドポイントを呼び出せる回数が一定数に制限されます。POST メソッドには 15 分あたり 200 リクエストのユーザーレート制限があります。DELETE メソッドには 15 分あたり 50 リクエストのレート制限があります。さらに、[3 時間あたり 300 リクエスト](https://blog.x.com/developer/en_us/topics/tools/2018/new-developer-requirements-to-protect-our-platform)という上限があり、manage Posts または manage Retweets 権限で作成されたポストも含まれます。
  
 
 <div id="source-labels">
   ### ソースラベル
 </div>
 
-アプリ名とウェブサイトの URL は、アプリケーションによってプログラムを通じて作成されたポストのメタデータ内で、[ソースラベル](https://help.x.com/en/using-twitter/how-to-tweet#source-labels) として表示されます。X アプリのユースケースを変更する場合は、[Developer Terms](https://developer.x.com/content/developer-twitter/en/developer-terms/agreement-and-policy) に準拠していることを確保するため、必ずこれらの設定でのユースケースも更新してください。
+あなたのアプリ名とウェブサイトの URL は、アプリケーションによってプログラム経由で作成されたポストのメタデータ内で [ソースラベル](https://help.x.com/en/using-twitter/how-to-tweet#source-labels) として表示されます。X アプリのユースケースを変更する場合は、[Developer Terms](https://developer.x.com/content/developer-twitter/en/developer-terms/agreement-and-policy) に準拠し続けるために、必ずこれらの設定でユースケースも更新してください。
  
 
 <div id="profile-settings">
   ### プロフィール設定
 </div>
 
-プロフィール設定で位置情報（geo）が有効になっている場合にのみ、ポストに位置情報を追加できます。geo が有効になっていない場合でも、リクエストボディに location パラメータを追加することはできますが、その位置情報はポストに紐づきません。画像でユーザーをタグ付けする場合も同様です。タグ付けしようとしているユーザーがフォトタグ付けを有効にしていない場合、ポスト自体は正常に作成されますが、タグ付けされたユーザーのリストにはそのユーザー名は表示されません。 
+プロフィール設定で位置情報（ジオ）機能を有効にしている場合にのみ、ポストに位置情報を追加できます。位置情報機能を有効にしていない場合でも、リクエストボディに location パラメータを追加すること自体はできますが、その位置情報がポストに紐付くことはありません。画像へのユーザーのタグ付けについても同様です。タグ付けしようとしているユーザーが写真へのタグ付け機能を有効にしていない場合、そのポストが正常に作成されても、タグ付けされたユーザー一覧にそのユーザー名は表示されません。 
  
 
 <div id="adding-media-to-a-post">
-  ### ポストへのメディアの追加
+  ### ポストにメディアを追加する
 </div>
 
-現時点では、X API v2 だけを使ってメディアのアップロード処理を完結させる方法はありません。ただし、すでにアップロード済みのメディアをポストに添付することはできます。すでに [v1 のメディアアップロードエンドポイントを使用してアップロードした](https://developer.x.com/en/docs/twitter-api/v1/media/upload-media/api-reference/post-media-upload)メディア、または [X Media Studio](https://media.x.com/en/articles/products/2018/media-studio) を使用してアップロードしたメディアの media id を利用できます。これらの media id は、あなた自身（または現在認証されているユーザー）に属するメディアのものである必要があります。
+現在のところ、X API v2 だけでメディアを完全にアップロードする方法はありません。ただし、事前にアップロード済みのメディアをポストに添付することはできます。すでに [v1 の media エンドポイントを使用してアップロードされているメディア](https://developer.x.com/en/docs/twitter-api/v1/media/upload-media/api-reference/post-media-upload)や、[X Media Studio](https://media.x.com/en/articles/products/2018/media-studio) を使用してアップロードされたメディアの media id を利用できます。これらの media id は、自分自身、もしくは認証済みユーザーのものである必要があります。
 
 **次のステップ**
 

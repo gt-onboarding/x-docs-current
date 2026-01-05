@@ -7,40 +7,40 @@ keywords: ["批量合规快速入门", "合规批处理快速入门", "合规作
 import { Button } from '/snippets/zh/button.mdx';
 
 <div id="getting-started-with-the-batch-compliance-endpoints">
-  ## 使用批量合规端点入门
+  ## 开始使用批量合规端点
 </div>
 
-使用批量合规端点通常包括 5 个步骤：
+使用批量合规端点通常包括以下 5 个步骤：
 
-1. 创建合规作业
+1. 创建合规任务
 2. 准备帖子 ID 或用户 ID 列表
 3. 上传帖子 ID 或用户 ID 列表
-4. 检查合规作业状态
+4. 检查合规任务的状态
 5. 下载结果
 
-在本节中，我们将学习如何通过命令行依次完成这些步骤。若要查看不同编程语言的示例代码，请访问我们的 [X API v2 示例代码 GitHub 仓库](https://github.com/xdevplatform/Twitter-API-v2-sample-code)。
+在本节中，我们将学习如何使用命令行完成上述每个步骤。如果你想查看不同编程语言的示例代码，请访问我们的 [X API v2 示例代码 GitHub 仓库](https://github.com/xdevplatform/Twitter-API-v2-sample-code)。
 
 <div id="prerequisites">
   ### 先决条件
 </div>
 
-要完成本指南，你需要一组用于对请求进行身份验证的 [密钥和令牌](/zh/resources/fundamentals/authentication)。你可以通过以下步骤生成这些密钥和令牌：
+要完成本指南，你需要一组用于对请求进行认证的 [keys and tokens](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
 
-* [注册开发者账号](https://developer.x.com/en/apply-for-access)并通过审核。
-* 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 以及一个关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
-* 前往你的 App 的 “Keys and tokens” 页面以生成所需的凭证。请确保将所有凭证保存在安全的位置。
+* [注册开发者账号](https://developer.x.com/en/apply-for-access)并获得批准。
+* 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 以及关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+* 前往你的 App 的 “Keys and tokens” 页面生成所需的凭证。请确保将所有凭证保存在安全的位置。
 
 <div id="step-one-create-a-compliance-job">
-  #### 第一步：创建合规任务
+  #### 第一步：创建合规作业
 </div>
 
-首先，你需要创建一个合规任务，并指定你将上传的是帖子 ID 还是用户 ID（使用 `type` 参数）。另外，你还可以为该任务命名（使用 `name` 参数）。 
+首先，你需要创建一个合规作业，并指定你将上传的是帖子 ID 还是用户 ID（使用 `type` 参数）。（可选）你还可以为作业指定一个名称（使用 `name` 参数）。 
 
-要为该请求授权，你需要使用 [App only](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)。为此，请确保将下面的 `$APP_ACCESS_TOKEN` 替换为你在开发者门户中的 [X App](/zh/resources/fundamentals/developer-apps) 里生成的 [App Access Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)。
+要为此请求授权，你需要使用[仅应用（App-only）身份验证](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)。为此，请务必将下方的 $APP&#95;ACCESS&#95;TOKEN 替换为你在开发者门户的 [X App](/zh/resources/fundamentals/developer-apps) 中生成的 [App 访问令牌](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)。
 
 `curl --request POST 'https://api.x.com/2/compliance/jobs' \ --header 'Authorization: Bearer $APP_ACCESS_TOKEN' \ --header 'Content-Type: application/json' \ --data-raw '{"type": "tweets"}'`
 
-如果你的 API 调用成功，你将收到类似下面的响应：
+如果你的 API 调用成功，你将会收到类似如下的响应：
 
 ```
 {
@@ -58,13 +58,13 @@ import { Button } from '/snippets/zh/button.mdx';
 }
 ```
 
-请记录 upload&#95;url、download&#95;url 和 id 字段中的值；后续步骤中将会用到它们。
+请记下 upload&#95;url、download&#95;url 和 id 字段的值，后续步骤会用到它们。
 
 <div id="step-two-prepare-a-list-of-post-ids-or-user-ids">
   #### 步骤二：准备帖子 ID 或用户 ID 列表
 </div>
 
-创建一个包含帖子 ID 或用户 ID 的文本文件，其中每一行只包含一个帖子 ID 或用户 ID。文本文件的内容类似如下：
+创建一个包含帖子 ID 或用户 ID 的文本文件，每一行只包含一个帖子 ID 或用户 ID。文本文件的内容大致如下所示：
 
 1417856744319971329
 
@@ -79,9 +79,9 @@ import { Button } from '/snippets/zh/button.mdx';
 . . .
 
 <Note>
-  **注意**：上述文件可以只包含帖子 ID 或只包含用户 ID，不能混合两者。
+  **Note**: 上面的文件只能包含帖子 ID 或用户 ID 中的一种，不能同时混用这两种 ID。
 
-  你可以通过一个 **PUT** 请求将文件直接上传到此 URL。请注意，该 URL 已经使用身份验证令牌签名，这意味着你不需要再次通过传递应用访问令牌来进行身份验证。请务必在请求中携带一个 Content-Type 头部，以表明你正在上传文本文件，并将下面的 $FILE&#95;LOCATION 替换为你的文件路径。
+  你可以通过一个 **PUT** 请求，直接将文件上传到此 URL。请注意，该 URL 已使用身份验证令牌签名，这意味着你无需再通过传递应用访问令牌来进行身份验证。请确保携带一个 Content-Type 头部以表明你正在上传文本文件，并将下面的 $FILE&#95;LOCATION 替换为你的文件路径。
 </Note>
 
 ```
@@ -91,15 +91,15 @@ curl -X PUT  \
 "https://storage.googleapis.com/twitter-compliance/customer_test_object_123456_d8ske9.json?X-Goog-Algorithm=\nGOOG4-RSA-SHA256&X-Goog-Credential=example%40example-project.iam.gserviceaccount\n.com%2F20181026%2Fus-central-1%2Fstorage%2Fgoog4_request&X-Goog-Date=20181026T18\n1309Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&X-Goog-Signature=247a2aa45f16\n9edf4d187d54e7cc46e4731b1e6273242c4f4c39a1d2507a0e58706e25e3a85a7dbb891d62afa849\n6def8e260c1db863d9ace85ff0a184b894b117fe46d1225c82f2aa19efd52cf21d3e2022b3b868dc\nc1aca2741951ed5bf3bb25a34f5e9316a2841e8ff4c530b22ceaa1c5ce09c7cbb5732631510c2058\n0e61723f5594de3aea497f195456a2ff2bdd0d13bad47289d8611b6f9cfeef0c46c91a455b94e90a\n66924f722292d21e24d31dcfb38ce0c0f353ffa5a9756fc2a9f2b40bc2113206a81e324fc4fd6823\na29163fa845c8ae7eca1fcf6e5bb48b3200983c56c5ca81fffb151cca7402beddfc4a76b13344703\n2ea7abedc098d2eb14a7"
 ```
 
-状态码 200 将表示上传成功。
+状态码 200 表示上传已成功完成。
 
 <div id="step-three-optional-check-your-job-status">
   #### 步骤三（可选）：检查作业状态
 </div>
 
-较大的上传可能需要一些时间来处理。你可以在内容合规作业端点中指定你在第一步中获得的作业 ID，以查询作业状态。
+较大的上传可能需要一些时间来处理。你可以在内容合规作业端点中指定你在第一步中收到的作业 ID 来查询其状态。
 
-同样，请务必将下方的 $APP&#95;ACCESS&#95;TOKEN 替换为你的应用访问令牌（App Access Token），并将 $ID 替换为你在第一步中获得的作业 ID。
+同样，请确保将下面的 $APP&#95;ACCESS&#95;TOKEN 替换为你的应用访问令牌，并将 $ID 替换为你在第一步中获得的作业 ID。
 
 `curl --request GET 'https://api.x.com/2/compliance/jobs/$ID' \ --header 'Authorization: Bearer $APP_ACCESS_TOKEN'`
 
@@ -121,20 +121,20 @@ curl -X PUT  \
 }
 ```
 
-当状态为 complete 时，表示结果已可以下载。注意：状态的其他可能取值包括 created、complete、in&#95;progress、failed 和 expired。
+状态为 complete 表示结果已经可以供你下载。注意：status 的其他取值可以是 created、complete、in&#95;progress、failed 和 expired。
 
 <div id="step-four-download-the-results">
-  #### 步骤四：下载结果
+  #### 第四步：下载结果
 </div>
 
-在收到任务完成状态后，你可以从 `download_url` 字段中给出的 URL（同样在第一步中生成）下载合规结果。此 URL 已包含签名的身份验证令牌，这意味着你无需再次传递应用访问令牌来进行身份验证。
+在收到任务完成状态后，你可以从 `download&#95;url` 字段中提供的 URL（同样在第一步中生成）下载合规结果。该 URL 已使用身份验证令牌签名，这意味着你无需再通过传递应用访问令牌来进行身份验证。
 
 ```
 curl --request GET \
 'https://storage.googleapis.com/twttr-tweet-compliance/1423047488781488129/delivery/1202726487847104512_1423047488781488129?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210804%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210804T222534Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=8ed0fe9e9748f6be5e7e052f6635c8b5cbe62fb2d3a165278b922b28a48fb79b02d74f0bd31b4fdb32532bc6746c6082aaff2154cdab4b59c4c6561ff2c840e5f32dd13c09ff5b52376dfac1b7f97807c72209d2844a6c078b71fddf22a5493f88118802e98a60e16ce5715fce0242baddd17d4598d31be59393e1dacd22fc1eeb532572cc4e784402c5fbeb84a22dd308922e937a26fa99cb717bb26fb61b657403010121a996691814b7aeb00bc05ed25f15d394fd46899dd9390be6d5da44960e81d8018318c325c70b39d0a4fc9d65fea2b8b3355d4c7dd7c386eac1d9c09233462bde40fa3f4023d1cd6470b0346f9f36d74665dde3f716940312019703'
 ```
 
-结果将包含一组 JSON 对象（每行一个对象）。每个对象将包含一个帖子或用户的 id、该帖子或用户的创建日期（便于按日期定位帖子）、需要执行的操作、合规操作的原因以及该操作的日期：
+结果将包含一组 JSON 对象（每行一个对象）。每个对象将包含一个帖子或用户 id、该帖子或用户的创建日期（便于按日期定位帖子）、需执行的操作、执行该合规操作的原因以及该操作的日期：
 
 ```
 {"id":"1265324480517361664","action":"delete","created_at":"2019-10-29T17:02:47.000Z","redacted_at":"2020-07-29T17:02:47.000Z","reason":"deleted"}
@@ -142,6 +142,6 @@ curl --request GET \
 {"id":"1265324480517361669","action":"delete","created_at":"2019-10-29T17:02:47.000Z","redacted_at":"2020-07-29T17:02:47.000Z","reason":"suspended"}
 ```
 
-你的代码可以解析每一行 JSON 数据，定位帖子或用户 ID，并从数据集中删除具有这些 ID 的帖子和用户，以保持合规。对于你上传的某个 ID，如果没有对应的 JSON 对象，你可以认为该 ID 已合规。
+你的代码可以解析每一行 JSON，以查找帖子或用户的 ID，并从数据集中删除具有这些 ID 的帖子和用户，以保持合规性。如果对于你上传的某个 ID 没有对应的 JSON 对象，则可以认为该 ID 是合规的。
 
 **注意**：并非所有合规事件都会包含 redacted&#95;at 字段。

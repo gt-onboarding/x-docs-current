@@ -1,32 +1,32 @@
 ---
 title: OAuth 2.0
 sidebarTitle: 개요
-keywords: ["OAuth 2.0", "OAuth 2.0 인증", "OAuth 2.0 PKCE", "Bearer Token", "앱 전용 인증", "OAuth 2.0 플로우", "Authorization Code"]
+keywords: ["OAuth 2.0", "OAuth 2.0 인증", "OAuth 2.0 PKCE", "Bearer Token", "앱 전용 인증", "OAuth 2.0 플로우", "인가 코드"]
 ---
 
 <div id="bearer-token-also-known-as-app-only">
-  ### Bearer Token (앱 전용 인증이라고도 함)
+  ### Bearer Token (app-only라고도 함)
 </div>
 
-OAuth 2.0 Bearer Token은 [developer App](/ko/resources/fundamentals/developer-apps)을(를) 대신해 요청을 인증합니다. 이 방식은 앱에만 특화된 것이므로 사용자 계정은 전혀 관여하지 않습니다. 일반적으로 공개 정보에 대해 읽기 전용 액세스만 필요한 개발자를 위해 사용됩니다. 
+OAuth 2.0 Bearer Token은 [개발자 앱](/ko/resources/fundamentals/developer-apps)을 대신해 요청을 인증합니다. 이 방식은 앱에만 적용되므로 사용자가 전혀 관여하지 않습니다. 주로 공개 정보에 대한 읽기 전용 액세스만 필요한 개발자가 사용합니다. 
 
-이 인증 방식에서는 요청을 보낼 때 Bearer Token을 함께 포함해야 하며, 이 토큰은 개발자 앱의 키와 토큰(Keys and tokens) 섹션에서 생성할 수 있습니다. 다음은 가짜 Bearer Token을 사용한 요청 예시입니다:
+이 인증 방식에서는 요청에 Bearer Token을 함께 전달해야 하며, 이는 개발자 앱의 키와 토큰(Keys and tokens) 섹션에서 생성할 수 있습니다. 다음은 가짜 Bearer Token을 사용한 요청 예시입니다:
 
 ```json
   curl "https://api.x.com/2/tweets?ids=1261326399320715264,1278347468690915330" \
   -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAAFnz2wAAAAAAxTmQbp%2BIHDtAhTBbyNJon%2BA72K4%3DeIaigY0QBrv6Rp8KZQQLOTpo9ubw5Jt?WRE8avbi"
 ```
 
-앱 전용 인증을 사용하는 API 호출은 App 수준에서 엔드포인트별로 [rate limit](/ko/resources/fundamentals/rate-limits)의 적용을 받습니다.
+앱 전용 인증(app-only authentication)을 사용하는 API 호출은 App 단위로, 엔드포인트별로 [요청 한도](/ko/resources/fundamentals/rate-limits)가 적용됩니다.
 
-이 방법을 사용하려면 Bearer Token이 필요하며, [POST oauth2/token](/ko/resources/fundamentals/authentication/api-reference#post-oauth2-token) 엔드포인트에 API Key와 Secret을 전달해 생성하거나, [developer portal](/ko/resources/fundamentals/developer-portal) 내 App 설정의 &quot;keys and tokens&quot; 섹션에서 생성할 수 있습니다.
+이 방법을 사용하려면 Bearer Token이 필요하며, 이는 API Key와 Secret을 [POST oauth2/token](/ko/resources/fundamentals/authentication/api-reference#post-oauth2-token) 엔드포인트로 전달해 생성하거나, [developer portal](/ko/resources/fundamentals/developer-portal)의 App 설정에 있는 &quot;keys and tokens&quot; 섹션에서 생성할 수 있습니다.
 
-Bearer Token을 해지(revoke)하려면 [POST oauth2/invalidate&#95;token](/ko/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) 엔드포인트를 사용하거나, App 설정의 &quot;keys and tokens&quot; 섹션에서 해당 Bearer Token 옆에 있는 &quot;revoke&quot;를 클릭하면 됩니다.
+Bearer Token을 무효화(revoke)하려면 [POST oauth2/invalidate&#95;token](/ko/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) 엔드포인트를 사용하거나, [developer portal](/ko/resources/fundamentals/developer-portal)의 App 설정에 있는 &quot;keys and tokens&quot; 섹션에서 해당 Bearer Token 옆의 &quot;revoke&quot;를 클릭하면 됩니다.
 
 <div id="oauth-20-authorization-code-flow-with-pkce">
   ### OAuth 2.0 Authorization Code Flow with PKCE
 </div>
 
-OAuth 2.0 Authorization Code Flow with PKCE를 사용하면 다른 사용자를 대신해 인증을 수행하면서 애플리케이션의 scope를 보다 세밀하게 제어할 수 있고, 여러 기기에 걸친 인가 플로우를 개선할 수 있습니다. 다시 말해, X를 사용하는 사람들을 위한 애플리케이션을 구축하는 개발자는 자신의 앱이 사용자에게 요청하는 정보에 대해 더 많은 제어권을 갖게 되며, 최종 사용자에게 꼭 필요한 데이터와 정보만 요청하면 됩니다.
+OAuth 2.0 Authorization Code Flow with PKCE를 사용하면 다른 사용자를 대신해 인증할 수 있으며, 애플리케이션의 scope를 더 세밀하게 제어할 수 있고 여러 기기에 걸친 인가 플로우를 개선할 수 있습니다. 즉, X에서 사람들을 위한 애플리케이션을 개발하는 경우, 앱이 사용자에게 요청하는 정보 범위를 더 잘 제어할 수 있으므로, 최종 사용자에게 실제로 필요한 데이터와 정보만 요청하면 됩니다.
 
-이 최신 인가 프로토콜을 사용하면, 앱 인가를 위한 동의 절차를 더 간소화된 방식으로 최종 사용자에게 제공할 수 있으며, 그 과정에서 해당 사용자에게 요청한 특정 scope만 표시됩니다. 이는 데이터 처리 부담을 줄여 줄 뿐만 아니라 최종 사용자의 신뢰 향상으로도 이어질 수 있습니다.
+이 최신 인가 프로토콜을 사용하면 최종 사용자에게 앱 인가를 위한 보다 간소화된 동의 플로우를 제공할 수 있으며, 여기에는 요청한 특정 scope만 표시됩니다. 이는 처리해야 할 데이터 부담을 줄여 줄 뿐만 아니라, 최종 사용자의 신뢰를 높이는 데에도 도움이 될 수 있습니다.

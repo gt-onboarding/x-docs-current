@@ -1,56 +1,56 @@
 ---
 title: 概要
 sidebarTitle: 概要
-keywords: ["ポスト件数", "ポスト件数", "件数エンドポイント", "ボリューム件数", "検索ボリューム", "ポストボリューム", "件数 API"]
+keywords: ["ポスト件数", "ポスト件数", "count エンドポイント", "ボリューム件数", "検索ボリューム", "ポストボリューム", "count API"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
-v2 Post counts エンドポイントを使用すると、開発者は特定のクエリに対するデータ量を把握して取得できます。これは、次のようなさまざまな理由で有用です。
+v2 Post counts エンドポイントを使用すると、開発者は特定のクエリに対するデータ量を把握して取得できます。これは、次のようなさまざまな目的で有用です。
 
-* キーワードに対するポスト数を把握し、トレンドラインなどの可視化を作成する。
+* キーワードに対するポスト数を把握し、トレンドラインなどの可視化を構築する。
 
-* イベントや会話が発生した期間を把握し、クエリで関連するデータを確実に取得できるようにする。
+* クエリが関連するデータを確実に取得できるように、イベントや会話が発生した期間を把握する。
 
-* 検索クエリが返すポスト数を把握し、recent search や full-archive search エンドポイントを使用する前に、クエリを調整する。
-  **注意:** counts は、search エンドポイントから返される結果と常に一致するわけではありません。これは、search エンドポイントは counts エンドポイントでは実行されない追加のコンプライアンス処理を経るためです。
+* 最近の検索または全アーカイブ検索エンドポイントを使用する前に、検索クエリでどれくらいのポストが返されるかを把握し、クエリを調整する。
+  **注意:** counts エンドポイントには適用されない追加のコンプライアンス処理が検索エンドポイントでは行われるため、counts の値が検索エンドポイントから返される結果と常に一致するとは限りません。
 
-* 実際に生データを取得し、月間の[ポスト上限](/ja/x-api/fundamentals/post-cap)にポストをカウントして消費することなく、あるトピックをめぐる会話の規模を把握する。
+* 実際に生データを取得せずに、特定のトピックに関する会話の規模を把握し、月間の [Post cap](/ja/x-api/fundamentals/post-cap) に対するポスト数を見積もる。
 
-クエリを作成する際には、[アクセスレベル](/ja/x-api/getting-started/about-x-api)に応じて、クエリ長および使用できるオペレーターが制限されます。
+クエリを作成する際には、[アクセスレベル](/ja/x-api/getting-started/about-x-api) に基づき、クエリ長と利用可能なオペレーターが制限されます。
 
-* Pro アクセスのあるプロジェクトを使用している場合、利用可能なすべてのオペレーターを使用でき、最大 1024 文字までのクエリを使用できます。
+* Pro アクセスのあるプロジェクトを使用している場合は、利用可能なすべてのオペレーターを使用でき、最大 1024 文字のクエリを使用できます。
 
-* Enterprise アクセスのあるプロジェクトを使用している場合、利用可能なすべてのオペレーターを使用でき、最大 4096 文字までのクエリを使用できます。
+* Enterprise アクセスのあるプロジェクトを使用している場合は、利用可能なすべてのオペレーターを使用でき、最大 4096 文字のクエリを使用できます。
 
-また、必要な Post counts の時間粒度（day、hour、minute のいずれか）および対象期間（start&#95;time と end&#95;time パラメータを使用）を指定することもできます。このエンドポイントが使用するデフォルトの時間粒度は hour です。そのため、granularity パラメータを指定しない場合、このエンドポイントは直近 7 日間について、1 時間ごとの Post counts を返します。
+必要な Post counts を取得する期間に加えて、粒度（day、hour、minute のいずれか）も指定できます（`start_time` と `end_time` パラメーターを使用）。このエンドポイントのデフォルトの時間粒度は hour であるため、`granularity` パラメーターを指定しない場合、直近 7 日間について 1 時間ごとの Post counts が返されます。
 
 <Note>
-  **アカウント設定**
+  **アカウントの設定**
 
-  これらのエンドポイントにアクセスするには、以下が必要です。
+  これらのエンドポイントにアクセスするには、次が必要です。
 
-  * 承認済みの[開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)
-  * [プロジェクト](/ja/resources/fundamentals/projects)内にある[開発者アプリ](/ja/resources/fundamentals/developer-apps)のキーとトークンを使用して認証すること
+  * 承認済みの [開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * [プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用して認証すること。
 
-  X API v2 エンドポイントへのアクセス方法については、[はじめにガイド](/ja/x-api/getting-started/getting-access)をご覧ください。
+  X API v2 エンドポイントへのアクセスの取得については、[はじめにガイド](/ja/x-api/getting-started/getting-access)をご覧ください。
 </Note>
 
 <div id="recent-post-counts">
   ### 直近のポスト件数
 </div>
 
-Recent Post counts エンドポイントを使用すると、過去 7 日間における、クエリに一致するポストの件数をプログラムによって取得できます。このエンドポイントは、[プロジェクト](/ja/resources/fundamentals/projects) 内の [App](/ja/resources/fundamentals/developer-apps) に紐づいたキーとトークンを利用しているすべてのユーザーが使用でき、認証には [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を使用します。
+直近のポスト件数エンドポイントを使用すると、過去 7 日間におけるクエリに一致するポスト件数をプログラムから取得できます。このエンドポイントは、[プロジェクト](/ja/resources/fundamentals/projects) 内の [App](/ja/resources/fundamentals/developer-apps) に関連付けられたキーとトークンを使用するすべてのユーザーが利用でき、認証には [OAuth 2.0 アプリ専用フロー](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を使用します。
 
 <div id="full-archive-post-counts">
   ### 全アーカイブのポスト件数
 </div>
 
-full-archive Post counts エンドポイントを使用すると、公開ポストの全アーカイブを対象に、クエリに一致するポスト数をプログラムで取得できます。現在、このエンドポイントを使用できるのは、[Academic Research または Enterprise アクセス](/ja/x-api/getting-started/about-x-api) の承認を受けており、認証に [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を利用している方のみです。
+full-archive Post counts エンドポイントを使用すると、公開ポストの全アーカイブを対象に、クエリに一致するポストの数をプログラムから取得できます。現在、このエンドポイントを利用できるのは、[Academic Research または Enterprise アクセス](/ja/x-api/getting-started/about-x-api) の承認を受けており、認証に [OAuth 2.0 アプリ専用フロー](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を使用している方のみです。
 
-一例として、full-archive Post counts エンドポイントを使用すると、ハッシュタグ #SOSHurricaneHarvey について、2017 年 8 月から 9 月の期間における 1 日あたりのポスト数を確認できます。
+利用例として、full-archive Post counts エンドポイントを使い、2017 年 8 月から 9 月の期間について、ハッシュタグ #SOSHurricaneHarvey が付いたポスト数を 1 日ごとに取得することができます。
 
-**注意:** counts エンドポイントは、1 レスポンスあたり 31 日分でページネーションされます。たとえば、`day` の粒度を指定した場合、1 ページにつき 31 日分、1 日あたりの結果件数が返されます。`hour` の粒度を指定した場合、1 ページにつき 744 時間分（31 日 × 24 時間）、1 時間あたりの結果件数が返されます。粒度および期間を指定しない場合、このエンドポイントは、直近 30 日間について、クエリごとの 1 時間あたりのポスト件数を返します。
+**注意:** counts エンドポイントは、1 レスポンスあたり 31 日分ずつページネーションされます。たとえば、granularity を day に設定すると、1 ページあたり 31 日分について、日単位の結果件数が返されます。granularity を hour に設定すると、1 ページあたり 744 時間分（31 日 × 24 時間）について、時間単位の結果件数が返されます。granularity と期間を指定しない場合、このエンドポイントは、直近 30 日間について、クエリごとのポスト件数を 1 時間ごとに返します。
 
 <div className="flex space-x-4">
   <Button href="/ja/x-api/posts/search/quickstart/full-archive-search">

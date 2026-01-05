@@ -1,7 +1,7 @@
 ---
-title: X API v2를 사용해 사용자의 게시물과 멘션 탐색
-description: "user Post timeline 및 user mention timeline 엔드포인트를 사용하면 개발자는 사용자가 작성한 공개 게시물과 해당 사용자를 언급한 공개 게시물을 조회할 수 있습니다."
-sidebarTitle: 사용자의 게시물 탐색
+title: X API v2를 사용해 사용자의 게시물과 멘션 살펴보기
+description: "user Post timeline 및 user mention timeline 엔드포인트를 사용하면 개발자는 특정 사용자가 작성한 공개 게시물과 해당 사용자가 언급된 공개 게시물을 조회할 수 있습니다."
+sidebarTitle: 사용자의 게시물 살펴보기
 mode: wide
 keywords: ["사용자 타임라인", "사용자 멘션", "트윗 타임라인", "멘션 타임라인", "사용자 게시물", "튜토리얼", "API 튜토리얼", "사용자 트윗"]
 ---
@@ -10,70 +10,70 @@ keywords: ["사용자 타임라인", "사용자 멘션", "트윗 타임라인", 
   ## 소개
 </div>
 
-[최근 검색 endpoint](/ko/x-api/posts/search/introduction)는 지난 7일 이내에 게시된 게시물만 가져올 수 있지만, 사용자 게시물 타임라인 및 사용자 멘션 타임라인 endpoint는 승인된 사용자(사용자 ID 사용)의 지난 7일보다 더 이전에 작성된 게시물과 멘션까지 조회할 수 있습니다. 개발자는 이 endpoint를 사용하여 사용자의 타임라인이나 멘션에 있는 게시물의 토픽, 엔터티, 감성을 분석할 수 있습니다. 이 튜토리얼에서는 사용자 트윗 타임라인 endpoint와 사용자 멘션 타임라인 endpoint를 사용하여 특정 사용자의 게시물과 멘션을 탐색하는 방법을 설명합니다.
+[최근 검색 엔드포인트](/ko/x-api/posts/search/introduction)는 지난 7일 이내에 게시된 게시물만 가져올 수 있지만, 사용자 게시물 타임라인 엔드포인트와 사용자 멘션 타임라인 엔드포인트를 사용하면 user ID를 이용해 승인된 사용자의 지난 7일 이전 게시물과 멘션도 조회할 수 있습니다. 개발자는 이러한 엔드포인트를 사용하여 사용자의 타임라인 또는 멘션에 있는 게시물의 주제, 개체, 감성(sentiment)을 분석할 수 있습니다. 이 튜토리얼에서는 사용자 Tweet 타임라인 엔드포인트와 사용자 멘션 타임라인 엔드포인트를 사용해 특정 사용자의 게시물과 멘션을 탐색하는 방법을 설명합니다.
  
 
 <div id="prerequisites">
-  ## 사전 준비 사항
+  ## 필수 조건
 </div>
 
-* user Tweet timeline 및 user mention timeline 엔드포인트를 사용하려면 유효한 개발자 계정이 있어야 합니다. 
-* 또한 [프로젝트](/ko/resources/fundamentals/projects)를 하나 생성해 두어야 합니다.
-* [가입](https://developer.x.com/en/portal/petition/essential/basic-info)을 통해 개발자 계정에 가입하고, [새 developer portal 환경](https://developer.x.com/en/portal/opt-in.html)을 활성화해야 합니다. 
-* [developer portal](/ko/resources/fundamentals/developer-portal)에서 생성된 [프로젝트](/ko/resources/fundamentals/projects)에 연결된 개발자 앱의 활성화된 키와 토큰이 있어야 접근할 수 있습니다.
-* [X developer portal](/ko/resources/fundamentals/developer-portal)에 있는 앱에서 발급받은 Bearer Token이 필요합니다.
-* 승인된 개발자 계정이 없다면 [신청](https://developer.x.com/en/apply-for-access)하여 발급받을 수 있습니다.
+* 사용자 트윗 타임라인과 사용자 멘션 타임라인 엔드포인트를 사용하려면 유효한 개발자 계정이 필요합니다. 
+* [프로젝트](/ko/resources/fundamentals/projects)가 생성되어 있어야 합니다.
+* [개발자 계정에 가입](https://developer.x.com/en/portal/petition/essential/basic-info)하고 [새로운 개발자 포털 경험](https://developer.x.com/en/portal/opt-in.html)을 활성화해야 합니다. 
+* [개발자 포털](/ko/resources/fundamentals/developer-portal)에서 생성된 [프로젝트](/ko/resources/fundamentals/projects)에 연결된 개발자 앱의 활성화된 키와 토큰이 있어야 합니다.
+* [X 개발자 포털](/ko/resources/fundamentals/developer-portal)에 있는 앱에서 발급된 Bearer Token이 필요합니다.
+* 승인된 개발자 계정이 없다면 [여기에서 신청할 수 있습니다](https://developer.x.com/en/apply-for-access).
 
 <div id="approved-developer-account">
   ## 승인된 개발자 계정
 </div>
 
-아직 없다면 [여기에서 신청](https://developer.x.com/en/apply-for-access)할 수 있습니다.
+아직 개발자 계정이 없다면, [개발자 계정을 신청하세요](https://developer.x.com/en/apply-for-access).
 
 <div id="create-a-project-and-connect-an-app">
-  ## 프로젝트 생성 및 앱 연결
+  ## 프로젝트를 생성하고 앱을 연결하기
 </div>
 
-[developer portal](https://developer.x.com/en/portal/dashboard)에서 새 프로젝트 만들기를 클릭합니다.
+[developer portal](https://developer.x.com/en/portal/dashboard)에서 **Create a new Project**를 클릭해 새 프로젝트를 생성하세요.
 
 <Frame>
   <img src="/images/projects.png.twimg.1920.png" />
 </Frame>
 
-프로젝트 이름을 지정하고 적절한 사용 사례(use case)를 선택한 다음 프로젝트 설명을 입력합니다. 이후에는 새 앱을 생성하거나 기존 [App](/ko/resources/fundamentals/developer-apps)과 연결할 수 있습니다(App은 X API에 HTTP 요청을 보내는 데 필요한 API 키를 담고 있는 컨테이너입니다).
+프로젝트 이름을 지정하고, 적절한 사용 사례(use case)를 선택한 뒤 프로젝트 설명을 입력합니다. 다음으로 새 앱을 생성하거나, 기존 [App](/ko/resources/fundamentals/developer-apps)을 연결할 수 있습니다(앱은 X API에 HTTP 요청을 보내는 데 필요한 API 키를 담고 있는 컨테이너입니다).
 
 <Frame>
   <img src="/images/add-your-app.png.twimg.1920.png" />
 </Frame>
 
-‘create a new App instead’를 클릭하고 앱 이름을 지정해 새 앱을 생성합니다.
+**Create a new App instead**를 클릭한 뒤 새 앱을 만들기 위해 앱 이름을 지정합니다.
 
 <Frame>
   <img src="/images/last-step-name-your-app.png.twimg.1920.png" />
 </Frame>
 
-‘complete’를 클릭하면 새 X API v2 엔드포인트에 연결하는 데 사용할 수 있는 API 키와 Bearer Token을 받게 됩니다.
+**Complete**를 클릭하면 API 키와 Bearer Token이 발급되며, 이를 사용해 X API v2의 새 엔드포인트에 연결할 수 있습니다.
 
 <Frame>
   <img src="/images/here-are-your-keys.png.twimg.1920.png" />
 </Frame>
 
-API key, API secret key 및 Bearer Token 옆의 (+)를 클릭하고 이 값을 로컬 머신의 안전한 위치에 복사합니다. 다음 단계에서 API 호출을 수행할 때 이 값이 필요합니다.
+API key, API secret key 및 Bearer Token 옆의 (+)를 클릭하고, 해당 값을 로컬 머신의 안전한 위치에 복사해 두세요. 다음 단계에서 API 호출을 할 때 이 값들이 필요합니다.
 
 참고: 위 스크린샷의 키 값은 숨겨져 있지만, 본인의 developer portal에서는 API key, API secret key 및 Bearer Token의 실제 값을 확인할 수 있습니다.
  
 
 <div id="how-to-get-the-user-id-for-a-user-to-use-in-the-user-tweet-timeline-and-user-mention-timeline-endpoints">
-  ## 사용자 트윗 타임라인 및 사용자 멘션 타임라인 엔드포인트에서 사용할 사용자 ID를 얻는 방법
+  ## user Tweet timeline 및 user mention timeline 엔드포인트에서 사용할 사용자 ID를 가져오는 방법
 </div>
 
-사용자 트윗 타임라인 및 사용자 멘션 타임라인 엔드포인트를 사용하면 사용자 ID를 통해 게시물을 가져올 수 있습니다. 사용자 이름으로부터 사용자 ID를 얻으려면 새로운 [user lookup endpoint v2](/ko/x-api/users/lookup/quickstart/user-lookup)를 사용할 수 있습니다. USER&#95;NAME은 원하는 사용자 이름으로, XXXX는 위에서 발급받은 Bearer Token으로 바꾸세요.
+user Tweet timeline 및 user mention timeline 엔드포인트를 사용하면 user ID로 게시물을 조회할 수 있습니다. username에서 user ID를 가져오려면 새로운 [user lookup endpoint v2](/ko/x-api/users/lookup/quickstart/user-lookup)를 사용할 수 있습니다. USER&#95;NAME을 원하는 username으로 바꾸고, XXXX는 위에서 발급받은 자신의 Bearer Token으로 바꾸십시오.
 
 ```bash
   curl --request GET 'https://api.x.com/2/users/by/username/USER_NAME --header 'Authorization: Bearer XXXXXX'
 ```
 
-응답에 다음과 같이 사용자 id가 표시됩니다.
+응답에 user id가 아래와 같이 표시됩니다.
 
 ```json
 {
@@ -89,13 +89,13 @@ API key, API secret key 및 Bearer Token 옆의 (+)를 클릭하고 이 값을 �
   ## 사용자 트윗 타임라인 및 사용자 멘션 타임라인 엔드포인트에 연결하기
 </div>
 
-특정 사용자의 트윗 타임라인을 가져오려면 터미널에서 다음 cURL 명령을 실행하세요(실행 전에 USER&#95;ID를 원하는 사용자의 id로, XXXX를 위에서 발급받은 Bearer Token으로 바꿔야 합니다).
+특정 사용자의 트윗 타임라인을 가져오려면 터미널에서 다음 curl 명령을 실행합니다(이때 USER&#95;ID는 원하는 사용자 ID로, XXXX는 위에서 발급받은 본인의 Bearer Token으로 바꾸어 사용합니다).
 
 ```bash
 curl --request GET 'https://api.x.com/2/users/USER_ID/tweets' --header 'Authorization: Bearer XXXXXX'
 ```
 
-이러한 요청에 대한 JSON 응답에는 기본적으로 해당 게시물의 `id`와 `text`가 포함되어 있는 것을 확인할 수 있습니다(아래 예시 참조).
+이 요청에 대한 JSON 응답에는 기본적으로 해당 게시물의 id와 텍스트가 포함되어 있음을 확인할 수 있습니다(예시는 아래를 참고하세요).
 
 ```yaml
 {
@@ -104,23 +104,23 @@ curl --request GET 'https://api.x.com/2/users/USER_ID/tweets' --header 'Authoriz
 }
 ```
 
-응답의 일부로 추가적인 필드(예: 사용자 정보, context annotations 등과 같은 추가 Tweet 필드)를 반환받고 싶다면, 응답에서 해당 필드를 명시적으로 지정해야 합니다. 이에 대한 자세한 방법은 [fields 및 expansions 사용 가이드](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)를 참고하세요.
+응답에 추가 필드(예: 사용자 정보, context annotations 등의 추가 트윗 필드)를 포함해 받으려면, 요청에서 해당 필드를 명시적으로 지정해야 합니다. 방법은 [fields 및 expansions 사용 가이드](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에서 확인할 수 있습니다.
 
-원하는 프로그래밍 언어를 사용하여 이러한 게시물을 가져올 수도 있습니다. user Tweet timeline 및 user mention timeline 엔드포인트에 대한 Python, Node (JavaScript), Java, Ruby 샘플 코드는 [GitHub 저장소](https://github.com/xdevplatform/Twitter-API-v2-sample-code)에서 확인할 수 있습니다.
+원하는 프로그래밍 언어를 사용해 이러한 게시물을 가져올 수도 있습니다. 사용자 트윗 타임라인 및 사용자 멘션 타임라인 엔드포인트에 대한 Python, Node (JavaScript), Java, Ruby 샘플 코드는 당사의 [GitHub 저장소](https://github.com/xdevplatform/Twitter-API-v2-sample-code)에서 확인해 보세요.
 
 <div id="exploring-the-users-posts">
-  ## 특정 사용자의 게시물 탐색
+  ## 사용자의 게시물 살펴보기
 </div>
 
-user Tweet timeline 엔드포인트와 user mention timeline 엔드포인트를 사용해 게시물을 가져오는 방법을 알게 되면, 해당 사용자의 게시물을 탐색해 볼 수 있습니다. 예를 들어, 사용자의 멘션에 자주 등장하는 공통 개체명(named entities)을 식별하고 싶다면, 다음과 같이 할 수 있습니다:
+user Tweet timeline 및 user mention timeline 엔드포인트를 사용해 게시물을 가져오는 방법을 알게 되면, 해당 사용자의 게시물을 본격적으로 살펴볼 수 있습니다. 예를 들어, 사용자의 멘션에 포함된 공통 명명 개체를 식별하려는 경우 다음과 같이 할 수 있습니다:
 
-API 요청에서 Tweet 응답에 `context_annotations` 객체가 반환되도록 지정합니다:
+API 요청에서 Tweet 응답에 `context_annotations` 객체가 포함되어 반환되도록 지정합니다:
 
 ```bash
 curl --request GET 'https://api.x.com/2/users/USER_ID/mentions?tweet.fields=context_annotations' --header 'Authorization: Bearer XXXXXX'
 ```
 
-응답에서 멘션에 명명된 개체가 포함되어 있는지 확인할 수 있습니다. 예시는 다음과 같습니다:
+응답에서 멘션에 어떤 명명된 개체가 포함되어 있는지 확인할 수 있습니다. 예시는 다음과 같습니다:
 
 ```json
 {
@@ -136,17 +136,17 @@ curl --request GET 'https://api.x.com/2/users/USER_ID/mentions?tweet.fields=cont
 }
 ```
 
-멘션에서 어떤 인기 개체가 나타나는지 확인하려면, 멘션에 포함된 각 트윗을 파싱하여 인기 개체별 개수를 집계할 수 있습니다.
+멘션에서 어떤 인기 있는 엔터티가 나타나는지 확인하고 싶다면, 멘션에 포함된 각 트윗을 파싱해 인기 있는 엔터티의 개수를 집계해 둘 수 있습니다.
 
-타임라인에서 미디어를 포함하는 모든 게시물의 미리보기 이미지 URL을 살펴보고 싶다면, 다음과 같이 할 수 있습니다.
+타임라인에서 미디어를 포함하는 모든 게시물에 대해 미리보기 이미지 URL을 살펴보고 싶다면, 다음과 같이 할 수 있습니다.
 
-API 요청에서 `tweet.media` 필드에서 `preview_image_url`을 요청하고, `expansions`에 `attachments.media_keys`를 지정합니다.
+API 요청에서 tweet.media 필드에 preview&#95;image&#95;url을 포함하도록 지정하고, attachments.media&#95;keys expansions를 요청합니다.
 
 ```bash
 curl --request GET 'https://api.x.com/2/users/2244994945/mentions?max_results=100&media.fields=preview_image_url&expansions=attachments.media_keys' --header 'Authorization: Bearer XXXXXX'
 ```
 
-응답에서 아래와 같이 includes 객체 내의 preview&#95;image&#95;url을 확인할 수 있습니다.
+응답에서 아래 예시와 같이 includes 객체의 preview&#95;image&#95;url 필드를 확인할 수 있습니다.
 
 ```json
 {
@@ -162,13 +162,13 @@ curl --request GET 'https://api.x.com/2/users/2244994945/mentions?max_results=10
 }
 ```
 
-사용자의 게시물을 탐색하는 방법을 이해했다면, 다른 API 및 서비스를 사용해 게시물을 보다 다양하게 활용할 수 있습니다. 아래 리소스는 사용자 트윗 타임라인 및 사용자 멘션 타임라인 엔드포인트를 사용할 때 참고하면 좋습니다.
+사용자의 게시물을 탐색하는 방법을 이해했다면, 다른 API 및 서비스를 사용해 게시물을 더 다양하게 활용할 수도 있습니다. 아래는 사용자 트윗 타임라인 및 사용자 멘션 타임라인 엔드포인트를 사용할 때 참고하면 좋은 리소스입니다.
 
 <div id="resources">
   ## 리소스
 </div>
 
-* [user Tweet timeline 및 user mention timeline 엔드포인트](/ko/x-api/posts/timelines/introduction)에 대해 자세히 알아보세요.
-* 제공되는 기능을 더 알아보려면 [user Tweet timeline 엔드포인트 API 참고 문서](/ko/x-api/posts/user-posts-timeline-by-user-id)를 확인하세요.
-* 제공되는 기능을 더 알아보려면 [user mention timeline 엔드포인트 API 참고 문서](/ko/x-api/posts/user-mention-timeline-by-user-id)를 확인하세요.
-* 다른 [튜토리얼](/ko/tutorials)을 읽고 영감을 얻어 보세요.
+* [사용자 게시물 타임라인 및 사용자 언급 타임라인 엔드포인트](/ko/x-api/posts/timelines/introduction)에 대해 자세히 알아보세요.
+* 제공되는 기능을 확인하려면 [사용자 게시물 타임라인 엔드포인트 API 레퍼런스](/ko/x-api/posts/user-posts-timeline-by-user-id)를 참고하세요.
+* 제공되는 기능을 확인하려면 [사용자 언급 타임라인 엔드포인트 API 레퍼런스](/ko/x-api/posts/user-mention-timeline-by-user-id)를 참고하세요.
+* 다른 [튜토리얼](/ko/tutorials)을 읽어 보며 영감을 얻어 보세요.

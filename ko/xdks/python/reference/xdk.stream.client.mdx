@@ -3,9 +3,9 @@ title: "StreamClient"
 sidebarTitle: "StreamClient"
 ---
 
-이 모듈은 X API의 스트림 엔드포인트와 상호작용하기 위한 클라이언트를 제공합니다.
-실시간 스트리밍 작업은 데이터가 도착하는 즉시 이를 내보내는 제너레이터를 반환합니다.
-스트리밍 연결은 안정적인 처리를 위해 지수 백오프 재시도 로직으로 자동 관리됩니다.
+이 모듈은 X API의 스트림 엔드포인트와 상호 작용하기 위한 클라이언트를 제공합니다.
+실시간 스트리밍 작업은 데이터가 도착하는 대로 데이터를 내보내는 제너레이터를 반환합니다.
+스트리밍 연결은 안정적인 처리를 위해 지수적 백오프를 사용하는 재시도 로직으로 자동 관리됩니다.
 
 <div id="streamclient">
   ## StreamClient
@@ -15,7 +15,7 @@ sidebarTitle: "StreamClient"
 
 <Badge color="gray">기반 클래스: object</Badge>
 
-스트림 작업을 처리하는 스트리밍 Client
+스트림 작업용 Streaming Client
 
 <div id="constructors">
   ## 생성자
@@ -33,7 +33,7 @@ sidebarTitle: "StreamClient"
   ### `get_rule_counts`
 </div>
 
-스트림 규칙 개수 조회
+스트림 규칙 수 가져오기
 필터링 스트림의 활성 규칙 집합에 포함된 규칙 수를 조회합니다.
 
 #### 매개변수
@@ -42,9 +42,7 @@ sidebarTitle: "StreamClient"
 표시할 RulesCount 필드의 쉼표로 구분된 목록입니다.
 </ParamField>
 
-<div id="returns">
-  #### 반환 값
-</div>
+#### 반환
 
 `GetRuleCountsResponse` - 응답 데이터
 
@@ -52,13 +50,15 @@ sidebarTitle: "StreamClient"
   ### `get_rules`
 </div>
 
-스트림 규칙 가져오기
-필터링 스트림에 설정된 활성 규칙 세트 전체 또는 일부를 조회합니다.
+스트림 규칙을 가져옵니다.
+filtered stream에 대해 활성 규칙 세트 또는 규칙의 일부(하위 집합)를 가져옵니다.
 
-#### 매개변수
+<div id="parameters">
+  #### Parameters
+</div>
 
 <ParamField path="path.ids" type="List or None" default="None">
-쉼표로 구분된 규칙 ID 목록입니다.
+Rule ID를 콤마로 구분한 목록입니다.
 </ParamField>
 
 <ParamField path="path.max_results" type="int or None" default="None">
@@ -66,10 +66,12 @@ sidebarTitle: "StreamClient"
 </ParamField>
 
 <ParamField path="path.pagination_token" type="str or None" default="None">
-결과를 페이지네이션하기 위해, 이전 요청에서 반환된 `next_token` 값을 전달하면 이 값이 설정됩니다.
+이 값은 결과를 페이지네이션하기 위해 이전 요청에서 반환된 `next_token` 값을 전달하면 설정됩니다.
 </ParamField>
 
-#### 반환값
+<div id="returns">
+  #### 반환 값
+</div>
 
 `IteratorGetRulesResponse`
 
@@ -77,25 +79,25 @@ sidebarTitle: "StreamClient"
   ### `labels_compliance`
 </div>
 
-게시물 라벨 스트리밍
-게시물에 적용되는 모든 라벨링 이벤트를 스트림으로 제공합니다.
-이는 데이터가 생성되는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-반환되는 각 항목은 스트림에서의 단일 데이터 포인트를 나타냅니다.
+게시물 라벨 스트림 (스트리밍)
+게시물에 적용된 모든 라벨링 이벤트를 스트림으로 제공합니다.
+이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 반환하는 스트리밍 엔드포인트입니다.
+각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
 연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
-스트림이 끊기면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
+스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
 
 #### 매개변수
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청할 백필(backfill) 분(minute) 수입니다.
+요청된 백필(backfill) 시간의 분 단위 길이입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물 레이블이 제공될 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물 레이블이 제공되는 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물 레이블이 제공될 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물 레이블이 제공되는 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
@@ -106,41 +108,41 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물 레이블이 제공될 가장 늦은 UTC 타임�
   ### `likes_compliance`
 </div>
 
-Likes 컴플라이언스 데이터를 스트리밍합니다(스트리밍)
-사용자의 Likes와 관련된 모든 컴플라이언스 데이터를 스트리밍합니다.
-이 엔드포인트는 데이터가 사용 가능해지는 대로 실시간으로 제공하는 스트리밍 엔드포인트입니다.
-각 항목은 스트림에서 나온 개별 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 재시도 로직으로 자동으로 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 다시 연결합니다.
+좋아요 컴플라이언스 데이터 스트리밍 (Streaming)
+사용자 좋아요와 관련된 모든 컴플라이언스 데이터를 스트리밍합니다.
+이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전송하는 스트리밍 엔드포인트입니다.
+각 항목은 스트림에서 전달되는 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
+스트림 연결이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
 
 #### 매개변수
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필 분(minute) 수입니다.
+요청할 백필(backfill) 분(minute) 수입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. Likes Compliance 이벤트가 제공되기 시작하는 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. Likes 컴플라이언스 이벤트가 제공될 UTC 타임스탬프 중 가장 이른 시각입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. Likes Compliance 이벤트가 제공되는 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. Likes 컴플라이언스 이벤트가 제공될 UTC 타임스탬프 중 가장 늦은 시각입니다.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃, 콜백을 사용자 정의하기 위한 선택적 StreamConfig입니다.
+재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 옵션 StreamConfig입니다.
 </ParamField>
 
 <div id="likes_firehose">
   ### `likes_firehose`
 </div>
 
-모든 Like 스트림 (Streaming)
-실시간으로 모든 공개 Like를 스트리밍합니다.
-이 엔드포인트는 데이터가 생성되는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 항목은 스트림에서 나온 개별 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 다시 연결합니다.
+모든 좋아요 스트림 (Streaming)
+공개된 모든 좋아요(Like)를 실시간으로 스트리밍합니다.
+이는 데이터가 사용 가능해지는 즉시 실시간으로 전달하는 스트리밍 endpoint입니다.
+각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동으로 관리됩니다.
+스트림 연결이 끊어지면 SDK가 클라이언트 측 개입 없이 자동으로 재연결합니다.
 
 #### 매개변수
 
@@ -149,15 +151,15 @@ YYYY-MM-DDTHH:mm:ssZ. Likes Compliance 이벤트가 제공되는 가장 늦은 U
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청된 백필 시간(분)입니다.
+요청된 백필(backfill) 기간(분)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 좋아요가 제공될 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ 형식입니다. 좋아요(Like)가 제공될 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ 형식입니다. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
@@ -184,12 +186,12 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프�
   ### `likes_sample10`
 </div>
 
-샘플링된 Like 스트림 (스트리밍)
-공개 Like의 10% 샘플을 실시간으로 스트리밍합니다.
-이 엔드포인트는 데이터가 생성되는 대로 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 항목은 스트림에서 전달되는 단일 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 기반 재시도 로직으로 자동 관리됩니다.
-스트림 연결이 끊기면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
+표본 추출된 Like 스트림(스트리밍)
+실시간으로 공개 Like의 10% 표본을 스트리밍합니다.
+이 엔드포인트는 데이터를 사용할 수 있게 되는 즉시 실시간으로 스트리밍합니다.
+각 반환 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동으로 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
 
 <div id="parameters">
   #### Parameters
@@ -200,100 +202,100 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프�
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필(backfill) 분 수입니다.
+요청된 백필(backfill) 시간(분)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ 형식. Likes가 제공될 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 좋아요가 제공될 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
-표시할 LikeWithTweetAuthor 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-확장할 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-표시할 User 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-표시할 트윗 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
-</ParamField>
-
-<div id="posts">
-  ### `posts`
-</div>
-
-필터링된 게시물 스트리밍(Streaming)
-활성 규칙 집합과 일치하는 게시물을 실시간으로 스트리밍합니다.
-이 스트리밍 엔드포인트는 데이터가 사용 가능해지는 대로 실시간으로 데이터를 전송합니다.
-각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
-연결은 지수 백오프를 사용하는 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
-
-#### 매개변수
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청된 백필(backfill) 기간(분)입니다.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공되기 시작하는 가장 이른 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공되는 가장 늦은 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-표시할 트윗 필드를 쉼표로 구분한 목록입니다.
+표시할 LikeWithTweetAuthor 필드를 쉼표로 구분한 목록입니다.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
 확장할 필드를 쉼표로 구분한 목록입니다.
 </ParamField>
 
-<ParamField path="path.media_fields" type="List or None" default="None">
-표시할 미디어 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-표시할 투표 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
 <ParamField path="path.user_fields" type="List or None" default="None">
-표시할 사용자 필드를 쉼표로 구분한 목록입니다.
+표시할 User 필드를 쉼표로 구분한 목록입니다.
 </ParamField>
 
-<ParamField path="path.place_fields" type="List or None" default="None">
-표시할 장소 필드를 쉼표로 구분한 목록입니다.
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+표시할 트윗 필드를 쉼표로 구분한 목록입니다.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
+재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 옵션 StreamConfig입니다.
+</ParamField>
+
+<div id="posts">
+  ### `posts`
+</div>
+
+필터링된 게시물 스트리밍
+활성 규칙 집합과 일치하는 게시물을 실시간으로 스트리밍합니다.
+이 엔드포인트는 데이터가 이용 가능해지는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
+전달되는 각 항목은 스트림의 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
+
+#### 매개변수
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+요청할 백필 기간(분)입니다.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ 형식입니다. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ 형식입니다. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+표시할 트윗 필드를 쉼표로 구분된 리스트입니다.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+확장할 필드를 쉼표로 구분된 리스트입니다.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+표시할 미디어 필드를 쉼표로 구분된 리스트입니다.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+표시할 Poll 필드를 쉼표로 구분된 리스트입니다.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+표시할 사용자 필드를 쉼표로 구분된 리스트입니다.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+표시할 장소 필드를 쉼표로 구분된 리스트입니다.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
 </ParamField>
 
 <div id="posts_compliance">
   ### `posts_compliance`
 </div>
 
-게시물 컴플라이언스 데이터 스트리밍 (Streaming)
+게시물 컴플라이언스 데이터 스트리밍
 게시물과 관련된 모든 컴플라이언스 데이터를 스트리밍합니다.
-이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
-연결은 지수적 백오프 방식의 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 다시 연결합니다.
+이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전송하는 스트리밍 엔드포인트입니다.
+각 수신 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
 
 #### 매개변수
 
@@ -302,31 +304,31 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공되는 가장 늦은 UTC 타임스탬�
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필 기간(분)입니다.
+요청된 백필(backfill) 시간(분)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. Post 컴플라이언스 이벤트가 제공되기 시작하는 UTC 기준의 가장 이른 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물 컴플라이언스 이벤트가 제공될 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. Post 컴플라이언스 이벤트가 제공되는 UTC 기준의 가장 늦은 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물 컴플라이언스 이벤트가 제공될 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
+재시도 동작, 타임아웃, 콜백을 사용자 정의하기 위한 선택적 StreamConfig입니다.
 </ParamField>
 
 <div id="posts_firehose">
   ### `posts_firehose`
 </div>
 
-모든 게시물 스트리밍 (Streaming)
+모든 게시물 스트림 (Streaming)
 실시간으로 모든 공개 게시물을 스트리밍합니다.
-이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 전달 항목은 스트림에서 나온 하나의 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 방식의 재시도 로직으로 자동 관리됩니다.
-스트림 연결이 끊기면 SDK가 클라이언트의 개입 없이 자동으로 재연결합니다.
+이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 데이터를 반환하는 스트리밍 엔드포인트입니다.
+각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
+연결은 지수적 백오프 재시도 로직으로 자동으로 관리됩니다.
+스트림이 끊기면 SDK가 클라이언트 측 개입 없이 자동으로 다시 연결합니다.
 
 #### 매개변수
 
@@ -335,15 +337,15 @@ YYYY-MM-DDTHH:mm:ssZ. Post 컴플라이언스 이벤트가 제공되는 UTC 기�
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청된 백필(backfill) 기간(분)입니다.
+요청된 백필(backfill) 기간(분 단위)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물을 제공하기 시작할 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물을 제공하기 위한 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
@@ -371,36 +373,38 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물을 제공하기 위한 가장 늦은 UTC 타임�
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
+재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적인 StreamConfig입니다.
 </ParamField>
 
 <div id="posts_firehose_en">
   ### `posts_firehose_en`
 </div>
 
-영어 게시물 스트리밍
-실시간으로 모든 공개 영어 게시물을 스트리밍합니다.
+영어 게시물 스트리밍 (Streaming)
+실시간으로 공개된 모든 영어 게시물을 스트리밍합니다.
 이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 전달되는 항목은 스트림에서 단일 데이터 포인트를 나타냅니다.
+각각 전달되는 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
 연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
-스트림이 끊기면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
+스트림 연결이 끊어지면 SDK가 클라이언트의 별도 개입 없이 자동으로 재연결합니다.
 
-#### 매개변수
+<div id="parameters">
+  #### Parameters
+</div>
 
 <ParamField path="path.partition" type="int">
 파티션 번호입니다.
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필(backfill) 분 수입니다.
+요청한 백필(backfill) 기간(분)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
@@ -428,7 +432,7 @@ YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공될 가장 늦은 UTC 타임스�
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
+재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
 </ParamField>
 
 <div id="posts_firehose_ja">
@@ -437,9 +441,123 @@ YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공될 가장 늦은 UTC 타임스�
 
 일본어 게시물 스트림(Streaming)
 실시간으로 모든 공개 일본어 게시물을 스트리밍합니다.
-이 엔드포인트는 데이터가 사용 가능해지는 대로 실시간으로 전송하는 스트리밍 엔드포인트입니다.
+이 엔드포인트는 데이터가 생성되는 대로 실시간으로 전달하는 스트리밍 엔드포인트입니다.
 각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
-연결은 지수적 백오프 재시도 로직으로 자동 관리됩니다.
+연결은 지수 백오프(exponential backoff) 재시도 로직으로 자동 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 다시 연결합니다.
+
+#### 매개변수
+
+<ParamField path="path.partition" type="int">
+파티션 번호입니다.
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+요청하는 백필(backfill) 시간(분)입니다.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+표시할 트윗 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+확장할 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+표시할 미디어 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+표시할 Poll 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+표시할 User 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+표시할 Place 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
+</ParamField>
+
+<div id="posts_firehose_ko">
+  ### `posts_firehose_ko`
+</div>
+
+한국어 게시물 스트림(스트리밍)
+실시간으로 모든 공개 한국어 게시물을 스트리밍합니다.
+이 엔드포인트는 데이터가 생성되는 즉시 실시간으로 데이터를 전송합니다.
+각 수신 항목은 스트림의 단일 데이터 포인트를 나타냅니다.
+연결은 지수적 백오프를 사용하는 재시도 로직으로 자동으로 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
+
+#### 매개변수
+
+<ParamField path="path.partition" type="int">
+파티션 번호입니다.
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+요청한 백필 기간(분)입니다.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ 형식입니다. 게시물이 제공되는 가장 이른 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ 형식입니다. 게시물이 제공되는 가장 늦은 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+표시할 트윗 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+확장할 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+표시할 미디어 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+표시할 투표 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+표시할 사용자 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+표시할 장소 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적인 StreamConfig입니다.
+</ParamField>
+
+<div id="posts_firehose_pt">
+  ### `posts_firehose_pt`
+</div>
+
+포르투갈어 게시물 스트림 (스트리밍)
+실시간으로 모든 공개 포르투갈어 게시물을 스트리밍합니다.
+이 엔드포인트는 데이터가 생성되는 대로 실시간으로 전달하는 스트리밍 엔드포인트입니다.
+각 반환 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
 스트림 연결이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
 
 <div id="parameters">
@@ -451,64 +569,7 @@ YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공될 가장 늦은 UTC 타임스�
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필 기간(분 단위)입니다.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공되기 시작하는 가장 이른 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ 형식. 게시물이 제공되는 가장 늦은 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-표시할 트윗 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-확장할 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-표시할 미디어 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-표시할 투표 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-표시할 사용자 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-표시할 장소 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃 및 콜백을 사용자 정의하기 위한 선택적 StreamConfig입니다.
-</ParamField>
-
-<div id="posts_firehose_ko">
-  ### `posts_firehose_ko`
-</div>
-
-한국어 게시물 스트림 (Streaming)
-실시간으로 모든 공개 한국어 게시물을 스트리밍합니다.
-이 엔드포인트는 데이터가 생성되는 대로 실시간 스트리밍 방식으로 제공합니다.
-각 반환 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
-연결은 지수 백오프를 사용하는 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 다시 연결합니다.
-
-#### 매개변수
-
-<ParamField path="path.partition" type="int">
-파티션 번호입니다.
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청할 백필 기간(분)입니다.
+요청된 백필 시간(분)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
@@ -517,108 +578,6 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 이른 UTC 타임스탬프�
 
 <ParamField path="path.end_time" type="str or None" default="None">
 YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-표시할 트윗 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-확장할 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-표시할 미디어 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-표시할 Poll 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-표시할 User 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-표시할 Place 필드를 쉼표로 구분한 목록입니다.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
-</ParamField>
-
-<div id="posts_firehose_pt">
-  ### `posts_firehose_pt`
-</div>
-
-포르투갈어 게시물 스트림(Streaming)
-실시간으로 모든 공개 포르투갈어 게시물을 스트리밍합니다.
-이는 데이터가 생성되는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-스트림에서 수신되는 각 항목은 단일 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 방식의 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트 측 개입 없이 자동으로 다시 연결합니다.
-
-#### 매개변수
-
-<ParamField path="path.partition" type="int">
-파티션 번호입니다.
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필 기간(분)입니다.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-표시할 트윗 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-확장할 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-표시할 미디어 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-표시할 투표(Poll) 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-표시할 사용자 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-표시할 장소 필드의 쉼표로 구분된 목록입니다.
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
-</ParamField>
-
-<div id="posts_sample">
-  ### `posts_sample`
-</div>
-
-샘플링된 게시물 스트림 (스트리밍)
-실시간으로 공개 게시물의 1% 샘플을 스트리밍합니다.
-이 엔드포인트는 데이터가 사용 가능해지는 대로 실시간으로 제공하는 스트리밍 엔드포인트입니다.
-제공되는 각 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
-
-#### 매개변수
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청하는 백필(backfill) 시간(분)입니다.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
@@ -649,37 +608,25 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프�
 재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
 </ParamField>
 
-<div id="posts_sample10">
-  ### `posts_sample10`
+<div id="posts_sample">
+  ### `posts_sample`
 </div>
 
-게시물 10% 샘플 스트리밍 (Streaming)
-실시간으로 공개 게시물의 10% 샘플을 스트리밍합니다.
+샘플링된 게시물을 스트림으로 제공합니다 (스트리밍)
+실시간으로 공개 게시물의 1% 샘플을 스트리밍합니다.
 이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 반환 항목은 스트림에서 수신된 단일 데이터 포인트를 나타냅니다.
-연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
-연결이 끊기면 SDK가 클라이언트 개입 없이 자동으로 다시 연결합니다.
+스트림에서 전달되는 각 항목은 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프를 사용하는 재시도 로직으로 자동 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 다시 연결합니다.
 
-#### 매개변수
-
-<ParamField path="path.partition" type="int">
-파티션 번호입니다.
-</ParamField>
+#### 파라미터
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청할 백필(backfill) 분 수입니다.
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 수 있는 가장 이른 UTC 타임스탬프입니다.
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 수 있는 가장 늦은 UTC 타임스탬프입니다.
+요청할 백필 시간(분)입니다.
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-표시할 게시물 필드의 쉼표로 구분된 목록입니다.
+표시할 트윗 필드의 쉼표로 구분된 목록입니다.
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
@@ -706,12 +653,69 @@ YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 수 있는 가장 늦은 UTC 타임
 재시도 동작, 타임아웃 및 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
 </ParamField>
 
+<div id="posts_sample10">
+  ### `posts_sample10`
+</div>
+
+게시물 10% 샘플 스트리밍
+실시간으로 공개 게시물의 10% 샘플을 스트리밍합니다.
+이 엔드포인트는 사용 가능한 즉시 데이터를 실시간으로 전달하는 스트리밍 엔드포인트입니다.
+각 반환 항목은 스트림에서 나온 단일 데이터 포인트를 나타냅니다.
+연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
+스트림이 끊어지면 SDK가 클라이언트 개입 없이 자동으로 재연결합니다.
+
+#### 매개변수
+
+<ParamField path="path.partition" type="int">
+파티션 번호입니다.
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+요청된 백필(backfill) 시간(분)입니다.
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 이른 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ. 게시물이 제공될 가장 늦은 UTC 타임스탬프입니다.
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+표시할 트윗 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+확장할 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+표시할 미디어 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+표시할 투표 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+표시할 사용자 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+표시할 장소 필드의 쉼표로 구분된 목록입니다.
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+재시도 동작, 시간 제한, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
+</ParamField>
+
 <div id="update_rules">
   ### `update_rules`
 </div>
 
-스트림 규칙 업데이트
-filtered stream의 활성 규칙 집합에서 규칙을 추가하거나 삭제합니다.
+스트림 규칙을 업데이트합니다
+filtered stream의 활성 규칙 세트에서 규칙을 추가하거나 삭제합니다.
 
 #### 매개변수
 
@@ -723,33 +727,31 @@ filtered stream의 활성 규칙 집합에서 규칙을 추가하거나 삭제�
   ### `users_compliance`
 </div>
 
-Users 규정 준수(Compliance) 데이터 스트림 (스트리밍)
-Users와 관련된 모든 규정 준수 데이터를 스트리밍합니다.
+Users 컴플라이언스 데이터 스트림 (스트리밍)
+Users와 관련된 모든 컴플라이언스 데이터를 스트리밍합니다.
 이 엔드포인트는 데이터가 사용 가능해지는 즉시 실시간으로 전달하는 스트리밍 엔드포인트입니다.
-각 항목은 스트림에서 전달되는 개별 데이터 포인트를 나타냅니다.
+각 항목은 스트림에서 전달되는 단일 데이터 포인트를 나타냅니다.
 연결은 지수 백오프 재시도 로직으로 자동 관리됩니다.
-스트림이 끊어지면 SDK가 클라이언트의 개입 없이 자동으로 재연결합니다.
+스트림 연결이 끊기면 SDK가 클라이언트의 개입 없이 자동으로 재연결합니다.
 
-<div id="parameters">
-  #### Parameters
-</div>
+#### 매개변수
 
 <ParamField path="path.partition" type="int">
 파티션 번호입니다.
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-요청한 백필 기간(분)입니다.
+요청한 백필 시간(분)입니다.
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. User Compliance 이벤트가 제공되기 시작하는 가장 이른 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. User Compliance 이벤트를 제공할 가장 이른 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ. User Compliance 이벤트가 제공되는 가장 늦은 UTC 타임스탬프입니다.
+YYYY-MM-DDTHH:mm:ssZ. User Compliance 이벤트를 제공할 가장 늦은 UTC 타임스탬프입니다.
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-재시도 동작, 타임아웃, 콜백을 사용자 정의하기 위한 선택적 StreamConfig입니다.
+재시도 동작, 타임아웃, 콜백을 사용자 지정하기 위한 선택적 StreamConfig입니다.
 </ParamField>

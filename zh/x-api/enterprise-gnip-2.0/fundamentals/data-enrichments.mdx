@@ -1,52 +1,52 @@
 ---
 title: "数据富化：Enterprise"
-keywords: ["数据富化", "Enterprise 富化功能", "GNIP 富化功能", "数据富化处理", "富化后的数据", "Enterprise 数据富化"]
+keywords: ["数据富化", "Enterprise 数据富化", "GNIP 数据富化", "数据富化", "富化数据", "Enterprise 数据富化"]
 ---
 
 ## 介绍
 
 `Enterprise`
 
-Enterprise 丰富信息是添加到部分数据 API 响应载荷中的附加元数据。它们仅适用于付费订阅方案。
+Enterprise 富化功能是添加在部分数据 API 响应载荷中的附加元数据。它们仅在付费订阅计划中可用。
 
-下表对每种丰富信息进行了简要说明：
+下表对每种富化功能做了简要说明：
 
-| 丰富信息 | 说明 |
+| 富化功能： | 描述： |
 | :--- | :--- |
-| Expanded and Enhanced URLs | 自动展开包含在帖子正文中的短链接（例如 bitly），并提供目标页面的 HTML 标题和描述等元数据。 |
-| Matching rules object | 指明接收到的帖子匹配了哪些规则。该对象会在响应中返回规则标签和规则 ID。 |
-| Poll metadata | 标记帖子中是否存在投票，包含投票选项列表，以及投票时长和到期时间。 |
-| Profile geo | 基于用户个人资料推导出的位置信息，包括 [经度, 纬度] 坐标（在可能的情况下）以及相关地点元数据。 |
+| Expanded and Enhanced URLs | 自动展开包含在帖子正文中的短链接（例如 bitly），并从目标页面中提供 HTML 标题和描述等元数据。 |
+| Matching rules object | 指示接收到的帖子匹配了哪些规则。该对象在响应中返回规则标签（rule tag）和规则 ID（rule ID）。 |
+| Poll metadata | 标识帖子中是否包含投票，包含投票选项列表，以及投票持续时间和到期时间。 |
+| Profile geo | 基于用户个人资料推导出的位置信息，包括（在可能的情况下）[经度，纬度] 坐标以及相关地点元数据。 |
 
 <div id="expanded-and-enhanced-urls">
-  ### 展开和增强的 URL
+  ### 展开和增强 URL
 </div>
 
-“展开和增强 URL”富化功能会自动展开帖子正文中的短链接 URL，并将得到的最终 URL 作为元数据包含在负载中。此外，该富化功能还会从目标页面的 HTML `title` 和 `description` 中提取页面元数据。
+“展开和增强 URL” 富化功能会自动展开包含在帖子正文中的短链接 URL，并将展开后的 URL 作为元数据包含在响应负载中。此外，此富化功能还会从目标页面的 HTML `title` 和 `description` 中提取页面元数据。
 
 **重要细节：**
 
-* 为了解析短链接，我们的系统会向提供的 URL 发送 HTTP HEAD 请求，并跟随所有重定向，直到到达最终的 URL。这个最终 URL（而不是页面内容本身）会被包含在响应负载中。
+* 为了解析短链接，我们的系统会向提供的 URL 发送 HTTP HEAD 请求，并按重定向链一路跟随，直到到达最终 URL。然后，这个最终 URL（而不是页面内容本身）会被包含在响应负载中。
 
-* URL 富化会为实时流增加大约 5–10 秒的延迟。
+* URL 富化会为实时流增加 5–10 秒的延迟。
 
-* 对于对 Full Archive Search API 发起的请求，展开后的 URL 富化数据仅适用于发布时间在 13 个月以内的帖子。
+* 对于发往 Full Archive Search API 的请求，展开 URL 富化数据仅适用于时间在 13 个月以内的帖子。
 
-* URL 富化不适用于帖子链接（包括引用帖子）、Moments 链接以及包含在帖子中的个人资料链接。 
+* URL 富化不适用于帖子链接（包括引用帖子的链接）、Moments 链接以及帖子中包含的个人资料链接。 
    
 
 <div id="post-payload">
-  #### Post 载荷
+  #### 帖子负载
 </div>
 
-展开和增强的 URL 富集数据位于 Post 载荷中的 `entities` 对象内——具体在 `entitites.urls.unwound` 对象中。它提供以下元数据字段：
+展开和增强 URL 富化位于帖子负载的 `entities` 对象中——具体来说是在 `entitites.urls.unwound` 对象内。它提供了以下元数据字段：
 
-* 展开的 URL - `unwound.url`
-* 展开的 HTTP 状态 - `unwound.status`
-* 展开的 URL HTML 标题 - 最多 300 个字符 - `unwound.title`
-* 展开的 URL HTML 描述 - 最多 1000 个字符 - `unwound.description`
+* 展开后的 URL - `unwound.url`
+* 展开后的 HTTP 状态 - `unwound.status`
+* 展开后的 URL HTML 标题 - 最多 300 个字符 - `unwound.title`
+* 展开后的 URL HTML 描述 - 最多 1000 个字符 - `unwound.description`
 
-**下面是一个带有 URL 富集数据的 [entities 对象](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#x-entities) 示例：**
+**下面是一个包含 URL 富化的 [entities 对象](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#x-entities) 示例：**
 
 ```
 "entities": {
@@ -79,7 +79,7 @@ Enterprise 丰富信息是添加到部分数据 API 响应载荷中的附加元�
   },
 ```
 
-**这是一个 entities 对象的示例，其中包含一个未增强的帖子链接：
+**这是一个 entities 对象的示例，其中包含一个未经富化处理的帖子链接：
 **
 
 ```
@@ -106,60 +106,60 @@ Enterprise 丰富信息是添加到部分数据 API 响应载荷中的附加元�
 **url:**
 
 * 示例：“url:tennis”
-* 对任意包含单词 tennis 的展开后的 URL（Expanded URL）进行分词匹配
-* 也可以用作过滤器，通过类似 “url:npr.org” 的方式来包含或排除来自特定网站的链接
+* 对任何包含单词 tennis 的展开 URL 进行分词匹配
+* 也可作为过滤器，通过类似 “url:npr.org” 的方式来包含或排除来自特定网站的链接
 
 **url&#95;title:**
 
 * 示例：“url&#95;title:tennis”
-* 对任意包含单词 tennis 的展开后的 URL 的 HTML 标题进行分词匹配
-* 匹配负载（payload）中包含的 HTML 标题数据，其最大长度为 300 个字符。
+* 对任何 HTML 标题中包含单词 tennis 的展开 URL 进行分词匹配
+* 匹配载荷中包含的 HTML 标题数据，该数据最长为 300 个字符。
 
 **url&#95;description:**
 
 * 示例：“url&#95;description:tennis”
-* 对任意包含单词 tennis 的展开后的 URL 的 HTML 描述进行分词匹配
-* 匹配负载（payload）中包含的 HTML 描述数据，其最大长度为 1000 个字符。
+* 对任何 HTML 描述中包含单词 tennis 的展开 URL 进行分词匹配
+* 匹配载荷中包含的 HTML 描述，该描述最长为 1000 个字符。
    
 
 <div id="http-status-codes">
   #### HTTP 状态码
 </div>
 
-URL 展开富化功能还会提供我们尝试展开的最终 URL 的 HTTP 状态码。正常情况下，这通常是 200。其他 400 系列的值表示解析该 URL 时出现问题。
+扩展 URL 富集功能还会提供我们尝试展开的最终 URL 的 HTTP 状态码。在正常情况下，该状态码为 200。其他 4xx 范围的状态码表示解析 URL 时出现问题。
 
-在尝试展开 URL 时，可能会返回多种状态码。在展开 URL 的过程中，如果遇到重定向，我们会持续跟随重定向，直到：
+在尝试展开 URL 时，可能会返回各种状态码。在展开 URL 的过程中，如果遇到重定向，我们会持续跟随重定向，直到：
 
-* 返回 200 系列状态码（成功）
-* 返回非重定向系列状态码（失败）
-* 由于在合理时间内仍无法解析出最终 URL 而超时（返回 408 - 超时）
+* 收到 2xx 状态码（成功）
+* 收到非重定向状态码（失败）
+* 因为在合理时间内仍无法解析最终 URL 而超时（返回 408 - timeout）
 * 遇到某种异常
    
 
-如果遇到异常，我们会使用以下原因与返回状态码之间的映射：
+如果遇到异常，我们会使用以下原因与返回状态码之间的映射关系：
 
 | 原因 | 返回的状态码 |
 | :--- | :--- |
-| SSL 异常 | 403（Forbidden，禁止访问） |
+| SSL 异常 | 403 (Forbidden) |
 | URL 不允许展开 | 405 |
-| Socket 超时 | 408（Timeout，请求超时） |
-| 未知主机异常 | 404（Not Found，未找到） |
-| 不支持的操作 | 404（Not Found，未找到） |
-| 连接异常 | 404（Not Found，未找到） |
-| 非法参数 | 400（Bad Request，错误请求） |
-| 其他所有情况 | 400（Bad Request，错误请求） |
+| Socket 超时 | 408 (Timeout) |
+| 未知主机异常 | 404 (Not Found) |
+| 不支持的操作 | 404 (Not Found) |
+| 连接异常 | 404 (Not Found) |
+| 非法参数 | 400 (Bad Request) |
+| 其他所有情况 | 400 (Bad Request) |
 
 <div id="matching-rules">
   ### 匹配规则
 </div>
 
-matching&#95;rules 富化数据是一个元数据对象，用于指明接收到的帖子匹配了哪一条或哪些规则。这最常与 PowerTrack 流一起使用。
+匹配规则富化数据是一个元数据对象，用于指示接收到的帖子是被哪些规则匹配到的。这通常与 PowerTrack 流一起使用。
 
-匹配将通过对规则中包含的词项进行精确匹配来完成，会在带标点和不带标点的活动内容中进行扫描。匹配不区分大小写。当发现内容包含规则中定义的所有词项时，在根级别会有一个 matching&#95;rules 对象，指示导致匹配的规则。
+匹配是通过对规则中包含的词项进行精确匹配来完成的，会在包含和不包含标点符号的情况下扫描活动内容。匹配不区分大小写。当发现内容包含规则中定义的所有词项时，在根级别会有一个 matching&#95;rules 对象，指示导致匹配的规则。
 
 **PowerTrack**
 
-通过 PowerTrack（实时、Replay 和 Historical）传送的帖子将包含如下所示的 matching&#95;rules 对象：
+通过 PowerTrack（实时、回放和历史）传递的帖子将包含如下所示的 matching&#95;rules 对象：
 
 ```
 "matching_rules": [{
@@ -169,38 +169,42 @@ matching&#95;rules 富化数据是一个元数据对象，用于指明接收到�
     }]
 ```
 
-在 PowerTrack 中，`matching_rules` 对象包含与给定结果匹配的*所有*规则。换句话说，如果多条规则匹配同一个帖子，该帖子只会被投递一次，但 `matching_rules` 元素中会包含所有匹配的规则。
+在 PowerTrack 中，`matching_rules` 对象表示与给定结果匹配的*所有*规则。换句话说，如果有多条规则匹配同一个帖子，该帖子只会被投递一次，但 `matching_rules` 元素中会包含所有与之匹配的规则。
 
 <div id="poll-metadata">
   ### 投票元数据
 </div>
 
-投票元数据是一项免费的富化功能，可在所有产品（实时和历史 API）的富化原生格式负载中使用。该元数据记录帖子中是否包含投票，提供投票选项列表，以及投票持续时间和到期时间。通过这种富化，可以轻松识别帖子中是否包含投票，并支持对含投票的帖子进行正确渲染和展示。
+投票元数据是一种免费的富化信息，可在所有产品（实时与历史 API）的富化原生格式负载中使用。该元数据记录帖子中是否存在投票、包含投票选项列表，并包括投票持续时间和到期时间。此类富化信息便于识别是否存在投票，并支持对含投票的帖子进行正确渲染和展示。
 
 <div id="important-details">
-  ##### 重要说明：
+  ##### 重要细节：
 </div>
 
 * 适用于所有 Enterprise API（PowerTrack、Replay、Search、Historical PowerTrack）
-  * *注意：* 对于 Replay 和 Historical PowerTrack，此元数据自 2017 年 2 月 22 日起首次提供。
+  * *注意：* 对于 Replay 和 Historical PowerTrack，此元数据自 2017-02-22 起首次提供。
 * 不包含投票信息或投票结果
-* 目前不支持过滤器/运算符（filter/operator）
-* 仅提供 **增强型原生格式（enriched native format）**
-  * 增强型原生格式是一项用户可控设置，可随时通过 Console 进行更改：*Select a Product (PowerTrack, Replay, Search) &gt; Settings 选项卡 &gt; Output Format (Leave data in its original format)*
+* 当前不支持 filter/operator
+* 仅以 **enriched native format（增强原生格式）** 提供
+  * Enriched native format 是一项由用户控制的设置，可随时通过 Console 进行更改：*Select a Product (PowerTrack, Replay, Search) &gt; Settings tab &gt; Output Format (Leave data in its original format)*
 
-#### 帖子载荷
+<div id="post-payload">
+  #### 帖子负载
+</div>
 
-投票帖子会在载荷中的 “entities.polls” 对象里包含以下元数据：
+投票帖子会在 payload 中的 “entities.polls” 对象中包含以下元数据：
 
-* 一个 “options” 数组，最多包含四个选项，其中包括位置（1-4）和选项文本
-* 投票结束日期
+* 一个 “options” 数组，最多包含四个选项，每个选项包括序号（1-4）及其选项文本
+* 投票到期日期
 * 投票持续时间
 
-请参阅下方的示例载荷以供参考。
+请参阅下面的示例负载以作进一步参考。
 
-#### 示例负载
+<div id="sample-payload">
+  #### 示例载荷
+</div>
 
-下面是经过富化的原生格式负载片段，用于突出展示新增的投票元数据：
+下面是富化后的原生格式载荷片段，用于展示新增的投票元数据：
 
 ```json
 "entities":{
@@ -228,17 +232,17 @@ matching&#95;rules 富化数据是一个元数据对象，用于指明接收到�
 ```
 
 <div id="profile-geo">
-  ### 个人资料地理信息
+  ### 个人资料地理位置
 </div>
 
 <div id="introduction">
   #### 简介
 </div>
 
-许多 X 用户的个人资料包含用户自行提供的公开位置信息。该数据以普通字符串形式返回在 user.location 字段中（参见 [User 对象数据字典](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#native-enriched-user-object)）。Profile Geo Enrichment 会在可能的情况下，对 location 字符串进行地理编码和规范化，为 user.location 的取值添加相关的结构化地理数据。只有当 Enterprise API 产品的 Post 负载中包含这些信息时，纬度/经度坐标和相关地点元数据才会被添加到 user.derived.locations 中。使用 [增强型原生格式](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary) 时可以获取这些数据，并且可以结合使用 [PowerTrack 规则](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators)进行过滤。
+许多 X 用户个人资料中包含由用户提供的公开位置信息。这类数据会以普通字符串形式返回在 user.location 字段中（参见 [User object data dictionary](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#native-enriched-user-object)）。Profile Geo 增强功能会在可能的情况下，对位置字符串进行地理编码和规范化，从而为 user.location 的值添加相关的结构化地理数据。只有当 Enterprise API 产品的 Post 负载中包含这些信息时，纬度/经度坐标和相关地点元数据才会添加到 user.derived.locations 中。使用 [增强的原生格式](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary) 时可以获取这些数据，并可以结合使用 [PowerTrack 规则](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators) 进行过滤。
 
 <Note>
-  **注意：** 用于生成 Profile Geo Enrichment 的部分辅助地理数据来自 GeoNames.org，X 按照 [Creative Commons Attribution 3.0 许可协议](https://creativecommons.org/licenses/by/3.0/us/legalcode) 使用这些数据。
+  **注意：** 用于创建 Profile Geo 增强功能的部分辅助地理数据来自 GeoNames.org，X 按照 [Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/us/legalcode) 的许可使用这些数据。
 </Note>
 
 Profile Geo 数据将包含在 X 的 PowerTrack、Replay、Volume Stream、Search 和 Historical PowerTrack API 中。
@@ -247,20 +251,20 @@ Profile Geo 数据将包含在 X 的 PowerTrack、Replay、Volume Stream、Searc
   #### 个人资料地理数据
 </div>
 
-| 增强原生字段名称 | 示例值 | 描述 |
+| 增强的原生字段名称 | 示例值 | 描述 |
 | :--- | :--- | :--- |
-| user.derived.locations.country | United States | 创建该帖子的用户所在的国家。 |
-| user.derived.locations.country&#95;code | US  | 对应创建该帖子的用户所在国家的两字母 ISO-3166 国家代码。 |
-| user.derived.locations.locality | Birmingham | 创建该帖子的用户所在的地名位置（通常为城市）。 |
-| user.derived.locations.region | Alabama | 创建该帖子的用户所在的区域位置（通常为州/省）。 |
-| user.derived.locations.sub&#95;region | Jefferson County | 创建该帖子的用户所在的次级区域位置（通常为郡/县）。 |
-| user.derived.locations.full&#95;name | Birmingham, Alabama, United States | 创建该帖子的用户所在位置的全称（不包括次级区域）。 |
-| User.derived.locations.geo | See Below | 一个数组，其中包含与创建该帖子的用户所在、粒度最低的位置相对应的经纬度坐标值。 |
+| user.derived.locations.country | United States | 创建该帖子用户所在位置的国家。 |
+| user.derived.locations.country&#95;code | US  | 与创建该帖子用户所在位置的国家相对应的两字母 ISO-3166 国家代码。 |
+| user.derived.locations.locality | Birmingham | 创建该帖子用户所在位置的地方级位置（通常为城市）。 |
+| user.derived.locations.region | Alabama | 创建该帖子用户所在位置的区域级位置（通常为州/省）。 |
+| user.derived.locations.sub&#95;region | Jefferson County | 创建该帖子用户所在位置的次级区域位置（通常为县）。 |
+| user.derived.locations.full&#95;name | Birmingham, Alabama, United States | 创建该帖子用户所在位置的完整名称（不包括次级区域）。 |
+| User.derived.locations.geo | See Below | 一个数组，其中包含一个与创建该帖子用户所在位置的最低粒度位置相对应的纬度/经度坐标值。 |
 
-Historical PowerTrack、Search 和 PowerTrack API 支持基于个人资料地理数据进行过滤。有关可用于个人资料地理数据过滤的运算符的更多详细信息，请参阅相应的产品文档。
+Historical PowerTrack、Search 和 PowerTrack API 支持基于个人资料地理数据进行过滤。有关可用于基于个人资料地理数据进行过滤的运算符的更多详细信息，请参阅相应的产品文档。
 
 <div id="sample-payload">
-  #### 示例有效负载
+  #### 示例载荷
 </div>
 
 ```
@@ -293,9 +297,9 @@ Historical PowerTrack、Search 和 PowerTrack API 支持基于个人资料地理
   #### 限制
 </div>
 
-* Profile Geo 增强功能会尝试为个人资料位置字符串中描述的地理位置确定最佳匹配地点。由于可能存在多个名称相似的地点或名称本身含糊等因素，结果在某些情况下可能并不准确。
+* Profile Geo 富化会尝试根据个人资料位置字符串中描述的地理位置，确定最合适的地理地点。由于存在多个名称相似的地点或地名本身含糊不清等因素，结果在所有情况下可能都不准确。
 * 如果用户的个人资料位置字段（actor.location）中未提供值，我们将不会尝试进行分类。
-* 精度级别：如果 Profile Geo 增强功能只能在国家或地区级别上有把握地确定位置，则诸如 subRegion 和 locality 等更低级别的地理信息将不会包含在有效负载（payload）中。
-* Profile Geo 增强功能会提供与其结果精度级别相对应的经纬度坐标（单个点）。这些坐标表示增强结果位置的地理中心。例如，如果精度级别是国家级，那么这些坐标将被设置为该国家的地理中心。
-* 为地址属性（locality/region/country/country code）提供的 PowerTrack 运算符在设计上粒度较细，以便支持多种规则组合。当尝试定位与其他地点同名的特定位置时，请考虑组合地址规则。例如，以下规则可以避免匹配到“San Francisco, Philippines”：profile&#95;locality:&quot;San Francisco&quot; profile&#95;region:California 在构建针对单个 Profile Geo 字段的规则时，请记住，每提升一级粒度，都会进一步缩小你看到的结果范围。在某些情况下，当尝试查看来自某个城市的数据时，如果某个 region 与该城市高度重叠，你可能只需要依赖一个 region 规则；例如，瑞士苏黎世市及其周边区域就可以通过 profile&#95;region:&quot;Zurich&quot; 有效地进行定位。
-* 与原生地理信息帖子配合使用：Profile Geo 增强功能为帖子提供了一种不同于有效负载中原生 geo 值的替代地理信息类型。这两种地理信息类型可以组合使用，以捕获与给定区域相关的所有可能帖子（基于可用地理数据），但二者在概念上并不等同。
+* 精度级别：如果 Profile Geo 富化只能在国家或地区级别上有把握地进行判断，则诸如 subRegion 和 locality 等更低级别的地理信息将不会出现在负载中。
+* Profile Geo 富化会提供与富化结果精度级别相对应的纬度/经度坐标（单个点）。这些坐标表示富化位置结果的地理中心。例如，如果精度级别为国家级，则这些坐标将设置为该国家的地理中心。
+* 为地址属性（locality/region/country/country code）提供的 PowerTrack 运算符被有意设计得较为细粒度，以便支持构建多种规则组合。当尝试定位一个与其他地点同名的特定位置时，可以考虑组合使用地址规则。例如，以下规则可以避免匹配 “San Francisco, Philippines”：profile&#95;locality:&quot;San Francisco&quot; profile&#95;region:California。在构建针对单个 Profile Geo 字段的规则时，请记住，每增加一个细粒度级别，都会缩小你看到的结果范围。在某些情况下，当尝试查看某个城市的数据时，如果某个地区与该城市有较大重叠，你可能只想依赖一个区域规则。例如，瑞士苏黎世市可以通过 profile&#95;region:&quot;Zurich&quot; 有效地连同其周边地区一并进行定位。
+* 与原生地理位置配合使用的帖子：Profile Geo 富化为帖子提供了一种不同于负载中原生 geo 值的替代地理信息类型。这两种地理信息可以组合使用，以捕获与给定区域相关的所有可能帖子（基于可用地理数据），尽管它们在概念上并不等同。

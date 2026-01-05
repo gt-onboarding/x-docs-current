@@ -1,7 +1,7 @@
 ---
-title: Gestionar respuestas por tema
-sidebarTitle: Gestionar respuestas por tema
-keywords: ["gestionar respuestas por tema", "moderación por tema", "moderación de respuestas por tema", "ocultar respuestas por tema", "filtrado de respuestas por tema"]
+title: Gestionar las respuestas por tema
+sidebarTitle: Gestionar las respuestas por tema
+keywords: ["gestionar respuestas por tema", "moderación por temas", "moderación de respuestas por tema", "ocultar respuestas por tema", "filtrado de temas"]
 ---
 
 import { Button } from '/snippets/es/button.mdx';
@@ -10,19 +10,19 @@ import { Button } from '/snippets/es/button.mdx';
   ### Gestionar las respuestas por tema
 </div>
 
-A través del endpoint de ocultar respuestas, puedes crear integraciones para ayudar a las personas y a las marcas a mantener sus conversaciones centradas en un tema. Esta página muestra cómo gestionar una conversación utilizando los endpoints de ocultar respuestas y [recent search](/es/x-api/posts/recent-search).
+Mediante el endpoint de ocultar respuestas, puedes crear integraciones para ayudar a personas y marcas a mantener sus conversaciones centradas en un tema. Esta página muestra cómo gestionar una conversación usando los endpoints de ocultar respuestas y [búsqueda reciente](/es/x-api/posts/recent-search).
 
-Recent search permite recuperar una conversación y sus respuestas, y la carga útil de la Publicación devuelve [Post annotations](/es/x-api/fundamentals/post-annotations) para ayudarte a entender el contexto y el tema de cada Publicación, independientemente del idioma.
+Búsqueda reciente permite recuperar una conversación y sus respuestas, y la carga útil de la Publicación devuelve [anotaciones de Publicaciones](/es/x-api/fundamentals/post-annotations) para ayudarte a comprender el contexto y el tema de cada Publicación, independientemente del idioma.
 
 El flujo de la Aplicación tendrá controles para mostrar y gestionar una conversación:
 
-1. Pide permiso al usuario para leer sus Publicaciones y gestionar sus respuestas.
+1. Pide el permiso del usuario para leer sus Publicaciones y gestionar sus respuestas.
 
-2. Extrae una conversación reciente a partir de la URL de una Publicación y comprueba que la conversación pertenece al usuario que se está autenticando.
+2. Extrae una conversación reciente a partir de una URL de Publicación y comprueba que la conversación pertenece al usuario autenticado.
 
-3. Llama al endpoint de recent search para mostrar cada Publicación de la conversación. La solicitud incluirá una consulta de búsqueda por ID de conversación y la expansión de anotaciones para determinar si la Publicación está relacionada con deportes o no, de acuerdo con la interpretación que hace X de la Publicación.
+3. Llamará al endpoint de búsqueda reciente para mostrar cada Publicación de la conversación. La solicitud incluirá una consulta de búsqueda por ID de conversación y la expansión de anotaciones para determinar si la Publicación está relacionada con deportes o no, de acuerdo con la interpretación que X hace de la Publicación.
 
-4. Llama al endpoint de ocultar respuestas para ocultar una respuesta cuando el usuario decide hacerlo. También proporcionará una forma de deshacer esta acción en caso necesario, de modo que el usuario siempre tenga el control. 
+4. Llama al endpoint Hide replies para ocultar una respuesta cuando el usuario decide hacerlo. También proporcionará una forma de deshacer esta acción en caso necesario, de modo que el usuario siempre tenga el control. 
 
 5. Para conversaciones más largas, proporcionará controles para [paginar los resultados de búsqueda](/es/x-api/posts/search/integrate/paginate).
     
@@ -31,10 +31,10 @@ El flujo de la Aplicación tendrá controles para mostrar y gestionar una conver
   #### Optimiza para el usuario (y para el uso)
 </div>
 
-Puedes diseñar un flujo de una forma que le dé al usuario el control de cualquier acción que quiera realizar. Tener este principio en mente también te ayuda a crear una integración que pueda optimizar el consumo de Publicaciones.
+Puedes diseñar un flujo de manera que el usuario tenga el control de cualquier acción que pretenda realizar. Tener este principio en mente también te ayuda a crear una integración que pueda optimizar el consumo de Publicaciones.
 
-1. Dado que el usuario autenticado solo puede gestionar conversaciones que haya iniciado, tu flujo debería finalizar de forma anticipada cuando no sea así.
-   * Haz una solicitud inicial de consulta de una Publicación. Finaliza el flujo de forma anticipada si la URL de la Publicación no es válida o la conversación no fue iniciada por el usuario que se está autenticando.
+1. Como el usuario autenticado solo puede gestionar las conversaciones que inició, tu flujo debe finalizar de forma anticipada cuando no sea así.
+   * Haz una solicitud inicial de búsqueda de la Publicación. Finaliza el flujo de forma anticipada si la URL de la Publicación no es válida o la conversación no fue iniciada por el usuario que se está autenticando.
    * De este modo, tu aplicación no tiene que hacer una solicitud de búsqueda reciente si la conversación no puede ser moderada por el usuario autenticado.
 2. Solicita [campos de usuario y de Publicación](/es/x-api/fundamentals/fields) en la misma solicitud para evitar hacer solicitudes por separado. Este enfoque también puede mejorar el rendimiento de tu aplicación.
-3. Evita hacer solicitudes innecesarias. Esta aplicación almacena en caché el estado oculto de una respuesta en el navegador del usuario. Esto es útil para conversaciones más extensas, donde el usuario puede querer retomar sus esfuerzos de moderación más adelante, y ayuda a tu aplicación a optimizar las solicitudes para ocultar o mostrar respuestas.
+3. Evita hacer solicitudes cuando no sean necesarias. Esta aplicación almacena en caché el estado oculto de una respuesta en el navegador del usuario. Esto es útil para conversaciones más extensas, donde el usuario puede querer retomar sus esfuerzos de moderación más adelante, y ayuda a tu aplicación a optimizar las solicitudes para ocultar o mostrar respuestas.

@@ -1,18 +1,18 @@
 ---
 title: v1에서 v2로
 sidebarTitle: v1에서 v2로
-keywords: ["v1.1에서 v2로 마이그레이션", "팔로우 마이그레이션", "팔로우 마이그레이션 이전", "Standard v1.1에서 v2 팔로우로", "v1에서 v2로 팔로우 마이그레이션", "마이그레이션 가이드"]
+keywords: ["v1.1에서 v2로 마이그레이션", "팔로우 마이그레이션", "팔로우 마이그레이션", "Standard에서 v2로 팔로우 마이그레이션", "v1에서 v2로 팔로우 마이그레이션", "마이그레이션 가이드"]
 ---
 
 import { Button } from '/snippets/ko/button.mdx';
 
 <div id="manage-follows-standard-v11-compared-to-x-api-v2">
-  #### 팔로우 관리: 스탠다드 v1.1과 X API v2 비교
+  #### 팔로우 관리: 표준 v1.1과 X API v2 비교
 </div>
 
-스탠다드 v1.1 [POST friendships/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create) 및 [POST friendships/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-destroy) 엔드포인트를 사용해 왔다면, 이 가이드는 스탠다드와 X API v2 팔로우 관리 엔드포인트 간의 공통점과 차이점을 이해하는 데 도움을 드리기 위한 것입니다.
+표준 v1.1 [POST friendships/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create) 및 [POST friendships/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-destroy) 엔드포인트로 작업해 왔다면, 이 가이드는 표준 v1.1 엔드포인트와 X API v2 팔로우 관리 엔드포인트 간의 유사점과 차이점을 이해하는 데 도움이 되는 것을 목표로 합니다.
 
-* **공통점**
+* **유사점**
   * OAuth 1.0a 사용자 컨텍스트
 * **차이점**
   * 엔드포인트 URL
@@ -28,7 +28,7 @@ import { Button } from '/snippets/ko/button.mdx';
 
 **OAuth 1.0a 사용자 컨텍스트 인증 방식**
 
-두 엔드포인트 버전 모두 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2)를 지원합니다. 따라서 이전에 표준 v1.1 manage follows 엔드포인트 중 하나를 사용해 오셨다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다. 
+두 엔드포인트 버전 모두 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-1-0a-2)를 지원합니다. 따라서 이전에 표준 v1.1 manage follows 엔드포인트 중 하나를 사용했다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다. 
 
 <div id="differences">
   #### 차이점
@@ -36,31 +36,31 @@ import { Button } from '/snippets/ko/button.mdx';
 
 **엔드포인트 URL**
 
-* 표준 v1.1 엔드포인트:
-  * POST https://api.x.com/1.1/friendships/create.json
+* Standard v1.1 엔드포인트:
+  * POST https://api.x.com/1.1/friendships/create.json\
     (사용자 팔로우)
-  * POST https://api.x.com/1.1/friendships/destroy.json
-    (사용자 팔로우 해제)
+  * POST https://api.x.com/1.1/friendships/destroy.json\
+    (사용자 언팔로우)
 * X API v2 엔드포인트:
-  * POST https://api.x.com/2/users/:id/following
+  * POST https://api.x.com/2/users/:id/following\
     (사용자 팔로우)
-  * DELETE https://api.x.com/2/users/:source&#95;user&#95;id/following/:target&#95;user&#95;id
-    (사용자 팔로우 해제) 
+  * DELETE https://api.x.com/2/users/:source&#95;user&#95;id/following/:target&#95;user&#95;id\
+    (사용자 언팔로우) 
 
-**앱 및 프로젝트 요구 사항**
+**앱 및 프로젝트 요구사항**
 
-X API v2 엔드포인트를 호출할 때는 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps) 및 [Project](/ko/resources/fundamentals/projects)에 연결된 자격 증명을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 프로젝트에 연결되지 않은 독립형 앱이나 프로젝트에 연결된 앱의 자격 증명을 모두 사용할 수 있습니다.
+X API v2 엔드포인트를 사용하려면, 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps) 중 [Project](/ko/resources/fundamentals/projects)와 연결된 앱에서 발급된 자격 증명을 사용해야 합니다. X API v1.1의 모든 엔드포인트는 독립 실행형 앱이든 프로젝트와 연결된 앱이든, 어느 쪽의 자격 증명도 사용할 수 있습니다.
 
 **요청 파라미터**
 
-다음 표준 v1.1 요청 파라미터는 X API v2에서 다음과 같이 대응됩니다.
+다음 Standard v1.1 요청 파라미터는 X API v2에서 이에 상응하는 항목이 있습니다:
 
-| 표준 v1.1 | X API v2 |
+| Standard v1.1 | X API v2 |
 | :--- | :--- |
 | 해당 없음 | id (POST), source&#95;user&#95;id (DELETE) |
 | user&#95;id | target&#95;user&#95;id |
 | screen&#95;name | 해당 없음 |
 
-표준 v1.1 파라미터는 쿼리 파라미터로 전달되고, X API v2 파라미터는 본문(body) 파라미터(POST 엔드포인트의 경우) 또는 경로(path) 파라미터(DELETE 엔드포인트의 경우)로 전달된다는 점에 유의하세요.
+Standard v1.1 파라미터는 쿼리 파라미터로 전달되는 반면, X API v2 파라미터는 본문 파라미터(POST 엔드포인트의 경우) 또는 경로 파라미터(DELETE 엔드포인트의 경우)로 전달된다는 점에 유의하세요.
 
-또한 v2의 id 및 source&#95;user&#95;id는 표준 v1.1 엔드포인트를 사용할 때는 필수 항목이 아니었습니다. 이는 OAuth 1.0a 사용자 컨텍스트와 함께 전달된 액세스 토큰을 통해 어떤 사용자가 팔로우/언팔로우를 시작했는지 추론했기 때문입니다. 
+또한 v2의 id 및 source&#95;user&#95;id는 Standard v1.1 엔드포인트를 사용할 때는 필수값이 아닙니다. 이는 OAuth 1.0a 사용자 컨텍스트와 함께 전달되는 액세스 토큰을 통해, 어떤 사용자가 팔로우/언팔로우를 시작했는지 유추할 수 있었기 때문입니다. 

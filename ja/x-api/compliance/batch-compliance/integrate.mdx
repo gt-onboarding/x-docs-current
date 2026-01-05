@@ -1,30 +1,30 @@
 ---
-title: 連携ガイド
-sidebarTitle: 連携ガイド
-keywords: ["バッチコンプライアンスの連携", "コンプライアンスバッチの連携", "コンプライアンスジョブの連携", "バッチコンプライアンスのセットアップ"]
+title: 統合ガイド
+sidebarTitle: 統合ガイド
+keywords: ["バッチコンプライアンス統合", "コンプライアンスバッチ統合", "コンプライアンスジョブ統合", "バッチコンプライアンスセットアップ"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
 
 <div id="working-with-resumable-uploads">
-  ## 再開可能なアップロードの利用
+  ## 再開可能アップロードの扱い方
 </div>
 
-Batch compliance エンドポイントを使用すると、開発者は大量の X データをバッチアップロードし、自分のデータセットがユーザーの意図と X 上のコンテンツの現在の状態を反映するためにどのような対応が必要かを把握できます。システムや接続が安定して信頼できる状態であれば、大量のデータをリモートサーバーにアップロードすることは比較的単純な操作です。しかし、常にそうとは限りません。環境によっては、一定時間が経過すると接続タイムアウトが発生し、あなたのアプリとアップロードサーバー間の接続が実質的に切断される場合があります。また、たとえばノート PC から Wi‑Fi 接続で大きなファイルをアップロードしようとしているときなどに、接続の問題に遭遇することもあります。このような状況では、1 本の連続した接続でアップロードするのではなく、そのファイルをより小さな部分に分けて順にアップロードできるほうが望ましいです。
+Batch compliance エンドポイントを使用すると、開発者は大量の X データを一括アップロードし、そのデータセットがユーザーの意図と X 上のコンテンツの最新の状態を反映するために必要な対応を把握できます。システムや接続が安定して信頼できる状態であれば、大量のデータをリモートサーバーにアップロードすることは比較的単純な操作です。しかし、常にそうとは限りません。環境によっては接続のタイムアウトが設定されていて、一定時間経過後にアプリとアップロードサーバー間の接続が強制的に切断される場合があります。また、たとえばノート PC から Wi‑Fi 経由で大きなファイルをアップロードしようとしたときなどに、接続の問題に遭遇することもあります。このような状況では、1 本の連続した接続でアップロードするのではなく、そのファイルをより小さな部分に分割して順にアップロードできることが望ましくなります。
 
-X の Batch compliance エンドポイントは、大きなファイルを処理するために Google Cloud Storage を使用しています。この種のストレージはさまざまな用途向けに最適化されており、Cloud Storage では「再開可能アップロード」と呼ばれる、大きなファイルを管理するための手法をサポートしています。
+X の Batch compliance エンドポイントは、大きなファイルを処理するために Google Cloud Storage を利用しています。この種のストレージはさまざまな用途向けに最適化されており、Cloud Storage は「再開可能アップロード」と呼ばれる、大きなファイルを管理するための手法をサポートしています。
 
-アップロードの途中で何らかの問題が発生した場合でも、Google Cloud Storage は中断された地点から処理を再開することができます。
+アップロード中にどこかで問題が発生した場合でも、Google Cloud Storage は中断された箇所から処理を再開できます。
 
 <div id="creating-a-resumable-job">
-  ### 再開可能なアップロードジョブを作成する
+  ### 再開可能アップロードジョブの作成
 </div>
 
 <div id="step-one">
-  #### ステップ1：
+  #### ステップ 1:
 </div>
 
-まず、コンプライアンスジョブを作成し、ポストIDかユーザーIDのどちらをアップロードするかを（`type` パラメータを使用して）指定します。さらに、リクエストボディに `resumable` を追加し、値を `true` に設定します。以下の `$APP&#95;ACCESS&#95;TOKEN` を、App-only のアクセストークンに必ず置き換えてください。
+まず、コンプライアンスジョブを作成し、`type` パラメータを使用して、ポスト ID をアップロードするかユーザー ID をアップロードするかを指定します。さらに、リクエストボディに `resumable` を追加し、その値を `true` に設定します。以下の `$APP&#95;ACCESS&#95;TOKEN` を、ご自身の App-only アクセストークンに必ず置き換えてください。
 
 ```
 curl --request POST \
@@ -52,13 +52,13 @@ API 呼び出しが成功すると、以下のようなレスポンスが返さ�
 }
 ```
 
-`upload_url` の値を控えておいてください。次の手順で使用します。
+upload&#95;url の値をメモしておいてください。以降の手順で使用します。
 
 <div id="step-two">
-  #### ステップ2:
+  #### ステップ 2:
 </div>
 
-次に、再開可能アップロードを開始します。そのためには、前のステップで取得した `upload_url` に対して **POST** リクエストを行い、以下のヘッダーを必ず含めてください。
+次に、再開可能アップロードを開始する必要があります。そのためには、前のステップで取得した `upload_url` に **POST** リクエストを送信し、以下のヘッダーを必ず含めてください:
 
 Content-Type: text/plain
 
@@ -74,36 +74,36 @@ curl --request POST \
  'x-goog-resumable: start
 ```
 
-この呼び出しが成功すると、201 のレスポンスコードが返されます。その後、レスポンスヘッダーの `Location` ヘッダーに含まれる値をコピーします。この値は次のような形式になります。
+この呼び出しが成功すると、レスポンスコード 201 が返されます。その後、レスポンスヘッダーに含まれる `location` ヘッダーの値をコピーします。この値は次のようになります。
 
 ```
 https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submission/1202726487847104512_1430227686685757442?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210824%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210824T175707Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-goog-resumable&X-Goog-Signature=890d958f9c7dcb7f238e4971b59da5afc5b8329fb197c67b5930fe0f9dfe180afe2d4bec341111809b88ccfab46ab1f81f4242abc1af7b67c6e8977c52e6d486f5f43ce6a37a7a6530d25f15e2bcd9bb54655fe4ee22b26f8886ba71b67b7b11afd1198d658d1b6f0c41260f55260a260e1be0239977feba43dce40bc0e8e6293a4a3a3f7ee0afc74d3d2f7f2d3d514f108d5887a52ac85760385e5b9bb67cd26bfcf6b1c19151ea8111e217a29407722dc0dc9ab373334e88c18159546237ec9334f9a1e33717dc82800c6a45bba82706d5aece84ecdf3fcac52b21c8a3085a639047cf2707a8b9e4c296fc7cf05edbb110f07b89e38f0f5ea77e8b313cade7&upload_id=ADPycds-_Ow7aqcpbG4XguXSVAgd_2fy-XiDA2qm-It9PCwBlZhF4e2bfOAQzEmRJ4T_l6jU6LfYdfrKa_KlFFBOyx3PjYzrxQ
 ```
 
-その後、[クイックスタートガイド](/ja/x-api/compliance/batch-compliance#getting-started-with-the-batch-compliance-endpoints)のステップ2以降に従って、ポスト ID またはユーザー ID をこの場所にアップロードできます。
+その後、[クイックスタートガイド](/ja/x-api/compliance/batch-compliance#getting-started-with-the-batch-compliance-endpoints)のステップ2以降に従って、この場所にポストまたはユーザーのIDをアップロードできます。
 
-技術的な複雑さがあるため、レジューム可能なアップロードはコードから利用するのが最も適しています。本ガイドでは、Node.js と [needle リクエストライブラリ](https://www.npmjs.com/package/needle) を使用します。
+技術的に複雑であるため、レジューム対応アップロードはコードと組み合わせて使用するのが最適です。このガイドでは、Node.js と [needle request library](https://www.npmjs.com/package/needle) を使用します。
 
 <div id="install-the-dependencies">
   ### 依存関係をインストールする
 </div>
 
-先に進む前に、Node.js の実行環境をインストールしておく必要があります。Node.js は公式サイトから入手できます。インストールが完了すると、Node.js には npm というユーティリティが含まれます。次のコマンドを実行して、Node と npm の両方がインストールされており、エラーにならないことを確認してください。
+先に進む前に、Node.js の実行環境をインストールしておく必要があります。Node.js は公式サイトから取得できます。インストールが完了すると、Node.js には npm というユーティリティが含まれています。次のコマンドを実行して Node と npm の両方がインストールされていることを確認し、エラーが発生しないことを確かめてください。
 
 `$ npm -v
 6.4.1`
 
-このようなバージョン番号が表示されれば、環境の準備は完了です（表示されるバージョン番号は異なる場合があります）。npm を使ってアップロード用ライブラリをインストールします。次のコマンドを実行してください。
+このようなバージョン番号が表示されれば、環境の準備は完了です（表示されるバージョン番号は異なる場合があります）。npm を使ってアップロードライブラリをインストールします。次のコマンドを実行してください。
 
 `$ npm install -g needle`
 
 これで準備完了です。追加の設定は不要です。
 
 <div id="request-a-resumable-destination">
-  #### 再開可能な送信先をリクエストする
+  #### 再開可能なアップロード先をリクエストする
 </div>
 
-新しいジョブを作成する際に、再開可能なアップロードをサポートする送信先を取得できるよう、`resumable` パラメータを `true` に設定します。レスポンスペイロード内で、`upload_url` の値が返されます。
+新しいジョブを作成するときは、再開可能アップロードに対応したアップロード先を取得できるよう、`resumable` パラメータを `true` に設定します。レスポンスのペイロードには、`upload_url` の値が含まれます。
 
 ```
 "upload_url":\
@@ -114,9 +114,9 @@ https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submis
   #### ファイルをアップロードするコードを準備する
 </div>
 
-デフォルトでは、このライブラリはアップロード先（バケットと呼びます）とアップロードしたいファイル名を受け取り、新しいアップロード先を作成します。バッチコンプライアンスエンドポイントではアップロード先が自動的に用意されるため、ライブラリに対して「すでにアップロードを受け入れる準備ができている場所がある」ことを伝える必要があります。 
+デフォルトでは、このライブラリはアップロード先（バケットと呼ばれます）とアップロードしたいファイル名を受け取り、新しいアップロード先を作成します。バッチコンプライアンスエンドポイントは独自のアップロード先を作成するため、ライブラリに対して、すでにアップロード先が用意されていることを知らせる必要があります。 
 
-この値を、アップロード対象のデータを含むファイルの名前とともにアップロードライブラリに渡します。ファイルを作成し、***twitter-upload.js*** という名前を付けて、次のコードを追加してください:
+このアップロード先を示す値に加えて、アップロードするデータを含むファイル名を、アップロード用ライブラリに渡す必要があります。ファイルを 1 つ作成し、名前を ***twitter-upload.js*** としてください。次のコードを追加します:
 
 ```
 const needle = require('needle');
@@ -206,26 +206,26 @@ async function requestResumableSession(url) {
 requestResumableSession(uploadURL).then(result => console.log('アップロード完了'));
 ```
 
-ファイルは最も都合のよい場所に保存してください。次に、コマンドラインでスクリプトを実行し、2つのパラメーターを渡します。
+ファイルは、最も都合のよい場所に保存してください。次に、コマンドラインでスクリプトを実行し、2つのパラメータを渡します。
 
-1. 1つ目は、アップロードしたいファイル（ポストまたはユーザーIDを含む）の場所です。
-2. 2つ目は、compliance エンドポイントのレスポンスで受け取ったアップロードURLです。
+1. 1つ目は、アップロードしたいファイル（ポストまたはユーザー ID を含む）の場所です。
+2. 2つ目は、コンプライアンスエンドポイントのレスポンスで受け取ったアップロード用 URL です。
 
-URL は必ずダブルクォーテーションで囲み、ファイル名にスペースやその他の文字が含まれている場合も、同様にダブルクォーテーションで囲んでください。
+URL は必ず二重引用符で囲み、ファイル名にスペースやその他の文字が含まれる場合も、同様に二重引用符で囲んでください。
 
 ```
 node twitter-upload.js compliance_upload.txt\
 "https://storage.googleapis.com/compliance_tweet_ids/customer_test_object_12950882_GlYjiE?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=193969463581-compute%40developer.gserviceaccount.com%2F20200618%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20200618T184154Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=b7bdcf32479b08715be91ed47b06471b8acdcdb319f8e4f423bf3a3056dfa03ed83e47446f33338e292967a15c08fa5ba34395edaf057a2ac975b88e710ca994adb023a9e1673a7c58ce2fa0d73537f72812af78e92b708dfe6b907a7d75bd0f6cfa61fec867e80ac83ced0725d1ee59787c9dbca50d41f7b0f513dad63a7564136b1a70042a2ec6ba6b697cbe480a4405362f7a08255a5e8205aa7baa562f99e6a092f0420f33d67ffaeb132f877fbaf16c969630b5f173e8a3f31c473707241fa4e28f4bed13fb2ea01d3af1c449321a2e6ee9ec1e331b447cabcfc6f9d1f99f564d180f0cc1d28ea54972c996102c67c6501c6c16a00c13d17756f960e0e1"
 ```
 
-次のような出力が表示されます:
+次のような出力が表示されます。
 
 `Starting upload to:  https://storage.googleapis.com/twttr-tweet-compliance/<redacted>
 Upload not completed, resuming
 Initiating upload`
 
-Ctrl + C を押すか、コマンドラインを閉じることで、いつでもアップロードを一時停止できます。後で同じコマンドを実行すると、中断した場所からアップロードを再開できます。ファイルのアップロードが完了すると、次のメッセージが表示されます:
+Ctrl+C を押すか、コマンドラインを閉じることで、いつでもアップロードを一時停止できます。同じコマンドを後で再度実行すると、中断した箇所からアップロードを再開できます。ファイルのアップロードが完了すると、次のメッセージが表示されます。
 
 `Upload complete`
 
-この時点で、[compliance status endpoint](/ja/x-api/compliance/get-compliance-job) を使用してコンプライアンスジョブの状態を確認でき、完了後にはコンプライアンス結果をダウンロードできるようになります。
+この時点で、[コンプライアンスステータスエンドポイント](/ja/x-api/compliance/get-compliance-job)を使ってコンプライアンスジョブのステータスを確認したり、完了後にコンプライアンス結果をダウンロードしたりできるようになります。

@@ -1,25 +1,25 @@
 ---
-title: 身份验证
-sidebarTitle: 身份验证
+title: 认证
+sidebarTitle: 认证
 ---
 
-X API 要求对所有端点进行身份验证。XDK 支持三种身份验证方法：
+X API 要求对所有端点进行认证。XDK 支持三种认证方法：
 
-1. Bearer Token（仅应用 app-only）
-2. 使用 PKCE 的 OAuth 2.0
+1. Bearer Token（仅应用级）
+2. OAuth 2.0 结合 PKCE
 3. OAuth 1.0a（用户上下文）
 
-- **Bearer Token**：用于对支持应用级身份验证的端点进行只读访问（例如搜索帖子、使用流式端点）。
-- **OAuth 2.0 PKCE**：用于基于 scope、由用户授权的安全访问（例如获取已认证用户帖子中的 non_public 指标）。
-- **OAuth 1.0a**：用于用户特定操作的传统身份验证方式（例如代表用户发帖、管理列表）。
+- **Bearer Token**：用于对支持应用认证的端点进行只读访问（如搜索帖子、流式端点）。
+- **OAuth 2.0 PKCE**：提供基于 scope、由用户授权的安全访问（例如获取已认证用户帖子中的非公开指标）。
+- **OAuth 1.0a**：用于用户特定操作的遗留认证方式（例如代表用户发帖、管理列表）。
 
-从 [X 开发者门户](https://developer.x.com/en/portal/dashboard) 获取凭证。你需要一个已获批准的开发者账号，以及一个具有相应权限的应用（例如读取 + 写入）。
+在 [X 开发者门户](https://developer.x.com/en/portal/dashboard) 获取凭证。你需要一个获批的开发者账号，以及一个具有相应权限（如读取 + 写入）的应用。
 
 <div id="creating-a-client">
-  ## 创建 Client 实例
+  ## 创建 Client
 </div>
 
-所有身份验证流程都会创建一个 `Client` 实例：
+所有身份验证流程都会生成一个 `Client` 实例：
 
 ```python
 from xdk import Client
@@ -27,13 +27,13 @@ from xdk import Client
 
 
 <div id="1-bearer-token-app-only">
-  ### 1. Bearer Token (仅限应用)
+  ### 1. Bearer Token（仅限应用）
 </div>
 
-用于在没有用户上下文的情况下执行只读操作。
+用于在无用户上下文的情况下执行只读操作。
 **步骤**：
 
-1. 在开发者门户中为你的应用生成一个 Bearer Token。
+1. 在开发者门户中，为你的应用生成一个 Bearer Token。
 2. 将其传递给 `Client`。
    **示例**：
 
@@ -41,7 +41,7 @@ from xdk import Client
 client = Client(bearer_token="XXXXX")
 ```
 
-**使用方法**:
+**用法**:
 
 ```python
 # search_recent 返回一个迭代器,因此对其进行迭代
@@ -55,16 +55,16 @@ for page in client.posts.search_recent(query="python", max_results=10):
 
 
 <div id="2-oauth-20-with-pkce-user-context">
-  ### 2. 使用 PKCE 的 OAuth 2.0（用户上下文）
+  ### 2. 使用 OAuth 2.0 与 PKCE（用户上下文）
 </div>
 
-此示例展示了如何将 OAuth 2.0 与 Proof Key for Code Exchange（PKCE）一起使用。将其用于特定用户的访问（例如代表用户发布帖子、为用户上传媒体等）。
+此示例展示如何将 OAuth 2.0 与 Proof Key for Code Exchange (PKCE) 结合使用。将其用于用户上下文访问（例如代表某个用户发布帖子、为用户上传媒体等）。
 **步骤**：
 
 1. 在开发者门户中，使用重定向 URI（例如 `http://localhost:8080/callback`）注册你的应用。
-2. 获取 Client ID（使用 PKCE 不需要 client secret）。
-3. 启动流程，引导用户访问授权 URL 并处理回调。
-   **示例**（使用 Web 服务器处理回调）：
+2. 获取 Client ID（使用 PKCE 无需 client secret）。
+3. 发起授权流程，将用户重定向到授权 URL 并处理回调。
+   **示例**（使用 web 服务器来处理回调）：
 
 ```python
 from xdk.oauth2_auth import OAuth2PKCEAuth
@@ -94,7 +94,7 @@ client = Client(bearer_token=access_token)
 # client = Client(token=tokens)
 ```
 
-**令牌刷新**（在 SDK 中会针对长时间会话自动执行）：
+**令牌刷新**（对于长期会话，SDK 会自动执行）：
 
 ```python
 # If access token expires, refresh using stored refresh_token
@@ -110,13 +110,13 @@ client = Client(bearer_token=tokens["access_token"])
   ### 3. OAuth 1.0a（用户上下文）
 </div>
 
-针对旧版应用或某些需要使用 OAuth 1.0a 进行身份验证的特定用例：
+对于旧版应用或需要使用 OAuth 1.0a 进行认证的特定用例：
 **步骤**：
 
 1. 在开发者门户中获取你的 API Key 和 API Secret。
-2. 如果你已经有访问令牌，可以直接使用；否则，请完成 OAuth 1.0a 流程以获取访问令牌。
-3. 创建一个 OAuth1 实例，并将该实例传递给 Client。
-   **示例**（使用现有访问令牌）：
+2. 如果你已经拥有访问令牌，可以直接使用；否则，请完成 OAuth 1.0a 授权流程来获取它们。
+3. 创建一个 OAuth1 实例并将其传入 Client。
+   **示例**（使用已有访问令牌）：
 
 ```python
 from xdk import Client
@@ -137,7 +137,7 @@ me = response.data
 print(me)
 ```
 
-**示例**（完整的 OAuth 1.0a 授权流程）：
+**示例**（完整的 OAuth 1.0a 流程）：
 
 ```python
 from xdk import Client
@@ -169,6 +169,6 @@ response = client.users.get_me()
 **注意**：
 
 * 在生产环境中绝不要将机密信息硬编码到代码中；请使用环境变量或机密管理服务（例如 `os.getenv("X_BEARER_TOKEN")`）。
-* 对于 PKCE，在生产环境中务必为重定向 URI 使用 HTTPS。
-* SDK 会验证令牌，并在验证失败时抛出 `xdk.AuthenticationError`。
-  如需查看使用 Python XDK 的详细代码示例，请访问我们的[代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/python)。
+* 对于 PKCE，请确保在生产环境中的重定向 URI 使用 HTTPS。
+* SDK 会验证令牌，如果验证失败会抛出 `xdk.AuthenticationError`。
+  要查看使用 Python XDK 的详细代码示例，请访问我们的[代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/python)。

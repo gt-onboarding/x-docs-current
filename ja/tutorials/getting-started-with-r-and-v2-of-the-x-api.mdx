@@ -1,5 +1,5 @@
 ---
-title: R と X API v2 入門
+title: R と X API v2 のはじめ方
 mode: wide
 keywords: ["R プログラミング", "R チュートリアル", "R API", "統計解析", "データ分析", "R 言語", "R 連携"]
 ---
@@ -8,28 +8,30 @@ keywords: ["R プログラミング", "R チュートリアル", "R API", "統�
   ## はじめに
 </div>
 
-このチュートリアルでは、プログラミング言語 R と X API v2 を使い始めるために必要な手順を順を追って説明します。R を使用して
+このチュートリアルでは、プログラミング言語 R と X API v2 を使い始めるために必要なことを、順を追って解説します。R を使って
 [user lookup](/ja/x-api/users/lookup/introduction) エンドポイントに接続し、
-X API から返される JSON をどのように扱うかを示します。user lookup は
-GET メソッドのエンドポイントであり、ユーザー ID またはユーザー名で指定された 1 人または複数のユーザーに関する情報を返します。
+X API から返される JSON をどのように扱うかを紹介します。user lookup は
+GET メソッドであり、ユーザー ID またはユーザー名で指定された 1 人または複数のユーザーに関する情報を返します。
 
-R は、時系列分析、モデリング、可視化、その他のデータ分析といった一般的なデータサイエンスのタスクで広く利用されている言語の 1 つであり、X API と組み合わせて使われることもよくあります。user
-lookup エンドポイントを使用すると、
-[user object](/ja/x-api/fundamentals/data-dictionary#user) を用いて、ある人物が持つフォロワー数と、その人の自己紹介文の感情スコアとの相関関係を判定できます。user object は、プロフィールに公開されている所在地にもとづいてアカウントのグループをマッピングする用途にも使用できます。
+ご存じない方のために説明すると、R は時系列解析、モデリング、可視化、その他のデータ分析といった一般的なデータサイエンスのタスクで最もよく使われる言語の 1 つであり、X API と組み合わせて利用されることもよくあります。user
+lookup エンドポイントを使うと、
+[user object](/ja/x-api/fundamentals/data-dictionary#user) を利用して、ある人物のフォロワー数と、その人物の自己紹介文のセンチメントスコアとの相関関係を判定できます。user object はまた、プロフィールで公開されている所在地情報に基づいて、アカウントのグループをマッピングすることにも使えます。
 
 <div id="getting-started-with-the-x-api">
   ### X API を使い始める
 </div>
 
-X API v2 を使用する前に、
+X API v2 を利用する前に、まず
 [サインアップ](https://developer.x.com/en/portal/petition/essential/basic-info)
 して開発者アカウントを取得する必要があります。
 
-開発者アカウントが承認されたら、まず
-[プロジェクト](/ja/resources/fundamentals/projects) を作成する必要があります。プロジェクトを使用すると、X API の利用目的に応じて作業内容を整理できるため、API へのアクセスを効果的に管理し、利用状況を把握できます。
+開発者アカウントが承認されたら、最初に
+[プロジェクト](/ja/resources/fundamentals/projects)
+を作成する必要があります。プロジェクトを使用すると、X API の利用目的に基づいて作業を整理できるため、API へのアクセスを効果的に管理し、利用状況を監視できます。
 
-各プロジェクトには [App](/ja/resources/fundamentals/developer-apps) が含まれており、X API を利用するために必要な認証情報を生成できます。
-X API の始め方の詳細については、ドキュメント内の
+各プロジェクトには 1 つの
+[App](/ja/resources/fundamentals/developer-apps)
+が含まれており、これを使って X API を利用するために必要な認証情報を生成できます。X API のはじめ方について詳しくは、ドキュメント内の
 [getting started](/ja/x-api/getting-started/about-x-api)
 セクションを参照してください。
 
@@ -38,20 +40,19 @@ X API の始め方の詳細については、ドキュメント内の
 </div>
 
 まず、[R をダウンロード](https://cloud.r-project.org/)する必要があります。これは
-[CRAN のウェブサイト](https://cran.r-project.org/)から行えます。
+[CRAN の Web サイト](https://cran.r-project.org/)から行えます。
 
-その後、R で作業する環境を整えるには、
-[RStudio](https://www.rstudio.com/)、R 拡張機能パックを備えた
-[Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r-pack)、
-あるいは Python を利用してきた場合は
+その後、R を扱うための環境として、
+[RStudio](https://www.rstudio.com/)、[Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=Ikuyadeu.r-pack) 向けの R 拡張機能パック、
+あるいは Python を使ってきた方であれば
 [Jupyter Notebook](https://docs.anaconda.com/anaconda/navigator/tutorials/r-lang/)
-を使用できます。
+などを利用できます。
 
 <div id="setting-up-your-environment-variable">
   ### 環境変数の設定
 </div>
 
-これから紹介するコードサンプルを実行するにあたっては、Bearer Token 用の環境変数を作成しておく必要があります。Bearer Token は、X API に対して認証を行い、リクエストを送信できるようにするためのものです。まず最初に、`"your-bearer-token"` を、自分の Bearer Token（developer portal 上の App の「Keys and tokens」セクションで取得できます）に置き換えてください。スクリプトを書き始める前に、この1行のコードをコンソールで実行しておく必要があります。
+これから示すコード例では、Bearer Token 用の環境変数を作成しておく必要があります。Bearer Token は、X API への認証を行い、リクエストを送信できるようにするためのものです。まず、`your-bearer-token` を、developer portal の自分のアプリの「キーとトークン」セクションで取得できる自分の Bearer Token に置き換えてください。スクリプトを書き始める前に、このコード行をコンソールで実行しておく必要があります。
 
 ```r
 Sys.setenv(BEARER_TOKEN = "your-bearer-token")
@@ -61,12 +62,8 @@ Sys.setenv(BEARER_TOKEN = "your-bearer-token")
   ### リクエストの送信
 </div>
 
-[httr](https://cran.r-project.org/web/packages/httr/index.html) パッケージを使用して、
-X API への HTTP リクエストを送信できます。まだインストールしていない場合は、
-コンソールからこのパッケージをインストールしてください。あわせて、
-JSON オブジェクトを扱うための
-[jsonlite](https://cran.r-project.org/web/packages/jsonlite/index.html) と、
-データ操作用の [dplyr](https://dplyr.tidyverse.org/) もインストールする必要があります。
+[httr](https://cran.r-project.org/web/packages/httr/index.html) パッケージを使用すると、X API に HTTP リクエストを送信できます。まだインストールしていない場合は、R コンソールでこのパッケージをインストールしてください。また、JSON データを扱うための
+[jsonlite](https://cran.r-project.org/web/packages/jsonlite/index.html) と、データ操作用の [dplyr](https://dplyr.tidyverse.org/) もインストールしておく必要があります。
 
 ```r
 install.packages("httr")
@@ -74,7 +71,7 @@ install.packages("jsonlite")
 install.packages("dplyr")
 ```
 
-API に接続するための R スクリプトの記述を開始できます。ファイルの先頭で、`httr`、`jsonlite`、`dplyr` パッケージを読み込みます。
+API に接続するための R スクリプトの作成を開始できます。ファイルの先頭で、`httr`、`jsonlite`、`dplyr` パッケージを読み込みます。
 
 ```r
 require(httr)
@@ -82,9 +79,9 @@ require(jsonlite)
 require(dplyr)
 ```
 
-コードサンプルの最初のステップは、X API へ認証するための準備をすることです。アプリから取得した
-[Bearer Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) を用意し、認証のためヘッダーに渡してください。以下の
-例では、$BEARER&#95;TOKEN を自分のトークンに置き換えてください。
+コードサンプルの最初のステップは、X API への認証を行うための準備です。アプリから取得した
+[Bearer Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)
+を用意し、認証のためにヘッダーに渡します。以下の例では、$BEARER&#95;TOKEN を自身のトークンに置き換えてください。
 
 ```r
 bearer_token <- Sys.getenv("$BEARER_TOKEN")
@@ -92,25 +89,24 @@ headers <- c(`Authorization` = sprintf('Bearer %s', bearer_token))
 ```
 
 認証の設定が完了したら、リクエストのパラメータを定義します。
-デフォルトでは、返される各ユーザーの id、name、username が返却されます。
-このペイロードは、追加の
-[fields](/ja/x-api/fundamentals/fields) や
-[expansions](/ja/x-api/fundamentals/expansions) を指定することでカスタマイズできます。
-この例では、user.fields=description で指定されるユーザーのプロフィールの自己紹介文と、
-ユーザーのピン留めされたポストを含む expansion が必要になります。
+デフォルトでは、取得した各ユーザーについて id、name、username が返されます。
+追加の[フィールド](/ja/x-api/fundamentals/fields)や
+[expansions](/ja/x-api/fundamentals/expansions) を指定することで、このペイロードを調整できます。
+この例では、ユーザーのプロフィールの自己紹介文を取得するために user.fields=description を指定し、
+さらにユーザーのピン留めされたポストを含めるための expansion を指定します。
 
 ```r
 params <- list(`user.fields` = 'description', `expansions` = 'pinned_tweet_id')
 ```
 
-これで、より詳しい情報を取得したい X のハンドル（アカウント名）を使って、URL を組み立てる準備ができました。サンプルを再利用可能にするために、`readline` メソッドを使用します。調べたいハンドルを入力したら、`$USERNAME` を目的の X ハンドルに置き換えて、指定したハンドルを含むように URL を組み立てます。
+これで、詳細情報を取得したい X ハンドル（アカウントとも呼ばれます）を使って URL をフォーマットする準備ができました。`readline` メソッドを使用して、このサンプルを再利用可能にします。調べたいハンドルを入力したら、`$USERNAME` を目的の X ハンドルに置き換えて、指定したハンドルを含むように URL をフォーマットします。
 
 ```r
 handle <- readline('$USERNAME')
 url_handle <- sprintf('https://api.x.com/2/users/by?usernames=%s', handle)
 ```
 
-ここまで来たら、先ほど作成した URL に対して `httr` パッケージを使って GET リクエストを行い、ヘッダーで認証情報を渡し、さらに定義したパラメータを指定します。レスポンスはテキストオブジェクトとして変数 obj に保存でき、これを出力してリクエスト結果を確認できます。
+ここまで来たら、先ほど作成した URL に対して httr パッケージを使って GET リクエストを送り、ヘッダーに認証情報を指定し、定義したパラメータを渡します。レスポンスはテキストオブジェクトとして変数 obj に保存し、これを出力して、送信したリクエストの結果を確認できます。
 
 ```r
 response <-
@@ -122,16 +118,19 @@ print(obj)
 ```
 
 <div id="working-with-our-json-payload">
-  ### JSON ペイロードの操作
+  ### JSON ペイロードの扱い方
 </div>
 
-JSON を扱う際に私が好んで使う方法の 1 つは、データフレームを利用することです。データフレームを使うと、複雑にネストされたデータに簡単にアクセスできます。これを行うには、`jsonlite` パッケージの `fromJSON` メソッドを使ってファイルをフラット化し、フィールドが同一のオブジェクト内に収まるようにします。その後、そのオブジェクトをデータフレームに変換します。これで、このデータフレームを表示する準備が整いました。
+JSON を扱う際に私がよく使う方法の1つは、データフレームを使うことです。データフレームを使うと、
+複雑にネストされたデータに簡単にアクセスできます。これを行うには、jsonlite パッケージの fromJSON メソッドを使って
+ファイルをフラット化し、フィールドが同じオブジェクト内に入るようにします。次に、そのオブジェクトをデータフレームに渡します。
+これで、このデータフレームを確認する準備が整いました。
 
 ```
 json_data <- fromJSON(obj, flatten = TRUE) %>% as.data.frame View(json_data)
 ```
 
-データフレームからデータのフィールドにアクセスし、それらを使ってハンドル、ユーザー名、自己紹介文を含む文字列を作成できます。
+データフレームからデータのフィールドにアクセスし、それらを使ってハンドル、ユーザー名、自己紹介文を含む文字列を作成することができます。
 
 ```r
 final <-
@@ -143,18 +142,18 @@ final <-
   )
 ```
 
-取得している各フィールドの間に改行を挿入してオブジェクトを表示するには、`print` ではなく `cat` を使用してください。
+取得している各フィールドの間に改行を入れてオブジェクトを表示するには、`print` の代わりに `cat` を使用してください。
 
 ```r
 cat(final)
 ```
 
-複数のハンドルに対してリクエストを送信している場合は、ループを使えば、各データフレームの要素に簡単にアクセスできます。
+複数のハンドルに対してリクエストを送信している場合は、ループを使えば各データフレームの要素に簡単にアクセスできます。
 
 <div id="conclusion">
-  ### 結論
+  ### まとめ
 </div>
 
-このチュートリアルが、R と X API を扱い始めるための出発点となれば幸いです。次のステップとして、recent search、Post lookup、user lookup 用の R 向けサンプルについては、私たちの
-[v2 sample code](https://github.com/xdevplatform) を参照してください。途中で何か問題があれば
-[forums](https://devcommunity.x.com/) でお知らせいただくか、このチュートリアルから何かを作りたくなったら [@XDevelopers](https://x.com/XDevelopers) へポストしてください。
+このチュートリアルが、R と X API を扱う際の出発点となれば幸いです。次のステップとして、最近検索、ポスト取得、ユーザー取得向けの R のサンプルコードがある
+[v2 sample code](https://github.com/xdevplatform) をぜひご確認ください。途中で問題が発生した場合は
+[forums](https://devcommunity.x.com/) でお知らせいただくか、このチュートリアルからインスピレーションを得て何かを作成された場合は [@XDevelopers](https://x.com/XDevelopers) へポストしてお知らせください。

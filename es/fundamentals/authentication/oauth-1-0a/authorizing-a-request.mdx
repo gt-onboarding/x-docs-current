@@ -1,7 +1,7 @@
 ---
-title: Autorizar una solicitud
-sidebarTitle: Autorizar una solicitud
-keywords: ["autorizar una solicitud", "autorización OAuth", "autorización de solicitudes", "autorización OAuth 1.0a", "autorizar una solicitud de API"]
+title: "Autorizar una solicitud"
+sidebarTitle: "Autorizar una solicitud"
+keywords: ["autorizar solicitud", "autorización OAuth", "autorización de una solicitud", "autorización OAuth 1.0a", "autorizar solicitud de API"]
 ---
 
 import { Button } from "/snippets/es/button.mdx";
@@ -10,9 +10,9 @@ import { Button } from "/snippets/es/button.mdx";
   ### Autorizar una solicitud
 </div>
 
-El propósito de este documento es mostrarte cómo modificar solicitudes HTTP con el fin de enviar solicitudes autorizadas a la X API.
+El objetivo de este documento es mostrarte cómo modificar solicitudes HTTP con el fin de enviar solicitudes autorizadas a la X API.
 
-Todas las API de X se basan en el protocolo HTTP. Esto significa que cualquier software que escribas y que use las API de X envía una serie de mensajes estructurados a los servidores de X. Por ejemplo, una solicitud para publicar el texto “**Hello Ladies + Gentlemen, a signed OAuth request!**” como una Publicación se verá de la siguiente manera:
+Todas las API de X se basan en el protocolo HTTP. Esto significa que cualquier software que escribas y que utilice las API de X envía una serie de mensajes estructurados a los servidores de X. Por ejemplo, una solicitud para publicar el texto “**Hello Ladies + Gentlemen, a signed OAuth request!**” como una Publicación se verá algo como esto:
 
 ```
 POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
@@ -26,14 +26,14 @@ Host: api.x.com
 status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
 ```
 
-Cualquier biblioteca HTTP debería poder generar y enviar la solicitud anterior con un mínimo de dificultad. Sin embargo, la solicitud anterior se considera no válida, ya que no hay forma de saber:
+Cualquier biblioteca HTTP debería poder generar y enviar la solicitud anterior sin demasiada dificultad. Sin embargo, la solicitud anterior se considera no válida, ya que no hay forma de saber:
 
 1. Qué aplicación está realizando la solicitud
-2. En nombre de qué usuario se está enviando la solicitud
-3. Si el usuario ha concedido a la aplicación autorización para publicar en su nombre
+2. En nombre de qué usuario se está publicando la solicitud
+3. Si el usuario ha otorgado a la aplicación autorización para publicar en su nombre
 4. Si la solicitud ha sido manipulada por un tercero durante su transmisión
 
-Para permitir que las aplicaciones proporcionen esta información, la API de X se basa en el [protocolo OAuth 1.0a](http://tools.ietf.org/html/rfc5849). En un nivel muy simplificado, la implementación de X requiere que las solicitudes que necesitan autorización contengan un encabezado HTTP Authorization adicional con suficiente información para responder las preguntas enumeradas anteriormente. Una versión de la solicitud HTTP mostrada arriba, modificada para incluir este encabezado, tiene el siguiente aspecto (normalmente el encabezado Authorization debería estar en una sola línea, pero aquí se ha dividido para facilitar la lectura):
+Para permitir que las aplicaciones proporcionen esta información, la API de X se basa en el [protocolo OAuth 1.0a](http://tools.ietf.org/html/rfc5849). De forma muy simplificada, la implementación de X requiere que las solicitudes que necesitan autorización contengan un encabezado HTTP Authorization adicional con suficiente información para responder a las preguntas anteriores. Una versión de la solicitud HTTP mostrada arriba, modificada para incluir este encabezado, sería similar a esta (normalmente el encabezado Authorization tendría que estar en una sola línea, pero aquí se ha dividido para que sea más legible):
 
 ```
 POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
@@ -55,18 +55,18 @@ Host: api.x.com
 status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
 ```
 
-Cuando se creó esta solicitud, habría sido aceptada por la X API como válida.
+Cuando se creó esta solicitud, la X API la habría aceptado como válida.
 
-Si este proceso de firma te parece que excede el alcance de tu integración, considera usar [Web Intents](https://dev.x.com/web/intents), que no necesitan usar OAuth para interactuar con la X API.
+Si este proceso de firma parece estar fuera del alcance de tu integración, considera usar [Web Intents](https://dev.x.com/web/intents), que no necesitan usar OAuth para interactuar con la X API.
  
 
 **Recopilación de parámetros**
 
-Deberías poder ver que el encabezado contiene 7 pares clave/valor, donde todas las claves comienzan con la cadena “oauth&#95;”. Para cualquier solicitud de la X API, recopilar estos 7 valores y crear un encabezado similar te permitirá especificar la autorización para la solicitud. A continuación se describe cómo se generó cada valor:
+Deberías poder ver que el encabezado contiene 7 pares clave/valor, donde todas las claves comienzan con la cadena “oauth&#95;”. Para cualquier solicitud a la X API, recopilar estos 7 valores y crear un encabezado similar te permitirá especificar la autorización para la solicitud. A continuación se describe cómo se generó cada valor:
 
 **Consumer key**
 
-El oauth&#95;consumer&#95;key identifica qué aplicación está realizando la solicitud. Obtén este valor en la página de configuración de tu [X app](/es/resources/fundamentals/developer-apps) en el [portal para desarrolladores](/es/resources/fundamentals/developer-portal).
+El oauth&#95;consumer&#95;key identifica qué aplicación está realizando la solicitud. Obtén este valor en la página de configuración de tu [Aplicación de X](/es/resources/fundamentals/developer-apps) en el [portal para desarrolladores](/es/resources/fundamentals/developer-portal).
 
 |                            |                        |
 | :------------------------- | :--------------------- |
@@ -74,7 +74,7 @@ El oauth&#95;consumer&#95;key identifica qué aplicación está realizando la 
 
 **Nonce**
 
-El parámetro oauth&#95;nonce es un token único que tu aplicación debe generar para cada solicitud. X utilizará este valor para determinar si una solicitud se ha enviado varias veces. El valor de esta solicitud se generó codificando en base64 32 bytes de datos aleatorios y eliminando todos los caracteres no alfanuméricos, pero cualquier método que produzca una cadena alfanumérica relativamente aleatoria debería funcionar aquí.
+El parámetro oauth&#95;nonce es un token único que tu aplicación debe generar para cada solicitud individual. X usará este valor para determinar si una solicitud se ha enviado varias veces. El valor para esta solicitud se generó codificando en base64 32 bytes de datos aleatorios y eliminando todos los caracteres que no sean alfanuméricos, pero cualquier enfoque que produzca una cadena alfanumérica relativamente aleatoria debería funcionar aquí.
 
 |                 |                                            |
 | :-------------- | :----------------------------------------- |
@@ -82,9 +82,9 @@ El parámetro oauth&#95;nonce es un token único que tu aplicación debe gener
 
 **Signature**
 
-El parámetro oauth&#95;signature contiene un valor que se genera al procesar todos los demás parámetros de la solicitud, junto con dos valores secretos, mediante un algoritmo de firma. El propósito de la firma es que X pueda verificar que la solicitud no se haya modificado durante la transmisión, verificar la aplicación que envía la solicitud y verificar que la aplicación tenga autorización para interactuar con la cuenta del usuario.
+El parámetro oauth&#95;signature contiene un valor que se genera al pasar todos los demás parámetros de la solicitud y dos valores secretos por un algoritmo de firma. El propósito de la firma es que X pueda verificar que la solicitud no ha sido modificada en tránsito, verificar la aplicación que envía la solicitud y verificar que la aplicación tiene autorización para interactuar con la cuenta del usuario.
 
-El proceso para calcular oauth&#95;signature para esta solicitud se describe en [Creating a signature](/es/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature).
+El proceso para calcular el oauth&#95;signature para esta solicitud se describe en [Creating a signature](/es/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature).
 
 |     |     |
 | :--- | :--- |
@@ -100,7 +100,7 @@ El oauth&#95;signature&#95;method utilizado por X es HMAC-SHA1. Este valor se
 
 **Marca de tiempo**
 
-El parámetro oauth&#95;timestamp indica cuándo se creó la solicitud. Este valor debe ser la cantidad de segundos transcurridos desde la época de Unix en el momento en que se genera la solicitud y debería poder generarse fácilmente en la mayoría de los lenguajes de programación. X rechazará las solicitudes que se hayan creado hace demasiado tiempo, por lo que es importante mantener el reloj del equipo que genera las solicitudes sincronizado con NTP.
+El parámetro oauth&#95;timestamp indica cuándo se creó la solicitud. Este valor debe ser el número de segundos desde la época Unix en el momento en que se genera la solicitud y debería poder generarse fácilmente en la mayoría de los lenguajes de programación. X rechazará las solicitudes que se hayan creado hace demasiado tiempo, por lo que es importante mantener el reloj de la computadora que genera las solicitudes sincronizado con NTP.
 
 |     |     |
 | :--- | :--- |
@@ -108,9 +108,9 @@ El parámetro oauth&#95;timestamp indica cuándo se creó la solicitud. Este v
 
 **Token**
 
-El parámetro oauth&#95;token normalmente representa el permiso de un usuario para compartir el acceso a su cuenta con tu aplicación. Hay algunas solicitudes de autenticación en las que este valor no se envía o es una forma diferente de token, pero esas se tratan en detalle en [Obtaining access tokens](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens). Para la mayoría de las solicitudes de uso general, utilizarás lo que se conoce como un **token de acceso**.
+El parámetro oauth&#95;token normalmente representa el permiso de un usuario para compartir el acceso a su cuenta con tu aplicación. Hay algunas solicitudes de autenticación en las que este valor no se envía o es una forma diferente de token, pero estas se tratan en detalle en [Obtaining access tokens](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens). Para la mayoría de las solicitudes de uso general, utilizarás lo que se denomina un **Token de acceso**.
 
-Puedes generar un [token de acceso](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) válido para tu cuenta en la página de configuración de tu [aplicación de X](/es/resources/fundamentals/developer-apps) en el [developer portal](/es/resources/fundamentals/developer-portal).
+Puedes generar un [Token de acceso](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) válido para tu cuenta en la página de configuración de tu [aplicación de X](/es/resources/fundamentals/developer-apps) en el [portal para desarrolladores](/es/resources/fundamentals/developer-portal).
 
 |     |     |
 | :--- | :--- |
@@ -118,33 +118,33 @@ Puedes generar un [token de acceso](/es/resources/fundamentals/authentication/oa
 
 **Versión**
 
-El parámetro oauth&#95;version siempre debe ser 1.0 para cualquier solicitud enviada a la X API.
+El parámetro oauth&#95;version debe ser siempre 1.0 para cualquier solicitud enviada a la X API.
 
 |     |     |
 | :--- | :--- |
 | oauth&#95;version | 1.0 |
 
 <div id="building-the-header-string">
-  #### Creación de la cadena de encabezado
+  #### Construcción de la cadena de encabezado
 </div>
 
-Para crear la cadena de encabezado, imagina que escribes en una cadena denominada DST.
+Para construir la cadena de encabezado, imagina que escribes en una cadena llamada DST.
 
 1. Añade la cadena “OAuth ” (incluyendo el espacio al final) a DST.
-2. Para cada par clave/valor de los 7 parámetros enumerados arriba:
-   1. [Codifica en porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) la clave y añádela a DST.
+2. Para cada par clave/valor de los 7 parámetros listados arriba:
+   1. [Codifica por porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) la clave y añádela a DST.
    2. Añade el signo igual ‘=’ a DST.
    3. Añade una comilla doble ‘”’ a DST.
-   4. [Codifica en porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) el valor y añádelo a DST.
+   4. [Codifica por porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) el valor y añádelo a DST.
    5. Añade una comilla doble ‘”’ a DST.
    6. Si quedan pares clave/valor, añade una coma ‘,’ y un espacio ‘ ‘ a DST.
 
-Presta especial atención a la codificación en porcentaje de los valores al construir esta cadena. Por ejemplo, el valor de oauth&#95;signature de tnnArxj06cWHq44gCs1OSKk/jLY= debe codificarse como tnnArxj06cWHq44gCs1OSKk%2FjLY%3D.
+Presta especial atención a la codificación por porcentaje de los valores al construir esta cadena. Por ejemplo, el valor de oauth&#95;signature tnnArxj06cWHq44gCs1OSKk/jLY= debe codificarse como tnnArxj06cWHq44gCs1OSKk%2FjLY%3D.
 
-Aplicar estos pasos a los parámetros recopilados arriba da como resultado la siguiente cadena:
+Aplicar estos pasos a los parámetros recopilados anteriormente da como resultado la siguiente cadena:
 
 ```
 OAuth oauth\_consumer\_key="xvz1evFS4wEEPTGEFPHBog", oauth\_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg", oauth\_signature="tnnArxj06cWHq44gCs1OSKk%2FjLY%3D", oauth\_signature\_method="HMAC-SHA1", oauth\_timestamp="1318622958", oauth\_token="370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb", oauth_version="1.0"
 ```
 
-Este valor debe usarse como encabezado Authorization de la solicitud.
+Este valor debe configurarse como el encabezado Authorization de la solicitud.

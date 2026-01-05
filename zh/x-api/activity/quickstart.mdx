@@ -1,20 +1,20 @@
 ---
 title: 快速入门
 sidebarTitle: 快速入门
-keywords: ["activity API 快速入门", "X Activity API 快速入门", "activity 快速入门", "activity 教程", "activity 指南"]
+keywords: ["activity API quickstart", "X Activity API quickstart", "activity quickstart", "activity tutorial", "activity guide"]
 ---
 
-本指南说明如何使用 X Activity API 端点来订阅并接收事件。一般分为 3 个步骤：
+本指南介绍如何使用 X Activity API 端点订阅并接收事件。通常需要 3 个步骤：
 
-1. 确定你想要筛选其事件的用户的 User ID
+1. 确定你要筛选其事件的用户的 User ID
 2. 为该用户创建你想要筛选的事件类型的订阅
-3. 使用 Webhook 或持久 HTTP 流式连接接收事件
+3. 通过 webhook 或持久 HTTP 流式连接接收事件
 
 <div id="getting-user-ids">
   ## 获取用户 ID
 </div>
 
-在创建订阅之前，你需要先知道你想要作为过滤条件的账号的用户 ID。此示例中，我们将使用 XDevelopers 账号。你可以通过几种方式查询用户 ID，包括：
+在创建订阅之前，你需要先知道要作为过滤对象的那个账号的用户 ID。在本示例中，我们将使用 XDevelopers 这个 handle。你可以通过几种方式查询用户 ID，包括：
 
 **通过用户名查询用户的 ID：**
 
@@ -28,7 +28,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" "https://api.x.com/2/users/by/
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
 ```
 
-这两个端点都会返回用户信息，包括 `id` 字段，你可以在订阅过滤条件中使用该字段。下面是一个示例 JSON 响应：
+这两个端点都会返回用户信息，包括 `id` 字段，你可以在订阅过滤条件中使用该字段。示例 JSON 响应如下所示：
 
 ```json
 {
@@ -45,9 +45,9 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
   ## 创建订阅
 </div>
 
-下一步是创建一个订阅。在本示例中，我们将订阅 XDevelopers 账号的个人简介更新。为此，我们会在 JSON 请求体中传入 `user_id` 和 `event_type`。在这个例子中，`event_type` 为 `ProfileBioUpdate`。
+下一步是创建一个订阅。在这个示例中，我们将订阅 X Developers 的个人简介更新。为此，我们会在 JSON 请求体中传入 `user_id` 和 `event_type`。在本例中，`event_type` 为 `ProfileBioUpdate`。
 
-我们将传入 XDevelopers 的用户 id：`2244994945`，以及一个可选的标签：
+我们将传入 X Developers 的用户 ID：`2244994945`，以及一个可选标签：
 
 ```json
 {
@@ -59,7 +59,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
 }
 ```
 
-我们将使用来自开发者门户的 [Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/overview#bearer-token-also-known-as-app-only)，来对所有与 XAA 相关的端点进行授权：
+我们将使用在开发者门户中获取的 [Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/overview#bearer-token-also-known-as-app-only)，对所有与 XAA 相关的端点进行授权：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -74,7 +74,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   }'
 ```
 
-请求成功后，将创建订阅：
+请求成功后，将创建你的订阅：
 
 ```json
 {
@@ -101,13 +101,13 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   ## 获取事件
 </div>
 
-创建订阅后，我们可以通过 [webhooks](https://docs.x.com/x-api/webhooks/introduction) 或持久 HTTP 流来接收事件。在本示例中，我们将打开一个持久 HTTP 流：
+创建订阅之后，我们可以通过 [webhooks](https://docs.x.com/x-api/webhooks/introduction) 或持久 HTTP 流来接收事件。在本示例中，我们将建立持久 HTTP 流连接：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/activity/stream
 ```
 
-当 X 开发者账号更新其个人简介时，该事件将通过流进行推送：
+当 X 开发者账户更新其个人简介时，该事件将通过流发送：
 
 ```json
 {
@@ -130,13 +130,13 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/activity/s
   ## 订阅管理
 </div>
 
-X Activity API 提供接口，可通过标准的 CRUD 操作来管理订阅。
+X Activity API 提供了一组端点，可通过标准的 CRUD 操作管理订阅。
 
 <div id="create-subscription">
   ### 创建订阅
 </div>
 
-创建一个新的订阅用于接收事件：
+创建新的订阅以接收事件：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -155,7 +155,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 **注意：**
 
 * `tag` 字段是可选的。可用于在投递时标识事件。
-* `webhook_id` 字段同样是可选的。有关设置 webhook 的帮助，请参阅我们的 [webhook 文档](https://docs.x.com/x-api/webhooks/introduction)。如果指定了 `webhook_id`，在流处于打开状态时，事件除了会投递到提供的 webhook，还会投递到该流。
+* `webhook_id` 字段也是可选的。请参阅我们的 [webhook 文档](https://docs.x.com/x-api/webhooks/introduction) 了解如何设置 webhook。如果指定了 `webhook_id`，在流处于打开状态时，事件会在发送到该流的同时，也被投递到指定的 webhook。
 
 **响应：**
 
@@ -180,7 +180,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   ### 列出订阅
 </div>
 
-获取你的应用的所有当前有效订阅：
+获取您应用的所有有效订阅：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -222,7 +222,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   ### 删除订阅
 </div>
 
-删除订阅：
+移除订阅：
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -243,16 +243,16 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 }
 ```
 
-`total_subscriptions` 显示删除操作完成后与你的应用关联的剩余订阅数。
+`total_subscriptions` 表示删除操作执行后与你的应用关联的剩余订阅数量。
 
 
 <div id="update-subscription">
   ### 更新订阅
 </div>
 
-该 PUT 端点允许你更新订阅的交付方式或标签。
+该 PUT 端点允许你更新订阅的投递方式或标签。
 
-更新 `filter` 或 `event_type` 时，需要先删除现有订阅，然后再创建一个新的订阅。
+更新 `filter` 或 `event_type` 字段时，需要先删除现有订阅，然后再创建一个新的订阅。
 
 ```
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \

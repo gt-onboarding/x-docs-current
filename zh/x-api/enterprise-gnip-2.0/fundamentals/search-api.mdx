@@ -6,9 +6,9 @@ keywords: ["enterprise search", "GNIP search", "enterprise search API", "search 
 
 > **请注意：**
 >
-> 我们已经在 [X API v2](/zh/x-api/getting-started/about-x-api) 中发布了新版的 [搜索帖子](/zh/x-api/posts/search/introduction) 和 [帖子计数](/zh/x-api/posts/counts/introduction)。建议你[查看 X API v2 的新变化](/zh/x-api/migrate/overview)。
+> 我们已经在 [X API v2](/zh/x-api/getting-started/about-x-api) 中发布了新版的 [搜索帖子](/zh/x-api/posts/search/introduction) 和 [帖子计数](/zh/x-api/posts/counts/introduction)。建议你[查看 X API v2 中的新变化](/zh/x-api/migrate/overview)。
 >
-> 这些端点已更新，现已包含帖子编辑元数据。你可以在[“编辑帖子”基础知识页面](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)了解更多关于这些元数据信息。 
+> 这些端点已经更新，现已包含帖子编辑相关的元数据。你可以在[“编辑帖子”基础知识页面](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)了解更多关于这些元数据的信息。 
 
 <div id="overview">
   ## 概览
@@ -16,26 +16,26 @@ keywords: ["enterprise search", "GNIP search", "enterprise search API", "search 
 
 `Enterprise`
 
-*Enterprise API 仅在我们的受管访问级别下提供。要使用这些 API，您必须先通过我们的 Enterprise 销售团队开通账户。要了解更多信息，请参阅 [此处](https://developer.x.com/en/products/x-api/enterprise)。*
+*Enterprise API 仅在我们的托管访问级别中可用。要使用这些 API，您必须先与我们的 Enterprise 销售团队开通账户。要了解更多信息，请参见 [此处](https://developer.x.com/en/products/x-api/enterprise)。*
 
-*您可以在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api)查看所有 X API 搜索帖子相关产品。*
+*您可以在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api)查看所有 X API 搜索帖子产品。*
 
-有两个 Enterprise 搜索 API：
+有两种 Enterprise 搜索 API：
 
-1. 30-Day Search API 提供过去 30 天的数据。
-2. Full-Archive Search API 提供对完整 X 数据全量存档的即时访问，最早可追溯到 2006 年 3 月发布的第一条帖子。
+1. 30-Day Search API 提供最近 30 天的数据。
+2. Full-Archive Search API 提供对 X 完整数据语料库的即时、全量访问，可一直追溯到 2006 年 3 月发布的第一条帖子。
 
-这些 RESTful API 每次请求支持一个最长 2,048 个字符的查询。查询使用 PowerTrack 规则语法编写——更多详情请参阅 [规则与过滤](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#getting-started-with-enterprise-rules-and-queries)。用户可以指定任意时间段，精确到分钟级。不过，响应会受到以下两者中较小值的限制：您指定的 maxResults 或 31 天，并包含一个 next token，用于获取下一批结果。如果未指定时间参数，API 将返回最近 30 天内匹配的数据。
+这些 RESTful API 在每个请求中支持长度最多为 2,048 个字符的单个查询。查询使用 PowerTrack 规则语法编写——有关更多详细信息，请参见 [规则和过滤](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#getting-started-with-enterprise-rules-and-queries)。用户可以指定任意时间范围，精确到分钟。然而，响应会受限于您指定的 maxResults 或 31 天中两者较小的一个，并包含一个 next token，用于分页获取下一组结果。如果未指定时间参数，API 将返回最近 30 天内与查询匹配的数据。
 
-Enterprise 搜索 API 提供低延迟、完整保真度、基于查询的帖子归档访问，时间粒度为分钟级。帖子数据按时间倒序返回，从与查询匹配的最新帖子开始。帖子在发布后大约 30 秒即可通过搜索 API 获取。
+Enterprise 搜索 API 以分钟级粒度提供对帖子存档的低延迟、全保真、基于查询的访问。帖子数据按时间倒序返回，从与查询匹配的最新帖子开始。帖子在发布约 30 秒后即可通过搜索 API 获取。
 
-这些搜索端点会提供已编辑帖子的元数据。对于 2022 年 9 月 29 日之后创建的所有帖子对象，即使帖子从未被编辑，也会包含帖子编辑元数据。每次编辑帖子时，都会创建一个新的帖子 ID。某个帖子的编辑历史通过一个帖子 ID 数组记录，从原始 ID 开始。
+这些搜索端点提供帖子编辑元数据。自 2022 年 9 月 29 日以来创建的所有帖子对象都包含帖子编辑元数据，即使帖子从未被编辑。每当帖子被编辑时，都会创建一个新的帖子 ID。帖子的编辑历史记录由一个帖子 ID 数组进行记录，从最初的 ID 开始。
 
-这些端点始终返回最新的编辑版本以及完整的编辑历史。任何在其 30 分钟编辑窗口之后收集到的帖子都将代表该帖子的最终版本。要进一步了解编辑帖子元数据，请参阅 [编辑帖子基础](/zh/x-api/fundamentals/edit-posts) 页面。
+这些端点将始终返回最近一次编辑的结果，以及完整的编辑历史。任何在 30 分钟编辑窗口结束后被收集的帖子都将代表其最终版本。要进一步了解编辑帖子元数据，请查看 [编辑帖子基础知识](/zh/x-api/fundamentals/edit-posts) 页面。
 
-请求中包含一个 maxResults 参数，用于指定每次 API 响应中返回的最大帖子数量。如果与查询关联的帖子多于每次响应允许返回的最大结果数，响应中将包含一个 next token。后续请求可以使用这些 next token 来分页获取与该查询关联的完整帖子集合。
+请求中包含一个 maxResults 参数，用于指定每个 API 响应中要返回的帖子最大数量。如果与查询关联的帖子数量超过了每个响应允许返回的最大结果数，响应中会包含一个 next token。这些 next token 会在后续请求中使用，以便分页遍历与查询关联的整套帖子。
 
-这些 Enterprise 搜索 API 提供一个 *counts* 端点，使用户可以请求与其查询相关的数据量信息。 
+这些 Enterprise 搜索 API 提供一个 *counts* 端点，使用户能够请求与其查询相关的数据量信息。 
 
 <div id="request-types">
   ### 请求类型
@@ -47,30 +47,30 @@ Enterprise 搜索 API 支持两种请求类型：
   #### 搜索请求（data）
 </div>
 
-向 Enterprise 搜索 API 发起的搜索请求，可以在指定的时间范围内每个响应返回最多 500 条结果，并且可以通过分页获取更多数据。通过使用 `maxResults` 参数，你可以为展示类场景指定较小的每页大小（允许用户按需请求更多结果），或指定较大的每页大小（最多 500）以进行大规模数据提取。`data` 按时间倒序返回，并在交付时已通过合规处理。
+向 Enterprise 搜索 API 发起的搜索请求，允许你在给定的时间范围内，每个响应最多返回 500 条结果，并可以通过分页获取更多数据。使用 `maxResults` 参数时，你可以为展示类用例指定较小的每页大小（允许用户按需请求更多结果），或者为大规模数据提取指定较大的每页大小（最高 500）。数据将按时间倒序返回，并在交付时确保合规。
 
 <div id="counts-requests-post-count">
   #### 计数请求（帖子计数）
 </div>
 
-计数请求可用于检索历史活动计数，它反映在所请求的时间范围内，与给定查询匹配的活动发生的次数。响应本质上会为你提供一个计数直方图，按天、小时或分钟进行分桶（默认分桶为 *hour*）。需要特别注意的是，计数结果并不总是反映在帖子发布很久之后（7 天以上）才发生的合规事件（例如帖子删除）；因此，计数指标与针对同一查询发起的数据请求所得结果不完全匹配是预期之中的。
+计数请求可以用来检索历史活动计数，它们反映在所请求的时间范围内，与给定查询匹配的活动发生的次数。响应本质上会为你提供一个计数直方图，按天、小时或分钟分组（默认分组粒度为 *hour*）。需要注意的是，计数结果并不总是反映在帖子发布后很久（7 天以上）发生的合规事件（例如帖子删除）；因此，预期计数指标不一定总能与针对同一查询发起的数据请求所得结果完全一致。
 
-**计费说明：**每一条针对数据和计数端点发起的请求——*包括分页请求*——都会被计为一条计费请求。因此，如果单个查询有多个结果页，那么翻阅这 X 个结果页在计费上就等同于 X 条请求。
+**计费说明：**每个请求——*包括分页请求*——对数据和计数端点发起的请求都会计为一次计费请求。因此，如果单个查询有多页结果，在这 X 页结果中逐页分页获取，就相当于在计费中产生了 X 次请求。
 
 <div id="available-operators">
   ### 可用运算符
 </div>
 
-Enterprise 搜索 API 支持长度最多为 2,048 个字符的规则。Enterprise 搜索 API 支持下表中列出的运算符。有关详细说明，请参阅[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)。 
+Enterprise 搜索 API 支持长度最多为 2,048 个字符的规则。Enterprise 搜索 API 支持下列运算符。有关详细说明，请参阅[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)。 
 
 |     |     |     |     |
 | :--- | :--- | :--- | :--- |
-| **基于帖子内容匹配：** | **基于相关账号匹配：** | **帖子属性：** | **地理空间运算符：** |
-| * keyword<br />* “quoted phrase”<br />* “keyword1 keyword2”~N<br />* #<br />* @<br />* $<br />* url:<br />* lang: | * from:<br />* to:<br />* retweets&#95;of: | * is:retweet  <br />    <br />* has:mentions<br />* has:hashtags<br />* has:media<br />* has:videos<br />* has:images<br />* has:links<br />* has:symbols<br />* is:verified  <br />    <br />* -is:nullcast（仅用于取反的运算符） | * bounding&#95;box:[west&#95;long south&#95;lat east&#95;long north&#95;lat]<br />* point&#95;radius:[lon lat radius]<br />* has:geo<br />* place:<br />* place&#95;country:<br />* has:profile&#95;geo<br />* profile&#95;country:<br />* profile&#95;region:<br />* profile&#95;locality: |
+| **基于帖子内容匹配：** | **基于感兴趣账号匹配：** | **帖子属性：** | **地理空间运算符：** |
+| * keyword<br />* “quoted phrase”<br />* “keyword1 keyword2”~N<br />* #<br />* @<br />* $<br />* url:<br />* lang: | * from:<br />* to:<br />* retweets&#95;of: | * is:retweet  <br />    <br />* has:mentions<br />* has:hashtags<br />* has:media<br />* has:videos<br />* has:images<br />* has:links<br />* has:symbols<br />* is:verified  <br />    <br />* -is:nullcast （仅否定运算符） | * bounding&#95;box:[west&#95;long south&#95;lat east&#95;long north&#95;lat]<br />* point&#95;radius:[lon lat radius]<br />* has:geo<br />* place:<br />* place&#95;country:<br />* has:profile&#95;geo<br />* profile&#95;country:<br />* profile&#95;region:<br />* profile&#95;locality: |
 
-注意：不要将运算符嵌入/嵌套在关键词中（例如 “#cats”），在搜索 API 中会被解析为 cats。`lang:` 运算符以及所有 `is:` 和 `has:` 运算符不能作为独立运算符使用，必须与其他子句组合使用（例如 `@XDevelopers has:links`）。    
+注意：不要将运算符嵌入/嵌套在其他字符串中（“#cats”）在搜索 API 中将被解析为 cats。 “lang:” 运算符以及所有 “is:” 和 “has:” 运算符不能单独使用，必须与其他子句组合（例如 @XDevelopers has:links）。    
 
-搜索 API 由于分词/匹配功能的限制，仅使用一组有限的运算符。Enterprise 实时和批量历史 API 提供了更多运算符。更多详情请参阅[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#operators-by-product)。
+Search API 由于分词/匹配功能的限制，只使用有限集合的运算符。Enterprise 实时 API 和批量历史 API 提供了更多运算符。更多详细信息请参阅[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#operators-by-product)。
 
 如需更多信息，请参阅[运算符入门](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries)指南。
 
@@ -78,94 +78,94 @@ Enterprise 搜索 API 支持长度最多为 2,048 个字符的规则。Enterpris
   ### 数据可用性 / 重要日期
 </div>
 
-在使用 Full-Archive Search API 时，请牢记 X 平台自 2006 年以来一直在不断演进。随着新功能的加入，底层 JSON 对象也不断添加新的元数据。因此，理解搜索运算符所匹配的帖子属性是从何时开始引入的非常重要。下面列出了若干重要元数据分组最基础的“首次出现”日期。要详细了解帖子属性最初是何时引入的，请参阅[本指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#full-archive-search-metadata-timeline)。
+在使用 Full-Archive Search API 时，请记住 X 平台自 2006 年以来一直在不断演进。随着新功能的加入，底层 JSON 对象也不断增加新的元数据。因此，了解搜索操作符所匹配的帖子属性是从何时开始引入的非常重要。下面列出了一些重要元数据分组的关键“诞生”日期。要了解更多帖子属性最初引入的时间，请参阅[本指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#full-archive-search-metadata-timeline)。
 
 * 第一条帖子：3/21/2006
-* 第一批原生转推（Native Retweets）：11/6/2009
+* 第一条原生转发：11/6/2009
 * 第一条带地理标签的帖子：11/19/2009
-* 开始对 URL 建立索引以用于过滤：8/27/2011
-* 增强型 URL 展开元数据（网站标题和描述）：12/1/2014
-* 个人资料地理信息富化元数据与过滤：2/17/2015
+* URL 首次被索引用于过滤：8/27/2011
+* 增强的 URL 展开元数据（网站标题和描述）：12/1/2014
+* 个人资料地理信息丰富元数据及过滤：2/17/2015
 
 <div id="data-updates-and-mutability">
   ### 数据更新与可变性
 </div>
 
-使用 Enterprise 搜索 API 时，帖子中的部分数据是可变的，即在初始归档之后仍可能被更新或更改。
+在 Enterprise 搜索 API 中，帖子中的部分数据是可变的，即在初次归档之后仍然可以被更新或更改。
 
-这些可变数据分为两类：
+这些可变数据可分为两类：
 
 * 用户对象元数据：
   * 用户的 @handle（数字 ID 永不改变）
-  * 个人简介描述
+  * 个人简介
   * 计数：statuses、followers、friends、favorites、lists
-  * 个人资料中的所在地
-  * 其他详情，例如时区和语言
-* 帖子统计数据——即任何可以通过用户在平台上的操作而改变的内容（如下例）：
+  * 个人资料中的位置
+  * 其他细节，例如时区和语言
+* 帖子统计数据——即任何可以通过用户在平台上的操作而改变的内容（如下示例）：
   * Favorites 计数
   * Retweet 计数
 
-在大多数情况下，搜索 API 会返回在 *查询时* 平台上存在的数据，而不是帖子生成时的数据。然而，在使用 select 运算符（例如 from、to、@、is:verified）进行查询时，情况可能并非如此。数据会定期在我们的索引中更新，对最近时间范围的数据更新频率更高。结果是，在某些情况下，返回的数据可能与 X.com 上当前显示的数据不完全一致，而是与其上次被索引时的数据一致。
+在大多数情况下，搜索 API 会返回在 *查询时* 平台上存在的数据，而不是帖子生成时的数据。不过，对于使用特定运算符（例如 from、to、@、is:verified）的查询，情况可能并非如此。数据会在我们的索引中定期更新，对于最近时间范围的数据，更新频率会更高。因此，在某些情况下，返回的数据可能与 X.com 上当前显示的数据并不完全一致，而是与其最近一次被索引时的数据相匹配。
 
-请注意，这种不一致性问题仅适用于运算符作用于可变数据的查询。一个示例是按用户名进行过滤，最佳的变通方法是对这类查询使用用户数字 ID，而不是 @handle。
+请注意，这种不一致性问题仅适用于运算符作用于可变数据的查询。其中一个例子是按用户名过滤，最佳的变通方法是针对这些查询使用用户的数字 ID，而不是 @handle。
 
 <div id="single-vs-multi-threaded-requests">
   ### 单线程请求与多线程请求
 </div>
 
-每位客户的搜索端点都有预先设定的速率限制。Full-Archive 搜索的默认每分钟速率限制是每分钟 120 次请求，平均每秒 2 次查询（QPS）。这个平均 QPS 意味着，理论上每秒可以向 API 发出 2 次请求。考虑到产品的分页功能，如果一个一年的查询关联了一百万条帖子，并且这些帖子在全年均匀分布，那么要获取全部数据需要发出 2,000 多次请求（假设 `maxResults` 为 500）。假设每个响应需要两秒，这就需要 4,000 秒（略多于一小时）通过单线程串行/顺序（使用前一个响应的 “next” 令牌，以每秒 1 次请求的速率）拉取所有这些数据。还不错！
+每个客户的搜索端点都有预设的速率限制。Full-Archive 搜索的默认每分钟速率限制为 120 次请求，平均每秒 2 次查询（QPS）。这个平均 QPS 意味着理论上每秒可以向 API 发出 2 次请求。鉴于产品的分页功能，如果某个为期一年的查询关联了一百万条帖子，并且这些帖子在一年中均匀分布，那么需要发出 2,000 多次请求（假设 `maxResults` 为 500）才能接收全部数据。假设每个响应需要 2 秒时间，那么通过单线程（使用前一个响应的“next” 令牌，以每秒 1 次请求的方式）串行/顺序地拉取全部数据将需要 4,000 秒（稍超过 1 小时）。还不错！
 
-现在再看一种情况：使用 12 个并行线程来接收数据。假设这一百万条帖子在一年的时间内均匀分布，你可以将请求拆分为 12 个并行线程（多线程），从而为单个“任务”更充分地利用每秒速率限制。换句话说，你可以针对每个月运行一个线程，这样获取数据的速度可以提升到原来的 12 倍（或者说用大约 6 分钟即可完成）。
+现在考虑使用 12 条并行线程来接收数据的情况。假设这一百万条帖子在这一年内分布均匀，你可以将请求拆分为 12 条并行线程（多线程），从而为单个“作业”更充分地利用每秒的速率限制。换句话说，你可以针对你感兴趣的每一个月份运行一条线程，这样一来，数据的获取速度可以提高 12 倍（约 6 分钟）。
 
-这个多线程示例同样适用于计数端点。例如，如果你想获取两年期间的帖子计数，你可以发出一个单线程请求，并以每 31 天为一页进行分页回溯。假设每个响应需要 2 秒，那么进行 24 次 API 请求并获取完整的计数集大约需要 48 秒。不过，你也可以选择一次发出多个按月划分的请求。如果你以每秒 12 个请求的速率发出请求，整个计数集大约在 2 秒内即可获取。
+这个多线程示例同样适用于计数端点（counts endpoint）。比如，如果你想获取一个为期两年的帖子数量（Post counts），你可以发出一个单线程请求，并一次回溯 31 天来分页获取计数。假设每个响应需要 2 秒时间，那么要发出 24 次 API 请求并检索完整的计数结果集大约需要 48 秒。然而，你也可以选择一次性发出多个按月划分的请求。如果以每秒 12 个请求的速度发起请求，则大约在 2 秒内就可以检索到完整的计数结果集。
 
 <div id="retry-logic">
   ### 重试逻辑
 </div>
 
-如果你在使用 Enterprise 搜索 API 时遇到 503 错误，这很可能是一次临时性错误，可以通过在稍后重新发起请求来解决。
+如果你在使用 Enterprise 搜索 API 时遇到 503 错误，该错误很可能是暂时性的，可以在短时间后再次发送请求来解决。
 
-如果请求连续失败 4 次，并且每次失败之间你都至少等待了 10 分钟，请按照以下步骤进行排查：
+如果请求连续失败 4 次，并且每次失败之间你至少等待了 10 分钟，请按照以下步骤进行排查：
 
-* 缩短请求所覆盖的时间范围后再重试。如果仍不成功，继续缩短时间范围，直至缩小到 6 小时的时间窗口为止。
-* 如果你在规则中使用了大量通过 OR 连接的检索词，请将它们拆分为多个独立规则，并分别重试。
-* 如果你在规则中使用了大量排除条件，请减少规则中被否定检索词的数量后重试。
+* 缩短请求所覆盖的时间范围后再重试。如果仍不成功，继续逐步缩短时间范围，最少缩短到 6 小时的时间窗口。
+* 如果你在规则中使用了大量通过 OR 运算符连接的搜索词，将它们拆分成多个独立规则，并分别重试。
+* 如果你在规则中使用了大量排除条件，减少规则中取反（否定）词条的数量，然后重试。
 
 <div id="quick-start">
   ## 快速入门
 </div>
 
 <div id="getting-started-with-enterprise-search-posts-30-day-api">
-  ### 开始使用 Enterprise Search Posts：30 天 API
+  ### 开始使用 Enterprise Search Posts: 30-Day API
 </div>
 
-Enterprise Search Posts：30 天 API 为你提供过去 30 天内发布的帖子。系统会根据你在请求中指定的查询来匹配帖子并返回给你。查询是一条规则，你可以在其中定义返回的帖子应当包含的内容。在本教程中，我们将搜索来自 X 账号 @XDevelopers、语言为英语的帖子。
+Enterprise Search Posts: 30-Day API 可为你提供最近 30 天内发布的帖子。系统会根据你在请求中指定的查询条件匹配帖子并返回结果。查询是一条规则，你可以在其中定义返回的帖子应当包含的内容。在本教程中，我们将搜索来自 X 账号 @XDevelopers、语言为英语的帖子。
 
-你在响应负载中得到的帖子可以是数据格式，它会为你提供完整的帖子负载；也可以是计数格式，它会以数值形式返回匹配帖子的计数数据。我们将使用 cURL 向数据端点和计数端点发起请求。
+你在响应中获得的帖子可以是 data 格式，它为你提供完整的帖子负载；也可以是 counts 格式，它为你提供匹配帖子的计数数据。我们将使用 cURL 向 data 和 counts 端点发起请求。
 
 你需要准备以下内容：
 
-* [Enterprise 账户]https://developer.x.com/en/products/x-api/enterprise
-* 你的用户名、密码和账户名
-* 与搜索端点关联的标签（label），如 console.gnip.com 中所示
+* [一个 Enterprise 账号](https://developer.x.com/en/products/x-api/enterprise)
+* 你的用户名、密码和账户名称
+* 与搜索端点关联的 label，如在 console.gnip.com 中所示
 
 <div id="accessing-the-data-endpoint">
   #### 访问数据端点
 </div>
 
-数据端点会返回与查询匹配的帖子完整负载（Post payload）。我们将使用 `from:` 和 `lang:` 运算符来查找来自 @XDevelopers 且为英文的帖子。*有关更多运算符 [请点击此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)。*
+数据端点会为我们提供与查询匹配的帖子完整负载（Post payload）。我们将使用 `from:` 和 `lang:` 运算符来查找由 @XDevelopers 发布的英文帖子。*有关更多运算符 [请点击此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)。*
 
 <Tabs>
   <Tab title="cURL">
     *cURL 是一个使用 URL 语法来获取或发送文件的命令行工具。*
 
-    在按如下所示进行替换后，将以下 cURL 请求复制到你的命令行中：
+    将下面的 cURL 请求复制到命令行中，并根据需要替换以下内容：
 
-    * **Username** `<USERNAME>`，例如：`email@domain.com`
+    * **Username（用户名）** `<USERNAME>`，例如：`email@domain.com`
 
-    * **Account name** `<ACCOUNT-NAME>`，例如：`john-doe`
+    * **Account name（账户名称）** `<ACCOUNT-NAME>`，例如：`john-doe`
 
-    * **Label** `<LABEL>`，例如：`prod`
+    * **Label（标签）** `<LABEL>`，例如：`prod`
 
     * **fromDate 和 toDate**，例如：`"fromDate":"201811010000", "toDate":"201811122359"`
 
@@ -177,19 +177,17 @@ Enterprise Search Posts：30 天 API 为你提供过去 30 天内发布的帖子
   </Tab>
 
   <Tab title="cURL 示例">
-    ```bash
-    _这是一个示例 cURL 请求。如果你尝试运行它，是无法成功执行的。_
+    *这是一个示例 cURL 请求。如果你尝试运行它，将不会成功执行。*
 
+    ```bash
     curl -X POST -uemail@domain.com "https://gnip-api.x.com/search/30day/accounts/john-doe/prod.json" -d '{"query":"from:TwitterDev lang:en","maxResults":"500","fromDate":"201811100000","toDate":"201812012359"}'
     ```
   </Tab>
 </Tabs>
 
-<div id="data-endpoint-response-payload">
-  #### 数据端点的响应载荷
-</div>
+#### 数据端点响应正文
 
-API 请求返回的载荷将采用 JSON 格式，如下所示。
+API 请求返回的响应正文将以 JSON 格式呈现，如下所示。
 
 ```json
 {
@@ -430,21 +428,21 @@ API 请求返回的载荷将采用 JSON 格式，如下所示。
   #### 访问 counts 端点
 </div>
 
-使用 counts 端点，我们将获取由 @XDevelopers 账号发布的、英文帖子按 `day` 分组的数量。
+使用 counts 端点，我们将按 `day` 分组，检索由 @XDevelopers 账号发布且语言为英文的帖子数量。
 
 <Tabs>
   <Tab title="cURL">
     *cURL 是一个使用 URL 语法来获取或发送文件的命令行工具。*
 
-    在对以下内容做出相应修改后，将下面的 cURL 请求复制到你的命令行中：
+    在按如下内容进行修改后，将以下 cURL 请求复制到命令行中：
 
-    * **Username** `<USERNAME>` 例如：`email@domain.com`
+    * **Username** `<USERNAME>`，例如：`email@domain.com`
 
-    * **Account name** `<ACCOUNT-NAME>` 例如：`john-doe`
+    * **Account name** `<ACCOUNT-NAME>`，例如：`john-doe`
 
-    * **Label** `<LABEL>` 例如：`prod`
+    * **Label** `<LABEL>`，例如：`prod`
 
-    * **fromDate 和 toDate** 例如：`"fromDate":"201811010000", "toDate":"201811122359"`
+    * **fromDate 和 toDate**，例如：`"fromDate":"201811010000", "toDate":"201811122359"`
 
     *发送请求后，系统会提示你输入密码。*
 
@@ -453,8 +451,8 @@ API 请求返回的载荷将采用 JSON 格式，如下所示。
     ```
   </Tab>
 
-  <Tab title="cURL example">
-    *这是一个 cURL 请求示例。如果你尝试运行它，将无法成功执行。*
+  <Tab title="cURL 示例">
+    *这是一个示例 cURL 请求。如果你尝试运行它，将无法成功执行。*
 
     ```bash
     curl -X POST -uemail@domain.com "https://gnip-api.x.com/search/30day/accounts/john-doe/prod/counts.json" -d '{"query":"from:TwitterDev lang:en","fromDate":"201811100000","toDate":"201812012359","bucket":"day"}'
@@ -462,9 +460,11 @@ API 请求返回的载荷将采用 JSON 格式，如下所示。
   </Tab>
 </Tabs>
 
-#### 计数端点响应载荷
+<div id="counts-endpoint-response-payload">
+  #### Counts 端点响应负载
+</div>
 
-通过 API 请求返回的载荷将以 JSON 格式呈现，如下所示。
+API 请求返回的负载将以 JSON 格式呈现，如下所示。
 
 ```json
 {
@@ -499,35 +499,35 @@ API 请求返回的载荷将采用 JSON 格式，如下所示。
 }
 ```
 
-做得很好！现在你已经成功调用了 Enterprise Search Posts：30 天 API。
+干得好！现在你已经成功访问 Enterprise Search Posts: 30-Day API 接口。
 
 <div id="referenced-articles">
   ##### **参考文章**
 </div>
 
-* [Post 对象简介](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary)
+* [帖子对象简介](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary)
 * [搜索运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)
-* [Post 对象和有效负载](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#post-object)
+* [帖子对象和载荷](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#post-object)
 
 <div id="getting-started-with-enterprise-search-posts-full-archive-api">
-  ### 开始使用 Enterprise Search Posts：Full-Archive API
+  ### 开始使用 enterprise Search Posts: Full-Archive API
 </div>
 
-Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条帖子起的所有帖子。系统会根据你在请求中指定的查询来匹配帖子并返回给你。查询是一条规则，用于定义你希望返回的帖子应包含的内容。在本教程中，我们将搜索来自 X 账号 @XDevelopers、语言为英语的帖子。
+enterprise Search Posts: Full-Archive API 可为你提供自 2006 年首条帖子以来的全部帖子。系统会根据你在请求中指定的查询条件匹配帖子并返回给你。查询是一条规则，你在其中定义返回的帖子应当包含的内容。在本教程中，我们将搜索由 X 账号 @XDevelopers 发布的英文帖子。
 
-你在响应负载中获得的帖子可以是 data 格式，它为你提供完整的帖子负载；也可以是 counts 格式，它为你提供匹配帖子数量的数值计数数据。我们将使用 cURL 向 data 和 counts 端点发起请求。
+你在响应中得到的帖子可以是 data 格式，它会为你提供完整的帖子负载；也可以是 counts 格式，它会为你提供匹配帖子数量的数值计数数据。我们将使用 cURL 向 data 和 counts 端点发送请求。
 
 你需要准备以下内容：
 
-* [一个 Enterprise 账号](https://developer.x.com/en/products/x-api/enterprise)
-* 你的用户名、密码和账号名称
-* 与搜索端点关联的标签，可在 console.gnip.com 中查看
+* [一个 Enterprise 账户]https://developer.x.com/en/products/x-api/enterprise
+* 你的用户名、密码和账户名称
+* 与搜索端点关联的标签（Label），如在 console.gnip.com 中所示
 
 <div id="accessing-the-data-endpoint">
   #### 访问数据端点
 </div>
 
-数据端点会向我们提供匹配到的帖子的完整负载（Post payload）。我们将使用 `from:` 和 `lang:` 运算符来查找来自 @XDevelopers 且语言为英文的帖子。*要查看更多运算符，[请点击这里](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)。*
+数据端点会向我们提供匹配到的帖子完整 Post 负载。我们将使用 `from:` 和 `lang:` 操作符来查找源自 @XDevelopers 且为英文的帖子。*有关更多操作符 [请点击此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)。*
 
 * [cURL](#tab1)
 * [cURL 示例](#tab2)
@@ -536,25 +536,25 @@ Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条�
   <Tab title="cURL">
     *cURL 是一个使用 URL 语法来获取或发送文件的命令行工具。*
 
-    在根据下面的内容进行相应修改后，将以下 cURL 请求复制到你的命令行中：
+    根据以下内容进行替换后，将下面的 cURL 请求复制到你的命令行中：
 
-    * **用户名** `<USERNAME>`，例如：`email@domain.com`
+    * **用户名** `<USERNAME>`，例如 `email@domain.com`
 
-    * **账户名称** `<ACCOUNT-NAME>`，例如：`john-doe`
+    * **账户名称** `<ACCOUNT-NAME>`，例如 `john-doe`
 
-    * **标签** `<LABEL>`，例如：`prod`
+    * **标签** `<LABEL>`，例如 `prod`
 
-    * **fromDate 和 toDate**，例如：`"fromDate":"201802010000", "toDate":"201802282359"`
+    * **fromDate 和 toDate**，例如 `"fromDate":"201802010000", "toDate":"201802282359"`
 
-    *发送请求后，你将被提示输入密码。*
+    *发送请求后，系统会提示你输入密码。*
 
     ```bash
     curl -X POST -u<USERNAME> "https://gnip-api.x.com/search/fullarchive/accounts/<ACCOUNT-NAME>/<LABEL>.json" -d '{"query":"from:TwitterDev lang:en","maxResults":"500","fromDate":"<yyyymmddhhmm>","toDate":"<yyyymmddhhmm>"}'
     ```
   </Tab>
 
-  <Tab title="cURL 示例">
-    *这是一个示例 cURL 请求。如果你尝试运行它，将无法成功执行。*
+  <Tab title="cURL example">
+    *下面是一个示例 cURL 请求。如果你尝试直接运行它，将无法成功。*
 
     ```bash
     curl -X POST -uemail@domain.com "https://gnip-api.x.com/search/fullarchive/accounts/john-doe/prod.json" -d '{"query":"from:TwitterDev lang:en","maxResults":"500","fromDate":"201802010000","toDate":"201802282359"}'
@@ -562,9 +562,11 @@ Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条�
   </Tab>
 </Tabs>
 
-##### 数据端点响应负载
+<div id="data-endpoint-response-payload">
+  ##### 数据端点响应负载
+</div>
 
-通过 API 请求获得的响应负载将以 JSON 格式返回，如下所示。
+API 请求返回的响应负载将以 JSON 格式呈现，如下所示。
 
 ```json
 {
@@ -801,21 +803,23 @@ Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条�
 }
 ```
 
-#### 访问计数端点
+<div id="accessing-the-counts-endpoint">
+  #### 访问 counts 端点
+</div>
 
-使用计数端点，我们将检索来自 @XDevelopers 账号、使用英文发布的帖子数量，并按 `day` 进行分组。
+通过 counts 端点，我们将按 `day` 分组，获取由 @XDevelopers 账号发布的英文帖子数量。
 
 <Tabs>
   <Tab title="cURL">
-    *cURL 是一个在命令行中使用 URL 语法来获取或发送文件的工具。*
+    *cURL 是一个使用 URL 语法来获取或发送文件的命令行工具。*
 
-    在进行以下修改之后，将下面的 cURL 请求复制到你的命令行中：
+    在按需修改以下内容后，将下面的 cURL 请求复制到命令行中：
 
-    * **Username（用户名）** `<USERNAME>` 例如：`email@domain.com`
+    * **Username** `<USERNAME>` 例如：`email@domain.com`
 
-    * **Account name（账户名称）** `<ACCOUNT-NAME>` 例如：`john-doe`
+    * **Account name** `<ACCOUNT-NAME>` 例如：`john-doe`
 
-    * **Label（标签）** `<LABEL>` 例如：`prod`
+    * **Label** `<LABEL>` 例如：`prod`
 
     * **fromDate 和 toDate** 例如：`"fromDate":"201802010000", "toDate":"201802282359"`
 
@@ -828,18 +832,16 @@ Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条�
 
   <Tab title="cURL 示例">
     ```bash
-    _下面是一个示例 cURL 请求。如果你尝试直接运行它，将不会生效。_
+    _这是一个示例 cURL 请求。如果你尝试运行它，将无法成功执行。_
 
     curl -X POST -uemail@domain.com "https://gnip-api.x.com/search/fullarchive/accounts/john-doe/prod/counts.json" -d '{"query":"from:TwitterDev lang:en","fromDate":"201802010000","toDate":"201802282359","bucket":"day"}'
     ```
   </Tab>
 </Tabs>
 
-<div id="counts-endpoint-response-payload">
-  #### Counts 端点响应负载
-</div>
+#### 计数端点响应载荷
 
-通过该 API 请求返回的负载将以 JSON 格式呈现，如下所示。
+你从 API 请求中获得的响应载荷将以 JSON 格式返回，如下所示。
 
 ```json
 {
@@ -874,60 +876,60 @@ Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条�
 }
 ```
 
-做得很好！现在你已经成功调用了 enterprise Search Posts: Full-Archive API 接口。
+做得很好！你现在已经成功访问 enterprise Search Posts: Full-Archive API 接口。
 
-##### 参考资料
+##### 参考文档
 
-* [帖子对象简介](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary)
+* [Post 对象简介](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary)
 * [搜索运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-operators)
-* [帖子对象和有效负载](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#post-object)
+* [Post 对象和有效负载](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#post-object)
 
 <div id="guides">
   ## 指南
 </div>
 
 <div id="building-search-queries">
-  ### 构造搜索查询
+  ### 构建搜索查询
 </div>
 
 <div id="enterprise-operators">
   ### Enterprise 运算符
 </div>
 
-以下是 X 的 Enterprise 搜索 API 所支持的全部运算符列表：
+以下列出了 X 的 Enterprise 搜索 API 所支持的全部运算符：
 
 * **Enterprise** 30 天搜索 API
-* **Enterprise** 完整归档搜索 API
+* **Enterprise** 全量归档搜索 API
 
-如需查看按产品分类的可用运算符并列对比，请参见[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#operators-by-product)。
+若要查看各产品可用运算符的并排对比，请参见[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#operators-by-product)。
 
-| 运算符                             | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| :------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| keyword                         | 匹配 Post 正文或 URL 中的已分词关键词。这是一种基于分词的匹配，这意味着你的关键词字符串将与 Post 正文的分词文本进行匹配——分词是基于标点符号、符号以及分隔符类的 Unicode 基本平面字符完成的。比如，一条文本为 “I like coca-cola” 的 Post 会被拆分为以下分词：I, like, coca, cola。然后这些分词会与你在规则中使用的关键词字符串进行比较。要匹配包含标点符号（例如 coca-cola）、符号或分隔符字符的字符串，你必须使用下文所述的带引号的精确匹配。<br /><br />**注意：** 使用 Search API 时，带重音符号的字符和其他特殊字符会被标准化为标准拉丁字符，这可能会改变外语中的含义或返回出乎意料的结果：<br />例如，&quot;músic&quot; 会匹配 “music”，反之亦然。<br />例如，像西班牙语中常见短语 &quot;Feliz Año Nuevo!&quot; 会被索引为 &quot;Feliz Ano Nuevo&quot;，从而改变该短语的含义。<br /><br />**注意：** 此运算符会同时匹配 Post 中的 URL 和展开后的 URL。 |
-| emoji                           | 在 Post 正文中匹配表情符号（emoji）。Emoji 采用标记化匹配，这意味着你的 emoji 会与 Post 正文的标记化文本进行匹配——标记化是基于标点符号、符号/emoji，以及 Unicode 基本平面中的分隔字符完成的。比如，文本为 “I like <Icon icon="pizza-slice" iconType="solid" />” 的 Post 会被拆分为以下标记：I、like、<Icon icon="pizza-slice" iconType="solid" />。这些标记随后会与你在规则中使用的 emoji 进行比较。请注意，如果某个 emoji 存在变体，你必须使用引号将其添加到规则中。                                                                                                                                                                                                                              |
-| &quot;exact phrase match&quot;  | 在 Post 的正文或 URL 中匹配分词后的有序短语。这是基于分词的匹配，这意味着你的关键词字符串会与 Post 正文的分词文本进行匹配——分词基于标点符号、符号以及分隔符类 Unicode 基本平面字符。<br /><br />**注意：** 标点符号不会被分词，而是被视为空白字符。<br />例如，加引号的 “#hashtag” 会匹配 “hashtag”，而不会匹配 #hashtag（要匹配实际的 hashtag，请使用不带引号的 hashtag # 运算符）。<br />例如，加引号的 “$cashtag” 会匹配 “cashtag”，而不会匹配 $cashtag（要匹配实际的 cashtag，请使用不带引号的 cashtag $ 运算符）。<br />例如，&quot;Love Snow&quot; 会匹配 &quot;#love #snow&quot;。<br />例如，&quot;#Love #Snow&quot; 会匹配 &quot;love snow&quot;。<br /><br />**注意：** 此运算符会在 Post 中对 URL 和展开后的 URL 均进行匹配。                               |
-| &quot;keyword1 keyword2&quot;~N | 通常被称为邻近（proximity）运算符，它会匹配这样的一条帖子：其中各关键词之间的距离不超过 N 个标记（token）。<br /><br />如果关键词的顺序相反，则它们之间的距离不能超过 N-2 个标记（token）。引号中可以包含任意数量的关键词。N 不能大于 6。<br /><br />请注意，此运算符仅在 `enterprise` 搜索 API 中提供。                                                                                                                                                                                                                                                                                                                                                             |
-| from:                           | 匹配来自特定用户的任意帖子。<br />该值必须是用户的 X 账户数字 ID 或用户名（不包含 @ 字符）。请参阅 [此处](/zh/x-api/users/lookup/introduction) 或 [此处](http://gettwitterid.com/) 了解查询 X 账户数字 ID 的方法。                                                                                                                                                                                                                                                                                                                                                                                                 |
-| to:                             | 匹配任何回复特定用户的帖子。<br /><br />取值必须是该用户的 X 账户数字 ID 或用户名（不包含 @ 字符）。请参见 [此处](/zh/x-api/users/lookup/introduction) 了解查询 X 账户数字 ID 的方法。                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| url:                            | 在帖子中展开后的 URL 上执行分词（关键词/短语）匹配（类似于 url&#95;contains）。包含标点符号或特殊字符的词元和短语应使用双引号包裹。例如：url:&quot;/developer&quot;。虽然一般不推荐这样做，但如果你想匹配特定协议，请用双引号括起来：url:&quot;[https://developer.x.com](https://developer.x.com)&quot;。<br />**注意：** 使用 PowerTrack 或 Historical PowerTrack 时，此运算符会匹配引用帖子（Quote Post）所引用的原始帖子中包含的 URL。例如，如果你的规则包含 url:&quot;developer.x.com&quot;，并且某条帖子中包含该 URL，则该帖子的任何引用帖子都将包含在结果中。使用 Search API 时则不会发生这种匹配。                                                                                                                                  |
-| #                               | 匹配包含指定话题标签的任意帖子。<br /><br />此运算符执行的是精确匹配，而不是分词匹配，这意味着规则 “2016” 会匹配带有完全相同话题标签 “2016” 的帖子，但不会匹配带有话题标签 “2016election” 的帖子。<br /><br />注意：hashtag 运算符依赖 X 的实体抽取来匹配话题标签，而不是直接从正文中提取话题标签。有关 X 实体 JSON 属性的更多信息，请参见[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#hashtags)。                                                                                                                                                                                                                                                                    |
-| @                               | 匹配任何提及给定用户名的帖子。<br />to: 运算符返回 @mention 运算符匹配结果的子集。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| $                               | 匹配任何包含指定“cashtag”（其词元首字符为“$”字符）的帖子。<br /><br />请注意，cashtag 运算符依赖于 X 的 “symbols” 实体抽取功能来匹配 cashtag，而不是尝试直接从帖子正文中抽取 cashtag。请参见[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#symbols)以了解有关 X Entities JSON 属性的更多信息。<br /><br />请注意，此运算符仅在 `enterprise` 搜索 API 中可用。<br /><br />                                                                                                                                                                                                                                                           |
-| retweets&#95;of:                | *可用别名*: retweets&#95;of&#95;user:<br />匹配转发指定用户的帖子。接受用户名和数字 X 账号 ID（而非帖子状态 ID）。参见 [此处](/zh/x-api/users/lookup/introduction) 以了解查找数字 X 账号 ID 的方法。                                                                                                                                                                                                                                                                                                                                                                                                         |
-| lang:                           | 匹配已被 X 归类为某种特定语言的帖子（且仅在该帖子已被进行此类分类时）。需要特别注意的是，每个帖子目前只会被归类为一种语言，因此使用 AND 运算符将多个语言条件组合在一起将不会返回任何结果。<br /><br />**注意：** 如果无法进行语言分类，则返回的结果为 “und”（表示未定义）。<br /><br />下面的列表显示了当前支持的语言及其对应的 BCP 47 语言标识符：<br />                                                                                                                                                                                                                                                                                                                                             |
+| 操作符                                                      | 说明                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| :------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| keyword                                                  | 在帖子正文或 URL 中匹配分词后的 keyword。这是分词匹配，这意味着你的 keyword 字符串会与帖子正文分词后的文本进行匹配——分词是基于标点符号、符号以及分隔符这类 Unicode 基本平面字符完成的。例如，一条正文为 “I like coca-cola” 的帖子会被拆分成如下词元：I、like、coca、cola。然后这些词元会与你在规则中使用的 keyword 字符串进行比较。要匹配包含标点符号（例如 coca-cola）、符号或分隔符类字符的字符串，你必须使用如下所述的带引号精确匹配。<br /><br />**注意：** 使用 Search API 时，带重音符号和特殊字符的内容会被规范化为标准拉丁字符，这可能会改变外语中的含义或返回意想不到的结果：<br />例如，&quot;músic&quot; 会匹配 “music”，反之亦然。<br />例如，像西班牙语中常见的短语 &quot;Feliz Año Nuevo!&quot; 会被索引为 &quot;Feliz Ano Nuevo&quot;，从而改变该短语的含义。<br /><br />**注意：** 此运算符会匹配帖子中的 URL 以及展开后的 URL。 |
+| emoji                                                    | 在 Post 正文中匹配 emoji。Emoji 是分词匹配，这意味着你的 emoji 会与 Post 正文的分词文本进行匹配——分词基于标点符号、符号/emoji 和分隔符等 Unicode 基本平面字符。比如，一条文本为 “I like <Icon icon="pizza-slice" iconType="solid" />” 的 Post 会被拆分为如下分词：I、like、<Icon icon="pizza-slice" iconType="solid" />。这些分词随后会与你在规则中使用的 emoji 进行比较。请注意，如果某个 emoji 存在变体，你必须使用引号将其括起来后再加入规则。                                                                                                                                                                                                                                |
+| &quot;精确短语匹配&quot;                                       | 匹配 Post 正文或 URL 中经过分词并保持顺序的短语。这是一种基于分词的匹配，这意味着你的关键字字符串会与 Post 正文的分词文本进行匹配——分词基于 Unicode 基本多文种平面中的标点、符号和分隔符字符。<br /><br />**注意：** 标点符号本身不会被分词，而是被当作空白字符处理。<br />例如，用引号括起的 “#hashtag” 会匹配 “hashtag”，但不会匹配 #hashtag（要匹配实际的 hashtag，请使用不带引号的 hashtag # 运算符）。<br />例如，用引号括起的 “$cashtag” 会匹配 “cashtag”，但不会匹配 $cashtag（要匹配实际的 cashtag，请使用不带引号的 cashtag $ 运算符）。<br />例如，&quot;Love Snow&quot; 会匹配 &quot;#love #snow&quot;。<br />例如，&quot;#Love #Snow&quot; 会匹配 &quot;love snow&quot;。<br /><br />**注意：** 此运算符会在 Post 中同时匹配 URL 和展开后的 URL。              |
+| &quot;keyword1 keyword2&quot;~N                          | 通常称为接近运算符，该运算符会匹配关键词之间距离不超过 N 个 token 的帖子。<br /><br />如果关键词的顺序相反，则它们之间的距离不能超过 N-2 个 token。引号内可以包含任意数量的关键词。N 不能大于 6。<br /><br />请注意，此运算符仅在 `enterprise` 搜索 API 中可用。                                                                                                                                                                                                                                                                                                                                                                             |
+| from:                                                    | 匹配来自特定用户的任何帖子。<br />该值必须是该用户的 X 数值型账户 ID 或用户名（不包含 @ 字符）。有关查找 X 数值型账户 ID 的方法，请参见 [此处](/zh/x-api/users/lookup/introduction) 或 [此处](http://gettwitterid.com/)。                                                                                                                                                                                                                                                                                                                                                                                       |
+| to:                                                      | 匹配任何回复特定用户的帖子。<br /><br />该值必须是该用户的数字 X 账户 ID 或用户名（不包括 @ 字符）。有关查询数字 X 账户 ID 的方法，请参见[此处](/zh/x-api/users/lookup/introduction)。                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| url:                                                     | 对 Post 展开后的 URL 执行基于分词的（关键字/短语）匹配（类似于 url&#95;contains）。包含标点符号或特殊字符的词元和短语应使用双引号括起来。例如，url:&quot;/developer&quot;。虽然通常不推荐，但如果你确实需要匹配特定协议，请使用双引号括起来：url:&quot;[https://developer.x.com](https://developer.x.com)&quot;。<br />**注意：** 使用 PowerTrack 或 Historical PowerTrack 时，此运算符会匹配引用帖子（Quote Post）中原始 Post 所包含的 URL。例如，如果你的规则包含 url:&quot;developer.x.com&quot;，并且某条 Post 包含该 URL，则该 Post 的任何引用帖子（Quote Tweets）都会包含在结果中。使用 Search API 时则不会出现这种情况。                                                                                              |
+| #                                                        | 匹配包含指定话题标签的任何帖子。<br /><br />此运算符执行的是精确匹配，而不是分词匹配，这意味着规则 “2016” 会匹配带有完全相同话题标签 “2016” 的帖子，但不会匹配带有话题标签 “2016election” 的帖子。<br /><br />注意：话题标签运算符依赖于 X 的实体抽取功能来匹配话题标签，而不是从帖子正文本身提取话题标签。有关 X 实体 JSON 属性的更多信息，请参阅[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#hashtags)。                                                                                                                                                                                                                                                             |
+| @ | 匹配任何提及指定用户名的 Post。<br />to: 运算符返回的是“@ 提及”运算符匹配结果的子集。 | 匹配所有提及指定用户名的帖子。<br />to: 运算符返回的是 @mention 运算符结果的一个子集。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| $                                                        | 匹配所有包含指定“cashtag”（其中该标记以“$”字符开头）的帖子。<br /><br />请注意，cashtag 运算符依赖于 X 的“symbols”实体提取功能来匹配 cashtag，而不是尝试从正文中直接提取 cashtag。有关 X Entities JSON 属性的更多信息，请参见[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#symbols)。<br /><br />请注意，此运算符仅在 `enterprise` 搜索 API 中可用。<br /><br />                                                                                                                                                                                                                                                         |
+| retweets&#95;of:                                         | *可用别名*: retweets&#95;of&#95;user:<br />匹配对指定用户帖子所做的转发帖子。可接受用户名或数字形式的 X 账号 ID（而非帖子状态 ID）。参见[此处](/zh/x-api/users/lookup/introduction)了解查找数字形式 X 账号 ID 的方法。                                                                                                                                                                                                                                                                                                                                                                                          |
+| lang:                                                    | 匹配已被 X 分类为特定语言的帖子（且仅在该帖子已被分类的情况下才会匹配）。需要特别注意的是，每条帖子目前只会被归类为一种语言，因此将多个语言条件使用 AND 运算符组合将不会返回任何结果。<br /><br />**注意：** 如果无法进行语言分类，则返回的结果为 ‘und’（表示未定义）。<br /><br />下面的列表展示了当前支持的语言及其对应的 BCP 47 语言标识符：<br />                                                                                                                                                                                                                                                                                                                                        |
 
 |     |     |     |     |
 | :--- | :--- | :--- | :--- |
 | 阿姆哈拉语: am | 德语: de | 马拉雅拉姆语: ml | 斯洛伐克语: sk |
-| 阿拉伯语: ar | 希腊语: el | 迪维希语: dv | 斯洛文尼亚语: sl |
+| 阿拉伯语: ar | 希腊语: el | 迪维希语（马尔代夫语）: dv | 斯洛文尼亚语: sl |
 | 亚美尼亚语: hy | 古吉拉特语: gu | 马拉地语: mr | 索拉尼库尔德语: ckb |
 | 巴斯克语: eu | 海地克里奥尔语: ht | 尼泊尔语: ne | 西班牙语: es |
 | 孟加拉语: bn | 希伯来语: iw | 挪威语: no | 瑞典语: sv |
 | 波斯尼亚语: bs | 印地语: hi | 奥里亚语: or | 他加禄语: tl |
-| 保加利亚语: bg | 拉丁字母印地语: hi-Latn | 旁遮普语: pa | 泰米尔语: ta |
+| 保加利亚语: bg | 拉丁文转写印地语: hi-Latn | 旁遮普语: pa | 泰米尔语: ta |
 | 缅甸语: my | 匈牙利语: hu | 普什图语: ps | 泰卢固语: te |
 | 克罗地亚语: hr | 冰岛语: is | 波斯语: fa | 泰语: th |
-| 加泰罗尼亚语: ca | 印尼语: in | 波兰语: pl | 藏语: bo |
+| 加泰罗尼亚语: ca | 印度尼西亚语: in | 波兰语: pl | 藏语: bo |
 | 捷克语: cs | 意大利语: it | 葡萄牙语: pt | 繁体中文: zh-TW |
 | 丹麦语: da | 日语: ja | 罗马尼亚语: ro | 土耳其语: tr |
 | 荷兰语: nl | 卡纳达语: kn | 俄语: ru | 乌克兰语: uk |
@@ -939,55 +941,55 @@ Enterprise Search Posts：Full-Archive API 可为你提供自 2006 年第一条�
 
 |||
 |:----|:---|
-|place:|匹配带有指定位置标签 *或* X place ID 的帖子（参见示例）。包含多个单词的地点名称（“New York City”“Palo Alto”）应放在引号中。<br /><br />**注意：** 关于如何获取 X place ID，请参阅公共 API 端点 [GET geo/search](https://developer.x.com/en/docs/x-api/v1/geo/place-information/overview)。<br /><br />**注意：** 此运算符不会匹配转发（Retweet），因为转发的地点信息附加在原始帖子上。它也不会匹配附加在引用转发（Quote Tweet）原始帖子上的地点信息。|
-|place&#95;country:|匹配这样一些帖子：其关联标签的 [place](https://developer.x.com/en/docs/x-api/v1/geo/place-information/overview) 的国家代码与给定的 ISO alpha-2 两字符代码相同。<br /><br />有效的 ISO 代码可在此处找到：[http://en.wikipedia.org/wiki/ISO&#95;3166-1&#95;alpha-2](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)<br /><br />**注意：** 此运算符不会匹配转发（Retweet），因为转发的地点信息附加在原始帖子上。它也不会匹配附加在引用转发（Quote Tweet）原始帖子上的地点信息。|
-|point&#95;radius:[lon lat radius]|在存在的情况下，与帖子的精确位置 (x,y) 进行匹配；在 X 中，还会与 “Place” 地理多边形进行匹配，要求该 Place 完全包含在定义的区域内。<br /><br />* 支持的半径单位为英里（mi）和千米（km）。<br />* 半径必须小于 25mi。<br />* 经度范围为 ±180。<br />* 纬度范围为 ±90。<br />* 所有坐标均为十进制度数。<br />* 规则参数放在方括号中，并以空格分隔。<br /><br />**注意：** 此运算符不会匹配转发（Retweet），因为转发的地点信息附加在原始帖子上。它也不会匹配附加在引用转发（Quote Tweet）原始帖子上的地点信息。|
-|bounding&#95;box:[west&#95;long south&#95;lat east&#95;long north&#95;lat]|*可用别名*：geo&#95;bounding&#95;box:<br /><br />在存在的情况下，与帖子的精确位置（经度、纬度）进行匹配；在 X 中，还会与 “Place” 地理多边形进行匹配，要求该 Place 完全包含在定义的区域内。<br /><br />* west&#95;long、south&#95;lat 表示边界框西南角，其中 west&#95;long 为该点的经度，south&#95;lat 为该点的纬度。<br />* east&#95;long 和 north&#95;lat 表示边界框东北角，其中 east&#95;long 为该点的经度，north&#95;lat 为该点的纬度。<br />* 边界框的宽度和高度必须小于 25mi。<br />* 经度范围为 ±180。<br />* 纬度范围为 ±90。<br />* 所有坐标均为十进制度数。<br />* 规则参数放在方括号中，并以空格分隔。<br />**注意：** 此运算符不会匹配转发（Retweet），因为转发的地点信息附加在原始帖子上。它也不会匹配附加在引用转发（Quote Tweet）原始帖子上的地点信息。|
-|profile&#95;country:|对 Profile Geo 增强数据中 “address” 对象里的 “countryCode” 字段进行精确匹配。<br />使用基于 ISO-3166-1-alpha-2 规范的标准化两字母国家代码集。为保持简洁，此运算符用于替代针对 “address” 对象中 “country” 字段的运算符。|
-|profile&#95;region:|匹配 Profile Geo 增强数据中 “address” 对象里的 “region” 字段。<br /><br />这是精确的完整字符串匹配。不需要使用反斜杠转义字符。例如，如果要匹配带有斜杠的内容，应使用 “one/two”，而不是 “one\/two”。包含空格或标点符号的子字符串要匹配时，请使用双引号。|
-|profile&#95;locality:|匹配 Profile Geo 增强数据中 “address” 对象里的 “locality” 字段。<br /><br />这是精确的完整字符串匹配。不需要使用反斜杠转义字符。例如，如果要匹配带有斜杠的内容，应使用 “one/two”，而不是 “one\/two”。包含空格或标点符号的子字符串要匹配时，请使用双引号。|
+|place:|匹配带有指定地点标签 *或* X place ID 的帖子（参见示例）。多词地名（“New York City”、“Palo Alto”）应使用引号括起来。<br /><br />**注意：** 关于如何获取 X place ID，请参阅公开 API 端点 [GET geo/search](https://developer.x.com/en/docs/x-api/v1/geo/place-information/overview)。<br /><br />**注意：** 此运算符不会匹配 Retweet，因为 Retweet 的地点信息附加在原始帖子上。它同样不会匹配附加在 Quote Tweet 原始帖子上的地点信息。|
+|place&#95;country:|匹配帖子中，已打标签的 [place](https://developer.x.com/en/docs/x-api/v1/geo/place-information/overview) 所关联的国家代码与给定的 ISO alpha-2 字符代码相同的情况。<br /><br />可在此处找到有效的 ISO 代码：[http://en.wikipedia.org/wiki/ISO&#95;3166-1&#95;alpha-2](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)<br /><br />**注意：** 此运算符不会匹配 Retweet，因为 Retweet 的地点信息附加在原始帖子上。它同样不会匹配附加在 Quote Tweet 原始帖子上的地点信息。|
+|point&#95;radius:[lon lat radius]|在存在时，会与帖子的精确位置（x,y）进行匹配；在 X 中，还会与 “Place” 的地理多边形进行匹配，前提是该 Place 被完整地包含在定义的区域内。<br /><br />* 支持的半径单位为英里（mi）和千米（km）。<br />* 半径必须小于 25 英里（25mi）。<br />* 经度范围为 ±180。<br />* 纬度范围为 ±90。<br />* 所有坐标均为十进制度数。<br />* 规则参数放在方括号中，以空格分隔。<br /><br />**注意：** 此运算符不会匹配 Retweet，因为 Retweet 的地点信息附加在原始帖子上。它同样不会匹配附加在 Quote Tweet 原始帖子上的地点信息。|
+|bounding&#95;box:[west&#95;long south&#95;lat east&#95;long north&#95;lat]|*可用别名*：geo&#95;bounding&#95;box:<br /><br />在存在时，会与帖子的精确位置（long, lat）进行匹配；在 X 中，还会与 “Place” 的地理多边形进行匹配，前提是该 Place 被完整地包含在定义的区域内。<br /><br />* west&#95;long 和 south&#95;lat 表示边界框的西南角，其中 west&#95;long 为该点的经度，south&#95;lat 为该点的纬度。<br />* east&#95;long 和 north&#95;lat 表示边界框的东北角，其中 east&#95;long 为该点的经度，north&#95;lat 为该点的纬度。<br />* 边界框的宽度和高度必须小于 25 英里（25mi）。<br />* 经度范围为 ±180。<br />* 纬度范围为 ±90。<br />* 所有坐标均为十进制度数。<br />* 规则参数放在方括号中，以空格分隔。<br />**注意：** 此运算符不会匹配 Retweet，因为 Retweet 的地点信息附加在原始帖子上。它同样不会匹配附加在 Quote Tweet 原始帖子上的地点信息。|
+|profile&#95;country:|与 Profile Geo 增强中 “address” 对象的 “countryCode” 字段进行精确匹配。<br />使用基于 ISO-3166-1-alpha-2 规范的一组标准化两字母国家/地区代码。为保持简洁，提供此运算符以替代对 “address” 对象中 “country” 字段的运算符。|
+|profile&#95;region:|与 Profile Geo 增强中 “address” 对象的 “region” 字段进行匹配。<br /><br />这是一个精确的完整字符串匹配。不需要使用反斜杠转义字符。例如，如果要匹配带有斜杠的内容，请使用 “one/two”，而不是 “one\/two”。对于包含空格或标点符号的子字符串，请使用双引号括起来。|
+|profile&#95;locality:|与 Profile Geo 增强中 “address” 对象的 “locality” 字段进行匹配。<br /><br />这是一个精确的完整字符串匹配。不需要使用反斜杠转义字符。例如，如果要匹配带有斜杠的内容，请使用 “one/two”，而不是 “one\/two”。对于包含空格或标点符号的子字符串，请使用双引号括起来。|
 
 <Info>
-  **注意：** 在使用 Search API 时，所有 is: 和 has: 运算符不能单独作为查询条件使用，必须与其他条件组合。
+  **注意：** 在使用 Search API 时，所有 `is:` 和 `has:` 操作符都不能单独使用，必须与其他条件组合使用。
 
-  例如，@XDeevelopers has:links
+  例如：@XDeevelopers has:links
 </Info>
 
-|                     |                                                                                                                                                                                                                                               |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| has:geo             | 匹配包含由 X 提供的、帖子特有地理位置信息的帖子。该信息可以是“geo”经纬度坐标，或者是以 X 的 [“Place”](https://dev.x.com/overview/api/places) 对象形式提供的“location”，并带有相应的显示名称、地理多边形以及其他字段。<br /><br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。        |
-| has:profile&#95;geo | *可用别名*: has:derived&#95;user&#95;geo<br /><br />匹配具有任意 [Profile Geo](http://support.gnip.com/enrichments/profile_geo.html) 元数据的帖子，无论其具体取值为何。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符组合使用。              |
-| has:links           | 此运算符匹配其消息正文中包含链接的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符一起使用。                                                                                                                                      |
-| is:retweet          | 仅传递与规则匹配的显式转发帖子。也可以使用否定形式来排除与规则匹配的转发帖子，此时只传递原始内容。<br /><br />此运算符仅匹配真正的转发帖子（Retweet），即使用 X 的转发功能生成的帖子。未使用 X 转发功能的引用帖子（Quoted Tweet）和修改过的帖子将不会被此运算符匹配。<br /><br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。 |
-| is:reply            | 用于根据帖子是否为回复其他帖子来筛选帖子。仅投递符合规则的直接回复。也可以取反，以排除符合规则的回复，使其不被投递。<br /><br />请注意，此运算符适用于付费高级版和 Enterprise 搜索，在 Sandbox 开发环境中不可用。<br /><br />  <br /><br />**注意：**使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。                              |
-| is:quote            | 仅投递引用帖子（Quote Tweet），即在帖子负载中由 &quot;is&#95;quote&#95;status&quot;:true 标识、引用其他帖子的帖子。也可以通过取反该运算符来排除引用帖子。  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。                                                           |
-| is:verified         | 仅返回作者已通过 X「认证」的帖子。也可以取反，以排除作者已通过认证的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符一起使用。                                                                                                                    |
-| has:mentions        | 匹配提及其他 X 用户的帖子。  <br />  <br /><br />**注意：**当使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符配合使用。                                                                                                                                           |
-| has:hashtags        | 匹配包含话题标签的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不带 `is:` 或 `has:` 的运算符配合使用。                                                                                                                                               |
-| has:media           | *可用别名*：has:media&#95;link<br /><br />匹配包含由 X 归类为媒体的 URL 的帖子。例如：pic.x.com。  <br />  <br /><br />**注意：**使用 Search API 时，必须将此运算符与未包含 `is:` 或 `has:` 的其他运算符配合使用。                                                                                  |
-| has:images          | 匹配包含由 X 归类为媒体的 URL 的帖子。例如，pic.x.com。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不含 `is:` 或 `has:` 的运算符配合使用。                                                                                                                       |
-| has:videos          | *可用别名*：has:video&#95;link<br /><br />匹配包含原生 X 视频（直接上传到 X）的帖子。不会匹配通过 Vine 或 Periscope 创建的视频，或包含指向其他视频托管网站链接的帖子。  <br />  <br /><br />**注意：** 使用搜索 API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符一起使用。                                                 |
-| has:symbols         | 匹配包含 cashtag 符号（前面带有“$”字符，例如 $tag）的帖子。请注意，此运算符仅在 `enterprise` 搜索 API 中可用。  <br />  <br /><br />**注意：** 使用搜索 API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。                                                                                      |
+|                     |                                                                                                                                                                                                                                            |
+| :------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| has:geo             | 匹配具有由 X 提供的、特定于帖子本身的地理位置信息的帖子。可以是 `geo` 纬度/经度坐标，或者是以 X [“Place”](https://dev.x.com/overview/api/places) 形式提供的 “location”，并带有相应的显示名称、地理多边形区域以及其他字段。<br /><br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。 |
+| has:profile&#95;geo | *可用别名*：has:derived&#95;user&#95;geo<br /><br />匹配包含任意 [Profile Geo](http://support.gnip.com/enrichments/profile_geo.html) 元数据的帖子，其具体数值如何无关紧要。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。          |
+| has:links           | 此运算符可匹配在消息正文中包含链接的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符一起使用。                                                                                                                                  |
+| is:retweet          | 仅投放与规则匹配的显式转发。也可以取反，以排除与规则匹配的转发，此时仅投放原创内容。<br /><br />此运算符仅查找真正的转发，即使用 X 转发功能生成的转发。未使用 X 转发功能的引用帖子和修改后的帖子不会被此运算符匹配。<br /><br />  <br /><br />**注意：**使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。                                 |
+| is:reply            | 一个用于根据帖子是否为回复帖来过滤帖子的运算符。仅投递与规则匹配的显式回复。也可以取反，以从投递中排除与规则匹配的回复。<br /><br />请注意，此运算符仅适用于付费 Premium 和 Enterprise 搜索，在 Sandbox 开发环境中不可用。<br /><br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符结合使用。                 |
+| is:quote            | 仅返回引用帖子（Quote Tweets），即在帖子负载中由 &quot;is&#95;quote&#95;status&quot;:true 标识的、引用另一条帖子的帖子。也可以使用其否定形式以排除引用帖子。  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符结合使用。                                                      |
+| is:verified         | 仅返回作者在 X 上为“verified”状态的帖子。也可以取反，以排除作者已验证的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符一起使用。                                                                                                          |
+| has:mentions        | 匹配提及其他 X 用户的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符结合使用。                                                                                                                                        |
+| has:hashtags        | 匹配包含话题标签的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与其他不包含 `is:` 或 `has:` 的运算符搭配使用。                                                                                                                                           |
+| has:media           | *可用别名*: has:media&#95;link<br /><br />匹配包含由 X 归类为媒体的 URL 的帖子。例如，pic.x.com。  <br />  <br /><br />**注意：**使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符一起使用。                                                                              |
+| has:images          | 匹配包含被 X 归类为媒体的 URL 的帖子。例如，pic.x.com。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符配合使用。                                                                                                                   |
+| has:videos          | *可用别名*: has:video&#95;link<br /><br />匹配包含原生 X 视频（直接上传到 X）的帖子。不会匹配使用 Vine、Periscope 创建的视频，或带有指向其他视频托管网站链接的帖子。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将该运算符与其他不包含 `is:` 或 `has:` 的运算符一起使用。                                          |
+| has:symbols         | 匹配包含 cashtag 符号（以“$”字符开头，例如：$tag）的帖子。请注意，该运算符仅在 `enterprise` 搜索 API 中可用。  <br />  <br /><br />**注意：** 使用 Search API 时，必须将此运算符与不包含 `is:` 或 `has:` 的其他运算符配合使用。                                                                               |
 
 <div id="product-overview">
   ### 产品概览
 </div>
 
-Enterprise 级的 Full-archive Search 于 2015 年 8 月推出，Premium 级版本于 2018 年 2 月推出。这些搜索产品使客户可以立即访问任何公开可用的帖子。通过 Full-archive Search，您只需提交一个查询，就可以以典型的 RESTful 方式接收响应。Full-archive Search 实现了每个响应最多 500 条帖子的分页机制，并支持 Premium 级每分钟最多 60 次请求（rpm）的速率限制、Enterprise 级为每分钟 120 次请求。基于这些特性，Full-archive Search 可用于快速、大规模地检索帖子，并可通过并发请求实现大规模访问。
+Enterprise 级别的 Full-archive Search 于 2015 年 8 月推出，premium 级别版本则于 2018 年 2 月推出。这些搜索产品使客户可以即时访问任何公开可用的帖子。使用 Full-archive Search 时，你提交一个查询，并以经典的 RESTful 方式接收响应。Full-archive Search 支持每个响应最多返回 500 条帖子的分页机制，并支持 premium 每分钟最多 60 次请求（rpm）的速率限制、enterprise 每分钟最多 120 rpm 的速率限制。基于这些特性，Full-archive Search 可用于快速检索帖子，并且可以通过并发请求在大规模场景下使用。
 
-与基于磁盘上一组帖子平面文件构建归档的 Historical PowerTrack 不同，Full-archive Search 的帖子归档更类似于一个在线数据库。与所有数据库一样，它支持对其内容进行查询。它还使用一个 *索引* 来实现高性能数据检索。使用 Full-archive Search 端点时，查询语言由 PowerTrack 运算符组成，这些运算符分别对应一个被索引的帖子 JSON 属性。
+与其归档基于磁盘上一组帖子平面文件（flat files）的 Historical PowerTrack 不同，Full-archive Search 的帖子归档更类似于一个在线数据库。与所有数据库一样，它支持对其内容进行查询。它还使用 *索引* 来实现高性能的数据检索。对于 Full-archive Search 端点，其查询语言由 PowerTrack 运算符（Operators）组成，这些运算符分别对应一个已建立索引的帖子 JSON 属性。
 
-同样地，与 Historical PowerTrack 一样，存在一些帖子属性在发起查询时以当前时间为准。例如，如果您今天使用 Search API 访问一条 2010 年发布的帖子，那么该用户的个人资料描述、账户 “home” 位置、显示名称，以及帖子在点赞（Favorites）和转发（Retweet）计数方面的指标，都会更新为当前的数值，而不是 2010 年时的数值。 
+同样地，与 Historical PowerTrack 类似，存在一些在发起查询时“取当前值”的帖子属性。例如，如果你今天使用 Search API 访问一条 2010 年发布的帖子，那么该用户的个人资料描述、账号“home” 位置、显示名称，以及该帖子的点赞（Favorites）和转发（Retweet）计数指标都会更新为今天的数值，而不是其在 2010 年时的数值。 
 
 <div id="metadata-timelines">
   ### 元数据时间线
 </div>
 
-下面是 Full-archive search 端点运算符开始匹配的时间线。在某些情况下，运算符匹配开始的时间远远晚于某种“交流惯例”在 X 上变得普遍的时候。比如，@Replies 作为一种用户惯例在 2006 年就已经出现，但直到 2007 年初才在 JSON 中成为具有“支持性” JSON 的&#95;一等对象&#95;或&#95;事件&#95;。因此，要在 2006 年匹配 @Replies，需要检查帖子正文，而不是依赖 `to:` 和 `in_reply_to_status_id:` 这些 PowerTrack 运算符。
+下面是 Full-archive search 端点中各个 Operator 开始匹配的时间线。在某些情况下，Operator 的匹配开始时间远远晚于某种“交流惯例”在 X 上成为惯例的时间。例如，@Replies 作为一种用户惯例是在 2006 年出现的，但直到 2007 年初，它才通过“支撑性” JSON 成为一等对象（*first-class object*）或事件（*event*）。因此，要在 2006 年匹配 @Replies，就需要检查帖子正文，而不是依赖 `to:` 和 `in_reply_to_status_id:` 这些 PowerTrack Operators。
 
-这里提供的细节是使用 Full-Archive Search 生成的（源自数百次搜索）。这条时间线并非 100% 完整或精确。如果你发现了另一个对你的用例至关重要的过滤/元数据“诞生日期”，请告知我们。
+这里提供的细节是使用 Full-Archive Search（基于数百次搜索得出）生成的。这条时间线并非 100% 完整或精确。如果你发现了另一个对你的用例至关重要的过滤器/元数据“诞生日”，请告知我们。
 
-请注意，底层搜索索引可能会被重建。因此，这些时间线细节也可能发生变化。
+请注意，底层 Search 索引可能会被重建。因此，这些时间线细节可能会发生变化。
 
 <div id="2006">
   #### 2006
@@ -995,7 +997,7 @@ Enterprise 级的 Full-archive Search 于 2015 年 8 月推出，Premium 级版�
 
 * 3 月 26 日 - `lang:`。在生成搜索索引时对帖子元数据进行回填的一个示例。
 * 7 月 13 日 - `has:mentions` 开始匹配。
-* 10 月 6 日 - `has:symbols`。用于讨论股票代码的 $cashtags（或 symbols）直到 2009 年初才变得常见。在那之前，大多数用法很可能是俚语（例如 $slang）。
+* 10 月 6 日 - `has:symbols`。用于讨论股票代码的 $cashtags（或 symbols）直到 2009 年初才变得常见。在那之前，大多数用法很可能是俚语（例如，$slang）。
 * 10 月 26 日 - `has:links` 开始匹配。
 * 11 月 23 日 - `has:hashtags` 开始匹配。
 
@@ -1003,203 +1005,203 @@ Enterprise 级的 Full-archive Search 于 2015 年 8 月推出，Premium 级版�
   #### 2007
 </div>
 
-* 1 月 30 日 - 首个一等公民 @reply（in&#95;reply&#95;to&#95;user&#95;id），`reply_to_status_id:` 开始匹配。
-* 8 月 23 日 - Hashtag（话题标签）开始作为组织话题和会话的通用约定出现。一周后首次被真正使用。
+* 1 月 30 日 - 首个被视为“一等公民”的 @reply（in&#95;reply&#95;to&#95;user&#95;id）出现，`reply_to_status_id:` 开始匹配。
+* 8 月 23 日 - 话题标签（Hashtag）作为组织话题和对话的通用约定出现。一周后迎来首次真正意义上的使用。
 
 <div id="2009">
   #### 2009
 </div>
 
-* 5 月 15 日 - `is:retweet`。请注意，此运算符从官方转推功能“测试版”发布及其“Via @”模式开始才会匹配。在此测试期间，Post 的动词字段值为 `post`，且原始帖子不会包含在负载中。
-* 8 月 13 日 - 官方转推的最终版本发布，采用“RT @”模式，将动词设为 `share`，并通过包含原始帖子的 `retweet_status` 属性，从而使 JSON 负载大小大约增加一倍。
+* 5 月 15 日 - `is:retweet`。请注意，此运算符从官方转发功能 “beta” 版开始生效，并匹配其 “Via @” 模式。在此 beta 期间，Post 动词为 ‘post’，且原始帖子不包含在 payload 中。
+* 8 月 13 日 - 官方转发功能最终版本发布，使用 “RT @” 模式，动词设置为 ‘share’，并在 ‘retweet&#95;status’ 字段中包含原始帖子（因此 JSON payload 大小大约增加一倍）。
 
 <div id="2010">
   #### 2010
 </div>
 
-* 3 月 6 日 - `has:geo`、`bounding_box:` 和 `point_radius:` 地理运算符开始进行匹配。
-* 8 月 28 日 - `has:videos`（直到 2015 年 2 月，此运算符会匹配包含指向特定视频托管网站（如 youtube.com、vimeo.com 和 vivo.com）链接的帖子）。
+* 3 月 6 日 - 开始支持使用 `has:geo`、`bounding_box:` 和 `point_radius:` 地理 Operator 进行匹配。
+* 8 月 28 日 - `has:videos`（直到 2015 年 2 月，该 Operator 会匹配包含指向特定视频托管网站（如 youtube.com、vimeo.com 和 vivo.com）的链接的帖子）。
 
 <div id="2011">
   #### 2011
 </div>
 
-* 7 月 20 日 - `has:media` 和 `has:images` 开始支持匹配。原生照片于 2010 年 8 月 9 日正式发布。
+* 7 月 20 日 - `has:media` 和 `has:images` 开始生效匹配。原生照片功能于 2010 年 8 月 9 日正式发布。
 
 <div id="2014">
   #### 2014
 </div>
 
-* 12 月 3 日 - （约）*部分* [增强 URL 元数据](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments)（包含 HTML 标题和描述）开始出现在数据载荷中。增强元数据在 2016 年 5 月基本完善。
+* 12 月 3 日 -（大致）*部分* [增强型 URL 元数据](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments)（包含 HTML 标题和描述）开始出现在负载中。增强型元数据在 2016 年 5 月得到了更为完整的实现。
 
 <div id="2015">
   #### 2015
 </div>
 
 * 2 月 10 日 - `has:videos` 匹配“原生”X 视频。
-* 2 月 17 日 - `has:profile_geo`、`profile_country:`、`profile_region:`、`profile_locality:` [Profile Geo](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments#profile-geo) 运算符开始生效。
-* 2 月 17 日 - `place_country:` 和 `place:` 帖子地理位置运算符开始生效。
+* 2 月 17 日 - `has:profile_geo`、`profile_country:`、`profile_region:`、`profile_locality:` [Profile Geo](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments#profile-geo) 运算符开始支持匹配。
+* 2 月 17 日 - `place_country:` 和 `place:` 帖子地理位置运算符开始支持匹配。
 
 <div id="2016">
   #### 2016
 </div>
 
-* 5 月 1 日 - [增强的 URL 元数据](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments) 更加广泛地开放使用，并作为 [2016 年 8 月 Gnip 2.0 发布的一部分](https://blog.x.com/2016/gnip-2-is-here) 被正式对外宣布。针对这些元数据，在 Search APIs 中没有对应的 Operators。
+* 5 月 1 日 - [增强的 URL 元数据](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments) 得到更广泛的开放和提供，并作为 [Gnip 2.0 于 2016 年 8 月发布的一部分](https://blog.x.com/2016/gnip-2-is-here) 正式宣布。针对这些元数据，Search API 中没有相应的 Operators。
 
 <div id="2017">
   #### 2017
 </div>
 
-* 2 月 22 日 - 投票元数据开始以增强的原生格式提供。针对这些元数据没有提供相应的 Operators。
+* 2 月 22 日 - 投票元数据开始以丰富的原生格式提供。这些元数据没有对应的运算符（Operator）。
 
 <div id="2022">
   #### 2022
 </div>
 
-* 9 月 27 日起 —— 自该日期起创建的所有 Post 对象都具有可用的编辑帖子元数据。所有提供 Post 对象的 Enterprise 端点也自该日起更新为提供这些元数据。提供的编辑元数据包括 edit&#95;history 和 edit&#95;controls 对象。对于 2022 年 9 月 27 日之前创建的 Posts，不会返回这些元数据。目前，没有与这些元数据相匹配的 Enterprise Operators 可用。若要进一步了解 Edit Post 元数据，请参阅 [Edit Posts 基础](/zh/x-api/fundamentals/edit-posts) 页面。
+* 自 9 月 27 日起创建的所有 Post 对象都具有可用的编辑 Post 元数据。从该日期开始，所有提供 Post 对象的 Enterprise 端点都已更新以提供这些元数据。提供的编辑元数据包括 edit&#95;history 和 edit&#95;controls 对象。对于 2022 年 9 月 27 日之前创建的 Posts，将不会返回这些元数据。目前，没有可与这些元数据匹配的 Enterprise 运算符。要进一步了解编辑 Post 元数据，请参阅 [Edit Posts fundamentals](/zh/x-api/fundamentals/edit-posts) 页面。
 
 <div id="2022">
   #### 2022
 </div>
 
-* 自 9 月 29 日起创建的所有 Post 对象都具备已编辑帖子元数据。自该日期起，所有提供 Post 对象的 Enterprise 端点都已更新为提供此元数据。提供的编辑元数据包括 `edit_history` 和 `edit_controls` 对象。对于在 2022 年 9 月 27 日之前创建的 Posts，将不会返回这些元数据。目前，还没有可用于匹配这些元数据的 Enterprise 运算符。若要了解有关编辑帖子元数据的更多信息，请参阅 [Edit Posts 基础知识](/zh/x-api/fundamentals/edit-posts) 页面。
+* 自 9 月 29 日起创建的所有 Post 对象都具有可用的编辑 Post 元数据。从这一天开始，所有提供 Post 对象的 Enterprise 端点都已更新为返回这些元数据。所提供的编辑元数据包括 `edit_history` 和 `edit_controls` 对象。对于 2022 年 9 月 27 日之前创建的帖子，将不会返回这些元数据。目前，还没有可用于匹配这些元数据的 Enterprise 运算符。要详细了解 Edit Post 元数据，请参阅 [Edit Posts 基础知识](/zh/x-api/fundamentals/edit-posts) 页面。
 
 <div id="filtering-tips">
   ### 过滤技巧
 </div>
 
-考虑到以上所有时间线信息，在编写 Search APIs 的过滤条件时，显然有许多细节需要考虑。需要重点考虑两个方面：
+综合上述所有时间线信息，可以看出，在编写 Search API 过滤条件时需要考虑很多细节。需要重点考虑两件事：
 
-* 某些元数据具有“生效”日期，因此过滤可能会产生&#95;假阴性&#95;。此类搜索包括依赖于在部分或全部搜索时间段内尚不存在的元数据的 Operator。比如，如果你使用 `has:images` Operator 搜索包含图片的帖子，那么在 2011 年 7 月之前的时间段内不会有任何匹配结果。这是因为该 Operator 是匹配&#95;原生&#95;照片（通过 X 用户界面附加到帖子中的图片）。如果想要更完整的图片分享帖子数据集，对于 2011 年 7 月之前的时间段，规则中还需要包含匹配常见图片托管 URL 的条件子句。
-* 某些元数据是使用在帖子发布&#95;之后&#95;产生的元数据回填而来。
+* 某些元数据具有“启用日期（born-on）”，因此过滤条件可能会导致&#95;假阴性&#95;。这类搜索包括依赖于在整个或部分搜索时间段内尚不存在的元数据的 Operators。比如，如果你使用 `has:images` Operator 搜索包含图片的帖子，在 2011 年 7 月之前的时间段内将不会有任何匹配结果。这是因为该 Operator 仅匹配&#95;原生&#95;照片（通过 X 用户界面附加到帖子上的图片）。如果要获取更完整的照片分享帖子数据集，对 2011 年 7 月之前的时间段进行过滤时，需要在规则中加入匹配常见图片托管 URL 的规则子句。
+* 某些元数据是在帖子发布&#95;之后&#95;才回填补录的。
 
 在创建 PowerTrack 查询时，通常会重点关注以下几类属性：
 
-* X 个人资料（Profiles）
-* 原始帖子或转发/分享的帖子
+* X 个人资料
+* 原创或转发帖子
 * 帖子语言分类
-* 具有地理位置信息的帖子
-* 通过链接分享的媒体
+* 带地理位置信息的帖子
+* 分享的链接媒体
 
-其中一部分属性具有特定的产品相关行为，而另一部分则行为完全相同。详情如下所示。
+其中一些具有特定产品行为，而另一些则表现一致。更多详情见下文。
 
 <div id="x-profiles">
   #### X 个人资料
 </div>
 
-Search API 在返回历史帖子时，会附带用户个人资料数据，其状态以&#95;检索时&#95;为准。如果你请求一条 2014 年的帖子，该用户的个人资料元数据将反映查询时刻的状态。
+Search API 返回的历史帖子会携带在“检索时刻”的用户个人资料数据。比如，如果你请求一条 2014 年的帖子，返回的用户个人资料元数据将反映该用户在查询当时的资料情况。
 
 <div id="original-posts-and-retweets">
-  #### 原始帖子和转发帖子
+  #### 原始帖子和转推
 </div>
 
-PowerTrack `_is:retweet_` 运算符使用户可以选择包含或排除转发帖子。使用该运算符的用户，需要为 2009 年 8 月之前的数据准备两种关于转发匹配（或不匹配）的策略。对于 2009 年 8 月之前的数据，需要检查帖子正文本身，并使用精确短语匹配，来匹配 “@RT ” 模式（实际上，如果你在过滤 2009 年 5 月至 8 月期间的转发，应该同时包含 “Via @” 模式）。对于 2009 年 8 月之后的时间段，可以使用 *is:retweet* 运算符。
+PowerTrack `_is:retweet_` 运算符允许用户选择包含或排除转推。在处理 2009 年 8 月之前的转推匹配（或不匹配）数据时，使用该运算符的用户需要采用两种不同的策略。对于 2009 年 8 月之前的时间段，需要通过精确短语匹配来检查帖子内容本身是否符合 “@RT ” 模式（实际上，如果你要筛选 2009 年 5 月至 8 月之间的转推，还应包括 “Via @” 模式）。对于 2009 年 8 月之后的时间段，则可以使用 *is:retweet* 运算符。
 
 <div id="post-language-classifications">
   #### 帖子语言分类
 </div>
 
-在按帖子语言分类进行过滤时，X 过往的产品之间存在明显差异。构建搜索存档（Search archive）时，所有帖子都补充了 X 的语言分类。因此，`lang:` 运算符可用于整个帖子存档。
+在按帖子语言分类进行过滤时，X 的历史产品之间存在较大差异。构建 Search 存档时，所有帖子都会补注 X 的语言分类，因此可以在整个帖子存档中使用 `lang:` 运算符。
 
 <div id="geo-referencing-posts">
-  #### 帖子的地理定位
+  #### 帖子的地理参照
 </div>
 
-为帖子进行地理定位主要有三种方式：
+为帖子添加地理参照主要有三种方式：
 
-* **帖子内容中的地理引用。** 在帖子内容中基于地理引用进行匹配，虽然通常是最具挑战性的方法（因为它依赖本地知识），但可应用于整个帖子存档。[此处](https://x.com/biz/statuses/28311) 是一个 2006 年针对旧金山地区、基于 “golden gate” 过滤条件的地理定位匹配示例。
+* **帖子内容中的地理引用。** 基于帖子内容中的地理引用进行匹配，虽然通常是最具挑战性的方法，因为它依赖于本地知识，但它可以应用于整个帖子存档。[此处](https://x.com/biz/statuses/28311) 是一个来自 2006 年、基于“golden gate”过滤器、针对旧金山地区的地理参照匹配示例。
 
-* **由用户为帖子添加地理标签。** 使用搜索 API 后，从 2010 年 3 月开始可以使用部分 Geo Operators 对帖子进行匹配，从 2015 年 2 月开始可以使用其他 Operators：
+* **由用户为帖子添加地理标签。** 使用搜索 API，自 2010 年 3 月起即可开始使用部分 Geo Operators 对帖子进行匹配，而其他 Geo Operators 则从 2015 年 2 月开始提供：
 
   * 2010 年 3 月 6 日：`has:geo`、`bounding_box:` 和 `point_radius:`
   * 2015 年 2 月 17 日：`place_country:` 和 `place:`
 
-* **由用户在账户资料中设置 “home” 位置。** Profile Geo Operators 在 Historical PowerTrack 和 Search APIs 中均可用。对于 Search APIs，这些 Profile Geo 元数据自 2015 年 2 月起可用。对于 Profile Geo 元数据尚不可用之前发布的帖子，可以使用 `bio_location:` Operator，用于匹配未标准化的用户输入。
+* **由用户在账户资料中设置的“home”位置。** Profile Geo Operators 在 Historical PowerTrack 和 Search API 中都可用。对于 Search API，这类 Profile Geo 元数据自 2015 年 2 月起可用。对于早于 Profile Geo 元数据可用时间发布的帖子，可以使用 `bio_location:` Operator 对非规范化的用户输入进行匹配。
 
 <div id="shared-links-and-media">
   #### 共享链接和媒体
 </div>
 
-2012 年 3 月，引入了扩展 URL 富化数据。在此之前，Post 负载中只包含用户提供的 URL。因此，如果用户使用了短链接，要根据目标（展开后的）URL 进行匹配会比较困难。通过 Search API，这些元数据从 2012 年 3 月起开始可用。
+2012 年 3 月，引入了扩展 URL 富化功能。在此之前，帖子载荷中只包含用户提供的 URL。因此，如果用户包含的是缩短 URL，要匹配感兴趣的（展开后的）URL 会比较困难。通过 Search API，这些元数据从 2012 年 3 月起开始提供。
 
-2016 年 7 月，引入了增强 URL 富化数据。该增强版本会在 Post 负载中提供网站的 HTML 标题和描述，并提供用于匹配这些内容的 Operator。这些元数据从 2014 年 12 月开始出现。
+2016 年 7 月，引入了增强 URL 富化功能。此增强版本在帖子载荷中提供网站的 HTML 标题和描述，并提供相应的运算符用于匹配。这些元数据从 2014 年 12 月开始出现。
 
-2016 年 9 月，X 引入了“原生附件”，其中末尾的共享链接不再计入 140 个字符的 Post 字符数限制。这两种 URL 富化数据对这些共享链接仍然适用。
+2016 年 9 月，X 引入了“原生附件”，其中末尾的共享链接不再计入 140 字符的帖子长度限制。这两种 URL 富化仍适用于这些共享链接。
 
-以下是相关 Search Operator 开始匹配的时间点：
+以下是相关搜索运算符开始生效的时间点：
 
 * 2006 年 10 月 26 日 - `has:links`
 * 2011 年 7 月 20 日 - `has:images` 和 `has:media`
-* 2011 年 8 月 - `url:`，配合 [Expanded URLs enrichment](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments)。早在 2006 年 9 月，`(url:"spotify.com" OR url:gnip OR url:microsoft OR url:google OR url:youtube)` 就能匹配 http://x.com/Adam/statuses/16602，即使在 twitter&#95;entities 和 gnip 对象中没有 urls[] 元数据。“youtube.com” 是一个示例：即便没有任何 urls[] 元数据，只要消息内容中出现该字符串，依然会匹配 url:youtube。
-* 2015 年 2 月 10 日 - `has:videos`（原生视频）。在 2010/08/28 到 2015/02/10 之间，该 Operator 会匹配带有指向部分视频托管站点（如 youtube.com、vimeo.com 和 vivo.com）链接的 Post。
-* 2016 年 5 月 1 日 - 基于 [Enhanced URLs enrichment](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments) 并已全面开放使用的 `url_title:` 和 `url_description:`。首批 Enhanced URL 元数据从 2014 年 12 月开始出现。
+* 2011 年 8 月 - `url:` 搭配 [Expanded URLs enrichment](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments)。早在 2006 年 9 月，`(url:"spotify.com" OR url:gnip OR url:microsoft OR url:google OR url:youtube)` 就能匹配 http://x.com/Adam/statuses/16602，即使在 twitter&#95;entities 和 gnip 对象中没有任何 urls[] 元数据。“youtube.com” 是一个示例：即使没有任何 urls[] 元数据，消息内容中也可以匹配到 url:youtube。
+* 2015 年 2 月 10 日 - 原生视频使用 `has:videos`。在 2010/08/28 到 2015/02/10 之间，该运算符会匹配包含指向 youtube.com、vimeo.com 和 vivo.com 等特定视频托管站点链接的帖子。
+* 2016 年 5 月 1 日 - 基于 [Enhanced URLs enrichment](/zh/x-api/enterprise-gnip-2.0/fundamentals/data-enrichments) 的 `url_title:` 和 `url_description:` 全面开放使用。首批增强 URL 元数据从 2014 年 12 月开始出现。
 
 <div id="frequently-asked-questionsfaq">
-  ## 常见问题解答（FAQ）
+  ## 常见问题（FAQ）
 </div>
 
 <div id="general-search-post-api-questions">
-  ### Search Post API 一般问题
+  ### 关于 Search Post API 的常见问题
 </div>
 
 <AccordionGroup>
-  <Accordion title="我通过 data 端点获取到的帖子数量与 counts 端点返回的帖子计数不一致，这是为什么？">
-    `counts` 端点返回的结果与 `data` 端点返回的结果之间存在已知差异。您可能会在结果中看到不一致，其原因在于 `counts` 端点是在合规处理之前进行统计的（也就是说，它不会考虑已删除的帖子、scrub geo 等），而 `data` 端点在返回数据时已经完成合规处理，并会反映所有合规事件。
+  <Accordion title="我通过 data 端点获取的帖子数量与 counts 端点返回的帖子数量不一致。为什么会这样？">
+    `counts` 端点和 `data` 端点返回的结果之间存在已知差异。结果中可能会出现不一致，这是因为 `counts` 端点返回的是合规处理之前的数据（也就是说，它不会计入已删除的帖子、地理信息清理等），而 `data` 端点在交付时已完成合规处理，并且会计入所有合规事件。
   </Accordion>
 
-  <Accordion title="为什么我没有收到应与我的查询匹配的帖子？">
-    之所以会出现这种情况，可能有以下几种原因，包括：
+  <Accordion title="我没有收到本应符合我查询条件的帖子。为什么？">
+    这种情况可能发生的原因有几种，包括：
 
-    1. 你期望看到的帖子来自受保护的账号
-    2. data 端点会处理所有合规事件（也就是说，已删除的帖子、被清除的地理位置信息等都不会包含在响应中）。
+    1. 你期望看到的帖子来自受保护账号
+    2. data 端点会处理所有合规事件（这意味着已删除的帖子、被清除的地理位置信息等将不会包含在响应中）。
   </Accordion>
 
-  <Accordion title="我的查询匹配到了一个帖子，但其中却包含了我在查询中取反的关键词。为什么会这样？">
-    这很可能是由于不正确使用我们的高级规则和过滤功能所致。请查看我们的[文档](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering)，并确保充分了解构建规则时的各项限制。
+  <Accordion title="我的查询匹配到了一个帖子，但其中包含了我在查询中排除的关键词。为什么会这样？">
+    这很可能是由于对我们的高级规则和过滤功能使用不当所致。请查阅我们[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering)的文档，并确保你了解构建规则时的相关限制。
   </Accordion>
 
-  <Accordion title="有没有可以帮助我开始使用 Search 帖子 API 的库？">
-    是的，有一些，例如：
+  <Accordion title="有没有可以帮助我上手使用 Search Post API 的库？">
+    是的，有一些，包括：
 
-    * [Tweepy](http://www.tweepy.org/) - 适用于使用标准 Search/Posts 产品（Python）
-    * [X API](https://github.com/geduldig/TwitterAPI) - 适用于使用标准 Search Posts API（Python）
-    * [Search Posts Python](https://github.com/xdevplatform/search-tweets-python) 和 [Search Posts Ruby](https://github.com/xdevplatform/search-tweets-ruby) - 这两个都是适用于 Enterprise（以及 v2！）Search Posts API 的优秀工具
+    * [Tweepy](http://www.tweepy.org/) - 适合用于标准搜索/帖子产品（Python）
+    * [X API](https://github.com/geduldig/TwitterAPI) - 适合用于标准 Search Post API（Python）
+    * [Search Posts Python](https://github.com/xdevplatform/search-tweets-python) 和 [Search Posts Ruby](https://github.com/xdevplatform/search-tweets-ruby) - 两个适用于 Enterprise（以及 v2！）Search Post API 的优秀工具
 
     我们直接支持的所有库都可以在我们的 xdevplatform GitHub 页面上找到：[https://github.com/xdevplatform](https://github.com/xdevplatform)。
 
-    此外，还有[其他第三方库](/zh/resources/fundamentals/authentication#oauth-1-0a-2)可能也会有所帮助；但请注意，其中一些可能无法与我们的 Premium 和 Enterprise 产品配合使用。
+    还有[其他第三方库](/zh/resources/fundamentals/authentication#oauth-1-0a-2)也可能有所帮助；但请注意，其中一些可能无法与我们的 Premium 和 Enterprise 产品配合使用。
   </Accordion>
 
-  <Accordion title="在向数据端点发出请求时，我返回的帖子数量有没有可能少于我在请求中设置的 `maxResults` 值？">
-    是的。我们的数据端点会在达到指定的 `maxResults` 上限时，或在 30 天后进行分页。
+  <Accordion title="在向数据端点发出请求时，我是否会收到少于自己在 `maxResults` 中设置数量的帖子？">
+    是的。我们的数据端点会在达到指定的 `maxResults` 数量时，或在经过 30 天后进行分页。
 
-    例如，如果在某个 30 天期间内你有 800 条帖子，你需要发送两次请求才能获取完整结果，因为每次请求最多只能返回 500 条帖子（`maxResults`）。同样地，如果你在第一个月只有 400 条帖子，在第二个月有 100 条帖子，你也需要发送两次请求才能获取全部结果，因为即使第一次请求返回的帖子数量少于指定的 `maxResults`，分页仍会在 30 天的时间段结束后进行。
+    例如，如果在某个 30 天周期内你有 800 个帖子，你需要发出两次请求才能获取完整结果；因为每次请求最多只能返回 500 个帖子（`maxResults`）。又比如，如果你在第一个月只有 400 个帖子，而第二个月只有 100 个帖子，你同样需要发出两次请求才能获取完整结果；因为即使第一次请求返回的帖子数量少于指定的 `maxResults`，分页仍然会在 30 天之后进行。
   </Accordion>
 
-  <Accordion title="匹配的帖子将按什么顺序返回？">
-    帖子按时间倒序返回。例如，第一页结果会显示与查询匹配的最新帖子，分页会一直继续，直到结果中的发布时间回溯到最初请求的 `fromDate` 为止。
+  <Accordion title="匹配到的帖子按什么顺序返回？">
+    帖子按时间倒序返回。例如，第一页结果会显示与查询匹配的最新帖子，分页会持续进行，直到结果中帖子的发布时间追溯到最初请求的 `fromDate` 为止。
   </Accordion>
 
-  <Accordion title="编辑帖子功能（Edit Posts）会如何影响我的用量和计费？">
-    只有原始帖子才会计入计费。任何后续编辑都会被忽略，不会计入你的整体活动计数。
+  <Accordion title="编辑帖子功能会如何影响我的用量和计费？">
+    只有原始帖子会计入计费。之后的任何编辑都会被忽略，不会计入你的总体活动计数。
 
     `Enterprise`
   </Accordion>
 
-  <Accordion title="我想进一步了解 Enterprise Search Post API 的价格，并申请开通该服务。应该如何操作？">
-    我们的 Enterprise 解决方案采用可预测的定价模式，并可根据您的业务需求量身定制。请在[此处](/zh/x-api/enterprise-gnip-2.0/enterprise-gnip)提交申请以获取更多信息。
+  <Accordion title="我想进一步了解 Enterprise Search Post API 的价格，并申请使用该服务。我该如何进行？">
+    我们的 Enterprise 解决方案采用可预期的定价，并可根据您的业务需求进行定制。请在[此处](/zh/x-api/enterprise-gnip-2.0/enterprise-gnip)提交申请以了解更多信息。
   </Accordion>
 
-  <Accordion title="如何构建适合我用例的规则集？">
-    * 有关 Enterprise Search Post API 的文档，请参阅 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-search-apis)
-    * 有关规则和过滤的实用信息，请参见 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators)
-    * 有关使用 data 端点的实用信息，请参见 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#data-endpoint)
-    * 有关使用 counts 端点的实用信息，请参见 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#counts-endpoint)
-    * 可用运算符列表请参见 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)
+  <Accordion title="如何构建符合我用例的规则集？">
+    * 请参阅我们的 Enterprise Search Post API 文档[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#enterprise-search-apis)
+    * 有关规则和过滤条件的有用信息可在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators)找到
+    * 有关使用 data 端点的有用信息可在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#data-endpoint)找到
+    * 有关使用 counts 端点的有用信息可在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#counts-endpoint)找到
+    * 可用运算符列表可在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)找到
   </Accordion>
 
-  <Accordion title="我本月的请求配额/上限已经用完，但还需要访问更多数据，该怎么办？">
-    请联系您在 X 的客户经理，他们可以协助您处理此事。
+  <Accordion title="我本月的请求上限/限制已经用完，但还需要访问更多数据，该怎么办？">
+    请联系你的 X 客户经理，他/她可以帮助你解决这个问题。
   </Accordion>
 </AccordionGroup>
 
@@ -1207,10 +1209,10 @@ PowerTrack `_is:retweet_` 运算符使用户可以选择包含或排除转发帖
   ### 错误排查指南
 </div>
 
-**代码 404 - 未找到**
+**错误代码 404 - 未找到**
 
-1. 请确保为每个 endpoint 使用了正确的参数（例如，`buckets` 字段只能用于 counts endpoint，不能用于 data endpoint）。
-2. 请再次确认 `:product`、`:account_name` 和 `:label` 字段是否正确。你可以在 GNIP Console 中找到你的 `:label` 字段（仅适用于 Enterprise 客户）。
+1. 请确保你在调用每个 endpoint 时使用了正确的参数（例如，`buckets` 字段只能与 counts endpoint 一起使用，不能与 data endpoint 一起使用）。
+2. 请再次确认 `:product`、`:account_name` 和 `:label` 字段是否正确。你可以在 GNIP Console 中找到你的 `:label` 字段（仅限 Enterprise 客户）。
 
 <div id="api-reference">
   ## API 参考
@@ -1222,21 +1224,21 @@ PowerTrack `_is:retweet_` 运算符使用户可以选择包含或排除转发帖
 
 有两个 Enterprise 搜索 API：
 
-* 30-Day Search API - 提供最近 30 天内发布的帖子。
+* 30-Day Search API - 提供过去 30 天内发布的帖子。
 * Full-Archive Search API - 提供最早可追溯到 2006 年的帖子，从 2006 年 3 月发布的第一条帖子开始。
 
-这些搜索 API 具有统一的设计，以下文档适用于二者。请注意，对于自 2022 年 9 月 29 日起创建的帖子，Tweet 对象会包含描述其编辑历史的帖子编辑元数据。更多详情请参阅 [&quot;Edit Tweets&quot;](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets) 基础知识页面。
+这些搜索 API 采用相同的设计，下面的文档适用于这两个 API。请注意，对于从 2022 年 9 月 29 日起创建的帖子，Tweet 对象将包含描述其编辑历史的帖子编辑元数据。更多详情请参阅基础知识页面 [&quot;Edit Tweets&quot;](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)。
 
-下面是集成 Enterprise 搜索 API 时所需的重要细节：
+下面是集成 Enterprise 搜索 API 时所需的重要信息：
 
 * 请求帖子数据和计数的方法
-* 认证
+* 身份验证
 * 分页
-* API 请求参数和请求示例
-* API 响应 JSON 载荷和响应示例
+* API 请求参数和示例请求
+* API 响应 JSON 负载和示例响应
 * HTTP 响应代码
 
-Enterprise API 提供对帖子归档的低延迟、高保真、基于查询的访问。这两个 API 之间唯一的区别是可搜索的时间范围，要么是最近 30 天，要么是最早从 2006 年开始。时间范围可以精确到分钟级。帖子数据按时间倒序返回，从与你的查询匹配的最新帖子开始。帖子通常会在发布后大约 30 秒内通过搜索 API 提供访问。
+Enterprise API 提供对帖子存档的低延迟、完全保真、基于查询的访问。这两个 API 的唯一区别在于可搜索的时间范围：要么是过去 30 天，要么是最早可追溯到 2006 年的数据。时间范围可以精确到分钟级。帖子数据按时间倒序返回，从与你的查询匹配的最新帖子开始。帖子在发布后大约 30 秒即可通过搜索 API 获取。
 
 <div id="methods">
   #### 方法
@@ -1246,72 +1248,72 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
 
 | 方法 | 说明 |
 | :--- | :--- |
-| [POST /search/:product/accounts/:account&#95;name/:label](#SearchRequests) | 检索过去 30 天内与指定的 PowerTrack 规则匹配的帖子。 |
-| [POST /search/:product/accounts/:account&#95;name/:label/counts](#CountRequests) | 检索过去 30 天内与指定的 PowerTrack 规则匹配的帖子数量。 |
+| [POST /search/:product/accounts/:account&#95;name/:label](#SearchRequests) | 检索过去 30 天内与指定 PowerTrack 规则匹配的帖子。 |
+| [POST /search/:product/accounts/:account&#95;name/:label/counts](#CountRequests) | 检索过去 30 天内与指定 PowerTrack 规则匹配的帖子数量。 |
 
 其中：
 
-* `:product` 指示你正在请求的搜索 endpoint，可以是 `30day` 或 `fullarchive`。
-* `:account_name` 是与你的账户关联的名称（区分大小写），如在 console.gnip.com 中所示。
+* `:product` 表示你要请求的搜索 endpoint，可以是 `30day` 或 `fullarchive`。
+* `:account_name` 是与你账户关联的名称（区分大小写），如在 console.gnip.com 中所示。
 * `:label` 是与你的搜索 endpoint 关联的标签（区分大小写），如在 console.gnip.com 中所示。
 
-例如，如果 TwitterDev 账户拥有标签为 “prod”（production 的缩写）的 30 天搜索产品，则搜索 endpoints 为：
+例如，如果 TwitterDev 账户拥有标签为 “prod”（production 的缩写） 的 30 天搜索产品，则搜索 endpoints 为：
 
-* 数据 endpoint：[https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod.json](https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod.json)
-* 计数 endpoint：[https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod/counts.json](https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod/counts.json)
+* 数据 endpoint: [https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod.json](https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod.json)
+* 计数 endpoint: [https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod/counts.json](https://gnip-api.x.com/search/30day/accounts/TwitterDev/prod/counts.json)
 
 你的完整 Enterprise 搜索 API endpoint 会显示在 [https://console.gnip.com](https://console.gnip.com)。
 
-下面是使用一个名为 curl 的简单 HTTP 实用工具发起请求的若干示例。这些示例在 URL 中使用了 `:product`、`:account_name` 和 `:label`。要使用这些示例，请务必将 URL 更新为你的实际信息。
+下面是几个使用简单 HTTP 工具 `curl` 的示例请求。这些示例在 URL 中使用了 `:product`、`:account_name` 和 `:label`。要使用这些示例，请务必将 URL 中的占位符更新为你的具体信息。
 
 <div id="authentication">
   #### 身份验证
 </div>
 
-对 Enterprise 搜索 API 的所有请求都必须使用 HTTP *基本身份验证（Basic Authentication）*，其凭据由用于登录你在 [https://console.gnip.com](https://console.gnip.com) 上的账户的有效电子邮件地址和密码组合组成。凭证必须作为每个请求的 *Authorization* 请求头传递。
+所有对 Enterprise 搜索 API 的请求都必须使用 HTTP *Basic Authentication*，其凭据由你用于登录 [https://console.gnip.com](https://console.gnip.com) 上账户的有效电子邮件地址和密码组合构成。凭据必须通过每个请求的 *Authorization* 标头发送。
 
 <div id="requestresponse-behavior">
   #### 请求/响应行为
 </div>
 
-通过使用 `fromDate` 和 `toDate` 参数，你可以请求 API 所支持的任意时间范围。30-Day search API 提供最近 31 天的帖子（尽管被称为 “30-Day” API，它实际上提供 31 天的数据，以便用户可以请求完整的自然月）。Full-Archive search API 则可以返回一直追溯到最早一条帖子（2006 年 3 月 21 日）的数据。不过，单次响应中返回的结果数量会受限于你指定的 `maxResults` 或 31 天这两者中较小的一个。如果匹配的数据量或你请求的时间范围超过了你指定的 `maxResults` 或 31 天，你会收到一个 `next` 令牌，你应当使用它在你指定的时间范围内继续分页获取剩余的数据。
+通过使用 `fromDate` 和 `toDate` 参数，你可以请求该 API 支持的任意时间段。30 天搜索 API 提供最近 31 天内的帖子（尽管称为 “30 天” API，它实际上提供 31 天的数据，以便用户可以请求完整月份的时间段）。Full-Archive 搜索 API 提供从第一条帖子（2006 年 3 月 21 日）开始直至现在的所有帖子。然而，单个响应中返回的结果会被限制在你指定的 `maxResults` 或 31 天这两者中较小的一个。如果匹配的数据量或你的时间范围超过你指定的 `maxResults` 或 31 天，你将会收到一个 `next` 令牌，你应当使用该令牌在你指定的时间范围内继续分页获取数据。
 
-例如，假设你使用 Full-Archive search，希望获取 2017 年 1 月 1 日到 2017 年 6 月 30 日之间所有与你的查询匹配的帖子。你会在请求中使用 `fromDate` 和 `toDate` 参数来指定这完整的六个月时间范围。search API 会返回第一“页”帖子，其帖子数量与 `maxResults` 参数相同（默认值为 100）。在假设还有更多帖子（而且很可能会有更多）的情况下，API 还会返回一个 `next` 令牌，使你能够发起请求以获取下一“页”数据。这个过程会一直重复，直到 API 不再返回 `next` 令牌为止。更多细节请参见下一节。
+例如，假设你正在使用 Full-Archive 搜索，并且希望获取 2017 年 1 月 1 日到 2017 年 6 月 30 日之间与你的查询匹配的所有帖子。你将在请求中通过 `fromDate` 和 `toDate` 参数指定这一完整的六个月时间段。搜索 API 会返回第一页帖子，其数量与 `maxResults` 参数相同（默认值为 100）。假设还有更多帖子（而且很可能会有更多），API 还会提供一个 `next` 令牌，使你可以发起请求以获取下一页数据。该过程会重复进行，直到 API 不再返回 `next` 令牌。更多详情请参见下一节。
 
 <div id="pagination">
   #### 分页
 </div>
 
-当同时发起数据请求和计数请求时，返回的数据很可能多于单个响应所能包含的内容。这种情况下，响应中会包含一个“next”令牌。该“next”令牌作为顶层 JSON 属性提供。每当提供了“next”令牌时，就意味着还有更多数据需要获取，因此你需要继续发起 API 请求。
+对于数据请求和计数请求来说，很可能存在超过单个响应可返回数量的数据。在这种情况下，响应会包含一个 `next` 令牌。`next` 令牌作为根级 JSON 属性提供。每当返回 `next` 令牌时，表示还有更多数据可以获取，你需要继续发起 API 请求。
 
-**注意：** “next”令牌在数据请求和计数请求中的行为略有差异，下面会分别进行说明，并在 API 参考部分提供示例响应。
+**注意：** `next` 令牌在数据请求和计数请求中的行为略有不同，下面会分别进行说明，并在 API 参考部分提供示例响应。
 
 <div id="data-pagination">
   ##### 数据分页
 </div>
 
-数据请求通常会返回超过单次响应可包含的数据量。每个数据请求都会包含一个参数，用于设置每次请求要返回的帖子最大数量。`maxResults` 参数的默认值为 100，可设置为 10–500 之间的任意值。如果你的查询匹配到的帖子数量超过了请求中使用的 `maxResults` 值，响应中会包含一个 `next` token（作为 JSON 根级属性）。这个 `next` token 会在后续请求中使用，用于检索该查询所匹配帖子的下一部分数据（即下一“页”）。在你到达该查询结果的最后一“页”之前，响应中会持续提供 `next` token，当响应中不再提供 `next` token 时，表示已经到达最后一“页”。
+数据请求通常会返回超过单个响应所能包含的数据量。每个数据请求都包含一个参数，用于设置每次请求要返回的最大帖子数量。`maxResults` 参数默认值为 100，可设置为 10–500 范围内的数值。如果你的查询匹配到的帖子数量超过了请求中设置的 `maxResults` 值，响应会包含一个 `next` 令牌（作为根级 JSON 属性）。该 `next` 令牌会在后续请求中使用，用于检索该查询所匹配帖子的下一部分结果（即下一“页”）。系统会持续返回 `next` 令牌，直到到达该查询结果的最后一“页”，此时将不再提供 `next` 令牌。
 
-要请求下一“页”的数据，你必须发起与原始请求完全相同的查询，包括使用的 `query`、`toDate` 和 `fromDate` 参数（如果有），并额外添加一个 `next` 请求参数，其值设置为上一个响应中返回的值。这既可以用于 GET 请求，也可以用于 POST 请求。但在 GET 请求的情况下，`next` 参数必须进行 URL 编码。
+要请求下一“页”的数据，你必须发出与原始请求完全相同的查询，包括 `query`、`toDate` 和 `fromDate` 参数（如果使用了它们），并额外包含一个 `next` 请求参数，其值设置为前一次响应中的 `next` 令牌值。该机制可用于 GET 或 POST 请求。但在 GET 请求的情况下，`next` 参数必须进行 URL 编码。
 
-你可以持续传入上一次查询响应中的 `next` 元素，直到你获取到查询时间范围内的所有帖子。当你收到一个不包含 `next` 元素的响应时，这意味着你已经到达最后一页，在该查询与时间范围内不再有额外数据可用。
+你可以在后续查询中持续传入上一次查询返回的 `next` 元素，直到你获取到查询时间范围内的所有帖子。当你收到的响应不再包含 `next` 元素时，表示你已经到达最后一页，指定查询和时间范围内不再有更多可用数据。
 
 <div id="counts-pagination">
-  ##### 计数分页
+  ##### Counts 分页
 </div>
 
-`counts` 端点会基于查询返回与之关联的帖子量，粒度可以是按天、按小时或按分钟。`counts` API 端点会返回一个带时间戳的计数数组，单次返回的计数数据最多覆盖 31 天。如果你请求超过 31 天的计数，将会得到一个 `next` 令牌。与数据端点返回的 `next` 令牌类似，你必须使用与最初完全相同的查询，并在请求中包含一个 `next` 请求参数，其值设置为上一次响应中返回的值。
+`counts` 端点会基于查询返回与之关联的帖子数量，按天、按小时或按分钟进行聚合。`counts` API 端点会返回一个带时间戳的计数数组，该数组所覆盖的计数数据最长为 31 天。如果你请求超过 31 天的计数，则会返回一个 `next` token。与数据的 `next` token 一样，你必须发起与原始请求完全相同的查询，并同时包含一个 `next` 请求参数，其值设置为上一次响应中返回的值。
 
-除了请求超过 31 天的计数之外，还有另一种情况下也会返回 `next` 令牌。对于高量查询，生成计数所需的时间可能足够长，从而触发响应超时。当发生这种情况时，你将会收到少于 31 天的计数，但同时会得到一个 `next` 令牌，以便继续发起请求，获取完整的计数数据负载。***重要提示：*** 超时情况下只会返回完整的“桶（bucket）”——因此，2.5 天只会返回 2 个完整的按天“桶（bucket）”。
+除了请求超过 31 天的计数之外，还有另一种会返回 `next` token 的情况。对于数据量更大的查询，生成计数可能耗时较长，从而触发响应超时。当发生这种情况时，你将会收到不足 31 天的计数，但会得到一个 `next` token，以便继续发起请求以获取完整的计数数据。***重要提示：*** 发生超时时，只会返回完整的“桶（bucket）”——因此，2.5 天的结果会返回 2 个完整的按天聚合的“桶”。
 
 <div id="additional-notes">
   ##### 补充说明
 </div>
 
-* 在搜索请求中使用 fromDate 或 toDate 时，只会返回处于该时间范围内的结果。当到达该时间范围内最后一组结果时，将不会再收到 `next` 令牌。
-* `next` 元素可以与任意介于 10 至 500 之间的 maxResults 值一起使用（默认值为 100）。maxResults 决定每个响应中返回多少条帖子，但不会阻止您最终获取全部结果。
-* `next` 元素不会过期。使用相同 `next` 查询发送的多个请求将会收到相同的结果，而不论请求是在何时发出的。
-* 使用 `next` 参数对结果进行分页时，您可能会在查询边界处遇到重复结果。您的应用应当能够容忍这些重复。
+* 在搜索请求中使用 fromDate 或 toDate 时，你只会获得位于该时间范围内的结果。当你到达该时间范围内最后一组结果时，将不会再收到 `next` token。
+* 可以在任意 10-500 范围内的 maxResults 值（默认 100）下使用 `next` 字段。maxResults 决定每个响应中返回多少帖子，但不会阻止你最终获取所有结果。
+* `next` 字段不会过期。使用相同 `next` 查询发起的多次请求将会收到相同的结果，而不论请求是在何时发出的。
+* 使用 `next` 参数对结果进行分页时，你可能会在查询边界处遇到重复结果。你的应用应当能够容忍这些重复。
 
 <div id="data-endpoint">
   #### 数据端点
@@ -1321,22 +1323,24 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
   ##### POST /search/:product/:label
 </div>
 
-###### 端点模式：
+<div id="endpoint-pattern">
+  ###### 端点模式：
+</div>
 
-此端点会返回指定查询和时间范围内的数据。如果未指定时间范围，则时间参数将默认为最近 30 天。注意：也可以通过发送 GET 请求而非 POST 请求来实现相同的功能，只需将下面所述的参数编码到 URL 中即可。
+此端点会根据指定的查询和时间范围返回数据。如果未指定时间范围，时间参数将默认设为过去 30 天。请注意：也可以通过使用 GET 请求（而非 POST 请求）来实现同样的功能，只需将下文所述参数编码到 URL 中即可。
 
 <div id="data-request-parameters">
   ##### 数据请求参数
 </div>
 
-| 参数 | 说明 | 是否必需 | 示例值 |
+| Parameters | Description | Required | Sample Value |
 | :--- | :--- | :--- | :--- |
-| query | 等同于一条 PowerTrack 规则，最多允许 2,048 个字符（对正向和负向子句的数量没有限制）。  <br />  <br />此参数应包含该 PowerTrack 规则的所有部分，包括所有运算符；规则的各个部分不应拆分到其他查询参数中。  <br />  <br />**注意：** 并非所有 PowerTrack 运算符都受支持。受支持的运算符列在 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 | Yes | (snow OR cold OR blizzard) weather |
-| tag | 标签可用于将规则及其匹配到的数据划分为不同的逻辑分组。如果提供了规则标签，则该规则标签会包含在 `matching_rules` 属性中。  <br />  <br />建议为每条规则的标签分配规则特定的 UUID，并在客户端维护所需的映射关系。 | No  | 8HYG54ZGTU |
-| fromDate | 提供帖子数据的最早 UTC 时间戳（对于 Full-Archive 搜索可以最早回溯到 2006 年 3 月 21 日）。时间戳以分钟为粒度，并且是包含边界（例如 12:00 包含第 00 分钟）。  <br />  <br />*已指定：* 仅使用 fromDate 而不使用 toDate 参数时，将返回从当前时间 now( ) 起向前回溯直到 fromDate 的查询结果。  <br />  <br />*未指定：* 如果未指定 fromDate，API 将返回从 now( ) 或（如果已指定）toDate 起向前回溯 30 天内的所有结果。  <br />  <br />如果既未使用 fromDate 也未使用 toDate 参数，API 将返回最近 30 天内的所有结果，从请求发出时间开始向前回溯。 | No  | 201207220000 |
-| toDate | 提供帖子数据的最晚（最近）UTC 时间戳。时间戳以分钟为粒度，并且是不包含边界（例如 11:59 不包含该小时第 59 分钟）。  <br />  <br />*已指定：* 仅使用 toDate 而不使用 fromDate 参数时，将返回 toDate 之前最近 30 天的数据。  <br />  <br />*未指定：* 如果未指定 toDate，API 将返回从 now( ) 起向前回溯到 fromDate 的所有查询结果。  <br />  <br />如果既未使用 fromDate 也未使用 toDate 参数，API 将返回整个 30 天索引内的所有结果，从请求发出时间开始向前回溯。 | No  | 201208220000 |
-| maxResults | 每个请求返回的搜索结果最大数量。取值范围为 10 到系统限制（当前为 500）。默认情况下，请求响应会返回 100 条结果。 | No  | 500 |
-| next | 此参数用于获取下一“页”结果，如 [此处](#Pagination) 所述。该参数使用的值直接来自 API 返回的响应，不应修改。 | No  | NTcxODIyMDMyODMwMjU1MTA0 |
+| query | 等价于一条 PowerTrack 规则，长度最多为 2,048 个字符（正向和负向子句的数量不限）。  <br />  <br />此参数应包含 PowerTrack 规则的所有部分，包括所有运算符；规则的任何部分都不应拆分到 query 的其他参数中。  <br />  <br />**注意：** 并非所有 PowerTrack 运算符都受支持。受支持的运算符列在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 | Yes | (snow OR cold OR blizzard) weather |
+| tag | 可以使用标签将规则及其匹配的数据划分为不同的逻辑分组。如果提供了规则标签，该规则标签会包含在 `matching_rules` 属性中。  <br />  <br />建议为规则标签分配规则专用的 UUID，并在客户端维护所需的映射关系。 | No  | 8HYG54ZGTU |
+| fromDate | 返回帖子数据的最早 UTC 时间戳（在使用 Full-Archive search 时可追溯至 2006 年 3 月 21 日）。时间戳精度为分钟，并且是包含性的（即 12:00 包含第 00 分钟）。  <br />  <br />*已指定：* 仅使用 fromDate 而不提供 toDate 参数时，将返回从 now() 起向过去回溯直到 fromDate 的查询结果。  <br />  <br />*未指定：* 如果未指定 fromDate，则 API 将返回从 now() 或 toDate（如已指定）起向过去 30 天内的所有查询结果。  <br />  <br />如果既未使用 fromDate 也未使用 toDate 参数，API 将返回最近 30 天内的所有结果，从请求时间开始向过去回溯。 | No  | 201207220000 |
+| toDate | 返回帖子数据的最新（最近）UTC 时间戳。时间戳精度为分钟，但不包含该时间点本身（即 11:59 不包含该小时的第 59 分钟）。  <br />  <br />*已指定：* 仅使用 toDate 而不提供 fromDate 参数时，将返回 toDate 之前最近 30 天内的数据。  <br />  <br />*未指定：* 如果未指定 toDate，则 API 将返回从 now() 起向过去回溯到 fromDate 的所有查询结果。  <br />  <br />如果既未使用 fromDate 也未使用 toDate 参数，API 将返回整个 30 天索引中的所有结果，从请求时间开始向过去回溯。 | No  | 201208220000 |
+| maxResults | 单次请求可返回的搜索结果最大数量。取值为 10 与系统上限（当前为 500）之间的数字。默认情况下，一个请求会返回 100 条结果。 | No  | 500 |
+| next | 此参数用于获取下一“页”结果，如[此处](#Pagination)所述。用于该参数的值直接取自 API 返回的响应，不应更改。 | No  | NTcxODIyMDMyODMwMjU1MTA0 |
 
 <div id="additional-details">
   ###### 其他详细信息
@@ -1344,11 +1348,11 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
 
 |     |     |
 | :--- | :--- |
-| **可用时间范围** | 30-Day：最近 31 天  <br />Full-Archive：2006 年 3 月 21 日至今 |
-| **查询格式** | 等同于一条 PowerTrack 规则，最多可包含 2,048 个字符（正向和负向子句数量不受限制）。  <br />  <br />**注意：**并非所有 PowerTrack 运算符都受支持。请参阅 [Available operators](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators) 了解受支持的运算符列表。 |
-| **速率限制** | 将在分钟级和秒级对合作伙伴施加速率限制。每分钟的速率限制会根据您的合同条款因合作伙伴而异。但这些每分钟速率限制并非用于单次突发请求。无论您的每分钟速率限制是多少，所有合作伙伴的请求都会被限制为每秒最多 20 个请求，该限制在所有数据和/或计数请求之间聚合计算。 |
-| **合规性** | 通过 Full-Archive Search API 提供的所有数据在交付时均符合合规要求。 |
-| **实时可用性** | 数据会在 Twitter 平台上生成后的 30 秒内进入索引并可用。 |
+| **可用时间范围** | 30-Day：过去 31 天  <br />Full-Archive：2006 年 3 月 21 日至今 |
+| **查询格式** | 等同于一条 PowerTrack 规则，最多 2,048 个字符（正负条件的数量不受限制）。  <br />  <br />**注意：**并非所有 PowerTrack 运算符都受支持。有关受支持运算符的列表，请参阅 [可用运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 |
+| **速率限制** | 合作伙伴将在分钟级和秒级两个粒度上受到速率限制。每分钟的速率限制将根据您的合同约定按合作伙伴而有所不同。但这些每分钟速率限制并不应在单次突发请求中全部用完。无论您的每分钟速率限制是多少，所有合作伙伴的请求都将被限制为每秒最多 20 次，该限制在所有数据和/或计数请求之间聚合计算。 |
+| **合规性** | 通过 Full-Archive Search API 交付的所有数据在交付时均符合合规要求。 |
+| **实时可用性** | 数据会在生成后 30 秒内在 Twitter 平台的索引中可用。 |
 
 <div id="example-data-requests-and-responses">
   ##### 示例数据请求与响应
@@ -1358,8 +1362,8 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
   ###### 示例 POST 请求
 </div>
 
-* 在 POST 请求中，请求参数通过 JSON 格式的请求体发送，如下所示。
-* 要检索的 PowerTrack 规则的所有部分（例如关键词，或其他如 bounding&#95;box: 之类的操作符）都应放在 &#39;query&#39; 参数中。
+* POST 请求中的请求参数通过 JSON 格式的请求正文发送，如下所示。
+* 要查询的 PowerTrack 规则中的所有部分（例如关键词，以及 bounding&#95;box: 等其他运算符）都应放在 `query` 参数中。
 * 不要将规则的各个部分拆分为查询 URL 中的单独参数。
 
 下面是一个用于发起初始数据请求的 POST（使用 cURL）命令示例：
@@ -1368,7 +1372,7 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
     curl -X POST -u<username> "https://gnip-api.x.com/search/:product/accounts/:account_name/:label.json" -d '{"query":"from:twitterDev","maxResults":500,"fromDate":"yyyymmddhhmm","toDate":"yyyymmddhhmm"}'
 ```
 
-如果 API 的数据响应中包含一个“next”令牌，下面是一个后续请求示例：它与原始请求相同，只是将“next”参数设置为提供的令牌值：
+如果 API 响应数据中包含一个 `next` 令牌，下面是一个后续请求示例：在原始请求的基础上，将 `next` 参数设置为提供的令牌值：
 
 ```bash
     curl -X POST -u<username> "https://gnip-api.x.com/search/:product/accounts/:account_name/:label.json" -d '{"query":"from:twitterDev","maxResults":500,"fromDate":"yyyymmddhhmm","toDate":"yyyymmddhhmm",
@@ -1379,11 +1383,11 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
   ###### 示例 GET 请求
 </div>
 
-* GET 请求中的请求参数会采用标准 URL 编码方式编码到 URL 中。
-* 所有要查询的 PowerTrack 规则部分（例如关键词，以及诸如 bounding&#95;box: 之类的其他运算符）都应放在 &#39;query&#39; 参数中。
-* 不要将规则的各个部分拆分为查询 URL 中的单独参数。
+* GET 请求中的请求参数会使用标准 URL 编码方式编码到 URL 中。
+* 要查询的 PowerTrack 规则的所有部分（例如关键词、以及 bounding&#95;box: 等其他运算符）都应放在 `query` 参数中。
+* 不要在查询 URL 中将规则的各个部分拆分为单独的参数。
 
-下面是一个用于发起初始数据请求的 GET（使用 cURL）命令示例：
+下面是一个使用 GET（通过 cURL）发起初始数据请求的示例命令：
 
 ```bash
     curl -u<username> "http://gnip-api.x.com/search/:product/accounts/:account_name/:label.json?query=from%3Atwitterdev&maxResults=500&fromDate=yyyymmddhhmm&toDate=yyyymmddhhmm"
@@ -1393,10 +1397,10 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
   ###### 示例数据响应
 </div>
 
-请注意，对于自 2022 年 9 月 29 日起创建的帖子，Tweet 对象会包含用于描述其编辑历史的 Tweet 编辑元数据。有关更多详细信息，请参阅 [&quot;Edit Tweets&quot;](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets) 基础介绍页面。
+请注意，对于自 2022 年 9 月 29 日起创建的帖子，Tweet 对象将包含描述其编辑历史的帖子编辑元数据。有关更多详细信息，请参阅 [“Edit Tweets”](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets) 基础说明页面。
 
-下面是一个数据查询的示例响应。此示例假定可用帖子数量超过 `maxResults`，因此会提供一个用于后续请求的 &#39;next&#39; token。如果与您的查询匹配的帖子数量不超过 &#39;maxResults&#39;，则响应中不会包含 &#39;next&#39; token。
-&#39;next&#39; 元素的值会随每次查询而变化，应将其视为不透明字符串进行处理。&#39;next&#39; 元素在响应正文中的形式如下：
+下面是一个数据查询的响应示例。此示例假设可用的帖子数量多于 `maxResults`，因此为后续请求提供了一个 `next` 令牌。如果与您的查询关联的帖子数量不超过 `maxResults`，则响应中不会包含 `next` 令牌。
+`next` 元素的值会随每次查询而变化，应将其视为不透明字符串。`next` 元素在响应正文中的形式如下所示：
 
 ```json
 {
@@ -1417,7 +1421,7 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
   }
 ```
 
-后续请求的响应可能如下所示（请注意其中新增的帖子以及不同的 `next` 值）：
+后续请求的响应可能如下所示（请注意新出现的帖子以及不同的 &#39;next&#39; 值）：
 
 ```json
 {
@@ -1438,10 +1442,10 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
   }
 ```
 
-你可以继续传入上一次查询响应中的 &#39;next&#39; 元素，直到获取到查询时间范围内的所有帖子。当你收到的响应中不再包含 &#39;next&#39; 元素时，这意味着你已经到达最后一页，并且在所指定的时间范围内不再有可用数据。
+你可以继续传入上一次查询返回的 &#39;next&#39; 元素，直到获取到查询时间范围内的所有帖子。当你收到的响应中不再包含 &#39;next&#39; 元素时，这表示你已经到达最后一页，该时间范围内不再有更多可用数据。
 
 <div id="counts-endpoint">
-  #### 计数端点
+  #### 计数接口
 </div>
 
 <div id="searchstreamcounts">
@@ -1449,55 +1453,57 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
 </div>
 
 <div id="endpoint-pattern">
-  ###### 端点路径模式：
+  ###### 端点模式：
 </div>
 
 `/search/fullarchive/accounts/:account_name/:label/counts.json`
 
-此端点会返回指定查询的计数数据（数据量）。如果未指定时间范围，则时间参数将默认为过去 30 天。数据量会以带时间戳的数组形式返回，粒度可以是按天、按小时（默认）或按分钟。
+此端点会返回指定查询的计数（数据量）。如果未指定时间范围，则时间参数默认为过去 30 天。数据量将以带时间戳的数组形式返回，可按天、按小时（默认）或按分钟聚合。
 
-**注意：** 也可以通过使用 GET 请求而不是 POST 请求来实现相同的功能，只需将下文所述的参数编码到 URL 中即可。
+**注意：**也可以通过使用 GET 请求而不是 POST 来实现相同的功能，只需将下文描述的参数编码到 URL 中即可。
 
 <div id="counts-request-parameters">
   ##### 计数请求参数
 </div>
 
-| 参数 | 说明 | 是否必需 | 示例值 |
+| Parameters | 描述 | 是否必需 | 示例值 |
 | :--- | :--- | :--- | :--- |
-| query | 相当于一条 PowerTrack 规则，最多 2,048 个字符（对正向和负向子句的数量没有限制）。  <br />  <br />此参数应包含该 PowerTrack 规则的所有部分，包括所有运算符；规则的任何部分都不应拆分到 query 的其他参数中。  <br />  <br />**注意：** 并非所有 PowerTrack 运算符都受支持。支持的运算符列表请参阅 [Available operators](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 | 是 | (snow OR cold OR blizzard) weather |
-| fromDate | 提供帖子时所使用的最早 UTC 时间戳（最早可追溯到 2006 年 3 月 21 日）。时间戳的精度为分钟且为包含边界（即 12:00 包含第 00 分钟）。  <br />  <br />*已指定：* 仅使用 fromDate 而不提供 toDate 参数时，API 将为该查询提供从当前时间起向前回溯至 fromDate 的计数（数据量）。如果 fromDate 早于当前时间 31 天之前，你将收到一个 next token，用于对请求进行分页。  <br />  <br />*未指定：* 如果未指定 fromDate，API 将提供当前时间或 toDate（如果已指定）之前 30 天内的计数（数据量）。  <br />  <br />如果既未使用 fromDate 参数，也未使用 toDate 参数，API 将提供最近 30 天的计数（数据量），从发起请求的时间开始向前回溯。 | 否  | 201207220000 |
-| toDate | 提供帖子时所使用的最晚（最近）UTC 时间戳。时间戳的精度为分钟且为不包含边界（即 11:59 不包含该小时的第 59 分钟）。  <br />  <br />*已指定：* 仅使用 toDate 而不提供 fromDate 参数时，将提供 toDate 之前最近 30 天内的计数（数据量）。  <br />  <br />*未指定：* 如果未指定 toDate，API 将提供从当前时间起向前回溯至 fromDate 的计数（数据量）。如果 fromDate 早于当前时间 31 天之前，你将收到一个 next token，用于对请求进行分页。  <br />  <br />如果既未使用 fromDate 参数，也未使用 toDate 参数，API 将提供最近 30 天的计数（数据量），从发起请求的时间开始向前回溯。 | 否  | 201208220000 |
-| bucket | 提供计数数据所依据的时间单位。计数数据可以按请求时间范围内的每一天、每小时或每分钟返回。默认返回按小时统计的计数。可选值：&#39;day&#39;、&#39;hour&#39;、&#39;minute&#39; | 否  | minute |
-| next | 此参数用于获取结果的下一“页”，具体说明见 [此处](#Pagination)。该参数使用的值直接来自 API 返回的响应，不应进行修改。 | 否  | NTcxODIyMDMyODMwMjU1MTA0 |
+| query | 等同于一条 PowerTrack 规则，最多可包含 2,048 个字符（对正向和负向子句的数量没有限制）。  <br />  <br />此参数应包含 PowerTrack 规则的所有部分，包括所有运算符；规则的各部分不应拆分到查询的其他参数中。  <br />  <br />**注意：** 并非所有 PowerTrack 运算符都受支持。支持的运算符列表请参阅 [可用运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 | 是 | (snow OR cold OR blizzard) weather |
+| fromDate | 返回帖子数据时所使用的最早 UTC 时间戳（最早可追溯至 2006 年 3 月 21 日）。时间戳的粒度为分钟，并且是包含性的（即 12:00 包含第 00 分钟）。  <br />  <br />*已指定：* 仅使用 fromDate 而不提供 toDate 参数时，API 会从现在起回溯，返回直到 fromDate 之间的查询计数（数据量）。如果 fromDate 早于当前时间 31 天以上，您会收到一个 next token 以便对请求进行分页。  <br />  <br />*未指定：* 如果未指定 fromDate，API 会返回当前时间前 30 天或 toDate（如果已指定）之前的计数（数据量）。  <br />  <br />如果既未使用 fromDate 也未使用 toDate 参数，API 会返回最近 30 天的计数（数据量），从请求发起时间开始向过去回溯。 | 否  | 201207220000 |
+| toDate | 返回帖子数据时所使用的最新（最近）UTC 时间戳。时间戳的粒度为分钟，但不包含该分钟（即 11:59 不包含该小时的第 59 分钟）。  <br />  <br />*已指定：* 仅使用 toDate 而不提供 fromDate 参数时，将返回 toDate 之前最近 30 天的计数（数据量）。  <br />  <br />*未指定：* 如果未指定 toDate，API 会从现在起回溯，返回直到 fromDate 的查询计数（数据量）。如果 fromDate 早于当前时间 31 天以上，您会收到一个 next token 以便对请求进行分页。  <br />  <br />如果既未使用 fromDate 也未使用 toDate 参数，API 会返回最近 30 天的计数（数据量），从请求发起时间开始向过去回溯。 | 否  | 201208220000 |
+| bucket | 返回计数数据所使用的时间单位。可以在请求的时间范围内按天、小时或分钟返回计数数据。默认情况下，将返回按小时聚合的计数。可选值：&#39;day&#39;、&#39;hour&#39;、&#39;minute&#39; | 否  | minute |
+| next | 此参数用于获取下一“页”结果，如[此处](#Pagination)所述。用于该参数的值直接取自 API 返回的响应，不应修改。 | 否  | NTcxODIyMDMyODMwMjU1MTA0 |
 
-###### 补充详情
+<div id="additional-details">
+  ###### 其他详细信息
+</div>
 
 |     |     |
 | :--- | :--- |
-| **可用时间范围** | 30 天：过去 31 天  <br />完整归档：2006 年 3 月 21 日至今 |
-| **查询格式** | 相当于一条 PowerTrack 规则，最多 2,048 个字符。  <br />  <br />**注意：**并非所有 PowerTrack 运算符都受支持。支持的运算符列表请参阅 [可用运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 |
-| **速率限制** | 合作伙伴将在分钟级和秒级两个粒度上同时受到速率限制。每分钟的速率限制会因合作伙伴而异，并在你的合同中进行约定。不过，这些每分钟速率限制并非旨在通过单次突发调用被完全耗尽。无论你的每分钟速率限制是多少，所有合作伙伴每秒最多只能发送 20 个请求，该上限会在所有数据请求和/或计数请求之间聚合计算。 |
-| **计数精度** | 通过此 endpoint 返回的计数反映的是实际发生的帖子数量，并不反映任何后续的合规事件（删除、scrub geos）。由于用户合规操作，被计数的部分帖子可能无法通过数据 endpoint 获取。 |
+| **可用时间范围** | 30 天：过去 31 天  <br />完整存档：2006 年 3 月 21 日至今 |
+| **查询格式** | 相当于一条 PowerTrack 规则，最多 2,048 个字符。  <br />  <br />**注意：**并非所有 PowerTrack 运算符都受支持。支持的运算符列表请参阅[可用运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api#available-operators)。 |
+| **速率限制** | 合作伙伴将在分钟和秒两个粒度上受到速率限制。每分钟速率限制会根据您的合同在不同合作伙伴之间有所差异。但这些每分钟速率限制并不应在一次突发中被一次性用尽。无论您的每分钟速率限制是多少，所有合作伙伴每秒最多只能发出 20 个请求，此限制会在所有数据和/或计数请求之间进行聚合计算。 |
+| **计数精度** | 通过此端点返回的计数反映的是实际发生的帖子数量，并不反映任何后续的合规事件（删除、地理位置清除）。由于用户的合规操作，某些已计入计数的帖子在数据端点中可能不可用。 |
 
 <div id="example-counts-requests-and-responses">
-  ##### 计数端点的请求与响应示例
+  ##### 计数请求和响应示例
 </div>
 
 <div id="example-post-request">
   ###### 示例 POST 请求
 </div>
 
-* POST 请求中的请求参数通过 JSON 格式的请求体发送，如下所示。
-* 被查询的 PowerTrack 规则的所有组成部分（例如关键词、其他运算符，如 bounding&#95;box:）都应放在 `query` 参数中。
+* 在 POST 请求中，请求参数通过 JSON 格式的请求体发送，如下所示。
+* 要查询的 PowerTrack 规则的所有部分（例如关键字，或其他运算符，如 bounding&#95;box:）都应放在 &#39;query&#39; 参数中。
 * 不要将规则的各个部分拆分为查询 URL 中的单独参数。
 
-下面是一个用于发起初始计数请求的 POST（使用 cURL）命令示例：
+下面是一个使用 cURL 发起初始计数请求的 POST 命令示例：
 
 ```bash
     curl -X POST -u<username> "https://gnip-api.x.com/search/:product/accounts/:account_name/:label/counts.json" -d '{"query":"TwitterDev","fromDate":"yyyymmddhhmm","toDate":"yyyymmddhhmm","bucket":"day"}'
 ```
 
-如果 API 的计数响应中包含一个 &#39;next&#39; 令牌，下面是一个后续请求示例：该请求与原始请求相同，只是将 &#39;next&#39; 参数设置为提供的令牌：
+如果 API 的 counts 响应包含一个 &#39;next&#39; token，下面是一个后续请求示例：它基于原始请求，并将 &#39;next&#39; 参数设置为提供的 token：
 
 ```bash
     curl -X POST -u<username> "https://gnip-api.x.com/search/:product/accounts/:account_name/:label/counts.json" -d '{"query":"TwitterDev","fromDate":"yyyymmddhhmm","toDate":"yyyymmddhhmm","bucket":"day",
@@ -1509,22 +1515,22 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
 </div>
 
 * GET 请求中的请求参数会使用标准 URL 编码方式编码到 URL 中
-* 所有要查询的 PowerTrack 规则部分（例如关键词、其他运算符如 bounding&#95;box:）都应放在 `query` 参数中
-* 不要在查询 URL 中将规则的各个部分拆分为单独的参数
+* 所有要查询的 PowerTrack 规则部分（例如关键词、以及像 bounding&#95;box: 这样的其他运算符）都应放在 &#39;query&#39; 参数中
+* 不要将规则的各个部分拆分为单独的参数放在查询 URL 中
 
-下面是一个使用 GET（通过 cURL）发起初始计数请求的示例命令：
+下面是一个使用 GET（通过 cURL）发起初始计数请求的命令示例：
 
 ```bash
     curl -u<username> "http://gnip-api.x.com/search/fullarchive/accounts/:account_name/:label/counts.json?query=TwitterDev&bucket=day&fromDate=yyyymmddhhmm&toDate=yyyymmddhhmm"
 ```
 
 <div id="example-counts-responses">
-  #### 计数响应示例
+  #### 示例计数响应
 </div>
 
-下面是一个针对计数（数据量）查询的示例响应。此示例响应包含一个 &#39;next&#39; 令牌，这意味着计数请求的时间范围超过 31 天，或者提交的查询所关联的数据量足够大，从而触发了部分响应。
+下面是一个针对计数（数据量）查询的示例响应。此示例响应包含一个 &#39;next&#39; 令牌，这意味着计数请求的时间范围超过 31 天，或者提交的查询所关联的数据量足够大，从而触发了部分结果响应。
 
-&#39;next&#39; 元素的值会随每次查询而变化，应将其视为一个不透明字符串处理。响应正文中的 &#39;next&#39; 元素将如下所示：
+&#39;next&#39; 元素的值会随每次查询而变化，应将其视为不透明字符串。&#39;next&#39; 元素在响应正文中看起来如下所示：
 
 ```json
     {
@@ -1572,7 +1578,7 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
     }
 ```
 
-后续请求的响应可能类似如下（请注意新的计数时间线以及不同的 &#39;next&#39; 值）：
+对后续请求的响应可能如下（请注意新的计数时间线以及不同的“next”值）：
 
 ```json
     {
@@ -1593,20 +1599,20 @@ Enterprise 搜索的基础 URI 为 `https://gnip-api.x.com/search/`。
     }
 ```
 
-你可以在请求中继续传递上一条查询返回的 `next` 元素，直到你获取到该查询时间段内的所有计数结果。当你收到的响应中不再包含 `next` 元素时，这表示你已经到达最后一页，在该时间范围内已没有更多计数结果可用。
+你可以继续传入上一次查询中的 &#39;next&#39; 元素，直到获取到该查询时间范围内的所有计数结果。当你收到的响应中不再包含 &#39;next&#39; 元素时，表示你已经到达最后一页，并且在该时间范围内不再有其他可用的计数。
 
 <div id="http-response-codes">
   #### HTTP 响应代码
 </div>
 
-| 状态码 | 文本 | 描述 |
+| Status | Text | Description |
 | :--- | :--- | :--- |
-| 200 | OK | 请求已成功。JSON 响应将类似于以下示例： |
-| 400 | Bad Request | 通常由于请求中包含无效的 JSON，或请求未发送任何 JSON 负载而返回此响应。 |
-| 401 | Unauthorized | 由于凭证无效导致 HTTP 身份验证失败。请使用你的凭证登录 console.gnip.com，确保在请求中正确使用了这些凭证。 |
-| 404 | Not Found | 在发送请求的 URL 上未找到该资源，通常是因为使用了错误的 URL。 |
-| 422 | Unprocessable Entity | 由于查询中包含无效参数而返回此状态码，例如无效的 PowerTrack 规则。 |
-| 429 | Unknown Code | 你的应用已超出连接请求的限制。对应的 JSON 消息将类似于以下示例： |
+| 200 | OK  | 请求已成功。JSON 响应将类似于以下内容： |
+| 400 | Bad Request | 通常是因为请求中包含无效的 JSON，或者请求未发送任何 JSON 负载而导致返回此响应。 |
+| 401 | Unauthorized | 由于凭证无效导致 HTTP 身份验证失败。请使用你的凭证登录 console.gnip.com，以确保在请求中正确使用这些凭证。 |
+| 404 | Not Found | 在请求所指向的 URL 上未找到资源，通常是因为使用了错误的 URL。 |
+| 422 | Unprocessable Entity | 由于查询中包含无效参数而返回此响应，例如包含无效的 PowerTrack 规则。 |
+| 429 | Unknown Code | 你的应用已超出连接请求的限制。相应的 JSON 消息将类似于以下内容： |
 | 500 | Internal Server Error | 服务器端发生错误。请使用指数退避模式重试你的请求。 |
 | 502 | Proxy Error | 服务器端发生错误。请使用指数退避模式重试你的请求。 |
 | 503 | Service Unavailable | 服务器端发生错误。请使用指数退避模式重试你的请求。 |

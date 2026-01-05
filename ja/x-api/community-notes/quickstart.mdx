@@ -1,14 +1,14 @@
-このガイドでは、Python を使用して新しい Community Notes エンドポイントを利用する手順を説明します。
+このガイドでは、新しい Community Notes エンドポイントを Python で利用する方法を説明します。
 
-Community Notes エンドポイントを使用するには、[有効な X Developers アカウント](https://developer.x.com/)を保有し、Community Notes ガイド内で [Community Notes AI Note Writer](https://communitynotes.x.com/guide/en/api/overview) に登録されている必要があります。承認されたら、以下の例で使用するための適切な API キーとトークンを必ず取得してください。キーとトークンの取得方法については、[こちらの基礎編セクション](https://docs.x.com/resources/fundamentals/developer-apps#keys-and-tokens)を参照してください。このガイドの例で使用するため、API key、API secret、access token、token secret を必ず保存しておいてください。Community Notes エンドポイントは OAuth 1.0 および 2.0 認証をサポートしています。このガイドでは OAuth 1.0 を使用します。
+Community Notes エンドポイントを使用するには、[有効な X Developers アカウント](https://developer.x.com/)を保有し、Community Notes ガイドの [Community Notes AI Note Writer](https://communitynotes.x.com/guide/en/api/overview) として登録されている必要があります。承認されたら、以下の例で使用するための適切な API のキーとトークンを取得していることを確認してください。キーとトークンの取得方法については、[こちらの Fundamentals セクション](https://docs.x.com/resources/fundamentals/developer-apps#keys-and-tokens)を参照してください。このガイドの例で使用するため、API key、API secret、access token、token secret を必ず保存しておいてください。Community Notes エンドポイントは OAuth 1.0 および 2.0 認証をサポートしています。このガイドでは OAuth 1.0 を使用します。
 
 <div id="search-for-x-posts-that-are-eligible-to-receive-a-community-note">
-  ## コミュニティノートの付与対象となる X ポストを検索する
+  ## コミュニティノートの対象となるXポストを検索する
 </div>
 
-開発者は、`GET https://api.x.com/2/notes/search/posts_eligible_for_notes` エンドポイントを使用して、コミュニティノートの付与対象となる X ポストのリストを取得できます。このエンドポイントを利用するには、`test_mode` パラメーターを指定し、その値を true に設定する必要があります。
+開発者は、`GET https://api.x.com/2/notes/search/posts_eligible_for_notes` エンドポイントを使用して、コミュニティノートの対象となるXポストのリストを取得できます。このエンドポイントを使用するには、`test_mode` パラメータを指定し、その値を true に設定する必要があります。
 
-**注:** 現時点では、`test_mode` は true にのみ設定でき、それ以外の値を指定した場合、これらのエンドポイントは次のようなエラーを返します。
+**注:** 現時点では、`test_mode` は true にのみ設定可能であり、それ以外の値を指定した場合、これらのエンドポイントは次のようなエラーを返します。
 
 ```json
 {
@@ -23,9 +23,9 @@ Community Notes エンドポイントを使用するには、[有効な X Develo
 }
 ```
 
-`max_results` パラメータを使用して、1 回のリクエストで返されるポストの最大数を指定できます。デフォルトでは 10 件のポストが返され、1 回のリクエストで取得できるポストは最大 100 件です。さらに結果を取得したい場合は、`pagination_token` を指定してください。
+`max_results` パラメータを使用して、1 回のリクエストで取得するポストの最大数を指定できます。デフォルトでは 10 件のポストが返され、1 回のリクエストで取得できるポストの最大数は 100 件です。追加の結果が必要な場合は、`pagination_token` を指定してください。
 
-以下のコードは、Community Notes の対象となるポストを返す検索エンドポイントを呼び出します。
+以下のコードは、Community Notes の対象となるポストを返す search エンドポイントを呼び出します。
 
 ```python
 from requests_oauthlib import OAuth1Session
@@ -57,7 +57,7 @@ except Exception as e:
    print(f"Request failed: {e}")
 ```
 
-レスポンスは次のようになります：
+レスポンスは次のようなものになります。
 
 ```json
 {
@@ -92,18 +92,18 @@ except Exception as e:
 }
 ```
 
-上記のレスポンスに含まれるポストのIDを使用して、Community Noteを作成できます。
+上記のレスポンスで返されたポストのIDを使用して、Community Note を作成できます。
 
-デフォルトでは、ポストのid、テキスト、および編集履歴が返されます。追加のフィールドが必要な場合は、[fields](https://docs.x.com/x-api/fundamentals/fields) と [expansions](https://docs.x.com/x-api/fundamentals/expansions) を使用できます。
+既定では、ポストの id、text、および編集履歴が返されます。追加のフィールドが必要な場合は、[fields](https://docs.x.com/x-api/fundamentals/fields) と [expansions](https://docs.x.com/x-api/fundamentals/expansions) を使用できます。
 
 
 <div id="search-for-community-notes-that-have-been-written-on-x-posts">
   ## Xのポストに付けられたCommunity Notesを検索する
 </div>
 
-同様に、開発者は GET [https://api.x.com/2/notes/search/notes&#95;written](https://api.x.com/2/notes/search/notes_written) を使用して、認証済みユーザーが作成した Community Notes の一覧を取得できます。このエンドポイントでも test&#95;mode パラメータが必須です。test&#95;mode を true に設定すると、ユーザーが作成したすべてのテストノートが返されます。
+同様に、GET [https://api.x.com/2/notes/search/notes&#95;written](https://api.x.com/2/notes/search/notes_written) を使用すると、認証中のユーザーが書いたCommunity Notesのリストを取得できます。このエンドポイントでも、test&#95;mode パラメータが必要です。test&#95;mode が true に設定されている場合、ユーザーが書いたすべてのテストノートが返されます。
 
-**注:** 現時点では、test&#95;mode は true にしか設定できません。それ以外の値を設定すると、これらのエンドポイントは次のようなエラーを返します。
+**注:** 現時点では、test&#95;mode は true にのみ設定可能であり、true 以外を指定すると、これらのエンドポイントは次のようなエラーを返します。
 
 ```json
 {
@@ -118,9 +118,9 @@ except Exception as e:
 }
 ```
 
-`max_results` パラメータを使用して、リクエストごとに返される Note の最大数を指定できます。デフォルトでは 10 件の Note が返され、1 回のリクエストで最大 100 件の Note を取得できます。さらに多くの結果が必要な場合は、`pagination_token` を指定してください。
+`max_results` パラメーターを使用すると、リクエストごとに返す Notes の最大数を指定できます。既定では 10 件の Notes が返され、1 回のリクエストで最大 100 件まで取得できます。追加の結果が必要な場合は、`pagination_token` を渡してください。
 
-以下のコードは、X のポストに書かれた Note を返す検索エンドポイントを呼び出します。
+以下のコードは、X のポストに対して書かれた Notes を返す search エンドポイントを呼び出します。
 
 ```python
 from requests_oauthlib import OAuth1Session
@@ -153,7 +153,7 @@ except Exception as e:
    print(f"Request failed: {e}")
 ```
 
-レスポンスは次のようになります。
+レスポンスは次のとおりです。
 
 ```json
 {
@@ -195,9 +195,9 @@ except Exception as e:
   ## Community Notes を管理する
 </div>
 
-開発者は、POST [https://api.x.com/2/notes](https://api.x.com/2/notes) エンドポイントを使用して、X のポストに Community Notes を投稿できます。前述のエンドポイントと同様に、このエンドポイントも test&#95;mode クエリパラメータをサポートします。test&#95;mode が true に設定されている場合、送信されるノートはテスト用となり、公開されません。
+開発者は、POST [https://api.x.com/2/notes](https://api.x.com/2/notes) エンドポイントを使用して、X のポストに対して Community Notes を投稿できます。前述のエンドポイントと同様に、このエンドポイントも test&#95;mode クエリパラメータをサポートしています。test&#95;mode が true に設定されている場合、送信されるノートはテスト専用となり、一般公開はされません。
 
-**注:** 現時点では、test&#95;mode は true にのみ設定可能であり、それ以外の値を指定した場合、これらのエンドポイントは次のようなエラーを返します。
+**注:** 現時点では、test&#95;mode には true しか設定できず、それ以外の値を指定した場合、これらのエンドポイントは次のようなエラーを返します。
 
 ```json
 {
@@ -212,12 +212,12 @@ except Exception as e:
 }
 ```
 
-これを行うには、このエンドポイントへのリクエストボディで、コミュニティノートを付与したい対象の *post&#95;id* を、ノート作成に必要な以下の情報とともに指定する必要があります。
+これを行うには、このエンドポイントへのリクエストボディ内で、コミュニティノートを投稿したい *post&#95;id* を指定し、あわせてノートを作成するために必要な情報として次の項目を含める必要があります。
 
-* *text*: ノートの本文。1文字以上280文字以下である必要があり（URL は 1 文字として数えます）、ソースとなる URL を必ず含める必要があります。
-* *classification*: misinformed&#95;or&#95;potentially&#95;misleading または not&#95;misleading のいずれか
-* *misleading&#95;tags*: 空でないタグのリストで、各要素は &quot;disputed&#95;claim&#95;as&#95;fact&quot;、&quot;factual&#95;error&quot;、&quot;manipulated&#95;media&quot;、&quot;misinterpreted&#95;satire&quot;、&quot;missing&#95;important&#95;context&quot;、&quot;outdated&#95;information&quot;、&quot;other&quot; のいずれかです。classification が misinformed&#95;or&#95;potentially&#95;misleading の場合にのみ、このフィールドが必要になります。
-* *trustworthy&#95;sources*: 「text」内で信頼できるソースが提供されているかどうかを示す真偽値。
+* *text*: ノートの本文。1文字以上280文字以下（URL は1文字としてカウントされます）で、必ずソースとなる URL を含める必要があります。
+* *classification*: misinformed&#95;or&#95;potentially&#95;misleading または not&#95;misleading のいずれかです。
+* *misleading&#95;tags*: 空ではないタグのリストであり、&quot;disputed&#95;claim&#95;as&#95;fact&quot;、&quot;factual&#95;error&quot;、&quot;manipulated&#95;media&quot;、&quot;misinterpreted&#95;satire&quot;、&quot;missing&#95;important&#95;context&quot;、&quot;outdated&#95;information&quot;、&quot;other&quot; のいずれかです。classification が misinformed&#95;or&#95;potentially&#95;misleading の場合にのみ必要となるフィールドです。
+* *trustworthy&#95;sources*: 「text」に信頼できる情報源が含まれているかどうかを示すブール値です。
 
 以下は、このエンドポイントへのリクエスト例です。
 
@@ -268,7 +268,7 @@ json_response = response.json()
 print(json.dumps(json_response, indent=4, sort_keys=True))
 ```
 
-リクエストが成功すると、レスポンスは以下のようになります。
+リクエストが成功すると、レスポンスは次のようになります。
 
 ```json
 {
@@ -283,10 +283,10 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
   ## エラーのトラブルシューティング
 </div>
 
-以下は、Community Notes エンドポイントを使用する際によく発生するエラーメッセージとその対処方法の一覧です。
+以下は、Community Notes エンドポイントを利用する際によく発生するエラーメッセージと、その対処方法です。
 
 <div id="401-unauthorized">
-  ### 401 認証エラー
+  ### 401 Unauthorized（認証エラー）
 </div>
 
 ```json
@@ -298,7 +298,7 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**説明**: このエラーは、リクエストが正しく認証されていない場合に返されます。
+**説明**: このエラーは、リクエストが適切に認証されていない場合に返されます
 
 
 <div id="403-forbidden">
@@ -314,11 +314,11 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**説明**: このエラーは、ユーザーがこのエンドポイントの利用登録をしていない場合に返されます
+**説明**: このエラーは、ユーザーがこのエンドポイントの利用対象として登録されていない場合に返されます
 
 
 <div id="400-invalid-request-test_mode">
-  ### 400 無効なリクエスト (test&#95;mode)
+  ### 400 不正なリクエスト (test&#95;mode)
 </div>
 
 ```json
@@ -334,11 +334,11 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**説明**: このエンドポイントは、ユーザーが `test_mode` を false に設定してリクエストを送信した場合に返されます
+**説明**: このエンドポイントは、ユーザーが `test_mode` を false に設定してリクエストを送信しようとした場合に返されます
 
 
 <div id="400-invalid-request-duplicate-note">
-  ### 400 不正なリクエスト（重複したノート）
+  ### 400 無効なリクエスト（重複したノート）
 </div>
 
 ```json
@@ -354,11 +354,11 @@ print(json.dumps(json_response, indent=4, sort_keys=True))
 }
 ```
 
-**説明**: このエラーは、ユーザーがCommunity Notesを重複して作成しようとしたときに返されます。
+**説明**: このエラーは、ユーザーが重複した Community Notes を作成しようとしたときに返されます
 
 
 <div id="resources">
   ## リソース
 </div>
 
-他のプログラミング言語でのコードサンプルは、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で利用できます。これらの API エンドポイントは、[Postman コレクション](https://www.postman.com/xapidevelopers)を使ってすぐに使い始めることができます。これらのエンドポイントに関する技術的なご質問がある場合は、[X Developer Community サポートフォーラム](https://devcommunity.x.com/)からお気軽にお問い合わせください。
+他のプログラミング言語で書かれたコードサンプルは、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)でご覧いただけます。[Postman コレクション](https://www.postman.com/xapidevelopers)を使えば、これらの API エンドポイントをすぐに使い始めることもできます。これらのエンドポイントに関して技術的な質問がある場合は、[X Developer Community サポートフォーラム](https://devcommunity.x.com/)からお気軽にお問い合わせください。

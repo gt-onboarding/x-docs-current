@@ -1,7 +1,7 @@
 ---
 title: クイックスタート
 sidebarTitle: クイックスタート
-keywords: ["filtered stream クイックスタート", "ストリーミング クイックスタート", "filtered stream チュートリアル", "ストリーム ガイド", "ストリーミング サンプル"]
+keywords: ["filtered stream クイックスタート", "ストリーミング クイックスタート", "filtered stream チュートリアル", "ストリームガイド", "ストリーミングの例"]
 ---
 
 import { Button } from '/snippets/ja/button.mdx';
@@ -10,41 +10,41 @@ import { Button } from '/snippets/ja/button.mdx';
   ## filtered stream エンドポイントの利用を開始する
 </div>
 
-このクイックスタートガイドでは、cURL リクエストを使用して filtered stream エンドポイントグループに最初のリクエストを送信する方法を説明します。cURL は、最小限の設定でリクエストを実行できるコマンドラインツールです。
+このクイックスタートガイドでは、cURL リクエストを使用して filtered stream エンドポイント群に最初のリクエストを送信する手順を説明します。cURL は、最小限の設定でリクエストを送信できるコマンドラインツールです。
 
-他の言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub リポジトリをご覧ください。
+他の言語でのサンプルコードを確認したい場合は、当社の [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub リポジトリをご覧ください。 
 
 <Note>
   **前提条件**
 
-  このガイドを完了するには、リクエストを認証するための一連の [キーとトークン](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+  このガイドを完了するには、リクエストの認証に使用する[キーとトークン](/ja/resources/fundamentals/authentication)のセットが必要です。これらのキーとトークンは、次の手順で生成できます。
 
-  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
-  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [developer App](/ja/resources/fundamentals/developer-apps) を作成します。
-  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+  * [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access)し、承認を受けてください。
+  * 開発者ポータルで、[プロジェクト](/ja/resources/fundamentals/projects)と、それに関連付けられた[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成します。
+  * App の「Keys and tokens」ページに移動し、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
 </Note>
 
 <div id="steps-to-build-a-filtered-stream-request-using-curl">
-  ### cURL を使用して filtered stream リクエストを構築する手順
+  ### cURL を使用して filtered stream リクエストを作成する手順
 </div>
 
-**ステップ 1：ルールを作成する**
+**ステップ 1: ルールを作成する**
 
-ルールは、ストリームに配信されるポストを決定するために、ブール演算と括弧を使って組み合わせる 1 つ以上の異なる[オペレーター](/ja/x-api/posts/filtered-stream#building-rules-for-filtered-stream)で構成されます。このガイドでは、キーワード「cat」と画像の両方を含むポストを見つけるようにストリームをフィルタリングします。ルールは次のとおりです。
+ルールは、どのポストをストリームに配信するかを定義するために、ブールロジックと括弧を使って組み合わせられた 1 つ以上のさまざまな[オペレーター](/ja/x-api/posts/filtered-stream#building-rules-for-filtered-stream)で構成されます。このガイドでは、「cat」というキーワードと画像の両方を含むポストが取得されるように、ストリームをフィルタリングします。作成するルールは次のとおりです。
 
 ```cat has:images
 ```
 
-**ステップ 2: ルールにタグを追加する**
+**ステップ2：ルールにタグを追加する**
 
-ストリームには複数のルールを同時に追加できます。ストリーミング接続を開始すると、これらのいずれかのルールにマッチしたポストは、同じストリーミング接続で受信されます。どのポストがどのルールにマッチしたかを判別できるようにするため、ルール作成リクエストにタグを指定できます。そのルールにマッチした各ポストには、そのポストのペイロード内に、どのルールにマッチしたかを示す tag フィールドが含まれるようになります。このルールには、次のタグを割り当てます：
+ストリームには、同時に複数のルールを追加できます。ストリーミング接続を開くと、これらのいずれかのルールにマッチしたポストは、同じストリーミング接続を通じて流れてきます。どのポストがどのルールにマッチしたかを把握できるようにするため、ルール作成リクエスト時にタグを渡すことができます。そのルールにマッチした各ポストのペイロードには、どのルールにマッチしたかを示す tag フィールドが含まれるようになります。このルールには、次のタグを設定します。
 
 ```cats with images
 ```
 
 **ステップ3：ルールをストリームに追加する**
 
-このエンドポイントでは、リクエストと一緒に、ルールとそのタグを含む `application/json` のボディを渡す必要があります。また、このルールをストリームに追加しようとしているため、ルールの値とタグを `add` オブジェクトの中に含めていることにも留意してください。JSON ボディは次のようになります。
+このエンドポイントでは、ルールとそのタグを含む `application/json` 形式のリクエストボディを渡す必要があります。ルールをストリームに追加しようとしているため、`add` オブジェクト内にルールの値とタグを含めていることにも気付くと思います。JSON ボディは次のようになります。
 
 ```json
 {
@@ -57,7 +57,7 @@ import { Button } from '/snippets/ja/button.mdx';
 }
 ```
 
-この JSON ボディの準備が整ったので、これを cURL リクエストに追加できます。リクエストは次のようになります。ただし、このリクエストはまだ完成していないため、後の手順に進むまで送信しないでください。
+この JSON 本文の準備が整ったので、これを cURL リクエストに追加できます。リクエストは次のようになります。ただし、このリクエストはまだ完成していないため、後のステップに進むまで送信しないでください。
 
 ```json
 curl -X POST 'https://api.x.com/2/tweets/search/stream/rules' \
@@ -72,13 +72,13 @@ curl -X POST 'https://api.x.com/2/tweets/search/stream/rules' \
 
 **ステップ4：リクエストを認証する**
 
-filtered stream rules エンドポイントでは [OAuth 2.0 アプリ専用フロー認証](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) が必要なため、ステップ3の cURL コマンド内の $APP&#95;ACCESS&#95;TOKEN を、事前準備の手順で生成した [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) に置き換える必要があります。 
+filtered stream のルールエンドポイントは [OAuth 2.0 App-Only authentication](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) を必要とするため、ステップ3の cURL コマンド内の $APP&#95;ACCESS&#95;TOKEN を、前提条件の手順で生成した [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) に置き換える必要があります。 
 
 **ステップ5：ルールをストリームに追加する**
 
-次のステップでは、cURL リクエストを実行してルールをストリームに追加します。cURL コマンドをコマンドラインインターフェイスにコピーして貼り付け、「Enter」キーを押してください。 
+次に、cURL リクエストを実行してルールをストリームに追加します。cURL コマンドをコマンドラインインターフェースにコピー＆ペーストし、「Enter」キーを押します。 
 
-cURL リクエストが成功すると、value、tag、および id（ルールの一意の識別子として機能します）に関するデータを含むレスポンスが返されます。レスポンスは次のようになります。
+cURL リクエストが成功すると、value、tag、id（ルールの一意の識別子として機能します）に関するデータを含むレスポンスが返されます。レスポンスは次のような形式になります。
 
 ```json
 {
@@ -101,7 +101,7 @@ cURL リクエストが成功すると、value、tag、および id（ルール�
 }
 ```
 
-ルールが正しく追加されたことを確認するには、再度 $APP&#95;ACCESS&#95;TOKEN を自分のトークンに置き換え、以下の GET リクエストを rules エンドポイントに送信します。このリクエストにより、ストリームに追加されたすべてのルールの一覧が返されます。
+ルールが正常に追加されたことを確認するには、次の GET リクエストを rules エンドポイントに送信します。その際、再度 $APP&#95;ACCESS&#95;TOKEN をご自身のトークンに置き換えてください。このリクエストは、ストリームに追加されているすべてのルールの一覧を返します。
 
 ```bash
 curl -X GET 'https://api.x.com/2/tweets/search/stream/rules' \
@@ -123,18 +123,18 @@ cURL リクエストが成功すると、次のようなレスポンスが返さ
 }
 ```
 
-**ステップ6：取得したいフィールドを特定して指定する**
+**ステップ6：取得するフィールドを特定して指定する**
 
-ステップ5を終えた後にストリームに接続すると、レスポンス内でデフォルトの [Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) のフィールドである id、text、edit&#95;history&#95;tweet&#95;ids を受け取ります。これら以外の追加のフィールドを受け取りたい場合は、リクエスト内で [field](/ja/x-api/fundamentals/fields) パラメータおよび／または [expansion](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドを指定する必要があります。
+ステップ 5 の後にストリームへ接続すると、レスポンスにはデフォルトの [Post object](/ja/x-api/fundamentals/data-dictionary#tweet) のフィールドである id、text、edit&#95;history&#95;tweet&#95;ids が含まれます。これらに加えて追加のフィールドを受け取りたい場合は、リクエストで [field](/ja/x-api/fundamentals/fields) パラメータおよび／または [expansion](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドを指定する必要があります。
 
-この演習では、異なるオブジェクトから 3 通りのフィールドセットをリクエストします。
+この演習では、異なるオブジェクトから 3 つの異なるフィールドセットをリクエストします。
 
-1. 主となる Post オブジェクトに対する追加フィールド tweet.created&#95;at。
-2. 返されるポストの投稿者に対応する [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user) のデフォルトフィールド: id、name、username
-3. 関連する user オブジェクトに対する追加フィールド user.created&#95;at
+1. プライマリの Post オブジェクトに対する追加の tweet.created&#95;at フィールド
+2. 返されるポストの投稿者に関連付けられた [user object](/ja/x-api/fundamentals/data-dictionary#user) のデフォルトフィールド: id、name、username
+3. 関連するユーザーオブジェクトに対する追加の user.created&#95;at フィールド
     
 
-これらのフィールドをリクエストするには、リクエスト内で次の内容を渡す必要があります。
+これらのフィールドをリクエストするには、リクエストで次の値を渡す必要があります。
 
 |              |                |                                                                 |
 | :----------- | :------------- | :-------------------------------------------------------------- |
@@ -143,7 +143,7 @@ cURL リクエストが成功すると、次のようなレスポンスが返さ
 | expansions   | author&#95;id  | includes.users.id, includes.users.name, includes.users.username |
 | user.fields  | created&#95;at | includes.users.created&#95;at                                   |
 
-これで、この内容を踏まえてストリームに接続するためのリクエスト URL を組み立てることができます。次のようになります。
+これでこの情報を踏まえて、ストリームに接続するためのリクエスト URL を組み立てることができます。URL は次のようになります。
 
 ```bash
 https://api.x.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at
@@ -151,15 +151,15 @@ https://api.x.com/2/tweets/search/stream?tweet.fields=created_at&expansions=auth
 
 **ステップ 7: ストリームに接続してレスポンスを確認する**
 
-ルールを設定し、取得したいフィールドを指定したので、設定したルールにマッチする Post オブジェクトを配信するストリームに接続する準備が整いました。ステップ 6 で取得した URL をリクエストに追加すると、cURL コマンドは次のようになります。
+ルールを設定し、返してほしいフィールドを指定したので、ストリームに接続する準備が整いました。ストリームに接続すると、送信したルールにマッチするポストオブジェクトが配信されます。以下は、ステップ 6 で取得した URL をリクエストに追加したあとの cURL コマンドの例です。
 
 ```bash
 curl -X GET -H "Authorization: Bearer $APP_ACCESS_TOKEN" "https://api.x.com/2/tweets/search/stream?tweet.fields=created_at&expansions=author_id&user.fields=created_at"
 ```
 
-もう一度お伝えすると、このリクエストは OAuth 2.0 アプリ専用フローで認証する必要があるため、コマンドラインツールにコピー＆ペーストする前に、必ず $APP&#95;ACCESS&#95;TOKEN をご自身の認証情報に置き換えてください。
+繰り返しになりますが、このリクエストは OAuth 2.0 アプリ専用フローで認証されている必要があるため、コマンドラインツールにコピー＆ペーストする前に、必ず $APP&#95;ACCESS&#95;TOKEN をご自身の認証情報に置き換えてください。
 
-filtered stream に接続すると、設定したルールに一致するポストを、次の JSON フォーマットで受信し始めます。
+filtered stream に接続すると、ルールに一致するポストが、次の JSON 形式で受信され始めます。
 
 ```json
 {
@@ -199,4 +199,4 @@ filtered stream に接続すると、設定したルールに一致するポス�
 }
 ```
 
-接続を終了するには、Mac でも Windows でも、コマンドラインツール上で Ctrl+C を押して接続を切断するか、ウィンドウを閉じてください。
+接続を終了したい場合は、Mac または Windows のどちらのシステムでも、コマンドラインツール上で Control+C を押して接続を切るか、ウィンドウを閉じてください。

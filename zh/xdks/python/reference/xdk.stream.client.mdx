@@ -3,9 +3,9 @@ title: "StreamClient"
 sidebarTitle: "StreamClient"
 ---
 
-本模块提供用于与 X API 的流式端点交互的客户端。
-实时流式操作会返回生成器，在数据到达时持续产出数据。
-流式连接由系统自动管理，并通过指数退避重试逻辑实现更健壮的处理。
+此模块提供一个用于与 X API 流式端点交互的客户端。
+实时流式操作会返回生成器对象，在数据到达时依次产出数据。
+流式连接由系统自动管理，并采用指数退避重试逻辑，以实现更健壮的处理。
 
 <div id="streamclient">
   ## StreamClient
@@ -13,9 +13,9 @@ sidebarTitle: "StreamClient"
 
 <Badge color="blue">类</Badge>
 
-<Badge color="gray">基类：object</Badge>
+<Badge color="gray">继承自：object</Badge>
 
-用于流相关操作的 Streaming Client
+用于流式操作的 Streaming Client
 
 <div id="constructors">
   ## 构造函数
@@ -25,9 +25,7 @@ sidebarTitle: "StreamClient"
   ### `__init__`
 </div>
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.client" type="Client"></ParamField>
 
@@ -36,14 +34,12 @@ sidebarTitle: "StreamClient"
 </div>
 
 获取流规则数量
-获取 filtered stream 当前活动规则集中规则的数量。
+检索过滤流当前活动规则集中的规则数量。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.rules_count_fields" type="List or None" default="None">
-以逗号分隔的 RulesCount 字段列表，用于指定要显示的字段。
+用于指定要显示的 RulesCount 字段的逗号分隔列表。
 </ParamField>
 
 <div id="returns">
@@ -57,11 +53,9 @@ sidebarTitle: "StreamClient"
 </div>
 
 获取流规则
-检索 filtered stream 当前生效的全部规则，或其中的一部分。
+检索过滤流当前的活动规则集或其中的一个子集。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.ids" type="List or None" default="None">
 以逗号分隔的规则 ID 列表。
@@ -72,12 +66,10 @@ sidebarTitle: "StreamClient"
 </ParamField>
 
 <ParamField path="path.pagination_token" type="str or None" default="None">
-此参数的值由请求返回的 `next_token` 提供，用于在结果中进行分页。
+通过传入请求中返回的 `next_token` 来设置此值，用于对结果进行分页检索。
 </ParamField>
 
-<div id="returns">
-  #### 返回值
-</div>
+#### 返回
 
 `IteratorGetRulesResponse`
 
@@ -85,19 +77,17 @@ sidebarTitle: "StreamClient"
   ### `labels_compliance`
 </div>
 
-Post 标签流（流式）
-以流的形式传输应用于帖子上的所有标签事件。
-这是一个流式端点，会在数据可用时实时提供数据。
-每个返回项代表该流中的一个数据点。
-连接由带有指数退避重试逻辑的机制自动管理。
-如果流连接中断，SDK 将在无需客户端干预的情况下自动重新连接。
+帖子标签流（Streaming）
+以流式方式传输应用于帖子上的所有标签事件。
+这是一个流式端点，会在数据可用时实时输出数据。
+每个输出项代表该流中的一个数据点。
+连接由带指数退避的重试逻辑自动管理。
+如果流连接断开，SDK 会在无需客户端干预的情况下自动重新连接。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-要回填的分钟数。
+请求的回填时长（分钟）。
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
@@ -109,7 +99,7 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子标签的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
+可选的 StreamConfig，用于自定义重试行为、超时和回调。
 </ParamField>
 
 <div id="likes_compliance">
@@ -117,106 +107,50 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子标签的最晚 UTC 时间戳。
 </div>
 
 流式传输点赞合规数据（Streaming）
-为用户流式传输与点赞相关的所有合规数据。
-这是一个流式端点，会在数据可用时实时输出数据。
-每个输出的条目代表来自该流的单个数据点。
-连接由带有指数退避的重试逻辑自动管理。
+针对用户流式传输所有与点赞相关的合规数据。
+这是一个流式接口，会在数据可用时实时返回数据。
+每个返回的项都表示来自该流的单个数据点。
+连接通过带有指数退避的重试逻辑自动管理。
 如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回填的分钟数。
+请求的回填时长（分钟）。
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。开始提供 Likes 合规事件的最早 UTC 时间戳。
+YYYY-MM-DDTHH:mm:ssZ。用于提供点赞合规事件的最早 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供 Likes 合规事件的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
-</ParamField>
-
-<div id="likes_firehose">
-  ### `likes_firehose`
-</div>
-
-流式获取所有点赞（Streaming）
-
-实时流式获取所有公开的点赞。
-这是一个流式端点，会在有新数据时实时输出数据。
-每个输出的条目代表流中的一个数据点。
-连接由带指数退避的重试逻辑自动管理。
-如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回填的分钟数。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。将返回点赞的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。将返回帖子数据的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
-以逗号分隔的 LikeWithTweetAuthor 字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-以逗号分隔的要展开的字段列表。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-以逗号分隔的 User 字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-以逗号分隔的 Post 字段列表，用于展示。
+YYYY-MM-DDTHH:mm:ssZ。用于提供点赞合规事件的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
 可选的 StreamConfig，用于自定义重试行为、超时和回调。
 </ParamField>
 
-<div id="likes_sample10">
-  ### `likes_sample10`
+<div id="likes_firehose">
+  ### `likes_firehose`
 </div>
 
-流式采样 Likes（流式）
+流式获取所有点赞（Like）的数据
 
-实时返回 10% 的公开 Likes 抽样数据。
-这是一个流式端点，会在数据可用时实时返回。
-每个返回项代表该流中的一个数据点。
-连接由带指数退避的重试逻辑自动管理。
-如果流连接中断，SDK 会在无需客户端干预的情况下自动重连。
+以实时流的方式获取所有公开的点赞（Like）。
+这是一个流式接口，会在数据可用时实时输出数据。
+每个输出条目代表流中的一个数据点。
+连接由带指数退避的重试机制自动管理。
+如果流连接中断，SDK 会在无需客户端参与的情况下自动重连。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.partition" type="int">
-分区编号。
+分区号。
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回填的分钟数。
+请求的回填时长（分钟）。
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
@@ -228,19 +162,68 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
-要显示的、以逗号分隔的 LikeWithTweetAuthor 字段列表。
+要展示的 LikeWithTweetAuthor 字段的逗号分隔列表。
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-要扩展的、以逗号分隔的字段列表。
+要扩展的字段的逗号分隔列表。
 </ParamField>
 
 <ParamField path="path.user_fields" type="List or None" default="None">
-要显示的、以逗号分隔的 User 字段列表。
+要展示的 User 字段的逗号分隔列表。
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-要显示的、以逗号分隔的帖子字段列表。
+要展示的帖子字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+用于自定义重试行为、超时和回调的可选 StreamConfig。
+</ParamField>
+
+<div id="likes_sample10">
+  ### `likes_sample10`
+</div>
+
+Likes 抽样流（Streaming）
+实时流式获取 10% 的公开 Likes 样本。
+这是一个流式端点，会在数据可用时实时返回数据。
+每个返回的条目都表示流中的一个单独数据点。
+连接由带指数退避的重试逻辑自动管理。
+如果流中断，SDK 会在无需客户端干预的情况下自动重新建立连接。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区编号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回填的分钟数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。用于提供点赞数据的最早 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。用于提供帖子数据的最晚 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
+以逗号分隔的 LikeWithTweetAuthor 字段列表，用于显示。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+以逗号分隔的要展开的字段列表。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+以逗号分隔的 User 字段列表，用于显示。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+以逗号分隔的 Tweet 字段列表，用于显示。
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
@@ -251,19 +234,109 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
   ### `posts`
 </div>
 
-流式筛选帖子（Streaming）
-实时流式传输与当前激活规则集匹配的帖子。
+按过滤规则流式获取帖子（Streaming）
+以实时方式流式传输与当前活动规则集匹配的帖子。
 这是一个流式端点，会在数据可用时实时返回数据。
-每个返回的项代表流中的一个数据点。
-连接由带有指数退避重试逻辑的机制自动管理。
-如果流连接断开，SDK 会在无需客户端干预的情况下自动重新连接。
+每个返回的元素代表流中的一个单独数据点。
+连接由带指数回退的重试逻辑自动管理。
+如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
 
 <div id="parameters">
-  #### 参数
+  #### Parameters
 </div>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
-要回填的分钟数。
+请求回补的历史数据时长（分钟）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。从该最早的 UTC 时间戳开始提供帖子。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。截止到该最晚的 UTC 时间戳提供帖子。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+以逗号分隔的帖子字段列表，用于指定要返回的字段。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+以逗号分隔的字段列表，用于指定要展开的字段。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+以逗号分隔的媒体字段列表，用于指定要返回的字段。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+以逗号分隔的投票字段列表，用于指定要返回的字段。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+以逗号分隔的用户字段列表，用于指定要返回的字段。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+以逗号分隔的地点字段列表，用于指定要返回的字段。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+可选的 StreamConfig，用于自定义重试行为、超时和回调。
+</ParamField>
+
+<div id="posts_compliance">
+  ### `posts_compliance`
+</div>
+
+流式传输帖子合规性数据（Streaming）
+流式返回所有与帖子相关的合规性数据。
+这是一个流式端点，会在数据可用时实时返回数据。
+每个输出项都代表来自流的一条数据点。
+连接通过带指数退避的重试逻辑自动管理。
+如果流断开连接，SDK 会在无需客户端干预的情况下自动重新连接。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区编号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回填的分钟数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。开始提供帖子合规事件的最早 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。提供帖子合规事件的最晚 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+用于自定义重试行为、超时和回调的可选 StreamConfig。
+</ParamField>
+
+<div id="posts_firehose">
+  ### `posts_firehose`
+</div>
+
+流式获取所有帖子（流式传输）
+实时流式传输所有公开的帖子。
+这是一个流式端点，会在数据可用时实时返回数据。
+每个返回的项代表来自该流的一个数据点。
+连接由指数退避重试逻辑自动管理。
+如果流断开，SDK 将在无需客户端干预的情况下自动重新连接。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区编号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回补的分钟数。
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
@@ -272,6 +345,177 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
 
 <ParamField path="path.end_time" type="str or None" default="None">
 YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+以逗号分隔的要显示的帖子字段列表。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+以逗号分隔的要展开的字段列表。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+以逗号分隔的要显示的媒体字段列表。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+以逗号分隔的要显示的投票字段列表。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+以逗号分隔的要显示的用户字段列表。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+以逗号分隔的要显示的地点字段列表。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+可选的 StreamConfig，用于自定义重试行为、超时和回调。
+</ParamField>
+
+<div id="posts_firehose_en">
+  ### `posts_firehose_en`
+</div>
+
+流式获取英文帖子（Streaming）
+实时流式传输所有公开的英文帖子。
+这是一个流式端点，会在数据可用时实时输出数据。
+每个输出项代表该流中的单个数据点。
+连接由带指数退避的重试逻辑自动管理。
+如果流中断，SDK 将自动重新连接，无需客户端干预。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回补的分钟数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+要展示的帖子字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+要展开的字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+要展示的媒体字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+要展示的投票字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+要展示的用户字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+要展示的地点字段的逗号分隔列表。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
+</ParamField>
+
+<div id="posts_firehose_ja">
+  ### `posts_firehose_ja`
+</div>
+
+流式获取日语帖子（Streaming）
+以流式方式实时获取所有公开的日语帖子。
+这是一个流式端点，会在数据可用时实时输出数据。
+每个输出的条目代表该流中的一个数据点。
+连接通过指数退避重试机制自动管理。
+如果流断开，SDK 将在无需客户端干预的情况下自动重新连接。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区编号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回补的分钟数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+以逗号分隔的帖子字段列表，用于返回。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+以逗号分隔的待扩展字段列表。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+以逗号分隔的媒体字段列表，用于返回。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+以逗号分隔的投票字段列表，用于返回。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+以逗号分隔的用户字段列表，用于返回。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+以逗号分隔的地点字段列表，用于返回。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+可选的 StreamConfig，用于自定义重试行为、超时设置和回调。
+</ParamField>
+
+<div id="posts_firehose_ko">
+  ### `posts_firehose_ko`
+</div>
+
+流式获取韩语帖子（Streaming）
+实时流式获取所有公开的韩语帖子。
+这是一个流式端点，会在数据可用时实时输出数据。
+每个输出的条目代表来自该流的一个独立数据点。
+连接由带指数退避的重试逻辑自动管理。
+如果流断开，SDK 将在无需客户端干预的情况下自动重新连接。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区编号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回填的分钟数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。将提供帖子数据的最早 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。将提供帖子数据的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
@@ -299,179 +543,25 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-用于自定义重试行为、超时和回调的可选 StreamConfig。
-</ParamField>
-
-<div id="posts_compliance">
-  ### `posts_compliance`
-</div>
-
-流式传输帖子合规数据（Streaming）
-流式传输与帖子相关的所有合规数据。
-这是一个流式端点，会在数据可用时实时输出数据。
-每个输出项代表来自该流的一个数据点。
-连接由带有指数退避的重试逻辑自动管理。
-如果流断开，SDK 将在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回补的数据时长（分钟）。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。开始提供帖子合规事件的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子合规事件的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-用于自定义重试行为、超时和回调的可选 StreamConfig。
-</ParamField>
-
-<div id="posts_firehose">
-  ### `posts_firehose`
-</div>
-
-流式获取所有帖子（流式）
-实时流式传输所有公开帖子。
-这是一个流式端点，在数据可用时会实时输出数据。
-每个输出项代表该流中的一个数据点。
-连接由带有指数退避的重试逻辑自动管理。
-如果流中断，SDK 将在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回填的时长（分钟）。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子时所能追溯到的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子时所能追溯到的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-以逗号分隔的帖子字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-以逗号分隔的待展开字段列表。
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-以逗号分隔的媒体字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-以逗号分隔的投票字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-以逗号分隔的用户字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-以逗号分隔的地点字段列表，用于展示。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
 可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
 </ParamField>
 
-<div id="posts_firehose_en">
-  ### `posts_firehose_en`
+<div id="posts_firehose_pt">
+  ### `posts_firehose_pt`
 </div>
 
-流式传输英文帖子（Streaming）
-实时流式传输所有公开的英文帖子。
+葡萄牙语帖子流（流式）
+
+实时流式传输所有公开的葡萄牙语帖子。
 这是一个流式端点，会在数据可用时实时返回数据。
-每个返回项代表来自该流的一个数据点。
-连接通过带有指数退避重试逻辑的机制自动管理。
-如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
+每个返回的项代表该流中的一个数据点。
+连接采用指数退避重试逻辑自动管理。
+如果连接中断，SDK 会在无需客户端干预的情况下自动重新连接。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.partition" type="int">
 分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回补数据的时长（分钟）。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-以逗号分隔的帖子字段列表，用于指定要返回的字段。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-以逗号分隔的字段列表，用于指定要扩展的字段。
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-以逗号分隔的媒体字段列表，用于指定要返回的字段。
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-以逗号分隔的投票字段列表，用于指定要返回的字段。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-以逗号分隔的用户字段列表，用于指定要返回的字段。
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-以逗号分隔的地点字段列表，用于指定要返回的字段。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-可选的 StreamConfig，用于自定义重试策略、超时和回调。
-</ParamField>
-
-<div id="posts_firehose_ja">
-  ### `posts_firehose_ja`
-</div>
-
-流式获取日语帖子（Streaming）
-实时流式获取所有公开的日语帖子。
-这是一个流式端点，会在数据可用时实时返回数据。
-每个返回的条目代表该流中的一个数据点。
-连接由指数退避的重试逻辑自动管理。
-如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区号。
 </ParamField>
 
 <ParamField path="path.backfill_minutes" type="int or None" default="None">
@@ -487,237 +577,11 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.tweet_fields" type="List or None" default="None">
-要显示的帖子字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-要扩展的字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-要显示的媒体字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-要显示的投票字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-要显示的用户字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-要显示的地点字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
-</ParamField>
-
-<div id="posts_firehose_ko">
-  ### `posts_firehose_ko`
-</div>
-
-流式获取韩语帖子（Streaming）
-实时流式传输所有公开的韩语帖子。
-这是一个流式端点，会在数据可用时实时输出数据。
-每个输出的条目代表流中的一个独立数据点。
-连接由带指数退避的重试逻辑自动管理。
-如果流断开，SDK 将在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回补的分钟数。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-以逗号分隔的帖子字段列表，用于返回。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-以逗号分隔的要展开的字段列表。
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-以逗号分隔的媒体字段列表，用于返回。
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-以逗号分隔的投票字段列表，用于返回。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-以逗号分隔的用户字段列表，用于返回。
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-以逗号分隔的地点字段列表，用于返回。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
-</ParamField>
-
-<div id="posts_firehose_pt">
-  ### `posts_firehose_pt`
-</div>
-
-葡萄牙语帖子流（Streaming）
-实时流式传输所有公开的葡萄牙语帖子。
-这是一个流式端点，会在数据可用时实时返回数据。
-每个返回的元素都表示来自流的一条数据点。
-连接由带有指数退避的重试逻辑自动管理。
-如果流连接中断，SDK 会在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-回填的分钟数。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-要显示的帖子字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-要展开的字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-要显示的媒体字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-要显示的投票字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-要显示的用户字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-要显示的地点字段的逗号分隔列表。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-用于自定义重试行为、超时和回调的可选 StreamConfig。
-</ParamField>
-
-<div id="posts_sample">
-  ### `posts_sample`
-</div>
-
-流式获取抽样帖子（流式）
-
-以实时方式流式获取 1% 的公开帖子样本。
-这是一个流式端点，会在数据可用时实时推送数据。
-每个推送的条目都表示该流中的一个独立数据点。
-连接由 SDK 自动管理，并使用指数退避的重试逻辑。
-如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回填的数据时长（分钟）。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
-以逗号分隔的帖子字段列表，用于显示。
-</ParamField>
-
-<ParamField path="path.expansions" type="List or None" default="None">
-以逗号分隔的要扩展的字段列表。
-</ParamField>
-
-<ParamField path="path.media_fields" type="List or None" default="None">
-以逗号分隔的媒体字段列表，用于显示。
-</ParamField>
-
-<ParamField path="path.poll_fields" type="List or None" default="None">
-以逗号分隔的投票字段列表，用于显示。
-</ParamField>
-
-<ParamField path="path.user_fields" type="List or None" default="None">
-以逗号分隔的用户字段列表，用于显示。
-</ParamField>
-
-<ParamField path="path.place_fields" type="List or None" default="None">
-以逗号分隔的地点字段列表，用于显示。
-</ParamField>
-
-<ParamField path="path.stream_config" type="StreamConfig">
-可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
-</ParamField>
-
-<div id="posts_sample10">
-  ### `posts_sample10`
-</div>
-
-以 10% 抽样比例获取帖子流（流式）
-
-实时流式返回 10% 抽样的公开帖子。
-这是一个流式端点，会在数据可用时实时推送数据。
-每个返回的条目代表流中的单个数据点。
-连接由指数退避重试逻辑自动管理。
-如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
-
-<div id="parameters">
-  #### 参数
-</div>
-
-<ParamField path="path.partition" type="int">
-分区编号。
-</ParamField>
-
-<ParamField path="path.backfill_minutes" type="int or None" default="None">
-请求回补的分钟数。
-</ParamField>
-
-<ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最早 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
-</ParamField>
-
-<ParamField path="path.tweet_fields" type="List or None" default="None">
 以逗号分隔的要显示的帖子字段列表。
 </ParamField>
 
 <ParamField path="path.expansions" type="List or None" default="None">
-以逗号分隔的要扩展的字段列表。
+以逗号分隔的要展开的字段列表。
 </ParamField>
 
 <ParamField path="path.media_fields" type="List or None" default="None">
@@ -740,35 +604,133 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
 可选的 StreamConfig，用于自定义重试行为、超时时间和回调。
 </ParamField>
 
+<div id="posts_sample">
+  ### `posts_sample`
+</div>
+
+流式获取抽样帖子（Streaming）
+以实时方式流式获取 1% 的公开帖子样本。
+这是一个流式接口，会在数据可用时实时返回数据。
+每个返回的条目代表流中的一个数据点。
+连接由带指数退避的重试逻辑自动管理。
+如果流断开连接，SDK 将在无需客户端干预的情况下自动重新连接。
+
+#### 参数
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回填的时间长度（分钟）。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+要显示的帖子字段的以逗号分隔的列表。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+要扩展的字段的以逗号分隔的列表。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+要显示的媒体字段的以逗号分隔的列表。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+要显示的投票字段的以逗号分隔的列表。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+要显示的用户字段的以逗号分隔的列表。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+要显示的地点字段的以逗号分隔的列表。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+用于自定义重试行为、超时和回调的可选 StreamConfig。
+</ParamField>
+
+<div id="posts_sample10">
+  ### `posts_sample10`
+</div>
+
+以 10% 抽样比例获取帖子流（流式）
+以 10% 抽样比例实时获取公开帖子的样本。
+这是一个流式端点，会在数据可用时实时返回数据。
+每个返回项代表该流中的一个数据点。
+连接通过指数退避的重试逻辑自动管理。
+如果流连接断开，SDK 会在无需用户干预的情况下自动重连。
+
+#### 参数
+
+<ParamField path="path.partition" type="int">
+分区编号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+请求回填的分钟数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。用于提供帖子数据的最早 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。用于提供帖子数据的最晚 UTC 时间戳。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+要显示的帖子字段列表，使用逗号分隔。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+要展开的字段列表，使用逗号分隔。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+要显示的媒体字段列表，使用逗号分隔。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+要显示的投票字段列表，使用逗号分隔。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+要显示的用户字段列表，使用逗号分隔。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+要显示的地点字段列表，使用逗号分隔。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+可选的 StreamConfig，用于自定义重试行为、超时和回调。
+</ParamField>
+
 <div id="update_rules">
   ### `update_rules`
 </div>
 
-更新流规则
-在过滤流的当前规则集中添加或删除规则。
+更新过滤流规则
+在 filtered stream 的生效规则集中添加或删除规则。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="body.body" type="UpdateRulesRequest">
-请求正文
+请求体
 </ParamField>
 
 <div id="users_compliance">
   ### `users_compliance`
 </div>
 
-流式获取 Users 合规数据（Streaming）
-流式传输与 Users 相关的所有合规数据。
-这是一个流式端点，会在数据可用时实时返回数据。
-每个返回的条目代表该流中的单个数据点。
-连接由带有指数退避重试策略的机制自动管理。
-如果流断开连接，SDK 会在无需客户端干预的情况下自动重新连接。
+流式获取用户合规数据（Streaming）
+流式返回与用户相关的所有合规数据。
+这是一个流式端点，会在数据可用时实时返回。
+每条返回记录代表流中的一个数据点。
+连接由带有指数退避机制的重试逻辑自动管理。
+如果流断开，SDK 会在无需客户端干预的情况下自动重新连接。
 
-<div id="parameters">
-  #### 参数
-</div>
+#### 参数
 
 <ParamField path="path.partition" type="int">
 分区编号。
@@ -779,13 +741,13 @@ YYYY-MM-DDTHH:mm:ssZ。提供帖子数据的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.start_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。将从该最早 UTC 时间戳开始提供用户合规事件。
+YYYY-MM-DDTHH:mm:ssZ。开始提供用户合规事件的最早 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.end_time" type="str or None" default="None">
-YYYY-MM-DDTHH:mm:ssZ。将截止到该最晚 UTC 时间戳提供用户合规事件。
+YYYY-MM-DDTHH:mm:ssZ。停止提供用户合规事件的最晚 UTC 时间戳。
 </ParamField>
 
 <ParamField path="path.stream_config" type="StreamConfig">
-用于自定义重试行为、超时和回调的可选 StreamConfig。
+可选的 StreamConfig，用于自定义重试行为、超时和回调。
 </ParamField>

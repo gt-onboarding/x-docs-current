@@ -1,7 +1,7 @@
 ---
 title: Creación de una firma
 sidebarTitle: Creación de una firma
-keywords: ["firma OAuth", "crear una firma", "firma OAuth 1.0a", "firma HMAC", "generación de firmas", "proceso de firma OAuth"]
+keywords: ["firma OAuth", "crear firma", "firma OAuth 1.0a", "firma HMAC", "generación de firma", "proceso de firma OAuth"]
 ---
 
 import { Button } from "/snippets/es/button.mdx";
@@ -10,9 +10,9 @@ import { Button } from "/snippets/es/button.mdx";
   ### Creación de una firma
 </div>
 
-Esta página explica cómo generar una firma HMAC-SHA1 de OAuth 1.0a para una solicitud HTTP. Esta firma será adecuada para enviarla a X API como parte de una solicitud autorizada, tal como se describe en [autorizar una solicitud](/es/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request).
+Esta página explica cómo generar una firma OAuth 1.0a HMAC-SHA1 para una solicitud HTTP. Esta firma se puede enviar a X API como parte de una solicitud autorizada, tal como se describe en [autorización de una solicitud](/es/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request).
 
-La solicitud utilizada para demostrar la firma es una solicitud POST a [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json). La solicitud en bruto es la siguiente:
+La solicitud que se usa para ilustrar el proceso de firma es una solicitud POST a [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json). La solicitud original tiene el siguiente aspecto:
 
 ```
 POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
@@ -26,24 +26,24 @@ Host: api.x.com
 status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
 ```
 
-**Recopilación del método y la URL de la solicitud**
+**Recopilación del método de la solicitud y la URL**
 
-Para generar una firma, comienza determinando el método HTTP y la URL de la solicitud. Estos dos valores ya se conocen al crear la solicitud, por lo que son fáciles de obtener.
+Para generar una firma, primero determina el método HTTP y la URL de la solicitud. Ambos se conocen en el momento de crear la solicitud, por lo que son fáciles de obtener.
 
 El método de la solicitud casi siempre será GET o POST para solicitudes a la X API.
 
 |             |      |
 | :---------- | :--- |
-| Método HTTP | POST |
+| HTTP Method | POST |
 
-La URL base es la URL a la que se dirige la solicitud, sin incluir ninguna cadena de consulta ni parámetros de fragmento (hash). Es importante usar el protocolo correcto aquí, así que asegúrate de que la parte “https://” de la URL coincida con la solicitud real enviada a la API.
+La URL base es la URL a la que se dirige la solicitud, sin incluir la cadena de consulta ni los parámetros de fragmento (hash). Es importante usar el protocolo correcto aquí, así que asegúrate de que la parte “https://” de la URL coincida con la solicitud real que se envía a la API.
 
 |          |                                                                                          |
 | :------- | :--------------------------------------------------------------------------------------- |
-| URL base | [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json) |
+| Base URL | [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json) |
 
 <div id="collecting-parameters">
-  #### Recopilación de parámetros
+  #### Recopilar parámetros
 </div>
 
 A continuación, recopila todos los parámetros incluidos en la solicitud. Hay dos ubicaciones posibles para estos parámetros adicionales: la URL (como parte de la cadena de consulta) y el cuerpo de la solicitud. La solicitud de ejemplo incluye un único parámetro en ambas ubicaciones:
@@ -73,10 +73,10 @@ Una solicitud HTTP tiene parámetros que están codificados para URL, pero debes
 | oauth&#95;token                | 370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb |
 | oauth&#95;version              | 1.0                                                |
 
-Estos valores deben codificarse en una sola cadena, que se usará más adelante. El proceso para construir la cadena es muy específico:
+Estos valores deben codificarse en una sola cadena, que se utilizará más adelante. El proceso para construir la cadena es muy específico:
 
-1. [Codifica mediante percent-encoding](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) cada clave y valor que se va a firmar.
-2. Ordena la lista de parámetros alfabéticamente [[1]](/es/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature) por clave codificada [[2]](/es/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature).
+1. [Codifica con percent-encoding](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) cada clave y valor que se vaya a firmar.
+2. Ordena la lista de parámetros alfabéticamente [[1]](/es/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature) por la clave codificada [[2]](/es/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature).
 3. Para cada par clave/valor:
 4. Añade la clave codificada a la cadena de salida.
 5. Añade el carácter ‘=’ a la cadena de salida.
@@ -84,14 +84,14 @@ Estos valores deben codificarse en una sola cadena, que se usará más adelante.
 7. Si quedan más pares clave/valor, añade un carácter ‘&amp;’ a la cadena de salida.
     
 
-[1] La especificación OAuth indica ordenar lexicográficamente, que es el orden alfabético predeterminado para muchas bibliotecas.
+[1] La especificación de OAuth indica ordenar lexicográficamente, que es el orden alfabético predeterminado para muchas bibliotecas.
 
-[2] En el caso de dos parámetros con la misma clave codificada, la especificación OAuth indica continuar ordenando según el valor. Sin embargo, X no acepta claves duplicadas en las solicitudes de API
+[2] En el caso de dos parámetros con la misma clave codificada, la especificación de OAuth indica continuar ordenando según el valor. Sin embargo, X no acepta claves duplicadas en las solicitudes de la API
  
 
 **Cadena de parámetros**
 
-La siguiente *cadena de parámetros* se producirá al repetir estos pasos con los parámetros recopilados arriba:
+La siguiente *cadena de parámetros* se generará al repetir estos pasos con los parámetros recopilados anteriormente:
 
 | status                   | Hello Ladies + Gentlemen, a signed OAuth request!  |
 | :----------------------- | :------------------------------------------------- |
@@ -107,61 +107,61 @@ La siguiente *cadena de parámetros* se producirá al repetir estos pasos con lo
   #### Creación de la cadena base de la firma
 </div>
 
-Los tres valores recopilados hasta ahora deben unirse para formar una sola cadena, a partir de la cual se generará la firma. Esto se denomina **cadena base de la firma** en la especificación de OAuth.
+Los tres valores recopilados hasta ahora deben unirse para formar una sola cadena, a partir de la cual se generará la firma. La especificación OAuth la denomina **cadena base de la firma**.
 
 Para codificar el método HTTP, la URL base y la cadena de parámetros en una sola cadena:
 
-1. Convierte el método HTTP a mayúsculas y establece la cadena de salida igual a este valor.
+1. Convierte el método HTTP en mayúsculas y asigna este valor a la cadena de salida.
 2. Añade el carácter ‘&amp;’ a la cadena de salida.
-3. [Aplica percent encoding](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) a la URL y añádela a la cadena de salida.
+3. [Codifica con porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) la URL y añádela a la cadena de salida.
 4. Añade el carácter ‘&amp;’ a la cadena de salida.
-5. [Aplica percent encoding](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) a la cadena de parámetros y añádela a la cadena de salida.
+5. [Codifica con porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) la cadena de parámetros y añádela a la cadena de salida.
     
 
-Esto generará la siguiente *cadena base de la firma*:
+Esto producirá la siguiente *cadena base de la firma*:
 
 ```
 POST&https%3A%2F%2Fapi.x.com%2F1.1%2Fstatuses%2Fupdate.json&include_entities%3Dtrue%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521
 ```
 
-Asegúrate de aplicar percent-encoding a la cadena de parámetros. La cadena base de la firma debe contener exactamente 2 caracteres ampersand ‘&amp;’. Los caracteres de porcentaje ‘%’ en la cadena de parámetros deben codificarse como %25 en la cadena base de la firma.
+Asegúrate de aplicar percent-encoding a la cadena de parámetros. La cadena base de la firma debe contener exactamente 2 caracteres de ampersand ‘&amp;’. Los caracteres de porcentaje ‘%’ de la cadena de parámetros deben codificarse como %25 en la cadena base de la firma.
 
 <div id="getting-a-signing-key">
   #### Obtención de una clave de firma
 </div>
 
-Los últimos datos que debes recopilar son secretos que identifican la [aplicación de X](/es/resources/fundamentals/developer-apps) que realiza la solicitud y al usuario en cuyo nombre se realiza dicha solicitud. Es muy importante tener en cuenta que estos valores son extremadamente sensibles y nunca deben compartirse con nadie.
+Los últimos datos que debes recopilar son secretos que identifican la [aplicación de X](/es/resources/fundamentals/developer-apps) que realiza la solicitud y al usuario en cuyo nombre se realiza la solicitud. Es muy importante tener en cuenta que estos valores son extremadamente sensibles y nunca deben compartirse con nadie.
 
-El valor que identifica tu aplicación ante X se denomina **consumer secret** y se puede encontrar en el [portal para desarrolladores](/es/resources/fundamentals/developer-portal) al ver la [página de detalles de la aplicación](/es/resources/fundamentals/developer-apps). Este valor será el mismo para cada solicitud que tu aplicación de X envíe.
+El valor que identifica tu aplicación ante X se denomina **consumer secret** y se puede encontrar en el [portal para desarrolladores](/es/resources/fundamentals/developer-portal) al ver la [página de detalles de la aplicación](/es/resources/fundamentals/developer-apps). Este será el mismo valor para cada solicitud que envíe tu aplicación de X.
 
 |     |     |
 | :--- | :--- |
 | Consumer secret | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw |
 
-El valor que identifica la cuenta en cuyo nombre actúa tu aplicación se denomina **OAuth token secret**. Este valor se puede obtener de varias maneras, todas ellas descritas en [obtención de tokens de acceso](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens).
+El valor que identifica la cuenta en cuyo nombre actúa tu aplicación se denomina **OAuth token secret**. Este valor se puede obtener de varias maneras, todas las cuales se describen en [obtención de tokens de acceso](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens).
 
 |     |     |
 | :--- | :--- |
 | OAuth token secret | LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
 
-De nuevo, es muy importante mantener estos valores privados dentro de tu aplicación. Si crees que tus valores se han visto comprometidos, regenera tus tokens (los tokens de esta página se han marcado como no válidos para solicitudes reales).
+Una vez más, es muy importante mantener estos valores privados dentro de tu aplicación. Si crees que tus valores se han visto comprometidos, regenera tus tokens (los tokens de esta página se han marcado como inválidos para solicitudes reales).
 
-Ambos valores deben combinarse para formar una **clave de firma** que se utilizará para generar la firma. La clave de firma es simplemente el token secret [codificado en porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters):
+Es necesario combinar ambos valores para formar una **signing key** que se utilizará para generar la firma. La signing key es simplemente el token secret [codificado en porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters):
 
-Ten en cuenta que existen algunos flujos, como cuando se obtiene un [request token](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens), en los que el token secret aún no se conoce. En este caso, la clave de firma debe consistir en el **consumer secret** [codificado en porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) seguido de un carácter ampersand ‘&amp;’.
+Ten en cuenta que existen algunos flujos, como al obtener un [request token](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens), en los que el token secret aún no se conoce. En este caso, la signing key debe consistir en el **consumer secret** [codificado en porcentaje](/es/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) seguido de un carácter ampersand «&amp;».
 
 |     |     |
 | :--- | :--- |
-| Clave de firma | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&amp;LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
+| Signing key | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&amp;LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
 
 <div id="calculating-the-signature">
   #### Cálculo de la firma
 </div>
 
-Finalmente, la firma se calcula pasando la cadena base de firma y la clave de firma al algoritmo de hash HMAC-SHA1. Los detalles del algoritmo se explican en la función hash&#95;hmac.
+Finalmente, la firma se calcula pasando la cadena base de la firma y la clave de firma al algoritmo de hash HMAC-SHA1. Los detalles del algoritmo se explican en la función hash&#95;hmac.
 
-La salida de la función de firma HMAC es una cadena binaria. Esta debe codificarse en base64 para producir la cadena de la firma. Por ejemplo, la salida dada la cadena base y la clave de firma indicadas en esta página es 2E CF 77 84 98 99 6D 0D DA 90 5D C7 17 7C 75 07 3F 3F CD 4E. Ese valor, cuando se convierte a base64, es la firma OAuth para esta solicitud:
+La salida de la función de firmado HMAC es una cadena binaria. Esta debe codificarse en base64 para producir la cadena de firma. Por ejemplo, la salida usando la cadena base y la clave de firma indicadas en esta página es 2E CF 77 84 98 99 6D 0D DA 90 5D C7 17 7C 75 07 3F 3F CD 4E. Ese valor, cuando se convierte a base64, es la firma OAuth para esta solicitud:
 
 |     |     |
 | :--- | :--- |
-| Firma OAuth | Ls93hJiZbQ3akF3HF3x1Bz8/zU4= |
+| OAuth signature | Ls93hJiZbQ3akF3HF3x1Bz8/zU4= |

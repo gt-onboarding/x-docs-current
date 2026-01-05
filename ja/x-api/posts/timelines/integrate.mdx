@@ -1,25 +1,25 @@
 ---
-title: 統合ガイド
-sidebarTitle: 統合ガイド
-keywords: ["タイムライン統合", "タイムラインガイド", "タイムライン実装", "ホームタイムライン統合", "ユーザータイムライン統合"]
+title: 連携ガイド
+sidebarTitle: 連携ガイド
+keywords: ["タイムライン連携", "タイムラインガイド", "タイムライン実装", "ホームタイムライン連携", "ユーザータイムライン連携"]
 ---
 
 <div id="how-to-integrate-with-the-timelines-endpoints">
-  ## Timelines エンドポイントと連携する方法
+  ## Timelines エンドポイントとの連携方法
 </div>
 
-このページでは、Timelines エンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと主要な概念について説明します。ページの内容は、次のセクションに分かれています。
+このページでは、Timelines エンドポイントをシステムに統合する際に把握しておくべき、いくつかのツールと主要な概念について説明します。ページの内容は次のセクションに分かれています。
 
-* [役に立つツール](#helpful-tools)
+* [役立つツール](#helpful-tools)
 * 主要な概念
   * [認証](#authentication)
-  * [developer portal、プロジェクト、アプリ](#portal)
+  * [Developer Portal、Projects、Apps](#portal)
   * [レート制限](#rate-limits)
   * [フィールドと expansions](#fields)
   * [ポストのメトリクス](/ja/x-api/posts/timelines#timelines-integration-guide)
   * [ページネーション](#pagination)
   * [結果のフィルタリング](#filtering)
-  * [ポストの上限と返されるポスト数](#caps)
+  * [ポスト上限と返されるポスト数](#caps)
   * [ポストの編集](#edits)
   * [エッジケース](#edge)[](#edge)
 
@@ -27,42 +27,42 @@ keywords: ["タイムライン統合", "タイムラインガイド", "タイム
   ### 便利なツール
 </div>
 
-いくつかの主要な概念を見ていく前に、これらのエンドポイントの機能をテストし始める際には、次のいずれかのツールまたはコードサンプルを使用することをおすすめします。
+いくつかの重要な概念を見ていく前に、これらのエンドポイントの機能をテストし始める際には、次のいずれかのツールまたはコードサンプルを使用することをおすすめします。
 
 **コードサンプル**
 
-お好みのプログラミング言語でこれらのエンドポイントを利用できるようにセットアップしたい場合は、その出発点として使えるさまざまなコードサンプルを、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)でいくつか提供しています。
+お好みのプログラミング言語で、これらのエンドポイントをコードから利用できるようにしたいとお考えですか？[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で、出発点として利用できるさまざまなコードサンプルを提供しています。
 
 **ライブラリ**
 
-スムーズに開始するために、数多く存在する[コミュニティ製サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)のいずれかを活用してください。v2 エンドポイントに対応したライブラリは、適切なバージョンタグを確認することで見つけることができます。
+作業を始める際には、数多く存在する[コミュニティ製のサードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)のいずれかを活用してください。適切なバージョンタグを確認することで、v2 エンドポイントに対応したライブラリを見つけることができます。
 
 **Postman**
 
-Postman は、これらのエンドポイントをテストするのに最適なツールです。各 Postman リクエストには、利用可能な内容をすばやく理解できるように、すべてのパスパラメータおよびボディパラメータが含まれています。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ページをご覧ください。
+Postman は、これらのエンドポイントをテストするのに非常に便利なツールです。各 Postman リクエストには、利用可能な内容をすばやく理解できるよう、すべてのパスおよびボディパラメータが含まれています。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ページをご覧ください。
 
 <div id="key-concepts">
-  ### 重要な概念
+  ### Key concepts
 </div>
 
 **認証**
 
-すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使用して、リクエストを[認証](/ja/resources/fundamentals/authentication)する必要があります。これらのエンドポイントへのリクエストを認証するには、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。ユーザーポストのタイムラインおよびユーザーメンションタイムラインには、OAuth 2.0 App-Only を使用できます。
+すべての X API v2 エンドポイントでは、キーとトークンとも呼ばれる一連の認証情報を使用してリクエストを[認証](/ja/resources/fundamentals/authentication)する必要があります。これらのエンドポイントへのリクエストを認証するには、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。ユーザーのポストタイムラインおよびユーザー宛てメンションタイムラインには、OAuth 2.0 アプリ専用フローを使用できます。
 
-[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) では、APIキー、ユーザーのアクセストークン、およびその他いくつかのパラメータを使用して[認可ヘッダーを作成](https://developer-staging.x.com/resources/fundamentals/authentication/authorizing-a-request)し、それをリクエストに付与する必要があります。アクセストークンは、あなたが代理でリクエストを行うユーザーに紐づいている必要があります。別のユーザー用のアクセストークンを生成したい場合は、そのユーザーが [3-legged OAuth フロー](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用してあなたのアプリを認可する必要があります。 
+[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) では、API Keys、ユーザーの Access Tokens、およびその他少数のパラメータを使用して[認可ヘッダーを作成](https://developer-staging.x.com/resources/fundamentals/authentication/authorizing-a-request)し、それをリクエストに付与する必要があります。Access Tokens は、あなたが代理でリクエストを送信するユーザーに関連付けられている必要があります。別のユーザー用の Access Tokens セットを生成したい場合、そのユーザーは [3-legged OAuth フロー](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用してあなたのアプリを承認する必要があります。 
 
-なお、OAuth 1.0a は扱いが難しい場合があります。この認証方法に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview)を利用するか、Postman のようなツールを使用するか、OAuth 2.0 を使用してリクエストを認証することを推奨します。これらのエンドポイントからポストまたは非公開メトリクスを取得したい場合は、ユーザーが所有するコンテンツに対して適切な権限を得るために、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE のいずれかを使用する必要があります。
+なお、OAuth 1.0a は扱いが難しい場合があります。この認証方法に詳しくない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview)を使用するか、Postman のようなツールを使用するか、あるいは OAuth 2.0 を使用してリクエストを認証することを推奨します。これらのエンドポイントからポストまたは非公開メトリクスを取得したい場合は、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE のいずれかを使用する必要があります。これにより、そのコンテンツを所有するユーザーから適切な権限を取得していることが保証されます。
 
-[OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) では、リクエストに [OAuth 2.0 App Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を付与するだけで済みます。App Access Token は、開発者アプリ内から直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。これは、ユーザーポストのタイムラインまたはユーザーメンションタイムラインに使用できます。
+[OAuth 2.0 アプリ専用フロー](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)では、リクエストに [OAuth 2.0 App Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を付与するだけで済みます。App Access Token は、開発者アプリ内で直接生成するか、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成できます。これはユーザーのポストタイムラインまたはユーザー宛てメンションタイムラインで使用できます。
 
-[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) は、アプリケーションのスコープに対するより細かな制御と、複数デバイス間にまたがる認可フローを可能にします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与するための、きめ細かなスコープを選択できます。 
+[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) は、アプリケーションのスコープをより細かく制御でき、複数デバイス間にまたがる認可フローを可能にします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する細かいスコープを選択できます。 
 
-アプリで OAuth 2.0 を有効にするには、developer portal の App 設定セクションにあるアプリの認証設定で有効化する必要があります。
+アプリで OAuth 2.0 を有効にするには、developer portal の App settings セクションにあるアプリの authentication settings で有効化する必要があります。
 
 <Info>
-  **注意事項**
+  **ご注意ください**
 
-  以下の[フィールド](/ja/x-api/fundamentals/fields)をリクエストする場合、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必須です。 
+  次の[フィールド](/ja/x-api/fundamentals/fields)をリクエストする場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必要です。 
 
   * `tweet.fields.non_public_metrics`
   * `tweet.fields.promoted_metrics`
@@ -72,33 +72,33 @@ Postman は、これらのエンドポイントをテストするのに最適な
   * `media.fields.organic_metrics`
 </Info>
 
-**[](/ja/x-api/fundamentals/pagination)developer portal、プロジェクト、および開発者アプリ**
+**[](/ja/x-api/fundamentals/pagination)Developer portal、プロジェクト、および開発者アプリ**
 
 任意の X API v2 エンドポイントを利用するには、まず[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内に[プロジェクト](/ja/resources/fundamentals/projects)を設定し、そのプロジェクト内に[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成する必要があります。その開発者アプリ内のキーとトークンは、これらのタイムラインエンドポイントで使用できます。
 
 **レート制限**
 
-毎日、何万もの開発者が X API にリクエストを送信しています。このボリュームを管理するため、各エンドポイントには[レート制限](/ja/x-api/fundamentals/rate-limits)が設定されており、アプリまたは認証済みユーザーに代わって各開発者が行えるリクエスト数が制限されています。 
+毎日、何千人もの開発者が X API にリクエストを送信しています。トラフィック量を管理するため、各エンドポイントには[レート制限](/ja/x-api/fundamentals/rate-limits)が設けられており、アプリに代わって、または認証済みユーザーに代わって、各開発者が送信できるリクエスト数が制限されています。 
 
-これらのエンドポイントには、使用される認証方法に応じて異なるレート制限が適用されます。アプリレベルのレート制限は、OAuth 2.0 App-Only を使用してリクエストを送信するアプリに適用され、一方でユーザーレベルのレート制限は、OAuth 1.0a User Context を使用して特定の認可ユーザーに代わって行われるリクエストに適用されます。これら 2 種類のレート制限は、15 分間のウィンドウ内でのリクエスト頻度に基づいています。
+これらのエンドポイントには、使用される認証方法に応じて異なるレート制限が適用されます。アプリレベルのレート制限は、OAuth 2.0 アプリ専用フローを使用してリクエストを行うアプリに適用され、一方、ユーザーレベルのレート制限は、OAuth 1.0a User Context を使用して特定の認可ユーザーに代わって送信されるリクエストに適用されます。これら 2 種類のレート制限は、15 分の時間枠内でのリクエスト頻度に基づいています。
 
-たとえば、これら両方のタイムラインエンドポイントに対して OAuth 2.0 アプリ専用フロー認証を使用しているアプリは、15 分間のあいだにユーザーのポストタイムラインに対して 1,500 回（ページネーションリクエストを含む）、ユーザーのメンションタイムラインに対して 450 回（ページネーションリクエストを含む）リクエストを送信できます。同じアプリが、同じ 15 分間のあいだに 2 人の異なる認可ユーザー（OAuth 1.0a User Context を使用）を用いる場合、それぞれの認証済みユーザーについて、ユーザーのポストタイムラインに対して 900 回（ページネーションリクエストを含む）、ユーザーのメンションタイムラインに対して 180 回（ページネーションリクエストを含む）リクエストを送信できます。 
+たとえば、これら両方のタイムラインエンドポイントに対して OAuth 2.0 アプリ専用フローの認証を利用するアプリは、15 分間の時間枠内で、ユーザーのポストタイムラインには 1500 回（ページネーション用のリクエストを含む）、ユーザーのメンションタイムラインには 450 回（ページネーション用のリクエストを含む）リクエストを実行できます。同じアプリが、同じ 15 分間の時間枠内で、OAuth 1.0a User Context を利用した 2 人の異なる認可済みユーザーを用いる場合、それぞれの認証済みユーザーについて、ユーザーのポストタイムラインには 900 回（ページネーション用のリクエストを含む）、ユーザーのメンションタイムラインには 180 回（ページネーション用のリクエストを含む）リクエストを実行できます。 
 
-逆時系列のホームタイムラインには、ユーザーごとに 15 分間あたり 180 リクエストというレート制限があります。このエンドポイントでは、過去 7 日間にそのタイムライン上で作成されたすべてのポストと、作成日時に関係なく直近 800 件のポストを取得できます。
+逆時系列のホームタイムラインには、ユーザーごとに 15 分あたり 180 リクエストというレート制限があります。このエンドポイントでは、対象のタイムライン上で過去 7 日間に作成されたすべてのポスト、または作成日時に関係なく直近 800 件のポストを取得できます。
 
 **Fields と expansions**
 
-X API v2 では、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) を使用して、API から返してほしいデータを正確に選択できます。`expansions` パラメータを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは、`expansions` パラメータを使って poll、place、メディア、その他のオブジェクトをリクエストできます。
+X API v2 では、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) を使用して、API から返されるデータを必要なものだけに絞り込むことができます。`expansions` パラメータを使うと、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは `expansions` パラメータを使って、poll、place、media などのオブジェクトをリクエストできます。
 
-`fields` パラメータを使用すると、さまざまなデータオブジェクト内のどのフィールドを受け取りたいかを正確に指定できます。デフォルトでは、これらのエンドポイントから返される主要なポストオブジェクトには、`id` と `text` フィールドが含まれます。`author_id` や `public_metrics` などの追加フィールドを取得するには、`fields` パラメータを使用してそれらを明示的に指定する必要があります。インテグレーションでの利用を検討すべき重要なフィールドとしては、poll データ、[metrics](/ja/x-api/fundamentals/metrics)、[Post annotations](/ja/x-api/fundamentals/post-annotations)、[conversation ID](/ja/x-api/fundamentals/conversation-id) フィールドなどがあります。
+`fields` パラメータを使うと、さまざまなデータオブジェクト内のどのフィールドを受け取りたいかを正確に指定できます。デフォルトでは、これらのエンドポイントから返される主要なポストオブジェクトには、id と text フィールドが含まれます。author&#95;id や public&#95;metrics などの追加フィールドを受け取るには、それらを `fields` パラメータで明示的にリクエストする必要があります。インテグレーションでの利用を検討すべき重要なフィールドとしては、poll のデータ、[metrics](/ja/x-api/fundamentals/metrics)、[Post annotations](/ja/x-api/fundamentals/post-annotations)、[conversation ID](/ja/x-api/fundamentals/conversation-id) フィールドなどがあります。
 
-[X API v2 data dictionary](/ja/x-api/fundamentals/data-dictionary) には、[fields と expansions の使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) に関するガイドも追加されています。
+[X API v2 データ辞書](/ja/x-api/fundamentals/data-dictionary)内に、[fields と expansions の使い方](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)に関するガイドを追加しています。
 
-**Post metrics**
+**Post メトリクス**
 
-X API v2 のエンドポイントでは、リクエストに適切なフィールドを渡している場合、返されるポストオブジェクトから直接ポストのメトリクスを取得できます。
+X API v2 のエンドポイントでは、リクエスト時に適切なフィールドを指定すれば、返されるポストオブジェクトから直接ポストメトリクスを取得できます。
 
-ポストのメトリクスについては、ユーザーのプライバシーおよび次のレスポンスフィールドに関連する、いくつかの制限事項があります。
+ユーザープライバシーと、次のレスポンスフィールドに関連して、ポストメトリクスにはいくつかの制限があることに注意してください。
 
 * `tweet.fields.non_public_metrics`
 * `tweet.fields.promoted_metrics`
@@ -107,54 +107,54 @@ X API v2 のエンドポイントでは、リクエストに適切なフィー�
 * `media.fields.promoted_metrics`
 * `media.fields.organic_metrics`
 
-これらのフィールドにはプライベートなメトリクスデータが含まれるため、ユーザーのポストタイムラインエンドポイントを使用してポストの投稿者に代わってこのデータを取得するには、その投稿者から認可を受けている必要があります。つまり、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code Flow with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) を使用する必要があります。
+これらのフィールドには非公開メトリクスデータが含まれます。つまり、ユーザーポストタイムラインエンドポイントを使用して、ポストの投稿者に代わってこのデータを取得するには、その投稿者から認可を受けている必要があり、そのためには [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code Flow with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) を利用する必要があります。
 
-たとえば、ユーザー ID 1234 のユーザーのポストタイムラインについて `non_public_metrics` を取得するには、そのユーザーに関連付けられたアクセストークンをリクエストに含める必要があります。[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用することで、ユーザーにアプリを認可してもらい、そのユーザーに紐づく一連のアクセストークンを取得できます。 
+たとえば、ユーザー ID 1234 のユーザーポストタイムラインについて `non_public_metrics` を受け取るには、そのユーザーに紐づいたアクセストークンをリクエストに含める必要があります。[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)を利用することで、ユーザーにアプリを認可してもらい、そのユーザーに紐づくアクセストークンのセットを取得できます。 
 
-ユーザーメンションタイムラインを使用している場合、メンションを行った投稿者がアプリに対し自身のプライベートなメトリクスデータへのアクセスを認可しており、かつ OAuth 1.0a User Context でそのユーザーのアクセストークンを使ってリクエストを行っている場合を除き、上記のフィールドは利用できません。
+ユーザーメンションタイムラインを使用している場合、メンションを行った投稿者が、アプリによる自分の非公開メトリクスデータへのアクセスを認可し、かつ OAuth 1.0a User Context でリクエストを行う際にそのユーザーのアクセストークンを使用している場合を除き、これらのフィールドは利用できません。
 
-`non_public_metrics`、`organic_metrics`、`promoted_metrics` はすべて、過去 30 日以内に作成されたポストに対してのみ利用可能です。つまり、これらのフィールドをリクエストした場合、結果は自動的に過去 30 日以内のポストのみに絞り込まれます。
+`non_public_metrics`、organic&#95;metrics、promoted&#95;metrics は、いずれも過去 30 日以内に作成されたポストに対してのみ取得できます。つまり、これらのフィールドをリクエストする場合、結果は自動的に過去 30 日以内のポストに限定されます。
 
-これらのフィールドがリクエストされた場合、認証済みユーザーが作成したポストのみが返され、それ以外のポストについてはエラーメッセージが返されます。
+これらのフィールドがリクエストされている場合、認証済みユーザーが作成したポストのみが返され、それ以外のポストについてはエラーメッセージが返されます。
 
 **ページネーション**
 
-これらのエンドポイントは、レスポンスを迅速に返すためにページネーションを利用します。単一のレスポンスで送信できる結果（タイムラインエンドポイントでは最大 100 件のポスト）を超える場合は、ページネーションが必要になります。1 ページあたりに返す結果数を指定するには `max_results` パラメータを使用し、次のページの結果を取得するには `pagination_token` パラメータを使用します。詳細については、[pagination guide](/ja/x-api/fundamentals/pagination) を参照してください。
+これらのエンドポイントは、レスポンスを高速に返すためにページネーションを利用します。単一のレスポンスで送信できる件数（タイムラインエンドポイントでは最大 100 ポスト）を超える結果がある場合は、ページネーションを行う必要があります。`max_results` パラメータを使用して 1 ページあたりに返す件数を指定し、`pagination_token` パラメータを使用して次ページの結果を取得します。詳しくは、[ページネーションガイド](/ja/x-api/fundamentals/pagination)を参照してください。
 
 **結果のフィルタリング**
 
-これらのエンドポイントには、結果をフィルタリングするために使用できる複数のパラメータが含まれています。start&#95;date と end&#95;date を使用すると、特定の期間に結果を絞り込むことができます。特定のポストの集合をポスト ID で指定したい場合は、since&#95;id と until&#95;id を使用できます。ユーザーポストタイムラインには、結果からリツイートと返信を除外できる exclude パラメータも用意されています。 
+これらのエンドポイントには、結果をフィルタリングするために使用できるパラメータがいくつか用意されています。start&#95;time と end&#95;time を使用すると、結果を特定の期間に絞り込むことができます。特定のポストの集合をポスト ID で指定したい場合は、since&#95;id と until&#95;id を使用できます。ユーザーポストタイムラインには、結果からリポストや返信を除外できる exclude パラメータも用意されています。 
 
-**ポスト上限と返されるポスト数**
+**ポストキャップと返されるポスト数**
 
-ユーザーポストタイムラインエンドポイントとユーザーメンションタイムラインエンドポイントには、1 か月に返せるポスト数に上限があります。逆時系列のホームタイムラインエンドポイントには、この制限は適用されません。
+ユーザーポストタイムラインエンドポイントとユーザーメンションタイムラインエンドポイントは、1 か月あたりに返せるポスト数に上限があります。逆時系列ホームタイムラインエンドポイントには、この制限は適用されません。
 
-どのタイムラインエンドポイントを使用した場合でも、返されたポストはプロジェクトレベルの[ポスト上限](/ja/x-api/fundamentals/post-cap)にカウントされます。使用状況は developer portal に表示され、「月」は [developer portal dashboard](https://developer.x.com/en/portal/dashboard) に表示されているサブスクリプションの更新日に開始します。 
+どのタイムラインエンドポイントを使用した場合でも、返されるポストはプロジェクトレベルの[ポストキャップ](/ja/x-api/fundamentals/post-cap)にカウントされます。使用状況は developer portal に表示されており、「月」は [developer portal dashboard](https://developer.x.com/en/portal/dashboard) に表示されるサブスクリプション更新日から始まります。 
 
-ユーザーポストタイムラインエンドポイントは、ユーザーのタイムラインに投稿された直近 3,200 件のポストのみを返します。start&#95;time と end&#95;time に、直近 3,200 件を超える期間を指定した場合、レスポンス自体は成功しますが、ポストは返されません。
+ユーザーポストタイムラインエンドポイントは、ユーザーのタイムラインにポストされた直近 3200 件のポストのみを返します。start&#95;time と end&#95;time に、直近 3200 件を超える期間を指定した場合、レスポンス自体は成功しますが、ポストは返されません。
 
 また、ユーザーポストタイムラインのリクエストに excludes=replies を指定した場合は、直近 800 件のポストのみが返される点にも注意が必要です。
 
 ユーザーメンションタイムラインエンドポイントは、直近 800 件のポストメンションのみを返します。
 
-逆時系列のホームタイムラインエンドポイントは、直近 3,200 件のポストを返します。
+逆時系列ホームタイムラインエンドポイントは、直近 3200 件のポストを返します。
 
 **ポストの編集**
 
-編集可能なポストは、元のポストが公開されてから 30 分以内で最大 5 回まで編集できます。検索エンドポイントは常にポストの最新バージョンを返します。公開から 30 分以上経過したポストだけをリクエストする場合は、常にそのポストの最終バージョンを受け取ることができます。ただし、ほぼリアルタイムのユースケースで、直近 30 分以内に公開されたポストをクエリしている場合、それらのポストは取得後に編集されている可能性があります。これらのポストは検索、または Post Lookup エンドポイントを使って再取得することで、最終的な状態を確認できます。ポスト編集の仕組みについて詳しくは、[Edit Posts fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。  
+編集可能なポストは、元のポストが投稿されてから 30 分の間に最大 5 回まで編集できます。Search エンドポイントは常にポストの最新バージョンを返します。投稿から 30 分以上経過したポストのみをリクエストする場合は、常にそのポストの最終バージョンを受け取ることになります。ただし、ほぼリアルタイムのユースケースがあり、直近 30 分以内に投稿されたポストをクエリしている場合、取得後にそれらのポストが編集されている可能性があります。これらのポストは Search もしくは Post Lookup エンドポイントで再取得して、最終的な状態を確認できます。ポスト編集の仕組みについて詳しくは、[Edit Posts fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。  
 
-**エッジケース**
+**例外ケース**
 
-* ユーザーポストタイムラインエンドポイントで 30 日より前のポストに対して非公開メトリクスをリクエストすると、結果件数が 0 で next&#95;token がレスポンスに含まれる場合があります。この問題を回避するには、non&#95;public&#95;metrics パラメータで指定する期間を直近 30 日以内に収めてください。加えて、max&#95;results の最小値は 10 にする必要があります。これらによりこの状況を回避しやすくなりますが、それでも発生する可能性はあります。
+* User Post timeline エンドポイントで、30 日より前のポストに対して non-public metrics をリクエストした場合、結果の件数が 0 であるにもかかわらず、レスポンスに next&#95;token が含まれることがあります。この問題を回避するには、non&#95;public&#95;metrics パラメータで指定する期間を直近 30 日以内に収まるようにしてください。加えて、max&#95;results の最小値は 10 にする必要があります。これらはこの状況の回避に役立つ可能性がありますが、それでも発生する場合があります。
 
-* プロモーションされていないポストに対して promoted メトリクスをリクエストすると、ポストデータではなく空のレスポンスが返されます。この問題については、現在チームが修正に取り組んでいます。
+* プロモーションされていないポストに対して promoted metrics をリクエストすると、ポストのデータではなく空のレスポンスが返されます。現在、この問題の修正に取り組んでいます。
 
-* ポスト本文が 140 文字を超えるリツイートの場合、ポストテキスト全体ではなく、text フィールドが切り詰められて返されます。短期的な回避策としては、参照されているポストを expansion で展開し、展開先から全文を取得してください。これは既知のバグであり、今後修正予定です。
+* 本文テキストが 140 文字を超えるポストを含む Retweet の場合、ポスト本文全体ではなく text フィールドが切り詰められて返されます。短期的な回避策としては、参照されているポストを展開し、そのエクスパンションから全文を取得してください。これは既知のバグであり、将来的に修正予定です。
 
 **次のステップ**
 
 [タイムラインエンドポイントへの最初のリクエストを行う]/x-api/posts/timelines#getting-started-with-reverse-chronological-home-timeline &quot;タイムラインエンドポイントへの最初のリクエストを行う&quot;)
 
-[すべてのパラメータやフィールドなどの一覧は API Reference ページを参照してください](/ja/x-api/posts/timelines#api-reference-index)
+[API Reference ページで、パラメータ、フィールドなどの一覧を確認する](/ja/x-api/posts/timelines#api-reference-index)
 
-[サポートの利用やエラーのトラブルシューティングを行う](https://developer.x.com/en/support/x-api)
+[サポートを受ける、またはエラーをトラブルシュートする](https://developer.x.com/en/support/x-api)

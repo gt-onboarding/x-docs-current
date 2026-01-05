@@ -1,41 +1,41 @@
 ---
 title: 速率限制
-keywords: ["Ads API 速率限制", "速率限制", "Ads API 节流", "速率限制", "请求限制", "Ads API 限制"]
+keywords: ["Ads API rate limits", "rate limiting", "Ads API throttling", "rate limits", "request limits", "Ads API limits"]
 ---
 
-Advertiser API 的速率限制方式与 REST API v1.1 类似，相关文档请参阅：[REST API Rate Limiting in v1.1](https://developer.x.com/content/developer-twitter/en/docs/basics/rate-limits)。与 REST API v1.1 不同的是，这里没有提供按 endpoint 列出的可编程索引。各 endpoint 的速率限制和重置时间窗口通过 HTTP 响应头返回。Ads API 中的所有速率限制均使用 OAuth 1.0A。
+Advertiser API 的速率限制规则与 REST API v1.1 类似，相关文档参见：[REST API Rate Limiting in v1.1](https://developer.x.com/content/developer-twitter/en/docs/basics/rate-limits)。但与 REST API v1.1 不同的是，没有按 endpoint 提供可通过程序访问的限制索引。各 endpoint 的速率限制及重置时间窗口会通过 HTTP 响应头返回。Ads API 中的所有速率限制都使用 OAuth 1.0A。
 
 <div id="user-level-and-ad-account-level-limits">
-  ## 用户级别和广告账户级别限制
+  ## 用户级别和广告账户级别的限制
 </div>
 
-速率限制分为两种类型：用户令牌级别和广告账户级别。一部分端点启用了广告账户级别速率限制。用户令牌是你用于认证并调用 Ads API 的 [OAuth 访问令牌](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)。每个用户令牌可以访问一个或多个广告账户。
+速率限制有两种类型：用户令牌级别和广告账户级别。部分端点支持使用广告账户级别的速率限制。用户令牌是你用于认证并调用 Ads API 的 [OAuth access token](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)。每个用户令牌可以访问一个或多个广告账户。
 
-当响应头中返回了广告账户级别速率限制时，开发者应当使用广告账户级别速率限制；仅在找不到广告账户级别限制时才使用用户级别限制。
+当响应头中返回广告账户级别的速率限制时，开发者应优先使用广告账户级别的速率限制，仅在找不到广告账户级别限制时才使用用户级别限制。
 
-用户级别速率限制通过以下响应头体现：**x-rate-limit-limit**、**x-rate-limit-remaining** 和 **x-rate-limit-reset**
+用户级别速率限制通过以下响应头来表示：**x-rate-limit-limit**、**x-rate-limit-remaining** 和 **x-rate-limit-reset**
 
-对于启用了广告账户级别速率限制的端点，其速率限制通过以下响应头体现：**x-account-rate-limit-limit**、**x-account-rate-limit-remaining** 和 **x-account-rate-limit-reset**。
+对于启用了广告账户级别速率限制的端点，其速率限制通过以下响应头来表示：**x-account-rate-limit-limit**、**x-account-rate-limit-remaining** 和 **x-account-rate-limit-reset**。
 
-广告账户级别速率限制仅适用于 GET 端点，以便应用在单个用户令牌可访问多个广告账户的场景下，同步实体数据（例如 campaign 或 line item 对象）。写入操作不保证使用相同的广告账户级别速率限制。
+广告账户级别的速率限制仅适用于 GET 端点，以便应用在通过单个用户令牌访问多个广告账户时，可以同步实体数据（例如 campaign 或 line item 对象）。写入操作不能保证使用相同的广告账户级别速率限制。
 
-对于采用广告账户级别速率限制的端点，用户级别的速率限制会被设置为一个较高的值，用来表示整个应用的全局配额。在可用的情况下，应优先使用广告账户级别速率限制来控制你的请求量。
+对于采用广告账户级别速率限制的端点，用户级别的速率限制会被设置为一个较高的数值，用于代表整个应用的全局配额。在可用时，应优先使用广告账户级别的速率限制来控制你的请求量。
 
 <div id="best-practices">
   ## 最佳实践
 </div>
 
-1. 在你的数据库中保存上次同步的时间戳，在请求数据时（在适用的情况下）使用 `sort_by=updated_at-desc` 选项来获取数据，这样当你处理到早于上次同步时间戳的数据时，就可以停止同步过程，从而避免对相同数据进行重复同步。
+1. 在你的数据库中保存上次同步的时间戳，在请求数据时（在适用的情况下）使用 `sort_by=updated_at-desc` 选项来请求数据，这样当同步到早于上次同步时间戳的数据时，就可以停止同步流程。这样可以避免重复同步相同的数据。
 
-2. 在一次请求中获取多个实体：某些端点允许你指定一个用逗号分隔的值列表，以检索多条类似的数据。这可以减少你发起的调用总次数，从而更高效地利用速率限制。
+2. 在单个请求中请求多个实体：某些端点允许你指定以逗号分隔的值列表，以检索多条类似的数据。这可以减少你发起的调用总数，从而更高效地利用速率限制配额。
 
-3. 在请求中使用最大的 “count” 值：对于某些端点（例如 [GET accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#targeting-criteria)），强烈建议使用最大 count 值进行调用，以返回 1000 个对象，而不是默认的 200 个。
+3. 在请求中使用最大 “count” 值：强烈建议对某些端点（例如 [GET accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#targeting-criteria)）使用最大 count 值进行调用，以返回 1000 个对象，而不是默认的 200 个。
 
 <div id="analytics-syncing">
-  ## Analytics 同步
+  ## 分析同步
 </div>
 
-有关 Analytics 端点速率限制的更多信息，请参阅 [Analytics 速率限制指南](/zh/x-ads-api/analytics#best-practices)。
+如需了解有关 Analytics 端点速率限制的更多信息，请参阅[Analytics 速率限制指南](/zh/x-ads-api/analytics#best-practices)。
 
 <div id="faqs">
   ## 常见问题解答
@@ -43,18 +43,18 @@ Advertiser API 的速率限制方式与 REST API v1.1 类似，相关文档请�
 
 *是否可以为某个广告账户或我们的应用提高速率限制？*
 
-我们通常无法提高速率限制，这些限制的设定已经足以支持规模最大的广告账户。请首先落实本文件中列出的最佳实践；如果在此之后速率限制仍然影响到你扩展规模或实现业务目标的能力，请联系你的 X Ads API 对接人，并提供完整的用例说明和相关请求的详细信息。
+一般情况下，我们无法提高速率限制，这些限制的设定已经足以支持规模最大的广告账户。请先实施本文档中列出的最佳实践；如果在此之后速率限制仍然影响到你扩大规模或实现业务目标的能力，请联系你的 X Ads API 对接人，并提供该用例及相关请求的完整细节。
 
 <div id="scopes-of-rate-limiting">
-  ## 速率限制范围
+  ## 速率限制的范围
 </div>
 
 <div id="scopes-for-this-doc">
-  ### 本文档中的范围说明
+  ### 本文档中的限额范围
 </div>
 
-* Category：所有属于该类别的端点在每个时间窗口内共享同一组分配的速率限制。
-* Endpoint：每个端点在每个时间窗口内都有自己独立分配的速率限制。
+* Category：属于同一类别的所有端点在每个时间窗口内共用一个分配的配额。
+* Endpoint：每个端点在每个时间窗口内都有自己独立分配的配额。
 
 <div id="ads-api-rate-limit-chart">
   ## Ads API 速率限制一览表
@@ -64,18 +64,18 @@ Advertiser API 的速率限制方式与 REST API v1.1 类似，相关文档请�
   ### Ads API 速率限制
 </div>
 
-| 端点类型 | 按端点或类别划分的范围 | 每 1 分钟窗口内的速率限制 |
+| 端点类型 | 按端点或类别划分的适用范围 | 每 1 分钟时间窗口内的速率限制 |
 | :--- | :--- | :--- |
 | 写入（POST、PUT、DELETE） | 类别 | 450 |
 | 受众 | 端点 | 1500 |
 
-| 端点类型 | 按端点或类别划分的范围 | 每 15 分钟窗口内的速率限制 |
+| 端点类型 | 按端点或类别划分的适用范围 | 每 15 分钟时间窗口内的速率限制 |
 | :--- | :--- | :--- |
 | 分析（同步） | 类别 | 250 |
-| 核心实体读取（Line Items、Campaigns 等）<br /><br />其他账户读取（其他带 :account&#95;id 的 GET 端点） | 端点（广告账户级别）<br /><br />端点（部分广告账户级别） | 10,000<br /><br />2000 |
-| 定向条件（除下方之外） | 类别 | 400 |
+| 核心实体读取（Line Items、Campaigns 等）<br /><br />其他账户读取（其他带有 :account&#95;id 的 GET 端点） | 端点（广告账户级别）<br /><br />端点（部分广告账户级别） | 10,000<br /><br />2000 |
+| 定向条件（除下方所列外） | 类别 | 400 |
 | 定向条件（tv&#95;markets、tv&#95;shows） | 端点 | 2000 |
-| Audience Insights | 类别 | 400 |
-| Keyword Insights | 类别 | 500 |
+| 受众洞察 | 类别 | 400 |
+| 关键词洞察 | 类别 | 500 |
 | 全局读取（不带 :account&#95;id 的 GET 端点） | 端点 | 5   |
 | 转化 | 端点 | 60,000 |

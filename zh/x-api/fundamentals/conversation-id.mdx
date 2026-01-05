@@ -1,21 +1,21 @@
 ---
 title: 会话 ID
-keywords: ["会话 ID", "会话串", "回复串", "会话串跟踪", "会话跟踪", "回复链", "会话串重建"]
+keywords: ["会话 ID", "会话线程", "回复线程", "线程追踪", "会话追踪", "回复链", "线程还原"]
 ---
 
 <div id="conversation-threads-using-the-x-api">
-  ### 使用 X API 的会话线程
+  ### 使用 X API 处理会话线程
 </div>
 
-如果你观察在 X 上会话是如何演变的，一条帖子就可以引发多个会话线程，并且随着更多用户参与，每个线程的长度和复杂度都会不断增加。识别帖子之间的关系并理解会话线程，是 X API v2 有效负载和搜索功能的一项特性。当某条帖子是对另一条帖子（即回复）或对某条回复发出的回应时，每条回复都会有一个定义好的 `conversation_id`，它与启动该会话的原始帖子的 Post ID 相同。
+如果你观察 X 上的会话是如何发展演变的，会发现一条帖子可以激发出多个会话线程；随着更多人参与进来，每个线程的长度和复杂度都可能不断增加。识别帖子之间的关系并理解会话线程，是 X API v2 负载和搜索功能提供的一项特性。当帖子是对某条帖子（即“回复”）的响应，或对某条回复的响应时，现在每条回复上都会带有一个定义好的 `conversation_id`，其值与发起该会话的原始帖子的 id 一致。
 
-针对某条给定帖子的回复，以及对这些回复的后续回复，都被视为从这一条原始帖子衍生出的同一个会话的一部分。无论产生多少个回复线程，它们都会共享同一个 `conversation_id`，指向最初引发该会话的原始帖子。使用 X API v2，你可以检索并重建整个会话线程，从而帮助你理解大家在讨论什么，以及会话和观点是如何演变的。
+对某个给定帖子的回复，以及对这些回复的进一步回复，都包含在从该单一原始帖子衍生出的会话中。无论产生多少条回复线程，它们都会共享一个与引发该会话的原始帖子相同的 `conversation_id`。使用 X API v2，你可以检索并重建整个会话线程，从而帮助你理解人们在说什么，以及会话和想法是如何演变的。
 
 <div id="example-conversation-thread">
   #### 会话线程示例
 </div>
 
-下面是一个会话线程示例，涉及五位不同的用户，其中包含一条对某条回复的回复。
+下面是一个包含五位不同参与者的会话线程示例，其中包括一条对某条回复的回复。
 
 ```json
 {
@@ -85,8 +85,8 @@ keywords: ["会话 ID", "会话串", "回复串", "会话串跟踪", "会话跟�
 }
 ```
 
-通过 `tweet.fields` 参数检索 `conversation_id`
-要为 v2 端点返回的所有帖子请求 `conversation_id`，请在请求参数中添加 tweet.fields=conversation&#95;id 字段。conversation&#95;id 字段始终是该会话回复线程中原始帖子的 id。所有位于同一回复线程中的帖子（包括由较早回复线程衍生出的回复线程）都会显示相同的 conversation&#95;id。
+将 `conversation_id` 作为 `tweet.fields` 参数获取
+要在 v2 端点上为返回的所有帖子请求 `conversation_id`，请在请求参数中添加 tweet.fields=conversation&#95;id 字段。conversation&#95;id 字段始终是该会话回复线程中原始帖子的 id。相同回复线程中的所有帖子（包括由更早回复线程派生出来的回复线程中的帖子）都会显示相同的 conversation&#95;id。
 
 <div id="request-with-conversation_id-parameter">
   ### 包含 `conversation_id` 参数的请求
@@ -154,10 +154,10 @@ curl --request GET \
   ### 将 `conversation_id` 用作过滤运算符
 </div>
 
-`conversation_id` 可以在「最近搜索」中用作搜索查询参数，或在 [filtered stream](/zh/x-api/posts/filtered-stream/introduction) 的规则中用作运算符。这样会返回该对话线程中的全部帖子：要么通过 filtered stream 实时返回，要么通过 [search Tweets](/zh/x-api/posts/search/introduction) 以时间倒序返回。你还可以在将该运算符与 [Posts counts](/zh/x-api/posts/counts/introduction) 搭配使用时，获取某个对话中的帖子总数。
+`conversation_id` 可以在近期搜索中作为查询参数使用，或在规则中作为运算符用于 [filtered stream](/zh/x-api/posts/filtered-stream/introduction)。这将返回整条对话线程中的所有帖子，既可以通过 filtered stream 实时获取，也可以通过 [搜索帖子](/zh/x-api/posts/search/introduction) 以时间倒序获取。你还可以将该运算符与 [Posts counts](/zh/x-api/posts/counts/introduction) 搭配使用，以获取某个对话中的帖子数量。
 
 <div id="request-to-query-by-conversation_id">
-  ## 根据 `conversation_id` 查询的请求
+  ## 根据 `conversation_id` 的查询请求
 </div>
 
 ```
@@ -170,7 +170,7 @@ curl --request GET \
   ### 响应
 </div>
 
-*注意：搜索到的帖子按时间倒序排列。*
+*注意：搜索结果中的帖子按时间倒序排列。*
 
 ```
 {

@@ -1,49 +1,50 @@
 ---
-title: 列表成员查询
-sidebarTitle: 列表成员查询
-keywords: ["列表成员查询快速入门", "列表成员查询", "获取列表成员快速入门", "列表成员资格查询"]
+title: 列表成员查找
+sidebarTitle: 列表成员查找
+keywords: ["列表成员查找快速入门", "列表成员查找", "获取列表成员快速入门", "列表成员关系查找"]
 ---
 
 import { Button } from '/snippets/zh/button.mdx';
 
 <Note>
-  **请注意：** 本指南假定你已经完成了[快速开始概览](/zh/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group)中列出的所有前提条件。
+  **请注意：** 本指南假设你已经完成了[快速入门概览](/zh/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group)中列出的前提条件。
 </Note>
 
 <div id="steps-to-build-a-list-members-lookup-request">
-  ### 构建列表成员查询请求的步骤
+  ### 构建 List 成员查询请求的步骤
 </div>
 
-**第一步：在 Postman 中选择 List 端点集合**
+**步骤一：在 Postman 中选择 List 相关的端点集合**
 
-在将 X API v2 集合加载到 Postman 后，导航到 “List” 文件夹，选择其中的 “List members” 文件夹，然后选择 “Members lookup”。
+在你将 X API v2 集合加载到 Postman 之后，导航到 “List” 文件夹，选择其中的 “List members” 文件夹，然后选择 &quot;Members lookup&quot;。
+ 
 
-**第二步：确定并指定你想要获取成员的 List**
+**步骤二：确定并指定你希望检索成员的 List**
 
-你必须指定一个你希望获取成员的 List。你可以通过访问 x.com，点击某个 List，然后查看浏览器地址栏中的 URL 来找到该 List 的 ID。例如，下面这个 URL 中的 List ID 是 84839422。
+你必须指定一个你希望获取成员的 List。你可以通过访问 x.com，点击某个 List，然后查看浏览器地址栏中的 URL 来找到该 List 的 ID。例如，下面这个 URL 的 List ID 是 84839422。
 
 https://x.com/i/lists/84839422
 
-目标 ID 可以是任意有效的 List ID。在 Postman 中，导航到 “Params” 选项卡，将你的 ID 输入到 id 路径变量的 “Value” 列中。请务必不要在任何 ID 的前后包含空格。
+目标 ID 可以是任意有效的 List ID。在 Postman 中，导航到 &quot;Params&quot; 选项卡，并在 id 路径变量的 &quot;Value&quot; 列中输入你的 ID。务必确保在任何 ID 前后都不要包含空格。
 
 |     |     |
 | :--- | :--- |
 | **Key** | **Value** |
-| `id` | 84839422（List ID） |
+| `id` | 84839422 (List ID) |
 
-**第三步：确定并指定你希望获取哪些字段**
+**步骤三：确定并指定你希望检索的字段**
 
-如果你在完成第三步后点击 “Send” 按钮，你将在响应中收到默认的 [user object](/zh/x-api/fundamentals/data-dictionary#user) 字段：id、name 和 username。
+如果你在完成步骤三后点击 &quot;Send&quot; 按钮，你将在响应中收到默认的 [user object](/zh/x-api/fundamentals/data-dictionary#user) 字段：id、name 和 username。
 
-如果你希望在 id、name 和 username 之外获取其他字段，你需要在请求中通过 [字段](/zh/x-api/fundamentals/fields) 和/或 [扩展字段](/zh/x-api/fundamentals/expansions) 参数来指定这些字段。
+如果你希望在 id、name 和 username 之外再获取更多字段，就必须在请求中通过 [字段](/zh/x-api/fundamentals/fields) 和/或 [扩展字段](/zh/x-api/fundamentals/expansions) 参数来指定这些字段。
 
-在本练习中，我们将从不同对象中请求三组额外字段：
+在本练习中，我们将从不同对象请求三组额外字段：
 
 * 主 user 对象中的额外 user.created&#95;at 字段。
-* 使用 expansions 参数请求完整的 [Post object](/zh/x-api/fundamentals/data-dictionary#tweet)。
+* 使用扩展字段参数请求完整的 [Post object](/zh/x-api/fundamentals/data-dictionary#tweet)。
 * 关联 Post 对象中的额外 tweet.created&#95;at 字段。
 
-在 Postman 中，导航到 “Params” 选项卡，在 “Query Params” 表中添加以下键值对：
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，并在 &quot;Query Params&quot; 表中添加以下键值对：
 
 |     |     |     |
 | :--- | :--- | :--- |
@@ -52,13 +53,13 @@ https://x.com/i/lists/84839422
 | expansions | pinned&#95;tweet&#95;id | `includes.tweets.id,  <br/>includes.tweets.text  <br/>` |
 | tweet.fields | created&#95;at | `includes.tweets.created_at` |
 
-你现在应当会在 “Send” 按钮旁边看到类似如下的 URL：
+此时你应该会在 “Send” 按钮旁边看到一个类似的 URL：
 
 `https://api.x.com/2/lists/84839422/members?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
 
-**第四步：发送请求并查看响应**
+**步骤四：发送请求并查看响应**
 
-完成所有设置后，点击 “Send” 按钮，你将收到与下面示例响应类似的返回结果：
+当一切设置完成后，点击 &quot;Send&quot; 按钮，你将会收到与下面示例响应类似的结果：
 
 ```
 {

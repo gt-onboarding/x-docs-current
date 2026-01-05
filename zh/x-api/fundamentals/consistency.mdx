@@ -4,20 +4,20 @@ keywords: ["一致性", "API 一致性", "统一的 API", "一致的端点", "AP
 ---
 
 <div id="consistency-across-the-x-api-v2-endpoints">
-  ## X API v2 各个 endpoint 之间的一致性
+  ## X API v2 各端点之间的一致性
 </div>
 
-全新的 X API v2 的一个主要方面，是在各个 endpoint 之间保持一致性。这意味着在相似的 endpoint 间，返回的对象、功能以及 API 的行为都是统一的。
+新的 X API v2 的一大特点是各端点之间的一致性。这意味着在相似的端点中，返回的对象、功能以及 API 的行为都是统一的。
 
-你可以期望所有 endpoint 在以下元素上保持一致：
+你可以预期以下元素在所有端点中都是相同的：
 
 <div id="path-naming">
   ### 路径命名
 </div>
 
-路径命名始终包含端点的[版本](/zh/x-api/fundamentals/versioning)，后面跟着**资源**。除此之外，路径可以包含与前面资源相关的 **ID**，用于帮助确定要返回哪些数据的**选择动词**（例如 `search` 或 `sample`）、用于帮助确定数据将如何传递的**传输动词**（例如 `stream`），或者与主要资源存在**关系**的其他资源（例如 `/user/12/tweets`）。最后，如果端点包含任何查询参数，你可以在末尾追加**查询参数**。
+路径命名始终包含端点的[版本](/zh/x-api/fundamentals/versioning)，后面跟着**资源（resource）**。除此之外，路径可以包含与前面资源相关的 **ID**，用于帮助确定要返回哪些数据的**选择动词**（例如 `search` 或 `sample`），用于帮助确定数据将如何传输的**传递动词**（例如 `stream`），或者与主资源存在**关联关系**的其他资源（例如 `/user/12/tweets`）。最后，如果端点包含查询参数，你可以在末尾追加**查询参数**。
 
-下面是这些路径和查询项的组织方式示例：
+下面是一些路径和查询项如何组织的示例：
 
 `/version/resource/id?param1=value&param2=value /version/resource/delivery/selection?param1=value&param2=value`
 
@@ -29,21 +29,21 @@ keywords: ["一致性", "API 一致性", "统一的 API", "一致的端点", "AP
   ### JSON Schema
 </div>
 
-请求的响应是使用 [JSON Schema](http://json-schema.org/) 定义的。这意味着请求会始终以数组的形式返回一组对象，并且每个元素都有一个 id。请求不会返回以 id 作为键的映射（map）。
+请求的响应使用 [JSON Schema](http://json-schema.org/) 定义。这意味着响应始终以数组形式返回一组对象，并且每个元素都有一个 id。响应不会返回以 id 作为键的映射（map）。
 
 <div id="response-object-and-parameters">
   ### 响应对象和参数
 </div>
 
-默认返回的对象在此对象类型的每个端点中都是相同的：
+对于某个对象类型，其各个 endpoint 返回的默认对象是相同的：
 
-* `id` 始终为字符串。
-* 参数和响应字段始终使用美式英语拼写。
-* 如果没有值，字段将为空或不返回。
-* `entities` 对象只包含从帖子文本中提取的实体：包括 `urls`、`hashtags`、`mentions` 和 `cashtags`。
-* 所有与 cards 相关的信息（包括 `media_keys` 和 `poll_ids` 字段）都在 `attachments` 对象中返回。
+* `id` 对象始终是字符串。
+* 参数和响应字段统一使用美式英语拼写。
+* 如果没有值，字段将为空或不会返回。
+* `entities` 对象仅包含从帖子文本中提取的实体：包括 `urls`、`hashtags`、`mentions` 和 `cashtags`。
+* 所有与卡片相关的信息（包括 `media_keys` 和 `poll_ids` 字段）都在 `attachments` 对象中返回。
 
-下面是一个来自[单条帖子查询](/zh/x-api/posts/post-lookup-by-post-id) 端点的响应对象示例（将 [tweet.fields](/zh/x-api/fundamentals/data-dictionary#tweet) 参数设置为 `author_id`、`entities`）：
+下面是一个来自 [单条帖子查询](/zh/x-api/posts/post-lookup-by-post-id) endpoint 的响应对象示例（其中 [tweet.fields](/zh/x-api/fundamentals/data-dictionary#tweet) 参数被设置为 `author_id`、`entities`）：
 
 ```json
 {
@@ -93,11 +93,11 @@ keywords: ["一致性", "API 一致性", "统一的 API", "一致的端点", "AP
   ### 身份验证
 </div>
 
-所有 X API v2 端点都需要身份验证。许多端点接受 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#oauth-2-0) 方法，你需要在请求中向端点提供 Bearer Token 才能成功发起请求。
+所有 X API v2 端点都需要身份验证。其中许多端点支持 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#oauth-2-0) 方式，你需要在向端点发送请求时附带 Bearer Token，才能使请求成功。
 
-对于那些需要授权才能代表其他用户创建、操作或检索数据的端点，请使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)。这意味着你需要提供你的[开发者应用](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)的 [API 密钥和令牌](/zh/resources/fundamentals/authentication#api-key-and-secret)，以及一组用户 [访问令牌](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)，这些访问令牌由你为要代表其发起请求的用户生成。[三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) 可以帮助你获取访问令牌。请使用能够自动构建此授权请求头的[工具或库](/zh/x-api/tools-and-libraries/overview)。
+对于需要授权才能代表其他用户创建、修改或检索数据的端点，请使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)。这意味着，你需要提供你的[开发者应用](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)的 [API 密钥和令牌](/zh/resources/fundamentals/authentication#api-key-and-secret)，以及一组该用户的[访问令牌](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)，这些访问令牌是你为所代表的用户生成的。[三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) 可以帮助你获取访问令牌。请使用会自动构建此授权头的[工具或库](/zh/x-api/tools-and-libraries/overview)。
 
-有关身份验证的更多信息，请参阅我们的[身份验证](/zh/resources/fundamentals/authentication)文档。
+有关身份验证的更多信息，请参阅我们关于[身份验证](/zh/resources/fundamentals/authentication)的文档。
 
 ***
 
@@ -105,9 +105,9 @@ keywords: ["一致性", "API 一致性", "统一的 API", "一致的端点", "AP
   ### 字段
 </div>
 
-每个端点返回的对象都是简化过的。为了让开发者能够对从 API 返回的响应进行更多自定义，可以使用 [`fields`](/zh/x-api/fundamentals/fields) 参数来请求所需的字段。字段在各个端点之间保持一致。无论在哪个返回 Post 对象的端点中，Post 对象都会返回相同的字段。同一组字段也可以在相似的端点中进行查询。
+每个端点返回的对象都是精简的。为了让开发者能够对从 API 返回的响应进行更多自定义，可以使用 [`fields`](/zh/x-api/fundamentals/fields) 参数来请求所需的字段。字段在各个端点之间保持一致。Post 对象在所有返回 Post 对象的端点中都会返回相同的一组字段。同一组字段可以在类似的端点中进行查询。
 
-例如，相同的 Post 字段既可以在 [Posts lookup](/zh/x-api/posts/lookup/introduction) 中查询，也可以在 [Users lookup](/zh/x-api/users/lookup/introduction) 中用于展开的置顶 Post。
+例如，相同的 Post 字段既可以在 [Posts lookup](/zh/x-api/posts/lookup/introduction) 中查询，也可以在 [Users lookup](/zh/x-api/users/lookup/introduction) 中针对展开的置顶 Post 进行查询。
 
 ***
 
@@ -115,6 +115,6 @@ keywords: ["一致性", "API 一致性", "统一的 API", "一致的端点", "AP
   ### 扩展字段
 </div>
 
-在适用的情况下，[expansions](/zh/x-api/fundamentals/expansions) 可用于所有嵌套的 id 字段（例如所有名为 `*_id` 的字段，如 `author_id`）。对于所有包含 id 且该 id 不是当前对象顶级标识符的字段，也可以使用扩展字段。举例来说，在 [Posts 查询](/zh/x-api/posts/lookup/introduction) 中，Post 是当前对象，其字段 `id` 为顶级标识符。通过将这些以逗号分隔的值添加到 `expansions` 参数中，可以将 `author_id` 或 `referenced_tweets.id` 字段扩展为完整的用户或 Post 对象。
+在适用的情况下，[扩展字段](/zh/x-api/fundamentals/expansions) 可用于所有嵌套的 id 字段（例如所有命名为 `*_id` 的字段，如 `author_id`）。对于所有包含 id 且该 id 不是当前对象顶级标识符的字段，也都提供扩展字段。例如，在 [Posts 查找](/zh/x-api/posts/lookup/introduction) 中，Post 是当前对象，其字段 `id` 是顶级标识符。可以通过将这些以逗号分隔的值添加到 `expansions` 参数中，将 `author_id` 或 `referenced_tweets.id` 字段扩展为完整的用户或 Post 对象。
 
 如果你发现与这些字段相关的任何不一致之处，请[提交问题反馈](https://twitterdevfeedback.uservoice.com/)。

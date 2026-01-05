@@ -1,5 +1,5 @@
 ---
-keywords: ["Account Activity API", "AAA", "webhooks", "账号事件", "用户活动", "实时事件", "活动订阅", "webhook 事件"]
+keywords: ["Account Activity API", "AAA", "webhooks", "账户事件", "用户活动", "实时事件", "活动订阅", "webhook 事件"]
 ---
 
 <div id="v2-account-activity-api">
@@ -7,15 +7,15 @@ keywords: ["Account Activity API", "AAA", "webhooks", "账号事件", "用户活
 </div>
 
 <Note>
-  Account Activity API v2 现已在 [**Pro**](https://developer.x.com/en/portal/products) 产品中提供！
+  Account Activity API v2 现已在 [**Pro**](https://developer.x.com/en/portal/products) 产品中开放使用！
 </Note>
 
 <div id="overview">
-  ## 概览
+  ## 概述
 </div>
 
-Account Activity API (AAA) 提供了一种通过 webhook 实时接收与 X 用户账号相关事件的方式。通过将特定用户账号订阅到预先配置的 webhook 上，你的应用可以在单一连接中，从一个或多个你拥有或已订阅的账号接收各种活动通知，例如帖子、私信、点赞、关注、屏蔽等。\
-此 API 通常用于构建需要对用户操作立即做出响应，或基于用户活动保持最新状态的应用。对于你在 webhook 注册的每个用户订阅，你都会收到如下所列的所有相关活动：
+Account Activity API（AAA）通过 webhooks 提供了一种接收与 X 用户账号相关的实时事件的方式。通过将特定用户账号订阅到一个预先配置好的 webhook，你的应用可以通过单一连接，从一个或多个你拥有或已订阅的账号中，接收到诸如帖子、私信、点赞、关注、屏蔽等各种活动通知。\
+此 API 通常用于构建需要对用户操作即时响应，或基于用户活动维护最新状态的应用。对于你在 webhook 注册中订阅的每个用户账号，你都会在此 webhook 上收到其下列所有相关活动：
 
 <div id="activity-types">
   ## 活动类型
@@ -23,73 +23,73 @@ Account Activity API (AAA) 提供了一种通过 webhook 实时接收与 X 用�
 
 * **帖子**（由用户发布）
 * **帖子删除**（由用户执行）
-* **@ 提及**（提及该用户）
-* **回复**（发给用户或由用户发出）
+* **@提及**（提及该用户）
+* **回复**（发给用户或来自用户）
 * **转发**（由用户转发或转发用户的帖子）
 * **引用帖子**（由用户发布或引用用户的帖子）
-* **对引用帖子的转发**（由用户转发或转发用户的引用帖子）
+* **引用帖子的转发**（由用户转发或转发用户的引用帖子）
 * **点赞**（由用户点赞或点赞用户的帖子）
-* **关注**（由用户关注他人或他人关注用户）
-* **取消关注**（由用户发起或针对用户执行）
-* **屏蔽**（由用户发起或针对用户执行）
-* **取消屏蔽**（由用户发起或针对用户执行）
-* **静音**（由用户发起或针对用户执行）
-* **取消静音**（由用户发起或针对用户执行）
-* **已发送私信**（由用户发送）
-* **已接收私信**（由用户接收）
-* **正在输入指示器**（发送给用户）
-* **已读回执**（发送给用户）
+* **关注**（由用户关注或关注用户）
+* **取消关注**（由用户取消关注或他人取消关注该用户）
+* **拉黑**（由用户拉黑或拉黑人用户）
+* **取消拉黑**（由用户取消拉黑或他人取消拉黑该用户）
+* **静音**（由用户静音或静音用户）
+* **取消静音**（由用户取消静音或他人取消对该用户的静音）
+* **发送的私信**（由用户发送）
+* **收到的私信**（由用户接收）
+* **正在输入状态指示**（发给用户）
+* **已读回执**（发给用户）
 * **撤销订阅**（由用户执行）
 
-**注意**：我们不会通过 Account Activity API 传递首页时间线数据。请使用 User Posts timeline by User ID 端点来拉取这些数据。
+**注意**：我们不会通过 Account Activity API 提供主页时间线数据。请使用 User Posts timeline by User ID 端点来获取这些数据。
 
 <div id="feature-summary">
   ## 功能概览
 </div>
 
-| 套餐层级 | 价格 | 唯一订阅数 | Webhook 数量 |
+| 级别 | 价格 | 唯一订阅数 | Webhook 数量 |
 | :----- | :----- | :----- | :----- |
 | Pro | $5000/月 | 3 | 1 |
-| Enterprise | [联系销售团队](/zh/enterprise/forms/enterprise-api-interest) | 5000+ | 5+ |
+| Enterprise | [联系销售](/zh/enterprise/forms/enterprise-api-interest) | 5000+ | 5+ |
 
-本文档重点介绍如何使用 v2 Account Activity API 端点来管理与你的 webhooks 关联的用户订阅。
+本文档重点介绍如何使用 v2 Account Activity API 的端点来管理与你的 webhooks 关联的用户订阅。
 
 <div id="manage-subscriptions">
   ## 管理订阅
 </div>
 
-Account Activity API 会在与订阅你服务的 X 账号相关的事件发生时，通过 webhook 发送 JSON 消息。X 会将这些活动推送到你已注册的 webhook。通过以下步骤，你将了解如何为用户账号设置和管理订阅。
+Account Activity API 会在与订阅了你服务的 X 账号相关的事件发生时，通过 webhook 向你发送 JSON 格式的消息。X 会将这些活动推送到你注册的 webhook。通过以下步骤，你将了解如何为用户账号设置和管理订阅。
 
 <Warning>
-  Account Activity API v2 目前不支持 User Auth 2.0。我们正在修复这一问题，并会在支持 OAuth 2.0 时更新我们的文档。
+  Account Activity API v2 目前不支持 User Auth 2.0。我们正在解决这一问题，并会在支持 OAuth 2.0 时更新我们的文档。
 </Warning>
 
 <div id="1-create-an-x-app">
   ### 1. 创建 X 应用
 </div>
 
-使用已获批准的开发者账号，在 [开发者门户](https://developer.x.com/en/portal/products/enterprise) 中创建一个 X 应用。如果是代表公司创建应用，请使用公司的 X 账号。
+使用已获批准的开发者账号，通过[开发者门户](https://developer.x.com/en/portal/products/enterprise)创建一个 X 应用。若是代表公司创建，请使用公司的 X 账号。
 
-* 在应用页面的 **Permissions** 选项卡中启用 “Read, Write, and Access direct messages”。
-* 在 **Keys and Access Tokens** 选项卡中，记录下应用的 **Consumer Key (API Key)**、**Consumer Token (API Secret)** 和 **Bearer Token**。
-* 生成应用的 **Access Token** 和 **Access Token Secret**，用于订阅用户账号。
-* 如果不熟悉 X 登录和用户上下文，请查看 [Obtaining Access Tokens](https://developer.x.com/en/docs/authentication)。
-* 在开发者门户的 “Apps” 页面中记录下应用的数字 id。申请 Account Activity API 访问权限时需要提供该值。
+* 在应用页面的“权限”（Permissions）选项卡中启用“读取、写入和访问私信”。
+* 在 &quot;Keys and Access Tokens&quot; 选项卡中，记下你应用的 **Consumer Key (API Key)**、**Consumer Token (API Secret)** 和 **Bearer Token**。
+* 生成你应用的 **Access Token** 和 **Access Token Secret**。订阅用户账号时需要用到这些。
+* 如果你不熟悉 X 登录和用户上下文，请查看 [Obtaining Access Tokens](https://developer.x.com/en/docs/authentication)。
+* 从开发者门户中的 &quot;Apps&quot; 页面记下你应用的数值型 id。在申请 Account Activity API 访问权限时需要提供该 id。
 
 <div id="2-get-account-activity-api-access">
   ### 2. 获取 Account Activity API 访问权限
 </div>
 
-Account Activity API 仅在 Enterprise 级别提供。请通过 [开发者门户](https://developer.x.com/en/portal/products/enterprise) 提交 Enterprise 访问权限申请。
+Account Activity API 仅在 Enterprise 级别中提供。请通过 [开发者门户](https://developer.x.com/en/portal/products/enterprise) 提交申请以获取 Enterprise 访问权限。
 
 <div id="3-register-a-webhook">
   ### 3. 注册 Webhook
 </div>
 
-要接收 Account Activity 事件，必须注册一个具有公开可访问 HTTPS URL 的 webhook。有关开发 webhook 消费端应用、注册 webhook、对其进行安全配置以及处理 Challenge-Response Checks（CRC）的详细信息，请参阅 V2 Webhooks API 文档。
+要接收 Account Activity 事件，你必须注册一个具有公开可访问 HTTPS URL 的 webhook。有关开发 webhook 消费者应用程序、注册 webhook、对其进行安全配置以及处理 Challenge-Response Checks (CRC) 的详细信息，请参阅 V2 Webhooks API 文档。
 
-* 确保你的 webhook 已配置为处理带有 JSON 编码事件负载的 POST 请求。
-* 从 webhook 注册响应中获取 **webhook&#95;id**，因为在管理订阅时需要用到该值。
+* 确保你的 webhook 被配置为处理带有 JSON 编码的事件负载的 POST 请求。
+* 从 webhook 注册响应中获取 **webhook&#95;id**，因为管理订阅时需要使用它。
 
 <div id="4-validate-setup">
   ### 4. 验证设置
@@ -97,45 +97,45 @@ Account Activity API 仅在 Enterprise 级别提供。请通过 [开发者门户
 
 要验证你的应用和 webhook 是否配置正确：
 
-* 为某个用户账号添加对你的 webhook 的订阅（参见下文“添加订阅”）。
-* 使用你的应用已订阅的某个 X 账号，给其发布的一条帖子点点赞。
-* 你应该通过发送到你的 webhook URL 的 POST 请求收到一个 favorite&#95;events 负载。
-* **注意**：在添加订阅之后，事件开始投递可能需要最长 10 秒钟。
+* 为你的 webhook 订阅一个用户账户（参见下文 “Adding a Subscription”）。
+* 让该用户为你的应用已订阅的某个 X 账号发布的一条帖子点收藏（favorite）。
+* 你应该会通过发送到你的 webhook URL 的 POST 请求收到一个 `favorite_events` 负载。
+* **注意**：在添加订阅后，事件开始被投递可能需要长达 10 秒钟。
 
 <div id="important-notes">
   ### 重要说明
 </div>
 
-* **身份验证**：在为用户订阅时，使用该用户帐户的 consumer key、consumer secret、access token 和 access token secret。
-* **私信（Direct Messages）**：所有收发的私信（通过 POST /2/dm&#95;conversations/with/:participant&#95;id/messages 发送）都会通过 webhook 发送到你的应用，以便让你的应用了解所有 DM 活动。
+* **认证**：在为用户订阅时，使用该用户帐户的 consumer key、consumer secret、access token 和 access token secret。
+* **私信（Direct Messages）**：所有收发的私信（通过 POST /2/dm&#95;conversations/with/:participant&#95;id/messages 发送）都会通过 webhook 投递，以便让你的应用了解所有私信相关活动。
 * **事件重复**：
-  * 如果两个已订阅的用户在同一个 DM 会话中，你的 webhook 会收到重复事件（每个用户各一条）。使用 for&#95;user&#95;id 字段来区分它们。
+  * 如果两个已订阅用户在同一个私信会话中，你的 webhook 会接收到重复事件（每个用户一条）。请使用 for&#95;user&#95;id 字段进行区分。
   * 如果多个应用共享同一个 webhook URL 和用户，事件会被多次发送（每个应用一次）。
-  * 你的应用应使用事件 ID 进行去重，以处理偶发的重复事件。
-* **示例代码**：请参阅 [Account Activity API Setup](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master)，了解一个用于显示 webhook 事件的 Web 应用示例。
+  * 你的应用应使用事件 ID 对事件进行去重，以处理偶发的重复事件。
+* **示例代码**：有关展示 webhook 事件的 Web 应用程序示例，请参见 [Account Activity API Setup](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master)。
 
 <div id="managing-subscribed-users-v2-api">
   ## 管理已订阅用户（v2 API）
 </div>
 
-在注册了具有有效 webhook&#95;id 的 webhook 之后，即可管理用户订阅，以接收其账号活动。使用以下端点来添加、查看或移除订阅。
+在你拥有一个已注册且具有有效 webhook&#95;id 的 webhook 之后，你可以管理用户的订阅，以接收他们的账户活动。使用以下端点来添加、查看或移除订阅。
 
 <div id="adding-a-subscription">
   ### [添加订阅](https://docs.x.com/x-api/account-activity/subscribes-the-provided-application-to-all-events-for-the-provided-user-context-for-all-message-types)
 </div>
 
 **Endpoint**: POST /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all
-**Description**: 将当前通过身份验证的用户订阅到指定的 webhook，以接收事件。
-**Authentication**: OAuthUser（需要三方 OAuth 流程，代表被订阅的用户）。
+**Description**: 将正在进行身份验证的用户订阅到指定的 webhook，以便接收事件。
+**Authentication**: OAuthUser（需要三方 OAuth 流程，代表要订阅的用户）。
 
 * **Consumer Key**: 例如，xvz1evFS...
 * **Access Token**: 例如，370773112-GmHxMAgYyLbN...
 
 **Path Parameters**:
 
-| Parameter      | Description           |
-| :------------- | :-------------------- |
-| webhook&#95;id | 要与订阅关联的 webhook 的 ID。 |
+| Parameter      | Description            |
+| :------------- | :--------------------- |
+| webhook&#95;id | 要将订阅关联到的 webhook 的 ID。 |
 
 **Request**:
 bash
@@ -147,7 +147,7 @@ curl --request POST --url 'https://api.twitter.com/2/account_activity/webhooks/:
 
 **响应**：
 
-* **成功 (200 OK)**：
+* **成功（200 OK）**：
 * JSON
 
 ```
@@ -160,11 +160,11 @@ curl --request POST --url 'https://api.twitter.com/2/account_activity/webhooks/:
 
 * **失败（400 Bad Request）**：
 
-| 原因                          | 描述                                |
-| :-------------------------- | :-------------------------------- |
-| WebhookIdInvalid            | 所提供的 webhook&#95;id 未找到，或未与该应用关联。 |
-| DuplicateSubscriptionFailed | 针对指定的 webhook&#95;id，该用户的订阅已存在。   |
-| SubscriptionLimitExceeded   | 该应用在所有 webhook 上的订阅数量已达到上限。       |
+| 原因                          | 说明                               |
+| :-------------------------- | :------------------------------- |
+| WebhookIdInvalid            | 提供的 webhook&#95;id 未找到，或未与该应用关联。 |
+| DuplicateSubscriptionFailed | 针对该用户和指定 webhook&#95;id 的订阅已存在。  |
+| SubscriptionLimitExceeded   | 该应用在所有 webhook 上的订阅数量已达到上限。      |
 
 ###
 
@@ -173,13 +173,13 @@ curl --request POST --url 'https://api.twitter.com/2/account_activity/webhooks/:
 </div>
 
 **Endpoint**: GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all
-**Description**: 检查发起请求的已认证用户是否已订阅指定的 webhook。
+**Description**: 检查当前进行身份验证的用户是否已订阅指定的 webhook。
 **Authentication**: OAuthUser（需要三方 OAuth 流程）。
 **Path Parameters**:
 
-| Parameter      | Description        |
+| 参数             | 说明                 |
 | :------------- | :----------------- |
-| webhook&#95;id | 要检查的 webhook 的 ID。 |
+| webhook&#95;id | 要检查的 webhook 的 id。 |
 
 **Request**:
 bash
@@ -202,11 +202,11 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
 }
 ```
 
-* **失败（400 Bad Request）**：
+* **失败（400 Bad Request）**:
 
-| 原因               | 说明                              |
-| :--------------- | :------------------------------ |
-| WebhookIdInvalid | 提供的 webhook&#95;id 未找到或未与该应用关联。 |
+| 原因               | 说明                               |
+| :--------------- | :------------------------------- |
+| WebhookIdInvalid | 所提供的 webhook&#95;id 未找到或未与该应用关联。 |
 
 ###
 
@@ -214,15 +214,15 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
   ### [Removing Subscriptions](https://docs.x.com/x-api/account-activity/deactivates-a-subscription-for-the-specified-webhook-and-user-id)
 </div>
 
-**端点**: DELETE /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all
-**描述**: 停用特定用户 ID 的订阅，停止向该 webhook 发送事件。
-**认证方式**: OAuth2 App Only Bearer Token。
+**接口**：DELETE /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all
+**描述**：停用特定用户 ID 的订阅，停止向该 webhook 投递事件。
+**认证方式**：OAuth2 应用仅限（App only）Bearer Token。
 
-* **Bearer Token**: 例如：AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...
+* **Bearer Token**：例如，AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...
 
-**路径参数**:
+**路径参数**：
 
-| 参数             | 描述                   |
+| 参数             | 说明                   |
 | :------------- | :------------------- |
 | webhook&#95;id | 包含该订阅的 webhook 的 ID。 |
 | user&#95;id    | 要取消订阅的用户的数值 ID。      |
@@ -237,7 +237,7 @@ curl --request DELETE --url 'https://api.twitter.com/2/account_activity/webhooks
 
 **响应**：
 
-* **成功（200 OK）**：
+* **成功 (200 OK)**：
 * JSON
 
 ```
@@ -248,25 +248,25 @@ curl --request DELETE --url 'https://api.twitter.com/2/account_activity/webhooks
 }
 ```
 
-* **失败（400 Bad Request）**:
+* **失败（400 错误请求）**：
 
-| 原因                   | 描述                                            |
-| :------------------- | :-------------------------------------------- |
-| SubscriptionNotFound | 在指定的 webhook&#95;id 上不存在针对指定 user&#95;id 的订阅。 |
-| WebhookIdInvalid     | 提供的 webhook&#95;id 不存在，或未与该应用关联。              |
+| 原因                   | 描述                                               |
+| :------------------- | :----------------------------------------------- |
+| SubscriptionNotFound | 在给定的 webhook&#95;id 上不存在针对指定 user&#95;id 的订阅。    |
+| WebhookIdInvalid     | 未找到提供的 webhook&#95;id，或该 webhook&#95;id 未与该应用关联。 |
 
 <div id="viewing-all-subscriptions">
   ### [查看所有订阅](https://docs.x.com/x-api/account-activity/get-a-list-of-the-current-all-activity-type-subscriptions-for-the-specified-webhook)
 </div>
 
 **端点**: GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list
-**描述**: 获取当前已订阅指定 webhook 的所有用户 ID 列表。
-**认证方式**: OAuth2 应用级 Bearer Token。
+**描述**: 获取当前订阅指定 webhook 的所有用户 ID 列表。
+**认证方式**: OAuth2 应用级（App-only）Bearer Token。
 **路径参数**:
 
-| 参数             | 描述                    |
-| :------------- | :-------------------- |
-| webhook&#95;id | 要列出其订阅的 webhook 的 ID。 |
+| 参数             | 描述                     |
+| :------------- | :--------------------- |
+| webhook&#95;id | 用于列出其订阅的 webhook 的 ID。 |
 
 **请求**:
 bash
@@ -276,10 +276,10 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
 --header 'authorization: Bearer <BEARER_TOKEN>'
 ```
 
-**响应**：
+**响应**:
 
-* **成功 (200 OK)**：
-* JSON
+* **成功 (200 OK)**:
+* json
 
 ```
 {
@@ -297,18 +297,18 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/webhooks/:W
 
 * **失败（400 Bad Request）**:
 
-| 原因               | 说明                               |
-| :--------------- | :------------------------------- |
-| WebhookIdInvalid | 未找到提供的 webhook&#95;id，或其未与该应用关联。 |
+| 原因               | 说明                                |
+| :--------------- | :-------------------------------- |
+| WebhookIdInvalid | 提供的 webhook&#95;id 无法找到，或未与该应用关联。 |
 
 ###
 
 <div id="subscriptions-count">
-  ### [订阅计数](https://docs.x.com/x-api/account-activity/get-a-count-of-subscriptions-that-are-currently-active-on-your-account)
+  ### [Subscriptions Count](https://docs.x.com/x-api/account-activity/get-a-count-of-subscriptions-that-are-currently-active-on-your-account)
 </div>
 
 **Endpoint**: GET /2/account&#95;activity/subscriptions/count
-**Description**: 返回活动订阅的总数以及为进行认证的应用预配的上限。
+**Description**: 返回当前活动订阅的总数，以及为当前认证应用预配置的上限。
 **Authentication**: OAuth2 应用专用 Bearer Token。
 **Request**:
 bash
@@ -320,8 +320,8 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/subscriptio
 
 **响应**：
 
-* **成功 (200 OK)**：
-* JSON
+* **成功（200 OK）**：
+* json
 
 ```
 {
@@ -338,11 +338,11 @@ curl --request GET --url 'https://api.twitter.com/2/account_activity/subscriptio
   ## [重放](https://docs.x.com/x-api/account-activity/request-activity-replay)
 </div>
 
-AAAv2 提供重放功能，允许你在指定的时间范围内检索过去的事件，并将其重新发送到你的 webhook。此功能可用于在停机导致遗漏事件时进行恢复。
+AAAv2 提供重放功能，你可以在指定的时间范围内检索历史事件，并将其重新投递到你的 webhook。这对于在停机期间恢复遗漏的事件非常有用。
 
 **Endpoint**: POST /2/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all
 
-**Description**: 启动一个重放作业
+**Description**: 启动一个重放任务
 
 **Authentication**: OAuth2 App Only Bearer Token
 
@@ -354,10 +354,10 @@ AAAv2 提供重放功能，允许你在指定的时间范围内检索过去的�
 
 **Query Parameters**:
 
-| Parameter     | Description                                                                                                                                                                 |
-| :------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| from&#95;date | 提供事件的最早（起始）UTC 时间戳，必须采用 ‘yyyymmddhhmm’ 格式。时间戳精确到分钟且为包含边界（例如 12:00 包含第 00 分钟）。有效时间必须在最近 24 小时内、使用 UTC 时间，且必须早于当前时间点至少 31 分钟。建议 from&#95;date 和 to&#95;date 之间的间隔控制在约 2 小时以内。 |
-| to&#95;date   | 提供事件的最新（结束）UTC 时间戳，必须采用 ‘yyyymmddhhmm’ 格式。时间戳精确到分钟且为不包含边界（例如 12:30 不包含该小时的第 30 分钟）。有效时间必须在最近 24 小时内、使用 UTC 时间，且必须早于当前时间点至少 10 分钟。                                           |
+| Parameter     | Description                                                                                                                                                            |
+| :------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| from&#95;date | 要提供事件的最早（起始）UTC 时间戳，必须为 “yyyymmddhhmm” 格式。时间戳粒度为分钟，且为包含端点（例如，12:00 包含第 0 分钟）。有效时间必须在过去 24 小时内（UTC），且必须早于当前时间点至少 31 分钟。建议 from&#95;date 和 to&#95;date 之间的间隔控制在约 2 小时以内。 |
+| to&#95;date   | 要提供事件的最晚（结束）UTC 时间戳，必须为 “yyyymmddhhmm” 格式。时间戳粒度为分钟，且为不包含端点（例如，12:30 不包含该小时的第 30 分钟）。有效时间必须在过去 24 小时内（UTC），且必须早于当前时间点至少 10 分钟。                                          |
 
 **Responses**:
 
@@ -379,20 +379,20 @@ Failures:
 
 | Reason              | Description                         |
 | :------------------ | :---------------------------------- |
-| QueryParamInvalid   | from&#95;date 早于当前时间 24 小时以前。       |
+| QueryParamInvalid   | from&#95;date 早于当前时间 24 小时以上。       |
 | QueryParamInvalid   | from&#95;date 晚于 to&#95;date。       |
 | QueryParamInvalid   | from&#95;date 是未来时间。                |
 | QueryParamInvalid   | to&#95;date 是未来时间。                  |
 | QueryParamInvalid   | from&#95;date 或 to&#95;date 的格式不正确。 |
-| CrcValidationFailed | 在 CRC 验证期间，从 webhook URL 接收到的响应不正确。 |
-| ReplayConflictError | 指定的 webhook 已有重放任务在进行中。             |
-| WebhookIdInvalid    | 提供的 webhook&#95;id 无效，或未与该应用关联。     |
+| CrcValidationFailed | 在 CRC 验证期间从 webhook URL 收到的响应不正确。   |
+| ReplayConflictError | 指定的 webhook 已有重放作业在进行中。             |
+| WebhookIdInvalid    | 提供的 webhook&#95;id 无效或未与该应用关联。      |
 
 <div id="job-completed-messages">
   ### 任务完成消息
 </div>
 
-当你的重播任务成功完成后，X 会发送如下所示的任务完成事件。一旦你收到该事件，即表示该任务已运行结束，你可以提交下一个任务。
+当你的重放任务成功完成后，X 会发送以下任务完成事件。一旦你收到该事件，说明任务已运行结束，可以提交下一个任务。
 
 ```
 {
@@ -405,7 +405,7 @@ Failures:
 }
 ```
 
-如果你的作业未能成功完成，我们会返回如下消息，提示你重试该 Replay 作业。当你收到此事件时，说明该作业已运行结束，此时可以提交新的作业。
+如果你的作业未能成功完成，我们会返回以下消息，提示你重试该 Replay 作业。收到此事件后，表示该作业已运行结束，你可以提交另一个作业。
 
 ```
 {
@@ -422,42 +422,42 @@ Failures:
   ## 账户活动数据对象结构
 </div>
 
-| Object | 详情 |
+| 对象 | 详情 |
 | :----- | :----- |
 | for&#95;user&#95;id | 标识与该事件相关的用户订阅。 |
-| is&#95;blocked&#95;by | （条件字段）仅在帖子提及事件中、且发出提及的用户被订阅用户屏蔽时才会返回。 |
-| source | 执行该活动的用户（例如进行关注、屏蔽或静音操作的用户）。 |
-| target | 活动所针对的用户（例如被关注、被屏蔽或被静音的用户）。 |
+| is&#95;blocked&#95;by | （条件字段）仅在帖子提及事件中显示，当提及方用户被订阅用户屏蔽时。 |
+| source | 执行该活动的用户（例如发起关注、屏蔽或静音操作的用户）。 |
+| target | 活动所作用到的用户（例如被关注、被屏蔽或被静音的用户）。 |
 
 <div id="available-activities">
   ### 可用活动
 </div>
 
-| 消息类型 | 详情 |
+| 消息类型 | 详细信息 |
 | :----- | :----- |
-| tweet&#95;create&#95;events | 帖子状态事件，包括帖子、转帖、回复、@ 提及、引用帖子或对引用帖子的转帖。 |
-| favorite&#95;events | 包含用户和目标对象的点赞事件。 |
-| follow&#95;events | 包含用户和目标对象的关注事件。 |
-| unfollow&#95;events | 包含用户和目标对象的取消关注事件。 |
-| block&#95;events | 包含用户和目标对象的屏蔽事件。 |
-| unblock&#95;events | 包含用户和目标对象的取消屏蔽事件。 |
-| mute&#95;events | 包含用户和目标对象的静音事件。 |
-| unmute&#95;events | 包含用户和目标对象的取消静音事件。 |
-| user&#95;event | 当用户移除应用授权时触发的撤销事件（订阅会自动删除）。 |
-| direct&#95;message&#95;events | 已发送或已接收消息的私信（DM）状态事件。 |
-| direct&#95;message&#95;indicate&#95;typing&#95;events | 包含用户和目标对象的 DM 正在输入事件。 |
-| direct&#95;message&#95;mark&#95;read&#95;events | 包含用户和目标对象的 DM 已读事件。 |
-| tweet&#95;delete&#95;events | 用于合规性的帖子删除通知。 |
-| spaces&#95;events | 当前不支持。即将推出。 |
+| tweet&#95;create&#95;events | 帖子、转发、回复、@提及、引用帖子或对引用帖子的转发等的发布事件。 |
+| favorite&#95;events | 包含用户和目标的点赞事件。 |
+| follow&#95;events | 包含用户和目标的关注事件。 |
+| unfollow&#95;events | 包含用户和目标的取消关注事件。 |
+| block&#95;events | 包含用户和目标的屏蔽事件。 |
+| unblock&#95;events | 包含用户和目标的取消屏蔽事件。 |
+| mute&#95;events | 包含用户和目标的静音事件。 |
+| unmute&#95;events | 包含用户和目标的取消静音事件。 |
+| user&#95;event | 当用户移除应用授权时触发的授权撤销事件（订阅会自动删除）。 |
+| direct&#95;message&#95;events | 已发送或已接收消息的 DM 事件。 |
+| direct&#95;message&#95;indicate&#95;typing&#95;events | 包含用户和目标的 DM 正在输入事件。 |
+| direct&#95;message&#95;mark&#95;read&#95;events | 包含用户和目标的 DM 已读事件。 |
+| tweet&#95;delete&#95;events | 为合规性提供的帖子删除通知。 |
+| spaces&#95;events | 当前尚不支持。即将推出。 |
 
 <div id="payload-examples">
   ## 负载示例
 </div>
 
-下面是每种 Account Activity 事件的示例负载。
+以下是每种 Account Activity 事件的负载示例。
 
 <div id="tweet_create_events-posts-retweets-replies-quotetweets">
-  ### tweet&#95;create&#95;events (帖子、转帖、回复、引用帖子)
+  ### tweet&#95;create&#95;events（帖子、转推、回复、引用帖子）
 </div>
 
 ```json
@@ -474,7 +474,7 @@ Failures:
 ###
 
 <div id="tweet_create_events-mentions">
-  ### tweet&#95;create&#95;events (@提及)
+  ### tweet&#95;create&#95;events（@提及）
 </div>
 
 ```json
@@ -635,7 +635,7 @@ Failures:
 ```
 
 <div id="user_event">
-  ### user&#95;event 用户事件
+  ### user&#95;event
 </div>
 
 ```json
@@ -837,16 +837,16 @@ Failures:
 ```
 
 <div id="support-for-longform-posts">
-  ## 对长文帖子（Longform Posts）的支持
+  ## 对长格式帖子的支持
 </div>
 
-V2 Account Activity API 现在支持**长文**帖子，即超过 280 个字符的帖子。当 tweet&#95;create&#95;events 负载中包含长文帖子时，`text` 字段包含前 140 个字符（或更少），并且 `truncated` 字段被设置为 true。完整的帖子内容会在 `extended_tweet` 对象中提供，其中包括：
+V2 Account Activity API 现已支持 **长格式**帖子，即长度超过 280 个字符的帖子。当长格式帖子包含在 tweet&#95;create&#95;events 负载中时，`text` 字段仅包含前 140 个字符（或更少），并且 `truncated` 字段会被设置为 true。帖子的完整内容会在 `extended_tweet` 对象中提供，其中包括：
 
-* full&#95;text: 帖子的完整文本，包括超过 280 字符限制的所有字符。
-* entities: 出现在完整文本中的所有实体（例如话题标签、URL、用户提及、符号），包括那些位于第 280 个字符之后的实体。
-* display&#95;text&#95;range: 用于显示的字符范围，基于完整文本进行计算。
+* full&#95;text: 帖子的完整文本，包括所有超出 280 字符限制的内容。
+* entities: 出现在完整文本中的任意实体（例如 hashtags、URL、用户提及、符号），包括出现在第 280 个字符之后的实体。
+* display&#95;text&#95;range: 用于显示的字符范围，基于完整文本计算。
 
-这可以确保应用能够处理长文帖子的全部内容，包括文本后面才出现的提及或其他实体。下面是一个长文帖子的 tweet&#95;create&#95;events 负载示例：
+这样可以确保应用能够处理长格式帖子的全部内容，包括出现在文本后部的提及或其他实体。下面是一个长格式帖子的 tweet&#95;create&#95;events 负载示例：
 
 ```json
 {
@@ -924,10 +924,10 @@ V2 Account Activity API 现在支持**长文**帖子，即超过 280 个字符�
 ```
 
 <div id="account-activity-api-migrating-from-legacy-enterprise-to-v2">
-  ## 将 Account Activity API 从旧版 Enterprise 迁移到 v2
+  ## 从旧版 Enterprise Account Activity API 迁移到 v2
 </div>
 
-请参阅我们的[迁移指南](https://docs.x.com/x-api/account-activity/migrate/overview)！
+请参阅[迁移指南](https://docs.x.com/x-api/account-activity/migrate/overview)！
 
 <div id="frequently-asked-questions">
   ## 常见问题解答
@@ -935,35 +935,35 @@ V2 Account Activity API 现在支持**长文**帖子，即超过 280 个字符�
 
 **使用 Account Activity API 有哪些优势？**
 
-Account Activity API 使用 webhooks，在不需要保持打开连接（不同于流式 API）或频繁轮询（不同于 REST API）的情况下实时传递数据。其优势包括：
+Account Activity API 使用 webhooks，无需保持开放连接（不同于流式 API）或频繁轮询（不同于 REST API），即可实时传递数据。其优势包括：
 
 * **速度**：以 X 的速度传递数据。
-* **简洁**：通过单一 webhook 连接提供所有账号事件，包括帖子、@提及、回复、转发、引用帖子、点赞、私信、关注、拉黑和静音。
-* **可扩展性**：在无速率限制或事件上限（Enterprise 级别）的情况下支持受管账号的所有活动。
+* **简单性**：通过单个 webhook 连接提供所有账户事件，包括帖子、@ 提及、回复、转帖、引用帖子、点赞、DM、关注、拉黑和静音。
+* **可扩展性**：在 Enterprise 级别下，为托管账户支持所有活动，没有速率限制或事件上限。
 
-**我需要为 Account Activity API 配置开发、预发布和生产环境，这可能吗？**
+**我需要为 Account Activity API 准备开发、预发布和生产环境，这可以实现吗？**
 
-可以\！你可以注册多个 webhook URL，并通过 [V2 Webhooks API](https://docs.x.com/x-api/webhooks/introduction) 分别管理订阅。
+可以！您可以注册多个 webhook URL，并通过 [V2 Webhooks API](https://docs.x.com/x-api/webhooks/introduction) 分别管理订阅。
 
-**你们是否有关于如何开始使用 Account Activity API 的分步指南？**
+**是否有关于如何设置 Account Activity API 的分步指南？**
 
-有\！请参阅 [Getting Started with Webhooks 入门指南](https://docs.x.com/x-api/webhooks/introduction) 和 [Account Activity API 示例应用](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py)。
+有！请参阅 [Webhooks 入门指南](https://docs.x.com/x-api/webhooks/introduction) 和 [Account Activity API 示例应用](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py)。
 
-**使用 Account Activity API 时，我必须使用哪种身份验证方式？**
+**使用 Account Activity API 时必须使用哪种身份验证方式？**
 
-身份验证要求是按端点指定的。详情请查看[身份验证部分](https://developer.x.com/en/docs/authentication)。
+身份验证要求是按端点指定的。详细信息请查看 [身份验证部分](https://developer.x.com/en/docs/authentication)。
 
-**如果我订阅了彼此互相互动的用户，会收到重复的活动吗？**
+**如果我为彼此交互的用户创建了订阅，会不会收到重复的活动？**
 
-会。如果你的应用对用户 A 和用户 B 都进行了订阅，当用户 A 在一条帖子中提及用户 B 时，你的 webhook 会收到两个事件（每个用户一个事件）。使用 `for_user_id` 字段来识别对应的订阅。
+会。如果您的应用为用户 A 和用户 B 创建了订阅，并且用户 A 在帖子中提及了用户 B，您的 webhook 会接收两个事件（每个用户一个）。请使用 `for_user_id` 字段来识别对应的订阅。
 
-**当我对我的 webhook 进行订阅时，能否将端点中** /all/ **这一部分替换为其他 account activity 数据对象，以限制传送的活动类型？**
+**当我为我的 webhook 创建订阅时，能否将端点中的** /all/ **部分替换为其他账户活动数据对象，以限制传递的活动类型？**
 
-不能。/all/ 产品是唯一的选项，它会传送所有受支持的事件类型。
+不能。/all/ 产品是唯一选项，会传递所有受支持的事件类型。
 
-**如果我有三个 webhook 的访问权限，是否可以为已注册为 Enterprise 使用的每个应用各使用三个 webhook？**
+**如果我有三个 webhook 配额，能否为每个已注册的 Enterprise 应用分别使用三个 webhook？**
 
-webhook 限制是按账号级别设定的，而不是按应用设定。例如，如果你有三个 webhook 和两个应用，你可以为一个应用使用两个 webhook，为另一个应用使用一个 webhook，但不能为每个应用都使用三个 webhook。
+webhook 数量限制是按账户设置的，而不是按应用设置的。比如，在有三个 webhook 和两个应用的情况下，您可以为一个应用使用两个 webhook、为另一个应用使用一个，但不能为每个应用都使用三个。
 
 <div id="account-activity-api-reference-index">
   ## Account Activity API 参考索引
@@ -971,11 +971,11 @@ webhook 限制是按账号级别设定的，而不是按应用设定。例如，
 
 | 目的 | V2 端点 |
 | :----- | :----- |
-| 将应用订阅到某个账号的事件通知 | POST /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
-| 返回当前有效订阅的数量 | GET /2/account&#95;activity/subscriptions/count |
-| 检查某个 webhook 是否已订阅某个账号 | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
-| 返回当前有效订阅的列表 | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list |
-| 使用仅限应用的 OAuth 停用订阅 | DELETE /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all |
+| 将应用订阅到某个账户的事件 | POST /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
+| 返回当前活动订阅的数量 | GET /2/account&#95;activity/subscriptions/count |
+| 检查某个 webhook 是否已订阅某个账户 | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all |
+| 返回当前活动订阅列表 | GET /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list |
+| 使用仅应用 OAuth 停用订阅 | DELETE /2/account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all |
 | 创建回放作业 | POST /2/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all |
 
-关于 webhook 管理相关的端点（注册、查看、验证、删除），请参阅 [V2 Webhooks API 文档](https://docs.x.com/x-api/webhooks/introduction)
+有关 webhook 管理端点（注册、查看、验证、删除），请参阅 [V2 Webhooks API 文档](https://docs.x.com/x-api/webhooks/introduction)

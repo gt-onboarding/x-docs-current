@@ -1,36 +1,36 @@
 ---
 title: 連携ガイド
 sidebarTitle: 連携ガイド
-keywords: ["ポストルックアップ連携", "ルックアップ連携ガイド", "ルックアップ実装", "ルックアップ設定", "ポストルックアップ統合"]
+keywords: ["ポストルックアップの連携", "ルックアップ連携ガイド", "ルックアップの実装", "ルックアップのセットアップ", "ポストルックアップ連携"]
 ---
 
 import { Button } from "/snippets/ja/button.mdx"
 
-このページでは、Posts ルックアップエンドポイントをシステムに統合する際に役立つ、いくつかのツールと重要な概念について説明します。内容はいくつかのセクションに分けて構成しています。
+このページでは、ポストのルックアップエンドポイントをシステムに統合する際に役立つ各種ツールと重要な概念について説明します。このページの内容は、次のセクションに分かれています。
 
 * [便利なツール](#helpful)
 * 重要な概念
   * [認証](#authentication)
-  * [developer portal、プロジェクト、アプリ](#portal)
+  * [Developer portal、プロジェクト、アプリ](#portal)
   * [レート制限](#limits)
-  * [フィールドと expansions](#fields)
+  * [フィールドとexpansions](#fields)
   * [ポストの編集](#edits)
-  * [エッジケース](#edge)
+  * [例外的なケース](#edge)
 
 <div id="helpful-tools">
   ## 便利なツール
 </div>
 
-主要な概念に入る前に、まずは次のツールに慣れておくことをおすすめします。
+いくつかの重要な概念を説明する前に、次のツールに慣れておくことをおすすめします。
 
 **Postman**\
-Postman は、利用可能な機能を把握するために、あらゆるパスやボディパラメータを指定してエンドポイントをテストできる優れたツールです。詳しくは、[Postman 入門ガイド](/ja/tutorials/postman-getting-started)をご覧ください。
+Postman は、パスやボディパラメータを含めてエンドポイントをテストできる便利なツールで、どのような機能が利用できるかを把握するのに役立ちます。詳しくは、[Postman 入門ガイド](/ja/tutorials/postman-getting-started)をご覧ください。
 
 **コードサンプル**\
-お好みのプログラミング言語向けのコードサンプルは、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で見つけることができます。
+お好みのプログラミング言語向けのコードサンプルは、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)で確認できます。
 
-**サードパーティライブラリ**\
-v2 エンドポイントと互換性のあるコミュニティ製の [サードパーティライブラリ](/ja/resources/tools-and-libraries)を活用してください。
+**サードパーティ製ライブラリ**\
+コミュニティによって開発された、v2 エンドポイントと互換性のある[サードパーティ製ライブラリ](/ja/resources/tools-and-libraries)を活用してください。
 
 <div id="key-concepts">
   ## 基本概念
@@ -40,20 +40,20 @@ v2 エンドポイントと互換性のあるコミュニティ製の [サード
   ### 認証
 </div>
 
-すべての X API v2 エンドポイントでは、認証されたリクエストが必要です。次のいずれかの方法で認証できます。
+すべての X API v2 エンドポイントでは、認証済みリクエストが必須です。次のいずれかの方法で認証できます。
 
-* API Key、Access Token、その他のパラメータを使用して[認可ヘッダーを作成](/ja/resources/fundamentals/authentication#authorizing-a-request)する [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)。
-* リクエストに [App Access Token](/ja/resources/fundamentals/authentication) を含める [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#oauth-2-0)。
-* アプリのスコープや複数デバイス間での認可をより細かく制御できる [OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication)。
+* API Key、アクセストークン、および追加パラメータを使用して[認可ヘッダーを作成](/ja/resources/fundamentals/authentication#authorizing-a-request)する [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)
+* リクエストに [App Access Token](/ja/resources/fundamentals/authentication) を渡す [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#oauth-2-0)
+* アプリのスコープと複数デバイスでの認可をより細かく制御できる [OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication)
 
 <Note>
-  OAuth 1.0a の実装は難しい場合があります。馴染みがない場合は、[ライブラリ](/ja/resources/tools-and-libraries) または OAuth 2.0 を利用することを検討してください。非公開メトリクスやポストにアクセスする場合は、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE を使用してください。
+  OAuth 1.0a の実装は難しい場合があります。あまり馴染みがない場合は、[ライブラリ](/ja/resources/tools-and-libraries) を利用するか、リクエストには OAuth 2.0 を利用することを検討してください。非公開メトリクスやポストにアクセスする必要がある場合は、OAuth 1.0a User Context か OAuth 2.0 Authorization Code with PKCE を使用してください。
 </Note>
 
 <Tip>
   **注意**
 
-  > 次のフィールドをリクエストする場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必要です。
+  > 次のフィールドをリクエストする場合には、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必要です。
   >
   > * `tweet.fields.non_public_metrics`
   > * `tweet.fields.promoted_metrics`
@@ -64,31 +64,31 @@ v2 エンドポイントと互換性のあるコミュニティ製の [サード
 </Tip>
 
 <div id="developer-portal-projects-and-apps">
-  ### developer portal、プロジェクト、アプリ
+  ### Developer Portal、プロジェクト、およびアプリ
 </div>
 
-X API v2 の認証情報を取得するには、以下が必要です。
+X API v2 の認証情報を取得するには、次のものが必要です。
 
 1. 承認済みの[開発者アカウント](/ja/resources/fundamentals/developer-portal)。
 2. その開発者アカウント内の[プロジェクト](/ja/resources/fundamentals/projects)。
-3. そのプロジェクト内の[開発者アプリ](/ja/resources/fundamentals/developer-apps)。ここでキーとトークンを確認できます。
+3. そのプロジェクト内の[開発者アプリ](/ja/resources/fundamentals/developer-apps)で、キーとトークンを取得できます。
 
 <div id="rate-limits">
   ### レート制限
 </div>
 
-X API リクエストには、ボリュームを管理するための[レート制限](/ja/resources/fundamentals/rate-limits)が適用されます。制限はアプリレベルとユーザーレベルの両方に適用されます。
+X API へのリクエストには、リクエスト数を管理するための[レート制限](/ja/resources/fundamentals/rate-limits)が適用されます。制限はアプリレベルとユーザーレベルの両方に適用されます。
 
-* **アプリレベル**: 任意のアプリが一定期間内に送信できるリクエスト数を制限します。
-* **ユーザーレベル**: 認証済みユーザーが複数の開発者アプリにまたがってポストのルックアップを実行できる頻度を制限します。
+* **アプリレベル**: 任意のアプリが一定期間内に行えるリクエスト数を制限します。
+* **ユーザーレベル**: 認証済みユーザーが、複数の開発者アプリを通じてポストのルックアップを実行できる頻度を制限します。
 
 <div id="fields-and-expansions">
-  ### フィールドと expansions
+  ### フィールドとexpansions
 </div>
 
 X API v2 では、`fields` と `expansions` を使用して特定のデータフィールドを選択できます。
 
-* **Expansions**: 関連する追加オブジェクトを取得できるようにします。サポートされている expansions には次のものがあります。
+* **Expansions**: 関連する追加オブジェクトを取得できるようにします。サポートされているexpansionsには、次のものがあります。
   * `edit_history_tweet_ids`
   * `attachments.poll_ids`
   * `attachments.media_keys`
@@ -99,19 +99,19 @@ X API v2 では、`fields` と `expansions` を使用して特定のデータフ
   * `referenced_tweets.id`
   * `referenced_tweets.id.author_id`
 
-* **Fields**: オブジェクト内で返すデータフィールドを指定し、追加データを取得します。Post オブジェクトでは、デフォルトで `id`、`text`、`edit_history_tweet_ids` が返されます。`tweet.created_at` や `tweet.entities` などのその他のオプションは、明示的にリクエストする必要があります。
+* **Fields**: 返すオブジェクト内のデータフィールドを指定して、追加のデータを取得します。Post オブジェクトのデフォルトは `id`、`text`、`edit_history_tweet_ids` です。`tweet.created_at` や `tweet.entities` などのその他のオプションは、明示的にリクエストする必要があります。
 
-詳細については、[X API v2 データ辞書](/ja/x-api/fundamentals/data-dictionary) 内の `fields` と `expansions` のガイドを参照してください。
+詳細については、[X API v2 データ辞書](/ja/x-api/fundamentals/data-dictionary)内のフィールドとexpansionsに関するガイドを参照してください。
 
 <div id="post-edits">
   ### ポストの編集
 </div>
 
-編集対象のポストは、公開後30分以内であれば最大5回まで編集できます。Posts lookup エンドポイントは、常に最新のポストバージョンを返します。準リアルタイムのユースケースでは、この時間ウィンドウを考慮してください。詳細については、[ポスト編集の基本](/ja/x-api/fundamentals/edit-posts)を参照してください。
+対象となるポストは、公開後30分以内であれば最大5回まで編集できます。Posts lookup エンドポイントでは、常に最新のポストのバージョンが返されます。ほぼリアルタイムでの利用シナリオでは、この時間ウィンドウを考慮してください。詳細については、[Edit Posts fundamentals](/ja/x-api/fundamentals/edit-posts) を参照してください。
 
 <div id="edge-cases">
   ### エッジケース
 </div>
 
-* **Promoted メトリクス**: プロモーションされていないポストの Promoted メトリクスをリクエストすると、空のレスポンスが返されます。
-* **テキストの省略**: リポストではポストのテキストが省略されます。完全なテキストを取得するには、参照先のポストを展開してください。
+* **Promoted メトリクス**: プロモーションされていないポストに対して Promoted メトリクスをリクエストしても、空のレスポンスが返されます。
+* **省略されたテキスト**: リツイートされたポストではテキストが省略されます。完全なテキストを取得するには、参照先のポストを展開してください。

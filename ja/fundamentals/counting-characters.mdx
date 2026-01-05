@@ -2,48 +2,48 @@
 title: ポスト作成時の文字数カウント
 sidebarTitle: 文字数カウント
 icon: text-size
-keywords: ["文字数カウント", "ポストの長さ", "280文字", "文字数制限", "Unicode", "絵文字", "CJK文字", "URLの長さ", "ポスト作成", "twitter-text", "文字エンコーディング", "UTF-8"]
+keywords: ["文字数カウント", "ポストの長さ", "280文字", "文字数制限", "Unicode", "絵文字", "CJK文字", "URL の長さ", "ポスト作成", "twitter-text", "文字エンコーディング", "UTF-8"]
 ---
 
-このページでは、ポスト作成時および X API において文字がどのように扱われるかを説明します。実装の詳細については、X が提供しているオープンソースの [twitter-text](http://github.com/twitter/twitter-text) ライブラリを参照してください。これは [GitHub](https://github.com/twitter) 上で入手できます。
+このページでは、ポストを作成する際および X API において、文字がどのように扱われるかを説明します。実装の詳細については、X が提供しているオープンソースライブラリ [twitter-text](http://github.com/twitter/twitter-text) を参照してください。[GitHub](https://github.com/twitter) 上で公開されています。
 
 <div id="background">
   ## 背景
 </div>
 
-X は SMS のテキストベースのサービスとして始まりました。これにより、当初のポストの長さは 140 文字に制限されていました（SMS の 160 文字制限のうち 20 文字をコマンドやユーザー名用に確保していたことが一因です）。その後、X の進化に伴い、ポストの最大文字数は 280 文字まで拡張されました。依然として短く簡潔ではありますが、より豊かな表現が可能になりました。
+X は SMS ベースのテキストサービスとして始まりました。このため、当初のポストの最大文字数は 140 文字に制限されていました（SMS の 160 文字制限のうち 20 文字をコマンドやユーザー名用に確保していたことが一因です）。その後 X の進化に伴い、ポストの最大文字数は 280 文字まで拡張されました。依然として短く簡潔でありながら、より豊かな表現が可能になりました。
 
 <div id="definition-of-a-character">
   ## 文字の定義
 </div>
 
-ほとんどの場合、ポストのテキストコンテンツには最大 280 文字または [Unicode](https://unicode.org/) グリフを含めることができます。一部のグリフは 1 文字より多くとしてカウントされます。
+ほとんどの場合、ポストのテキストコンテンツには最大 280 文字、または [Unicode](https://unicode.org/) グリフを含めることができます。一部のグリフは、1 文字より多くとしてカウントされます。
 
-グリフが 1 文字としてカウントされるか、それ以上としてカウントされるかを、そのグリフの重みと呼びます。どの文字が 1 文字を超える重みを持つかの正確な定義は、[twitter-text ポスト解析ライブラリ](https://github.com/twitter/twitter-text)用の[設定ファイル](https://github.com/twitter/twitter-text/tree/master/config)に記載されています。
+あるグリフが 1 文字として数えられるか、複数文字として数えられるかを、その重み（weight）と呼びます。どの文字が 1 文字を超える重みを持つかについての正確な定義は、[twitter-text ポスト解析ライブラリ](https://github.com/twitter/twitter-text)の [構成ファイル](https://github.com/twitter/twitter-text/tree/master/config)に記載されています。
 
-現在の設定ファイルのバージョンでは、デフォルトの重み（2 文字分）と、それとは異なる重みが定義されている 4 つの [Unicode コードポイント](https://unicode.org/charts/About.html)の範囲が定義されています。現在、これらの範囲に含まれるコードポイントはすべて 1 文字としてカウントされます。
+現在の構成ファイルのバージョンでは、デフォルトの重みを 2 文字分として定義し、重み付けが異なる 4 つの [Unicode 符号位置](https://unicode.org/charts/About.html)の範囲を定義しています。現在、これらの範囲内の符号位置はすべて 1 文字としてカウントされます。
 
-* 最初の範囲は、Latin-1 コードページ全体にわたる文字を対象としています (U+0000 - U+10FF)。
-* 2 番目の範囲は、Zero Width Joiner（絵文字やその他のグリフを結合するために使用される）を含む一般的な句読点です (U+2000-U+200D)。
-* 3 番目の範囲は、Unicode の方向制御マークである U+200E と U+200F を除く一般的な句読点です (U+2010-U+201F)。
-* 最後の範囲は引用符を対象としています (U+2032-U+2037)。
+* 1 つ目の範囲は、Latin-1 コードページ全体の文字を対象とします (U+0000 - U+10FF)。
+* 2 つ目の範囲は、Zero Width Joiner（絵文字やその他のグリフを結合するために使用される）までを含む一般的な句読点です (U+2000-U+200D)。
+* 3 つ目の範囲は、Unicode の双方向マークである U+200E と U+200F を除く一般的な句読点です (U+2010-U+201F)。
+* 最後の範囲は、引用符を対象とします (U+2032-U+2037)。
 
-ポストのテキストと、twitter-text ライブラリで計算された長さの例は、ライブラリのテスト設定ファイル [validate.yml](https://github.com/twitter/twitter-text/blob/master/conformance/validate.yml) に記載されています。
+ポストテキストの例と、それに対して twitter-text ライブラリで算出される長さは、ライブラリのテスト構成ファイルである [validate.yml](https://github.com/twitter/twitter-text/blob/master/conformance/validate.yml) に記載されています。
 
 **例**
 
 | 表示される文字 | 長さ | 説明 | Unicode シーケンス |
 |:---------------------|:--------|:-------------|:------------------|
 | a | 1 | ラテン小文字 a | U+0061 |
-| á | 1 | ラテン小文字 a（アクセント付き） | U+00E1 |
-| ӑ | 1 | キリル小文字 a（ブレーブ付き） | U+04D1 |
-| Ồ | 1 | ラテン小文字 o（サーカムフレックスおよびアクセント付き） | U+1ED2 |
+| á | 1 | アキュート付きラテン小文字 a | U+00E1 |
+| ӑ | 1 | ブレーブ付きキリル小文字 a | U+04D1 |
+| Ồ | 1 | サーカムフレックスとアキュート付きラテン小文字 o | U+1ED2 |
 
 <div id="emojis">
   ## 絵文字
 </div>
 
-[twemoji](https://twemoji.x.com/) によってサポートされている絵文字は、結合修飾子の有無にかかわらず、常に 2 文字としてカウントされます。これには、[Fitzpatrick 肌の色トーン](https://emojipedia.org/modifiers/) や [性別修飾子](https://blog.emojipedia.org/unicode-and-the-emoji-gender-gap/) によって修飾された絵文字も含まれます。これらは Unicode のコードポイント数が大幅に多くなる場合でも同様です。絵文字の重みは、標準的な絵文字が 1 つ以上の Unicode ゼロ幅ジョインナー (U+200D) と組み合わさった並びを検出する、twitter-text 内の正規表現によって定義されています。
+[twemoji](https://twemoji.x.com/) でサポートされている絵文字は、結合修飾子の有無にかかわらず、常に 2 文字としてカウントされます。これには、[Fitzpatrick 肌の色トーン修飾子](https://emojipedia.org/modifiers/) や [性別修飾子](https://blog.emojipedia.org/unicode-and-the-emoji-gender-gap/) によって変更された絵文字も含まれ、Unicode コードポイント数が大幅に多くなる場合でも同様です。絵文字の重みは、標準的な絵文字と 1 つ以上の Unicode Zero Width Joiner（U+200D）のシーケンスを検出する、twitter-text 内の正規表現によって定義されています。
 
 **例**
 
@@ -51,44 +51,44 @@ X は SMS のテキストベースのサービスとして始まりました。�
 |:-----------------|:--------|:-------------|:------------------|
 | 👾 | 2 | 既知の絵文字のデフォルトの長さ | -- |
 | 🙋🏽 | 2 | 肌の色トーン修飾子付き絵文字 | 🙋 U+1F64B, 🏽 U+1F3FD |
-| 👨‍🎤 | 2 | 結合字形 (ゼロ幅ジョインナー) を使用した絵文字シーケンス | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [🎤 U+1F3A4](https://emojipedia.org/emoji/%F0%9F%8E%A4/) |
-| 👨‍👩‍👧‍👦 | 2 | 複数の結合字形 (ゼロ幅ジョインナー) を使用した絵文字シーケンス | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👩 U+1F469](https://emojipedia.org/emoji/%F0%9F%91%A9/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👧 U+1F467](https://emojipedia.org/emoji/%F0%9F%91%A7/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👦 U+1F466](https://emojipedia.org/emoji/%F0%9F%91%A6/) |
+| 👨‍🎤 | 2 | 結合グリフ（ゼロ幅接合子）を使用した絵文字シーケンス | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [🎤 U+1F3A4](https://emojipedia.org/emoji/%F0%9F%8E%A4/) |
+| 👨‍👩‍👧‍👦 | 2 | 複数の結合グリフ（ゼロ幅接合子）を使用した絵文字シーケンス | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👩 U+1F469](https://emojipedia.org/emoji/%F0%9F%91%A9/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👧 U+1F467](https://emojipedia.org/emoji/%F0%9F%91%A7/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👦 U+1F466](https://emojipedia.org/emoji/%F0%9F%91%A6/) |
 
 <div id="chinese-japanese-korean-glyphs">
   ## 中国語 / 日本語 / 韓国語のグリフ
 </div>
 
-CJK（中国語 / 日本語 / 韓国語）で使用されるグリフも、2文字としてカウントされます。したがって、CJK テキストのみで構成されたポストでは、この種類のグリフを最大 140 個までしか使用できません。
+CJK（中国語 / 日本語 / 韓国語）で使用されるグリフも 2 文字分としてカウントされます。したがって、CJK テキストのみで構成されたポストでは、この種類のグリフを最大 140 個までしか使用できません。
 
 <div id="entity-objects">
   ## エンティティオブジェクト
 </div>
 
-ポストには[エンティティオブジェクト](/ja/x-api/fundamentals/data-dictionary)を含めることができ、その一部はポストの文字数に影響します。
+ポストには [Entity Objects](/ja/x-api/fundamentals/data-dictionary) を含めることができ、その一部はポストの文字数に影響します。
 
-URL: [すべての URL は t.co リンクに変換されます](https://developer.x.com/content/developer-twitter/en/docs/basics/tco)。これは、URL の長さが [twitter-text 設定ファイル](https://github.com/twitter/twitter-text/tree/master/config)内の `transformedURLLength` パラメータによって定義されることを意味します。現在、ポスト内の URL の長さは、実際の URL の長さがそれより短い場合でも 23 文字として扱われます。
+URL: [すべての URL は t.co リンクに変換されます](https://developer.x.com/content/developer-twitter/en/docs/basics/tco)。そのため、URL の長さは [twitter-text 設定ファイル](https://github.com/twitter/twitter-text/tree/master/config) 内の `transformedURLLength` パラメータで定義されます。現在、ポスト内の URL は、元の URL がそれより短い場合でも、長さは 23 文字として扱われます。
 
-返信: リプライポストの先頭に自動入力される @name は文字数制限にはカウントされません。新規のリプライではないポストで、@メンションから始まるものはカウントされ、また、ユーザーがポスト本文中に明示的に追加した @メンション も同様にカウントされます。
+返信: 返信ポストの先頭に自動入力される @name は、文字数制限にはカウントされません。新規の返信ではないポストで、先頭が @メンションから始まる場合はカウント対象となり、またユーザーがポスト本文中に明示的に追加した @メンションもカウントされます。
 
-メディア: 公式クライアントからポストされた場合、pic.x.com の URL として表現されるポスト添付メディアは、文字数 0 として扱われます。
+メディア: 公式クライアントからポストされた場合、pic.x.com URL として表現されるポストに添付されたメディアは、文字数としては 0 文字とカウントされます。
 
-エンティティオブジェクトの詳細については、[開発者向けドキュメント](/ja/x-api/fundamentals/data-dictionary)を参照してください。
+エンティティオブジェクトの詳細については、[開発者向けドキュメント](/ja/x-api/fundamentals/data-dictionary) を参照してください。
 
 <div id="x-character-encoding">
-  ## X 文字エンコーディング
+  ## X 文字エンコード
 </div>
 
-X API エンドポイントは、UTF-8 でエンコードされたテキストのみを受け付けます。その他のエンコーディングは、API にテキストを送信する前に UTF-8 に変換する必要があります。
+X API のエンドポイントは UTF-8 でエンコードされたテキストのみを受け付けます。その他のエンコーディングは、テキストを API に送信する前に UTF-8 に変換する必要があります。
 
-X は、ポストの長さを、テキストを Normalization Form C (NFC) に正規化したものを用いて数えます。
+X は、ポストの長さを、テキストを Normalization Form C (NFC) に正規化したものを使ってカウントします。
 
-例として、「café」という単語を考えます。見た目も読み方も同じですが、バイト数が異なる 2 つのバイト列があります。
+例として、単語 &quot;café&quot; を考えてみます。見た目も読み方も同じですが、異なるバイト数を使う 2 つのバイト列があります:
 
 |     | | |
 |:-----|:---|:---|
-| café | 0x63 0x61 0x66 0xC3 0xA9 | 「é」文字（合成済み文字）を使用した場合。 |
-| café | 0x63 0x61 0x66 0x65 0xCC 0x81 | 結合分音記号を使用し、「e」の上に重ねた場合。 |
+| café | 0x63 0x61 0x66 0xC3 0xA9 | &quot;é&quot; 文字（「合成済み文字」）を使用している場合。 |
+| café | 0x63 0x61 0x66 0x65 0xCC 0x81 | &quot;e&quot; に重ねて使用される、結合分音記号を使っている場合。 |
 
-Normalization Form C は、分解した長い形式 (0x65 0xCC 0x81) よりも、結合済み文字（café の例の 0xC3 0xA9）の使用を優先します。
+Normalization Form C は、分解形 (0x65 0xCC 0x81) よりも、完全に結合された文字（café の例における 0xC3 0xA9）を優先します。
 
-X は、UTF-8 のバイト数ではなく、テキスト内のコードポイント数を数えます。café の例の 0xC3 0xA9 は 1 つのコードポイント (U+00E9) であり、UTF-8 では 2 バイトとしてエンコードされますが、0x65 0xCC 0x81 は 2 つのコードポイントであり、3 バイトとしてエンコードされます。
+X は UTF-8 のバイト数ではなく、テキスト内のコードポイント数をカウントします。café の例における 0xC3 0xA9 は、UTF-8 では 2 バイトでエンコードされる 1 つのコードポイント (U+00E9) であるのに対し、0x65 0xCC 0x81 は 3 バイトでエンコードされる 2 つのコードポイントです。

@@ -6,43 +6,43 @@ keywords: ["批量合规", "合规批处理", "批量合规 API", "合规作业"
 
 import { Button } from '/snippets/zh/button.mdx';
 
-X 致力于支持使用 X API 进行构建的开发者社区。作为这一承诺的一部分，我们的目标是让我们的 API 对开发者来说开放且公平，对 X 上的用户而言安全可靠，并让整个 X 平台受益。对于任何将 X 内容离线存储的开发者来说，确保数据能够反映用户意愿以及 X 上内容的当前状态至关重要。例如，当 X 上的某人删除了某条帖子或其账号、将其帖子设为受保护，或从其帖子中清除地理位置信息时，X 和我们的开发者都必须尊重该用户的预期和意图。批量合规端点为开发者提供了一个简单的工具，帮助你根据 [X Developer Agreement and Policy](https://developer.x.com/en/developer-terms/policy) 保持 X 数据合规。 
+X 致力于支持使用 X API 构建产品的开发者社区。作为这一承诺的一部分，我们的目标是让 API 对开发者保持开放和公平、对 X 上的用户安全，并整体上有利于 X 平台。任何将 X 内容离线存储的开发者，都必须确保这些数据反映用户意图以及 X 上内容的当前状态。举例来说，当某位 X 用户删除了某条帖子或其账号、将其帖子设为受保护状态，或从帖子中清除地理信息时，X 和我们的开发者都必须尊重该用户的预期和意图。批量合规端点为开发者提供了一种简单工具，以帮助在符合 [X 开发者协议与政策](https://developer.x.com/en/developer-terms/policy) 的前提下维护 X 数据。 
 
-这些批量合规端点允许你上传包含帖子或用户 ID 的大型数据集，以获取它们的合规状态，从而确定哪些数据需要采取行动，使你的数据集符合合规要求。请注意，批量合规端点的使用仅限于前述使用场景，任何其他用途均被禁止，并可能导致平台执法措施。
+这些批量合规端点允许你上传包含帖子或用户 ID 的大型数据集，以获取其合规状态，从而确定哪些数据需要采取操作，才能使你的数据集满足合规要求。请注意，批量合规端点仅限于上述使用场景，任何其他用途均被禁止，并可能导致执法行动。
 
-通常，使用此端点需要经过 4 个步骤：
+通常，使用此端点涉及 4 个步骤：
 
-1. **创建合规任务**
-   你可以指定任务类型（值为 tweets 或 users），以指明你要上传的数据集包含的是帖子 ID 还是用户 ID。你在任意时间每种任务类型最多只能有一个并发任务。
+1. **创建合规作业**
+   你可以指定作业类型（取值为 tweets 或 users），以表明你要上传的数据集包含帖子 ID 还是用户 ID。任何时间，你每种作业类型最多只能有一个并发作业。
 2. **将数据集上传到 upload&#95;url**
-   接下来，你将数据集作为纯文本文件上传到提供的 upload&#95;url，文件的每一行包含一个帖子 ID 或用户 ID。该 upload&#95;url 在 15 分钟后过期。
-3. **（可选）检查任务状态**
-   你可以检查合规任务的状态，以查看其是已创建、进行中（in&#95;progress）、失败还是已完成。
+   接下来，你将数据集作为纯文本文件上传到提供的 upload&#95;url，文件中的每一行包含一个帖子 ID 或用户 ID。upload&#95;url 在 15 分钟后过期。
+3. **（可选）检查作业状态**
+   你可以检查合规作业的状态，以了解其是 created、in&#95;progress、failed 还是 complete。
 4. **下载结果**
-   当你的任务完成后，你可以使用 download&#95;url 下载结果。该 download&#95;url 在一周后过期（从任务创建时开始计时）。
+   当作业完成后，你可以使用 download&#95;url 下载结果。download&#95;url 在一周后（自作业创建时起算）过期。
 
-   结果中将包含一组 JSON 对象（每行一个对象）。每个对象会包含一个帖子 ID、该帖子的创建日期（有助于按日期定位帖子）、所需的操作、采取合规操作的原因，以及该用户被暂停的日期。
+   结果中将包含一组 JSON 对象（每行一个对象）。每个对象会包含帖子 ID、帖子的创建日期（有助于按日期定位帖子）、所需采取的操作、合规操作的原因，以及用户被停权的日期。
 
-在结果中，你将会收到以下合规事件类型：
+你将在结果中收到以下合规事件类型：
 
 * deleted - 表示帖子或用户账号已被删除
 * deactivated - 表示帖子或用户账号已被停用
-* scrub&#95;geo - 表示与该帖子或用户关联的地理位置信息已被移除
-* protected - 表示发布该帖子的账号变为私密账号
-* suspended - 表示发布该帖子的账号已被暂停使用
+* scrub&#95;geo - 表示与帖子或用户关联的地理信息已被移除
+* protected - 表示发布该帖子的账号改为私密账号
+* suspended - 表示发布该帖子的账号已被停权
 
 **账号设置**
 
 要访问这些端点，你需要：
 
 * 一个已获批准的 [开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
-* 使用位于某个 [项目](/zh/resources/fundamentals/projects) 中的 [开发者应用](/zh/resources/fundamentals/developer-apps) 所提供的密钥和令牌进行认证。 
+* 使用位于某个 [项目](/zh/resources/fundamentals/projects) 中的 [开发者应用](/zh/resources/fundamentals/developer-apps) 的密钥和令牌进行身份验证。 
 
-在我们的 [入门指南](/zh/x-api/getting-started/getting-access) 中了解更多关于获取 X API v2 端点访问权限的信息。
+在我们的 [入门指南](/zh/x-api/getting-started/getting-access) 中进一步了解如何获取 X API v2 端点的访问权限。
 
 <div className="flex space-x-2">
   <Button href="/zh/x-api/compliance/batch-compliance/quickstart">
-    快速开始
+    快速上手
   </Button>
 
   <Button href="https://github.com/xdevplatform/compliant-client">
@@ -54,6 +54,6 @@ X 致力于支持使用 X API 进行构建的开发者社区。作为这一承�
   </Button>
 
   <Button href="https://developer.x.com/apitools/api?endpoint=/2/compliance/jobs">
-    使用 API Explorer 试用
+    在 API Explorer 中试用
   </Button>
 </div>

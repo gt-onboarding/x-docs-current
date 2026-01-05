@@ -4,17 +4,17 @@ sidebarTitle: 빠른 시작
 keywords: ["activity API 빠른 시작", "X Activity API 빠른 시작", "activity 빠른 시작", "activity 튜토리얼", "activity 가이드"]
 ---
 
-이 가이드는 X Activity API 엔드포인트를 사용하여 이벤트를 구독하고 수신하는 방법을 설명합니다. 일반적으로 다음 세 단계를 거칩니다:
+이 가이드는 X Activity API 엔드포인트를 사용하여 이벤트를 구독하고 수신하는 방법을 설명합니다. 일반적으로 다음 세 단계로 진행합니다:
 
-1. 필터링하려는 이벤트의 대상이 되는 사용자의 사용자 id를 확인합니다.
-2. 해당 사용자에 대해 필터링하려는 이벤트 유형에 대한 구독을 생성합니다.
-3. webhook 또는 지속적인 HTTP 스트리밍 연결을 사용하여 이벤트를 수신합니다.
+1. 필터링하려는 이벤트가 발생하는 User의 User ID를 확인합니다.
+2. 해당 User에 대해 필터링하려는 이벤트 유형에 대한 구독을 생성합니다.
+3. webhook 또는 지속적인 HTTP 스트림 연결을 사용하여 이벤트를 수신합니다.
 
 <div id="getting-user-ids">
   ## 사용자 ID 가져오기
 </div>
 
-구독을 생성하기 전에 필터링할 계정의 사용자 ID를 알고 있어야 합니다. 이 예제에서는 XDevelopers 핸들을 사용합니다. 사용자 ID는 다음과 같은 여러 방법으로 조회할 수 있습니다:
+구독을 생성하기 전에 필터를 적용하려는 계정의 사용자 ID를 알고 있어야 합니다. 이 예제에서는 XDevelopers 핸들을 사용하겠습니다. 사용자 ID를 조회하는 방법에는 다음과 같이 여러 가지가 있습니다:
 
 **사용자 이름으로 사용자 ID 조회:**
 
@@ -22,13 +22,13 @@ keywords: ["activity API 빠른 시작", "X Activity API 빠른 시작", "activi
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" "https://api.x.com/2/users/by/username/xdevelopers"
 ```
 
-**내 사용자 id 가져오기:**
+**내 사용자 ID 가져오기:**
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
 ```
 
-두 엔드포인트 모두 구독 필터에서 사용할 수 있는 `id` 필드를 포함한 사용자 정보를 반환합니다. 아래는 예시 JSON 응답입니다.
+두 엔드포인트 모두 `id` 필드를 포함한 사용자 정보를 반환하며, 이 `id`를 구독 필터에서 사용할 수 있습니다. 아래는 예시 JSON 응답입니다.
 
 ```json
 {
@@ -42,12 +42,12 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/users/me
 
 
 <div id="creating-a-subscription">
-  ## Subscription 생성
+  ## 구독 생성하기
 </div>
 
-다음 단계는 Subscription을 생성하는 것입니다. 이 예제에서는 XDevelopers 계정의 bio 업데이트를 구독합니다. 이를 위해 JSON body에 `user_id`와 `event_type`을 포함해 전달합니다. 이 경우 `event_type`은 `ProfileBioUpdate`입니다.
+다음 단계는 구독을 생성하는 것입니다. 이 예제에서는 XDevelopers의 프로필 소개(bio) 업데이트에 구독합니다. 이를 위해 JSON 본문에 `user_id`와 `event_type`을 전달합니다. 이 경우 `event_type`은 `ProfileBioUpdate`입니다.
 
-X Developers의 user ID인 `2244994945`와 선택적인 tag를 전달하겠습니다:
+X Developer의 사용자 ID `2244994945`와 선택적 태그를 함께 포함합니다.
 
 ```json
 {
@@ -59,7 +59,7 @@ X Developers의 user ID인 `2244994945`와 선택적인 tag를 전달하겠습�
 }
 ```
 
-XAA 관련 모든 엔드포인트에 대한 인가를 위해 developer portal에서 발급받은 [Bearer Token](https://docs.x.com/fundamentals/authentication/oauth-2-0/overview#bearer-token-also-known-as-app-only)을 사용합니다.
+XAA와 관련된 모든 엔드포인트 호출은 developer portal에서 발급받은 [bearer token](https://docs.x.com/fundamentals/authentication/oauth-2-0/overview#bearer-token-also-known-as-app-only)으로 인가를 수행합니다.
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -74,7 +74,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   }'
 ```
 
-요청이 성공적으로 처리되면 구독이 생성됩니다:
+요청이 성공적으로 처리되면 구독이 생성됩니다.
 
 ```json
 {
@@ -98,7 +98,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 
 
 <div id="getting-the-events">
-  ## 이벤트 가져오기
+  ## 이벤트 수신
 </div>
 
 구독을 생성한 후에는 [webhooks](https://docs.x.com/x-api/webhooks/introduction) 또는 지속적인 HTTP 스트림을 통해 이벤트를 수신할 수 있습니다. 이 예제에서는 지속적인 HTTP 스트림을 엽니다:
@@ -107,7 +107,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" https://api.x.com/2/activity/stream
 ```
 
-Xdevelopers 계정이 프로필 소개를 업데이트하면, 이 이벤트는 스트림을 통해 전달됩니다:
+Xdevelopers 계정에서 프로필 소개(바이오) 정보를 업데이트하면, 해당 이벤트가 스트림으로 전송됩니다:
 
 ```json
 {
@@ -130,7 +130,7 @@ Xdevelopers 계정이 프로필 소개를 업데이트하면, 이 이벤트는 �
   ## 구독 관리
 </div>
 
-X Activity API는 구독을 표준 CRUD 작업으로 관리할 수 있는 엔드포인트를 제공합니다.
+X Activity API는 표준 CRUD 연산을 통해 구독을 관리하기 위한 엔드포인트를 제공합니다.
 
 <div id="create-subscription">
   ### 구독 생성
@@ -154,8 +154,8 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 
 **참고:**
 
-* `tag` 필드는 선택 사항입니다. 이 필드는 이벤트가 전달될 때 식별하는 데 도움이 되도록 사용할 수 있습니다.
-* `webhook_id` 필드도 선택 사항입니다. webhook 설정 방법은 [webhook 문서](https://docs.x.com/x-api/webhooks/introduction)를 참고하세요. `webhook_id`가 지정된 경우, 이벤트는 스트림이 열려 있는 경우 스트림뿐만 아니라 지정된 webhook으로도 전달됩니다.
+* `tag` 필드는 선택 사항입니다. 이 필드는 이벤트가 전달될 때 식별하는 데 사용할 수 있습니다.
+* `webhook_id` 필드도 선택 사항입니다. webhook 설정 방법은 [webhook 문서](https://docs.x.com/x-api/webhooks/introduction)를 참고하세요. `webhook_id`가 지정된 경우, 스트림이 열려 있다면 이벤트는 해당 스트림뿐만 아니라 지정된 webhook으로도 전달됩니다.
 
 **응답:**
 
@@ -177,10 +177,10 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 
 
 <div id="list-subscriptions">
-  ### 구독 목록 조회
+  ### 구독 조회
 </div>
 
-앱의 모든 활성 구독을 조회합니다:
+앱의 모든 활성 구독을 조회합니다.
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -222,7 +222,7 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
   ### 구독 삭제
 </div>
 
-구독을 삭제합니다.
+구독을 삭제합니다:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
@@ -243,16 +243,16 @@ curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
 }
 ```
 
-`total_subscriptions` 는 삭제 작업을 수행한 후 앱에 연결된 남은 구독 수를 나타냅니다.
+`total_subscriptions`는 삭제 작업 이후 앱과 연결된 구독의 남은 수를 표시합니다.
 
 
 <div id="update-subscription">
   ### 구독 업데이트
 </div>
 
-PUT 엔드포인트를 사용하면 구독의 전달 방식 또는 태그를 업데이트할 수 있습니다.
+PUT 엔드포인트를 사용하면 구독의 전송 방식 또는 태그를 업데이트할 수 있습니다.
 
-`filter` 또는 `event_type`를 업데이트하려면 기존 구독을 삭제한 후 새 구독을 추가해야 합니다.
+`filter` 또는 `event_type`를 변경하려면 기존 구독을 삭제하고 새로 추가해야 합니다.
 
 ```
 curl -H "Authorization: Bearer YOUR_BEARER_TOKEN" \
