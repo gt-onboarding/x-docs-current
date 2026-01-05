@@ -1,0 +1,131 @@
+---
+title: "메트릭"
+keywords: ["메트릭", "참여도 메트릭", "트윗 메트릭", "노출수", "리트윗", "좋아요", "동영상 조회수", "분석", "공개 메트릭", "비공개 메트릭", "오가닉 메트릭", "프로모션 메트릭"]
+---
+
+<div id="overview">
+  ## Overview
+</div>
+
+`metrics` 필드를 사용하면 개발자는 게시물 및 미디어 객체에 대한 공개 및 비공개 참여 메트릭에 접근할 수 있습니다. 공개 메트릭은 개발자 계정을 보유한 누구나 사용할 수 있지만, 비공개 메트릭은 소유/권한이 부여된 계정(아래 정의)에 대해서만 사용할 수 있습니다. 메트릭에는 요청에서 지정된 각 게시물에 대한 노출 수, 리트윗, 인용 트윗, 좋아요, 답글, 동영상 조회 수, 동영상 조회 구간(쿼타일), URL 및 프로필 링크 클릭의 전체 개수가 포함됩니다. 또한 게시물이 [Ad](https://ads.x.com/)로 프로모션된 경우, 오가닉 또는 프로모션 컨텍스트에서 획득한 메트릭을 구분해 확인할 수 있는 옵션도 있습니다.
+
+공개 메트릭은 [App-only Token](/ko/resources/fundamentals/authentication#oauth-2-0) 인증으로 요청할 수 있습니다. 비공개 메트릭은 소유/권한이 부여된 게시물에 대해서만 요청할 수 있으며, 이를 위해 개발자는 [OAuth 2.0](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 또는 [OAuth 1.0a](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 사용자 컨텍스트 인가를 사용해 인증해야 합니다.
+
+**비공개, 오가닉, 프로모션 메트릭은 지난 30일 이내에 생성된 게시물에만 제공됩니다.**
+
+<div id="terminology">
+  ### 용어
+</div>
+
+* **인가된 계정**: 해당 계정에 대한 액세스를 허용해 [X 개발자 앱](/ko/resources/fundamentals/developer-apps)의 사용을 승인한 X 계정입니다(어떠한 [앱 권한 수준](/ko/resources/fundamentals/developer-apps#app-permissions)이든 게시물 메트릭에 대한 액세스를 허용합니다).
+* **소유 계정**: [X 개발자 앱](/ko/resources/fundamentals/developer-apps)과 연결된 X 계정입니다.
+* **공개 메트릭**: 좋아요 수, 리트윗 수처럼 [X](https://x.com/home)에서 누구나 확인할 수 있는 지표의 총합입니다.
+* **비공개 메트릭**: 노출 수, 동영상 조회 4분위수 등 [X](https://x.com/home)에서 공개적으로 제공되지 않는 지표의 총합입니다. [OAuth 2.0](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 또는 [OAuth 1.0a](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 사용자 컨텍스트 인증이 필요합니다.
+* **유기 메트릭(Organic metrics)**: 유기적 컨텍스트(일반적인 방식으로 게시 및 조회됨)에 귀속되는 공개 및 비공개 메트릭의 그룹입니다. [OAuth 2.0](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 또는 [OAuth 1.0a](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 사용자 컨텍스트 인증이 필요합니다.
+* **프로모션 메트릭(Promoted metrics)**: 프로모션 컨텍스트(Ads 캠페인의 일부로 게시되거나 조회됨)에 귀속되는 공개 및 비공개 메트릭의 그룹입니다. [OAuth 2.0](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 또는 [OAuth 1.0a](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 사용자 컨텍스트 인증이 필요하며, 해당 게시물이 광고에서 프로모션된 상태여야 합니다.
+
+<div id="available-metrics">
+  ## 사용 가능한 메트릭
+</div>
+
+| Metric               | API Representations                                                                                                                                                                                                                                     | Description                                                                                                                                                                                                                                                                                                                                                                                |
+|:----------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Impressions**      | `data.non_public_metrics.impression_count`, `data.organic_metrics.impression_count`, `data.promoted_metrics.impression_count`                                                                                                                           | 게시물이 조회된 총 횟수(사용자 기준 고유 값 아님)입니다. 게시물의 일부라도 화면에 보이면 1회 조회로 집계됩니다. OAuth 1.0a 사용자 컨텍스트 인증이 필요합니다.                                                                                                               |
+| **Retweets**         | `data.public_metrics.retweet_count`, `data.organic_metrics.retweet_count`, `data.promoted_metrics.retweet_count`                                                                                                                                       | 게시물이 리트윗된 총 횟수입니다. 인용 트윗(“댓글이 있는 리트윗”)은 포함되지 않습니다. X 클라이언트에 표시되는 &quot;리트윗 및 댓글&quot; 총계를 얻으려면 `retweet_count`와 `quote_count`를 합산합니다.                                           |
+| **Quote Tweets**     | `data.public_metrics.quote_count`                                                                                                                                                                                                                      | 게시물이 새로운 댓글(메시지)과 함께 리트윗(인용 트윗)된 총 횟수입니다. 유료 컨텍스트에서 발생한 인용 트윗은 없으므로, 모든 인용 트윗은 자연 발생(오가닉)입니다.                                                                                                                                           |
+| **Likes**            | `data.public_metrics.like_count`, `data.organic_metrics.like_count`, `data.promoted_metrics.like_count`                                                                                                                                                 | 게시물이 좋아요를 받은 총 횟수입니다. `public_metrics` 필드는 X에 공개적으로 표시되는 수치와 일치하도록 오가닉 및 유료 컨텍스트의 좋아요 수를 합산한 총계를 반환합니다.                                                                                                   |
+| **Replies**          | `data.public_metrics.reply_count`, `data.organic_metrics.reply_count`, `data.promoted_metrics.reply_count`                                                                                                                                              | 게시물에 댓글이 달린 총 횟수입니다. `public_metrics` 필드는 오가닉 및 유료 컨텍스트의 댓글 수를 합산한 총계를 반환합니다.                                                                                                                                                   |
+| **URL Link Clicks**  | `data.non_public_metrics.url_link_clicks`, `data.organic_metrics.url_link_clicks`, `data.promoted_metrics.url_link_clicks`                                                                                                                             | 사용자가 게시물 내 URL 링크 또는 URL 미리보기 카드를 클릭한 횟수입니다. OAuth 1.0a 사용자 컨텍스트 인증이 필요합니다.                                                                                                                                                                  |
+| **User Profile Clicks** | `data.non_public_metrics.user_profile_clicks`, `data.organic_metrics.user_profile_clicks`, `data.promoted_metrics.user_profile_clicks`                                                                                                             | 사용자가 게시물에서 표시 이름, 사용자 이름, 프로필 사진 등의 영역을 클릭한 횟수입니다. OAuth 1.0a 사용자 컨텍스트 인증이 필요합니다.                                                                                                                                               |
+| **Video views**      | `includes.media.public_metrics.view_count`, `includes.media.organic_metrics.view_count`, `includes.media.promoted_metrics.view_count`                                                                                                                  | 게시물에 포함된 동영상이 재생된 총 횟수입니다. 이는 해당 동영상이 게시된 모든 게시물을 통틀어 집계한 동영상 조회 수입니다. `expansions=attachment.media_keys` 미디어 expansion이 필요합니다.                                                                |
+| **Video view quartiles** | `includes.media.non_public_metrics.playback_0_count`, `includes.media.non_public_metrics.playback_25_count`, `includes.media.non_public_metrics.playback_50_count`, `includes.media.non_public_metrics.playback_75_count`, `includes.media.non_public_metrics.playback_100_count` | 동영상에서 각 사분위 구간까지 재생한 사용자 수입니다. OAuth 1.0a 사용자 컨텍스트 인증과 `expansions=attachment.media_keys` 미디어 expansion이 필요합니다.                                                                                                 |
+
+<div id="requesting-metrics">
+  ## 메트릭 요청하기
+</div>
+
+<div id="public-metrics">
+  ### 공개 메트릭
+</div>
+
+다음 요청에서는 게시물과 첨부된 동영상에 대해, 아래의 필드와 expansions 파라미터를 사용하여 공개 메트릭을 요청합니다. `$BEARER_TOKEN`을 본인이 생성한 Bearer Token 값으로 교체해야 합니다.
+
+* `tweet.fields=public_metrics`
+* `expansions=attachments.media_keys&media.fields=public_metrics`
+
+<div id="sample-request">
+  #### 요청 예시
+</div>
+
+```bash
+curl 'https://api.x.com/2/tweets?ids=1204084171334832128&tweet.fields=public_metrics&expansions=attachments.media_keys&media.fields=public_metrics' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+<div id="private-metrics-non-public-organic-metrics">
+  ### 비공개 메트릭(Non-public, 오가닉 메트릭)
+</div>
+
+다음 요청은 게시물과 첨부된 동영상에 대해 비공개 메트릭과 오가닉 메트릭의 추가 세부 정보를 요청합니다. 이러한 필드는 비공개이며 X에서 공개적으로 볼 수 없기 때문에, 요청에는 [OAuth 2.0](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 또는 [OAuth 1.0a](/ko/resources/fundamentals/authentication#oauth-1-0a-2) 사용자 컨텍스트 기반 인증이 필요합니다. 아래에 필요한 OAuth 1.0a 서명을 생성하는 방법은 [가이드](/ko/resources/fundamentals/authentication#creating-a-signature)를 참고하세요.
+
+* `tweet.fields=non_public_metrics,organic_metrics`
+* `expansions=attachments.media_keys&media.fields=non_public_metrics,organic_metrics`
+
+<div id="sample-request">
+  #### 요청 예시
+</div>
+
+```bash
+curl 'https://api.x.com/2/tweets/1204084171334832128?tweet.fields=non_public_metrics,organic_metrics&media.fields=non_public_metrics,organic_metrics&expansions=attachments.media_keys' --header 'authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+<div id="sample-response">
+  #### 응답 예시
+</div>
+
+```
+{
+  "data": {
+    "attachments": {
+      "media_keys": ["13_1204080851740315648"]
+    },
+    "id": "1263145271946551300",
+    "non_public_metrics": {
+      "impression_count": 956,
+      "url_link_clicks": 9,
+      "user_profile_clicks": 34
+    },
+    "organic_metrics": {
+      "impression_count": 956,
+      "like_count": 49,
+      "reply_count": 2,
+      "retweet_count": 9,
+      "url_link_clicks": 9,
+      "user_profile_clicks": 34
+    },
+    "text": "test"
+  },
+  "includes": {
+    "media": [
+      {
+        "media_key": "13_1204080851740315648",
+        "non_public_metrics": {
+          "playback_0_count": 0,
+          "playback_100_count": 1,
+          "playback_25_count": 2,
+          "playback_50_count": 1,
+          "playback_75_count": 1
+        },
+        "organic_metrics": {
+          "playback_0_count": 0,
+          "playback_100_count": 1,
+          "playback_25_count": 2,
+          "playback_50_count": 1,
+          "playback_75_count": 1,
+          "view_count": 1
+        },
+        "type": "video"
+      }
+    ]
+  }
+}
+```

@@ -1,0 +1,265 @@
+---
+title: クエリを作成する
+sidebarTitle: クエリを作成する
+keywords: ["クエリの作成", "検索クエリ", "クエリビルダー", "検索演算子", "クエリ構文", "検索クエリの作成", "クエリガイド"]
+---
+
+<div id="building-queries-for-search-posts">
+  ## ポスト検索用クエリの構築
+</div>
+
+検索エンドポイントは、GET リクエストで 1 つのクエリを受け取り、そのクエリに一致する過去のポストのセットを返します。クエリは、さまざまなポスト属性にマッチさせるためのオペレーターで構成されます。 
+
+<div id="table-of-contents">
+  ### 目次
+</div>
+
+* [クエリの構築](#build)
+* [クエリの制限](#limits)
+* [オペレーターの利用可能範囲](#availability)
+* [オペレーターの種類：単独使用と論理演算子との併用必須](#types)
+* [ブール演算子とグループ化](#boolean)
+* [演算の順序](#order-of-operations)
+* [句読点・ダイアクリティカルマーク・大文字小文字の区別](#punctuation)
+* [具体性と効率性](#specificity)
+* [引用ポストのマッチング挙動](#quote-tweets)
+* [クエリの反復的な構築](#iterative)
+* [リクエストへのクエリの追加](#adding-a-query)
+* [クエリ例](#examples)
+* [オペレーター一覧](#list)
+
+<div id="building-a-query">
+  ### クエリの構築
+</div>
+
+<div id="query-limitations">
+  #### クエリの制限事項
+</div>
+
+使用している[アクセスレベル](/ja/x-api/getting-started/about-x-api)に応じて、クエリの長さには制限があります。 
+
+Basic または Pro アクセスの場合、recent search エンドポイント向けのクエリは最大 512 文字まで使用できます。 
+
+Pro アクセスの場合、full archive search エンドポイント向けのクエリは最大 1,024 文字まで使用できます。 
+
+<div id="operator-availability">
+  #### オペレーターの利用可否
+</div>
+
+ほとんどのオペレーターはすべての開発者が利用できますが、一部は特定のアクセスレベルに限定されています。各オペレーターがどのアクセスレベルで利用可能かは、次のラベルを用いて[list of operators](/ja/x-api/posts/search/integrate/operators)テーブル内に示しています。
+
+* **Core operators:** すべての[Project](/ja/resources/fundamentals/projects)で利用可能。
+* **Advanced operators:** 特定のアクセスレベルを持つ Project を使用している場合に利用可能。
+
+<div id="operator-types-standalone-and-conjunction-required">
+  #### 演算子の種類: スタンドアロン型と接続必須型
+</div>
+
+**スタンドアロン演算子** は、それ単体でも、（接続必須のものを含む）他の任意の演算子と組み合わせても使用できます。
+
+たとえば、次のクエリはスタンドアロン演算子である `#hashtag` 演算子を使用しているため、有効です。
+
+`#xapiv2`
+
+**接続必須演算子** は、クエリ内でそれ単体では使用できません。少なくとも 1 つのスタンドアロン演算子がクエリに含まれている場合にのみ使用できます。これは、これらの演算子だけを使用すると条件があまりに一般的になりすぎ、非常に大量のポストにマッチしてしまうためです。
+
+たとえば、次のクエリは接続必須演算子だけを含んでいるため、サポートされません。
+
+`has:media`
+
+`has:links OR is:retweet`
+
+スタンドアロン演算子として `"X data"` のようなフレーズを追加すると、そのクエリは有効になります。
+
+`"X data" has:mentions (has:media OR has:links)`
+
+<div id="boolean-operators-and-grouping">
+  #### ブール演算子とグルーピング
+</div>
+
+1 つのクエリ内で複数の演算子を組み合わせたい場合、次のような方法が使えます。
+
+|     |     |
+| :--- | :--- |
+| **AND ロジック** | 連続する演算子の間をスペースで区切ると、ブールの「AND」ロジックになります。これは、両方の条件を満たすポストだけが一致することを意味します。たとえば、`snow day #NoSchool` は、snow と day という語句とハッシュタグ #NoSchool を含むポストに一致します。 |
+| **OR ロジック** | 連続する演算子の間に OR を挟むと OR ロジックになり、いずれかの条件を満たせばポストが一致します。たとえば、`grumpy OR cat OR #meme` と指定すると、grumpy または cat のいずれかの語句、もしくはハッシュタグ #meme を少なくとも 1 つ含むポストに一致します。 |
+| **NOT ロジック、否定** | キーワード（または任意の演算子）の前にダッシュ (-) を付けると、それを否定（NOT）できます。たとえば、`cat #meme -grumpy` は、ハッシュタグ #meme と語句 cat を含み、かつ grumpy という語句を含まないポストに一致します。よく使われるクエリ句の 1 つが `-is:retweet` で、これはリツイートには一致せず、オリジナルのポスト、引用ポスト、および返信にのみ一致します。すべての演算子は否定できますが、否定された演算子だけを単独で使うことはできません。 |
+| **グルーピング** | 演算子同士をグループ化するために、括弧を使用できます。たとえば、`(grumpy cat) OR (#meme has:images)` は、grumpy と cat という両方の語句を含むポスト、またはハッシュタグ #meme を含む画像付きポストのいずれかを返します。AND が先に適用され、その後に OR が適用される点に注意してください。 |
+
+**否定についての注意事項**
+
+演算子 `is:nullcast` は、常に否定形（`-is:nullcast`）で使用する必要があります。
+
+否定された演算子を単独で使用することはできません。
+
+括弧でグループ化した一連の演算子を、括弧ごとまとめて否定しないでください。代わりに、各演算子を個別に否定します。たとえば、`skiing -(snow OR day OR noschool)` を使用する代わりに、`skiing -snow -day -noschool` を使用することを推奨します。 
+
+<div id="order-of-operations">
+  #### 演算の順序
+</div>
+
+`AND` と `OR` の機能を組み合わせる場合、次の演算の順序によってクエリの評価方法が決まります。
+
+1. `AND` ロジックで接続されたオペレーターが最初にまとめて評価される。
+2. 次に、`OR` ロジックで接続されたオペレーターが適用される。
+
+例:
+
+* `apple OR iphone ipad` は `apple OR (iphone ipad)` として評価されます。
+* `ipad iphone OR android` は `(iphone ipad) OR android` として評価されます。
+
+あいまいさをなくし、クエリが意図したとおりに評価されるようにするために、必要に応じて括弧で検索語をグループ化してください。
+
+例:
+
+* `(apple OR iphone) ipad`
+* `iphone (ipad OR android)`
+
+<div id="punctuation-diacritics-and-case-sensitivity">
+  #### 句読点、ダイアクリティカルマーク、大文字と小文字の区別
+</div>
+
+アクセントやダイアクリティカルマークを含むキーワードまたはハッシュタグでクエリを指定した場合、そのアクセントやダイアクリティカルマーク付きの語句だけでなく、通常の文字で表記された語句を含むポスト本文にもマッチします。たとえば、キーワード `Diacrítica` やハッシュタグ `#cumpleaños` を使ったクエリは、チルダ付きの *Diacrítica* や *#cumpleaños* だけでなく、í や ñ にチルダが付かない *Diacritica* や *#cumpleanos* にもマッチします。
+
+アクセントやダイアクリティカルマーク付きの文字は、通常の文字と同じように扱われ、単語境界とは見なされません。たとえば、キーワード `cumpleaños` を使ったクエリは、単語 *cumpleaños* を含むアクティビティにのみマッチし、*cumplea*、*cumplean*、*os* を含むアクティビティにはマッチしません。
+
+すべてのオペレーターは大文字と小文字を区別せずに評価されます。たとえば、クエリ `cat` は、*cat*、*CAT*、*Cat* を含むすべてのポストにマッチします。
+
+[filtered stream](/ja/x-api/posts/filtered-stream) のマッチング動作は、Search Posts とは異なります。[filtered stream のルールを構築する](/ja/x-api/posts/filtered-stream#building-rules-for-filtered-stream) 場合、アクセントやダイアクリティカルマークを含むキーワードやハッシュタグは、同じアクセントやダイアクリティカルマークを含む語句にのみマッチし、代わりに通常の文字だけを使った語句にはマッチしないことに注意してください。
+
+たとえば、キーワード `Diacrítica` やハッシュタグ `#cumpleaños` を含む filtered stream のルールは、*Diacrítica* と *#cumpleaños* にのみマッチし、í や ñ にチルダが付かない *Diacritica* や *#cumpleanos* にはマッチしません。
+
+<div id="specificity-and-efficiency">
+  #### 具体性と効率性
+</div>
+
+クエリの作成を始めるときは、いくつか留意すべき点があります。
+
+* 単一のキーワードや #hashtag など、広く汎用的な単独のオペレーターだけをクエリに使うことは、一般的には推奨されません。そのようなクエリは、非常に大量のポストにマッチする可能性が高いためです。より堅牢なクエリを作成することで、より絞り込まれたポストの集合を取得でき、ペイロード内のノイズを減らし、有用なインサイトを得るためにふるいにかける必要のあるデータ量を減らすことが期待できます。 
+  * たとえば、クエリがキーワード `happy` だけの場合、1 日あたり 200,000 ～ 300,000 件のポストが返される可能性があります。
+  * より多くの条件オペレーターを追加すると検索結果が絞り込まれます。たとえば `(happy OR happiness) place_country:GB -birthday -is:retweet`
+* 効率的なクエリを記述することは、クエリの文字数制限を守るうえでも有益です。文字数には、スペースやオペレーターを含むクエリ文字列全体が含まれます。
+  * たとえば、次のクエリは 59 文字です。`(happy OR happiness) place_country:GB -birthday -is:retweet`
+
+<div id="quote-tweet-matching-behavior">
+  #### 引用ポストのマッチング動作
+</div>
+
+Search Posts エンドポイントを使用する場合、オペレーターは引用された元のポストのコンテンツにはマッチせず、引用ポストに含まれるコンテンツにのみマッチします。
+
+ただし、[filtered stream](/ja/x-api/posts/filtered-stream) では、引用された元のポストのコンテンツと引用ポストのコンテンツの両方にマッチすることに注意してください。
+
+<div id="iteratively-building-a-query">
+  #### クエリを段階的に構築する
+</div>
+
+<div id="test-your-query-early-and-often">
+  ##### クエリを早い段階から頻繁にテストする
+</div>
+
+最初の試行で「正しい」結果を返すクエリを作成できることはほとんどありません。X 上には、最初は明白ではないものも数多く存在しており、上で説明したクエリ構文を、望む検索内容にうまく結び付けるのが難しい場合があります。クエリを作成していく際には、途中の段階で定期的にテストすることが重要です。
+
+このセクションでは、次のクエリから始め、テスト中に得られた結果に基づいて調整していきます。 
+
+`happy OR happiness`
+
+<div id="use-results-to-narrow-the-query">
+  ##### 結果を使ってクエリを絞り込む
+</div>
+
+クエリをテストするときは、返されるポストを確認し、期待しているデータが含まれているかどうかを確認する必要があります。まずは広い条件のクエリと、より多くのポストが一致するような設定から始めることで、結果を見ながらクエリを調整し、不要な結果を除外するように絞り込むことができます。  
+
+サンプルクエリをテストしたところ、さまざまな言語のポストが返されることに気付きました。この状況では、英語のポストだけを受け取りたいので、`lang:` オペレーターを追加します:
+
+`(happy OR happiness) lang:en`
+
+テストでは、人々にハッピーバースデーを願う多くのポストが返されたため、否定キーワードオペレーターとして `-birthday` を追加します。さらに、オリジナルのポストのみを受け取りたいので、否定オペレーター `-is:retweet` も追加します:
+
+`(happy OR happiness) lang:en -birthday -is:retweet`
+
+<div id="adjust-for-inclusion-where-needed">
+  ##### 必要に応じて抽出範囲を広げる
+</div>
+
+期待しているデータが取得できておらず、実際には返ってくるはずの既存のポストがあると分かっている場合は、目的のデータを除外してしまっている可能性のあるオペレーターを削除して、クエリの範囲を広げる必要があるかもしれません。 
+
+この例では、探している感情を表現している他のポストが自分のタイムライン上にあるにもかかわらず、テスト結果には含まれていないことに気付きました。より広く網羅できるようにするため、キーワード `excited` と `elated` を追加します。
+
+`(happy OR happiness OR excited OR elated) lang:en -birthday -is:retweet`
+
+<div id="adjust-for-popular-trendsbursts-over-the-time-period">
+  ##### 一定期間内の人気トレンドや急増に合わせて調整する
+</div>
+
+X ではトレンドがすばやく移り変わります。作成したクエリは継続的に管理していく必要があります。クエリをしばらく使い続ける予定がある場合は、定期的に受け取っているデータを確認し、調整が必要かどうかを見極めることをおすすめします。
+
+この例では、人々に「happy holidays」と挨拶するポストが取得され始めていることに気付きました。これらのポストを結果に含めたくないので、除外用の `-holidays` キーワードを追加します。
+
+`(happy OR happiness OR excited OR elated) lang:en -birthday -is:retweet -holidays`
+
+<div id="adding-a-query-to-your-request">
+  ### リクエストへのクエリの追加
+</div>
+
+リクエストにクエリを追加するには、`query` パラメータを使用する必要があります。他のクエリパラメータと同様に、作成したクエリは必ず HTTP エンコード（URL エンコード）してください。
+
+以下は、cURL コマンドを使用した場合の例で、さらに `tweet.fields` と `max_results` パラメータも含まれています。このコマンドを使用する場合は、`$BEARER_TOKEN` をご自身の [Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0) に置き換えてください。
+
+```bash
+curl https://api.x.com/2/tweets/search/recent?query=cat%20has%3Amedia%20-grumpy&tweet.fields=created_at&max_results=100 -H "Authorization: Bearer $BEARER_TOKEN"
+```
+
+<div id="query-examples">
+  ### クエリ例
+</div>
+
+<div id="tracking-a-natural-disaster">
+  #### 自然災害の追跡
+</div>
+
+次のクエリは、2017 年にヒューストンを襲った Hurricane Harvey について言及している、気象機関や観測所からの元のポストに一致します。
+
+HTTP エンコードを行わない場合のクエリは次のようになります。
+
+`has:geo (from:NWSNHC OR from:NHC\_Atlantic OR from:NWSHouston OR from:NWSSanAntonio OR from:USGS\_TexasRain OR from:USGS_TexasFlood OR from:JeffLindner1) -is:retweet`
+
+HTTP エンコードを行い、クエリパラメータおよび recent search の URI を用いると、クエリは次のようになります。
+
+`https://api.x.com/2/tweets/search/recent?query=-is%3Aretweet%20has%3Ageo%20(from%3ANWSNHC%20OR%20from%3ANHC\_Atlantic%20OR%20from%3ANWSHouston%20OR%20from%3ANWSSanAntonio%20OR%20from%3AUSGS\_TexasRain%20OR%20from%3AUSGS_TexasFlood%20OR%20from%3AJeffLindner1)`
+
+<div id="reviewing-the-sentiment-of-a-conversation">
+  #### 会話のセンチメントを確認する
+</div>
+
+次のルールは、ハッシュタグ *#nowplaying* を中心に展開している会話のセンチメントをよりよく理解するために利用できるもので、北米内で公開されたポストのみに範囲を絞っています。
+
+HTTP エンコードを行っていない場合、ポジティブとネガティブそれぞれのクエリは次のようになります。
+
+`#nowplaying (happy OR exciting OR excited OR favorite OR fav OR amazing OR lovely OR incredible) (place\_country:US OR place\_country:MX OR place_country:CA) -horrible -worst -sucks -bad -disappointing`
+
+`#nowplaying (horrible OR worst OR sucks OR bad OR disappointing) (place\_country:US OR place\_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible`
+
+HTTP エンコードを施し、クエリパラメータと recent search の URI を含めると、クエリは次のようになります。
+
+`https://api.x.com/2/tweets/search/recent?query=%23nowplaying%20(happy%20OR%20exciting%20OR%20excited%20OR%20favorite%20OR%20fav%20OR%20amazing%20OR%20lovely%20OR%20incredible)%20(place\_country%3AUS%20OR%20place\_country%3AMX%20OR%20place_country%3ACA)%20-horrible%20-worst%20-sucks%20-bad%20-disappointing`
+
+`https://api.x.com/2/tweets/search/recent?query=%23nowplaying%20(horrible%20OR%20worst%20OR%20sucks%20OR%20bad%20OR%20disappointing)%20(place\_country%3AUS%20OR%20place\_country%3AMX%20OR%20place_country%3ACA)%20-happy%20-exciting%20-excited%20-favorite%20-fav%20-amazing%20-lovely%20-incredible`
+
+<div id="find-posts-that-relate-to-a-specific-post-annotation">
+  #### 特定のポスト注釈に関連するポストを見つける
+</div>
+
+このルールは、ポスト内で判定された言語が日本語であり、かつ猫ではないペットの画像を含むオリジナルのポストを検索するために作成しました。これを行うために、`context:` オペレーターを使用して、[Post annotation](/ja/x-api/fundamentals/post-annotations) 機能を活用しました。まず、[Post lookup](/ja/x-api/posts/lookup/introduction) エンドポイントと `tweet.fields=context_annotations` フィールドパラメータを使用して、クエリで使用する必要がある domain.entity ID を特定しました。
+
+* 猫に関連するポストは、`domain` 66（Interests and Hobbies カテゴリ）と entity 852262932607926273（Cats）を返します。
+* ペットに関連するポストは、`domain` 65（Interests and Hobbies Vertical）と entity 852262932607926273（Pets）を返します。
+
+HTTP エンコードなしのクエリは次のようになります。
+
+`context:65.852262932607926273 -context:66.852262932607926273 -is:retweet has:images lang:ja`
+
+HTTP エンコードを行い、クエリパラメータと recent search エンドポイントの URI を含めると、クエリは次のようになります。
+
+`https://api.x.com/2/tweets/search/recent?query=context%3A65.852262932607926273%20-context%3A66.852262932607926273%20-is%3Aretweet%20has%3Aimages%20lang%3Aja`
+
+さらにサポートが必要な場合は、[query builder tool](https://developer.x.com/apitools/query?query=) を試してみてください。

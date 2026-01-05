@@ -1,0 +1,61 @@
+---
+title: v2 Account Activity API 마이그레이션 가이드
+keywords: ["Account Activity API 마이그레이션", "AAA 마이그레이션", "v2 마이그레이션", "API 마이그레이션 가이드", "v2로 마이그레이션", "Account Activity API v2"]
+---
+
+이 가이드는 레거시 Enterprise Account Activity API에서 v2 Account Activity API로 마이그레이션하는 데 도움이 됩니다. 핵심 기능은 동일하게 유지되지만, X API v2와의 일관성을 위해 엔드포인트 구조와 인증 방식이 업데이트되었습니다.
+
+<div id="summary-of-changes">
+  ### 변경 사항 요약
+</div>
+
+* **API 형식**: 엔드포인트는 /1.1/account\_activity/ 대신 /2/account\_activity/ 기본 경로(base path)를 사용합니다.  
+* **Webhook 관리**: 웹후크 생성, 조회, 검증(CRC), 삭제는 [V2 Webhooks API](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py)에서 처리합니다.  
+* **인증**: V2 엔드포인트에는 다음 둘 중 하나가 필요합니다.  
+  * 사용자 단위 작업(예: 사용자 구독 추가)의 경우 **OAuthUser**(3-legged OAuth)  
+  * 앱 수준 작업(예: 구독 조회/삭제)의 경우 **OAuth2 App Only**(Bearer Token)  
+  * V1.1은 주로 OAuth 1.0a를 포함해 서로 다른 인증 요건을 사용했습니다.  
+* **엔드포인트 매핑**:
+
+| V1.1 Endpoint | V2에 해당하는 엔드포인트 / 동작 | 비고 |
+| ----- | ----- | ----- |
+| POST /1.1/account\_activity/webhooks.json?url=\<URL\> | POST /2/webhooks | [Docs](https://docs.x.com/x-api/webhooks/introduction). OAuth2 App Only 필요. |
+| GET /1.1/account\_activity/webhooks.json | GET /2/webhooks | [Docs](https://docs.x.com/x-api/webhooks/introduction). OAuth2 App Only 필요. |
+| PUT /1.1/account\_activity/webhooks/:webhook\_id.json | PUT /2/webhooks/:webhook\_id | CRC를 트리거합니다. [Docs](https://docs.x.com/x-api/webhooks/introduction). OAuth2 App Only 필요. |
+| DELETE /1.1/account\_activity/webhooks/:webhook\_id.json | DELETE /2/webhooks/:webhook\_id | [Docs](https://docs.x.com/x-api/webhooks/introduction). OAuth2 App Only 필요. |
+| POST /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all.json | POST /2/account\_activity/webhooks/:webhook\_id/subscriptions/all | OAuthUser 필요. |
+| GET /1.1/account\_activity/subscriptions/count.json | GET /2/account\_activity/subscriptions/count | OAuth2 App Only 필요. |
+| GET /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all.json | GET /2/account\_activity/webhooks/:webhook\_id/subscriptions/all | OAuthUser 필요. |
+| GET /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all/list.json | GET /2/account\_activity/webhooks/:webhook\_id/subscriptions/all/list | OAuth2 App Only 필요. |
+| DELETE /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/:user\_id/all | DELETE /2/account\_activity/webhooks/:webhook\_id/subscriptions/:user\_id/all | OAuth2 App Only 필요. |
+| DELETE /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all | 사용 중단 / 직접 대응되는 항목 없음 | 개별 삭제를 사용하거나 DELETE /2/webhooks/:webhook\_id로 웹후크를 제거하세요. |
+
+* **응답 형식**: AAAPI 문서에서 성공 및 오류 응답 구조를 검토하세요.
+
+마이그레이션 시, 새 기본 경로를 사용하도록 코드를 업데이트하고 인증 플로를 조정하며, [V2 Webhooks API](https://docs.x.com/x-api/webhooks/introduction)로 웹후크를 관리하세요.
+
+<div id="how-to-migrate">
+  ### 마이그레이션 방법
+</div>
+
+* **패키지 선택**:  
+  * Account Activity API 액세스를 위해 Enterprise 또는 Pro 패키지를 선택하되, 다음 사항을 고려하십시오:  
+    * 필요한 웹훅 개수.  
+    * 현재/예상 구독 또는 인증된 사용자 수.  
+    * X 클라이언트 애플리케이션 수.  
+    * 원하는 지원 수준(포럼 vs. 관리형 Enterprise 1:1 지원).  
+    * 가격 세부 정보(Enterprise의 경우 영업팀에 문의).  
+* **OAuth 2.0으로 인증 업데이트**:  
+  * X 앱에 "읽기, 쓰기 및 다이렉트 메시지 액세스" 권한이 있는지 확인하십시오.  
+  * V2 엔드포인트를 위해 OAuth 2.0으로 업데이트하십시오. 범위가 변경된 경우 사용자를 다시 인증하십시오.  
+  * developer portal을 사용하여 다음을 관리하십시오:  
+    * OAuth 2.0 액세스 토큰.  
+    * Client ID 및 Client Secret.  
+* **웹훅 확인 또는 재구성**:  
+  * 기존 웹훅 URL을 사용하거나 새 URL을 설정하십시오(예: https://your\_domain.com/webhook/twitter).  
+  * [V2 Webhooks API 문서](https://docs.x.com/x-api/webhooks/introduction)를 참조하여 웹훅을 등록하고 관리하십시오.  
+* **샘플 앱:**  
+  * [간단한 웹훅 서버](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py)  
+    * CRC 확인에 응답하고 POST 이벤트를 수락하는 방법을 보여주는 단일 Python 스크립트입니다.  
+  * [Account Activity API 샘플 대시보드](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master)  
+    * [bun.sh](http://bun.sh)로 작성된 웹 앱으로, 웹훅 및 구독을 관리하고 앱에서 직접 실시간 이벤트를 수신할 수 있습니다.

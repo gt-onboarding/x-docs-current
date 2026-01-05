@@ -1,0 +1,45 @@
+---
+title: 分页
+keywords: ["Ads API pagination", "pagination", "cursor pagination", "page through results", "Ads API pagination tokens"]
+---
+
+为了支持更高的广告活动数量上限，并高效检索与某个账户关联的所有实体，Advertiser API 现在在多个 GET 端点上支持分页。该分页机制易于使用，并且与 REST API 中的基于游标的分页方式非常相似，详见 [Using cursors to navigate collections](https://developer.x.com/en/docs/x-api/v1/pagination)。
+
+<div id="getting-started">
+  ## 入门
+</div>
+
+对于特定的 GET 请求，我们现在接受可选的 `cursor` 和 `count` 查询参数。如果某个响应中包含的实体数量多于 `count`，这些端点会返回前 `count` 个实体，并在响应 JSON 中包含一个 `next_cursor` 键。
+
+`GET https://ads-api.x.com/5/accounts/abc1/campaigns?count=50`
+
+```json
+{
+  "data": \[...\],
+  "next_cursor": "c-3yvu1pzhd3i7",
+  "request": {...}
+}
+```
+
+要获取下一批响应，你需要在查询参数中加入 `cursor`：
+
+`GET https://ads-api.x.com/5/accounts/abc1/campaigns?cursor=c-3yvu1pzhd3i7&count=50`
+
+```json
+{
+  "data": \[...\],
+  "next_cursor": "c-3w3zdyg8ywan",
+  "request": {...}
+}
+```
+
+
+<div id="going-deeper">
+  ## 更深入了解
+</div>
+
+对于大多数端点，`count` 的最大值为 **1,000**，最小值为 **1**，默认值为 **200**。
+
+`next_cursor` 提供的值始终是字符串，应视为不透明；其实现可能会发生变化。如果在当前结果集页面中返回的实体少于 `count`，则 `next_cursor` 的值将为 `null`。
+
+**注意：**analytics 端点不支持这种方式的分页。stats 端点上的分页是通过指定时间区间来实现的。有关更多信息，请参阅各个端点的文档。

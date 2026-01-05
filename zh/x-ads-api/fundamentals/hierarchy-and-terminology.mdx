@@ -1,0 +1,174 @@
+---
+title: "Ads API 层级结构和术语"
+keywords: ["Ads API 层级结构", "广告层级结构", "广告术语", "账户结构", "广告系列结构", "广告结构"]
+---
+
+要在 Ads API 中取得良好效果，了解 X Ads 中各实体之间的关系非常重要。本教程将介绍 X Ads 对象层级结构的基本概念。
+
+![X Ads API 层级结构](/images/adsapi-heirarchy.png.twimg.1920.png)
+
+<div id="ad-group-line-items">
+  ## 广告组（line items）
+</div>
+
+广告组在 Ads API 中称为 [line items](https://developer.x.com/content/developer-twitter/en/docs/tutorials/ads-api-hierarchy-terminology#line-items)，隶属于广告活动（campaign），用于对一组 X 用户进行定向投放和出价。广告主通过将帖子或媒体（例如作为 In-stream 广告推广的视频）与某个 line item 关联来进行推广。另见 Ad Group。
+
+<div id="account-media">
+  ## 账户媒体
+</div>
+
+一组作为[账户媒体](/zh/x-ads-api/creatives#account-media)上传到广告账户的创意素材集合，其中可以包括推广视频的[前贴片资源](/zh/x-ads-api/campaign-management#video-views-preroll-objective)（也称为流内广告），以及可在 [X Audience Platform](https://developer.x.com/content/developer-twitter/en/docs/ads/measurement/overview/twitter-audience-platform) 上投放的图片。
+
+<div id="ads-accounts">
+  ## 广告账户
+</div>
+
+在 X Ads 的层级结构最顶层是广告账户。一个广告账户可以由多个 X 用户管理。@Furni，我们的示例家具商店，就是管理广告账户的用户示例。我们通过一个 account&#95;id 来标识广告账户，它是一个 [base36](https://en.wikipedia.org/wiki/Base36) 编码的字母数字字符串。
+
+在每个账户下，我们存储了一些可以在多个广告系列中复用的实体类型，例如可用于定向的定制受众、账户媒体（视频或图片），以及卡片（一种可以添加到帖子中的扩展创意素材）。
+
+<div id="amplify-video">
+  ## Amplify 视频
+</div>
+
+在上传视频素材时，上传方可以为该视频定义一个类别（例如 Tweet Video、Tweet Gif、Tweet Image 和 Amplify Video）。当你尝试上传将作为流内广告投放的视频时，必须使用 Amplify Video 类别。此类视频需要经过特殊处理以确保可以被投放，因此媒体类别必须设置为 Amplify Video。
+
+<div id="analytics">
+  ## 分析
+</div>
+
+分析指标可帮助合作伙伴和广告主了解他们在 X 上推广内容的投放效果。这包括展示次数、点击次数、视频观看次数和花费等信息。此外，合作伙伴和广告主还可以获取其触达受众中各类细分群体的详细指标。
+
+Ads API 支持两种获取详细广告系列表现指标的方式：同步和异步。
+
+通过[同步分析](/zh/x-ads-api/analytics#synchronous-analytics)请求，所请求的指标会直接在响应中返回。同步端点支持较短的时间范围，非常适合用于查询广告系列的实时表现。
+
+通过[异步分析](/zh/x-ads-api/analytics#asynchronous-analytics)端点，所请求的指标会在关联的“作业”处理完成后，以可下载结果文件的形式提供。异步端点支持在更长的时间范围内请求指标，允许返回细分数据，并适用于获取规模更大的数据——非常适合用于生成报表或进行历史数据回填。
+
+<div id="campaigns">
+  ## 广告系列
+</div>
+
+广告主投放的每一个广告系列都必须在现有的资金工具下创建。通过广告系列，你可以定义广告活动的名称、投放排期和预算等内容。延续 Furni 的示例，我们可以创建一个名为 “Furni home decor” 的广告系列。
+
+需要注意的是，一个广告账户最多只能拥有 200 个处于活动状态的广告系列；该上限可以由广告主的客户经理提升。广告系列会被视为“活动中”，直到到达其结束时间或耗尽其预算。已暂停的广告系列在计算广告系列数量上限时仍被视为活动中的广告系列。
+
+<div id="cards">
+  ## 卡片
+</div>
+
+卡片提供了一种在视觉上扩展帖子的方式，可以包含图片、视频或 UI 元素。Ads API 支持多种卡片类型，可用于帖子，并可在广告活动中进行推广。
+
+<div id="creatives">
+  ## 广告素材
+</div>
+
+广告主可以在包含广告素材的广告系列中推广帖子，这些素材可以是图片、GIF 和视频等。这些素材可以与 X 卡片关联，从而在帖子中附加丰富的照片、视频和媒体体验。素材也可以直接附加到帖子中。例如，你可以同时包含文本和视频（或最多 3 张图片），并创建一条推广帖子。
+
+每个广告单元都必须至少关联一个广告素材才能投放。可用的素材选项包括：用于获取新关注者的 Promoted Accounts（推广账号）、用于 TX Audience Platform 各类广告单元的图片或视频等 Media Creatives（媒体素材），以及 Promoted Posts（推广帖子）。
+
+<div id="funding-instruments">
+  ## 资金工具
+</div>
+
+广告账户下还包括资金工具，即广告主为在 X Ads 中使用而设置的不同资金来源。这些资金来源形式多样，从他们与 X 签署的插入订单，到绑定到该账户的信用卡等。
+
+<div id="line-items">
+  ## 广告组（Line Items）
+</div>
+
+在一个推广活动中，你可以设置一个或多个广告组，在 Ads API 中也称为 line items。可以将广告组视为推广活动中的不同细分单元，每个广告组都有自己的一套定向设置和对应的创意素材。包含多个广告组的推广活动通常被称为“广告组推广活动（ad group campaigns）”。
+
+在单个推广活动中使用多个广告组的一个好处是，你可以创建更加多样化的定向与创意素材组合。
+
+在我们的 “Furni home decor” 推广活动下，我们可能希望创建两个广告组：一个是 “Home buyers in San Francisco”，另一个是 “Home buyers in London”。
+
+每个推广活动最多允许创建 100 个广告组，一个 Ads 账户在所有推广活动中合计最多允许拥有 4,000 个处于启用状态的广告组。
+
+<div id="mobile-app-promotion-map">
+  ## 移动应用推广（MAP）
+</div>
+
+移动应用推广（Mobile App Promotion，简称 MAP）是一套产品套件，使广告主能够通过 X 推广移动应用，包括应用安装、转化和再互动等目标。
+
+<div id="mobile-app-conversion-tracking-mact">
+  ## 移动应用转化跟踪（MACT）
+</div>
+
+X 移动应用推广成效衡量功能，允许广告主跟踪在 X 上旨在推动应用安装或其他应用内转化的广告活动效果。X 的移动应用测量合作伙伴，使广告主能够管理他们希望从其在 X 上推广的应用中进行跟踪的转化。MACT 概览
+
+<div id="media-library">
+  ## 媒体库
+</div>
+
+媒体库端点可用于为 X Ads 账户管理图片、GIF 和视频。库中的媒体资产可以用于帖子和创建卡片，也可以在多个创意中重复使用，从而无需反复上传同一资产。
+
+<div id="promoted-accounts">
+  ## 推广账号
+</div>
+
+推广账号（粉丝推广活动）是 Who to Follow 功能的一部分，该功能会向用户推荐他们当前尚未关注但可能感兴趣的账号。推广账号有助于向用户展示更多他们可能会喜欢的各类账号。
+
+推广账号使广告主可以推广其账号，并在 X 上扩大受众群体。粉丝推广活动会在 X 平台的多个位置展示——包括首页时间线、Who to Follow，以及搜索结果——并会被标记为 Promoted，以将其与其他推荐账号区分开来。
+
+<div id="promotable-users">
+  ## 可投放用户
+</div>
+
+每个 X Ads 账户可以有一个或多个可投放用户，即我们可以通过该广告账户进行推广的用户。Furni 的 @Furni 账号就是 Furni 广告账户下一个完全可投放用户（FULL）的示例，这意味着我们可以为 @Furni 及其帖子投放所有类型的广告系列。一个广告账户只能有一个完全可投放用户（FULL）。
+
+注意，一个广告账户下还可以有其他可投放用户。例如，如果我们想推广 @Jack 关于 Furni 产品的帖子，他将在该账户上成为仅限转发的可投放用户，其类型在系统中标记为 RETWEETS&#95;ONLY。广告主应联系其 X 客户经理，了解如何将仅转发用户添加到其广告账户中。
+
+<div id="promoted-video">
+  ## 推广视频
+</div>
+
+推广视频是出现在推广帖子中的视频，由广告主付费投放。它们会出现在主页时间线、X 上搜索结果的顶部以及平台的其他位置，并会被清晰标注为“推广”。
+
+<div id="publisher-network">
+  ## 发布商网络
+</div>
+
+请参阅 [X Audience Platform](/zh/x-ads-api/audiences)。
+
+<div id="scheduled-tweets">
+  ## 排期帖子
+</div>
+
+排期帖子允许广告主或用户创建一个帖子，并将其安排在未来的某个时间上线。除了能够创建和管理这些帖子之外，API 还允许将这些帖子与一个广告项目（line item）关联，以便在帖子上线后进行推广。这样，广告主就可以预先创建原生帖子，并提前规划广告活动创意，以配合任何关键节点。例如，将一个帖子创意预先排期为在新品发布公告发出的同时立即上线。
+
+<div id="segmentation">
+  ## 细分
+</div>
+
+细分允许合作伙伴和广告主按特定定向维度（例如年龄、设备或语言）分别获取指标，并且仅能通过我们的异步分析端点获取。要请求细分指标，请使用 `segmentation_type` 请求参数。有关细分选项的更多详细信息，请参阅 Metrics and Segmentation。
+
+<div id="tailored-audience-list">
+  ## 自定义受众 - 列表
+</div>
+
+基于列表的自定义受众是三种自定义受众类型之一，通过上传包含你自有用户和客户数据的文件创建。你的列表会与 X 上的用户进行匹配，从而使你可以在广告活动中直接定向触达他们。请查阅这些限制条件。
+
+<div id="tailored-audience-web">
+  ## 定制受众 - Web
+</div>
+
+来自 Web 的定制受众是三种定制受众类型之一，由曾访问过你网站的 X 用户组成。要使用来自 Web 的定制受众，你必须在你的网站上安装我们的 X pixel，或使用我们认可的标签管理合作伙伴之一。请查阅相关限制条件。
+
+<div id="targeting-criteria">
+  ## 定向条件
+</div>
+
+如前所述，定向条件是与某个广告项目（line item）关联的。你可以使用多种不同的定向方式，从位置、关键词和性别，到更细粒度的属性，比如用户行为和兴趣。对于 “Home Buyers in San Francisco” 这个广告项目，我们可能会同时定向到 “home buying” 行为以及 “San Francisco” 这个位置。
+
+要了解可用的不同类型的定向，请访问我们开发者网站上的 Targeting Overview 页面。
+
+<div id="twitter-object-nest-ton">
+  ## Twitter Object Nest (TON)
+</div>
+
+Twitter Object Nest (TON) 用来存储通过 Media Upload 端点上传的媒体和各类素材，以供 Creatives 使用。
+
+## 创意素材
+
+每个广告单元都必须至少关联一个创意素材才能投放。可用的创意类型包括：用于获取新关注者的 Promoted Accounts、适用于整个 X Audience Platform 上广告单元的图片或视频等 Media Creatives，或 Promoted Posts。下面是一个 @Furni 可以进行推广并用作创意素材的帖子示例。

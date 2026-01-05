@@ -1,0 +1,175 @@
+---
+title: "ページネーション"
+sidebarTitle: "ページネーション"
+---
+
+SDK は、ページネーション対応のレスポンスを返すあらゆるエンドポイントで利用できる汎用的なページネーター用ユーティリティを提供します。メソッドは通常のレスポンスを返し、それをページネーターでラップして使用します。
+
+<div id="basic-pagination">
+  ### 基本的なページネーション
+</div>
+
+<CodeGroup dropdown>
+
+```typescript quick-start.ts theme={null}
+import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform/xdk';
+
+const client: Client = new Client({ bearerToken: 'your-bearer-token' });
+
+// 任意のリスト系エンドポイントを、適切な型情報付きでラップする
+const followers: UserPaginator = new UserPaginator(
+  async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
+    const res = await client.users.getFollowers('<userId>', {
+      maxResults: 100,
+      paginationToken: token,
+      userFields: ['id','name','username'],
+    });
+    return { 
+      data: res.data ?? [], 
+      meta: res.meta, 
+      includes: res.includes, 
+      errors: res.errors 
+    };
+  }
+);
+```
+
+```javascript quick-start.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+import { UserPaginator } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const followers = new UserPaginator(async (token) => {
+  const res = await client.users.getFollowers('<userId>', {
+    maxResults: 100,
+    paginationToken: token,
+    userFields: ['id','name','username'],
+  });
+  return { data: res.data ?? [], meta: res.meta, includes: res.includes, errors: res.errors };
+});
+```
+
+</CodeGroup>
+
+<div id="manual-paging">
+  ### 手動ページング
+</div>
+
+<CodeGroup>
+
+```typescript manual.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+await followers.fetchNext();          // 1ページ目
+while (!followers.done) {
+  await followers.fetchNext();        // 2ページ目以降
+}
+
+const userCount: number = followers.users.length;  // 取得済みユーザーの総数
+const firstUser: Schemas.User | undefined = followers.users[0];
+const nextToken: string | undefined = followers.meta?.next_token;
+```
+
+```javascript manual.js theme={null}
+await followers.fetchNext();
+while (!followers.done) await followers.fetchNext();
+console.log(followers.items.length);
+```
+
+</CodeGroup>
+
+<div id="async-iteration">
+  ### 非同期イテレーション
+</div>
+
+<CodeGroup>
+
+```typescript async.ts theme={null}
+import { Schemas } from '@xdevplatform/xdk';
+
+for await (const user of followers) {
+  const typedUser: Schemas.User = user;
+  console.log(typedUser.username);  // 型安全なアクセス
+}
+```
+
+```javascript async.js theme={null}
+for await (const user of followers) {
+  console.log(user.username);
+}
+```
+
+</CodeGroup>
+
+<div id="next-page-as-a-new-instance">
+  ### 次のページを新しいインスタンスとして扱う
+</div>
+
+<CodeGroup>
+
+```typescript next.ts theme={null}
+import { UserPaginator } from '@xdevplatform/xdk';
+
+await followers.fetchNext();
+if (!followers.done) {
+  const page2: UserPaginator = await followers.next(); // 次のページから開始する独立した Paginator
+  await page2.fetchNext();
+  console.log(page2.users.length);  // 2 ページ目の要素
+}
+```
+
+```javascript next.js theme={null}
+await followers.fetchNext();
+if (!followers.done) {
+  const page2 = await followers.next();
+  await page2.fetchNext();
+}
+```
+
+</CodeGroup>
+
+<div id="error-handling-and-rate-limits">
+  ### エラー処理とレート制限
+</div>
+
+<CodeGroup>
+
+```typescript errors.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+try {
+  for await (const item of followers) {
+    const user: Schemas.User = item;
+    // ユーザーを処理...
+  }
+} catch (err: unknown) {
+  if (followers.rateLimited) {
+    console.error('レート制限に達しました。バックオフが必要です');
+    // バックオフして後で再試行
+  } else {
+    console.error('ページネーションエラー:', err);
+    throw err;
+  }
+}
+```
+
+```javascript errors.js theme={null}
+try {
+  for await (const item of followers) {
+    // ...
+  }
+} catch (err) {
+  if (followers.rateLimited) {
+    // バックオフして後で再試行
+  } else {
+    throw err;
+  }
+}
+```
+
+</CodeGroup>
+
+<Info>
+JavaScript/TypeScript XDK を使用した詳細なコード例については、[コードサンプルの GitHub リポジトリ](https://github.com/xdevplatform/samples/tree/main/javascript)を参照してください。
+</Info>

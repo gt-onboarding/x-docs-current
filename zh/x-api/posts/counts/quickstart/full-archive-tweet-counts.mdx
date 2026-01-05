@@ -1,0 +1,261 @@
+---
+title: 搜索帖子（完整存档）
+sidebarTitle: 搜索帖子（完整存档）
+keywords: ["完整存档帖子计数快速入门", "存档计数快速入门", "历史计数快速入门", "完整存档计数"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-full-archive-post-counts-endpoint">
+  ### 开始使用完整存档帖子计数端点
+</div>
+
+本快速入门指南将帮助你使用 Postman（一款用于发送 HTTP 请求的图形化工具）向完整存档帖子计数端点发出第一个请求。
+
+如果你希望查看不同编程语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。
+
+<Note>
+  ### 前提条件
+
+  完整存档帖子计数端点目前仅向拥有 Pro 或 Enterprise 访问权限的用户开放。要使用此端点，你必须先申请 Pro 或 [Enterprise 访问权限](https://docs.google.com/forms/d/e/1FAIpQLScO3bczKWO2jFHyVZJUSEGfdyfFaqt2MvmOfl_aJp0KxMqtDA/viewform)。
+
+  除了获得访问权限之外，你还需要一组用于对请求进行身份验证的[密钥和令牌](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * 在开发者门户中，进入具有 Enterprise 访问权限的[项目](/zh/resources/fundamentals/projects)，并确保在该项目中关联了一个[开发者应用](/zh/resources/fundamentals/developer-apps)。
+
+  * 进入你的应用的“Keys and tokens”页面以生成所需的凭证。请务必将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-build-a-full-archive-post-counts-request">
+  #### 构建全量归档帖子计数请求的步骤
+</div>
+
+**第一步：先选择一个工具或库**
+
+有多种不同的工具、代码示例和库可以用来向此端点发起请求，但在这里我们将使用 Postman 工具来简化流程。
+
+要将 X API v2 的 Postman 集合加载到你的环境中，请点击下面的按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 之后，导航到 Post counts &gt; Full-archive Post counts 请求。
+
+**第二步：对请求进行身份验证**
+
+要正确向 X API 发起请求，你需要确认自己拥有相应的权限。对于这个端点，你必须使用 [OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 身份验证方式对请求进行认证。
+
+你必须将你的密钥和令牌，特别是[应用访问令牌（App Access Token）](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（也称为应用仅 Bearer Token）添加到 Postman 中。你可以通过在 Postman 右上角选择名为 “X API v2” 的环境，然后在 &quot;initial value&quot; 和 &quot;current value&quot; 字段中添加你的密钥和令牌（点击环境下拉菜单旁边的眼睛图标）来完成此操作。
+
+如果你正确完成了上述操作，此变量会自动填充到请求的 Authorization 选项卡中。
+ 
+
+**第三步：创建查询**
+
+每个全量归档帖子计数请求都需要一个[查询](/zh/x-api/posts/counts/integrate/build-a-query)。在本示例中，我们将使用一个匹配 @XDevelopers 账号发布的帖子的查询。对于这个查询，我们使用 from 运算符并将其设置为 XDevelopers（不区分大小写）：
+
+`from:XDevelopers`
+
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，并将此 ID，或以逗号分隔的一串帖子 ID，输入到 `ids` 参数的 &quot;Value&quot; 列中。
+ 
+
+| Key | Value | Description |
+| :--- | :--- | :--- |
+| `query` | `from:XDevelopers` | 提交到全量归档帖子计数端点的查询 |
+
+第四步（可选）：指定粒度和时间范围
+
+如果你在完成第三步后点击 “Send” 按钮，你将获得默认的全量归档帖子计数结果：最近 30 天内按小时划分的计数。如果你想按天获取全量归档帖子计数，你需要添加 granularity 参数并将其值设置为 day。如果你想获取 30 天之前的帖子计数，你需要指定 start&#95;time 和 end&#95;time 参数及其所需的值。 
+
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，并在 &quot;Query Params&quot; 表中添加以下键值对：
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| granularity | day | 帖子计数结果的粒度。可选值为 day、hour 或 minute |
+| start&#95;time | 2021-05-01T00:00:00Z | 提供帖子数据的最早 UTC 时间戳 |
+| end&#95;time | 2021-06-01T00:00:00Z | 提供帖子数据的最早 UTC 时间戳。 |
+
+你现在应该会在 “Send” 按钮旁边看到如下 URL：
+
+`https://api.x.com/2/tweets/counts/all?query=from%3AXDevelopers&start_time=2021-05-01T00:00:00Z&end_time=2021-06-01T00:00:00Z&granularity=day`
+
+**第五步：发起请求并查看响应**
+
+在完成所有设置之后，点击 “Send” 按钮，你将会收到类似如下的响应：
+
+```
+{
+   "data": [
+       {
+           "end": "2021-05-02T00:00:00.000Z",
+           "start": "2021-05-01T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-03T00:00:00.000Z",
+           "start": "2021-05-02T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-04T00:00:00.000Z",
+           "start": "2021-05-03T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-05T00:00:00.000Z",
+           "start": "2021-05-04T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-06T00:00:00.000Z",
+           "start": "2021-05-05T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-07T00:00:00.000Z",
+           "start": "2021-05-06T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-08T00:00:00.000Z",
+           "start": "2021-05-07T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-09T00:00:00.000Z",
+           "start": "2021-05-08T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-10T00:00:00.000Z",
+           "start": "2021-05-09T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-11T00:00:00.000Z",
+           "start": "2021-05-10T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-12T00:00:00.000Z",
+           "start": "2021-05-11T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-13T00:00:00.000Z",
+           "start": "2021-05-12T00:00:00.000Z",
+           "帖子数量": 6
+       },
+       {
+           "end": "2021-05-14T00:00:00.000Z",
+           "start": "2021-05-13T00:00:00.000Z",
+           "帖子数量": 1
+       },
+       {
+           "end": "2021-05-15T00:00:00.000Z",
+           "start": "2021-05-14T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-16T00:00:00.000Z",
+           "start": "2021-05-15T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-17T00:00:00.000Z",
+           "start": "2021-05-16T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-18T00:00:00.000Z",
+           "start": "2021-05-17T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-19T00:00:00.000Z",
+           "start": "2021-05-18T00:00:00.000Z",
+           "帖子数量": 1
+       },
+       {
+           "end": "2021-05-20T00:00:00.000Z",
+           "start": "2021-05-19T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-21T00:00:00.000Z",
+           "start": "2021-05-20T00:00:00.000Z",
+           "帖子数量": 8
+       },
+       {
+           "end": "2021-05-22T00:00:00.000Z",
+           "start": "2021-05-21T00:00:00.000Z",
+           "帖子数量": 1
+       },
+       {
+           "end": "2021-05-23T00:00:00.000Z",
+           "start": "2021-05-22T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-24T00:00:00.000Z",
+           "start": "2021-05-23T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-25T00:00:00.000Z",
+           "start": "2021-05-24T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-26T00:00:00.000Z",
+           "start": "2021-05-25T00:00:00.000Z",
+           "帖子数量": 1
+       },
+       {
+           "end": "2021-05-27T00:00:00.000Z",
+           "start": "2021-05-26T00:00:00.000Z",
+           "帖子数量": 1
+       },
+       {
+           "end": "2021-05-28T00:00:00.000Z",
+           "start": "2021-05-27T00:00:00.000Z",
+           "帖子数量": 1
+       },
+       {
+           "end": "2021-05-29T00:00:00.000Z",
+           "start": "2021-05-28T00:00:00.000Z",
+           "帖子数量": 2
+       },
+       {
+           "end": "2021-05-30T00:00:00.000Z",
+           "start": "2021-05-29T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-05-31T00:00:00.000Z",
+           "start": "2021-05-30T00:00:00.000Z",
+           "帖子数量": 0
+       },
+       {
+           "end": "2021-06-01T00:00:00.000Z",
+           "start": "2021-05-31T00:00:00.000Z",
+           "帖子数量": 0
+       }
+   ],
+   "meta": {
+       "总帖子数量": 22
+   }
+}
+```
+
+**步骤六：分页获取结果**
+
+如果响应中的 `meta` 对象也包含 `next_token`，你可以将它的值传递给 `next_token` 查询参数。
+
+| Key | Value | Description |
+| :--- | :--- | :--- |
+| next&#95;token | 将你在上一个请求的 `meta` 对象中获取到的 `next_token` 填写在这里。 | 如果你最新的请求没有返回所有剩余结果，你会在 `meta` 对象中收到一个 `next_token`。你需要读取该字段的值，并在下一次请求中将其作为 `next_token` 参数的值，其他请求参数保持不变。 |
+
+在正确设置好 `next_token` 的值之后，点击 &quot;Send&quot; 按钮，即可获取下一页的结果。

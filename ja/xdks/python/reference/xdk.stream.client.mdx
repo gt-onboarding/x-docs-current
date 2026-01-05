@@ -1,0 +1,771 @@
+---
+title: "StreamClient"
+sidebarTitle: "StreamClient"
+---
+
+このモジュールは、X API のストリームエンドポイントとやり取りするためのクライアントを提供します。
+リアルタイムのストリーミング処理は、データの到着に応じて順次データを生成するジェネレーターを返します。
+ストリーミング接続は、自動的に指数バックオフのリトライロジックで管理され、堅牢に動作します。
+
+<div id="streamclient">
+  ## StreamClient
+</div>
+
+<Badge color="blue">クラス</Badge>
+
+<Badge color="gray">基底クラス: object</Badge>
+
+ストリーム操作を行うための Client
+
+<div id="constructors">
+  ## コンストラクター
+</div>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+#### パラメータ
+
+<ParamField path="path.client" type="Client"></ParamField>
+
+<div id="get_rule_counts">
+  ### `get_rule_counts`
+</div>
+
+ストリームルール数を取得
+filtered stream のアクティブなルールセットに含まれるルール数を取得します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.rules_count_fields" type="List or None" default="None">
+表示する RulesCount フィールドをカンマ区切りで指定します。
+</ParamField>
+
+<div id="returns">
+  #### 戻り値
+</div>
+
+`GetRuleCountsResponse` - レスポンス データ
+
+<div id="get_rules">
+  ### `get_rules`
+</div>
+
+ストリームルールを取得
+filtered stream のアクティブなルールセット、またはその一部のルールを取得します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.ids" type="List or None" default="None">
+カンマ区切りのルールIDのリストです。
+</ParamField>
+
+<ParamField path="path.max_results" type="int or None" default="None">
+結果の最大数です。
+</ParamField>
+
+<ParamField path="path.pagination_token" type="str or None" default="None">
+結果をページネーションするために、前のリクエストで返された `next_token` を渡すことで設定される値です。
+</ParamField>
+
+<div id="returns">
+  #### 戻り値
+</div>
+
+`IteratorGetRulesResponse`
+
+<div id="labels_compliance">
+  ### `labels_compliance`
+</div>
+
+ポストラベルのストリーミング（Streaming）
+ポストに適用されたすべてのラベル付けイベントをストリーミングします。
+このエンドポイントはストリーミングエンドポイントであり、利用可能になり次第リアルタイムでデータを配信します。
+ストリームから順次出力される各アイテムは、単一のデータポイントを表します。
+接続は、指数バックオフを用いた再試行ロジックによって自動的に管理されます。
+ストリームが切断された場合でも、SDK はクライアント側の操作なしに自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルとして要求する時間（分）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストのラベルが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストのラベルが提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="likes_compliance">
+  ### `likes_compliance`
+</div>
+
+いいねに関するコンプライアンスデータをストリーミングします（Streaming）
+ユーザーのいいねに関連するすべてのコンプライアンスデータをストリーム配信します。
+これは、データが利用可能になり次第リアルタイムでデータを返すストリーミングエンドポイントです。
+返される各アイテムは、ストリームからの 1 つのデータポイントを表します。
+接続は、指数バックオフによる再試行ロジックで自動的に管理されます。
+ストリームが切断された場合でも、SDK がクライアント側の操作なしに自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+リクエストするバックフィルの時間（分）を指定します。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。Likes Compliance イベントが提供される最も早い UTC タイムスタンプを指定します。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。Likes Compliance イベントが提供される最も遅い UTC タイムスタンプを指定します。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="likes_firehose">
+  ### `likes_firehose`
+</div>
+
+すべてのLikeをストリーミングします (ストリーミング)
+すべての公開Likeをリアルタイムでストリーミングします。
+これはストリーミングエンドポイントであり、利用可能になり次第、リアルタイムにデータを出力します。
+出力される各アイテムは、ストリームからの単一のデータポイントを表します。
+接続は指数バックオフのリトライロジックによって自動的に管理されます。
+ストリームが切断された場合、SDKはクライアント側での操作なしに自動的に再接続します。
+
+#### パラメータ
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルをリクエストする時間（分単位）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。Likes が提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。Posts が提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
+表示する LikeWithTweetAuthor フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示する User フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示する Tweet フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするための省略可能な StreamConfig。
+</ParamField>
+
+<div id="likes_sample10">
+  ### `likes_sample10`
+</div>
+
+いいねのサンプル配信（ストリーミング）
+公開いいねの 10% サンプルをリアルタイムでストリーミングします。
+これは、データが利用可能になり次第リアルタイムで配信するストリーミングエンドポイントです。
+配信される各アイテムは、ストリームからの 1 つのデータポイントを表します。
+接続は、指数バックオフによるリトライロジックで自動的に管理されます。
+ストリームが切断された場合、SDK はクライアント側での介入なしに自動的に再接続します。
+
+#### パラメータ
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルを行う時間（分単位）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。いいねが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.like_with_tweet_author_fields" type="List or None" default="None">
+表示する LikeWithTweetAuthor フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示する User フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+再試行動作、タイムアウト、コールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="posts">
+  ### `posts`
+</div>
+
+フィルターされたポストのストリーミング
+アクティブなルールセットに一致するポストをリアルタイムでストリームします。
+これは、データが利用可能になり次第リアルタイムで返すストリーミングエンドポイントです。
+受信する各アイテムは、ストリームからの 1 つのデータポイントを表します。
+この接続は、指数バックオフを用いたリトライロジックにより自動的に管理されます。
+ストリームが切断された場合、クライアント側での操作なしに SDK が自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルを要求する分数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最新の UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアのフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する Poll のフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示する User のフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する Place のフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+再試行動作、タイムアウト、コールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="posts_compliance">
+  ### `posts_compliance`
+</div>
+
+ポストのコンプライアンスデータをストリーミングします（Streaming）
+ポストに関連するすべてのコンプライアンスデータをストリーミングします。
+これはストリーミングエンドポイントであり、利用可能になり次第データをリアルタイムで返します。
+ストリームから返される各アイテムは、ストリーム内の 1 つのデータポイントを表します。
+接続は指数バックオフのリトライロジックによって自動的に管理されます。
+ストリームが切断された場合でも、SDK はクライアント側での介入なしに自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルを行う時間（分）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストコンプライアンスイベントを取得する最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストコンプライアンスイベントを取得する最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするための省略可能な StreamConfig。
+</ParamField>
+
+<div id="posts_firehose">
+  ### `posts_firehose`
+</div>
+
+すべてのポストをストリーミング配信する（Streaming）
+公開されているすべてのポストをリアルタイムでストリーミング配信します。
+これは、データが利用可能になり次第リアルタイムで返すストリーミングエンドポイントです。
+生成される各アイテムは、ストリームからの 1 つのデータポイントを表します。
+接続は指数バックオフを用いた再試行ロジックによって自動的に管理されます。
+ストリームが切断された場合でも、クライアント側の操作なしに SDK が自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+要求するバックフィル時間（分単位）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが返される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが返される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアのフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する投票のフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示するユーザーのフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する場所のフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするための省略可能な StreamConfig。
+</ParamField>
+
+<div id="posts_firehose_en">
+  ### `posts_firehose_en`
+</div>
+
+英語のポストをストリーミング（Streaming）
+公開されている英語のポストをすべてリアルタイムでストリーミングします。
+これは、データが利用可能になり次第リアルタイムで返すストリーミングエンドポイントです。
+ストリームから得られる各アイテムは、ストリーム中の単一のデータポイントを表します。
+接続は、指数バックオフを用いた再試行ロジックによって自動的に管理されます。
+ストリームが切断された場合でも、クライアント側での操作なしに SDK が自動的に再接続します。
+
+#### パラメータ
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+要求するバックフィルの分数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアのフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する投票のフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示するユーザーのフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する場所のフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+再試行動作、タイムアウト、およびコールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="posts_firehose_ja">
+  ### `posts_firehose_ja`
+</div>
+
+日本語のポストをストリーミングする (Streaming)
+公開されているすべての日本語のポストをリアルタイムでストリーミングします。
+これは、利用可能になり次第リアルタイムでデータを返すストリーミングエンドポイントです。
+生成される各アイテムは、ストリームからの 1 つのデータポイントを表します。
+接続は、指数バックオフを用いたリトライロジックによって自動的に管理されます。
+ストリームが切断された場合でも、SDK はクライアント側での操作なしに自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルとして取得する時間（分）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する投票フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示するユーザーフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する場所フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、およびコールバックをカスタマイズするための省略可能な StreamConfig。
+</ParamField>
+
+<div id="posts_firehose_ko">
+  ### `posts_firehose_ko`
+</div>
+
+韓国語のポストをストリーミングします（Streaming）
+公開されているすべての韓国語のポストをリアルタイムでストリーミングします。
+これはストリーミングエンドポイントであり、利用可能になり次第リアルタイムにデータを返します。
+出力される各項目は、ストリームからの単一のデータポイントを表します。
+接続は指数バックオフによるリトライロジックで自動的に管理されます。
+ストリームが切断された場合でも、クライアント側での操作なしに SDK が自動的に再接続します。
+
+#### パラメータ
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルとして要求する時間（分）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も早い UTC のタイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も遅い UTC のタイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する Poll フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示する User フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する Place フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+再試行動作、タイムアウト、およびコールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="posts_firehose_pt">
+  ### `posts_firehose_pt`
+</div>
+
+ポルトガル語のポストをストリーミング配信します（Streaming）
+公開されているすべてのポルトガル語のポストをリアルタイムでストリーミング配信します。
+これは、利用可能になり次第データをリアルタイムで返すストリーミングエンドポイントです。
+返される各アイテムは、ストリームからの 1 つのデータポイントを表します。
+接続は、指数バックオフを用いた再試行ロジックによって自動的に管理されます。
+ストリームが切断された場合、クライアント側の操作なしに SDK が自動的に再接続します。
+
+#### パラメータ
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルを行う時間（分単位）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアのフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する投票のフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示するユーザーのフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する場所のフィールドをカンマ区切りで指定するリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、およびコールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="posts_sample">
+  ### `posts_sample`
+</div>
+
+サンプルポストをストリーミングします (Streaming)
+公開ポストの1%のサンプルをリアルタイムでストリーミングします。
+これは、利用可能になり次第リアルタイムでデータを返すストリーミングエンドポイントです。
+返される各アイテムは、ストリームからの1つのデータポイントを表します。
+接続は指数バックオフ方式の再試行ロジックによって自動的に管理されます。
+ストリームが切断された場合、SDKはクライアント側での操作なしに自動で再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルを要求する時間（分単位）。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストのフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアのフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する Poll のフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示する User のフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示する Place のフィールドをカンマ区切りで指定したリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="posts_sample10">
+  ### `posts_sample10`
+</div>
+
+ポストを10%サンプリングしてストリーミングします（Streaming）
+公開ポストの10%サンプルをリアルタイムでストリーミングします。
+これは、利用可能になり次第リアルタイムでデータを返すストリーミングエンドポイントです。
+生成される各アイテムは、ストリームからの1つのデータポイントを表します。
+接続は指数バックオフを用いたリトライロジックによって自動的に管理されます。
+ストリームが切断された場合でも、SDK はクライアント側の操作なしで自動的に再接続します。
+
+<div id="parameters">
+  #### パラメーター
+</div>
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルをリクエストする時間（分）。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も早い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。ポストが提供される最も遅い UTC タイムスタンプ。
+</ParamField>
+
+<ParamField path="path.tweet_fields" type="List or None" default="None">
+表示するポストフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.expansions" type="List or None" default="None">
+展開するフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.media_fields" type="List or None" default="None">
+表示するメディアフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.poll_fields" type="List or None" default="None">
+表示する投票フィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.user_fields" type="List or None" default="None">
+表示するユーザーフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.place_fields" type="List or None" default="None">
+表示するプレイスフィールドのカンマ区切りリスト。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、コールバックをカスタマイズするためのオプションの StreamConfig。
+</ParamField>
+
+<div id="update_rules">
+  ### `update_rules`
+</div>
+
+ストリームのルールを更新します
+filtered stream のアクティブなルールセットに対して、ルールを追加または削除します。
+
+#### パラメータ
+
+<ParamField path="body.body" type="UpdateRulesRequest">
+リクエストボディ
+</ParamField>
+
+<div id="users_compliance">
+  ### `users_compliance`
+</div>
+
+Users のコンプライアンスデータをストリーミングします（Streaming）。
+Users に関連するすべてのコンプライアンスデータをストリーミング配信します。
+これは、データが利用可能になり次第リアルタイムで返すストリーミングエンドポイントです。
+返される各項目は、ストリームからの 1 つのデータポイントを表します。
+接続は、指数バックオフを用いた再試行ロジックによって自動的に管理されます。
+ストリームが切断された場合でも、SDK はクライアント側の操作なしに自動で再接続します。
+
+#### パラメータ
+
+<ParamField path="path.partition" type="int">
+パーティション番号。
+</ParamField>
+
+<ParamField path="path.backfill_minutes" type="int or None" default="None">
+バックフィルを行う時間（分）数。
+</ParamField>
+
+<ParamField path="path.start_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。User Compliance イベントが提供される UTC の最も早いタイムスタンプ。
+</ParamField>
+
+<ParamField path="path.end_time" type="str or None" default="None">
+YYYY-MM-DDTHH:mm:ssZ。User Compliance イベントが提供される UTC の最も遅いタイムスタンプ。
+</ParamField>
+
+<ParamField path="path.stream_config" type="StreamConfig">
+リトライ動作、タイムアウト、およびコールバックをカスタマイズするための省略可能な StreamConfig。
+</ParamField>

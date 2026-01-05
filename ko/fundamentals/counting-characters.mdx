@@ -1,0 +1,94 @@
+---
+title: 트윗 작성 시 문자 수 세기
+sidebarTitle: 문자 수 세기
+icon: text-size
+keywords: ["문자 수 세기", "트윗 길이", "280자", "문자 제한", "유니코드", "이모지 문자", "CJK 문자", "URL 길이", "트윗 작성", "twitter-text", "문자 인코딩", "UTF-8"]
+---
+
+이 페이지에서는 트윗 작성 및 X API 전반에서 문자가 어떻게 처리되는지 설명합니다. 구현에 대한 자세한 내용은 오픈 소스 [twitter-text](http://github.com/twitter/twitter-text) 라이브러리를 참고하세요. 이 라이브러리는 [GitHub](https://github.com/twitter)에서 확인할 수 있습니다.
+
+<div id="background">
+  ## 배경
+</div>
+
+X는 SMS 문자 메시지 기반 서비스로 시작했습니다. 이로 인해 초기 트윗 길이는 140자로 제한되었는데, 이는 부분적으로 SMS의 160자 제한 때문에 이 중 20자를 명령어와 사용자 이름에 할당했기 때문입니다. 시간이 지나 X가 발전하면서 최대 트윗 길이는 280자로 늘어났습니다. 여전히 짧고 간결하지만, 더 많은 표현이 가능해졌습니다.
+
+<div id="definition-of-a-character">
+  ## 문자 정의
+</div>
+
+대부분의 경우, 트윗의 텍스트 콘텐츠에는 최대 280개의 문자 또는 [Unicode](https://unicode.org/) 글리프를 포함할 수 있습니다. 일부 글리프는 두 글자 이상으로 계산됩니다.
+
+어떤 글리프가 한 글자 또는 그 이상으로 계산되는지를 해당 글리프의 가중치(weight)라고 합니다. 어떤 문자가 한 글자보다 큰 가중치를 갖는지에 대한 정확한 정의는 [twitter-text 트윗 파싱 라이브러리](https://github.com/twitter/twitter-text)를 위한 [구성 파일](https://github.com/twitter/twitter-text/tree/master/config)에 나와 있습니다.
+
+현재 버전의 구성 파일은 기본 가중치를 두 글자로 정의하고, 이와 다르게 가중치가 적용되는 네 개의 [Unicode 코드 포인트](https://unicode.org/charts/About.html) 범위를 정의합니다. 현재 이들 범위에 속하는 코드 포인트는 모두 한 글자로 계산됩니다.
+
+* 첫 번째 범위는 Latin-1 코드 페이지 전반에 걸친 문자를 포함합니다 (U+0000 - U+10FF).
+* 두 번째 범위는 Zero Width Joiner(이모지 및 기타 글리프를 결합하는 데 사용됨)를 포함한 일반 구두점입니다 (U+2000-U+200D).
+* 세 번째 범위는 U+200E와 U+200F(Unicode 방향 표식)를 제외한 일반 구두점입니다 (U+2010-U+201F).
+* 마지막 범위는 따옴표 문자 범위를 포함합니다 (U+2032-U+2037).
+
+트윗 텍스트의 예시와 twitter-text 라이브러리로 계산한 길이 예시는 라이브러리의 [validate.yml](https://github.com/twitter/twitter-text/blob/master/conformance/validate.yml) 테스트 구성 파일에서 확인할 수 있습니다.
+
+**예시**
+
+| 표시된 문자 | 길이 | 설명 | Unicode 시퀀스 |
+|:---------------------|:--------|:-------------|:------------------|
+| a | 1 | Latin Small Letter a | U+0061 |
+| á | 1 | Latin Small Letter A with acute  | U+00E1 |
+| ӑ | 1 | Cyrillic Small Letter A with breve | U+04D1 |
+| Ồ | 1 | Latin Small Letter o with circumflex and acute | U+1ED2 |
+
+<div id="emojis">
+  ## 이모지
+</div>
+
+[twemoji](https://twemoji.x.com/)에서 지원되는 이모지는 결합 수정자 여부와 상관없이 항상 문자 2개로 계산됩니다. 여기에는 [Fitzpatrick 피부 톤](https://emojipedia.org/modifiers/)이나 [성별 수정자](https://blog.emojipedia.org/unicode-and-the-emoji-gender-gap/)로 변경된 이모지도 포함되며, 유니코드 코드 포인트 수로 보면 훨씬 더 길더라도 마찬가지입니다. 이모지 가중치는 표준 이모지 뒤에 하나 이상의 Unicode Zero Width Joiner(U+200D)가 결합된 시퀀스를 찾는 twitter-text의 정규식으로 정의됩니다.
+
+**예시**
+
+| 표시되는 이모지 | 길이 | 설명 | 유니코드 시퀀스 |
+|:-----------------|:--------|:-------------|:------------------|
+| 👾 | 2 | 알려진 이모지의 기본 길이 | -- |
+| 🙋🏽 | 2 | 피부 톤 수정자가 있는 이모지 | 🙋 U+1F64B, 🏽 U+1F3FD |
+| 👨‍🎤 | 2 | 결합 글리프(제로 폭 조이너)를 사용하는 이모지 시퀀스 | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [🎤 U+1F3A4](https://emojipedia.org/emoji/%F0%9F%8E%A4/) |
+| 👨‍👩‍👧‍👦 | 2 | 여러 개의 결합 글리프(제로 폭 조이너)를 사용하는 이모지 시퀀스 | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👩 U+1F469](https://emojipedia.org/emoji/%F0%9F%91%A9/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👧 U+1F467](https://emojipedia.org/emoji/%F0%9F%91%A7/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👦 U+1F466](https://emojipedia.org/emoji/%F0%9F%91%A6/) |
+
+<div id="chinese-japanese-korean-glyphs">
+  ## 중국어 / 일본어 / 한국어 문자
+</div>
+
+CJK(중국어 / 일본어 / 한국어) 언어에서 사용되는 문자는 모두 두 글자로 계산됩니다. 따라서 CJK 텍스트로만 구성된 트윗은 이러한 유형의 문자를 최대 140자까지 포함할 수 있습니다.
+
+<div id="entity-objects">
+  ## 엔터티 객체
+</div>
+
+트윗에는 [엔터티 객체](/ko/x-api/fundamentals/data-dictionary)가 포함될 수 있으며, 이 중 일부는 트윗의 길이에 영향을 줍니다.
+
+URL: [모든 URL은 t.co 링크로 변환됩니다](https://developer.x.com/content/developer-twitter/en/docs/basics/tco). 이는 URL의 길이가 [twitter-text 설정 파일](https://github.com/twitter/twitter-text/tree/master/config)의 `transformedURLLength` 매개변수로 정의된다는 의미입니다. 트윗에 포함된 URL의 현재 길이는, URL 자체가 더 짧더라도 23자입니다.
+
+답글: 답글 트윗의 시작 부분에 자동으로 채워지는 @이름은 문자 수 제한에 포함되지 않습니다. 새로운 비‑답글 트윗이 @멘션으로 시작하는 경우에는 문자 수에 포함되며, 사용자가 트윗 본문에 직접 추가한 @멘션도 마찬가지로 문자 수에 포함됩니다.
+
+미디어: 공식 클라이언트에서 게시된 경우 pic.x.com URL로 표현되는, 트윗에 첨부된 미디어는 0자로 계산됩니다.
+
+엔터티 객체에 대한 더 자세한 내용은 [개발자 문서](/ko/x-api/fundamentals/data-dictionary)를 참고하세요.
+
+<div id="x-character-encoding">
+  ## X 문자 인코딩
+</div>
+
+X API 엔드포인트는 UTF-8로 인코딩된 텍스트만 허용합니다. 다른 모든 인코딩은 텍스트를 API로 보내기 전에 UTF-8로 변환해야 합니다.
+
+X는 트윗의 길이를 텍스트의 Normalization Form C (NFC) 버전을 사용해 계산합니다.
+
+예를 들어, 단어 &quot;café&quot;의 경우를 보겠습니다. 겉보기에는 동일하게 보이고 읽히지만, 서로 다른 바이트 개수를 사용하는 두 가지 바이트 시퀀스가 있습니다:
+
+|     | | |
+|:-----|:---|:---|
+| café | 0x63 0x61 0x66 0xC3 0xA9 | &quot;é&quot; 문자, 즉 &quot;조합된 문자(composed character)&quot;를 사용한 경우입니다. |
+| café | 0x63 0x61 0x66 0x65 0xCC 0x81 | &quot;e&quot; 위에 겹쳐지는 결합 분음 부호(combining diacritical)를 사용한 경우입니다. |
+
+Normalization Form C는 더 길게 분해된 형태(0x65 0xCC 0x81)보다 완전히 결합된 문자(위 café 예시의 0xC3 0xA9)를 우선적으로 사용합니다.
+
+X는 텍스트의 UTF-8 바이트 수가 아니라 코드 포인트 개수를 기준으로 길이를 계산합니다. café 예시의 0xC3 0xA9는 UTF-8에서 두 바이트로 인코딩된 하나의 코드 포인트(U+00E9)이지만, 0x65 0xCC 0x81는 세 바이트로 인코딩된 두 개의 코드 포인트입니다.

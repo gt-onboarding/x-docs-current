@@ -1,0 +1,112 @@
+---
+title: "ストリーミング"
+sidebarTitle: "ストリーミング"
+---
+
+TypeScript SDK は、ライブデータフィードのためのリアルタイムストリーミング機能を提供します。
+
+<div id="basic-streaming">
+  ## 基本的なストリーミング
+</div>
+
+リアルタイムのサンプリングされたポストに接続します:
+
+<CodeGroup>
+
+```typescript stream.ts theme={null}
+import { Client } from '@xdevplatform/xdk';
+
+const client: Client = new Client({ bearerToken: 'your-bearer-token' });
+
+// 公開ポストの 1% サンプル
+const stream = await client.stream.postsSample({
+  tweetFields: ['id','text','created_at'],
+  expansions: ['author_id'],
+  userFields: ['id','username','name']
+});
+
+// イベントを監視します
+stream.on('data', (event) => {
+  // event はパース済みの JSON 行 (data/includes/matching_rules)
+  console.log('New data:', event);
+});
+
+stream.on('error', (e) => console.error('Stream error:', e));
+stream.on('close', () => console.log('Stream closed'));
+```
+
+```javascript stream.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+const stream = await client.stream.postsSample({ tweetFields: ['id','text'] });
+
+stream.on('data', (event) => {
+  console.log('New data:', event);
+});
+stream.on('error', (e) => console.error('Stream error:', e));
+stream.on('close', () => console.log('Stream closed'));
+```
+
+</CodeGroup>
+
+<div id="async-iteration">
+  ## 非同期イテレーション
+</div>
+
+非同期イテレーションを使ってストリームを処理します。
+
+<CodeGroup>
+
+```typescript async.ts theme={null}
+const stream = await client.stream.postsSample();
+for await (const event of stream) {
+  // 各イベントはパース済みの JSON 行（data/includes/matching_rules）です
+  console.log(event);
+}
+```
+
+```javascript async.js theme={null}
+const stream = await client.stream.postsSample();
+for await (const event of stream) {
+  console.log(event);
+}
+```
+
+</CodeGroup>
+
+<div id="stream-management">
+  ## ストリーム管理
+</div>
+
+イベント駆動型ストリームのライフサイクルを制御します。
+
+```typescript
+// ストリームを閉じる
+stream.close();
+
+// 自動再接続（ラッパーで有効になっている場合）
+// デフォルトのEventDrivenStreamは基本的な再接続フックを公開します
+```
+
+
+<div id="error-handling">
+  ## エラー処理
+</div>
+
+ストリーミング時のエラーと再接続を処理します。
+
+```typescript
+stream.on('error', (event) => {
+  const err = event.error || event;
+  console.error('Stream error:', err);
+});
+
+stream.on('keepAlive', () => {
+  // ハートビート イベント
+});
+```
+
+<Info>
+  JavaScript/TypeScript XDK を使用した詳しいコード例については、[コードサンプルの GitHub リポジトリ](https://github.com/xdevplatform/samples/tree/main/javascript)を参照してください。
+</Info>

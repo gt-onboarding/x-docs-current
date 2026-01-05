@@ -1,0 +1,37 @@
+---
+title: PIN ベース認可
+sidebarTitle: PIN ベース OAuth
+keywords: ["PIN ベース OAuth", "PIN OAuth", "OAuth PIN", "PIN 認可", "OAuth 1.0a PIN", "デスクトップ OAuth"]
+---
+
+import { Button } from "/snippets/ja/button.mdx";
+
+<div id="pin-based-authorization">
+  ### PINベースの認可
+</div>
+
+PINベースの OAuth フローは、[3-legged OAuth](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) プロセスの一種で、認可後にユーザーをリダイレクトするための Web ブラウザにアクセスできない、またはブラウザを埋め込めないアプリケーション向けに設計されています。こうしたアプリケーションの例としては、コマンドラインアプリケーション、組み込みシステム、ゲーム機、特定の種類のモバイルアプリなどがあります。
+
+PINベースの OAuth フローは、`oauth_callback` を `oob` に設定した `request_token` をアプリが発行することで開始されます。`oob` という用語は、out-of-band OAuth を意味します。ユーザーは引き続き X にアクセスしてログインまたはアプリの認可を行いますが、アクセスを承認してもアプリケーションに自動リダイレクトされることはありません。その代わり、数値の PIN コードが表示され、その値をアプリケーションに戻って入力するよう指示されます。
+
+<Note>
+  **Note:** PIN ベースの認証を使用する場合でも、X アプリ設定内の `callback_url` は引き続き必須です。
+</Note>
+
+ 
+
+<div id="implementing-the-pin-based-oauth-flow">
+  #### PIN ベースの OAuth フローの実装
+</div>
+
+PIN ベースのフローは、[3-legged authorization](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)（および [Sign in with X](/ja/resources/fundamentals/authentication#log-in-with-x)）と同じ方法で実装しますが、以下の点が異なります。
+
+1. [POST oauth/request&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-request-token) 呼び出し時に、`oauth_callback` の値を `oob` に設定する必要があります。
+
+2. ユーザーが [GET oauth/authenticate](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) または [GET oauth/authorize URL](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authorize) を使用してあなたのアプリを認可するために X にリダイレクトされた後は、ユーザーは `callback_url` にリダイレクトされず、代わりに X によって生成された 7 桁前後の PIN と、その PIN をあなたのアプリケーションに入力するよう指示する画面が表示されます。
+
+3. ユーザーがこの PIN をあなたのアプリケーションに入力し、アプリケーションはその PIN 番号を `oauth_verifier` として使用して [POST oauth/access&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-access-token) を呼び出し、`access_token` を取得します。
+
+<Note>
+  **Note:** PIN 番号は再利用できません。取得した `access_token` は、そのユーザーを対象とするアプリケーションからのリクエストに使用する必要があります。
+</Note>

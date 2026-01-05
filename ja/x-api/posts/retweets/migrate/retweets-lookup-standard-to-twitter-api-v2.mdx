@@ -1,0 +1,88 @@
+---
+title: リツイートの取得
+sidebarTitle: リツイートの取得
+keywords: ["retweets lookup migration", "v1.1 to v2 retweets lookup", "migrate retweets lookup", "standard to v2 retweets", "retweets migration"]
+---
+
+<div id="retweets-lookup-standard-v11-compared-to-x-api-v2">
+  ### リツイートのルックアップ: standard v1.1 と X API v2 の比較
+</div>
+
+standard v1.1 の [v1.1 GET statuses/retweets/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweets-id)、[v1.1 GET statuses/retweets/:ids](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids) を利用してきた場合、このガイドの目的は、standard v1.1 と X API v2 のリツイートルックアップエンドポイントの共通点と相違点の理解に役立てることです。
+
+* **共通点**
+  * 認証
+  * 1 リクエストあたりのユーザー数の上限
+* **相違点**
+  * エンドポイント URL
+
+  * リクエストの制限事項
+
+  * アプリおよびプロジェクトの要件
+
+  * レスポンスデータの形式
+
+  * リクエストパラメータ
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**認証**
+
+標準版 v1.1 および X API v2 の両方の Retweets lookup エンドポイント（[v1.1 GET statuses/retweets/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweets-id) と [v1.1 GET statuses/retweeters/:ids](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-retweeters-ids)）は、[OAuth 1.0a User Context](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication) または OAuth 2.0 Bearer Token を使用します。
+
+**リクエストごとのユーザー数の上限**
+
+v1.1 と v2 のいずれの GET エンドポイントでも、Retweets lookup エンドポイントによって返されるユーザー数の最大値は 100 ユーザーです。v2 の Retweets lookup エンドポイントでは、ページネーション用のトークンは利用されず、デフォルトで 100 ユーザーが返され、これが返却される最大数となります。
+
+<div id="differences">
+  #### Differences
+</div>
+
+**エンドポイント URL**
+
+* 標準 v1.1 エンドポイント:
+  * https://api.x.com/1.1/statuses/retweets/:id.json
+    (`id` パラメーターで指定されたポストの、直近 100 件のリツイートのコレクションを返します)
+  * `https://api.x.com/1.1/statuses/retweeters/ids.json`
+    (`id` パラメーターで指定されたポストをリツイートしたユーザーに属する、最大 100 件のユーザー ID のコレクションを返します)
+* X API v2 エンドポイント:
+  * https://api.x.com/2/tweets/:id/retweeted&#95;by
+    (指定したポストをリツイートしたアカウントのリストを返します)
+
+**アプリとプロジェクトの要件**
+
+X API v2 のエンドポイントでは、リクエストを認証する際に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) と、それに関連付けられた [プロジェクト](/ja/resources/fundamentals/developer-apps) の認証情報を使用する必要があります。すべての X API v1.1 エンドポイントは、スタンドアロンのアプリ、またはプロジェクトに関連付けられたアプリのいずれかの認証情報を使用できます。
+
+**レスポンスデータ形式**
+
+標準 v1.1 と X API v2 のエンドポイントバージョンの最大の違いの 1 つは、どのフィールドをペイロードに含めるかの選択方法です。
+
+標準エンドポイントでは、多くのレスポンスフィールドがデフォルトで返され、さらに、どのフィールドまたはフィールドのセットをペイロードに含めるかを指定するパラメーターを使用することができます。
+
+X API v2 では、デフォルトでは user の id、name、username フィールドのみが返されます。追加のフィールドやオブジェクトをリクエストするには、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) パラメーターを使用する必要があります。このエンドポイントからリクエストしたユーザーフィールドは、すべて主要なユーザーオブジェクト内で返されます。展開されたポストオブジェクトおよびそのフィールドは、レスポンス内の includes オブジェクト内で返されます。その後、ユーザーと展開されたポストオブジェクトの両方に含まれている ID を照合することで、展開されたオブジェクトをユーザーオブジェクトに対応付けることができます。 
+
+これらの新しいパラメーターの詳細については、それぞれのガイド、または [fields と expansions の使用方法](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) に関するガイドをご覧いただくことをお勧めします。 
+
+また、標準 v1.1 のフィールドを新しい v2 のフィールドにマッピングするのに役立つ [データ形式の移行ガイド](/ja/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2) も用意しています。このガイドでは、特定のフィールドを返すために v2 のリクエストに含める必要がある、具体的な expansion および field パラメーターも確認できます。 
+ 
+
+特定のフィールドのリクエスト方法の変更に加えて、X API v2 では、[Post](/ja/x-api/fundamentals/data-dictionary#tweet) オブジェクトや [user](/ja/x-api/fundamentals/data-dictionary#user) オブジェクトなど、API が返すオブジェクトの新しい JSON 設計も導入しています。
+
+* JSON のルートレベルでは、標準エンドポイントはポストオブジェクトを statuses 配列で返しますが、X API v2 は data 配列で返します。 
+* リツイートおよび引用された「statuses」を参照する代わりに、X API v2 の JSON ではリツイートおよび引用されたポストを参照します。contributors や user.translator&#95;type など、多くのレガシーおよび非推奨フィールドは削除されつつあります。 
+* ポストオブジェクト内の favorites と、ユーザーオブジェクト内の favourites の両方を使用する代わりに、X API v2 では like という用語を使用します。 
+* X では、値を持たない JSON の値 (例: null) はペイロードに含めないという規約を採用しています。ポストおよびユーザーの属性は、null 以外の値を持つ場合にのみ含まれます。 
+   
+
+さらに、[Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet) に、次のような新しいフィールド群も導入しました。
+
+* [conversation&#95;id](/ja/x-api/fundamentals/conversation-id) フィールド
+* context と entities を含む 2 つの新しい [annotations](/ja/x-api/fundamentals/post-annotations) フィールド
+* いくつかの新しい [metrics](/ja/x-api/fundamentals/metrics) フィールド 
+* 指定したポストに誰が返信できるかを示す新しい reply&#95;setting フィールド
+
+**リクエストパラメーター**
+
+以下の標準 v1.1 のリクエストパラメーターは、2 つのクエリパラメーター (user&#95;id または screen&#95;name) を受け付けていました。X API v2 では数値のユーザー ID のみを受け付け、エンドポイントパスの一部として渡す必要があります。

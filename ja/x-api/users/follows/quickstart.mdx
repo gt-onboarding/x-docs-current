@@ -1,0 +1,98 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["フォロー クイックスタート", "フォローのクイックスタート", "フォロー管理 クイックスタート", "フォロー チュートリアル", "フォロー ガイド", "フォロー関係 クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-follows-endpoints">
+  ## manage follows エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して manage follows エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。 
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストの認証に使用するための一連の[キーとトークン](/ja/resources/fundamentals/authentication)が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access)し、承認を受けてください。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-manage-follows-request">
+  ### manage follows リクエストを作成する手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ1：ツールまたはライブラリを用意する
+</div>
+
+このエンドポイントにリクエストを送信する方法として、さまざまなツール、コード例、ライブラリを使用できますが、ここでは手順を簡略化するために Postman を使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Follows」フォルダーに移動し、「Follow a user ID」を選択します。
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### ステップ2: リクエストを認証する
+</div>
+
+X API に正しくリクエストを送信するには、自分に権限があることを確認する必要があります。このエンドポイントでそれを行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使ってリクエストを認証する必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+キーとトークン、具体的には API Key、API Secret Key、OAuth 1.0a user Access Token、OAuth 1.0a user Access Token Secret を Postman に追加する必要があります。Postman 画面右上の “X API v2” という名前の environment を選択し、その environment ドロップダウンの横にある目のアイコンをクリックして、「initial value」と「current value」フィールドにキーとトークンを追加してください。
+
+正しく設定されていれば、これらの変数は自動的にリクエストの Authorization タブに反映されます。
+ 
+
+<div id="step-three-specify-who-is-going-to-follow-whom">
+  #### ステップ3：誰が誰をフォローするかを指定する
+</div>
+
+Manage follows エンドポイントでは 2 つの ID を指定します。1 つはソースユーザー（他のユーザーをフォローまたはフォロー解除したいユーザー）のための ID、もう 1 つはターゲットユーザー（フォローまたはフォロー解除されるユーザー）のための ID です。ソースユーザーの ID は、認証しているユーザーのユーザー ID と一致している必要があります。この場合、自分のユーザーアカウントの ID を指定できます。自分の ID は次の 2 通りの方法で確認できます。
+
+1. [user lookup by username](/ja/x-api/users/user-lookup-by-id) エンドポイントを使って、username を渡すことで `id` フィールドを取得できます。 
+2. アクセストークンの値を確認すると、その数値部分が自分のユーザー ID になっています。
+    
+
+ターゲット ID には、有効な任意のユーザー ID を指定できます。たとえば @XDevelopers のユーザー ID は 2244994945 です。
+
+Postman で &quot;Params&quot; タブに移動し、id パス変数の &quot;Value&quot; 列に自分の ID を入力します。次に “Body” タブに移動し、target&#95;user&#95;id パラメータの値として 2244994945（@XDevelopers のユーザー ID）を入力します。いずれの ID の前後にもスペースが含まれないように注意してください。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | (your user ID) |
+| target&#95;user&#95;id | 2244994945 |
+
+&quot;Send&quot; ボタンをクリックすると、関係のステータスを含むレスポンスオブジェクトが返されます。
+
+* `"following": true` が返ってきた場合、その `id` は target&#95;user&#95;id を正常にフォローしています。
+* `"pending": true` が返ってきた場合、target&#95;user&#95;id は非公開設定になっており、あなたのフォローリクエストを承認する必要があります。
+
+####
+
+ステップ4：リクエストを送信し、レスポンスを確認する
+
+すべての準備が整ったら、「Send」ボタンをクリックして、次のようなレスポンスを受け取ります。
+
+```{
+    "data": {
+        "following": true,
+        "pending_follow": false
+    }
+}
+```
+
+同様に、ユーザーのフォローを解除しようとする場合は、同じ Postman コレクション内の「Unfollow a user ID」リクエストを使用します。ただし、`source_user_id` と `target_user_id` の両方のパラメータは、フォロー解除用エンドポイントを使用する際にパス変数として指定する必要があります。

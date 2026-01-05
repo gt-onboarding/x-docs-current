@@ -1,0 +1,173 @@
+---
+title: 인증
+sidebarTitle: 인증
+---
+
+X API는 모든 엔드포인트에 대해 인증이 필요합니다. XDK는 세 가지 인증 방식을 지원합니다:
+
+1. Bearer Token(앱 전용)
+2. OAuth 2.0 with PKCE
+3. OAuth 1.0a(사용자 컨텍스트)
+
+- **Bearer Token**: 앱 인증을 지원하는 엔드포인트(예: 게시물 검색, 스트리밍 엔드포인트)에 대한 읽기 전용 액세스에 사용합니다.
+- **OAuth 2.0 PKCE**: 스코프 기반의 사용자 승인 액세스를 위한 보안 인증 방식입니다(예: 인증된 사용자의 게시물 `non_public` 메트릭 가져오기).
+- **OAuth 1.0a**: 사용자별 작업(예: 사용자를 대신해 게시물 작성, 리스트 관리)을 위한 레거시 인증 방식입니다.  
+[X Developer Portal](https://developer.x.com/en/portal/dashboard)에서 자격 증명을 발급받으세요. 승인된 개발자 계정과 적절한 권한(예: 읽기 + 쓰기)을 가진 앱이 필요합니다.
+
+<div id="creating-a-client">
+  ## Client 생성
+</div>
+
+모든 인증 플로우에서는 `Client` 인스턴스를 생성합니다:
+
+```python
+from xdk import Client
+```
+
+
+<div id="1-bearer-token-app-only">
+  ### 1. Bearer Token (앱 전용)
+</div>
+
+사용자 컨텍스트 없이 읽기 전용 작업을 수행할 때 사용합니다.
+**단계**:
+
+1. Developer Portal에서 앱에 대한 Bearer Token을 생성합니다.
+2. 이 토큰을 `Client`에 전달합니다.
+   **예시**:
+
+```python
+client = Client(bearer_token="XXXXX")
+```
+
+**사용법**:
+
+```python
+# search_recent은 Iterator를 반환하므로 이를 반복 처리합니다
+for page in client.posts.search_recent(query="python", max_results=10):
+    if page.data and len(page.data) > 0:
+        first_post = page.data[0]
+        post_text = first_post.text if hasattr(first_post, 'text') else first_post.get('text', '')
+        print(post_text)  # 첫 번째 게시물 접근
+        break
+```
+
+
+<div id="2-oauth-20-with-pkce-user-context">
+  ### 2. OAuth 2.0 with PKCE (사용자 컨텍스트)
+</div>
+
+이 예제는 Proof Key for Code Exchange (PKCE)를 사용한 OAuth 2.0 사용 방법을 보여줍니다. 사용자를 대신해 게시물을 작성하거나 해당 사용자 계정으로 미디어를 업로드하는 등 사용자별 액세스가 필요할 때 이 방식을 사용하세요.
+**단계**:
+
+1. developer portal에서 앱을 등록하고 리디렉션 URI를 설정합니다(예: `http://localhost:8080/callback`).
+2. Client ID를 가져옵니다(PKCE에는 클라이언트 시크릿이 필요하지 않습니다).
+3. 플로를 시작하고, 사용자를 인증 URL로 보낸 후 콜백을 처리합니다.
+   **예시** (콜백 처리를 위해 웹 서버를 사용하는 경우):
+
+```python
+from xdk.oauth2_auth import OAuth2PKCEAuth
+from urllib.parse import urlparse
+import webbrowser
+# 1단계: PKCE 인스턴스 생성
+auth = OAuth2PKCEAuth(
+    client_id="YOUR_CLIENT_ID",
+    redirect_uri="YOUR_CALLBACK_URL",
+    scope="tweet.read users.read offline.access"
+)
+# 2단계: 인증 URL 가져오기
+auth_url = auth.get_authorization_url()
+print(f"인증하려면 다음 URL을 방문하세요: {auth_url}")
+webbrowser.open(auth_url)
+# 3단계: 콜백 처리 (실제 앱에서는 Flask와 같은 웹 프레임워크 사용)
+# callback_url = "http://localhost:8080/callback?code=AUTH_CODE_HERE"라고 가정
+callback_url = input("전체 콜백 URL을 여기에 붙여넣으세요: ")
+# 4단계: 코드를 토큰으로 교환
+tokens = auth.fetch_token(authorization_response=callback_url)
+access_token = tokens["access_token"]
+refresh_token = tokens["refresh_token"]  # 갱신을 위해 저장
+# 5단계: Client 생성
+# 옵션 1: bearer_token 사용 (OAuth2 액세스 토큰은 Bearer Token으로 작동)
+client = Client(bearer_token=access_token)
+# 옵션 2: 자동 갱신 지원을 위해 전체 토큰 딕셔너리 전달
+# client = Client(token=tokens)
+```
+
+**토큰 갱신** (장기 세션에서는 SDK에서 자동 처리됨):
+
+```python
+# 액세스 토큰이 만료되면 저장된 refresh_token을 사용하여 갱신합니다
+# refresh_token 메서드는 OAuth2PKCEAuth 인스턴스에 저장된 토큰을 사용합니다
+tokens = auth.refresh_token()
+# 갱신된 토큰을 사용합니다
+client = Client(bearer_token=tokens["access_token"])
+# 또는 전체 토큰 딕셔너리를 전달합니다: client = Client(token=tokens)
+```
+
+
+<div id="3-oauth-10a-user-context">
+  ### 3. OAuth 1.0a (사용자 컨텍스트)
+</div>
+
+레거시 애플리케이션이거나 OAuth 1.0a 인증이 필요한 특정 사용 사례의 경우 다음 단계를 따르세요.
+**단계**:
+
+1. developer portal에서 API Key와 API Secret을 확인합니다.
+2. 이미 액세스 토큰이 있다면 그대로 사용합니다. 그렇지 않다면, OAuth 1.0a 플로우를 완료하여 액세스 토큰을 발급받습니다.
+3. OAuth1 인스턴스를 생성하여 Client에 전달합니다.
+   **예시** (기존 액세스 토큰 사용 시):
+
+```python
+from xdk import Client
+from xdk.oauth1_auth import OAuth1
+# 1단계: 자격 증명을 사용하여 OAuth1 인스턴스 생성
+oauth1 = OAuth1(
+    api_key="YOUR_API_KEY",
+    api_secret="YOUR_API_SECRET",
+    callback="http://localhost:8080/callback",
+    access_token="YOUR_ACCESS_TOKEN",
+    access_token_secret="YOUR_ACCESS_TOKEN_SECRET"
+)
+# 2단계: OAuth1을 사용하여 Client 생성
+client = Client(auth=oauth1)
+# 3단계: Client 사용
+response = client.users.get_me()
+me = response.data
+print(me)
+```
+
+**예시** (전체 OAuth 1.0a 흐름):
+
+```python
+from xdk import Client
+from xdk.oauth1_auth import OAuth1
+import webbrowser
+# 1단계: OAuth1 인스턴스 생성
+oauth1 = OAuth1(
+    api_key="YOUR_API_KEY",
+    api_secret="YOUR_API_SECRET",
+    callback="http://localhost:8080/callback"
+)
+# 2단계: 요청 토큰 가져오기
+request_token = oauth1.get_request_token()
+# 3단계: 인증 URL 가져오기
+auth_url = oauth1.get_authorization_url(login_with_x=False)
+print(f"인증을 위해 다음 URL을 방문하세요: {auth_url}")
+webbrowser.open(auth_url)
+# 4단계: 사용자 인증 후 oauth_verifier 수신
+# 실제 앱에서는 콜백 URL을 통해 처리
+oauth_verifier = input("콜백에서 받은 OAuth verifier를 입력하세요: ")
+# 5단계: 액세스 토큰으로 교환
+access_token = oauth1.get_access_token(oauth_verifier)
+# 6단계: Client 생성
+client = Client(auth=oauth1)
+# 이제 Client를 사용할 수 있습니다
+response = client.users.get_me()
+```
+
+**참고**:
+
+* 운영 환경에서는 시크릿 값을 절대 하드코딩하지 말고, 환경 변수나 시크릿 관리자(예: `os.getenv("X_BEARER_TOKEN")`)를 사용하세요.
+* PKCE를 사용할 때는 운영 환경에서 리디렉트 URI가 HTTPS를 사용하도록 설정했는지 확인하세요.
+* SDK는 토큰의 유효성을 검증하고, 실패할 경우 `xdk.AuthenticationError`를 발생시킵니다.
+  Python XDK를 사용하는 자세한 코드 예시는 [code samples GitHub repo](https://github.com/xdevplatform/samples/tree/main/python)를 참고하세요.

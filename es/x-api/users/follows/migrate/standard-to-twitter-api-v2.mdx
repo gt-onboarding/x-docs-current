@@ -1,0 +1,66 @@
+---
+title: v1 a v2
+sidebarTitle: v1 a v2
+keywords: ["migración de v1.1 a v2", "migración de follows", "migrar follows", "follows estándar v1.1 a v2", "follows de v1 a v2", "guía de migración"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="manage-follows-standard-v11-compared-to-x-api-v2">
+  #### Administrar seguimientos: estándar v1.1 frente a X API v2
+</div>
+
+Si has estado trabajando con los endpoints estándar v1.1 [POST friendships/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create) y [POST friendships/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-destroy), el objetivo de esta guía es ayudarte a comprender las similitudes y diferencias entre los endpoints estándar y los endpoints de X API v2 para administrar seguimientos.
+
+* **Similitudes**
+  * Contexto de usuario de OAuth 1.0a
+* **Diferencias**
+  * URLs de los endpoints
+  * Requisitos de aplicación y Proyecto
+  * Métodos HTTP
+  * Parámetros de la solicitud
+
+     
+
+<div id="similarities">
+  #### Similitudes
+</div>
+
+**Método de autenticación de Contexto de usuario de OAuth 1.0a**
+
+Ambas versiones del endpoint admiten [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication#oauth-1-0a-2). Por lo tanto, si antes usabas uno de los endpoints estándar de v1.1 para administrar seguimientos, puedes seguir usando el mismo método de autenticación si migras a la versión de X API v2. 
+
+<div id="differences">
+  #### Diferencias
+</div>
+
+**URLs de endpoints**
+
+* Endpoints estándar v1.1:
+  * POST https://api.x.com/1.1/friendships/create.json
+    (seguir a un usuario)
+  * POST https://api.x.com/1.1/friendships/destroy.json
+    (dejar de seguir a un usuario)
+* Endpoint de X API v2:
+  * POST https://api.x.com/2/users/:id/following
+    (seguir a un usuario)
+  * DELETE https://api.x.com/2/users/:source&#95;user&#95;id/following/:target&#95;user&#95;id
+    (dejar de seguir a un usuario) 
+
+**Requisitos de aplicación y Proyecto**
+
+Los endpoints de X API v2 requieren que uses credenciales de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que esté asociada a un [Proyecto](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints estándar de X API v1.1 pueden usar credenciales de aplicaciones independientes o de aplicaciones asociadas con un proyecto.
+
+**Parámetros de la solicitud**
+
+Los siguientes parámetros estándar de solicitud v1.1 tienen equivalentes en X API v2:
+
+| Estándar v1.1 | X API v2 |
+| :--- | :--- |
+| Sin equivalente | id (POST), source&#95;user&#95;id (DELETE) |
+| user&#95;id | target&#95;user&#95;id |
+| screen&#95;name | Sin equivalente |
+
+Ten en cuenta que los parámetros estándar v1.1 se envían como parámetros de consulta, mientras que los parámetros de X API v2 se envían como parámetros en el cuerpo (para el endpoint POST) o parámetros de ruta (para el endpoint DELETE).
+
+Además, el id de v2 y source&#95;user&#95;id no son obligatorios cuando se usan los endpoints estándar v1.1, ya que los tokens de acceso enviados con Contexto de usuario de OAuth 1.0a permitían inferir qué usuario estaba iniciando la acción de seguir/dejar de seguir. 

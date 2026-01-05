@@ -1,0 +1,71 @@
+---
+title: "管理列表成员"
+sidebarTitle: "管理列表成员"
+keywords: ["管理列表成员迁移", "从 v1.1 迁移到 v2 的列表成员管理", "迁移管理列表成员", "从标准版迁移到 v2 的列表成员", "列表成员迁移"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="manage-list-members-standard-v11-compared-to-x-api-v2">
+  ### 管理列表成员：标准 v1.1 与 X API v2 的比较
+</div>
+
+如果你一直在使用标准 v1.1 的 [POST lists/members/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-create) 和 [POST lists/members/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-destroy) 端点，本指南旨在帮助你了解标准 v1.1 与 X API v2 中管理列表成员端点之间的相似点和不同点。
+
+* **相似点**
+  * 身份验证
+* **不同点**
+  * 端点 URL
+  * 应用和项目要求
+  * HTTP 方法
+  * 速率限制
+  * 请求参数
+
+<div id="similarities">
+  #### 相似点
+</div>
+
+**身份验证**
+
+两个版本的端点都支持 [OAuth 1.0a 用户上下文](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication)。因此，如果你之前一直在使用标准 v1.1 中用于管理 List 成员的某个端点，那么在迁移到 X API v2 版本时，可以继续使用相同的身份验证方法。
+
+<div id="differences">
+  #### 差异
+</div>
+
+**Endpoint URL**
+
+* 标准 v1.1 端点：
+  * POST https://api.x.com/1.1/lists/members/create.json
+    （向指定的 List 添加成员）
+  * POST https://api.x.com/1.1/lists/members/destroy.json
+    （从指定的 List 中移除成员）
+* X API v2 端点：
+  * POST https://api.x.com/2/lists/:id/members
+    （向指定的 List 添加成员）
+
+  * DELETE https://api.x.com/2/lists/:id/members/:user&#95;id
+    （从指定的 List 中移除成员）
+
+**速率限制**
+
+| **标准 v1.1** | **X API v2** |
+| :--- | :--- |
+| /1.1/lists/members/create.json<br /><br />none | /2/lists/:id/members<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟 300 次请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟 300 次请求 |
+| /1.1/lists/members/destroy.json<br /><br />none | /2/lists/:id/members/:user&#95;id<br /><br />使用 OAuth 1.0a 用户上下文时，每 15 分钟 300 次请求<br /><br />使用 OAuth 2.0 Authorization Code with PKCE 时，每 15 分钟 300 次请求 |
+
+**应用和项目要求**
+
+在对请求进行身份验证时，X API v2 端点要求你使用与某个 [developer App](/zh/resources/fundamentals/developer-apps) 所关联的 [Project](/zh/resources/fundamentals/projects) 的凭证。所有 X API v1.1 端点都可以使用来自独立应用或与项目关联应用的凭证。
+
+**请求参数**
+
+以下标准 v1.1 请求参数在 X API v2 中有对应项：
+
+| **标准 v1.1** | **X API v2** |
+| :--- | :--- |
+| list&#95;id | id  |
+| slug | 无对应项 |
+| screen&#95;name | 无对应项 |
+| owner&#95;screen&#95;name | 无对应项 |
+| owner&#95;id | 无对应项 |

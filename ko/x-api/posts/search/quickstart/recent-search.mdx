@@ -1,0 +1,141 @@
+---
+title: 최근 검색
+sidebarTitle: 최근 검색
+keywords: ["최근 검색", "검색 빠른 시작", "최근 검색 튜토리얼", "트윗 검색", "최근 검색 가이드", "검색 예제"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-recent-search-endpoint">
+  ## 최근 검색 엔드포인트 사용 시작하기
+</div>
+
+이 빠른 시작 가이드는 Postman을 사용하여 지정한 필드와 함께 최근 검색 엔드포인트에 첫 요청을 보내는 방법을 안내합니다.
+
+다른 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 리포지토리를 방문하세요. 
+
+<Note>
+  ### **사전 준비 사항**
+
+  이 가이드를 완료하려면 요청을 인증하는 데 사용할 [keys and tokens](/ko/resources/fundamentals/authentication) 세트가 필요합니다. 다음 단계를 따라 이러한 키와 토큰을 생성할 수 있습니다.
+
+  * [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하고 승인을 받으세요.
+  * developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성하세요.
+  * App의 &quot;Keys and tokens&quot; 페이지로 이동하여 필요한 자격 증명을 생성하세요. 모든 자격 증명은 안전한 위치에 저장해 두세요.
+</Note>
+
+<div id="steps-to-build-a-recent-search-request">
+  ### 최근 검색 요청을 구성하는 단계
+</div>
+
+**1단계: 도구 또는 라이브러리 선택**
+
+이 엔드포인트에 요청을 보내기 위해 사용할 수 있는 도구, 코드 예제, 라이브러리는 여러 가지가 있지만, 여기서는 과정을 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 로드하려면 아래 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 로드했다면, Search Posts &gt; Recent search 요청으로 이동합니다.
+
+**2단계: 요청 인증**
+
+X API에 정상적으로 요청을 보내려면 권한이 있는지 확인해야 합니다. 이 엔드포인트에서 이를 수행하려면 [OAuth 2.0 App-Only](/ko/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2), 또는 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 인증 방식을 사용해 요청을 인증해야 합니다.
+
+단순화를 위해 이 예제에서는 OAuth 2.0 App-Only를 사용할 것이지만, 비공개 [metrics](/ko/x-api/fundamentals/metrics) 또는 게시물을 요청하려면 다른 인증 방식 중 하나를 사용해야 합니다. 
+
+OAuth 2.0 App-Only를 사용하려면, 특히 [App Access Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (App-only Bearer Token이라고도 함)을 포함한 키와 토큰을 Postman에 추가해야 합니다. 이를 위해 Postman 오른쪽 상단에서 “X API v2”라는 이름의 환경을 선택한 다음, 해당 환경 드롭다운 옆의 눈 모양 아이콘을 클릭해 &quot;initial value&quot;와 &quot;current value&quot; 필드에 키와 토큰을 추가합니다.
+
+이 작업을 올바르게 완료했다면 이러한 변수는 요청의 Authorization 탭에 자동으로 반영됩니다.
+ 
+
+**3단계: 검색 쿼리 생성**
+
+각 최근 검색 요청에는 [search query](/ko/x-api/posts/search/integrate/build-a-query)가 하나 필요합니다. 이 예제에서는 @XDevelopers 계정이 게시한 게시물과 일치하는 쿼리를 사용할 것입니다. 이 쿼리에서는 from 연산자를 사용하고, 이를 XDevelopers(대소문자 구분 없음)로 설정합니다:
+
+`from:XDevelopers`
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 다음, 이 ID 또는 쉼표로 구분된 Post ID 문자열을 `ids` 파라미터의 &quot;Value&quot; 열에 입력합니다.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| `query` | from:XDevelopers | 최근 검색 엔드포인트로 전송할 검색 쿼리 |
+
+**4단계: 가져오려는 필드를 식별하고 지정**
+
+3단계를 마친 뒤 &quot;Send&quot; 버튼을 클릭하면, 응답에서 기본 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet) 필드인 id, text, `edit_history_tweet_ids`를 받게 됩니다. id, text, `edit_history_tweet_ids` 외에 추가 필드를 받고 싶다면, 요청에서 [field](/ko/x-api/fundamentals/fields) 및/또는 [expansion](/ko/x-api/fundamentals/expansions) 파라미터를 사용해 해당 필드를 지정해야 합니다.
+
+이 연습에서는 서로 다른 오브젝트에서 다음 네 가지 필드 세트를 요청하겠습니다.
+
+1. 기본 Post object 필드
+2. 주요 user 오브젝트의 추가 tweet.created&#95;at 필드
+3. 반환된 게시물에 대한 작성자의 user object 기본 필드
+4. 연관된 user object의 추가 user.description 필드
+
+Postman에서 &quot;Params&quot; 탭으로 이동하여 &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `description` | `includes.users.description` |
+
+이제 &quot;Send&quot; 버튼 옆에 다음과 같은 URL이 표시되는 것을 볼 수 있어야 합니다:
+
+`https://api.x.com/2/tweets/search/recent?query=from:XDevelopers&tweet.fields=created_at&expansions=author_id&user.fields=created_at`
+
+**5단계: 요청을 보내고 응답을 확인합니다**
+
+모든 설정을 마쳤다면 &quot;Send&quot; 버튼을 클릭하여 다음과 같은 응답을 받아보세요:
+
+```
+{
+   "data": [
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-11T16:05:06.000Z",
+           "id": "1271111223220809728",
+           "text": "오늘 밤 @jessicagarson이 R에서 좋아하는 Python 패키지를 실행하는 방법을 안내하는 것을 시청하세요. 🍿\n\n데이터 과학을 위한 두 가지 강력한 프로그래밍 언어를 함께 사용하는 방법을 배우고, Twitter의 Developer Labs에서 최근 검색 엔드포인트를 사용하는 실시간 예제를 확인하세요. https://t.co/v178oUZNuj"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-10T19:25:24.000Z",
+           "id": "1270799243071062016",
+           "text": "As we work towards building the new Twitter API, we’ve extended the deprecation timeline for several Labs v1 endpoints. Learn more 📖 https://t.co/rRWaJYJgKk"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-09T18:08:47.000Z",
+           "id": "1270417572001976322",
+           "text": "Annotations help you learn more about a Tweet — they can even help you find topics of interest. 🔬\n\nIn this tutorial, @suhemparack shows us how find Tweets related to COVID-19 using annotations + the filtered stream endpoint.\n\nLearn how you can, too. ⤵️\nhttps://t.co/qwVOgw0zSV"
+       }
+   ],
+   "includes": {
+       "users": [
+           {
+               "description": "The voice of Twitter's #DevRel team, and your official source for updates, news, & events about Twitter's API. \n\n#BlackLivesMatter",
+               "id": "2244994945",
+               "name": "X Developers",
+               "username": "XDevelopers"
+           }
+       ]
+   },
+   "meta": {
+       "newest_id": "1271111223220809728",
+       "oldest_id": "1270417572001976322",
+       "result_count": 3
+   }
+}
+```
+
+**다음 단계**
+
+[API Reference를 사용해 요청 사용자 지정하기](/ko/x-api/posts/recent-search)
+
+[쿼리 연산자 전체 목록 보기](/ko/x-api/posts/search/integrate/build-a-query "쿼리 연산자 전체 목록 보기")
+
+[이 엔드포인트용 샘플 코드 사용하기](https://github.com/xdevplatform/Twitter-API-v2-sample-code "이 엔드포인트용 샘플 코드 사용하기")

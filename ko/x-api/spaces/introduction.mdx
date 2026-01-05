@@ -1,0 +1,81 @@
+---
+title: 소개
+sidebarTitle: 소개
+keywords: ["spaces", "X spaces", "audio spaces", "live audio", "spaces API", "spaces lookup", "spaces search", "spaces discovery"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+다음 페이지에서는 X API에 포함된 Spaces 엔드포인트를 설명합니다. Spaces에 대한 전반적인 내용은 [help.x.com](https://help.x.com/en/using-twitter/spaces)을 방문해 확인하세요. 
+
+Spaces는 라이브 오디오 대화를 통해 표현과 상호작용을 가능하게 합니다. Spaces 엔드포인트는 Spaces를 중심으로 새로운 기능을 만들 수 있는 도구를 제공합니다. 이 엔드포인트를 사용해 라이브 또는 예약된 Spaces를 조회하거나, 사용자가 관심을 가질 만한 Spaces를 찾을 수 있도록 검색·탐색 경험을 구축할 수 있습니다.
+
+여러분의 창의성을 발휘해 우리가 처음 설계한 방식 그 이상으로 Spaces를 확장해 사용하시기 바랍니다. 이러한 엔드포인트를 사용하면 제목에 포함된 키워드를 기반으로 청취자에게 Spaces를 추천하는 경험을 만들거나, 특정 사용자가 팔로우하는 계정 중에서 라이브 또는 예정된 Spaces를 진행하는 계정을 노출하는 경험을 구축할 수 있습니다. 또한 호스트가 자신의 Spaces 성과를 더 잘 이해하고 오디언스에 대한 인사이트를 더 많이 얻을 수 있도록 도울 수도 있습니다.
+
+<div id="important-resources">
+  ### 중요한 리소스
+</div>
+
+다음 리소스는 시작하고 Spaces 엔드포인트를 통합하는 데 도움이 됩니다:
+
+* [X API v2 액세스 권한 받기](/ko/x-api/getting-started/getting-access)
+* [Spaces 데이터 사전](/ko/x-api/fundamentals/data-dictionary#space)
+* [첫 Spaces 엔드포인트 요청 보내기](/ko/x-api/spaces/lookup/introduction)
+
+   
+
+<div id="whats-currently-available">
+  #### 현재 이용 가능한 리소스
+</div>
+
+|     |     |
+| :--- | :--- |
+| **Spaces 조회** | [단일 Spaces ID로 조회](/ko/x-api/spaces/space-lookup-by-space-id)<br /><br />[여러 Spaces ID로 조회](/ko/x-api/spaces/space-lookup-up-space-ids)<br /><br />[생성자 ID로 조회](/ko/x-api/spaces/space-lookup-by-their-creators)<br /><br />[티켓을 구매한 사용자 목록 조회](/ko/x-api/spaces/retrieve-the-list-of-users-who-purchased-a-ticket-to-the-given-space) |
+| **Spaces 검색** | [키워드로 Spaces 검색](/ko/x-api/spaces/search-for-spaces) |
+
+<div id="understanding-the-lifecycle-of-spaces">
+  #### Spaces 라이프사이클 이해하기
+</div>
+
+X Developer Platform의 다른 리소스와 달리, Spaces에는 정해진 라이프사이클이 있습니다. Spaces는 시작 예정일 기준 최대 14일 이전에 예약할 수 있으며, 종료된 후에는 더 이상 이용할 수 없습니다. 호스트는 시작 전이라면 언제든지 이미 예약된 Space를 취소할 수도 있습니다.
+
+Spaces는 라이브 상태일 때만 액세스할 수 있으며, 한 번 종료되면 더 이상 Spaces 엔드포인트를 사용해 조회할 수 없고, 이 상태를 나타내는 오류 메시지가 반환됩니다.
+
+앱이 Spaces 데이터를 처리할 때는, 가장 최신 정보를 반환하고, 플랫폼에서 더 이상 이용할 수 없는 데이터는 제거할 책임이 있습니다. [Spaces lookup 엔드포인트](/ko/x-api/spaces/lookup/introduction)를 사용하면 사용자의 기대와 의도를 준수하고 있는지 확인하는 데 도움이 됩니다.
+ 
+
+<div id="roles-in-spaces">
+  ### Spaces에서의 역할
+</div>
+
+이 엔드포인트는 X 앱에서 Spaces가 동작하는 방식을 반영합니다. Spaces에서 X 사용자는 Space와 상호작용하는 방식에 따라 정해진 역할을 가질 수 있습니다.
+ 
+
+<div id="creator-or-primary-host">
+  ### 크리에이터(또는 기본 호스트)
+</div>
+
+기본 호스트는 Space를 생성한 사용자이자 해당 Space의 소유자입니다. 현재 Space에는 하나의 호스트만 둘 수 있으므로, 기본 호스트가 유일한 호스트가 됩니다. [Spaces 데이터 사전](/ko/x-api/fundamentals/data-dictionary#space)에서 기본 호스트 정보는 creator&#95;id 필드에 있으며, 이는 [user 객체](/ko/x-api/fundamentals/data-dictionary#user)로 확장할 수 있습니다.
+ 
+
+<div id="hosts">
+  ### 호스트
+</div>
+
+주 호스트는 하나 이상의 사용자를 공동 호스트로 지정할 수 있습니다. Spaces 데이터 사전에서 이 호스트들은 `host_ids`로 표시되며, 사용자 객체 목록으로 확장할 수 있습니다. 호스트 지정은 Space 진행 중에 변경될 수 있으며, 이 엔드포인트에서 반환되는 메타데이터는 요청 시점의 상태를 반영합니다.
+
+앱은 `creator_id` 값을 확인하여 주 호스트를 파악하고, `host_ids` 값을 확인하여 공동 호스트가 누구인지 알 수 있습니다.
+ 
+
+<div id="speaker">
+  ### Speaker
+</div>
+
+Speaker는 Space에서 발언할 수 있는 권한이 있는 사용자입니다. Speaker는 언제든지 0명 이상일 수 있으며, 하나의 Space에는 Host를 포함해 최대 10명의 Speaker가 있을 수 있습니다. Space 데이터 사전에서 Speaker는 `speaker_ids` 목록으로 반환되며, 이를 확장해 사용자 객체 목록으로 만들 수 있습니다.
+ 
+
+<div id="listener">
+  ### 리스너
+</div>
+
+리스너는 Space를 청취하고, 미리 정의된 리액션을 사용해 언제든 반응할 수 있으며, (Host가 Space 설정에서 이를 허용한 경우) 스피커 권한을 요청할 수 있습니다. 리스너 관련 정보는 participant&#95;count 필드의 참가자 수(Host 포함)에 집계된 값으로만 제공됩니다.

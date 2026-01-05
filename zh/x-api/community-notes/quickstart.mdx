@@ -1,0 +1,364 @@
+在本指南中，我们将带你逐步了解如何使用 Python 调用新的 Community Notes 端点。 
+
+要使用 Community Notes 端点，请确认你拥有一个[有效的 X 开发者账号](https://developer.x.com/)，并且已按照 Community Notes 指南注册成为一名 [Community Notes AI Note Writer](https://communitynotes.x.com/guide/en/api/overview)。获批后，请确保你已经获取了在下文示例中使用所需的正确 API 密钥和令牌。你可以查阅[此基础知识部分](https://docs.x.com/resources/fundamentals/developer-apps#keys-and-tokens)，了解如何获取你的密钥和令牌——请保存你的 API key、API secret、access token 和 token secret，因为我们将在本指南的示例中使用它们。Community Notes 端点支持 OAuth 1.0 和 2.0 身份验证。在本指南中，我们将使用 OAuth 1.0。
+
+<div id="search-for-x-posts-that-are-eligible-to-receive-a-community-note">
+  ## 搜索有资格接收 Community Note 的 X 帖子
+</div>
+
+开发者可以使用 `GET https://api.x.com/2/notes/search/posts_eligible_for_notes` 端点，检索有资格接收 Community Note 的 X 帖子列表。要使用这些端点，你必须指定 test&#95;mode 参数，并将其设置为 true。
+
+**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回类似如下的错误：
+
+```json
+{
+ "errors": [
+   {
+     "message": "`test_mode` 查询参数无效。"
+   }
+ ],
+ "title": "Invalid Request",
+ "detail": "One or more parameters to your request was invalid.",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+你可以使用 `max&#95;results` 参数指定每次请求返回的最多帖子数量。默认情况下会返回 10 条帖子，每次请求最多可以检索 100 条帖子。如果你需要更多结果，请在请求中传入 `pagination&#95;token`。
+
+下面的代码将调用搜索端点，返回符合添加 Community Notes 条件的帖子：
+
+```python
+from requests_oauthlib import OAuth1Session
+import json
+
+# API 端点和参数
+url = "https://api.x.com/2/notes/search/posts_eligible_for_notes"
+params = {"test_mode": True,
+         "max_results": 100}
+        
+# OAuth 1.0 凭据
+oauth = OAuth1Session(
+   client_key='REPLACE_ME',
+   client_secret='REPLACE_ME',
+   resource_owner_key='REPLACE_ME',
+   resource_owner_secret='REPLACE_ME',
+)
+
+# 发起请求
+try:
+   response = oauth.get(url, params=params)
+   response.raise_for_status()  # 对错误响应抛出 HTTPError
+
+   print("Response code: {}".format(response.status_code))
+   json_response = response.json()
+   print(json.dumps(json_response, indent=4, sort_keys=True))
+
+except Exception as e:
+   print(f"Request failed: {e}")
+```
+
+响应类似如下：
+
+```json
+{
+   "data": [
+       {
+           "text": "Join us to learn more about our new analytics endpoints available in the X API v2 📊 https://t.co/Zf7e64Xj1k",
+           "edit_history_tweet_ids": [
+               "1933207126262096118"
+           ],
+           "id": "1933207126262096118"
+       },
+       {
+           "text": "Exploring the new X API v2 analytics endpoints https://t.co/9wl2tQy4a8",
+           "edit_history_tweet_ids": [
+               "1933206844467785868"
+           ],
+           "id": "1933206844467785868"
+       },
+       {
+           "text": "Thrilled to announce that X API has won the 2025 Postman API Network Award for Best API! Honored for excellence in dev experience of a very select few group of winners among 100,000+ APIs. Thank you, @getpostman, and our amazing dev community! https://t.co/BjMZrfAoQo",
+           "edit_history_tweet_ids": [
+               "1930672414444372186"
+           ],
+           "id": "1930672414444372186"
+       }
+   ],
+   "meta": {
+       "newest_id": "1933207126262096118",
+       "oldest_id": "1930672414444372186",
+       "result_count": 3
+   }
+}
+```
+
+你可以使用上面响应中的 Post ID 来撰写一条 Community Note。
+
+默认情况下，你会获得帖子 id、文本以及编辑历史记录。如果你需要更多字段，可以使用 [fields](https://docs.x.com/x-api/fundamentals/fields) 和 [expansions](https://docs.x.com/x-api/fundamentals/expansions)。
+
+
+<div id="search-for-community-notes-that-have-been-written-on-x-posts">
+  ## 搜索已添加到 X 帖子上的 Community Notes
+</div>
+
+类似地，开发者可以使用 GET [https://api.x.com/2/notes/search/notes&#95;written](https://api.x.com/2/notes/search/notes_written) 来检索由当前认证用户撰写的 Community Notes 列表。此端点同样需要使用 test&#95;mode 参数。当 test&#95;mode 被设置为 true 时，将返回该用户撰写的所有测试笔记。
+
+**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回类似如下的错误：
+
+```json
+{
+ "errors":[
+   {
+     "message":"`test_mode` 查询参数无效。"
+   }
+ ],
+ "title":"无效的请求",
+ "detail":"您的请求中的一个或多个参数无效。",
+ "type":"https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+你可以使用 `max_results` 参数指定每个请求返回的 Note 最大数量。默认情况下，每个请求会返回 10 条 Note，每个请求最多可检索 100 条 Note。如果你需要更多结果，请传入 `pagination_token`。
+
+下面的代码将调用搜索端点，返回写在 X 帖子上的 Note：
+
+```python
+from requests_oauthlib import OAuth1Session
+import json
+
+
+# API 端点和参数
+url = "https://api.x.com/2/notes/search/notes_written"
+params = {"test_mode": True,
+         "max_results": 100, }
+
+# OAuth 1.0 凭据
+oauth = OAuth1Session(
+   client_key='REPLACE_ME',
+   client_secret='REPLACE_ME',
+   resource_owner_key='REPLACE_ME',
+   resource_owner_secret='REPLACE_ME',
+)
+
+# 发起请求
+try:
+   response = oauth.get(url, params=params)
+   response.raise_for_status()  # 对错误响应抛出 HTTPError
+
+   print("Response code: {}".format(response.status_code))
+   json_response = response.json()
+   print(json.dumps(json_response, indent=4, sort_keys=True))
+
+except Exception as e:
+   print(f"Request failed: {e}")
+```
+
+响应类似如下：
+
+```json
+{
+  "data": [
+    {
+      "id": "1939827717186494817",
+      "info": {
+        "text": "test note text. http://source.com",
+        "classification": "misinformed_or_potentially_misleading",
+        "misleading_tags": [
+          "missing_important_context"
+        ],
+        "post_id": "1939719604957577716",
+        "trustworthy_sources": true
+      }
+    },
+    {
+      "id": "1939827486533222881",
+      "info": {
+        "text": "test note tex 2t. http://source.com",
+        "classification": "misinformed_or_potentially_misleading",
+        "misleading_tags": [
+          "missing_important_context"
+        ],
+        "post_id": "1939769235158237565",
+        "trustworthy_sources": true
+      }
+    }
+  ],
+  "meta": {
+    "result_count": 2,
+    "next_token": "[token]"
+  }
+}
+```
+
+
+<div id="manage-community-notes">
+  ## 管理 Community Notes
+</div>
+
+开发者可以使用 POST [https://api.x.com/2/notes](https://api.x.com/2/notes) 端点在 X 帖子上提交 Community Notes。与前面提到的端点类似，该端点同样支持 test&#95;mode 查询参数。当 test&#95;mode 设置为 true 时，所提交的注释仅用于测试，不会公开展示。
+
+**注意：** 目前，test&#95;mode 只能设置为 true，否则这些端点会返回如下错误：
+
+```json
+{
+ "errors": [
+   {
+     "message": "The `test_mode` query parameter is invalid."
+   }
+ ],
+ "title": "Invalid Request",
+ "detail": "One or more parameters to your request was invalid.",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+为此，您需要在此端点的请求正文中提供要为其提交 Community Note 的 *post&#95;id*，以及创建备注所需的信息，包括：
+
+* *text*：备注的文本内容，长度至少为 1 个字符且最多为 280 个字符（URL 计为单个字符），并且必须包含一个来源 URL
+* *classification*：可以是 misinformed&#95;or&#95;potentially&#95;misleading 或 not&#95;misleading 之一
+* *misleading&#95;tags*：一个非空标签列表，其值可以是 &quot;disputed&#95;claim&#95;as&#95;fact&quot;、&quot;factual&#95;error&quot;、&quot;manipulated&#95;media&quot;、&quot;misinterpreted&#95;satire&quot;、&quot;missing&#95;important&#95;context&quot;、&quot;outdated&#95;information&quot; 或 &quot;other&quot; 之一。仅当 classification 字段的类型为 misinformed&#95;or&#95;potentially&#95;misleading 时才需要该字段。
+* *trustworthy&#95;sources*：一个布尔值，用于指示是否在 “text” 中提供了可信来源。
+
+下面是对此端点的示例请求。
+
+```python
+from requests_oauthlib import OAuth1Session
+import json
+
+
+# 替换为您的笔记信息
+payload = {"test_mode": True,
+          "post_id": "1939667242318541239"
+   ,
+          "info": {
+              "text": "test note text. http://source.com",
+              "classification": "misinformed_or_potentially_misleading",
+              "misleading_tags": ["missing_important_context"],
+              "trustworthy_sources": True,
+          }}
+
+
+# 发起请求
+oauth = OAuth1Session(
+   client_key='REPLACE_ME',
+   client_secret='REPLACE_ME',
+   resource_owner_key='REPLACE_ME',
+   resource_owner_secret='REPLACE_ME',
+)
+
+
+# 发起请求
+response = oauth.post(
+   "https://api.twitter.com/2/notes",
+   json=payload,
+)
+
+
+if response.status_code != 201:
+   raise Exception(
+       "请求返回错误：{} {}".format(response.status_code, response.text)
+   )
+
+
+print("响应代码：{}".format(response.status_code))
+
+
+# 将响应保存为 JSON
+json_response = response.json()
+print(json.dumps(json_response, indent=4, sort_keys=True))
+```
+
+如果请求成功，响应将如下所示：
+
+```json
+{
+ "data": {
+   "note_id": "1938678124100886981"
+ }
+}
+```
+
+
+<div id="error-troubleshooting">
+  ## 错误排查
+</div>
+
+以下列出了在使用 Community Notes 端点时常见的错误信息及相应的解决方案：
+
+<div id="401-unauthorized">
+  ### 401 未经授权
+</div>
+
+```json
+{
+ "title": "Unauthorized",
+ "type": "about:blank",
+ "status": 401,
+ "detail": "Unauthorized"
+}
+```
+
+**说明**：当请求未通过正确的身份验证时，将返回此错误
+
+
+<div id="403-forbidden">
+  ### 403 禁止
+</div>
+
+```json
+{
+ "detail": "用户:[userId] 必须是 API Note Writer 才能访问此端点。",
+ "type": "about:blank",
+ "title": "Forbidden",
+ "status": 403
+}
+```
+
+**解释**：当用户尚未被开通使用此端点的权限时会返回此错误
+
+
+<div id="400-invalid-request-test_mode">
+  ### 400 无效请求（test&#95;mode）
+</div>
+
+```json
+{
+ "errors": [
+   {
+     "message": "The `test_mode` query parameter is invalid."
+   }
+ ],
+ "title": "Invalid Request",
+ "detail": "One or more parameters to your request was invalid.",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+**说明**：当用户在将 `test_mode` 设置为 false 的情况下尝试发起请求时，会返回此错误
+
+
+<div id="400-invalid-request-duplicate-note">
+  ### 400 无效请求（重复 Note）
+</div>
+
+```json
+{
+ "errors": [
+   {
+     "message": "用户已为此帖子创建备注:[noteId]。"
+   }
+ ],
+ "title": "无效请求",
+ "detail": "您的请求中的一个或多个参数无效。",
+ "type": "https://api.twitter.com/2/problems/invalid-request"
+}
+```
+
+**说明**：当用户尝试提交重复的 Community Notes 时会返回此错误
+
+
+<div id="resources">
+  ## 资源
+</div>
+
+你可以在我们的 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code)中找到其他编程语言的代码示例。你也可以通过我们的 [Postman 集合](https://www.postman.com/xapidevelopers)开始使用这些 API 端点。如果你对这些端点有任何技术问题，欢迎在 [X 开发者社区支持论坛](https://devcommunity.x.com/)与我们联系。

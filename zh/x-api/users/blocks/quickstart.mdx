@@ -1,0 +1,167 @@
+---
+title: 快速入门
+sidebarTitle: 快速入门
+keywords: ["屏蔽功能快速入门", "用户屏蔽快速入门", "屏蔽功能教程", "屏蔽功能指南", "屏蔽功能快速入门指南"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-blocks-lookup-endpoint">
+  ## blocks 查找端点入门
+</div>
+
+本快速入门指南将帮助你使用 [Postman](/zh/tutorials/postman-getting-started) 向 blocks 查找端点发出你的第一个请求。
+
+如果你希望查看不同语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 代码库。
+
+<Note>
+  ### 前置条件
+
+  要完成本指南，你需要准备一组用于对请求进行身份验证的 [密钥和令牌](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审批。
+  * 在开发者门户中创建一个 [项目](/zh/resources/fundamentals/projects) 以及关联的 [开发者应用](/zh/resources/fundamentals/developer-apps)。
+  * 进入你的应用的 “Keys and tokens” 页面以生成所需的凭证。确保将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-build-a-blocks-lookup-request">
+  ### 构建屏蔽查询请求的步骤
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### 第一步：先选择一个工具或库
+</div>
+
+有多种工具、代码示例和库可用于向此端点发起请求，但为了简化流程，我们将在这里使用 Postman 工具。
+
+要将 X API v2 的 Postman 集合加载到你的环境中，请点击以下按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 之后，在 Postman 中进入 “Blocks” 文件夹，并选择 “Blocks Lookup”。
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### 步骤二：为请求进行身份验证
+</div>
+
+要正确地向 X API 发起请求，你需要先确认自己具有访问权限。对于此端点，你必须使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 或 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 来为请求进行身份验证。
+
+在本示例中，我们将使用 OAuth 1.0a 用户上下文。
+
+你必须将你的密钥和令牌——具体来说是 API Key、API Secret Key、OAuth 1.0a user Access Token 和 OAuth 1.0a user Access Token Secret——添加到 Postman 中。你可以在 Postman 右上角选择名为 “X API v2” 的环境，然后将你的密钥和令牌添加到 “Initial Value” 和 “Current Value” 字段中来完成此操作（方法是点击环境下拉菜单旁边的眼睛图标）。
+
+如果你已经正确完成上述操作，这些变量会自动填充到该请求的 Authorization 选项卡中。
+ 
+
+<div id="step-three-specify-a-user">
+  #### 步骤三：指定一个用户
+</div>
+
+使用此 endpoint 时，你必须指定你自己的用户 ID，或某个已通过认证用户的用户 ID，才能查看你屏蔽了哪些账号。
+
+在 Postman 中，切换到 “Params” 选项卡，在 id 路径变量的 “Value” 列（该部分底部）中输入该用户 ID，确保在用户 ID 前后不包含任何空格。
+ 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | （你的用户 ID） |
+| max&#95;results | 5   |
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### Step four: 识别并指定要检索的字段
+</div>
+
+如果你在步骤三之后点击 “Send” 按钮，你将在响应中收到默认的 [user object](/zh/x-api/fundamentals/data-dictionary#user) 字段：id、name 和 username。
+
+如果你想要获取除了 id、name 和 username 之外的其他字段，你需要在请求中通过 [fields](/zh/x-api/fundamentals/fields) 和/或 [expansions](/zh/x-api/fundamentals/expansions) 参数来指定这些字段。
+
+在本练习中，我们将从不同对象中请求三组额外字段：
+
+1. 主用户对象中的额外 user.created&#95;at 字段。
+2. 对于返回的用户，其关联的置顶帖子对象的默认字段：id 和 text。
+3. 关联帖子对象中的额外 tweet.created&#95;at 字段。
+
+在 Postman 中，转到 “Params” 选项卡，并在 “Query Params” 表格中添加以下键值对（key:value）：
+
+|              |                         |                                |
+| :----------- | :---------------------- | :----------------------------- |
+| **Key**      | **Value**               | **Returned fields**            |
+| user.fields  | created&#95;at          | user.created&#95;at            |
+| expansions   | pinned&#95;tweet&#95;id | tweet.id, tweet.text           |
+| tweet.fields | created&#95;at          | includes.tweets.created&#95;at |
+
+此时，你应该会在 “Send” 按钮旁边看到一个类似的 URL，只是其中使用的是你自己的用户 ID，而不是 TwitterDev 的：
+
+```
+      https://api.x.com/2/users/2244994945/blocking?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at
+```
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### 步骤五：发送请求并查看响应
+</div>
+
+完成所有设置后，点击 &quot;Send&quot; 按钮，你将会收到类似于下面示例的响应：
+
+```
+    {
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "现在,拥有600个或更多关注者的每个人都可以主持一个Space。\n\n根据我们所学到的,这些账户由于其现有受众,可能会有良好的主持体验。在将创建Space的能力带给所有人之前,我们专注于几件事。🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+```
+
+<div id="step-six-paginate-through-your-results">
+  #### 第六步：对结果进行分页
+</div>
+
+你可能会注意到，在响应的底部有一个 meta 对象。如果你收到了一个 next&#95;token，这就表示还有另一页结果可以获取。要获取下一页结果，你需要取出 next&#95;token 字段的值，并在请求中将其作为额外 pagination&#95;token 参数的值添加进去。
+ 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| pagination&#95;token | 1D3PU6DRII9HEZZZ |
+
+在添加了这个额外参数之后发送请求时，由于我们在第三步中将 max&#95;results 指定为 5，接下来的五条结果会随着后续的响应一起返回。你可以重复这一过程，直到所有结果都被返回；不过，你也可以使用 max&#95;results 参数，在每次请求中最多请求 1000 个用户，这样就不必频繁地对结果进行分页。

@@ -1,0 +1,175 @@
+---
+title: "페이지네이션"
+sidebarTitle: "페이지네이션"
+---
+
+SDK는 페이지네이션 응답을 반환하는 어떤 엔드포인트와도 함께 사용할 수 있는 범용 페이지네이터 유틸리티를 제공합니다. 메서드는 일반 응답을 반환하며, 이를 페이지네이터로 래핑해서 사용합니다.
+
+<div id="basic-pagination">
+  ### 기본 페이지네이션
+</div>
+
+<CodeGroup dropdown>
+
+```typescript quick-start.ts theme={null}
+import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform/xdk';
+
+const client: Client = new Client({ bearerToken: 'your-bearer-token' });
+
+// 모든 목록 엔드포인트를 적절한 타입으로 래핑합니다
+const followers: UserPaginator = new UserPaginator(
+  async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
+    const res = await client.users.getFollowers('<userId>', {
+      maxResults: 100,
+      paginationToken: token,
+      userFields: ['id','name','username'],
+    });
+    return { 
+      data: res.data ?? [], 
+      meta: res.meta, 
+      includes: res.includes, 
+      errors: res.errors 
+    };
+  }
+);
+```
+
+```javascript quick-start.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+import { UserPaginator } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const followers = new UserPaginator(async (token) => {
+  const res = await client.users.getFollowers('<userId>', {
+    maxResults: 100,
+    paginationToken: token,
+    userFields: ['id','name','username'],
+  });
+  return { data: res.data ?? [], meta: res.meta, includes: res.includes, errors: res.errors };
+});
+```
+
+</CodeGroup>
+
+<div id="manual-paging">
+  ### 수동 페이징
+</div>
+
+<CodeGroup>
+
+```typescript manual.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+await followers.fetchNext();          // 첫 번째 페이지
+while (!followers.done) {
+  await followers.fetchNext();        // 다음 페이지들
+}
+
+const userCount: number = followers.users.length;  // 가져온 전체 사용자 수
+const firstUser: Schemas.User | undefined = followers.users[0];
+const nextToken: string | undefined = followers.meta?.next_token;
+```
+
+```javascript manual.js theme={null}
+await followers.fetchNext();
+while (!followers.done) await followers.fetchNext();
+console.log(followers.items.length);
+```
+
+</CodeGroup>
+
+<div id="async-iteration">
+  ### 비동기 반복
+</div>
+
+<CodeGroup>
+
+```typescript async.ts theme={null}
+import { Schemas } from '@xdevplatform/xdk';
+
+for await (const user of followers) {
+  const typedUser: Schemas.User = user;
+  console.log(typedUser.username);  // 타입이 완전히 지정된 상태로 접근
+}
+```
+
+```javascript async.js theme={null}
+for await (const user of followers) {
+  console.log(user.username);
+}
+```
+
+</CodeGroup>
+
+<div id="next-page-as-a-new-instance">
+  ### 새 인스턴스로 다음 페이지 사용
+</div>
+
+<CodeGroup>
+
+```typescript next.ts theme={null}
+import { UserPaginator } from '@xdevplatform/xdk';
+
+await followers.fetchNext();
+if (!followers.done) {
+  const page2: UserPaginator = await followers.next(); // 다음 페이지부터 시작하는 독립적인 페이지네이터
+  await page2.fetchNext();
+  console.log(page2.users.length);  // 두 번째 페이지의 항목
+}
+```
+
+```javascript next.js theme={null}
+await followers.fetchNext();
+if (!followers.done) {
+  const page2 = await followers.next();
+  await page2.fetchNext();
+}
+```
+
+</CodeGroup>
+
+<div id="error-handling-and-rate-limits">
+  ### 오류 처리 및 요청 한도
+</div>
+
+<CodeGroup>
+
+```typescript errors.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+try {
+  for await (const item of followers) {
+    const user: Schemas.User = item;
+    // 사용자를 처리합니다...
+  }
+} catch (err: unknown) {
+  if (followers.rateLimited) {
+    console.error('Rate limited, backoff required');
+    // 일정 시간 대기 후 나중에 다시 시도
+  } else {
+    console.error('Pagination error:', err);
+    throw err;
+  }
+}
+```
+
+```javascript errors.js theme={null}
+try {
+  for await (const item of followers) {
+    // ...
+  }
+} catch (err) {
+  if (followers.rateLimited) {
+    // 일정 시간 대기 후 나중에 다시 시도
+  } else {
+    throw err;
+  }
+}
+```
+
+</CodeGroup>
+
+<Info>
+JavaScript/TypeScript XDK를 사용하는 자세한 코드 예제는 [code samples GitHub 저장소](https://github.com/xdevplatform/samples/tree/main/javascript)를 확인하세요.
+</Info>

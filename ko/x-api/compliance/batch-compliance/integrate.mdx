@@ -1,0 +1,231 @@
+---
+title: 통합 가이드
+sidebarTitle: 통합 가이드
+keywords: ["배치 컴플라이언스 통합", "컴플라이언스 배치 통합", "컴플라이언스 작업 통합", "배치 컴플라이언스 설정"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="working-with-resumable-uploads">
+  ## 재개 가능한 업로드 사용하기
+</div>
+
+Batch compliance 엔드포인트를 사용할 때, 개발자는 대량의 X 데이터를 일괄 업로드하고, 사용자 의도와 X 상의 콘텐츠의 현재 상태를 데이터셋에 반영하기 위해 어떤 조치가 필요한지 파악할 수 있습니다. 시스템과 네트워크 연결이 안정적이고 신뢰할 수 있다면, 대량의 데이터를 원격 서버로 업로드하는 작업은 비교적 간단합니다. 그러나 항상 그런 것은 아닙니다. 일부 환경에서는 일정 시간이 지나면 연결 타임아웃을 적용해, 앱과 업로드 서버 사이의 연결을 강제로 끊을 수 있습니다. 또한 예를 들어 노트북에서 Wi‑Fi 연결을 통해 큰 파일을 업로드하려 할 때와 같이 연결 문제에 직면할 수도 있습니다. 이러한 상황에서는 하나의 연속된 단일 연결을 유지하기보다는, 파일을 더 작은 여러 부분으로 나누어 순차적으로 업로드하는 것이 바람직합니다.
+
+X의 batch compliance 엔드포인트는 대용량 파일을 처리하기 위해 Google Cloud Storage에 의존합니다. 이 스토리지 서비스는 다양한 애플리케이션에 맞게 최적화되어 있으며, Cloud Storage는 재개 가능한 업로드(resumable uploads)라고 불리는 대용량 파일 관리 기법을 지원합니다.
+
+업로드 도중에 문제가 발생하더라도 Google Cloud Storage는 중단된 지점부터 작업을 다시 이어서 수행할 수 있습니다.
+
+<div id="creating-a-resumable-job">
+  ### 재개 가능한 작업 만들기
+</div>
+
+<div id="step-one">
+  #### 1단계:
+</div>
+
+먼저, 컴플라이언스 작업을 생성하고 `type` 파라미터를 사용해 게시물 ID를 업로드할지 사용자 ID를 업로드할지 지정해야 합니다. 또한 요청 본문에 `resumable`을 추가하고 값을 `true`로 설정합니다. 아래의 `$APP&#95;ACCESS&#95;TOKEN`을 앱 전용 액세스 토큰으로 반드시 교체하세요.
+
+```
+curl --request POST \
+ 'https://api.x.com/2/compliance/jobs' --header 'Authorization: Bearer $APP_ACCESS_TOKEN --header 'Content-Type: application/json' --data-raw '{
+   "type": "tweets",
+   "resumable": true
+}'
+```
+
+API 호출이 성공적으로 완료되면 다음과 같은 응답이 반환됩니다:
+
+```
+{
+   "data": {
+       "download_expires_at": "2021-08-18T19:42:55.000Z",
+       "status": "created",
+       "upload_url": "https://storage.googleapis.com/twttr-tweet-compliance/1425543269983784962/submission/1202726487847104512_1425543269983784962?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210811%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210811T194255Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=355e4c4739ae508304d3df15b4e13e64b6c7752d8d79d73676a4d8e60dc5241f83924ad2a1f8b7bddcc768062bb9c64d39b8e8f7cce7f66ffbea9f9ed33a4da975b3a2c127fb738c1c1ff3c3964bd4d9dc0706e6c8a70e67522160ea774e090d2793e06f890d1158ce86be3031c1c471b74f961b6f18743a28730611000336286ad0111b41fb5d14aa813ff00cf06b3572dc68d0b3c6fdc07f25c1b1196c1af4325a9ead68994944bbef0d2123585ea051deb9765aa7f5832446440bc9ba76af327b69df1fd7b1a99bd4419c128f1f697dbbacbc62bbc7c2c9aebc82a2128be0ed05d48a54d814162daad1232a0d13081e9543ab8557f567149af82281193f37",
+       "created_at": "2021-08-11T19:42:55.000Z",
+       "resumable": false,
+       "id": "1425543269983784962",
+       "type": "tweets",
+       "download_url": "https://storage.googleapis.com/twttr-tweet-compliance/1425543269983784962/delivery/1202726487847104512_1425543269983784962?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210811%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210811T194255Z&X-Goog-Expires=604800&X-Goog-SignedHeaders=host&X-Goog-Signature=0a11dd5a3c5adb508f32ce904568abada863dc9499ba2adeafb3452ccee0dcb3dade17910dbc502dcbe54c130ac4d8638eb176c8b7344de068139b06c970794efa6312f0a5149f40da441eafcaf475f670c93ca73951999902a531d34dfab1e5490918929e5b06ae803b5604e0c0c26852255ccdbc79a2c1e2eefe924e5e6bf5b6603a7f287d1621333b9548ec6cc203716070528bebc2e67c12e92b1f4e54471db92c15a54799f2b855ae224250ca44c47993fd7d79a4940a0f68fe09f73fc8b291e88cfd10ade860b4b35c2b964d1777c1d93cd300c313138d9ca90aa8b3ecd3bf9dc73d3ebe32ba7634228fe07e1e4ecdda57cd94c802afc520162735d5a3",
+       "upload_expires_at": "2021-08-11T19:57:55.000Z"
+   }
+}
+```
+
+upload&#95;url의 값을 기록해 두세요. 이후 단계에서 필요합니다.
+
+<div id="step-two">
+  #### 2단계:
+</div>
+
+다음으로, 재개 가능한 업로드를 초기화해야 합니다. 이를 위해 이전 단계에서 받은 `upload_url`로 **POST** 요청을 보내고, 이때 다음 헤더를 포함해야 합니다:
+
+Content-Type: text/plain
+
+Content-Length: 0
+
+x-goog-resumable: start
+
+```
+curl --request POST \
+'https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submission/1202726487847104512_1430227686685757442?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210824%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210824T175707Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-goog-resumable&X-Goog-Signature=890d958f9c7dcb7f238e4971b59da5afc5b8329fb197c67b5930fe0f9dfe180afe2d4bec341111809b88ccfab46ab1f81f4242abc1af7b67c6e8977c52e6d486f5f43ce6a37a7a6530d25f15e2bcd9bb54655fe4ee22b26f8886ba71b67b7b11afd1198d658d1b6f0c41260f55260a260e1be0239977feba43dce40bc0e8e6293a4a3a3f7ee0afc74d3d2f7f2d3d514f108d5887a52ac85760385e5b9bb67cd26bfcf6b1c19151ea8111e217a29407722dc0dc9ab373334e88c18159546237ec9334f9a1e33717dc82800c6a45bba82706d5aece84ecdf3fcac52b21c8a3085a639047cf2707a8b9e4c296fc7cf05edbb110f07b89e38f0f5ea77e8b313cade7' \
+--header 'Content-Type: text/plain' --header \
+ 'Content-Length: 0' --header \
+ 'x-goog-resumable: start
+```
+
+이 호출이 성공하면 201 응답 코드를 받게 됩니다. 그런 다음 응답 헤더에서 `location` 헤더의 값을 복사합니다. 값은 대략 다음과 같은 형식입니다:
+
+```
+https://storage.googleapis.com/twttr-tweet-compliance/1430227686685757442/submission/1202726487847104512_1430227686685757442?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=complianceapi-public-svc-acct%40twttr-compliance-public-prod.iam.gserviceaccount.com%2F20210824%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20210824T175707Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-goog-resumable&X-Goog-Signature=890d958f9c7dcb7f238e4971b59da5afc5b8329fb197c67b5930fe0f9dfe180afe2d4bec341111809b88ccfab46ab1f81f4242abc1af7b67c6e8977c52e6d486f5f43ce6a37a7a6530d25f15e2bcd9bb54655fe4ee22b26f8886ba71b67b7b11afd1198d658d1b6f0c41260f55260a260e1be0239977feba43dce40bc0e8e6293a4a3a3f7ee0afc74d3d2f7f2d3d514f108d5887a52ac85760385e5b9bb67cd26bfcf6b1c19151ea8111e217a29407722dc0dc9ab373334e88c18159546237ec9334f9a1e33717dc82800c6a45bba82706d5aece84ecdf3fcac52b21c8a3085a639047cf2707a8b9e4c296fc7cf05edbb110f07b89e38f0f5ea77e8b313cade7&upload_id=ADPycds-_Ow7aqcpbG4XguXSVAgd_2fy-XiDA2qm-It9PCwBlZhF4e2bfOAQzEmRJ4T_l6jU6LfYdfrKa_KlFFBOyx3PjYzrxQ
+```
+
+그런 다음 [빠른 시작 가이드](/ko/x-api/compliance/batch-compliance#getting-started-with-the-batch-compliance-endpoints)의 2단계부터 나머지 절차를 따라 이 위치에 게시물 또는 사용자 ID를 업로드할 수 있습니다.
+
+기술적으로 복잡하기 때문에 재개 가능한 업로드는 코드를 함께 사용할 때 가장 효과적입니다. 이 가이드에서는 Node.js와 [needle 요청 라이브러리](https://www.npmjs.com/package/needle)를 사용합니다.
+
+<div id="install-the-dependencies">
+  ### 의존성 설치
+</div>
+
+계속 진행하기 전에 Node.js 환경이 설치되어 있어야 합니다. Node.js는 공식 웹사이트에서 내려받을 수 있습니다. 설치가 완료되면 Node.js에는 npm이라는 유틸리티가 함께 포함됩니다. 다음 명령을 실행해 Node와 npm이 모두 설치되어 있고, 오류가 발생하지 않는지 확인합니다.
+
+`$ npm -v
+6.4.1`
+
+이와 비슷한 버전 번호가 표시되면 환경이 준비된 것입니다(표시되는 버전 번호는 다를 수 있습니다). 여기서는 npm을 사용해 업로드 라이브러리를 설치합니다. 다음 명령을 실행하세요:
+
+`$ npm install -g needle`
+
+이제 모든 준비가 완료되었습니다. 추가 설정은 필요하지 않습니다.
+
+<div id="request-a-resumable-destination">
+  #### 재개 가능한 대상 요청
+</div>
+
+새 작업을 생성할 때 재개 업로드를 지원하는 대상을 받으려면 `resumable` 매개변수를 `true`로 설정하세요. 응답 페이로드에서 upload&#95;url 값을 받게 됩니다.
+
+```
+"upload_url":\
+"https://storage.googleapis.com/compliance_tweet_ids/customer_test_object_12950882_GlYjiE?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=193969463581-compute%40developer.gserviceaccount.com%2F20200618%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20200618T184154Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=b7bdcf32479b08715be91ed47b06471b8acdcdb319f8e4f423bf3a3056dfa03ed83e47446f33338e292967a15c08fa5ba34395edaf057a2ac975b88e710ca994adb023a9e1673a7c58ce2fa0d73537f72812af78e92b708dfe6b907a7d75bd0f6cfa61fec867e80ac83ced0725d1ee59787c9dbca50d41f7b0f513dad63a7564136b1a70042a2ec6ba6b697cbe480a4405362f7a08255a5e8205aa7baa562f99e6a092f0420f33d67ffaeb132f877fbaf16c969630b5f173e8a3f31c473707241fa4e28f4bed13fb2ea01d3af1c449321a2e6ee9ec1e331b447cabcfc6f9d1f99f564d180f0cc1d28ea54972c996102c67c6501c6c16a00c13d17756f960e0e1"
+```
+
+<div id="prepare-the-code-to-upload-a-file">
+  #### 파일 업로드를 위한 코드 준비
+</div>
+
+기본적으로 이 라이브러리는 업로드 위치(버킷이라고 부름)와 업로드하려는 파일 이름을 입력받아, 새로운 업로드 대상 위치를 생성합니다. 하지만 배치 컴플라이언스(batch compliance) 엔드포인트는 자체적으로 대상 위치를 생성하므로, 이미 업로드를 받을 준비가 된 위치가 있다는 것을 라이브러리에 알려 주어야 합니다. 
+
+업로드할 데이터가 들어 있는 파일의 이름과 함께 이 값을 업로드 라이브러리에 전달해야 합니다. 파일을 하나 만들고 이름을 ***twitter-upload.js***&#xB85C; 지정하세요. 다음 코드를 추가합니다:
+
+```
+const needle = require('needle');
+const fs = require('fs');
+const path = require('path');
+
+const [, scriptName, filename, uploadURL] = process.argv;
+if (!filename || !uploadURL) {
+  console.error(`Usage: node ${path.basename(scriptName)} filename upload_url`);
+  process.exit(-1);
+}
+
+async function uploadFile(file, url) {
+  // rangeEnd는 파일의 마지막 바이트 인덱스입니다. 즉, 파일의 바이트 수
+  const rangeEnd = (await fs.promises.stat(file)).size;
+
+  let options = {
+    headers: {
+      'Content-Range': `bytes */${rangeEnd}`,
+    },
+  };
+
+  const response = await needle('put', url, null, options);
+
+  switch (response.statusCode) {
+    case 200:
+    case 201:
+      console.log('업로드 완료');
+      return;
+    case 308:
+      return resumeUpload(response, file, url);
+    default:
+      console.log('예상치 못한 응답 코드: ', response.statusCode);
+      return;
+  }
+}
+
+async function resumeUpload(response, file, url) {
+  console.log('업로드 미완료, 재개 중');
+  if (response.headers.range) {
+    let resumeOffset = Number(response.headers.range.split('-')[1]) + 1;
+
+    let options = {
+      headers: {
+        'Content-Range': `bytes ${resumeOffset}-${rangeEnd-1}/${rangeEnd}`,
+        'Content-Length': `${rangeEnd-resumeOffset}`,
+      },
+    };
+
+    let readStream = fs.createReadStream(file, {start: resumeOffset});
+    return needle('put', url, readStream, options);
+  } else {
+    console.log('업로드 시작 중');
+    let options = {
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    };
+
+    let readStream = fs.createReadStream(file);
+    return needle('put', url, readStream, options);
+  }
+}
+
+// 재개 가능한 세션 URL 요청
+async function requestResumableSession(url) {
+  const options = {
+    headers: {
+      'Content-Type': 'text/plain',
+      'Content-Length': '0',
+      'x-goog-resumable': 'start',
+    },
+  };
+
+  const res = await needle('post', url, null, options);
+  if (res.statusCode === 201) {
+    const resumableSessionURL = res.headers['location'];
+    console.log('업로드 시작: ', resumableSessionURL);
+
+    await uploadFile(filename, resumableSessionURL);
+  } else {
+    console.log('재개 가능한 세션 URI 생성 실패');
+  }
+
+}
+
+requestResumableSession(uploadURL).then(result => console.log('업로드 완료'));
+```
+
+파일을 적절한 위치에 저장합니다. 그런 다음 명령줄에서 스크립트를 실행하고 두 개의 매개변수를 전달합니다:
+
+1. 첫 번째는 업로드하려는 파일의 위치입니다(게시물 또는 사용자 ID가 포함된 파일).
+2. 두 번째는 컴플라이언스 엔드포인트 응답에서 받은 업로드 URL입니다.
+
+URL은 큰따옴표로 감싸고, 파일 이름에 공백이나 기타 문자가 포함되어 있다면 파일 이름도 동일하게 큰따옴표로 감싸야 합니다:
+
+```
+node twitter-upload.js compliance_upload.txt\
+"https://storage.googleapis.com/compliance_tweet_ids/customer_test_object_12950882_GlYjiE?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=193969463581-compute%40developer.gserviceaccount.com%2F20200618%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20200618T184154Z&X-Goog-Expires=900&X-Goog-SignedHeaders=content-type%3Bhost&X-Goog-Signature=b7bdcf32479b08715be91ed47b06471b8acdcdb319f8e4f423bf3a3056dfa03ed83e47446f33338e292967a15c08fa5ba34395edaf057a2ac975b88e710ca994adb023a9e1673a7c58ce2fa0d73537f72812af78e92b708dfe6b907a7d75bd0f6cfa61fec867e80ac83ced0725d1ee59787c9dbca50d41f7b0f513dad63a7564136b1a70042a2ec6ba6b697cbe480a4405362f7a08255a5e8205aa7baa562f99e6a092f0420f33d67ffaeb132f877fbaf16c969630b5f173e8a3f31c473707241fa4e28f4bed13fb2ea01d3af1c449321a2e6ee9ec1e331b447cabcfc6f9d1f99f564d180f0cc1d28ea54972c996102c67c6501c6c16a00c13d17756f960e0e1"
+```
+
+다음과 유사한 출력이 표시됩니다:
+
+`Starting upload to:  https://storage.googleapis.com/twttr-tweet-compliance/<redacted>
+Upload not completed, resuming
+Initiating upload`
+
+Ctrl + C를 누르거나 명령줄 창을 닫아서 언제든지 업로드를 일시 중지할 수 있습니다. 나중에 동일한 명령을 다시 실행하면 중단한 지점부터 업로드를 재개할 수 있습니다. 파일 업로드가 완료되면 다음 메시지가 표시됩니다:
+
+`Upload complete`
+
+이 시점부터 [compliance status endpoint](/ko/x-api/compliance/get-compliance-job)를 사용해 컴플라이언스 작업 상태를 확인할 수 있고, 완료되면 컴플라이언스 결과를 다운로드할 수 있습니다.

@@ -1,0 +1,60 @@
+---
+title: 「いいね」の管理
+sidebarTitle: 「いいね」の管理
+keywords: ["「いいね」管理の移行", "v1.1 から v2 への「いいね」管理", "「いいね」管理の v1.1 から v2 への移行", "Standard v1.1 から v2 への「いいね」", "「いいね」の移行"]
+---
+
+<div id="manage-likes-standard-v11-compared-to-x-api-v2">
+  ### いいねの管理: Standard v1.1 と X API v2 の比較
+</div>
+
+Standard v1.1 の [POST favorites/create](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-favorites-create) と [POST favorites/destroy](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-favorites-destroy) エンドポイントを利用している場合、このガイドは、Standard v1.1 と X API v2 の いいね管理エンドポイントの共通点と相違点を理解するのに役立ちます。
+
+* **共通点**
+  * OAuth 1.0a User Context
+* **相違点**
+  * エンドポイント URL と HTTP メソッド
+  * アプリとプロジェクトの要件
+  * リクエストパラメータ
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**OAuth 1.0a User Context 認証方法**
+
+どちらのエンドポイントのバージョンも [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) をサポートしています。したがって、これまで標準の v1.1 「manage favorites」エンドポイントのいずれかを使用していた場合、X API v2 版へ移行しても同じ認証方法を引き続き使用できます。
+
+<div id="differences">
+  #### 違い
+</div>
+
+**エンドポイント URL と HTTP メソッド**
+
+* Standard v1.1 エンドポイント:
+  * POST https://api.x.com/1.1/favorites/create.json
+    (ポストに「いいね」)
+  * POST https://api.x.com/1.1/favorites/destroy.json
+    (ポストの「いいね」を解除)
+* X API v2 エンドポイント:
+  * POST https://api.x.com/2/tweets/:id/likes
+    (ポストに「いいね」)
+  * DELETE https://api.x.com/2/tweets/:id/likes/:tweet&#95;id
+    (ポストの「いいね」を解除) 
+
+**アプリおよびプロジェクト要件**
+
+X API v2 エンドポイントでは、リクエストの認証時に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) と、それに関連付けられた [プロジェクト](/ja/resources/fundamentals/projects) の認証情報を使用する必要があります。すべての X API v1.1 エンドポイントでは、スタンドアロンのアプリ、またはプロジェクトに関連付けられたアプリの認証情報を使用できます。
+
+**リクエストパラメータ**
+
+次の Standard v1.1 リクエストパラメータには、X API v2 における対応パラメータがあります:
+
+| Standard v1.1 | X API v2 |
+| :--- | :--- |
+| id  | id  |
+| includes&#95;entities | 対応なし |
+
+Standard v1.1 のパラメータはクエリパラメータとして渡されるのに対し、X API v2 のパラメータは、POST エンドポイントではボディパラメータとして、DELETE エンドポイントではパスパラメータとして渡される点に注意してください。
+
+また、Standard v1.1 エンドポイントを使用する場合、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) と共に渡される [アクセストークン](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) によって、どのユーザーが「いいね」／「いいね」解除を行っているかが推論されるため、ポストに「いいね」するユーザーの id を指定する必要はありません。 

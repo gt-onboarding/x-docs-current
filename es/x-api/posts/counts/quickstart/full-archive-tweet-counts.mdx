@@ -1,0 +1,261 @@
+---
+title: Buscar Publicaciones (archivo completo)
+sidebarTitle: Buscar Publicaciones (archivo completo)
+keywords: ["inicio rápido de cantidades de Publicaciones del archivo completo", "inicio rápido de cantidades del archivo", "inicio rápido de cantidades históricas", "cantidades del archivo completo"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-full-archive-post-counts-endpoint">
+  ### Introducción al endpoint de recuento de Publicaciones del archivo completo
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud al endpoint de recuento de Publicaciones del archivo completo usando Postman, una herramienta gráfica que te permite realizar solicitudes HTTP.
+
+Si deseas ver código de ejemplo en diferentes lenguajes de programación, visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code). 
+
+<Note>
+  ### Requisitos previos
+
+  El endpoint de recuento de Publicaciones del archivo completo actualmente solo está disponible para quienes cuentan con acceso Pro o Enterprise. Para usar este endpoint, debes solicitar acceso Pro o [Enterprise](https://docs.google.com/forms/d/e/1FAIpQLScO3bczKWO2jFHyVZJUSEGfdyfFaqt2MvmOfl_aJp0KxMqtDA/viewform). 
+
+  Además de contar con la aprobación para el acceso, necesitarás un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * Ve a tu [Project](/es/resources/fundamentals/projects) con acceso Enterprise en el portal para desarrolladores y asegúrate de tener una [developer App](/es/resources/fundamentals/developer-apps) asociada dentro de ese Project.
+
+  * Ve a la página “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-build-a-full-archive-post-counts-request">
+  #### Pasos para crear una solicitud de conteos de Publicaciones del archivo completo
+</div>
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para realizar una solicitud a este endpoint, pero aquí vamos a usar la herramienta Postman para simplificar el proceso.
+
+Para cargar en tu entorno la colección de X API v2 para Postman, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la solicitud Post counts &gt; Full-archive Post counts.
+
+**Paso dos: Autentica tu solicitud**
+
+Para realizar correctamente una solicitud a la X API, debes verificar que tienes permiso. Para hacerlo con este endpoint, debes autenticar tu solicitud con los métodos de autenticación [OAuth 2.0 App-Only](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token).
+
+Debes agregar tus claves y tokens, específicamente el [App Access Token](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (también conocido como el Bearer Token solo para la aplicación) a Postman. Puedes hacerlo seleccionando el entorno denominado &quot;X API v2&quot; en la esquina superior derecha de Postman y agregando tus claves y tokens a los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el ícono de ojo junto al menú desplegable del entorno).
+
+Si has hecho esto correctamente, esta variable se incluirá automáticamente en la pestaña de autorización de la solicitud.
+ 
+
+**Paso tres: Crea una consulta**
+
+Cada solicitud de conteos de Publicaciones del archivo completo requiere una única [consulta](/es/x-api/posts/counts/integrate/build-a-query). Para este ejemplo, vamos a usar una consulta que coincida con las Publicaciones publicadas por la cuenta @XDevelopers. Para esta consulta usamos el operador from y lo establecemos en XDevelopers (no distingue mayúsculas de minúsculas):
+
+`from:XDevelopers`
+
+En Postman, navega a la pestaña &quot;Params&quot; e ingresa este ID, o una cadena de IDs de Publicaciones separadas por una coma, en la columna &quot;Value&quot; del parámetro `ids`.
+ 
+
+| Key | Value | Description |
+| :--- | :--- | :--- |
+| `query` | `from:XDevelopers` | Consulta que se enviará al endpoint de conteos de Publicaciones del archivo completo |
+
+Paso cuatro (opcional): Especifica la granularidad y el período de tiempo
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, obtendrás los conteos de Publicaciones del archivo completo predeterminados: por hora durante los últimos 30 días. Si quieres obtener conteos de Publicaciones del archivo completo por día, tendrás que agregar el parámetro granularity con un valor de day. Si quieres conteos de Publicaciones de hace más de 30 días, tendrás que especificar los parámetros start&#95;time y end&#95;time con los valores deseados. 
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave: valor a la tabla &quot;Query Params&quot;:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| granularity | day | La granularidad para los resultados de conteos de Publicaciones. Los valores posibles son day, hour o minute |
+| start&#95;time | 2021-05-01T00:00:00Z | La marca de tiempo UTC más antigua a partir de la cual se proporcionarán las Publicaciones |
+| end&#95;time | 2021-06-01T00:00:00Z | La marca de tiempo UTC más antigua a partir de la cual se proporcionarán las Publicaciones. |
+
+Ahora deberías ver la siguiente URL junto al botón &quot;Send&quot;:
+
+`https://api.x.com/2/tweets/counts/all?query=from%3AXDevelopers&start_time=2021-05-01T00:00:00Z&end_time=2021-06-01T00:00:00Z&granularity=day`
+
+**Paso cinco: Realiza tu solicitud y revisa tu respuesta**
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar a la siguiente:
+
+```
+{
+   "data": [
+       {
+           "end": "2021-05-02T00:00:00.000Z",
+           "start": "2021-05-01T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-03T00:00:00.000Z",
+           "start": "2021-05-02T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-04T00:00:00.000Z",
+           "start": "2021-05-03T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-05T00:00:00.000Z",
+           "start": "2021-05-04T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-06T00:00:00.000Z",
+           "start": "2021-05-05T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-07T00:00:00.000Z",
+           "start": "2021-05-06T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-08T00:00:00.000Z",
+           "start": "2021-05-07T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-09T00:00:00.000Z",
+           "start": "2021-05-08T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-10T00:00:00.000Z",
+           "start": "2021-05-09T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-11T00:00:00.000Z",
+           "start": "2021-05-10T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-12T00:00:00.000Z",
+           "start": "2021-05-11T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-13T00:00:00.000Z",
+           "start": "2021-05-12T00:00:00.000Z",
+           "tweet_count": 6
+       },
+       {
+           "end": "2021-05-14T00:00:00.000Z",
+           "start": "2021-05-13T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-05-15T00:00:00.000Z",
+           "start": "2021-05-14T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-16T00:00:00.000Z",
+           "start": "2021-05-15T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-17T00:00:00.000Z",
+           "start": "2021-05-16T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-18T00:00:00.000Z",
+           "start": "2021-05-17T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-19T00:00:00.000Z",
+           "start": "2021-05-18T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-05-20T00:00:00.000Z",
+           "start": "2021-05-19T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-21T00:00:00.000Z",
+           "start": "2021-05-20T00:00:00.000Z",
+           "tweet_count": 8
+       },
+       {
+           "end": "2021-05-22T00:00:00.000Z",
+           "start": "2021-05-21T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-05-23T00:00:00.000Z",
+           "start": "2021-05-22T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-24T00:00:00.000Z",
+           "start": "2021-05-23T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-25T00:00:00.000Z",
+           "start": "2021-05-24T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-26T00:00:00.000Z",
+           "start": "2021-05-25T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-05-27T00:00:00.000Z",
+           "start": "2021-05-26T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-05-28T00:00:00.000Z",
+           "start": "2021-05-27T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-05-29T00:00:00.000Z",
+           "start": "2021-05-28T00:00:00.000Z",
+           "tweet_count": 2
+       },
+       {
+           "end": "2021-05-30T00:00:00.000Z",
+           "start": "2021-05-29T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-05-31T00:00:00.000Z",
+           "start": "2021-05-30T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-06-01T00:00:00.000Z",
+           "start": "2021-05-31T00:00:00.000Z",
+           "tweet_count": 0
+       }
+   ],
+   "meta": {
+       "total_tweet_count": 22
+   }
+}
+```
+
+**Paso seis: pagina tus resultados**
+
+Si el objeto `meta` en tu respuesta también contiene `next_token`, puedes pasar su valor al parámetro de consulta `next_token`.
+
+| Clave | Valor | Descripción |
+| :--- | :--- | :--- |
+| `next_token` | Agregarás aquí el `next_token` que obtengas del objeto `meta` de tu solicitud anterior. | Si tu última solicitud no devuelve el resto de los resultados, recibirás un `next_token` en el objeto `meta`. Tomarás el valor de ese campo y lo agregarás como valor del parámetro `next_token` en tu siguiente solicitud, manteniendo constantes todos los demás parámetros de la solicitud. |
+
+Una vez que hayas establecido el valor correcto para `next_token`, haz clic en el botón «Send» y recibirás la siguiente página de resultados.

@@ -1,0 +1,140 @@
+---
+title: Introducción
+sidebarTitle: Introducción
+keywords: ["búsqueda de comunidades", "buscar comunidades", "encontrar comunidades", "búsqueda de comunidades", "descubrimiento de comunidades", "API de búsqueda de comunidades"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+Este endpoint te permite buscar y descubrir Communities a partir de palabras clave.
+
+El endpoint acepta una o más palabras clave como consulta. De forma predeterminada, una solicitud devolverá tanto Communities públicas como cerradas que coincidan con la consulta especificada.
+
+<Note>
+  **Configuración de la cuenta**
+
+  Para acceder a estos endpoints, necesitarás:
+
+  * Una [cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info) aprobada.
+  * Autenticarte usando las claves y tokens de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que se encuentre dentro de un [Proyecto](/es/resources/fundamentals/projects). 
+
+  Obtén más información sobre cómo obtener acceso a los endpoints de la X API v2 en nuestra [guía de introducción](/es/x-api/getting-started/getting-access).
+</Note>
+
+**Primeros pasos**
+
+<div id="authentication">
+  ### Autenticación
+</div>
+
+Puedes autenticar este endpoint con [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), [OAuth 2.0 solo para la aplicación](https://developer.x.com\(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token\)) o [OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+ 
+
+<div id="making-a-request">
+  ### Realizar una solicitud
+</div>
+
+Puedes llamar al endpoint de Search Communities como se muestra a continuación:
+
+```
+      curl --location 'https://api.x.com/2/communities/search?query=anime' --header 'Authorization: ••••••'
+```
+
+Si la solicitud se completa correctamente, verás la respuesta JSON que se muestra a continuación:
+
+```
+{
+   "data": [
+       {
+           "access": "Public",
+           "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+           "join_policy": "Open",
+           "name": "Anime Community"
+       },
+       {
+           "access": "Public",
+           "description": "Join and text about anime 🥰",
+           "join_policy": "Open",
+           "name": "Anime World 🌸"
+       },
+       {
+           "access": "Public",
+           "description": "For all anime lovers and creators!",
+           "join_policy": "Open",
+           "name": "Anime"
+       },
+   ],
+   "meta": {
+       "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+   }
+}
+```
+
+<div id="community-fields">
+  ### Campos de la comunidad
+</div>
+
+Puedes obtener datos adicionales asociados a una comunidad especificando los campos de comunidad.
+
+Los siguientes campos de comunidad están disponibles:
+
+| Valor del campo | Tipo | Descripción |     |
+| :--- | :--- | :--- | :--- |
+| created&#95;at | date (ISO 8601) | Momento de creación de la comunidad. |     |
+| id  | string | El identificador único de la comunidad. |     |
+| name | string | El nombre de la comunidad. |     |
+| description | string | El texto de la descripción de la comunidad, si está disponible. |     |
+| access | string | El nivel de acceso de la comunidad.  <br />  <br />Puede ser uno de:<br /><br />* `Public`<br />* `Closed` |     |
+| join&#95;policy | string | La política para unirse a la comunidad.  <br />  <br />Puede ser una de:<br /><br />* `Open`<br />* `RestrictedJoinRequestsDisabled`<br />* `RestrictedJoinRequestsRequireAdminApproval`<br />* `RestrictedJoinRequestsRequireModeratorApproval`<br />* `SuperFollowRequired` |     |
+| member&#95;count | integer | El número de miembros que se han unido a la comunidad. |     |
+
+<div id="example-request">
+  #### Ejemplo de solicitud
+</div>
+
+Puedes realizar una llamada al endpoint Search Communities con campos de comunidad adicionales, como se muestra a continuación:
+
+```
+      curl --location 'https://api.x.com/2/communities/search?query=anime&community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: ••••••'
+```
+
+**Ejemplo de respuesta**
+
+Si la solicitud se realiza correctamente, verás la respuesta JSON como se muestra a continuación:
+
+```
+{
+   "data": [
+       {
+           "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI=",
+           "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 39915,
+           "name": "Anime Community",
+           "created_at": "2024-02-17T06:58:50.000Z"
+       },
+       {
+           "id": "Q29tbXVuaXR5OjE1MDY3OTM5NTMxMDYwNDI4OTE=",
+           "description": "Join and text about anime 🥰",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 26019,
+           "name": "Anime World 🌸",
+           "created_at": "2022-03-24T00:44:07.000Z"
+       },
+       {
+           "id": "Q29tbXVuaXR5OjE0OTY3NzYyMTU5Mzk1MzQ4NDk=",
+           "description": "For all anime lovers and creators!",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 5612,
+           "name": "Anime",
+           "created_at": "2022-02-24T09:17:13.000Z"
+       }
+   ],
+   "meta": {
+       "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+   }
+}
+```

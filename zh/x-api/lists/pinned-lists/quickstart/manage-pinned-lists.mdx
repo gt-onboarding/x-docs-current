@@ -1,0 +1,67 @@
+---
+title: 管理固定列表
+sidebarTitle: 管理固定列表
+keywords: ["管理固定列表快速入门", "固定列表快速入门", "取消固定列表快速入门", "固定列表管理"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<Note>
+  **请注意：** 本指南假定你已经完成了[快速入门概览](/zh/x-api/lists/pinned-lists#getting-started-with-the-pinned-list-endpoint-group)中的前提条件。
+</Note>
+
+<div id="steps-to-build-a-manage-pinned-list-request">
+  ### 构建管理置顶列表请求的步骤
+</div>
+
+**步骤一：在 Postman 中选择 List 相关的端点集合**
+
+在你将 X API v2 集合加载到 Postman 之后，导航到“List”文件夹，选择其中的“Pinned Lists”文件夹，然后选择“Pin a List”。
+ 
+
+**步骤二：指定要置顶的 List**
+
+管理置顶 List 的端点需要两个 ID：一个是用户 ID（将 List 置顶的已认证用户），另一个是目标 List（要被置顶的 List）。用户的 ID 必须与认证用户的 ID 相对应，这意味着在为请求进行认证时，你必须传入与该用户 ID 关联的访问令牌。在这里，你可以指定属于你自己的用户 ID。你可以通过以下两种方式找到你的 ID：
+
+1. 使用按用户名查询用户的 [users lookup](/zh/x-api/users/lookup/introduction) 端点，你可以传入一个用户名并获取返回的 id 字段。
+2. 查看你的访问令牌，你会发现其中的数字部分就是你的用户 ID。
+
+目标 List ID 可以是任意有效的列表。在 Postman 中，导航到“Params”选项卡，将用户 ID 输入到 id 路径变量的“Value”列中。然后导航到“Body”选项卡，将你希望置顶的 List 的 ID 作为 list&#95;id 参数的值输入。请确保在任何 ID 前后都不要包含空格。
+
+|             |                                 |                    |
+| :---------- | :------------------------------ | :----------------- |
+| **Key**     | **Value**                       | **Parameter type** |
+| `id`        | The user ID                     | path               |
+| list&#95;id | The target List ID to be pinned | body               |
+
+你现在应该会在“Send”按钮旁边看到一个类似的 URL：
+
+```
+      https://api.x.com/2/users/2244994945/pinned_lists
+```
+
+步骤三：发出请求并查看响应
+
+完成所有设置后，点击“Send”按钮，你将收到一个与下方示例类似的响应：
+
+```
+{
+  "data": {
+    "pinned": true
+  }
+}
+```
+
+如果返回的响应对象中 `pinned` 键的值为 true，则表示你已成功固定目标列表。
+
+要取消固定列表，请在 Postman 中加载的 X API v2 集合中的 “Lists” 文件夹里选择 “Unpin List” 请求。此端点需要经过身份验证的用户 ID，以及要取消固定的列表 ID。在 “Params” 选项卡中，将用户 ID 作为 `id` 列的值输入，将要取消固定的列表 ID 作为 `list_id` 列的值输入。
+
+删除请求成功后，你将收到类似于以下示例的响应：
+
+```
+{
+  "data": {
+    "pinned": false
+  }
+}
+```

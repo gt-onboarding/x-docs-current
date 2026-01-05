@@ -1,0 +1,71 @@
+---
+title: リストメンバーの管理
+sidebarTitle: リストメンバーの管理
+keywords: ["リストメンバー管理の移行", "v1.1 から v2 へのリストメンバー管理の移行", "リストメンバー管理の移行", "Standard から v2 へのリストメンバー移行", "リストメンバーの移行"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="manage-list-members-standard-v11-compared-to-x-api-v2">
+  ### List メンバーの管理: Standard v1.1 と X API v2 の比較
+</div>
+
+Standard v1.1 の [POST lists/members/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-create) および [POST lists/members/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-destroy) エンドポイントを使用している場合、このガイドは、Standard v1.1 と X API v2 の List メンバー管理エンドポイントの共通点と相違点を理解するうえで役立つ内容をまとめたものです。
+
+* **類似点**
+  * 認証
+* **相違点**
+  * エンドポイント URL
+  * アプリおよびプロジェクトの要件
+  * HTTP メソッド
+  * レート制限
+  * リクエストパラメーター
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**認証**
+
+どちらのエンドポイントのバージョンも [OAuth 1.0a User Context](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication) をサポートします。したがって、以前に標準的な v1.1 の List メンバー管理エンドポイントのいずれかを使用していた場合は、X API v2 のエンドポイントに移行しても同じ認証方法を引き続き使用できます。
+
+<div id="differences">
+  #### 違い
+</div>
+
+**エンドポイント URL**
+
+* Standard v1.1 エンドポイント:
+  * POST https://api.x.com/1.1/lists/members/create.json
+    (指定したリストにメンバーを追加します)
+  * POST https://api.x.com/1.1/lists/members/destroy.json
+    (指定したリストからメンバーを削除します)
+* X API v2 エンドポイント:
+  * POST https://api.x.com/2/lists/:id/members
+    (指定したリストにメンバーを追加します)
+
+  * DELETE https://api.x.com/2/lists/:id/members/:user&#95;id
+    (指定したリストからメンバーを削除します)
+
+**レート制限**
+
+| **Standard v1.1** | **X API v2** |
+| :--- | :--- |
+| /1.1/lists/members/create.json<br /><br />なし | /2/lists/:id/members<br /><br />OAuth 1.0a User Context で 15 分間あたり 300 リクエスト<br /><br />OAuth 2.0 Authorization Code with PKCE で 15 分間あたり 300 リクエスト |
+| /1.1/lists/members/destroy.json<br /><br />なし | /2/lists/:id/members/:user&#95;id<br /><br />OAuth 1.0a User Context で 15 分間あたり 300 リクエスト<br /><br />OAuth 2.0 Authorization Code with PKCE で 15 分間あたり 300 リクエスト |
+
+**アプリとプロジェクトの要件**
+
+X API v2 エンドポイントでは、リクエストを認証する際に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) の認証情報を使用する必要があり、そのアプリは [プロジェクト](/ja/resources/fundamentals/projects) に関連付けられている必要があります。すべての X API v1.1 エンドポイントでは、スタンドアロンのアプリ、またはプロジェクトに関連付けられたアプリの認証情報を使用できます。
+
+**リクエストパラメータ**
+
+以下の Standard v1.1 のリクエストパラメータには、X API v2 での対応があります:
+
+| **Standard v1.1** | **X API v2** |
+| :--- | :--- |
+| list&#95;id | id  |
+| slug | 対応なし |
+| screen&#95;name | 対応なし |
+| owner&#95;screen&#95;name | 対応なし |
+| owner&#95;id | 対応なし |

@@ -1,0 +1,196 @@
+---
+title: 会話ID
+keywords: ["会話ID", "会話スレッド", "返信スレッド", "スレッドの追跡", "会話の追跡", "返信チェーン", "スレッドの再構成"]
+---
+
+<div id="conversation-threads-using-the-x-api">
+  ### X API を使用した会話スレッド
+</div>
+
+X 上で会話がどのように展開していくかを見ると、1 つのポストから複数の会話スレッドが生まれ、それぞれに参加者が増えるにつれて、長さも複雑さも増していくことがわかります。ポスト同士の関係性を特定し、会話スレッドを把握する機能は、X API v2 のペイロードおよび検索機能の一部です。あるポストに対してポストが投稿される場合（返信と呼ばれます）、あるいは返信に対してさらに返信が投稿される場合、各返信には定義済みの `conversation_id` が付与され、これは会話を開始した元のポストの Post ID と一致します。
+
+特定のポストへの返信と、その返信への返信はすべて、単一の元のポストから派生した 1 つの会話に含まれます。どれだけ多くの返信スレッドが生成されたとしても、それらはすべて、会話のきっかけとなった元のポストを指す共通の `conversation_id` を共有します。X API v2 を使用すると、会話スレッド全体を取得して再構築できるため、何が語られているのか、そして会話やアイデアがどのように展開していくのかを把握できます。
+
+<div id="example-conversation-thread">
+  #### 会話スレッドの例
+</div>
+
+以下は 5 人のユーザーが参加しており、返信に対する返信も 1 件含まれている会話スレッドの例です。
+
+```json
+{
+  "data": [
+    {
+      "conversation_id": "1279944223114900000",
+      "in_reply_to_user_id": "1102323333",
+      "author_id": "63044444",
+      "created_at": "2020-07-06T15:58:10.000Z",
+      "id": "1280169177479744444",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1280155225706433333"
+        }
+      ],
+      "text": "@ThirdPerson333 @OriginalPerson000 Reply to the third reply!"
+    },
+    {
+      "conversation_id": "1279944223114900000",
+      "in_reply_to_user_id": "3001960000",
+      "author_id": "1102323333",
+      "created_at": "2020-07-06T15:02:44.000Z",
+      "id": "1280155225706433333",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1279944223114900000"
+        }
+      ],
+      "text": "@OriginalPerson000 Third reply"
+    },
+    {
+      "conversation_id": "1279944223114900000",
+      "in_reply_to_user_id": "3001960000",
+      "author_id": "199562222",
+      "created_at": "2020-07-06T15:02:36.000Z",
+      "id": "1280155190306340864",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1279944223114900000"
+        }
+      ],
+      "text": "@OriginalPerson000 Second Reply"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "name": "Original person",
+        "id": "3001960000",
+        "username": "OriginalPerson000"
+      },
+      {
+        "name": "First person",
+        "id": "179201111",
+        "username": "FirstPerson111"
+      }
+    ]
+  },
+  "meta": {
+    "newest_id": "1280169177479744444",
+    "oldest_id": "1279945722494811111",
+    "result_count": 4
+  }
+}
+```
+
+`tweet.fields` パラメーターとして `conversation_id` を取得する
+v2 エンドポイントで返されるすべてのポストについて `conversation_id` を取得するには、リクエストパラメーターに tweet.fields=conversation&#95;id フィールドを追加します。conversation&#95;id フィールドは、会話の返信スレッド内にある元のポストのポスト ID を常に表します。以前の返信スレッドから派生した返信スレッドを含め、同じ返信スレッド内のすべてのポストは、同じ conversation&#95;id を持ちます。
+
+<div id="request-with-conversation_id-parameter">
+  ### `conversation_id` パラメータ付きリクエスト
+</div>
+
+```
+curl --request GET \
+  --url 'https://api.x.com/2/tweets?ids=1225917697675886593&tweet.fields=author_id,conversation_id,created_at,in_reply_to_user_id,referenced_tweets&expansions=author_id,in_reply_to_user_id,referenced_tweets.id&user.fields=name,username' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+<div id="response">
+  ### レスポンス
+</div>
+
+```
+{
+  "data": [
+    {
+      "id": "1225917697675886593",
+      "text": "@TwitterEng *ahem* https://t.co/aroJHt2zQ1",
+      "created_at": "2020-02-07T23:02:10.000Z",
+      "author_id": "2244994945",
+      "in_reply_to_user_id": "6844292",
+      "conversation_id": "1225912275971657728",
+      "referenced_tweets": [
+        {
+          "type": "quoted",
+          "id": "1200517737669378053"
+        },
+        {
+          "type": "replied_to",
+          "id": "1225912275971657728"
+        }
+      ]
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "username": "TwitterDev",
+        "name": "Twitter Dev",
+        "id": "2244994945"
+      },
+      {
+        "username": "TwitterEng",
+        "name": "Twitter Engineering",
+        "id": "6844292"
+      }
+    ],
+    "tweets": [
+      {
+        "id": "1200517737669378053",
+        "text": "|￣￣￣￣￣￣￣￣￣￣￣|\n             don't push            \n             to prod on            \n               Fridays                  \n|＿＿＿＿＿＿＿＿＿＿＿| \n(\\__/)",
+        "created_at": "2019-11-29T20:51:47.000Z",
+        "author_id": "2244994945",
+        "conversation_id": "1200517737669378053"
+      }
+    ]
+  }
+}
+```
+
+<div id="using-conversation_id-as-a-filter-operator">
+  ### `conversation_id` をフィルター演算子として使用する
+</div>
+
+`conversation_id` は、recent search における検索クエリパラメータとして、または [filtered stream](/ja/x-api/posts/filtered-stream/introduction) のルール内で使用する演算子として利用できます。これにより、filtered stream を使用した場合はリアルタイムで、[search Tweets](/ja/x-api/posts/search/introduction) を使用した場合は逆時系列で、会話スレッドに含まれるポスト全体が返されます。また、この演算子を [Posts counts](/ja/x-api/posts/counts/introduction) と組み合わせることで、会話内のポストの件数を取得することもできます。
+
+<div id="request-to-query-by-conversation_id">
+  ## `conversation_id` でクエリを行うリクエスト
+</div>
+
+```
+curl --request GET \
+  --url 'https://api.x.com/2/tweets/search/recent?query=conversation_id:1279940000004973111&tweet.fields=in_reply_to_user_id,author_id,created_at,conversation_id' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+<div id="response">
+  ### レスポンス
+</div>
+
+*注: 検索結果のポストは、新しいものから順（逆時系列）に返されます。*
+
+```
+{
+  "data": [
+    {
+      "id": "1280169000000704333",
+      "text": "@attributeisland @iterationjoe What beautiful creatures! Happy #seaturtleweek",
+      "conversation_id": "1279940000004973111",
+      "public_metrics": {
+        "retweet_count": 0,
+        "reply_count": 0,
+        "like_count": 7,
+        "quote_count": 0
+      }
+    }
+  ],
+  "meta": {
+    "newest_id": "1280169000000704333",
+    "oldest_id": "1279940000004973111",
+    "result_count": 5
+  }
+}
+```

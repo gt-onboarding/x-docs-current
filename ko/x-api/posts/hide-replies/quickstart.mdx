@@ -1,0 +1,86 @@
+---
+title: 빠른 시작
+sidebarTitle: 빠른 시작
+keywords: ["답글 숨기기 빠른 시작", "답글 숨기기 튜토리얼", "답글 숨기기 가이드", "답글 모더레이션", "답글 모더레이션 빠른 시작"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-hide-replies-endpoint">
+  ## hide replies 엔드포인트 시작하기
+</div>
+
+이 퀵스타트 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용하여 hide replies 엔드포인트에 대한 첫 번째 요청을 보내는 데 도움을 줍니다.
+
+다양한 언어의 코드 스니펫을 보고 싶다면 [hide replies API Reference 페이지](/ko/x-api/posts/hide-replies#put-2-tweets-id-hidden)를 방문하세요. 
+
+<Note>
+  ### 준비 사항
+
+  이 가이드를 완료하려면 요청을 인증하는 데 사용할 [keys and tokens](/ko/resources/fundamentals/authentication) 세트가 필요합니다. 다음 단계를 따라 이러한 키와 토큰을 생성할 수 있습니다.
+
+  * [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하여 승인을 받으세요.
+  * developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성하세요.
+  * App의 “Keys and tokens” 페이지로 이동해 필요한 자격 증명을 생성하세요. 생성한 자격 증명은 모두 안전한 위치에 보관하세요.
+</Note>
+
+<div id="steps-to-build-a-put-tweetsidhidden-request">
+  ### PUT /tweets/:id/hidden 요청을 작성하는 단계
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### 1단계: 도구 또는 라이브러리 선택
+</div>
+
+이 엔드포인트에 요청을 보내는 데 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 과정을 단순화하기 위해 Postman을 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 불러오려면 아래 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에서 X API v2 컬렉션을 불러온 후 hide replies 엔드포인트로 이동하세요.
+
+<div id="step-two-authenticate-your-request">
+  #### 2단계: 요청 인증하기
+</div>
+
+X API에 정상적으로 요청을 보내려면 해당 권한이 있는지 확인해야 합니다. 이 엔드포인트에서는 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 또는 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)를 사용해 요청을 인증해야 합니다.
+
+이 예제에서는 OAuth 1.0a User Context를 사용합니다.
+
+Postman에 키와 토큰, 즉 API Key, API Secret Key, OAuth 1.0a 사용자 액세스 토큰, OAuth 1.0a 사용자 액세스 토큰 시크릿을 추가해야 합니다. 이를 위해 Postman 오른쪽 상단에서 &quot;X API v2&quot;라는 이름의 environment(환경)를 선택한 뒤, &quot;initial value&quot;와 &quot;current value&quot; 필드에 키와 토큰을 추가합니다(환경 드롭다운 옆의 눈 모양 아이콘 클릭).
+
+설정을 올바르게 완료했다면 이 변수들은 요청의 Authorization 탭에 자동으로 반영됩니다.
+ 
+
+<div id="step-three-find-a-post-id-to-hide">
+  #### 3단계: 숨길 게시물 ID 찾기
+</div>
+
+hide replies 엔드포인트는 인가된 사용자를 대신해 답글을 숨기거나 숨김 해제할 수 있습니다. 이 예시에서는 사용자 프로필과 연결된 액세스 토큰을 사용하고 있기 때문에, 여러분이 시작한 대화에 참여한 사용자의 답글을 숨길 수 있습니다. 마찬가지로, 여러분의 앱을 인가한 다른 사용자에게 속한 액세스 토큰을 사용한다면, 해당 계정이 시작한 모든 대화의 답글을 관리할 수 있습니다.
+
+친구에게 게시물에 답글을 남겨 달라고 요청하세요(답글 숨기기 기능을 테스트 중이라는 것도 알려 주세요). 또는 테스트 계정으로 본인의 어떤 게시물에든 답글을 남겨도 됩니다. 그 답글을 클릭한 다음, URL에서 숫자로 된 부분만 복사합니다. 이것이 우리가 숨기려는 게시물 ID입니다.
+
+여기서는 ID가 `1232720193182412800`인 다음 게시물을 살펴보겠습니다.
+
+`https://x.com/TwitterDev/status/1232720193182412800`
+
+<div id="step-four-hide-the-post">
+  #### 4단계: 게시물 숨기기
+</div>
+
+Postman에서 Hide replies 폴더를 열고 Hide a reply를 선택합니다. Params 탭에서 `id` 필드 옆에 게시물 ID를 붙여넣습니다(URL의 `:id`는 바꿀 필요가 없습니다). &quot;Send&quot;를 클릭하면 성공 응답을 확인할 수 있습니다.
+
+`{"hidden":true}`
+
+<div id="step-five-unhide-the-post">
+  #### 5단계: 게시물 숨김 해제
+</div>
+
+숨겨진 게시물은 X 앱에서 별도의 탭으로 이동됩니다. Postman에서 게시물 숨김을 해제하려면 Hide replies 폴더를 열고 Unhide a reply를 선택합니다. Params 탭에서 이전 단계에서 사용한 동일한 게시물 ID를 `id` 필드에 붙여넣습니다. &quot;Send&quot;를 클릭하면 성공 응답을 확인할 수 있습니다.
+
+`{"hidden":false}`
+
+`hidden` 필드는 게시물의 숨김 상태를 나타냅니다. 숨김 상태가 `true`이면 게시물이 숨겨진 것이고, 마찬가지로 `false`이면 게시물이 숨겨져 있지 않은 것입니다.

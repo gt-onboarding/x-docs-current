@@ -1,0 +1,143 @@
+---
+title: "소개"
+sidebarTitle: "소개"
+keywords: ["activity API","X Activity API","액티비티 이벤트","프로필 업데이트","사용자 활동","실시간 이벤트","액티비티 스트림"]
+---
+
+X Activity API(XAA) 엔드포인트 그룹을 사용하면 개발자는 X 플랫폼에서 발생하는 액티비티 이벤트를 활용할 수 있습니다.
+
+개발자는 `ProfileBioUpdate`, `ProfilePictureUpdate` 등과 같이 관심 있는 이벤트를 구독하고, 해당 이벤트를 받고자 하는 사용자 ID를 기준으로 필터링할 수 있습니다. 해당 사용자 ID와 일치하는 이벤트는 1초 미만의 지연으로 앱에 전달됩니다.
+
+<Warning>
+  X Activity API는 오픈 베타로 제공됩니다. 오픈 베타 기간 동안 잠재적인 버그, 하위 호환성을 깨는 변경(breaking change), 또는 미완성 기능이 있을 수 있습니다.
+
+  여러분의 피드백은 매우 중요합니다. 문제를 발견하면 [개발자 커뮤니티 포럼](https://devcommunity.x.com/)을 통해 보고해 주세요.
+</Warning>
+
+<div id="delivery-mechanisms">
+  ## 전달 메커니즘
+</div>
+
+X Activity API는 현재 다음과 같은 전달 메커니즘을 통해 앱으로 이벤트를 전송할 수 있습니다:
+
+* 지속형 HTTP 스트림
+* [Webhook](/ko/x-api/webhooks/introduction)
+
+<div id="supported-event-types">
+  ## 지원되는 이벤트 유형
+</div>
+
+현재 X Activity API에서는 이벤트 유형을 다음과 같이 카테고리별로 지원합니다:
+
+<div id="profile-events">
+  ### 프로필 이벤트
+</div>
+
+프로필 이벤트는 사용자가 프로필 정보를 변경하면 발생합니다.
+
+| Event Name                   | Description                                         | Filters   |
+| ---------------------------- | --------------------------------------------------- | --------- |
+| `profile.update.bio`           | 사용자가 프로필 소개를 수정하면 발생합니다         | `user_id` |
+| `profile.update.profile_picture`       | 사용자가 프로필 사진을 수정하면 발생합니다     | `user_id` |
+| `profile.update.banner_picture`        | 사용자가 프로필 배너를 수정하면 발생합니다      | `user_id` |
+| `profile.update.geo`           | 사용자가 프로필 위치 정보를 수정하면 발생합니다    | `user_id` |
+| `profile.update.url`           | 사용자가 프로필 웹사이트 URL을 수정하면 발생합니다 | `user_id` |
+| `profile.update.screenname`    | 사용자가 표시 이름을 수정하면 발생합니다        | `user_id` |
+| `profile.update.verified_badge` | 사용자가 인증 배지를 변경하면 발생합니다      | `user_id` |
+
+<div id="follow-events">
+  ### 팔로우 이벤트
+</div>
+
+팔로우 이벤트는 한 사용자가 다른 사용자를 팔로우하거나 언팔로우할 때 발생합니다.
+
+| Event Name | Description                             | Filters   |
+| ---------- | --------------------------------------- | --------- |
+| `follow.follow`  | 사용자가 다른 사용자를 팔로우할 때 발생합니다   | `user_id` |
+| `follow.unfollow`  | 사용자가 다른 사용자를 언팔로우할 때 발생합니다 | `user_id` |
+
+<Note>
+  **Enterprise 전용:** 팔로우 이벤트는 현재 일부 Enterprise 및 파트너 티어 계정에서만 사용할 수 있습니다.
+</Note>
+
+<div id="news-events">
+  ### 뉴스 이벤트
+</div>
+
+뉴스 이벤트는 Grok이 큐레이션한 뉴스 주제와 헤드라인에 대한 최신 정보를 제공합니다.
+
+| 이벤트 이름 | 설명                                   | 필터     |
+| ---------- | ------------------------------------- | -------- |
+| `news.new`  | Grok이 큐레이션한 새로운 뉴스와 헤드라인 | `keyword` |
+
+<Note>
+  **Enterprise 전용:** 뉴스 이벤트는 현재 일부 Enterprise 및 Partner 티어 계정에서만 사용할 수 있습니다.
+</Note>
+
+향후 릴리스에서 XAA는 소셜 상호작용, 콘텐츠 참여도, 수익화 기능 등 추가 이벤트 유형을 지원하도록 확대될 예정입니다. 새로운 이벤트 유형이 제공될 때마다 본 문서를 계속 업데이트하겠습니다.
+
+<Note>
+  **참고:** XAA는 게시물을 전달하지 않습니다. 실시간 게시물 전달이 필요하다면, 개발자가 게시물을 필터링하고 실시간으로 스트리밍할 수 있게 해 주는 [Filtered Stream](/ko/x-api/posts/filtered-stream/introduction) 엔드포인트를 사용하십시오.
+</Note>
+
+<div id="event-privacy-and-authentication">
+  ## 이벤트 프라이버시 및 인증
+</div>
+
+X Activity API에서는 아래에서 설명하는 바와 같이 X 앱과 동일하게 **공개 이벤트**와 **비공개 이벤트**를 구분합니다.
+
+<div id="public-events">
+  ### Public Events
+</div>
+
+공개 이벤트는 공개 사용자 계정이 전체 공개로 수행하여 모든 X 사용자가 볼 수 있는 활동입니다. 이러한 이벤트는 X 플랫폼의 모든 사용자에게 표시되며, 사용자가 이를 보기 위해 OAuth 인증을 할 필요가 없습니다.
+
+**현재 공개 이벤트:**
+
+* 프로필 업데이트(소개, 프로필 사진, 배너, 위치, URL, 사용자 이름 변경)
+
+이러한 공개 이벤트의 경우, 필터에 user id를 지정하여 구독을 생성하고 XAA를 통해 수신할 수 있습니다.
+
+<div id="private-events">
+  ### 비공개 이벤트
+</div>
+
+비공개 이벤트는 OAuth 인증을 통해 사용자의 명시적인 동의가 필요한 활동입니다. 사용자는 X를 통해 인증하고, 이러한 이벤트에 접근할 수 있도록 개발자 앱에 명시적으로 권한을 부여해야 합니다.
+
+**비공개 이벤트에 대한 인증 요건:**
+
+* 사용자는 OAuth 2.0을 통해 귀하의 앱을 인증해야 합니다
+* 귀하의 앱은 적절한 OAuth 스코프를 획득해야 합니다
+* 사용자는 이러한 이벤트에 귀하의 앱이 접근할 수 있도록 명시적으로 권한을 부여해야 합니다
+* 비공개 이벤트에 대한 구독은 귀하의 앱을 승인한 사용자에 대해서만 생성할 수 있습니다
+
+<div id="subscription-limits">
+  ## 구독 한도
+</div>
+
+X Activity API의 구독 한도는 계정 티어에 따라 다릅니다:
+
+| 패키지 등급 | 최대 구독 수 |
+| ------------ | --------------------- |
+| Free         | 지원되지 않음         |
+| Basic        | 50                    |
+| Pro          | 2500                  |
+| Enterprise   | 50,000                |
+| Partner      | 100,000               |
+
+<Note>
+  **계정 설정**
+
+  이 엔드포인트에 액세스하려면 다음이 필요합니다.
+
+  * 승인된 [개발자 계정](https://developer.x.com/en/portal/petition/essential/basic-info)
+  * [프로젝트](/ko/resources/fundamentals/projects) 내에 있는 [개발자 앱](/ko/resources/fundamentals/developer-apps)의 키와 토큰을 사용한 인증
+
+  X API v2 엔드포인트에 대한 액세스 권한을 얻는 방법은 [시작하기 가이드](/ko/x-api/getting-started/getting-access)에서 자세히 알아보세요.
+</Note>
+
+<div className="flex">
+  <Button href="/ko/x-api/posts/filtered-stream/quickstart">
+    빠른 시작
+  </Button>
+</div>

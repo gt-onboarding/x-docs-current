@@ -1,0 +1,40 @@
+---
+title: TLS を使用した X API への接続
+sidebarTitle: TLS
+keywords: ["TLS", "SSL", "HTTPS", "安全な接続", "TLS接続", "暗号化接続", "API セキュリティ"]
+---
+
+import { Button } from "/snippets/ja/button.mdx";
+
+X API のエンドポイントへアクセスするには、TLS 接続が必須です。TLS を利用した通信では、ユーザーと X API の間でやり取りされる情報がパブリックインターネットを通過する際に保護されるため、ユーザーのプライバシーとセキュリティが守られます。X API への接続には、TLS バージョン 1.2 が必要です。
+
+
+<div id="verification">
+  ## 検証
+</div>
+
+<div id="use-an-up-to-date-root-store">
+  ### 最新のルートストアを使用する
+</div>
+
+X の証明書を検証する際には、アプリケーションやライブラリが信頼でき、かつ最新のルートストアを使用していることが重要です。可能であれば、オペレーティングシステムが提供するルートストアを使用するのが、もっとも簡単な方法となる場合があります。あるいは、[Mozilla (NSS) ルートストア](https://www.mozilla.org/en-US/about/governance/policies/security-group/certs/) は、公開かつ透明性の高い形で適切にメンテナンスされています。cURL も、[このストアの PEM 形式バージョン](https://curl.haxx.se/docs/caextract.html) を提供しています。
+
+X は現在、ほとんどの証明書を [DigiCert High Assurance EV Root CA](https://www.digicert.com/digicert-root-certificates.htm) から発行していますが、これはすべての X 関連証明書に当てはまるわけではなく、今後も永続的に保証されるものではありません。そのため、現在使用されている DigiCert のルート証明書のみを信頼対象とすると、将来的にアプリで問題が発生する可能性があります。
+
+<div id="check-crls-and-the-ocsp-status">
+  ### CRL と OCSP ステータスを確認する[](#check-crls-and-the-ocsp-status "Permalink to this headline")
+</div>
+
+多くのアプリケーションは、返された証明書に対して証明書失効リスト (CRL) を照会せず、その処理をオペレーティングシステムに任せています。X の証明書を受け入れる前に、アプリケーションまたは TLS ライブラリで CRL および OCSP (Online Certificate Status Protocol) の検証を必ず実行するよう構成されていることを確認してください。
+
+<div id="cdns">
+  ### CDNs[](#cdns "Permalink to this headline")
+</div>
+
+メディアを含むポストを表示する場合、画像を表示するための HTTPS URL として `media_url_https` 属性を使用してください。将来的には、API エンドポイントから配信されるすべての URL で HTTPS パスが提供されるようになります。
+
+<div id="provide-an-indication-of-security-status">
+  ## セキュリティ状態を示す
+</div>
+
+可能であれば、アプリケーションとXとの間の現在のセキュリティ状態を表示するようにしてください。一部のウェブブラウザは鍵アイコンの表示によってこれを示し、別のブラウザは現在の接続状態を説明的なメッセージで示します。

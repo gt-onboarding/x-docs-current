@@ -1,0 +1,183 @@
+---
+title: 时间倒序
+sidebarTitle: 时间倒序
+keywords: ["主页时间线", "时间倒序", "主页时间线快速入门", "时间线快速入门", "主页时间线教程"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-reverse-chronological-home-timeline">
+  ## 倒序首页时间线入门
+</div>
+
+本快速入门指南将帮助你使用一组指定字段，通过 [Postman](/zh/tutorials/postman-getting-started) 向某个时间线端点发出你的第一个请求。
+
+如果你想查看不同语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。
+
+<Note>
+  **前提条件**
+
+  要完成本指南，你需要拥有一组用于对请求进行身份验证的 [keys and tokens](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审批。
+  * 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 和一个关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+  * 进入你的 App 的 “Keys and tokens” 页面来生成所需凭证。确保将所有凭证保存在安全的位置。
+</Note>
+
+**构建倒序首页时间线请求的步骤**
+
+*在本示例中，我们将向按 ID 获取用户帖子时间线的端点发出请求，但你也可以将本快速入门中的内容应用到用户提及时间线的请求中。*
+
+**步骤一：选择工具或库**
+
+有多种不同的工具、代码示例和库可用于向此端点发出请求，但我们会在这里使用 Postman 工具来简化流程。
+
+要将 X API v2 Postman 集合加载到你的环境中，请点击以下按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在将 X API v2 集合加载到 Postman 后，导航到 “Timelines” 文件夹并找到 “Reverse chronological home timeline” 请求。
+
+**步骤二：为你的请求进行认证**
+
+要正确向 X API 发出请求，你需要验证自己拥有相应权限。对于此端点，你必须使用 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 认证方式来对你的请求进行认证。
+
+你必须将你的密钥和令牌添加到 Postman 中。你可以在 Postman 右上角选择名为 “X API v2” 的环境，然后将你的密钥和令牌添加到 &quot;initial value&quot; 和 &quot;current value&quot; 字段中（点击环境下拉菜单旁边的眼睛图标）。
+
+如果你设置正确，这些变量会自动注入到请求的 Authorization 选项卡中。
+
+**步骤三：确定并指定你希望获取其首页时间线的用户**
+
+你必须在请求中指定一个你希望为其获取近期帖子列表的用户。在此示例中，我们将传入一个用户 ID。
+
+用户 ID 是表示账号用户名（handle）的数值，你可以在账号个人资料 URL 中找到它。例如，下列账号的用户名是 `XDevelopers`。
+
+`https://x.com/XDevelopers`
+
+要将该用户名转换为用户 ID，你需要使用带有该用户名的 [users lookup endpoint](/zh/x-api/users/lookup/introduction)，并在返回的 payload 中找到数值型用户 ID。以 @XDevelopers 为例，其用户 ID 为 2244994945。
+
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，并将该用户 ID 输入到 id 参数 &quot;Value&quot; 列中。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**步骤四：确定并指定你希望检索的字段**
+
+如果你在完成步骤三后点击 &quot;Send&quot; 按钮，你将在响应中收到默认的 [Post object](/zh/x-api/fundamentals/data-dictionary#tweet) 字段：id、text 和 edit&#95;history&#95;tweet&#95;ids。
+
+如果你希望接收其他字段，则必须在请求中通过 [field](/zh/x-api/fundamentals/fields) 和/或 [expansion](/zh/x-api/fundamentals/expansions) 参数显式指定这些字段。
+
+在本练习中，我们将从不同对象中请求三组额外的字段集：
+
+1. 主要用户对象中额外的 tweet.created&#95;at 字段。
+
+2. 与返回帖子关联的作者的用户对象的默认字段：id、name 和 username
+
+3. 关联用户对象中额外的 user.created&#95;at 字段。
+    
+
+在 Postman 中，切换到 &quot;Params&quot; 选项卡，并在 &quot;Query Params&quot; 表中添加以下键值对：
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `created_at` | `includes.users.created_at` |
+| max&#95;results | 5   |     |
+
+此时你应该会在 &quot;Send&quot; 按钮旁边看到以下 URL：
+
+`https://api.x.com/2/users/:id/timelines/reverse_chronological?tweet.fields=created_at&expansions=author_id&user.fields=created_at&max_results=5`
+
+<Info>
+  **请注意：**
+
+  在 Postman 中，URL 字段中的路径参数 :id **不会**自动更新为你在 `id` 参数字段中输入的值，这就是为什么上面的 URL 包含的是 `:id` 而不是 2244994945。
+</Info>
+
+**步骤五：发送请求并查看响应**
+
+完成所有设置后，点击 &quot;Send&quot; 按钮，你将会收到如下响应：
+
+```{
+	"data": [
+		{
+			"created_at": "2022-05-12T17:00:00.000Z",
+			"text": "今天标志着 Devs in the Details 的推出,这是一个由使用 Twitter API 构建的开发者为开发者制作的技术视频系列。🚀\n\n在这一首播集中,@jessicagarson 向我们介绍了她如何构建 @FactualCat #WelcomeToOurTechTalk\n⬇️\n\nhttps://t.co/nGa8JTQVBJ",
+			"author_id": "2244994945",
+			"id": "1524796546306478083"
+		},
+		{
+			"created_at": "2022-05-11T19:16:40.000Z",
+			"text": "📢 Join @jessicagarson @alanbenlee and @i_am_daniele tomorrow, May 12  | 5:30 ET / 2:30pm PT as they discuss the future of bots https://t.co/sQ2bIO1fz6",
+			"author_id": "2244994945",
+			"id": "1524468552404668416"
+		},
+		{
+			"created_at": "2022-05-09T20:12:01.000Z",
+			"text": "Do you make bots with the Twitter API? 🤖\n\nJoin @jessicagarson @alanbenlee and @iamdaniele on Thursday, May 12  | 5:30 ET / 2:30pm PT as they discuss the future of bots and answer any questions you might have. 🎙📆⬇️\n\nhttps://t.co/2uVt7hCcdG",
+			"author_id": "2244994945",
+			"id": "1523757705436958720"
+		},
+		{
+			"created_at": "2022-05-06T18:19:54.000Z",
+			"text": "If you’d like to apply, or would like to nominate someone else for the program, please feel free to fill out the following form:\n\nhttps://t.co/LUuWj24HLu",
+			"author_id": "2244994945",
+			"id": "1522642324781633536"
+		},
+		{
+			"created_at": "2022-05-06T18:19:53.000Z",
+			"text": "We’ve gone into more detail on each Insider in our forum post. \n\nJoin us in congratulating the new additions! 🥳\n\nhttps://t.co/0r5maYEjPJ",
+			"author_id": "2244994945",
+			"id": "1522642323535847424"
+		}
+	],
+	"includes": {
+		"users": [
+			{
+				"created_at": "2013-12-14T04:35:55.000Z",
+				"name": "Twitter Dev",
+				"username": "TwitterDev",
+				"id": "2244994945"
+			}
+		]
+	},
+	"meta": {
+		"result_count": 5,
+		"newest_id": "1524796546306478083",
+		"oldest_id": "1522642323535847424",
+		"next_token": "7140dibdnow9c7btw421dyz6jism75z99gyxd8egarsc4"
+	}
+}
+```
+
+**步骤六：对结果进行分页**
+
+在上一个响应的底部，你会看到一个 meta 数据对象，其中包含以下字段：
+
+* oldest&#95;id
+* newest&#95;id
+* results&#95;count
+* next&#95;token
+* previous&#95;token
+
+在步骤四中，我们传递了一个值为 5 的 max&#95;results，这意味着每一页最多只会包含五条结果。要访问后续页面的数据，我们将从上一页结果中取出 next&#95;token 字段的值，并在 Postman 的 params 页面中，将该字符串作为 pagination&#95;token 参数的值添加进去，其余参数保持不变。 
+
+|                    |                               |
+| :----------------- | :---------------------------- |
+| **Key**            | **Value**                     |
+| `pagination_token` | t3buvdr5pujq9g7bggsnf3ep2ha28 |
+
+完成这些设置后，你可以再次点击“Send”，就应该会收到下一页的结果。 
+
+我们整理了一篇关于[分页](/zh/x-api/fundamentals/pagination)的指南，对这一概念进行了更详细的说明。
+
+**后续步骤**
+[使用 API 参考文档自定义你的请求](/zh/x-api/posts/timelines#api-reference-index)
+
+[向社区寻求帮助](https://devcommunity.x.com "向社区寻求帮助")

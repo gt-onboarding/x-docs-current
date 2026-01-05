@@ -1,0 +1,194 @@
+---
+title: Consulta de Me gusta
+sidebarTitle: Consulta de Me gusta
+keywords: ["consulta de Me gusta", "inicio rápido de Me gusta", "obtener Me gusta", "tutorial de Me gusta", "guía de Me gusta", "ejemplo de Me gusta"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-likes-lookup-endpoint">
+  ### Introducción al endpoint de consulta de Me gusta
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud al endpoint de consulta de Me gusta usando [Postman](/es/tutorials/postman-getting-started).
+
+Si quieres ver código de ejemplo en diferentes lenguajes de programación, visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+ 
+
+<div id="prerequisites">
+  #### Requisitos previos
+</div>
+
+Para poder completar esta guía, deberás contar con un conjunto de [claves y tokens](/es/resources/fundamentals/authentication), que puedes generar siguiendo estos pasos:
+
+1. [Solicita una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y obtén la aprobación.
+
+2. Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+
+3. Dirígete a la página “Keys and tokens” de tu App y guarda tus API Keys, Access Tokens y Bearer Token en tu gestor de contraseñas.
+
+<div id="steps-to-build-a-likes-lookup-request">
+  #### Pasos para crear una solicitud de búsqueda de Likes
+</div>
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para hacer una solicitud a este endpoint, pero aquí usaremos la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+[![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/m1_vnext/carat.svg)<br />Agregar X API v2 a Postman](https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400)
+
+Una vez que tengas cargada la colección de X API v2 en Postman, navega a la carpeta &quot;Likes&quot; y selecciona &quot;Liking users&quot;.
+ 
+
+**Paso dos: Autentica tu solicitud**
+
+Para realizar una solicitud exitosa a este endpoint, deberás usar autenticación [OAuth 1.0a User Context](/es/resources/fundamentals/authentication) o [OAuth 2.0 Bearer Token](/es/resources/fundamentals/authentication#oauth-2-0). Para hacerlo, debes agregar las siguientes claves y tokens a Postman seleccionando el entorno llamado &quot;X API v2&quot; y agregando las siguientes variables a los campos Initial value y Current value:
+
+* consumer&#95;key con tu API Key
+* consumer&#95;secret con tu API Key Secret
+* access&#95;token con tu Access Token
+* token&#95;secret con tu Access Token Secret
+   
+
+**Paso tres: Especifica una Publicación**
+
+Con este endpoint, debes especificar el id de la Publicación para la cual quieres obtener los usuarios a los que les ha gustado. Puedes encontrar el id de una Publicación navegando a esa Publicación en X y tomando el código numérico al final de la URL. Por ejemplo, el id de la Publicación de la siguiente URL es 1354143047324299264.
+
+https://x.com/TwitterDev/status/1354143047324299264
+
+En Postman, navega a la pestaña &quot;Params&quot; y escribe este nombre de usuario en la columna &quot;Value&quot; de la variable de ruta tweet&#95;id (en la parte inferior de la sección), asegurándote de no incluir espacios antes o después de los nombres de usuario. 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | El id de la Publicación de la que quieres obtener los usuarios a los que les ha gustado |
+
+**Paso cuatro: Identifica y especifica qué campos deseas recuperar**
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás en tu respuesta los campos predeterminados del [objeto user](/es/x-api/fundamentals/data-dictionary#user): id, name y username.
+
+Si deseas recibir campos adicionales además de id, name y username, tendrás que especificar esos campos en tu solicitud con los parámetros [fields](/es/x-api/fundamentals/fields) y/o [expansions](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de diferentes objetos:
+
+1. El campo adicional user.created&#95;at en los objetos de usuario principales.
+2. Los campos predeterminados del objeto de las Publicaciones fijadas asociadas para los usuarios devueltos: id y text.
+3. El campo adicional tweet.created&#95;at en los objetos de Publicación asociados.
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave-valor a la tabla &quot;Query Params&quot;:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | user.created&#95;at |
+| expansions | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at | tweet.created&#95;at |
+
+Ahora deberías ver la siguiente URL junto al botón &quot;Send&quot;:
+
+`https://api.x.com/2/tweets/1354143047324299264/liking_users?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**Paso cinco: Realiza tu solicitud y revisa tu respuesta**
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar al siguiente ejemplo de respuesta:
+
+```
+{
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "ahora, todos los que tengan 600 o más seguidores pueden organizar un Space.\n\nbasándonos en lo que hemos aprendido, es probable que estas cuentas tengan una buena experiencia como anfitriones debido a su audiencia existente. antes de llevar la capacidad de crear un Space a todos, nos estamos enfocando en algunas cosas. 🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+}
+```
+
+**Paso seis: Obtener las Publicaciones que le han gustado a un usuario**
+
+También es posible que quieras hacer una solicitud para obtener las Publicaciones que le han gustado a un usuario. Con el endpoint Likes lookup, puedes obtener información sobre las Publicaciones que le han gustado a un usuario. Para hacerlo, navega a la carpeta &quot;Likes&quot; y selecciona &quot;Liked Tweets&quot;. 
+
+Con este endpoint, debes especificar el ID de usuario para el que quieres obtener las Publicaciones que le han gustado. Puedes usar el endpoint de [user lookup](/es/x-api/users/lookup/introduction) para obtener esta información.
+
+En Postman, navega a la pestaña &quot;Params&quot; e introduce este nombre de usuario en la columna &quot;Value&quot; de la variable de ruta id (al final de la sección), asegurándote de no incluir espacios antes o después de los nombres de usuario. 
+
+|                 |                                                                               |
+| :-------------- | :---------------------------------------------------------------------------- |
+| **Key**         | **Value**                                                                     |
+| id              | El ID de usuario del que quieres obtener las Publicaciones que le han gustado |
+| max&#95;results | 5                                                                             |
+
+Ahora puedes ver una URL similar con tu ID en lugar del de TwitterDev junto al botón &quot;Send&quot;:
+ 
+
+`https://api.x.com/2/users/2244994945/liked_tweets?max_results=5`
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar al siguiente ejemplo de respuesta:
+
+```
+{
+  "data": [
+    {
+      "id": "1362449997430542337",
+      "text": "Honored to be the first developer to be featured in @TwitterDev's love fest 🥰♥️😍 https://t.co/g8TsPoZsij"
+    },
+    {
+      "id": "1365416026435854338",
+      "text": "We're so happy for our Official Partner @Brandwatch and their big news. https://t.co/3DwWBNSq0o https://t.co/bDUGbgPkKO"
+    },
+    {
+      "id": "1296487407475462144",
+      "text": "Echa un vistazo a esta función en @TwitterDev para aprender más sobre cómo estamos extrayendo datos de redes sociales para dar sentido a esta crisis de #saludpública en evolución https://t.co/sIFLXRSvEX."
+    },
+    {
+      "id": "1294346980072624128",
+      "text": "I awake from five years of slumber https://t.co/OEPVyAFcfB"
+    },
+    {
+      "id": "1283153843367206912",
+      "text": "@wongmjane Wish we could tell you more, but I’m only a teapot 👀"
+    }
+  ],
+  "meta": {
+        "next_token": "7140dibdnow9c7btw4539n0vybdnx19ylpayqf16fjt4l",
+    	  "result_count": 5
+  }
+}
+```

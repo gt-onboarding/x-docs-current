@@ -1,0 +1,63 @@
+---
+title: OAuth 1.0a
+sidebarTitle: 개요
+keywords: ["OAuth 1.0a", "OAuth 1.0", "OAuth 1.0a 인증", "OAuth 1.0a 사용자 컨텍스트", "3-legged OAuth", "OAuth 1.0a 흐름"]
+---
+
+import { Button } from "/snippets/ko/button.mdx";
+
+<div id="oauth-10a">
+  ## OAuth 1.0a
+</div>
+
+X 개발자 플랫폼의 많은 엔드포인트는 특정 X 계정을 대신해 액션을 수행하거나 API 요청을 보내기 위해 OAuth 1.0a 방식을 사용합니다. 예를 들어 X 개발자 앱이 있다면, 사용자가 자신의 계정으로 앱 인증만 완료하면 어떤 X 계정이든 그 계정을 대신해 API 요청을 보낼 수 있습니다.
+
+참고: HMAC-SHA1 또는 percent encoding 같은 개념에 익숙하지 않다면, 아래의 &quot;useful tools&quot; 섹션을 확인해 보시길 권장합니다. 이 섹션에는 인증 과정을 크게 단순화해 주는 여러 API 클라이언트가 나열되어 있습니다.
+
+<div id="key-concepts">
+  ### 핵심 개념
+</div>
+
+<div id="signing-a-request-with-keys-and-tokens">
+  #### 키와 토큰으로 요청 서명하기
+</div>
+
+각 API 요청에는 Authorization 헤더에 생성된 여러 키와 토큰을 포함해 서명해야 합니다. 먼저, [X 개발자 앱](/ko/resources/fundamentals/developer-apps)의 세부 정보 페이지에서 다음과 같은 여러 키와 토큰을 생성할 수 있습니다:
+
+|     |     |
+| :--- | :--- |
+| API key 및 secret:<br /><br />`oauth_consumer_key`<br /><br />`oauth_consumer_secret` | API 요청을 수행할 때 X 개발자 앱을 대표하는 사용자 이름과 비밀번호에 해당한다고 보면 됩니다. |
+| Access token 및 secret:<br /><br />`oauth_token`<br /><br />`oauth_token_secret` | Access token 및 access token secret은 OAuth 1.0a API 요청을 인증하는 데 사용되는 사용자별 자격 증명입니다. 이는 요청이 어떤 X 계정을 대신해 수행되는지 지정합니다.<br /><br />앱이 개발자 계정과 연결된 동일한 X 계정을 대신하여 요청을 보내길 원한다면, [X 개발자 앱](/ko/resources/fundamentals/developer-apps)의 세부 정보 페이지에서 자신의 access token과 token secret을 생성할 수 있습니다.<br /><br />다른 사용자의 access token을 생성하고 싶다면, 아래의 &quot;사용자를 대신해 요청 보내기(Making requests on behalf of users)&quot; 섹션을 참조하세요. |
+
+<div id="making-requests-on-behalf-of-users">
+  #### 사용자 대신 요청 보내기
+</div>
+
+서명을 생성할 때는 요청을 대신 보내려는 사용자를 나타내는 액세스 토큰 세트가 필요합니다.
+
+X 개발자 앱을 소유한 X 계정을 나타내는 액세스 토큰 세트는 [앱 상세 정보 페이지](https://developer.x.com/content/developer-twitter/en/apps)에서 생성할 수 있습니다. 하지만 다른 X 계정 대신 요청을 보내려는 경우, 해당 계정의 소유자가 [3-legged OAuth 플로우](/ko/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)의 일부로 자신의 계정에 로그인하여 귀하에게 액세스 권한을 부여해야 합니다. 이 프로세스의 결과는 OAuth 1.0a 요청을 보내는 데 사용할 수 있는 액세스 토큰 세트(oauth&#95;token 및 oauth&#95;token&#95;secret)입니다.
+
+이러한 키와 토큰을 확보한 후에는 [서명을 직접 생성](/ko/resources/fundamentals/authentication#creating-a-signature)할 수 있습니다. 이 작업에 대해 충분히 이해하고 있는 경우이거나, 아래에 언급된 도구 중 하나를 사용해 OAuth 1.0a가 필요한 엔드포인트에 요청을 보내는 경우가 아니라면, 이 방법은 권장하지 않습니다.
+
+참고용으로, 생성된 모든 토큰을 Authorization 헤더에 전달하여 서명된 cURL 요청을 보낸 예시는 다음과 같습니다.
+
+```bash
+curl --request POST \
+  --url 'https://api.x.com/1.1/statuses/update.json?status=Hello%20world' \
+  --header 'authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"' \
+```
+
+<Note>
+  **참고:** 사용자 액세스 토큰은 민감한 정보이므로 각별히 주의하여 보호해야 합니다. 액세스 토큰이 생성되는 순간, 해당 토큰을 나타내는 사용자는 앱이 이를 안전하게 보호해 줄 것이라고 믿는 것입니다. API 키와 사용자 액세스 토큰이 모두 유출되면, 앱을 통해 비공개 정보와 계정 기능에 대한 접근 권한이 노출될 수 있습니다. [키와 액세스 토큰 보호](/ko/resources/fundamentals/developer-apps)에 대해 더 자세히 알아보시기 바랍니다.
+</Note>
+
+<div id="useful-tools">
+  ### 유용한 도구
+</div>
+
+[요청에 서명하기](/ko/resources/fundamentals/authentication#creating-a-signature) 과정은 복잡합니다. 인증 토큰의 대부분을 자동으로 생성해 주는 API 클라이언트 라이브러리를 사용하는 것을 권장합니다.
+
+|     |     |
+| :--- | :--- |
+| [Postman](https://www.getpostman.com/) | REST API 요청을 생성하고 전송할 수 있는 API 클라이언트입니다. 이 도구에 대해 더 알아보려면 “[Postman 시작하기](/ko/tutorials/postman-getting-started)” 튜토리얼을 참고하세요. |
+| [Insomnia](https://insomnia.rest/) | Insomnia는 쿠키 관리, 환경 변수, 코드 생성, 인증 기능을 제공하는 REST API 클라이언트로, Mac, Windows, Linux에서 사용할 수 있습니다. |

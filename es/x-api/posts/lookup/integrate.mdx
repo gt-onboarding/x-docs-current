@@ -1,0 +1,117 @@
+---
+title: Guía de integración
+sidebarTitle: Guía de integración
+keywords: ["integración de búsqueda de Publicaciones", "guía de integración de búsquedas", "implementación de búsquedas", "configuración de búsquedas", "integración de búsqueda de Publicaciones"]
+---
+
+import { Button } from "/snippets/es/button.mdx"
+
+Esta página contiene información sobre varias herramientas y conceptos clave para ayudarte a integrar los endpoints de consulta de Publicaciones en tu sistema. Hemos organizado la página en las siguientes secciones:
+
+* [Herramientas útiles](#helpful)
+* Conceptos clave
+  * [Autenticación](#authentication)
+  * [developer portal, Proyectos y Aplicaciones](#portal)
+  * [Límites de frecuencia](#limits)
+  * [Campos y expansiones](#fields)
+  * [Ediciones de Publicaciones](#edits)
+  * [Casos límite](#edge)
+
+<div id="helpful-tools">
+  ## Herramientas útiles
+</div>
+
+Antes de profundizar en algunos conceptos clave, te recomendamos familiarizarte con las siguientes herramientas:
+
+**Postman**\
+Postman es una herramienta excelente para probar un endpoint, incluidos todos los parámetros de ruta y de cuerpo, y ayudarte a entender qué está disponible. Consulta nuestra [guía de introducción a Postman](/es/tutorials/postman-getting-started) para obtener más información.
+
+**Ejemplos de código**\
+Encuentra ejemplos de código para tu lenguaje de programación preferido en nuestra [página de GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+
+**Bibliotecas de terceros**\
+Utiliza [bibliotecas de terceros](/es/resources/tools-and-libraries) creadas por la comunidad y compatibles con los endpoints de la v2.
+
+<div id="key-concepts">
+  ## Conceptos clave
+</div>
+
+<div id="authentication">
+  ### Autenticación
+</div>
+
+Todos los endpoints de X API v2 requieren solicitudes autenticadas. Puedes autenticarte con:
+
+* [OAuth 1.0a User Context](/es/resources/fundamentals/authentication) usando claves de API, tokens de acceso y parámetros adicionales para [crear un encabezado de autorización](/es/resources/fundamentals/authentication#authorizing-a-request).
+* [OAuth 2.0 App-Only](/es/resources/fundamentals/authentication#oauth-2-0) pasando un [App Access Token](/es/resources/fundamentals/authentication) con tu solicitud.
+* [OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication) para un mayor control sobre el alcance de la aplicación y la autorización en múltiples dispositivos.
+
+<Note>
+  OAuth 1.0a puede ser difícil de implementar. Si no estás familiarizado con él, considera usar una [biblioteca](/es/resources/tools-and-libraries) u OAuth 2.0 para las solicitudes. Para métricas privadas o Publicaciones, usa OAuth 1.0a User Context u OAuth 2.0 Authorization Code with PKCE.
+</Note>
+
+<Tip>
+  **Ten en cuenta**
+
+  > Si estás solicitando los siguientes campos, se requiere OAuth 1.0a User Context u OAuth 2.0 Authorization Code:
+  >
+  > * `tweet.fields.non_public_metrics`
+  > * `tweet.fields.promoted_metrics`
+  > * `tweet.fields.organic_metrics`
+  > * `media.fields.non_public_metrics`
+  > * `media.fields.promoted_metrics`
+  > * `media.fields.organic_metrics`
+</Tip>
+
+<div id="developer-portal-projects-and-apps">
+  ### Portal para desarrolladores, Proyectos y Aplicaciones
+</div>
+
+Para obtener credenciales de X API v2, necesitas:
+
+1. Una [cuenta de desarrollador](/es/resources/fundamentals/developer-portal) aprobada.
+2. Un [Proyecto](/es/resources/fundamentals/projects) dentro de la cuenta de desarrollador.
+3. Una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) dentro de ese Proyecto, donde se pueden encontrar las claves y tokens.
+
+<div id="rate-limits">
+  ### Límites de frecuencia
+</div>
+
+Las solicitudes a la X API están sujetas a [límites de frecuencia](/es/resources/fundamentals/rate-limits) para gestionar el volumen de tráfico. Los límites se aplican tanto a nivel de aplicación como de usuario:
+
+* **Nivel de aplicación**: Limita la cantidad de solicitudes que puede realizar cualquier aplicación en un período determinado.
+* **Nivel de usuario**: Limita la frecuencia con la que un usuario autenticado puede realizar consultas de Publicaciones en distintas aplicaciones de desarrollador.
+
+<div id="fields-and-expansions">
+  ### Campos y expansiones
+</div>
+
+X API v2 permite seleccionar campos de datos específicos mediante `fields` y `expansions`:
+
+* **Expansiones**: Permiten recuperar objetos relacionados adicionales. Las expansiones compatibles incluyen:
+  * `edit_history_tweet_ids`
+  * `attachments.poll_ids`
+  * `attachments.media_keys`
+  * `author_id`
+  * `entities.mentions.username`
+  * `geo.place_id`
+  * `in_reply_to_user_id`
+  * `referenced_tweets.id`
+  * `referenced_tweets.id.author_id`
+
+* **Campos**: Especifican los campos de datos dentro de los objetos para devolver información adicional. El objeto Publicación incluye de forma predeterminada `id`, `text` y `edit_history_tweet_ids`. Otras opciones, como `tweet.created_at` y `tweet.entities`, deben solicitarse explícitamente.
+
+Para obtener más información, consulta la guía sobre campos y expansiones en el [diccionario de datos de X API v2](/es/x-api/fundamentals/data-dictionary).
+
+<div id="post-edits">
+  ### Ediciones de Publicaciones
+</div>
+
+Las Publicaciones que cumplan los requisitos se pueden editar hasta cinco veces dentro de los 30 minutos posteriores a su publicación. El endpoint de consulta de Publicaciones siempre proporciona la versión más reciente de la Publicación. En casos de uso casi en tiempo real, ten en cuenta esta ventana de tiempo. Para obtener más detalles, consulta [Aspectos fundamentales de la edición de Publicaciones](/es/x-api/fundamentals/edit-posts).
+
+<div id="edge-cases">
+  ### Casos límite
+</div>
+
+* **Promoted metrics**: Solicitar métricas promocionadas para Publicaciones no promocionadas devuelve una respuesta vacía.
+* **Truncated text**: El texto de la Publicación se trunca en los Retweets. Para obtener el texto completo, expande la Publicación referenciada.

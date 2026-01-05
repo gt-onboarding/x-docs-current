@@ -1,0 +1,124 @@
+---
+title: Inicio rápido
+sidebarTitle: Inicio rápido
+keywords: ["inicio rápido de Spaces lookup", "inicio rápido de GET spaces", "tutorial de Spaces lookup", "guía de inicio rápido de Spaces"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-spaces-lookup-endpoints">
+  ## Primeros pasos con los endpoints de consulta de Spaces
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud a uno de los endpoints de consulta de Spaces con un conjunto de campos específicos usando Postman.
+
+Si deseas ver código de ejemplo en distintos lenguajes de programación, visita nuestro repositorio [X API v2 sample code GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+
+<Note>
+  ### Requisitos previos
+
+  Para completar esta guía, necesitarás contar con un conjunto de [claves y tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y recibe la aprobación.
+  * Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Navega a la página «Keys and tokens» de tu aplicación para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-build-a-spaces-lookup-request">
+  #### Pasos para crear una solicitud de búsqueda de Spaces
+</div>
+
+*En este ejemplo, haremos una solicitud al endpoint de búsqueda de Spaces de usuario por id de creador, pero también puedes aplicar lo que aprendas en esta guía de inicio rápido a otras solicitudes de búsqueda.*
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para hacer una solicitud a este endpoint, pero aquí vamos a usar la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta Spaces y encuentra la solicitud &quot;Lookup Spaces created by one or more users&quot;.
+ 
+
+**Paso dos: Autentica tu solicitud**
+
+Para realizar correctamente una solicitud a la X API, debes verificar que tengas permiso. Para ello, este endpoint requiere que autentiques tu solicitud con los métodos de autenticación [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+
+Para mayor simplicidad, utilizaremos OAuth 2.0 solo para la aplicación con esta solicitud, pero tendrás que usar uno de los otros métodos de autenticación si quieres solicitar [métricas](/es/x-api/fundamentals/metrics) privadas o Spaces de un usuario privado. 
+
+Para utilizar OAuth 2.0 solo para la aplicación, debes agregar tus claves y tokens, específicamente el [App Access Token](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (también conocido como Bearer Token solo para la aplicación) en Postman. Puedes hacerlo seleccionando el entorno llamado &quot;X API v2&quot; en la esquina superior derecha de Postman y agregando tus claves y tokens en los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el ícono de ojo junto al menú desplegable de entornos).
+
+Si lo hiciste correctamente, estas variables se incorporarán automáticamente en la pestaña de autorización de la solicitud.
+ 
+
+**Paso tres: Identifica y especifica de qué usuario te gustaría recuperar Publicaciones**
+
+Debes especificar un usuario para el que quieras recuperar Spaces en vivo o próximos dentro de la solicitud. En este ejemplo, pasaremos un solo id de usuario.
+
+Los ids de usuario son simplemente el valor numérico que representa un nombre de usuario de cuenta que puedes encontrar en la URL del perfil de una cuenta. Por ejemplo, el nombre de usuario de la siguiente cuenta es XDevelopers.
+
+https://x.com/XDevelopers
+
+Para convertir este nombre de usuario en el id de usuario, tendrás que usar el endpoint de búsqueda de usuario con el nombre de usuario y encontrar el id de usuario numérico en el payload. En el caso de @XDevelopers, el id de usuario es 2244994945.
+
+En Postman, navega a la pestaña &quot;Params&quot; e ingresa este id de usuario en la columna &quot;Value&quot; del parámetro id.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| id  | 2244994945 |
+
+**Paso cuatro: Identifica y especifica qué campos te gustaría recuperar**
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás un id, que es el único campo del [objeto Space](/es/x-api/fundamentals/data-dictionary#space) que se devuelve de forma predeterminada en tu respuesta.
+
+Si quieres recibir campos adicionales, tendrás que especificarlos en tu solicitud con los parámetros space.fields o expansions.
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de diferentes objetos:
+
+* El campo adicional title en el objeto principal de Spaces.
+* El [objeto de usuario](/es/x-api/fundamentals/data-dictionary#user) completo del id de creador especificado.
+* El campo adicional user.created&#95;at en el objeto de usuario asociado.
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave: valor a la tabla &quot;Query Params&quot;:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| space.fields | title | creator&#95;id |
+| expansions | creator&#95;id | includes.users.id, includes.users.name, includes.users.username |
+| user.fields | created&#95;at | includes.users.created&#95;at |
+
+Ahora deberías ver la siguiente URL junto al botón &quot;Send&quot;:
+
+[https://api.x.com/2/spaces/by/creator&#95;ids?user&#95;ids=2244994945&amp;space.fields=creator&#95;id&amp;expansions=creator&#95;id&amp;user.fields=created&#95;at](https://api.x.com/2/spaces/by/creator\\_ids?user\\_ids=2244994945\&space.fields=creator\\_id\&expansions=creator\\_id\&user.fields=created_at)
+
+**Paso cinco: envía tu solicitud y revisa tu respuesta**
+
+Una vez que tengas todo configurado, haz clic en el botón “Send” y recibirás la siguiente respuesta:
+
+```
+{
+   "data": [
+    {
+        "creator_id": "2244994945",
+        "id": "1zqKVXPQhvZJB",
+        "title": "Hola mundo 👋",
+        "state": "Running"
+   },
+   "includes": {
+       "users": [
+           {
+               "created_at": "2013-12-14T04:35:55.000Z",
+               "name": "Twitter Dev",
+               "id": "2244994945",
+               "username": "TwitterDev"
+           }
+       ]
+   }
+]
+}
+```

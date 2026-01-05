@@ -1,0 +1,120 @@
+---
+title: 访问广告账户
+keywords: ["广告账户", "广告帐户", "访问广告账户", "账户访问", "广告账户管理", "账户层级结构"]
+---
+
+<div id="user-accounts-vs-ad-accounts">
+  # 用户账号与广告账号
+</div>
+
+在使用 Ads API 时会涉及两种不同类型的账号：广告账号和 X 用户账号。在 Ads API 文档中，“account”（账号）一词通常指的是广告账号。
+
+* 广告账号在 **business.x.com** 上注册，并在 API 中通过 `account_id` 标识。广告账号直接关联资金来源，并使用一个或多个 X 用户账号的内容作为“可推广用户”。每个广告账号可以授予一个或多个 X 用户账号访问权限。广告账号或“当前账号”在几乎每个执行的 URL 中都会以内联参数 `:account_id` 的形式出现。
+* X 用户账号（例如 @AdsAPI）在 Ads API 中通过 `user_id` 标识。一个或多个此类账号可以与一个广告账号关联。通过 API 发起请求的已认证 X 用户账号称为“当前用户”。当前用户可访问的广告账号列表可以通过 [GET accounts](/zh/x-ads-api/campaign-management#accounts) 获取。“可推广用户”是指可由某一特定广告账号推广的 X handle。有关这方面的更多详情，请参见 [获取 Ads 账号访问权限](/zh/x-ads-api/introduction)。
+
+<div id="methods-for-ad-account-access">
+  ## 获取广告账户访问权限的方法
+</div>
+
+你可以通过两种方法为某个广告主的账户发起 Ads API 请求：
+
+1. 代表某个广告主发起请求（**推荐**）
+2. 使用你自己的账户（该账户已被授予对某广告主账户的访问权限）发起请求，例如，一个支持多个账户的[代理机构](https://business.x.com/en/blog/agencies-manage-multiple-Twitter-Ads-accounts.html)。
+
+本文档简要概述了这两种方式之间的差异，应该和我们的其他资源（例如[多用户登录常见问题](https://business.x.com/en/help/troubleshooting/multi-user-login-faq.html)）结合使用。 
+
+如[请求授权](/zh/resources/fundamentals/authentication#authorizing-a-request#authorizing-a-request)中所述，对 Ads API 的所有请求都必须在 Authorization 头部中使用 [OAuth 1.0a](/zh/resources/fundamentals/authentication)，并携带通过[三方](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)[OAuth](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)流程获取的访问令牌。你的应用需要实现一个基于 Web 的 OAuth 流程来[获取访问令牌](/zh/resources/fundamentals/authentication#oauth-1-0a-2)。Ads API 开发者绝不应要求我们的 X 广告主共享其登录凭证。
+
+默认情况下，每个 [X 开发者应用](/zh/resources/fundamentals/developer-apps) 都包含一个静态的**访问令牌**，可用于为拥有该应用的账户发起 Ads API 请求。这些凭证非常适合单账户使用场景，无需执行三方 OAuth 或[基于 PIN 的 OAuth](/zh/resources/fundamentals/authentication#pin-based-authorization) 流程。如果你不需要访问其他 X Ads 账户，请使用这些[单用户](/zh/resources/fundamentals/authentication#oauth-1-0a-2)凭证，而不要按照后续步骤操作。
+
+<div id="levels-of-access">
+  ## 访问权限级别
+</div>
+
+<div id="app-level-permissions">
+  ### 应用级权限
+</div>
+
+每个用户在[申请 Ads API 访问权限](/zh/x-ads-api/getting-started/step-by-step-guide)时会被授予相应的访问级别：
+
+* **仅转化（Conversion Only）**：用户可访问 [Mobile](/zh/x-ads-api/measurement/mobile-conversions) 和 [Web Conversion](/zh/x-ads-api/measurement/web-conversions) 端点，并具有[读写](/zh/resources/fundamentals/developer-apps)访问权限。
+* **标准访问（Standard Access）**：用户可访问 [Analytics](/zh/x-ads-api/analytics)、[Campaign Management](https://developer.x.com/en/docs/twitter-ads-api/campaign-management/overview)、[Creatives](https://developer.x.com/en/docs/twitter-ads-api/creatives/overview)、[Custom Audiences](https://developer.x.com/en/docs/twitter-ads-api/audiences/overview) 和 [Conversion](/zh/x-ads-api/measurement/web-conversions) 端点，并具有[读写](/zh/resources/fundamentals/developer-apps)访问权限。
+
+**注意：** 在 2023 年 7 月之前申请访问权限的 Ads API 开发者，可能拥有不同的访问级别和权限，并且可能被限制为最多使用五个 OAuth 令牌。请参阅我们的[提高访问级别](/zh/x-ads-api/getting-started/increasing-access)指南，以获取其他端点的访问权限，或为现有应用解除令牌数量限制。
+
+<div id="ad-account-level-permissions">
+  ### 广告账户级别权限
+</div>
+
+每个有权访问 Ads 账户的用户都会拥有特定的账户级权限：**Account administrator**、**Ad manager**、**Campaign analyst**、**Organic analyst** 和 **Creative Manager**。有关账户级权限的最新文档，请参阅 **business.x.com**。应用应通过 [Authenticated User Access](/zh/x-ads-api/campaign-management#authenticated-user-access) API 端点检索当前已通过身份验证用户的权限，用于确定他们可以访问哪些 API 端点和广告功能。
+
+**注意：** 与 [Conversion API](/zh/x-ads-api/measurement/web-conversions) 一起使用的任何用户令牌，其对应用户必须具备 **Account administrator** 或 **Ad manager** 账户级权限。                                                                                                                                              
+
+<div id="methods-of-obtaining-access-tokens">
+  ## 获取访问令牌的方法
+</div>
+
+<div id="1-obtain-an-advertisers-user-access-token">
+  ### 1. 获取广告主（用户）的访问令牌
+</div>
+
+获取广告主的**访问令牌**有两种方法。最常见的方法是在你的 Web UI 中直接通过[三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)获取。对于没有面向广告主开放的公共 UI 的应用，可以实现[基于 PIN 的](/zh/resources/fundamentals/authentication#pin-based-authorization) OAuth 流程。用户完成三方流程后，你的应用将拥有通过 API 为其 Ads 账号发起请求所需的凭证。
+
+通过 OAuth 流程获取用户凭证是我们**强烈推荐**的大多数 Ads API 开发者用来访问广告主账号的方法。这样你可以代表某个用户调用 API，并以该用户身份执行操作。这些令牌本身不会过期，但用户可以随时撤销。
+
+<div id="2-obtain-your-developer-access-token">
+  ### 2. 获取你的（开发者）访问令牌
+</div>
+
+此选项要求广告主通过 business.x.com 上的 X 界面， [授予你的 @username](https://business.x.com/en/help/troubleshooting/multi-user-login-faq.html) （或多个 @username）访问其 X Ads 账号的权限。通过你账号的三方 OAuth 流程获取的**访问令牌**即可访问该广告主的 X Ads 账号。
+
+这样你就可以使用你自己 @username 对应的 OAuth 令牌来调用 API，而不是使用广告主的 OAuth 令牌。此选项的关键区别在于，只有在已将帖子委派/创作权限授予你的 @username 的情况下，你才能创建仅推广帖子（Promoted-Only Posts）。
+
+若要代表账号上的 `FULL` 可推广用户创建仅推广帖子，你还必须在此流程中被授予创建帖子权限。这样将通过 [GET accounts/:account&#95;id/authenticated&#95;user&#95;access](/zh/x-ads-api/campaign-management#accounts) 端点上的 `TWEET_COMPOSER` 权限来启用访问。
+
+<div id="differences-between-these-methods">
+  ## 这些方法之间的差异
+</div>
+
+|     |     |     |
+| :--- | :--- | :--- |
+|     | 广告主（用户）OAuth 令牌 | （开发者）OAuth 令牌  <br /> （@username 已添加到单独账号） |
+| 访问 Ads 帐户 | ✔   | ✔   |
+| 代表用户创建帖子 | ✔   | ✔*  |
+| 管理广告系列 | ✔   | ✔   |
+| 访问分析数据 | ✔   | ✔   |
+| 代表用户创建 Cards | ✔   | ✔   |
+| 开发者可通过 X Ads UI <br />进行访问 |     | ✔   |
+| [速率限制](/zh/x-api/enterprise-gnip-2.0/fundamentals/rate-limits) | 针对每个广告主单独设置 | 针对每个广告主帐户单独设置 |
+
+<Note>
+  **注意：** 详情请参阅上文的 **[获取你的（开发者）访问令牌](/zh/x-ads-api/fundamentals/accessing-ads-accounts#2-obtain-your-developer-access-token)** 部分。
+</Note>
+
+<div id="sample-use-case">
+  ## 用例示例
+</div>
+
+<div id="advertisers-access-token-via-oauth-3-legged-web-flow">
+  ### 通过 OAuth 三方网页流程获取广告主的访问令牌
+</div>
+
+标准流程是基于 Web 的，并使用 [3-legged authorization](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) OAuth 流程。这里展示的屏幕截图来自一个示例，你可以在 [https://github.com/xdevplatform/twauth-web](https://github.com/xdevplatform/twauth-web) 查看其源代码。
+
+在你的应用的某个步骤中，你需要重定向到 X，以便用户为你的应用授权。
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/twauth-web-2.png" alt="image0" />
+</Frame>
+
+当你携带 request token 重定向到 X 时，用户会被提示授权你的应用。
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/twauth-web-3.png" alt="image1" />
+</Frame>
+
+在用户授权你的应用之后，用户会被重定向到你在生成 request token 时提供的 callback URL。你将使用该回调来获取该用户的长期访问令牌，并将其保存在本地。
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/twauth-web-4.png" alt="image" />
+</Frame>

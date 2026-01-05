@@ -1,0 +1,128 @@
+---
+title: 安全性
+icon: lock
+keywords: ["安全性", "API 安全性", "开发者安全性", "安全编码", "OAuth 安全性", "API 密钥安全性", "令牌安全性", "XSS", "CSRF", "SQL 注入", "加密", "TLS", "漏洞报告", "安全最佳实践"]
+---
+
+我们坚信隐私是一项权利，而非特权，并且已被融入我们公司的根基之中。通过使用 X 开发者平台并遵守我们的开发者政策，你在确保平台服务于 X 上的公共对话，以及维护我们对隐私承诺方面扮演着关键角色。
+
+我们想提醒你，安全地进行构建对于保护你自身以及你的应用用户的数据至关重要。你有责任防范安全漏洞威胁，而我们共同承担保护 X 使用者的责任。本页面阐述了在构建安全应用以及尽可能保障数据和访问安全方面的相关要求和期望。
+
+<Note>请了解适用于 X 开发者平台的安全技术，包括 [身份验证](/zh/resources/fundamentals/authentication)、TLS 和 [应用权限](/zh/resources/fundamentals/developer-apps#app-permissions)，以及从 X 用户视角，在[使用第三方应用和会话](https://help.x.com/en/managing-your-account/connect-or-revoke-access-to-third-party-apps)时可用的安全功能。</Note>
+
+<div id="reporting-security-issues">
+  ## 报告安全问题
+</div>
+
+X 开发者平台用户在首次怀疑发生安全事件后，必须在 48 小时内通过 [X 的漏洞报告计划](https://hackerone.com/twitter) 通知 X。
+
+<div id="security-best-practices">
+  ## 安全最佳实践
+</div>
+
+在你使用 X 开发者平台以及互联网上的其他环境进行开发时，请牢记这些最佳实践。
+
+<div id="security-by-design">
+  ### 以安全为核心的设计
+</div>
+
+考虑聘请安全专业人员进行威胁模型审计和/或渗透测试。优秀的安全公司会深入挖掘，找出潜在问题。要了解 X 如何采用这种思维方式，请阅读[我们博客中的这篇文章](https://blog.x.com/en_us/topics/company/2019/privacy_data_protection.html)。
+
+此外，X 要求所有合作伙伴对以下事项负责：
+
+* 将代码维护在安全的代码库中。
+* 在整个系统开发生命周期（SDLC）过程中执行风险分析。
+* 确保在整个 SDLC 过程中及时发现并处置安全问题。
+* 确保在 SDLC 的各个阶段之间实现环境隔离。
+* 确保所有测试中发现的缺陷均已修复、重新测试并关闭。
+
+<div id="monitor-and-get-alerted">
+  ### 监控并接收告警
+</div>
+
+如果你怀疑你的 Web 应用出了问题，该如何确认？务必做好日志记录，并确保在发生严重异常和错误时能够收到通知。你可能还需要搭建一个包含关键指标的仪表盘，以便一眼就能看出是否有问题正在发生。
+
+<div id="create-a-reporting-channel">
+  ### 创建报告渠道
+</div>
+
+为用户提供便捷的联系方式，让他们能就使用你的应用时遇到的潜在安全问题与你取得联系。如果发现了影响 X 用户和数据的问题，你也有责任[向 X 报告此问题](#report)。如果发生安全事件，你应预先制定好用于通知受影响用户的应对方案或流程。
+
+<div id="adequate-testing">
+  ### 充分测试
+</div>
+
+确保你的端到端测试足够全面，并及时更新，将诸如未授权访问等安全场景中的预期失败纳入测试范围。站在攻击者的角度思考，配置系统测试，确保系统按预期阻止攻击者对 X 数据或受保护功能进行未授权访问。
+
+<div id="securing-api-keys-and-tokens">
+  ### 保护 API 密钥和令牌
+</div>
+
+作为 X 平台上的开发者，在用户授权你的开发者应用的前提下，你可以通过编程方式访问由 X 存储的你自己的数据和用户的数据。所有 API 请求都必须使用你的开发者应用的 API key 和 API secret，并在某些情况下使用授权用户的[访问令牌](/zh/resources/fundamentals/authentication)，通过 OAuth 进行[身份验证](/zh/resources/fundamentals/authentication)。你有责任确保你的凭证安全。
+
+推荐的最佳实践包括：
+
+* 建立密码/令牌定期轮换机制。
+* 始终在需要时加密敏感数据，并避免在过于上游的环节解密数据。
+* 将用户的访问令牌存储在加密存储中。
+* 如果你认为密钥和令牌已遭泄露，请[重新生成](/zh/resources/fundamentals/authentication#regenerate-api-keys-and-tokens)或[作废](/zh/resources/fundamentals/authentication#post-oauth2-invalidate-token)这些密钥和令牌。
+
+如需了解更多关于在 X 上使用 OAuth 进行调试和开发的讨论，请访问社区论坛的[安全板块](https://devcommunity.x.com/c/oauth/12)。
+
+<div id="input-validation">
+  ### 输入验证
+</div>
+
+不要假定用户始终会向你提供有效且可信赖的数据。对所有来自用户、并可能最终出现在 X API 请求中的数据进行清理。为你的应用维护一份可接受输入类型的允许列表（allowlist），并丢弃所有未在该列表中的内容。
+
+<div id="encrypted-communication">
+  ### 加密通信
+</div>
+
+X 要求所有 API 请求都必须通过 TLS 传输。与您自己的服务器之间的通信也应尽可能采用加密方式。
+
+<div id="exposed-debugging-information">
+  ### 暴露的调试信息
+</div>
+
+请确保不要通过调试界面或日志暴露敏感的 X 数据或凭据。一些 Web 框架在应用未正确配置时，可能会让调试信息被轻易访问。对于桌面和移动端开发者来说，也很容易在启用调试标志或符号的情况下误将调试版本发布出去。请在部署/构建流程中加入对这些配置的检查。另外，如果你在共享堆栈跟踪或崩溃转储用于问题报告，请确保其中私有 X 用户的数据已进行编辑/脱敏处理。
+
+<div id="unfiltered-input-unescaped-output">
+  ### 未过滤的输入，未转义的输出
+</div>
+
+一个容易记住的输入验证原则是 FIEO：Filter Input（过滤输入）、Escape Output（转义输出）。
+
+过滤所有来自应用程序外部的内容，包括 X API 数据、cookie 数据、用户提供的表单输入、URL 参数、数据库中的数据等。对应用程序发出的所有输出进行转义，包括发送到数据库服务器的 SQL、发送到用户浏览器的 HTML、发送给其他系统的 JSON 输出，以及发送给 shell 程序的命令等。
+
+<div id="cross-site-scripting-xss">
+  ### 跨站脚本攻击（XSS）
+</div>
+
+[XSS](https://owasp.org/) 攻击在大多数情况下是 Web 上最常见的一类安全问题。如果攻击者能将其自己的 JavaScript 代码注入到你的应用中，他们就可以做很多恶意操作。任何存储并展示用户提供的、不受信任数据的地方，都需要进行检查、清理，并进行 HTML 转义。要把这件事做好很难，因为黑客有[许多不同方式发起 XSS 攻击](https://www.owasp.org/index.php/Types_of_Cross-Site_Scripting)。你的编程语言或 Web 开发框架很可能已经提供了流行且经过充分测试的防御跨站脚本攻击的机制；请务必加以利用。
+
+<div id="sql-injection">
+  ### SQL 注入
+</div>
+
+如果你的应用使用了数据库，你需要了解什么是[SQL 注入](http://en.wikipedia.org/wiki/SQL_injection)。凡是接收输入的地方，都可能成为攻击者的目标，从而从输入字段“逃逸”，侵入你的数据库。请使用能够以系统化方式防御 SQL 注入的数据库访问库。如果你绕开这种方式而编写自定义 SQL，就需要编写严格的测试，以确保自己没有暴露在此类攻击之下。防御 SQL 注入的两种主要方法是：在构造 SQL 语句之前对输入进行转义，以及使用参数化输入来构造语句。推荐使用后者，因为它更不容易因程序员失误而出错。
+
+<div id="cross-site-request-forgery-csrf">
+  ### 跨站请求伪造（CSRF）
+</div>
+
+你能确定发往你的应用的请求确实来自你的应用本身吗？[CSRF](http://en.wikipedia.org/wiki/Cross-site_request_forgery) 攻击正是利用了这种不确定性，通过强迫你的网站中已登录的用户在不知情的情况下打开会执行操作的 URL。在开发者应用的情况下，这可能意味着攻击者利用你的应用强迫用户发布不想要的帖子或关注垃圾账户。
+
+应对 CSRF 最周全的方式，是在每个表单中包含一个随机令牌，并将其存储在受信任的位置；如果某个表单没有正确的令牌，就抛出错误。现代 Web 框架通常都有系统化的处理方式，在很多情况下甚至默认已经为你启用了这些机制。一个简单的预防措施（但绝不是你应该采取的唯一步骤）是要求所有创建、修改或删除数据的操作都必须通过 POST 请求完成。
+
+<div id="lack-of-rate-limiting">
+  ### 缺乏速率限制
+</div>
+
+在适当的场景下使用 CAPTCHA，以减缓潜在垃圾信息发送者和攻击者的操作速度。
+
+***
+
+<Info>
+  如果你发现了直接影响 X 平台本身的安全问题，我们提供了一个用于上报漏洞的[漏洞奖励计划](https://hackerone.com/twitter)。
+</Info>

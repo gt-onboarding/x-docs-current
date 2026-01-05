@@ -1,0 +1,336 @@
+---
+title: Índice de referencia de la API OAuth
+sidebarTitle: Referencia de la API
+keywords: ["referencia de la API OAuth", "API de autenticación", "endpoints de OAuth", "endpoints de autenticación", "referencia de OAuth", "referencia de la API"]
+---
+
+<div id="oauth-10a">
+  ### OAuth 1.0a
+</div>
+
+|     |     |
+| :--- | :--- |
+| **Propósito** | Method |
+| Paso 1 del flujo OAuth de tres patas y Sign in with X  <br />Permite que una aplicación cliente obtenga un OAuth Request Token para solicitar la autorización del usuario. | [POST oauth/request&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-request-token) |
+| Paso 2 del flujo OAuth de tres patas y Sign in with X  <br />Permite que una aplicación cliente use un OAuth Request Token para solicitar la autorización del usuario. | [GET oauth/authenticate](/es/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) |
+| Paso 2 del flujo OAuth de tres patas y Sign in with X  <br />Permite que una aplicación cliente use un OAuth Request Token para solicitar la autorización del usuario. | [GET oauth/authorize](/es/resources/fundamentals/authentication/api-reference#get-oauth-authorize) |
+| Paso 3 del flujo OAuth de tres patas y Sign in with X  <br />Permite que una aplicación cliente intercambie el OAuth Request Token por un OAuth Access Token. | [POST oauth/access&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-access-token) |
+| Permite que una aplicación registrada revoque un OAuth Access Token emitido. | [POST oauth/invalidate&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-invalidate-token) |
+
+<div id="oauth-20-bearer-token">
+  ### Bearer Token de OAuth 2.0
+</div>
+
+|     |     |
+| :--- | :--- |
+| **Propósito** | **Método** |
+| Permite que una Aplicación registrada genere un Bearer Token de OAuth 2 solo de Aplicación, que se puede usar para realizar solicitudes a la API en nombre de una Aplicación, sin contexto de usuario. | [POST oauth2/token](/es/resources/fundamentals/authentication/api-reference#post-oauth2-token) |
+| Permite que una Aplicación registrada revoque un Bearer Token de OAuth 2 solo de Aplicación que ya haya sido emitido. | [POST oauth2/invalidate&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) |
+
+<div id="post-oauthrequest_token">
+  ### POST oauth/request&#95;token
+</div>
+
+Permite que una aplicación cliente obtenga un OAuth Request Token para solicitar la autorización del usuario. Este método cumple con la [Sección 6.1](https://oauth.net/core/1.0/#auth_step1) del [flujo de autenticación OAuth 1.0](http://oauth.net/core/1.0/#anchor9).
+
+**Requerimos que utilices HTTPS para todos los pasos de autorización OAuth.**
+
+**Nota de uso:** Solo se aceptan valores ASCII para `oauth_nonce`
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/request_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | No  |
+| Rate limited? | Sí |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name | Required | Description | Example |
+| :--- | :--- | :--- | :--- |
+| oauth&#95;callback | required | Para cumplir con OAuth 1.0a este parámetro es **obligatorio**. El valor que especifiques aquí se usará como la URL a la que se redirigirá a un usuario si aprueba el acceso de tu aplicación a su cuenta. Establece esto en `oob` para el modo de PIN fuera de banda. Esta también es la forma en que se especifican URL de callback personalizadas para su uso en aplicaciones de escritorio y móviles. Envía siempre un `oauth_callback` en este paso, independientemente de que exista un callback prerregistrado.<br /><br />Requerimos que cualquier URL de callback utilizada con este endpoint se configure en la configuración de la aplicación en developer.x.com* | `http://themattharris.local/auth.php` `twitterclient://callback` |
+| x&#95;auth&#95;access&#95;type | optional | Anula el nivel de acceso que una aplicación solicita a la cuenta de un usuario. Los valores admitidos son `read` o `write`. Este parámetro está pensado para permitir que un desarrollador registre una aplicación de lectura/escritura pero también pueda solicitar acceso de solo lectura cuando corresponda. |     |
+
+Obtén más información sobre cómo aprobar tus URL de callback en [esta página](/es/resources/fundamentals/developer-apps#callback-urls).
+
+**Ten en cuenta** - Puedes ver y editar tus [aplicaciones de X](/es/resources/fundamentals/developer-apps) existentes a través del [panel de aplicaciones de X](https://developer.x.com/en/apps) si has iniciado sesión en tu cuenta de X en developer.x.com.
+
+**Example request[](#example-request "Permalink to this headline")**
+
+Request URL: `POST https://api.x.com/oauth/request_token`
+
+Request POST Body: *N/A*
+
+Authorization Header: `OAuth oauth_nonce="K7ny27JTpKVsTgdyLdDfmQQWVLERj2zAK5BslRsqyw", oauth_callback="http%3A%2F%2Fmyapp.com%3A3005%2Ftwitter%2Fprocess_callback", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1300228849", oauth_consumer_key="OqEqJeafRSF11jBMStrZz", oauth_signature="Pc%2BMLdv028fxCErFyi8KXFM%2BddU%3D", oauth_version="1.0"`
+
+Response: `oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik&oauth_token_secret=Kd75W4OQfb2oJTV0vzGzeXftVAwgMnEK9MumzYcM&oauth_callback_confirmed=true`
+
+<div id="get-oauthauthorize">
+  ### GET oauth/authorize
+</div>
+
+Permite que una aplicación cliente (Consumer) use un token de solicitud OAuth (Request Token) para solicitar la autorización del usuario. Este método cumple con la [Sección 6.2](http://oauth.net/core/1.0/#auth_step2) del [flujo de autenticación OAuth 1.0](http://oauth.net/core/1.0/#anchor9). Las aplicaciones de escritorio deben usar este método (y no pueden usar [GET oauth / authenticate](/es/resources/fundamentals/authentication/api-reference#get-oauth-authenticate)).
+
+**Nota de uso:** Nunca se envía un `oauth_callback` a este método; en su lugar, proporciónalo a [POST oauth / request&#95;token](/es/resources/fundamentals/authentication/api-reference#post-oauth-request-token).
+
+**URL del recurso[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/authorize`
+
+**Información del recurso[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Formatos de respuesta | JSON |
+| ¿Requiere autenticación? | Sí |
+| ¿Está sujeto a límites de frecuencia? | Sí |
+
+**Parámetros[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Nombre | Obligatorio | Descripción | Valor predeterminado | Ejemplo |
+| force&#95;login | opcional | Obliga al usuario a introducir sus credenciales para garantizar que se autoriza la cuenta de usuario correcta. |     |     |
+| screen&#95;name | opcional | Precompleta el campo de nombre de usuario en la pantalla de inicio de sesión de OAuth con el valor proporcionado. |     |     |
+
+**Ejemplo de solicitud[](#example-request "Permalink to this headline")**
+
+Envía al usuario al paso `oauth/authorize` en un navegador web, incluyendo el parámetro oauth&#95;token:
+`https://api.x.com/oauth/authorize?oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik`
+
+<div id="get-oauthauthenticate">
+  ### GET oauth/authenticate
+</div>
+
+Permite que una aplicación cliente use un `request_token` de OAuth para solicitar la autorización del usuario.
+
+Este método es un reemplazo de la [Sección 6.2](http://oauth.net/core/1.0/#auth_step2) del [flujo de autenticación OAuth 1.0](http://oauth.net/core/1.0/#anchor9) para aplicaciones que utilizan el flujo de autenticación con callback. El método usará al usuario que haya iniciado sesión actualmente como la cuenta para la autorización de acceso, a menos que el parámetro `force_login` esté establecido en `true`.
+
+Este método difiere de [GET oauth / authorize](/es/resources/fundamentals/authentication/api-reference#get-oauth-authorize) en que, si el usuario ya ha otorgado permiso a la aplicación, la redirección se producirá sin que el usuario tenga que volver a aprobar la aplicación. Para lograr este comportamiento, debes habilitar la configuración *Use Sign in with X* en el [registro de tu aplicación](https://developer.x.com/apps).
+
+**URL del recurso[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/authenticate`
+
+**Información del recurso[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Formatos de respuesta | JSON |
+| ¿Requiere autenticación? | Sí |
+| ¿Tiene límite de frecuencia? | Sí |
+
+**Parámetros[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Nombre | Obligatorio | Descripción | Valor predeterminado | Ejemplo |
+| force&#95;login | opcional | Obliga al usuario a introducir sus credenciales para garantizar que se autorice la cuenta de usuario correcta. |     | *true* |
+| screen&#95;name | opcional | Rellena previamente el campo de nombre de usuario en la pantalla de inicio de sesión de OAuth con el valor indicado. |     |     |
+
+**Ejemplo de solicitud[](#example-request "Permalink to this headline")**
+
+Envía al usuario al paso `oauth/authenticate` en un navegador web, incluyendo un parámetro `oauth_token`:
+`https://api.x.com/oauth/authenticate?oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik`
+
+<div id="post-oauthaccess_token">
+  ### POST oauth/access&#95;token
+</div>
+
+Permite que una Aplicación cliente intercambie el OAuth Request Token por un OAuth Access Token. Este método cumple con la [Sección 6.3](http://oauth.net/core/1.0/#auth_step3) del [flujo de autenticación OAuth 1.0](http://oauth.net/core/1.0/#anchor9).
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/access_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | Yes |
+| Rate limited? | Yes |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Name | Required | Description | Default Value | Example |
+| oauth&#95;token | required | El oauth&#95;token aquí debe ser el mismo que el oauth&#95;token devuelto en el paso request&#95;token. |     |     |
+| oauth&#95;verifier | required | Si utilizas el flujo web de OAuth, establece este parámetro en el valor de *oauth&#95;verifier* devuelto en la URL de callback. Si estás utilizando OAuth fuera de banda (out-of-band), establece este valor en el código PIN. Para cumplir con OAuth 1.0a, este parámetro es **obligatorio**. OAuth 1.0a se aplica estrictamente y las aplicaciones que no utilicen *oauth&#95;verifier* no podrán completar el flujo de OAuth. |     |     |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+`POST https://api.x.com/oauth/access_token?oauth_token=qLBVyoAAAAAAx72QAAATZxQWU6P&oauth_verifier=ghLM8lYmAxDbaqL912RZSRjCCEXKDIzx`
+
+Desde flujo basado en PIN: `POST https://api.x.com/oauth/access_token?oauth_token=9Npq8AAAAAAAx72QBRABZ4DAfY9&oauth_verifier=4868795`
+
+**Example response[](#example-response "Permalink to this headline")**
+
+`oauth_token=6253282-eWudHldSbIaelX7swmsiHImEL4KinwaGloHANdrY&oauth_token_secret=2EEfA6BG5ly3sR3XjE0IBSnlQu4ZrUzPiYTmrkVU&user_id=6253282&screen_name=xapi`
+
+<div id="post-oauthinvalidate_token">
+  ### POST oauth/invalidate&#95;token
+</div>
+
+Permite que una Aplicación registrada revoque un Token de acceso OAuth emitido presentando sus credenciales de cliente. Una vez que se haya invalidado un access&#95;token, los intentos posteriores de creación generarán un Token de acceso diferente y ya no se permitirá el uso del token invalidado.
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/1.1/oauth/invalidate_token`
+
+**Información del recurso[](#resource-information "Permalink to this headline")**
+
+|                            |                                                                      |
+| :------------------------- | :------------------------------------------------------------------- |
+| Formatos de respuesta      | JSON                                                                 |
+| ¿Requiere autenticación?   | Sí: contexto de usuario con los Tokens de acceso que desea invalidar |
+| ¿Con límite de frecuencia? | Sí                                                                   |
+
+**Ejemplo de solicitud[](#example-request "Permalink to this headline")**
+
+```bash
+        curl --request POST
+          --url 'https://api.x.com/1.1/oauth/invalidate_token.json'
+          --header 'authorization: OAuth oauth_consumer_key="CLIENT_KEY",
+         oauth_nonce="AUTO_GENERATED_NONCE", oauth_signature="AUTO_GENERATED_SIGNATURE",
+         oauth_signature_method="HMAC-SHA1", oauth_timestamp="AUTO_GENERATED_TIMESTAMP",
+         oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+**Ejemplo de respuesta[](#example-response "Permalink to this headline")**
+
+```bash
+        HTTP/1.1 200 OK
+        Content-Type: application/json; charset=utf-8
+        Content-Length: 127
+        ...
+
+        {"access_token":"ACCESS_TOKEN"}
+```
+
+**Ejemplo de respuesta de error después de invalidar el token[](#example-error-response-after-token-has-been-invalidated "Permalink to this headline")**
+
+```bash
+        HTTP/1.1 401 Authorization Required
+        ...
+
+        {"errors": [{
+          "code": 89,
+          "message": "Invalid or expired token."}
+        ]}
+```
+
+<div id="post-oauth2token">
+  ### POST oauth2/token
+</div>
+
+Permite que una aplicación registrada obtenga un Bearer Token OAuth 2, que puede usarse para realizar solicitudes a la API en nombre de la propia aplicación, sin un contexto de usuario. Esto se denomina [autenticación solo de aplicación](/es/resources/fundamentals/authentication/oauth-2-0/application-only).
+
+Un Bearer Token se puede invalidar usando oauth2/invalidate&#95;token. Una vez que un Bearer Token se ha invalidado, los nuevos intentos de creación generarán un Bearer Token diferente y el uso del token anterior ya no estará permitido.
+
+Solo puede existir un Bearer Token pendiente para una aplicación, y las solicitudes repetidas a este método devolverán el mismo token ya existente hasta que se haya invalidado.
+
+Las respuestas satisfactorias incluyen una estructura JSON que describe el Bearer Token otorgado.
+
+Los tokens recibidos mediante este método deben almacenarse en caché. Si se intenta obtenerlos con demasiada frecuencia, las solicitudes se rechazarán con un código de estado HTTP 403 y el código 99.
+
+**URL del recurso[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth2/token`
+
+**Información del recurso[](#resource-information "Permalink to this headline")**
+
+|                              |                                                                                                         |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------ |
+| Formatos de respuesta        | JSON                                                                                                    |
+| ¿Requiere autenticación?     | Sí: autenticación básica con tu clave de API como nombre de usuario y tu secreto de API como contraseña |
+| ¿Tiene límite de frecuencia? | Sí                                                                                                      |
+
+**Parámetros[](#parameters "Permalink to this headline")**
+
+|                |          |                                                                                                                                                                                                                                                                            |               |                          |
+| :------------- | :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------ | :----------------------- |
+| Name           | Required | Description                                                                                                                                                                                                                                                                | Default Value | Example                  |
+| grant&#95;type | required | Especifica el tipo de concesión que la aplicación está solicitando. Por el momento, solo se permite *client&#95;credentials*. Consulta [Autenticación solo de aplicación](/es/resources/fundamentals/authentication/oauth-2-0/application-only) para obtener más información. |               | *client&#95;credentials* |
+
+**Ejemplo de solicitud[](#example-request "Permalink to this headline")**
+
+```bash
+    POST /oauth2/token HTTP/1.1
+    Host: api.x.com
+    User-Agent: My X App v1.0.23
+    Authorization: Basic eHZ6MWV2R ... o4OERSZHlPZw==
+    Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+    Content-Length: 29
+    Accept-Encoding: gzip
+
+    grant_type=client_credentials
+```
+
+**Ejemplo de respuesta:**
+
+```bash
+    HTTP/1.1 200 OK
+    Status: 200 OK
+    Content-Type: application/json; charset=utf-8
+    ...
+    Content-Encoding: gzip
+    Content-Length: 140
+
+    {"token_type":"bearer","access_token":"AAAA%2FAAA%3DAAAAAAAA"}
+```
+
+<div id="post-oauth2invalidate_token">
+  ### POST oauth2/invalidate&#95;token
+</div>
+
+Permite que una aplicación registrada revoque un Bearer Token de OAuth 2.0 emitido presentando sus credenciales de cliente. Una vez que un Bearer Token se ha invalidado, los nuevos intentos de creación generarán un Bearer Token diferente y ya no se permitirá el uso del token invalidado.
+
+Las respuestas satisfactorias incluyen una estructura JSON que describe el Bearer Token revocado.
+
+**URL del recurso[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth2/invalidate_token`
+
+**Información del recurso[](#resource-information "Permalink to this headline")**
+
+|                            |                                                                                                                                                                                                                |
+| :------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Formatos de respuesta      | JSON                                                                                                                                                                                                           |
+| ¿Requiere autenticación?   | Sí: [OAuth 1.0a](/es/resources/fundamentals/authentication/oauth-1-0a) con las claves de API de consumidor de la aplicación y el token de acceso y el secreto de token de acceso del propietario de la aplicación |
+| ¿Con límite de frecuencia? | Sí                                                                                                                                                                                                             |
+
+**Parámetros[](#parameters "Permalink to this headline")**
+
+| Nombre           | Obligatorio | Descripción                                    |
+| :--------------- | :---------- | :--------------------------------------------- |
+| access&#95;token | obligatorio | El valor del Bearer Token que deseas invalidar |
+
+**Ejemplo de solicitud[](#example-request "Permalink to this headline")**
+
+```
+        curl --request POST
+          --url 'https://api.x.com/oauth2/invalidate_token?access_token=AAAA%2FAAA%3DAAAAAAAA'
+          --header 'authorization: OAuth oauth_consumer_key="CLIENT_KEY",
+         oauth_nonce="AUTO_GENERATED_NONCE", oauth_signature="AUTO_GENERATED_SIGNATURE",
+         oauth_signature_method="HMAC-SHA1", oauth_timestamp="AUTO_GENERATED_TIMESTAMP",
+         oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+**Ejemplo de respuesta[](#example-response "Enlace permanente a este encabezado")**
+
+```
+         Status: 200 OK
+         Content-Type: application/json; charset=utf-8
+         Content-Length: 135
+         ...
+       {
+        "access_token": "AAAA%2FAAA%3DAAAAAAAA"
+        }
+```

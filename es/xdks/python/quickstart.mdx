@@ -1,0 +1,70 @@
+---
+title: Inicio rápido
+sidebarTitle: Inicio rápido
+---
+
+Este ejemplo ilustra cómo buscar rápidamente Publicaciones con el XDK usando autenticación mediante Bearer Token.
+
+<div id="step-1-install-the-sdk">
+  ## Paso 1: Instala el SDK
+</div>
+
+```bash
+pip install xdk
+```
+
+<div id="step-2-get-your-bearer-token">
+  ## Paso 2: Obtén tu Bearer Token
+</div>
+
+1. Inicia sesión en el [X Developer Portal](https://developer.x.com/en/portal/dashboard).
+2. Crea o selecciona una aplicación.
+3. En la sección &quot;Keys and Tokens&quot;, genera un Bearer Token (autenticación solo de la aplicación).
+
+<div id="step-3-write-and-run-your-first-script">
+  ## Paso 3: Escribe y ejecuta tu primer script
+</div>
+
+Crea un archivo `quickstart.py`:
+
+```python
+# Importar el cliente
+from xdk import Client
+# Reemplaza con tu Bearer Token real
+client = Client(bearer_token="YOUR_BEARER_TOKEN_HERE")
+# Obtener Publicaciones recientes que mencionen "api"
+# search_recent devuelve un Iterator, así que itera sobre él
+for page in client.posts.search_recent(query="api", max_results=10):
+    if page.data and len(page.data) > 0:
+        # Acceder a la primera Publicación - los modelos Pydantic admiten acceso tanto por atributo como por diccionario
+        first_post = page.data[0]
+        post_text = first_post.text if hasattr(first_post, 'text') else first_post.get('text', '')
+        print(f"Latest Post: {post_text}")
+        break
+    else:
+        print("No se encontraron Publicaciones.")
+        break
+```
+
+Ejecútalo:
+
+```bash
+python quickstart.py
+```
+
+**Salida esperada**:
+
+```
+Latest Post: Exciting updates on XDK Python SDK!
+```
+
+**Solución de problemas**: Si obtienes un error 401, verifica tu Bearer Token. Para los límites de frecuencia (429), espera y vuelve a intentarlo.
+
+<div id="next-steps">
+  ## Próximos pasos
+</div>
+
+* Explora [Authentication](/es/xdks/python/authentication) para entender cómo usar la autenticación con Bearer Token (solo aplicación), OAuth 2.0 con PKCE (contexto de usuario) y OAuth 1.0a (contexto de usuario heredado).
+* Aprende sobre [Pagination](/es/xdks/python/pagination) para casos de uso en los que quieres que se devuelva una gran cantidad de resultados sin preocuparte por hacer múltiples llamadas a la API.
+* Profundiza en [Streaming](/es/xdks/python/streaming) para aprender a trabajar con datos en tiempo real.
+  Para ver ejemplos de código detallados con Python XDK, consulta nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/python).

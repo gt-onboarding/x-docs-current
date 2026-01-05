@@ -1,0 +1,52 @@
+---
+title: Filtered Stream Webhooks API
+sidebarTitle: 简介
+keywords: ["filtered stream webhooks", "stream webhooks", "webhook stream", "filtered stream webhook", "streaming webhooks", "webhook delivery"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="overview">
+  ## 概览
+</div>
+
+filtered stream endpoint 组使开发者能够对公共帖子流进行过滤。该 endpoint 组包含多个 endpoint，可用于创建和管理规则，并将这些规则应用到帖子流中，以返回匹配的公共帖子。通过该 endpoint 组，用户可以监听特定主题和事件、监控与竞赛相关的讨论、了解趋势如何发展等等。
+
+开发者可以使用 REST [rules endpoint](/zh/x-api/posts/filtered-stream#post-2-tweets-search-stream-rules) 添加和移除规则，以过滤匹配指定条件的帖子。这些 [rules](/zh/x-api/posts/filtered-stream#building-rules-for-filtered-stream) 可以通过运算符创建，用于匹配帖子属性，例如消息关键词、主题标签和 URL。运算符和规则子句可以结合布尔逻辑和括号来帮助优化过滤器的匹配行为。 
+
+添加一组规则后，你可以注册你的 webhook，X 将开始以 JSON 格式向其投递 [Post objects](/zh/x-api/fundamentals/data-dictionary#tweet)。你只会在你的 webhook 上收到与规则匹配的内容。
+
+该 endpoint 支持已编辑的帖子。你的 webhook 将接收与一个或多个过滤器匹配的已编辑帖子，以及其编辑历史，其中包括一个帖子 ID 数组。对于没有编辑历史的帖子，该数组只包含一个 ID。对于已被编辑的帖子，该数组包含多个 ID，按升序排列，反映每次编辑的顺序，数组最后一个元素为最新版本。要了解更多帖子编辑的工作方式，请参阅 [Posts edits fundamentals](/zh/x-api/fundamentals/edit-posts) 页面。 
+
+**注意：**该 endpoint 组在规则配置方式方面与 [v2 filtered stream endpoint](/zh/x-api/posts/filtered-stream/introduction) 类似。唯一的区别在于对匹配你规则的帖子的投递机制。
+
+* 对于 v2 filtered stream endpoint，你需要建立一个持久连接，并监听匹配你规则的帖子。
+* 对于此 filtered stream webhook endpoint，你需要注册你的 webhook，X 会将匹配你规则的帖子投递到你的 webhook。
+
+这免除了处理因客户端掉线或服务正常重启导致的服务器端断开连接的需求。由于我们可能每秒投递数百个事件，你的 webhook 服务器必须能够处理这些并发的连接请求。
+
+该 endpoint 目前向 Enterprise 开发者开放，并支持以下配置：
+
+* 每个项目 25,000+ 条规则
+* 构建规则时可以使用所有运算符
+* 规则长度最多可达 2048 个字符
+* 要申请 Enterprise 访问权限，请[点击这里](https://developer.x.com/en/products/x-api/enterprise/enterprise-api-interest-form)
+
+filtered stream 返回的帖子会计入每月的[帖子上限](/zh/x-api/fundamentals/post-cap)。
+
+<Note>
+  **账号设置**
+
+  要访问这些 endpoints，你需要：
+
+  * 一个已通过审批的[开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * 使用位于某个[项目](/zh/resources/fundamentals/projects)中的[开发者应用](/zh/resources/fundamentals/developer-apps)所提供的密钥和令牌进行身份验证。 
+
+  在我们的[入门指南](/zh/x-api/getting-started/getting-access)中了解更多关于如何获取 X API v2 endpoints 访问权限的信息。
+</Note>
+
+<div className="flex">
+  <Button href="/zh/x-api/posts/filtered-stream/quickstart">
+    快速开始
+  </Button>
+</div>

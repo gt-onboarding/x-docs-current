@@ -1,0 +1,92 @@
+---
+title: いいねの管理
+sidebarTitle: いいねの管理
+keywords: ["いいねの管理", "ポストにいいねする", "いいねを取り消す", "いいねクイックスタート", "いいねチュートリアル", "いいねガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-likes-endpoints">
+  ### manage Likes エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して manage Likes エンドポイントに対する最初のリクエストを送信する方法を説明します。
+
+さまざまな言語のサンプルコードを確認したい場合は、GitHub の [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) リポジトリをご覧ください。 
+
+<div id="prerequisites">
+  #### 前提条件
+</div>
+
+このガイドを完了するには、[キーとトークン](/ja/resources/fundamentals/authentication) が必要です。次の手順で生成してください。
+
+1. [開発者アカウントに申し込み](https://developer.x.com/en/apply-for-access)、承認を受けます。
+
+2. developer portal 上で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+
+3. 自分のアプリの「Keys and tokens」ページに移動し、API key、Access Token、Bearer Token をパスワードマネージャーに保存します。
+
+<div id="steps-to-build-a-manage-likes-request">
+  #### いいね管理リクエストを作成する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントにリクエストを送る方法として使えるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+[![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/m1_vnext/carat.svg)<br />X API v2 を Postman に追加](https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400)
+
+Postman に X API v2 コレクションを読み込んだら、「Likes」フォルダに移動し、「Like a Post」を選択します。
+
+**ステップ 2: リクエストを認証する**
+
+このエンドポイントへのリクエストを成功させるには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) を使用する必要があります。これを行うには、「X API v2」という名前の環境を選択し、次のキーとトークンを `initial value` と `current value` の両方のフィールドに変数として追加します。
+
+* consumer&#95;key: あなたの API Key
+* consumer&#95;secret: あなたの API Key Secret
+* access&#95;token: あなたのアクセストークン
+* token&#95;secret: あなたの Access Token Secret
+   
+
+**ステップ 3: いいねするポストを指定する**
+
+いいね管理エンドポイントでは 2 つの ID が必要です。1 つはユーザー（ポストにいいねしたいユーザー）の ID、もう 1 つはユーザーがいいねまたはいいね解除しようとしているポストの Post ID です。
+
+ユーザーの ID は、認証しているユーザーの ID と一致している必要があります。つまり、リクエストを認証する際に、そのユーザー ID に紐づく[アクセストークン](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)を渡す必要があります。この場合、ご自身のユーザー ID を指定できます。あなたの ID は次の 2 つの方法で確認できます。
+
+1. [user lookup by username](/ja/x-api/users/user-lookup-by-id) エンドポイントを使用し、ユーザー名を渡すと `id` フィールドを受け取ることができます。 
+2. アクセストークンを確認すると、数値部分があなたのユーザー ID です。
+    
+
+また、いいねしたいポストも指定する必要があります。ポストの Post ID は、x.com にアクセスしてポストをクリックし、URL を確認することで見つけることができます。たとえば、次の URL のポスト ID は 1228393702244134912 です。
+
+[https://x.com/TwitterDev/status/1228393702244134912](https://x.com/TwitterDev/status/1228393702244134912)
+
+Postman で &quot;Params&quot; タブに移動し、`id` パス変数の &quot;Value&quot; 列にあなたの ID を入力します。次に &quot;Body&quot; タブに移動し、いいねしたいポストの ID を `tweet_id` パラメータの値として入力します。いずれの ID にも前後にスペースが入らないよう注意してください。
+
+|              |                 |
+| :----------- | :-------------- |
+| **Key**      | **Value**       |
+| `id`         | (あなたのユーザー ID)   |
+| tweet&#95;id | (いいねしたいポストの ID) |
+
+「Send」ボタンをクリックすると、関係の状態を含むレスポンスオブジェクトが返ってきます。
+
+* `"liked": true` を受け取った場合、その `id` は `tweet_id` を正常にいいねしています。
+   
+
+**ステップ 4: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンを押すと、次のようなレスポンスが返ってきます。
+
+```
+{
+    "data": {
+        "liked": true
+    }
+}
+```
+
+同じポストへの「いいね」を取り消したい場合は、Postman の X API v2 コレクション内の「Likes」フォルダにある「Unlike a Post」という名前のリクエストを使用できます。`id` と `tweet_id` は、前の例と同じように使用します。ポストの「いいね」を取り消す際は、JSON ボディとして追加する必要はありません。そのため、`id` と `tweet_id` に必要なクエリパラメータを必ず指定してください。

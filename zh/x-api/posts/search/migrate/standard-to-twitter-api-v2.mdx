@@ -1,0 +1,199 @@
+---
+title: 从 v1 到 v2
+sidebarTitle: 从 v1 到 v2
+keywords: ["v1.1 向 v2 迁移", "搜索迁移", "搜索功能迁移", "标准版搜索迁移到 v2", "v1 到 v2 搜索迁移", "迁移指南"]
+---
+
+<div id="standard-v11-compared-to-x-api-v2">
+  ### 标准版 v1.1 与 X API v2 对比
+</div>
+
+如果你之前一直在使用 v1.1 的 [search/posts](/zh/x-api/posts/search/introduction)，本指南旨在帮助你了解标准版与 X API v2 搜索帖子端点之间的相似之处和差异。
+
+* **相似之处**
+  * OAuth 1.0a 用户上下文 与 OAuth 2.0 应用仅模式
+  * 支持帖子编辑历史及元数据。 
+* **差异**
+  * 端点 URL
+
+  * 应用和项目要求
+
+  * 响应数据格式
+
+  * 请求参数
+
+  * 新的查询运算符
+
+  * AND / OR 运算符优先级 
+
+<div id="similarities">
+  #### 相似点
+</div>
+
+**OAuth 1.0a 用户上下文和 OAuth 2.0 应用仅模式认证**
+
+v1.1 的 search/posts 端点和 X API v2 的最近搜索端点都支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 和 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#oauth-2-0)。 
+
+因此，如果你之前使用的是标准 v1.1 搜索端点，在迁移到 X API v2 版本时，可以继续使用相同的认证方式。 
+
+根据你所使用的认证库或软件包，应用仅模式认证可能是最容易上手的方式，并且只需通过一个简单的请求头部即可设置。要了解如何生成应用访问令牌，请参阅此 [OAuth 2.0 应用仅模式指南](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。 
+
+如果你想利用 X API v2 端点来获取私有或广告相关指标，则需要使用 OAuth 1.0a 用户上下文，并传递与发布该帖子（即你想获取其指标的帖子）的用户对应的用户访问令牌。 
+
+**对帖子编辑历史和元数据的支持**
+
+这两个版本都提供用于描述任何编辑历史的元数据。请查阅 [搜索 API 参考](/zh/x-api/posts/recent-search) 和 [帖子编辑基础知识页面](/zh/x-api/fundamentals/edit-posts) 以了解更多信息。 
+
+<div id="differences">
+  #### 差异
+</div>
+
+**端点 URL**
+
+* 标准 v1.1 端点：
+  * https://api.x.com/1.1/search/tweets
+
+* X API v2 端点：
+  * https://api.x.com/2/tweets/search/recent
+     
+
+**应用和项目要求**
+
+在对请求进行认证时，X API v2 端点要求你使用与某个 [Project](/zh/resources/fundamentals/projects) 关联的 [developer App](/zh/resources/fundamentals/developer-apps) 的凭证。所有 X API v1.1 端点都可以使用独立应用，或与 Project 关联的应用中的凭证。 
+
+**响应数据格式**
+
+标准 v1.1 和 X API v2 端点版本之间最大的差异之一在于，你如何选择要在负载中返回哪些字段。
+
+对于标准端点，你默认会收到许多响应字段，然后可以选择使用参数来指定在负载中应返回哪些字段或字段集。
+
+X API v2 版本默认只返回帖子 id 和 text 字段。要请求任何其他字段或对象，你需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数。你从这些端点请求的任何帖子字段都会返回在主帖子对象中。任何扩展的用户、媒体、投票或地点对象及其字段都会返回在响应中的 includes 对象内。然后你可以通过匹配帖子和扩展对象中出现的 ID，将任何扩展对象与帖子对象进行关联。 
+
+我们鼓励你在各自的指南中进一步了解这些新参数，或者阅读我们的[如何使用 fields 和 expansions](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 指南。 
+
+我们还整理了一份 [数据格式迁移指南](/zh/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)，可帮助你将标准 v1.1 字段映射到新的 v2 字段。该指南还会为你提供在 v2 请求中需要传递的具体 expansions 和 fields 参数，以便返回特定字段。 
+ 
+
+除了你请求某些字段的方式发生变化之外，X API v2 还为 API 返回的对象（包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象）引入了新的 JSON 设计。
+
+* 在 JSON 根级别，标准端点在 statuses 数组中返回 Post 对象，而 X API v2 在 data 数组中返回 Post 对象。 
+* X API v2 JSON 不再引用被转发和被引用的 “statuses”，而是引用被转发和被引用的帖子。许多旧版和已弃用字段（例如 contributors 和 user.translator&#95;type）都会被移除。 
+* X API v2 不再同时使用 favorites（在 Post 对象中）和 favourites（在 user 对象中），而统一使用术语 like。 
+* X 采用的约定是，没有值的 JSON 字段（例如 null）不会写入负载。只有在具有非 null 值时，Post 和 user 属性才会被包含在内。 
+   
+
+我们还为 [Post object](/zh/x-api/fundamentals/data-dictionary#tweet) 引入了一组新的字段，包括：
+
+* 一个 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 字段
+* 两个新的 [annotations](/zh/x-api/fundamentals/post-annotations) 字段，包括 context 和 entities
+* 若干新的 [metrics](/zh/x-api/fundamentals/metrics) 字段 
+* 一个新的 reply&#95;setting 字段，用于显示谁可以回复指定的帖子
+
+<div id="request-parameters">
+  #### 请求参数
+</div>
+
+以下标准 v1.1 请求参数在 X API v2 中有对应项：
+
+| 标准搜索 v1.1 | 搜索帖子 v2 |
+| :--- | :--- |
+| q   | query |
+|     | start&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+| until (YYYY-MM-DD) | end&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+| since&#95;id | since&#95;id |
+| max&#95;id | until&#95;id |
+| count | max&#95;results |
+| Response provides search&#95;metadata.next&#95;results | next&#95;token |
+
+还有一组标准搜索帖子请求参数 **不** 受 X API v2 支持：
+
+| **标准 v1.1 参数** | **详细信息** |
+| :--- | :--- |
+| geocode | 基础访问（Basic Access）级别的搜索帖子不支持地理位置（geo）运算符。 |
+| locale | 在标准搜索中，此参数用于指定查询语言，但从未得到完整实现。 |
+| lang | 搜索帖子端点提供 lang 查询运算符，用于匹配感兴趣的语言。 |
+| include&#95;entities | 帖子实体始终会被包含。 |
+| result&#95;type | 搜索帖子端点会返回所有匹配的帖子，而不考虑互动程度。 |
+| extended | X API v2 从零开始构建，以支持最长 280 个字符的帖子。在 v2 中，不再存在“extended”帖子的概念。 |
+
+下面是一个示例请求，展示标准请求与搜索帖子请求之间的差异：
+
+|     |     |
+| :--- | :--- |
+| **标准 v1.1** | **X API v2** |
+| https://api.x.com/1.1/search/tweets.json?q=snow&amp;count=50 | https://api.x.com/2/tweets/search/recent?query=snow&amp;max&#95;results=50 |
+
+这两个请求都会返回包含关键词 snow 的最新 50 条帖子。v2 请求会返回匹配帖子默认的 id 和 text 字段。下面是一个示例，展示如何在 JSON 负载中指定要包含的更多帖子和用户字段：
+
+|     |
+| :--- |
+| **X API v2** |
+| https://api.x.com/2/tweets/search/recent?query=snow&amp;max&#95;results=50&amp;tweet.fields=id,created&#95;at,author&#95;id,text,source,entities,attachments&amp;user.fields=id,name,username,description |
+
+**新的查询运算符**
+
+搜索帖子引入了新运算符，以支持两个新的 X API v2 功能： 
+
+* **[Conversation IDs](/zh/x-api/fundamentals/conversation-id)** - 随着会话在 X 上展开，会话 ID 将可用于标记属于该会话的帖子。会话中的所有帖子，其 conversation&#95;id 都会被设置为发起该会话的帖子 ID。 
+  * `conversation_id:`
+* **[X Annotations](/zh/x-api/fundamentals/post-annotations)** 为帖子提供上下文信息，包括实体和上下文注释。实体由人物、地点、产品和组织组成。上下文是领域或主题，即相关实体所属的范围。例如，帖子中提到的人物可能具有一个上下文，用于指明他们是运动员、演员还是政治人物。  
+  * context: 匹配带有目标上下文注释的帖子。 
+  * entity: 匹配带有目标实体注释的帖子。 
+
+     
+
+<div id="and-or-operator-precedence">
+  #### AND / OR 运算符优先级
+</div>
+
+构建搜索查询的基本构成单元是使用 OR 和 AND 进行逻辑组合。标准搜索 API 会先应用 OR 再应用 AND，而 Search Posts 端点（以及高级版和 Enterprise 版本）会先应用 AND 再应用 OR。在在这两者之间转换查询时，这一差异至关重要。 
+
+例如，在标准搜索中，如果你想匹配包含关键词 “storm”，并且提到单词 “colorado” 或 #COwx 话题标签的帖子，可以使用如下搜索查询：
+
+storm #COwx OR colorado
+
+在 Search Posts 的运算符优先级下，会先应用 AND 再应用 OR。因此，上面的查询等价于： 
+
+(storm #COwx) OR colorado
+
+然而，上述规则会匹配任何提到 “Colorado” 的帖子，而不管该帖子是否提到 “storm” 或 #COwx 话题标签。另外，它还会匹配同时提到关键词 “storm” 和 #COwx 话题标签的帖子。 
+
+要使查询按最初的意图运行，需要把 OR 子句分组在一起。将原始标准查询转换为适用于 Search Posts 的写法为：
+
+storm (#COwx OR colorado)
+
+这两条规则的匹配行为截然不同。以 2019 年 10 月为例，原始规则匹配超过 1,175,000 条帖子，而正确转换后的规则大约匹配 5,600 条帖子。务必注意 AND 和 OR 的使用，并在需要时使用括号。 
+
+<div id="curl-requests">
+  #### cURL 请求
+</div>
+
+**以下部分展示了标准 v1.1 端点及其在 v2 中等效端点的 cURL 请求。**
+
+这些请求使用 [OAuth 2.0 应用仅模式]([https://developer.x.com(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)](https://developer.x.com\(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token\)) 发起。要运行以下 cURL 请求，你需要将授权头中的 ACCESS&#95;TOKEN 替换为你的应用访问令牌。对于 v2 端点，你的应用访问令牌必须属于某个 [developer App](/zh/resources/fundamentals/developer-apps/overview)，并且该 App 位于某个 [Project](/zh/resources/fundamentals/projects/overview) 中。 
+
+v1.1 端点返回的响应负载将与 v2 端点返回的响应负载不同。在 v2 中，响应将包含默认字段，以及通过 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数请求的其他字段。你可以使用这些参数请求返回一组不同的字段。
+
+**标准 v1.1 [GET search/tweets](https://developer.x.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets) 和 v2 [GET tweets/search/recent](/zh/x-api/posts/recent-search) 端点**
+
+```bash
+      curl --request GET \
+  --url 'https://api.x.com/1.1/search/tweets.json?q=from%3ATwitterDev%20-is%3Aretweet&count=100' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+```bash
+      curl --request GET \
+  --url 'https://api.x.com/2/tweets/search/recent?query=from%3ATwitterDev%20-is%3Aretweet&tweet.fields=created_at%2Cconversation_id%2Centities&max_results=100' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+**后续步骤**
+
+[查看 X API v2 近期搜索快速入门指南](/zh/x-api/posts/search/quickstart/recent-search)
+
+[查看近期搜索的 API 参考文档](/zh/x-api/posts/recent-search)
+
+[查看这些端点的示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code "查看这些端点的示例代码")
+
+[分步指南：发送你的第一个近期搜索请求](/zh/x-api/getting-started/make-your-first-request "分步指南：发送你的第一个近期搜索请求")

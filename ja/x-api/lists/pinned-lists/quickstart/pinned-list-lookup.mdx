@@ -1,0 +1,89 @@
+---
+title: ピン留めされたリストの取得
+sidebarTitle: ピン留めされたリストの取得
+keywords: ["ピン留めされたリスト取得クイックスタート", "ピン留めされたリストの取得", "ピン留めされたリスト クイックスタート", "リスト取得クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<Note>
+  **注意：** このガイドでは、[クイックスタート概要](/ja/x-api/lists/pinned-lists#getting-started-with-the-pinned-list-endpoint-group)に記載されている前提条件を済ませていることを前提としています。
+</Note>
+
+<div id="steps-to-build-a-pinned-list-lookup-request">
+  ### ピン留めされたリストのルックアップリクエストを構築する手順
+</div>
+
+**ステップ 1: Postman で List エンドポイントコレクションを選択する**
+
+Postman に X API v2 コレクションを読み込んだら、「List」フォルダーに移動し、「Pinned Lists」フォルダーを選択してから、「User&#39;s pinned Lists」を選択します。
+ 
+
+**ステップ 2: ユーザーを特定して指定する**
+
+ユーザーのピン留めされたリストを取得するには、リクエスト内でそのユーザーの ID を指定する必要があります。ユーザー ID は認証に使用しているユーザーの ID と一致している必要があります。つまり、リクエストを認証する際には、そのユーザー ID に紐づくアクセストークンを渡す必要があります。この例では、自分自身のユーザー ID を指定できます。自分の ID は次の 2 通りの方法で確認できます。
+
+1. [users lookup](/ja/x-api/users/lookup/introduction) by username エンドポイントを使用し、username を渡すことで `id` フィールドを取得できます。
+2. 自分のアクセストークンを確認すると、数値の部分が自分のユーザー ID であることがわかります。
+
+Postman で「Params」タブに移動し、このユーザー ID を `id` パラメータの「Value」列に入力します。
+
+|         |                      |
+| :------ | :------------------- |
+| **Key** | **Value**            |
+| `id`    | 2244994945 (user ID) |
+
+**ステップ 3: 取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に「Send」ボタンをクリックすると、レスポンスにはデフォルトの [List object](/ja/x-api/fundamentals/data-dictionary#list) のフィールド `id` と `name` が返されます。
+
+`id` と `name` 以外の追加フィールドを受け取りたい場合は、[`field`](/ja/x-api/fundamentals/fields) パラメータおよび/または [`expansion`](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドをリクエスト内で指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 種類の追加フィールドセットをリクエストします。
+
+* プライマリの List オブジェクトにおける追加フィールド `follower_count`
+* expansion パラメータを使用した完全な [user object](/ja/x-api/fundamentals/data-dictionary#user)
+* 関連付けられたユーザーオブジェクトにおける追加フィールド `tweet.created_at`
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|             |                    |                                                                               |
+| :---------- | :----------------- | :---------------------------------------------------------------------------- |
+| Key         | Value              | Returned fields                                                               |
+| list.fields | follower&#95;count | `follower_count`                                                              |
+| expansions  | owner&#95;id       | `includes.users.id,  <br/>includes.users.name,  <br/>includes.users.username` |
+| user.fields | created&#95;at     | `includes.users.created_at`                                                   |
+
+「Send」ボタンの横に、次のような URL が表示されているはずです。
+
+`https://api.x.com/2/users/2244994945/pinned_lists?expansions=owner_id&list.fields=follower_count&user.fields=created_at`
+
+**ステップ 4: リクエストを送信してレスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンを押すと、次のサンプルレスポンスと同様のレスポンスが返されます。
+
+```
+{
+  "data": [
+    {
+      "follower_count": 0,
+      "id": "1454155907651158017",
+      "name": "test list",
+      "owner_id": "2244994945"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "username": "TwitterDev",
+        "id": "2244994945",
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "name": "Twitter Dev"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 1
+  }
+}
+```

@@ -1,0 +1,67 @@
+---
+title: 介绍
+sidebarTitle: 介绍
+keywords: ["帖子计数", "帖子数量统计", "计数端点", "数量统计", "搜索量统计", "帖子数量", "计数 API"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+X API v2 的帖子计数端点允许开发者了解并获取给定查询对应的数据量。这在很多情况下都很有用，包括：
+
+* 了解某个关键词的帖子量，用于构建可视化，比如趋势线。
+* 了解事件或讨论发生的时间区间，以确保你的查询能够捕获到相关数据。
+* 了解某个搜索查询大致会返回多少条帖子，从而在使用最近搜索或全量归档搜索端点之前，先对查询进行优化。
+  **请注意：** 计数结果并不总是与搜索端点返回的结果完全一致，因为搜索端点会经过额外的合规处理，而计数端点不会经过这些处理。
+* 在不实际拉取原始数据、也不将帖子计入你的每月[帖子上限](/zh/x-api/fundamentals/post-cap)的情况下，了解围绕某个话题的讨论规模。 
+
+在开发查询时，你会受到查询长度以及可用运算符的限制，这取决于你的[访问级别](/zh/x-api/getting-started/about-x-api)。 
+
+* 如果你使用的是具有 Pro 访问权限的项目，你可以使用所有可用运算符，且查询长度最多为 1024 个字符。 
+* 如果你使用的是具有 Enterprise 访问权限的项目，你可以使用所有可用运算符，且查询长度最多为 4096 个字符。 
+
+你还可以指定时间粒度（可以是 day、hour 或 minute），以及你需要帖子计数的时间区间（使用 `start_time` 和 `end_time` 参数）。该端点默认的时间粒度是 hour，这意味着如果你没有指定 granularity 参数，端点将返回过去 7 天内按小时统计的帖子计数。
+
+<Note>
+  **账号设置**
+
+  要访问这些端点，你需要：
+
+  * 一个已获批准的[开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * 使用位于某个[项目](/zh/resources/fundamentals/projects)中的[开发者应用](/zh/resources/fundamentals/developer-apps)的密钥和令牌进行认证。 
+
+  在我们的[入门指南](/zh/x-api/getting-started/getting-access)中了解更多关于获取 X API v2 端点访问权限的信息。
+</Note>
+
+<div id="recent-post-counts">
+  ### 近期帖子计数
+</div>
+
+近期帖子计数端点允许你以编程方式，基于查询获取过去七天内帖子的计数。任何使用与某个 [App](/zh/resources/fundamentals/developer-apps) 关联并属于某个 [Project](/zh/resources/fundamentals/projects) 的密钥和令牌的用户都可以使用该端点，并通过 [OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 进行身份验证。
+
+<div id="full-archive-post-counts">
+  ### 全量存档帖子计数
+</div>
+
+全量存档帖子计数端点允许你以编程方式，从全部公开帖子的存档中获取某个查询对应的帖子数量（数值计数）。目前，此端点仅向已获批[学术研究或 Enterprise 访问权限](/zh/x-api/getting-started/about-x-api)，并使用 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 进行身份验证的用户开放。
+
+例如：你可以使用全量存档帖子计数端点，查看 2017 年 8 月到 9 月期间，每天包含标签 #SOSHurricaneHarvey 的帖子数量。
+
+**请注意：** 该计数端点按每个响应最多覆盖 31 天的数据进行分页。例如，将粒度设置为 `day` 时，每页会返回这 31 天中每天的结果计数；将粒度设置为 `hour` 时，每页会返回 744 小时（31 天 × 24 小时）中每小时的结果计数。如果你未指定粒度和时间范围，此端点会返回过去 30 天内按小时聚合的查询帖子计数。
+
+<div className="flex space-x-4">
+  <Button href="/zh/x-api/posts/search/quickstart/full-archive-search">
+    快速入门
+  </Button>
+
+  <Button href="https://github.com/xdevplatform/Twitter-API-v2-sample-code">
+    示例代码
+  </Button>
+
+  <Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+    在 Postman 中运行
+  </Button>
+
+  <Button href="https://developer.x.com/apitools/api?endpoint=/2/tweets/search/recent&method=get">
+    使用 API Explorer 试用
+  </Button>
+</div>

@@ -1,0 +1,140 @@
+---
+title: Introduction
+sidebarTitle: Introduction
+keywords: ["커뮤니티 검색", "커뮤니티 검색하기", "커뮤니티 찾기", "커뮤니티 검색 기능", "커뮤니티 탐색", "커뮤니티 검색 API"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+이 엔드포인트를 사용하면 키워드를 기반으로 커뮤니티를 검색하고 찾아볼 수 있습니다.
+
+이 엔드포인트는 하나 이상의 키워드를 쿼리로 받습니다. 기본적으로 요청은 지정한 쿼리와 일치하는 공개 및 비공개 커뮤니티를 모두 반환합니다.
+
+<Note>
+  **계정 설정**
+
+  이 엔드포인트에 액세스하려면 다음이 필요합니다.
+
+  * 승인된 [개발자 계정](https://developer.x.com/en/portal/petition/essential/basic-info).
+  * [프로젝트](/ko/resources/fundamentals/projects)에 속한 [개발자 App](/ko/resources/fundamentals/developer-apps)의 키와 토큰을 사용한 인증.
+
+  X API v2 엔드포인트에 액세스하는 방법에 대해서는 [시작하기 가이드](/ko/x-api/getting-started/getting-access)를 참고하세요.
+</Note>
+
+**시작하기**
+
+<div id="authentication">
+  ### 인증
+</div>
+
+이 엔드포인트는 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication), [OAuth 2.0 앱 전용(App-Only)](https://developer.x.com(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), 또는 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 중 하나를 사용해 인증할 수 있습니다.
+ 
+
+<div id="making-a-request">
+  ### 요청 보내기
+</div>
+
+다음과 같이 Search Communities 엔드포인트를 호출할 수 있습니다:
+
+```
+      curl --location 'https://api.x.com/2/communities/search?query=anime' --header 'Authorization: ••••••'
+```
+
+요청이 성공적으로 처리되면 아래와 같은 JSON 응답이 표시됩니다.
+
+```
+{
+   "data": [
+       {
+           "access": "Public",
+           "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+           "join_policy": "Open",
+           "name": "Anime Community"
+       },
+       {
+           "access": "Public",
+           "description": "Join and text about anime 🥰",
+           "join_policy": "Open",
+           "name": "Anime World 🌸"
+       },
+       {
+           "access": "Public",
+           "description": "For all anime lovers and creators!",
+           "join_policy": "Open",
+           "name": "Anime"
+       },
+   ],
+   "meta": {
+       "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+   }
+}
+```
+
+<div id="community-fields">
+  ### 커뮤니티 필드
+</div>
+
+커뮤니티 필드를 지정하여 커뮤니티와 연결된 추가 데이터를 가져올 수 있습니다.
+
+사용할 수 있는 커뮤니티 필드는 다음과 같습니다:
+
+| 필드 값 | 타입 | 설명 |     |
+| :--- | :--- | :--- | :--- |
+| created&#95;at | date (ISO 8601) | 커뮤니티가 생성된 시각입니다. |     |
+| id  | string | 커뮤니티의 고유 식별자입니다. |     |
+| name | string | 커뮤니티의 이름입니다. |     |
+| description | string | 커뮤니티 설명(제공된 경우)의 텍스트입니다. |     |
+| access | string | 커뮤니티의 액세스 수준입니다.  <br />  <br />다음 중 하나일 수 있습니다:<br /><br />* `Public`<br />* `Closed` |     |
+| join&#95;policy | string | 커뮤니티의 가입 정책입니다.  <br />  <br />다음 중 하나일 수 있습니다:<br /><br />* `Open`<br />* `RestrictedJoinRequestsDisabled`<br />* `RestrictedJoinRequestsRequireAdminApproval`<br />* `RestrictedJoinRequestsRequireModeratorApproval`<br />* `SuperFollowRequired` |     |
+| member&#95;count | integer | 커뮤니티에 가입한 멤버 수입니다. |     |
+
+<div id="example-request">
+  #### 예시 요청
+</div>
+
+다음과 같이 추가 커뮤니티 필드를 포함하여 Search Communities 엔드포인트를 호출할 수 있습니다:
+
+```
+      curl --location 'https://api.x.com/2/communities/search?query=anime&community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: ••••••'
+```
+
+**예시 응답**
+
+요청이 성공하면 아래와 같은 JSON 응답이 반환됩니다:
+
+```
+{
+   "data": [
+       {
+           "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI=",
+           "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 39915,
+           "name": "Anime Community",
+           "created_at": "2024-02-17T06:58:50.000Z"
+       },
+       {
+           "id": "Q29tbXVuaXR5OjE1MDY3OTM5NTMxMDYwNDI4OTE=",
+           "description": "Join and text about anime 🥰",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 26019,
+           "name": "Anime World 🌸",
+           "created_at": "2022-03-24T00:44:07.000Z"
+       },
+       {
+           "id": "Q29tbXVuaXR5OjE0OTY3NzYyMTU5Mzk1MzQ4NDk=",
+           "description": "For all anime lovers and creators!",
+           "join_policy": "Open",
+           "access": "Public",
+           "member_count": 5612,
+           "name": "Anime",
+           "created_at": "2022-02-24T09:17:13.000Z"
+       }
+   ],
+   "meta": {
+       "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+   }
+}
+```

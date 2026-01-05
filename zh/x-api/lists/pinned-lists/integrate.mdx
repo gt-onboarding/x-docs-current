@@ -1,0 +1,97 @@
+---
+title: 集成指南
+sidebarTitle: 集成指南
+keywords: ["固定列表集成", "列表固定集成", "固定列表指南", "固定列表设置", "列表置顶集成"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+本页介绍了在将 mutes 端点集成到你的系统时需要了解的一些工具和关键概念。我们将内容分成以下几个部分：
+
+* [实用工具](#helpful)
+* 关键概念
+* [认证](#authentication)
+* [开发者门户、项目和应用](#portal)
+* [速率限制](#limits)
+* [字段和扩展字段](#fields)
+
+<div id="helpful-tools">
+  ### 实用工具
+</div>
+
+在深入介绍帮助你集成该端点的一些关键概念之前，我们建议你先熟悉以下内容：
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman 是一款非常适合用来测试 API 端点的工具。每个 Postman 请求都会包含所有路径参数和请求体参数，帮助你快速了解有哪些可用的内容。若要进一步了解我们的 Postman 集合，请访问我们的[《使用 Postman》](/zh/tutorials/postman-getting-started)页面。 
+
+<div id="code-samples">
+  #### 代码示例
+</div>
+
+想用你偏好的编程语言，通过一些代码来开始使用这个端点吗？你可以在我们的 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code) 找到多种代码示例，作为上手的起点。
+
+<div id="third-party-libraries">
+  #### 第三方库
+</div>
+
+使用我们社区提供的[第三方库](/zh/x-api/tools-and-libraries/overview)来帮助你入门。你可以通过查看相应的版本标签，找到与 v2 端点兼容的库。
+
+<div id="key-concepts">
+  ### 关键概念
+</div>
+
+<div id="authentication">
+  #### 身份验证
+</div>
+
+所有 X API v2 端点都要求你使用一组凭证（也称为密钥和令牌）对请求进行身份验证。你可以使用 OAuth 1.0a 用户上下文对发往此端点的请求进行身份验证。 
+
+[OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)，这意味着你必须使用一组 API 密钥和用户访问令牌才能成功发起请求。访问令牌必须与由你代表其发起请求的用户相关联。如果你希望为其他用户生成一组访问令牌，他们必须通过 [三方 OAuth 流程](https://developer.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens)授权你的应用。
+
+请注意，OAuth 1.0a 使用起来可能比较困难。如果你对这种身份验证方法不熟悉，我们建议你使用某个[库](/zh/x-api/tools-and-libraries/overview)或 Postman 等工具。
+
+<div id="developer-portal-projects-and-developer-apps">
+  #### 开发者门户、项目和开发者应用
+</div>
+
+要获取可用于 X API v2 端点的一组认证凭证，你必须先[注册开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)，在该账号下设置一个[项目](/zh/resources/fundamentals/projects)，然后在该项目中创建一个[开发者应用](/zh/resources/fundamentals/developer-apps)。之后，你可以在自己的开发者应用中找到密钥和令牌。
+ 
+
+<div id="rate-limits">
+  #### 速率限制
+</div>
+
+每天都有成千上万的开发者向 X API 发起请求。为了帮助管理如此庞大的请求量，我们在每个端点上都设置了[速率限制](/zh/x-api/fundamentals/rate-limits)，以限制你代表你的应用或已认证用户发起的请求次数。 
+
+这些端点采用用户级别的速率限制，这意味着你代表其发起请求的已认证用户，在任意开发者应用中对该端点的调用次数都是有限的。 
+
+下表展示了每个端点的速率限制。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **端点（Endpoint）** | **HTTP 方法** | **速率限制** |
+| /2/users/:id/pinned&#95;lists | POST | 每 15 分钟 50 次请求 |
+| /2/users/:id/pinned&#95;lists/:list&#95;id | DELETE | 每 15 分钟 50 次请求 |
+| /2/users/:id/pinned&#95;lists | GET | 每 15 分钟 15 次请求 |
+
+<div id="fields-and-expansions">
+  #### 字段和扩展字段
+</div>
+
+X API v2 的 GET 端点允许用户使用一组称为 `fields` 和 `expansions` 的工具，精确选择希望从 API 返回哪些数据。`expansions` 参数允许你展开响应中被引用的对象。例如，查询置顶列表时，你可以使用以下 [expansions](/zh/x-api/fundamentals/expansions)：
+
+* `owner_id`
+
+`fields` 参数允许你精确选择在不同数据对象中希望接收哪些[字段](/zh/x-api/fundamentals/fields)。此端点主要返回用户对象。默认情况下，列表对象返回 `id` 和 `name` 字段。若要接收其他字段，例如 `list.created_at` 或 `list.description`，你必须使用 fields 参数显式请求这些字段。 
+
+我们在 [X API v2 数据字典](/zh/x-api/fundamentals/data-dictionary)中新增了一份关于如何结合使用[字段和扩展字段](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)的指南。
+
+下表展示了该查找端点可用的字段和扩展字段：
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Endpoint** | **Fields** | **Expansions** |
+| /2/users/:id/pinned&#95;lists | `list.fields`<br /><br />`user.fields` | `owner_id` |

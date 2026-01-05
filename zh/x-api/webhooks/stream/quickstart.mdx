@@ -1,0 +1,152 @@
+---
+title: 快速入门
+sidebarTitle: 快速入门
+keywords: ["过滤流 Webhook 快速入门", "Webhook 流快速入门", "流式 Webhook 教程", "Webhook 流指南"]
+---
+
+<div id="getting-started-with-the-filtered-stream-webhooks-api">
+  ## 开始使用 filtered stream webhook API
+</div>
+
+在设置过滤规则方面，v2 filtered stream webhook API 与 [v2 filtered stream endpoint](/zh/x-api/posts/filtered-stream/introduction) 类似。不同之处在于传递匹配你规则的帖子所使用的机制。
+
+* 对于 v2 filtered stream endpoint，你需要建立一个持久连接，并监听匹配你规则的帖子。
+* 对于这个 filtered stream webhook endpoint，你需要注册你的 webhook，X 会将匹配你规则的帖子发送到你的 webhook。
+
+本指南说明如何使用 filtered stream webhook endpoint 来筛选并接收帖子。整个过程分为 3 个步骤：
+
+1. 设置你的 filtered stream 规则
+2. 创建你的 webhook
+3. 将你的 Filtered Stream 实例关联到你的 webhook
+
+一旦你将 Filtered Stream 实例关联到你的 webhook，X 就会把匹配你规则的帖子发送到你的 webhook。
+
+<div id="setting-up-your-filtered-stream-rules">
+  ### 设置过滤流规则
+</div>
+
+过滤流规则由一个或多个运算符组成，这些运算符通过布尔逻辑和括号组合在一起，用于定义哪些帖子会被发送到你的 webhook。过滤流 webhooks API 使用与 [v2 filtered stream endpoint](/zh/x-api/posts/filtered-stream/introduction) 相同的一组端点来创建和管理规则。你可以参考 [这篇详细指南](/zh/x-api/posts/filtered-stream/integrate/build-a-rule)，了解如何构建过滤条件。
+
+<div id="creating-your-webhook">
+  ### 创建 webhook
+</div>
+
+通过向 X API 注册一个可公开访问的 HTTPS URL 来创建 webhook，以接收事件。Webhook 必须能够处理用于 CRC 验证的 GET 请求，以及用于事件负载的 POST 请求。请参阅 [Webhooks 简介文档](/zh/x-api/webhooks/introduction) 了解创建和管理 webhook 的详细步骤。
+
+**注意：** 如果你已经在使用 [Account Activity API (AAA)](/zh/x-api/account-activity/introduction) 的 webhooks，那么在那边设置的 webhooks 在这里完全通用。事实上，如果你的带宽足够，并且能够区分不同来源的事件，你可以在此 API 中复用你为 AAA 使用的同一个 webhook 端点。
+
+<div id="linking-your-filtered-stream-instance-to-your-webhook">
+  ### 将你的 Filtered Stream 实例关联到 webhook
+</div>
+
+在你设置好规则并创建 webhook 之后，将该 webhook 关联到你的 Filtered Stream 实例。这样可以将匹配的帖子事件路由到你的 webhook URL。
+
+使用以下端点：`POST /2/tweets/search/webhooks/:webhook_id `
+
+你可以包含与流式端点 `/2/tweets/search/stream` 相同的查询参数，例如 expansions、fields 和 media 选项。这样可以自定义事件负载中包含的
+数据。
+
+**示例：**
+
+```bash
+curl --request POST \ 
+  --url 
+'https://api.x.com/2/tweets/search/webhooks/123456789012345678?ex
+pansions=author_id&user.fields=username,name,id' \ 
+  --header 'Authorization: Bearer $BEARER_TOKEN' 
+```
+
+成功的响应示例：
+
+```json
+{ 
+  "data": { 
+    "provisioned": true 
+  } 
+}
+```
+
+**提示：** 你可以将多个 webhook 关联到同一个流，以实现冗余，或用于接收不同的字段集。每个关联都可以指定独立的参数。
+
+一旦将 Filtered Stream 实例关联到你的 webhook 上，就会开始接收到符合你规则的帖子，如下所示：
+
+```json
+{
+    "data": {
+        "id": "1346889436626259968",
+        "text": "了解如何使用 X API v2 中的用户帖子时间线和用户提及时间线端点来探索帖子… https://t.co/56a0vZUx7i",
+        "created_at": "2021-01-06T18:40:40.000Z",
+        "author_id": "2244994945"
+    },
+    "includes": {
+        "users": [
+            {
+                "id": "2244994945",
+                "name": "Developers",
+                "username": "Xdevelopers",
+                "created_at": "2013-12-14T04:35:55Z",
+                "protected": false
+            }
+        ]
+    },
+    "matching_rules": [
+        {
+            "id": "120897978112909812",
+            "tag": "api-posts"
+        }
+    ]
+}
+```
+
+<div id="retrieving-webhooks-linked-to-filtered-stream">
+  ### 获取与 Filtered Stream 关联的 Webhook
+</div>
+
+获取当前所有与 Filtered Stream 关联的 webhook 列表：
+
+```bash
+GET /2/tweets/search/stream/webhooks 
+```
+
+示例响应：
+
+```json
+{
+    "data": {
+        "links": [
+            {
+                "application_id": "29893711",
+                "business_user_id": "1877374016438091776",
+                "fields": [
+                    "user.fields=username",
+                    "name",
+                    "id",
+                    "expansions=author_id"
+                ],
+                "instance_id": "1877375130462289920",
+                "webhook_id": "1952390923729424384"
+            }
+        ]
+    }
+}
+```
+
+<div id="unlinking-your-webhook-from-filtered-stream">
+  ### 将你的 webhook 与 Filtered Stream 取消关联
+</div>
+
+要停止在某个特定 webhook 上接收事件，请使用以下方式将其取消关联：
+
+```bash
+DELETE /2/tweets/search/webhooks/:webhook_id
+```
+
+响应如下：
+
+```json
+{
+    "data": {
+        "deleted": true
+    }
+}
+```

@@ -1,0 +1,2091 @@
+---
+title: オーディエンス
+keywords: ["カスタムオーディエンス", "テイラードオーディエンス", "オーディエンスターゲティング", "オーディエンス管理", "広告ターゲティング", "Audience API"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+## カスタムオーディエンス
+
+<div id="overview">
+  ### 概要
+</div>
+
+パートナーが [Custom Audiences](https://business.x.com/en/targeting/tailored-audiences.html) を作成する方法はいくつかあります。
+
+* [Audience API (CRM)](#crm)
+* [Web](#web)
+* [Mobile](#mobile)
+* [Flexible](#flexible)
+
+類似オーディエンス（lookalike custom audiences）は、ターゲティング対象から除外することはできません。さらに、同じ広告ラインアイテム（広告グループ）で、カスタムオーディエンスとその類似オーディエンスの両方を同時にターゲティングすることはできません。
+
+**オーディエンス管理**
+
+オーディエンスは、オーディエンスパートナーおよび Ads API パートナー経由で管理できます。カスタムオーディエンスにアクセスして管理するためのエンドポイントを API 上で提供しています。
+
+カスタムオーディエンス情報向けには、次の 2 つのエンドポイントがあります。
+
+* [GET accounts/:account&#95;id/custom&#95;audiences](/ja/x-ads-api/audiences)
+* [GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id](/ja/x-ads-api/audiences)
+
+オーディエンスのアップロードと管理の詳細については、[Audience API guide](/ja/x-ads-api/audiences) をご覧ください。
+
+**処理時間**
+
+一般的に、オーディエンスの変更は 6〜8 時間ごとに実行されるバッチで処理されます。オーディエンス変更が処理中であっても、更新対象の既存オーディエンスには影響しません。この時間枠内に、1 つのオーディエンスに対して追加の更新を 1 回以上、削除の更新を 1 回以上行うことは推奨しません。
+
+**ターゲティング**
+
+オーディエンスは、過去 90 日以内に X が所有・運営するクライアント上でアクティブだったユーザーが少なくとも 100 人とマッチしている場合にのみターゲティングできます。[GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id](/ja/x-ads-api/audiences) により、マッチするユーザーが少なすぎるためにオーディエンスをターゲティングできない場合、その旨が示されます。
+
+**Audience API (CRM)**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/crm_0.png" alt="画像2" />
+</Frame>
+
+オーディエンスパートナーまたは API パートナーがハッシュ化された識別子のリストを提供し、X が照合を行って、X 上でのメディアバイイング向けに利用可能なセグメントを生成します。パートナーは [Audience API](/ja/x-ads-api/audiences) を使用してこれらのオーディエンスを作成できます。
+
+**仕組み**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/crm_1.png" alt="画像3" />
+</Frame>
+
+**Web**
+
+X 上でのメディアバイイングに対してターゲットとするセグメントを特定するため、MPP オーディエンスパートナーと連携する際に標準的なクッキー照合プロセスを提供しています。加えて、広告主は [X Web Event Tag](/ja/x-ads-api/measurement/web-conversions#web-event-tags) を設定してウェブサイトのユーザーデータを収集し、対応する Custom Audience を作成できます。
+
+**設定手順**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/screen_shot_2013-11-26-cookie-usage.png" alt="画像0" />
+</Frame>
+
+![]()
+
+**仕組み**
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/tailored_audience_web.png" alt="画像1" />
+</Frame>
+
+**Mobile**
+
+詳細については、[「Custom Audiences from Mobile Apps」ブログ記事](https://blog.x.com/2014/introducing-tailored-audiences-from-mobile-apps) を参照してください。
+
+**Flexible**
+
+[Flexible audiences](/ja/x-ads-api/audiences) により、広告主は既存のカスタムオーディエンス、または既存のカスタムオーディエンスのサブセットに基づいて、オーディエンスの組み合わせを構築・保存できるようになります。カスタムオーディエンスのメンバーのサブセットは、インタラクションの新しさ（recency）と頻度（frequency）に基づいてターゲティングできます。
+
+**Custom Audiences の利用制限があるユースケース**
+
+[制限事項の詳細はこちら](https://developer.x.com/en/developer-terms/more-on-restricted-use-cases "Read more about restrictions")
+
+<div id="audiences-faq">
+  ### オーディエンスに関するよくある質問[](#real-time-tailored-audiences "Permalink to this headline")
+</div>
+
+**Q: 非常に大量のデータを送信しましたが、オーディエンスサイズが TOO&#95;SMALL と表示されるのはなぜですか？**
+
+A: 現在、データはリアルタイムでオーディエンスに追加されていますが、オーディエンスサイズを算出する処理ジョブは一定時間ごとにしか実行されません。数時間経過後には、正しいオーディエンスサイズが UI に表示されるはずです。
+
+**Q: オーディエンスデータの送信を完了し、24 時間以上待ちましたが、まだそのオーディエンスをターゲティングできません。次のステップとして何をすればよいですか？**
+
+A: 以下をご確認ください。
+
+* 渡しているユーザー ID が正しく、フォーマットが壊れていないこと。
+* 渡しているオーディエンス名が正しく、これまでのメンバーシップ更新と一致していること。
+* POST コマンドからのレスポンスが期待どおりであること。
+* ID Sync ピクセルが正しく実装されていること、また ID Sync プロセスで説明されているとおり、対象サイトに十分な数のユーザーが訪問してユーザーのマッピングが行われていること。メンバーシップ更新内のマッピングされていないユーザーは、ターゲティング可能なユーザーには変換されません。
+
+上記すべてが正しく機能していることを確認できた場合は、できる限り詳細な情報を添えて X のプロダクト担当窓口にお問い合わせください（望ましい情報の例については、[Guide to Partner Inbounds](/ja/x-ads-api/introduction) を参照してください）。
+
+**Q: エンドポイントは何回呼び出すことができ、その際どのようなアルゴリズムを使うべきですか？**
+
+A: 完全なオーディエンスメンバーシップを再送信するのではなく、増分データ（差分）のみを用いてシステムを呼び出すことを強く推奨します。このシステムは、世界最大級のウェブサイトに対して増分データ更新を処理できるだけのスループットを備えていることがテスト済みです。オーディエンスの初回アップロードは慎重にスロットリングする必要があり、初回アップロードの完了にはかなりの時間を要すると見込んでください。
+
+**Q: ターゲティングに使用できるオーディエンスの最小サイズはどのくらいですか？**
+
+* オーディエンスの最小サイズは 100 人のユーザー（マッチ後）です。500 人未満のユーザーしかマッチしなかったオーディエンスは、X Ads UI でターゲティングに利用できません。
+
+**Q: オーディエンスファイルの処理にはどのくらい時間がかかりますか？また、X ユーザーインターフェースでオーディエンスファイルが利用可能になるまでにはどのくらいかかりますか？**
+
+* 通常、オーディエンスファイルの処理には 4〜6 時間かかりますが、ファイルサイズによって異なります。ファイルの処理が完了すると、そのオーディエンスは X Ads UI 上で利用可能になります。
+
+**Q: マッチ率はどのように計算されますか？**
+
+* マッチ率 = 過去 90 日間のアクティブな X ユーザー数 / 提供されたユーザー数
+
+**Q: オーディエンスファイルが正しく動作しているかどうかをテストするにはどうすればよいですか？**
+
+* テスト用のオーディエンスファイルを用意し、広告主ハンドルとして「keltonlynn」を使用してください。その後、ファイルが正しく取り込まれ、X UI にロードされることをこちらで検証できます。
+
+**Q: パートナーユーザー識別子（`p_user_id`）とは何ですか？**
+
+* 貴社が各顧客を一意に識別するために使用している識別子です。
+
+**Q: Standard ID とは何ですか？**
+
+* メールアドレス、デバイス ID、X の @handle または ID などを指します。
+
+**Q: HMAC Key はどのように取得できますか？**
+
+* HMAC Key は暗号化されたメールで提供されます。お客様の公開 PGP キーを [mpp-inquiry@x.com](mailto:mpp-inquiry%x.com) に送付してください。まず、すべてが正しく動作していることを検証するためのテストメールをお送りします。検証が完了したら、HMAC Key を送付します。
+
+**Q: 付与された HMAC Key を使って、ハッシュ処理が正しく行われたことをどのように検証できますか？**
+
+* X からテストファイル（サンプルのメールアドレス、デバイス ID などを含む）と、その結果のハッシュファイルが提供されますので、そのファイルと照合して結果を検証できます。
+
+**Q: フルデータマッチファイルにファイルサイズの制限はありますか？**
+
+* いいえ、フルデータマッチファイルにサイズ制限はありません。
+
+**Q: フルデータマッチファイルの処理にはどのくらい時間がかかりますか？**
+
+* X がファイルを受信してから、処理が完了するまでに約 1 日かかります。
+
+<div id="crm">
+  ### CRM
+</div>
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/crm_0.png" alt="image0" />
+</Frame>
+
+本ドキュメントでは、Custom Audiences CRM パートナー向けの統合の詳細（ファイル形式およびデータ交換プロセス）について説明します。
+
+**概要**
+
+Company は、顧客に代わって、ハッシュ化された共通ユーザー識別子（例: メールアドレス）またはパートナーのユーザー ID のリストを X に提供し、秘匿照合（ブラインドマッチ）を実行して、ターゲティング用の X User ID のリストを作成します。ターゲティング用のセグメントは、ads.x.com のキャンペーン設定時にファイル名で指定された、広告主固有の @handle で利用可能になります。
+
+Company から X へのすべてのファイルは、X が Company に付与する専用アカウントを通じて、IronBox（www.golockbox.com）上のセキュアなパッケージとして提供されます。X は IronBox へのアクセスを提供します。IronBox API に関するドキュメントは [https://secure.goironcloud.com/Docs/Help/](https://secure.goironcloud.com/Docs/Help/) で確認できます。
+
+<div id="partner-id-matching-requirements">
+  #### パートナー ID マッチング要件
+</div>
+
+企業がユーザーをトラッキングするために独自の標準 ID システムを使用している場合（つまり、メールアドレス、デバイス id、X ユーザー ID などの一般的なユーザー識別子ではない場合）、以下のプロセスを推奨します。
+
+**1. フルデータマッチ**
+
+最初に、企業は、X と共有される一意の共通ユーザー識別子を含むすべてのユーザーレコードの包括的なリストを、1 つのファイルとして提供し、フルデータマッチを実行して、パートナー ID（`p_user_id`）と X ID（`tw_id`）のマッピングを X 側で保持します。これは適切なメンテナンスを行うために、2〜3 か月ごとに定期的に実施します。マッチングが完了すると、X はこのファイルから得られたベースラインのマッチ率をメールで企業と共有します。
+
+このファイルの形式は次のとおりです。
+
+ファイル名規則: FullDataMatch.[CompanyName].txt
+
+ハッシュアルゴリズム: HMAC&#95;SHA-256
+
+フォーマット:
+
+列 1: 共通ユーザー識別子を HMAC でハッシュ化した値
+
+列 2: パートナーユーザー ID（ユーザーごとに一意だが、ファイル内では重複可）
+
+列区切り文字（CSV）: ハッシュ化された共通ユーザー識別子とパートナー ID を区切るのにカンマを使用
+
+行区切りの値
+
+* 例: ユーザーレコード A のパートナーユーザー ID が 1 で、共通ユーザー識別子が 1、2、3 の場合:
+
+|     |     |
+| :--- | :--- |
+| 共通ユーザー識別子 1 | p&#95;user&#95;1 |
+| 共通ユーザー識別子 2 | p&#95;user&#95;1 |
+| 共通ユーザー識別子 3 | p&#95;user&#95;1 |
+
+*共通ユーザー識別子については、以下の「ハッシュ化手順」セクションを参照してください
+
+**2. カスタムセグメントリスト**
+
+企業は、`p_user_id` の形式でユーザーのリストを提供し、X 上でのターゲティングのために顧客向けのカスタムオーディエンスを作成します。
+
+* 行区切りの値
+* `p_user_id`
+* * （上記の 1. フルデータマッチ セクションで提供されたものと同一。フルデータマッチで提供された値がハッシュ化されている場合、企業はオーディエンスファイル内でも同じハッシュ化された値を提供します。ハッシュ化されていない値を提供した場合は、オーディエンスファイルでもハッシュ化されていない値を提供します。）
+
+<div id="standard-matching-requirements">
+  #### 標準マッチング要件
+</div>
+
+企業が、すべての顧客ユーザー識別子のマッピングに標準の ID を使用していない場合は、次のプロセスを推奨します。
+
+**カスタムセグメントリスト**
+
+企業は、顧客に代わって、ハッシュ化された共通ユーザー識別子のリストを X に直接提供し、カスタムオーディエンスを作成します。
+
+このファイルの形式は次のとおりです。
+
+* 行区切りの値
+* ハッシュ化された共通ユーザー識別子（例：e-mail アドレス）
+* 以下に示すファイル命名規則に従うこと
+* 以下の「ハッシュ化手順」に従って e-mail アドレスをハッシュ化すること
+
+<div id="custom-segment-list-file-naming-operations">
+  #### カスタムセグメントリストファイルの命名ルールと操作
+</div>
+
+ファイルに対して行われる操作は、ファイル名によって決まります。利用可能な操作と、一般的なファイル名の命名規則は次のとおりです: audiencename&#95;partnername.handle.operation.filetype
+
+* audiencename: カスタムオーディエンスの名前。この項目は、ads.x.com のキャンペーン設定 UI でオーディエンスを選択する際に表示される名前です（例: brand&#95;loyalty&#95;card&#95;holders）。
+* partnername: 広告主に代わってデータを提供する企業の名前（例: company&#95;name）。
+* handle: カスタムオーディエンスにアクセスできる X アカウント（@handle）（例: @pepsi, @dietpepsi）
+* operation: new, add, remove, removeall, replace（詳細は下記）
+* : アップロードされる各オーディエンスファイルを一意にするために使用される、秒単位の標準 Unix エポックタイム
+* filetype: ファイルは *.txt 形式である必要があります。
+
+<div id="creating-and-updating-audiences">
+  #### オーディエンスの作成と更新
+</div>
+
+1 つのファイルで新しいオーディエンスを作成します（例: loyalty&#95;card&#95;holders&#95;partnername.pepsi.new.txt）。
+
+Add - リストでマッチしたユーザーを既存のオーディエンスに追加します（例: loyalty&#95;card&#95;holders&#95;partnername.pepsi.add..txt）。
+
+Remove - リストでマッチしたユーザーを既存のオーディエンスから削除します（例: loyalty&#95;card&#95;holders&#95;partnername.pepsi.remove..txt）。
+
+Remove All - 定期的に更新される累積リストからマッチしたユーザーを、その Client に紐づくすべてのオーディエンスから削除します（すなわち Client のオプトアウトリスト）。例: partnername.pepsi.removeall.txt
+
+* このファイルは、広告主からオプトアウトしたユーザーの網羅的なリストとして使用できます。
+* X は、このファイルで最後に提供されたリストのみを有効として扱い、既存および今後作成されるすべてのオーディエンスに対してマッチしたユーザーについて適用します。
+
+対象となるのは、このファイルが提供され処理された時点の X ユーザーです。
+
+Replace - 既存のオーディエンスを削除し、新しいオーディエンスリストに置き換えます。例: loyalty&#95;card&#95;holders&#95;partnername.pepsi.replace..txt
+
+Overall Company Opt-Out - 企業全体のオプトアウトとして、Company は自社のオプトアウトポリシーに基づき、オプトアウトしたユーザーを削除するための累積オプトアウトファイルを提供します。
+
+X は、この Company オプトアウトファイルで最後に提供されたリストのみを有効として扱い、このファイルが提供され処理された時点でマッチした X ユーザーについて、既存および今後作成されるすべてのオーディエンスに対して適用します。Company オプトアウトファイルの形式は次のとおりです。例: partnername.removeall.txt
+
+Delete - 既存のオーディエンスを現在のオーディエンスリストから削除します（例: loyalty&#95;card&#95;holders&#95;partnername.pepsi.delete.txt）。
+
+<div id="hashing-directions">
+  #### ハッシュ化手順
+</div>
+
+X は、一般的なユーザー識別子（例：メールアドレス）をハッシュ化するための本番用キーを base64 エンコードしたうえで、PGP を介して安全に共有します。貴社は、そのキーを base64 デコードして、ハッシュ化に使用する 32 バイトのキーを生成します。
+
+base64 エンコードされたキーの例:
+
+BrQvOg+dACBUmKjRiNxZgJLh6zydjS0ZOv80FelTNzM=
+
+Base64 デコード後のキーの例:
+
+/:� TшY
+
+正規化: 貴社は、ハッシュ化の前に一般的なユーザー識別子に対して基本的な正規化処理を行います（ただし Device ID は除きます。「Device ID Normalization」セクションを参照してください）。
+
+<div id="e-mail-normalization">
+  #### E-mail の正規化
+</div>
+
+先頭と末尾のスペースを取り除き、メールアドレスをすべて小文字に変換します。
+
+例: 正規化前の E-mail アドレス: testemail&#95;Organisational&#95;baseball+884`@`It92I6Ev2B`.`Com
+
+正規化後: testemail&#95;organisational&#95;baseball+884`@`it92i6ev2b`.`com
+
+ハッシュ値: 74d9584eded0ad1e5572a1c1849f3716751d371d6117a6155dad5363f4b4fbec
+
+注: エンコードされた HMAC とキーの文字数は、入力内容とエンコード方式によって変動する可能性があるため、特定の文字数に固定されているわけではありません。
+
+<div id="device-id-normalization">
+  #### デバイスIDの正規化
+</div>
+
+デバイスIDのハッシュ化についても、SHA-256 ハッシュアルゴリズムと、当社がデータパートナーに提供する共通のソルトを使用するという同じ要件が適用されます。メールアドレスの場合と同様に空白文字は削除しますが、IDFA/Android ID については小文字化による正規化は行わず、IDFA/Android ID の正確な形式を使用する必要があります。
+
+以下は、ハッシュ化前の iOS および Android のデバイスIDの元の形式の例です。
+
+iOS IDFA: DD99CFF7-6186-4602-9DF2-ED3FD0B2D431
+
+Android ID: b5bf2122961b3595
+
+ハッシュ化された iOS IDFA: 134fb8cd95c7fd42e2793f469a447198ca5f990968db2dbadad70e723ed9750b
+
+ハッシュ化された Android ID: 130dddff1939f229476f50bc8adab8fcb7e3525b0e9604fe8effc15e68cee4a4
+
+<div id="x-user-id-normalization">
+  #### X User ID の正規化
+</div>
+
+X ID は引き続きハッシュ化されます。これは、@handle のカスタマーリストのようなデータのグルーピングは PII ではないものの、広告主にとってはプライベートな情報であるためです。X ID のハッシュ化については、SHA-256 ハッシュアルゴリズムと、当社がデータパートナーに提供する共通のソルトを使用するという、これまでと同様の要件が適用されます。X ID と `@`username の両方からはスペースを削除する必要がありますが、User ID の正規化は不要です。@username は正規化の一環として小文字に変換する必要があります。また、username の一部として @ 記号を含めてはいけません。
+
+生の ID の形式は次のとおりです:
+
+* User ID: 27674040
+* @username: testusername
+
+ハッシュ化された User ID: bf6b57d4e861e83bea8bbed2b800b251a64c95468ee6e8cb07c3368c9ed45e85
+
+ハッシュ化された @username: 12201ae78ad1afa907c7112d17f498154ffb0bf9ea523f5390e072a06d7d9812
+
+<div id="id-sync-integration">
+  ### ID Sync Integration
+</div>
+
+`p_id` を使用してデータを送信するパートナーは、広告主またはパートナーのユーザーidとXのユーザーidとのマッピングを生成するために、ID Syncプロセスを実行する必要があります。これにより、広告主はX上で自社のユーザーセグメントを直接ターゲティングできるようになります。パートナーは、会員情報の更新を送信する際に、パラメータ `user_identifier_type` の値を `TALIST_PARTNER_USER_ID` または `TAWEB_PARTNER_USER_ID` のいずれかに設定する必要があります。
+
+* **Web Only**: 以下のとおり、広告主のサイトにピクセルを設置することで実行できます。
+* **リスト**: [CRM](/ja/x-ads-api/audiences#crm) ページで説明しているいずれかの方法を使用して実行できます。
+
+<div id="pixel-url">
+  #### ピクセル URL
+</div>
+
+|     |
+| :--- |
+| **ベースURL** |
+| [https://analytics.x.com/i/adsct](https://analytics.x.com/i/adsct) |
+
+<div id="pixel-parameters">
+  #### ピクセル パラメーター
+</div>
+
+|     |     |
+| :--- | :--- |
+| **パラメーター** | **説明** |
+| `p_id` | X から割り当てられたパートナー ID |
+| `p_user_id` | パートナーシステム内でのユーザー ID |
+
+<div id="id-sync-pixel">
+  #### ID Sync Pixel:
+</div>
+
+パートナー id の例を 111、`p_user_id` の例を abc とすると、構成されるピクセルは次のようになります。
+
+```json
+    <pre class="brush: xml">
+    <img height="1" width="1" src="https://analytics.x.com/i/adsct?p_id=111&p_user_id=abc" style="display:none" />
+    </pre>
+```
+
+**オプトアウトファイルの構成と送信**
+
+パートナーは、パートナーが把握している範囲で、ターゲット広告配信からのオプトアウトを選択したユーザーの一覧を X に提供する必要があります。ファイルの形式は次のとおりです。
+
+|                   |                                     |                 |                                                                                                                                                                                                                                                                                    |
+| :---------------- | :---------------------------------- | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Column Number** | **Column Name**                     | **Column Type** | **Description**                                                                                                                                                                                                                                                                    |
+| 1                 | Partner ID                          | string          | 「partner id」は、各パートナーを一意に識別するために X がパートナーに付与する ID です。                                                                                                                                                                                                                               |
+| 2                 | The user’s id in the partner system | string          | `p_user_id` は、パートナーがユーザーを識別するために使用する一意の ID です。これらのオプトアウトユーザーを含むファイルは、[TON upload](/ja/x-ads-api/audiences) エンドポイントを使用してアップロードし、アップロードされたデータのパスを Global Opt Out エンドポイント（[PUT accounts/:account&#95;id/custom&#95;audiences/global&#95;opt&#95;out](/ja/x-ads-api/audiences)）に送信する必要があります。 |
+
+**メンバーシップ更新の送信**
+
+エンドポイントドキュメントで規定されているように、[POST custom&#95;audience&#95;memberships](/ja/x-ads-api/audiences) エンドポイント経由でユーザーを送信する際は、Cookie ベースのマッチングを有効にするために customer ID を渡す必要があります。`p_id` を含むデータを送信するパートナーは、`user_identifier_type` を `TALIST_PARTNER_USER_ID` または `TAWEB_PARTNER_USER_ID` に設定する **必要があります**。
+
+その他の手順は、[Real-Time Audience API Integration Guide](/ja/x-ads-api/audiences) に記載されている内容と同じです。
+
+<div id="custom-audiences-user-data">
+  ### カスタムオーディエンスのユーザーデータ
+</div>
+
+このドキュメントでは、[Custom Audience]/x-ads-api/audiences 用ユーザーデータの形式について説明します。
+
+**データの正規化**
+
+**デバイス ID**:
+
+* IDFA - 小文字でダッシュ区切りにすること。例: `4b61639e-47cc-4056-a16a-c8217e029462`
+* AdID - デバイス上の元の形式のままであること（大文字にせず、ダッシュは含める）。例: `2f5f5391-3e45-4d02-b645-4575a08f86e`
+* Android id - デバイス上の元の形式のままであること（大文字にせず、ダッシュやスペースを含めない）。例: `af3802a465767e36`
+
+**メールアドレス**:
+
+* 小文字にし、先頭と末尾のスペースを削除すること。例: `support@x.com`
+
+**X ユーザー名**:
+
+* 先頭に @ を付けず、小文字にし、先頭と末尾のスペースを削除すること。例: `jack`
+
+**X ユーザー ID**:
+
+* 標準的な整数。例: `143567`
+
+**データのハッシュ化**
+
+各行のデータは、ソルトなしで `SHA256` を使用してハッシュ化する必要があります。さらに、最終的なハッシュ値の出力は小文字にする必要があります。例: 49e0be2aeccfb51a8dee4c945c8a70a9ac500cf6f5cb08112575f74db9b1470d とし、**決して** 49E0BE2AECCFB51A8DEE4C945C8A70A9AC500CF6F5CB08112575F74DB9B1470D としてはいけません。
+
+```
+# pythonを使用してユーザー@AdsAPIをハッシュ化
+import hashlib
+hashlib.sha256("adsapi".encode()).hexdigest()
+
+#output
+49e0be2aeccfb51a8dee4c945c8a70a9ac500cf6f5cb08112575f74db9b1470d
+```
+
+ハッシュ用の追加コードサンプルは、[github.com/xdevplatform/ads-platform-tools](https://github.com/xdevplatform/ads-platform-tools)で確認できます。
+
+<div id="custom-audiences-web">
+  ### カスタムオーディエンス: Web
+</div>
+
+<Frame>
+  <img src="https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/images/info.png" alt="info.png" />
+</Frame>
+
+**情報**
+
+パートナーは、広告主に代わってターゲティングするための ID（`p_user_ids`）のリストを送信します。これは、`p_user_ids` と X ユーザー ID の間にマッピングを構築する ID Sync プロセスを通じて行われます。このマッピングは、その後ターゲティングに使用できる X ユーザー ID のリストを生成するために使用されます。これらのカスタムオーディエンスは、ads.x.com の Custom Audiences Web キャンペーン設定でラベルとして指定された、広告主固有の @handle で利用可能になります。
+
+X は、パートナーのタグやサイト上に設置できるセキュアピクセルを提供し、それにより ID（`p_user_ids`）を X ユーザー ID と照合できるようにします。ID Sync プロセスが完了すると、ターゲティングファイルはパートナーによって作成され、HTTPS エンドポイントを通じて X が利用できるようにされます。これらのターゲティングファイルは、X によって定期的に取り込まれ、その後 X の UI で利用可能になります。
+
+**X セキュアピクセル**
+
+X セキュアピクセルは次のような形式になります:
+
+[https://analytics.x.com/i/adsct?p&#95;user&#95;id=xyz&amp;p&#95;id=123](https://analytics.x.com/i/adsct?p\\_user\\_id=xyz\&p_id=123)
+
+**`p_user_id`** - xyz は、パートナーが提供するパートナーユーザー ID を表します
+
+**`p_id`** - 123 は、パートナーに割り当てられた一意の ID（X から提供）を表します
+
+**パートナー HTTPS エンドポイントとターゲティングユーザーファイル**
+
+パートナーは、ターゲティングファイルを定期的に取り込むために使用できる HTTPS エンドポイントおよび認証情報（ユーザー名/パスワード）を X に提供する必要があります。サンプルの HTTPS エンドポイントは次のような形式になります:
+
+```
+https://<partnerdomain>/twitter/partner_targeting_%Y-%M-%D.tsv.gz
+```
+
+%Y - 年を表すフォーマットコード (YYYY)
+
+%M - 月を表すフォーマットコード (MM)
+
+%D - 日を表すフォーマットコード (DD)
+
+送信されるデータは以下のファイルで構成されます。
+
+1. Partner Targeting User File
+2. Targeting Conversion File
+
+すべてのファイルは TSV 形式であり、各行の個々のフィールドはタブ文字で区切られます。正当なフィールド値そのものにタブ文字が含まれることはありません。
+
+**許可される X の IP レンジ:**
+
+Partner Endpoint へのアクセスを許可する IP レンジは次のとおりです。
+
+* 199.16.156.0/22
+* 199.59.148.0/22
+
+**Partner Targeting User File:**
+
+| **Column Number** | **Column Name**   | **Column Type** | **Description**                                                                                                                                                         |
+| :---------------- | :---------------- | :-------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1                 | partner id        | string          | 「partner id」は、各 Partner を一意に識別するために X が Partner に付与する ID です。                                                                                                            |
+| 2                 | advertiser id     | string          | 「advertiser id」は、広告主の @handle です。                                                                                                                                       |
+| 3                 | p&#95;user&#95;id | string          | 「p&#95;user&#95;id」は、Partner がユーザーを識別するために使用する一意の ID です。                                                                                                                |
+| 3                 | confidence score  | integer         | 「confidence score」は任意項目です。confidence score の推奨値は 0〜100 です。ユースケースがリターゲティングである場合、「100」の confidence score は、直接リターゲティングされたユーザーを意味します。0〜99 のスコアは、類似オーディエンスに対する信頼度のレベルに対応します。 |
+| 4                 | segment label     | string          | 「segment label」は任意項目です。Partner は、たとえば商品カテゴリを指定するために「segment label」を使用できます。この「segment label」は ads.x.com の UI における Custom Audiences の人間が判読可能な名前であるため、これを使用することを推奨します。     |
+
+**補足:**
+
+新しい Partner Targeting File を受信するたびに、特別な合意がない限り、それは Partner がターゲティングを推奨するユーザーの完全な一覧であり、増分データではないものとみなします。この Partner Targeting File の配信頻度については、各 Partner と合意します。予定どおりに Partner Targeting File を受信できなかった場合は、あらかじめ定義された有効期限までは前回のバージョンを使用します。
+
+<div id="audience-api-integration">
+  ## Audience API の連携
+</div>
+
+<div id="overview">
+  ### 概要
+</div>
+
+Audience API は Ads API の [v4](/ja/x-ads-api/introduction) の一部としてリリースされ、既存のレガシー Audiences エンドポイントに対して複数の改善が行われました。この新しいエンドポイントは新しい Audience 処理バックエンドによって支えられており、安定性、堅牢性、信頼性の面で大きく向上しています。このガイドの目的は、Audience API と従来の Audience のアップロードおよび管理プロセスとの違いを明確にすることです。 
+
+リファレンスドキュメントは [Audience API](/ja/x-ads-api/audiences) のリファレンスドキュメントページで確認できます。 
+
+**注記**: すべての Audience ユーザーデータはアップロード前に SHA-256 でハッシュ化する必要があります。受け付けられるユーザー識別子タイプおよびデータ正規化の詳細は、[user data](/ja/x-ads-api/audiences) ページを参照してください。
+
+**Audience 機能の変更点**
+
+以下の Custom Audience に対する変更は v4 から導入されており、Ads API v3 のサンセット後は、非推奨となったエンドポイントは利用できなくなります。
+
+* **非推奨** TON Upload:
+  * GET accounts/:account&#95;id/custom&#95;audience&#95;changes
+  * GET accounts/:account&#95;id/custom&#95;audience&#95;changes/:custom&#95;audience&#95;change&#95;id
+  * POST accounts/:account&#95;id/custom&#95;audience&#95;changes
+  * PUT accounts/:account&#95;id/custom&#95;audiences/global&#95;opt&#95;out
+* **非推奨** Real Time Audiences:
+  * POST custom&#95;audience&#95;memberships
+* Custom Audience:
+  * `list_type` パラメータは、すべての [Custom Audience](/ja/x-ads-api/audiences) エンドポイントのリクエストおよびレスポンスから削除されます。このパラメータは以前、Audience のユーザー識別子タイプ（例: email、X User ID など）を識別するために使用されていましたが、現在の Audience では同一の Audience に対して複数のユーザー識別子を受け付けることが可能となっており、この値は不要になりました。
+* 一般:
+  * Audience のルックバック期間は、過去 30 日間から 90 日間の間にアクティブだったユーザーにマッチするように更新されました
+  * ターゲット可能とするために必要な Audience のマッチ済みユーザーの最小数は、500 ユーザーから 100 ユーザーに引き下げられました
+
+<Note>
+  **前提条件**
+
+  * Ads API へのアクセス
+  * Audience エンドポイントへのアクセスには、allowlist への追加が必要です。このフォームに入力し、2018-08-01 以前に最初の同意を行っている場合は、新しい [X Ads Products and Services Agreement](/ja/x-ads-api/introduction) に同意してください
+</Note>
+
+**Audience アップロードプロセス**
+
+以下の表は、旧来の Audience 作成フローと新しい Audience 作成フローの主な違いを示したもので、詳細はこの後のセクションで説明します。
+
+| プロセスのステップ | Audience API | （非推奨）TON Upload |
+| :--- | :--- | :--- |
+| シェル Audience の作成 | [POST custom&#95;audience endpoint]/x-ads-api/audiences を介して作成可能 | [POST custom&#95;audience endpoint]/x-ads-api/audiences を介して作成可能 |
+| 新規ユーザーの追加 | [Audience endpoint](/ja/x-ads-api/audiences) で `operation_type` に `Update` を指定して使用 | [POST custom&#95;audience&#95;changes](/ja/x-ads-api/audiences) エンドポイントで `operation` に `ADD` を指定して使用 |
+| ユーザーの削除 | [Audience endpoint](/ja/x-ads-api/audiences) で `operation_type` に `Delete` を指定して使用 | [POST custom&#95;audience&#95;changes](/ja/x-ads-api/audiences) エンドポイントで `operation` に `REMOVE` を指定して使用 |
+| ユーザーのオプトアウト | [Audience endpoint](/ja/x-ads-api/audiences) で `operation_type` に `Delete` を指定し、ユーザーが属している対応する `custom_audience_id` を指定 | [Global opt-out endpoint](/ja/x-ads-api/audiences) を使用 |
+
+**注記** TON Upload 経路で更新またはオプトアウトされる Audience は、[TON Upload](/ja/x-ads-api/audiences) エンドポイント経由で対応するリストがアップロードされ、[custom&#95;audience&#95;changes](/ja/x-ads-api/audiences) エンドポイントを使用して Audience に関連付けられている必要があります。
+
+**レート制限**
+
+Audience API エンドポイントには、アカウントごとに 1 分あたり 1500 リクエストのレート制限があります。1 回のペイロードで送信できるユーザー数に制限はありません。ペイロードに関する制約は次のとおりです。
+
+1. 操作の総数: 2500 operations
+
+2. ペイロードサイズの上限: 5,000,000 bytes
+
+**Audience ユーザー管理**
+
+新しい Audience を作成するには、次の手順が必要です
+
+<div id="create-a-new-custom-audience">
+  ### 新しいカスタムオーディエンスを作成する
+</div>
+
+POST custom&#95;audience エンドポイントを使用して、新しいカスタムオーディエンスの「シェル」を作成し、対応するカスタムオーディエンスの `id` を取得します。オーディエンスを一から作成する場合、この手順は必須です。既存のオーディエンスを更新する場合は、次のセクションに進んでください。
+
+<div id="add-users-to-an-audience">
+  ### オーディエンスにユーザーを追加する
+</div>
+
+Custom Audience の `id` を指定して [POST accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/users](/ja/x-ads-api/audiences) エンドポイントを使用し、以下のようなサンプルペイロードを送信します。
+
+POST [https://ads-api.x.com/11/accounts/18ce54d4x5t/custom&#95;audiences/1nmth/users](https://ads-api.x.com/11/accounts/18ce54d4x5t/custom_audiences/1nmth/users)
+
+```
+    # すべての値はハッシュ化する必要があります。ハッシュ化されていない値は説明目的でこの例に使用されています
+    [
+      {
+        "operation_type": "Update",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "email": [
+                "abc@x.com"
+              ],
+              "handle": [
+                "x",
+                "adsapi"
+              ]
+            },
+            {
+              "email": [
+                "edf@x.com"
+              ],
+              "twitter_id": [
+                "121291606",
+                "17874544"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+ユーザーをAudienceに追加するには、`operation_type` に `Update` を指定します。新しいAudienceインターフェースでは、単一のユーザーに対して複数のユーザーキーを指定できます。JSONオブジェクト配列内の各オブジェクトは、1人のユーザーに対応します。上記のペイロード例を使用した場合、このリクエストでは2人のユーザーがAudienceに追加されます。1人は `email` と `handle` を持つユーザーで、もう1人は `email` と `twitter_id` を持つユーザーです。
+
+<div id="remove-users-from-an-audience">
+  #### オーディエンスからユーザーを削除する
+</div>
+
+ユーザーを追加する場合の手順と同様に、次のようにしてオーディエンスからユーザーを削除できます。
+
+POST [https://ads-api.x.com/11/accounts/18ce54d4x5t/custom&#95;audiences/1nmth/users](https://ads-api.x.com/11/accounts/18ce54d4x5t/custom_audiences/1nmth/users)
+
+```
+    # すべての値はハッシュ化する必要があります。ハッシュ化されていない値は説明目的でこの例に使用されています
+    [
+      {
+        "operation_type": "Delete",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "email": [
+                "abc@x.com"
+              ],
+              "twitter_id": [
+                "783214",
+                "1225933934"
+              ]
+            },
+            {
+              "email": [
+                "edf@x.com"
+              ],
+              "twitter_id": [
+                "121291606",
+                "17874544"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+`operation_type` は `Delete` に設定する必要があり、ユーザーはオーディエンスに追加した際に使用したいずれかのキーで照合されます。たとえば、あるユーザーを `email` と `twitter_id` を使ってオーディエンスに追加した場合、同じユーザーはこれらのキーのいずれか一方、つまり `email` か `twitter_id`、あるいはその両方を使って削除できます。
+
+さらに、同じリクエスト内で Audience に対するユーザーの追加と削除を行うことも可能です。このエンドポイントは、1 つのリクエストで複数の `operation_type` をサポートします。
+
+<div id="opt-out-users">
+  #### オプトアウトユーザー
+</div>
+
+グローバルなオプトアウトエンドポイントの非推奨に伴い、パートナーは、いずれかのオーディエンスからオプトアウトしたユーザーを `Delete` する必要があります。これを実現する方法はいくつかあります。
+
+1. 各ユーザーがどのオーディエンスに属しているかを管理し、各オーディエンスから個別にそのユーザーを削除する。
+2. 広告アカウントに関連付けられている **すべての** オーディエンスからそのユーザーを削除する。
+
+**一般的なベストプラクティス**
+
+* キューがスパイクして処理に時間がかかり、全体としてシステムに不要な負荷を与えることを避けるため、このエンドポイントはほぼリアルタイムのバッチで呼び出すことを強く推奨します。これにより、ユーザーをキャンペーンターゲティングに利用できるようになるタイミングも早まります。
+* 成功した API 呼び出しでは、リクエストで受信した `user` オブジェクト数に対応する `success_count` と `total_count` が返されます。
+* このエンドポイントは本質的にアトミックであり、リクエスト全体が成功するか、エラーが発生した場合はリクエスト全体が失敗します。エラー応答が返された場合は、API 利用者はエラーを修正し、ペイロード全体を含めてリクエストを再試行することを推奨します。 
+* 失敗した場合は、リトライ時に[指数バックオフ](https://en.wikipedia.org/wiki/Exponential_backoff)方式を使用することをパートナーに推奨します。たとえば、最初の失敗時には直ちにリトライし、2 回目の失敗時には 1 分後に、3 回連続で失敗した場合には 5 分後にリトライする、といった形です。
+
+<div id="api-reference">
+  ## API リファレンス
+</div>
+
+<div id="keyword-insights">
+  ### キーワードインサイト
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-insightskeywordssearch">
+  #### GET insights/keywords/search[](#get-insights-keywords-search "Permalink to this headline")
+</div>
+
+キーワードのグループを指定すると、対応するポスト数と、関連するキーワード 30 個のセットを取得します。ポスト数は入力したキーワードのみに対応し、関連キーワードは含まれません。
+
+許可される最大の時間範囲（`end_time` - `start_time`）は 7 日間です。
+
+結果は 1 つのジオ（国）に基づいてスコープされる点に注意してください。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/insights/keywords/search`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                    | Description                                                                                                                                                                                                                                                     |
+| :-------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| granularity  <br />*required*           | `start_time` と `end_time` で指定された時間範囲に対して返されるデータの粒度を指定します。たとえば `HOUR` を指定すると、`start_time` から `end_time` までの各時間ごとに 1 つのデータポイントが返されます。<br /><br />Type: enum<br /><br />Possible values: `DAY`, `HOUR`                                                             |
+| keywords  <br />*required*              | 検索を絞り込むためのカンマ区切りのキーワード文字列です。すべてのキーワードは互いに OR 条件で評価されます。<br /><br />**Note**: 使用できるキーワード（`keywords` と `negative_keywords` を合計したもの）は最大 10 個です。<br /><br />Type: string<br /><br />Example: `developers`                                                           |
+| start&#95;time  <br />*required*        | 取得されるデータを、`start_time` から `end_time` までの時間ウィンドウ内で収集されたデータにスコープします。[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で指定します。<br /><br />Type: string<br /><br />Example: `2017-07-10T00:00:00Z`                                                               |
+| end&#95;time  <br />*optional*          | 取得されるデータを、`start_time` から `end_time` までの時間ウィンドウ内で収集されたデータにスコープします。[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で指定します。<br /><br />**Note**: 省略した場合は現在時刻がデフォルトとして使用されます。<br /><br />Type: string<br /><br />Example: `2017-07-11T00:00:00Z`              |
+| location  <br />*optional*              | 結果を、アカウントのユーザーが所在する場所に基づいて絞り込むためのターゲティング値です。[GET targeting&#95;criteria/locations](/ja/x-ads-api/campaign-management#get-targeting-criteria-locations) エンドポイントから取得します。現在サポートされているのは国レベルのロケーションのみです。<br /><br />Type: string<br /><br />Example: `0ce8b9a7b2742f7e` |
+| negative&#95;keywords  <br />*optional* | 除外するキーワードのカンマ区切り文字列です。すべてのネガティブキーワードは互いに OR 条件で評価されます。<br /><br />**Note**: 使用できるキーワード（`keywords` と `negative_keywords` を合計したもの）は最大 10 個です。<br /><br />Type: string<br /><br />Example: `rain`                                                                  |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+```json
+GET https://ads-api.x.com/12/insights/keywords/search?end_time=2018-02-02&granularity=DAY&keywords=developers&start_time=2018-02-01
+```
+
+**レスポンスの例[](#example-response "この見出しへのパーマリンク")***
+
+```
+    {
+      "request": {
+        "params": {
+          "start_time": "2018-02-01T00:00:00Z",
+          "end_time": "2018-02-02T00:00:00Z",
+          "granularity": "DAY",
+          "keywords": [
+            "developers"
+          ]
+        }
+      },
+      "data": {
+        "related_keywords": [
+          "dev",
+          "developer",
+          "coders",
+          "mysql",
+          "devs",
+          "#technology",
+          "#developers",
+          "security",
+          "programmers",
+          "#tech",
+          "javascript",
+          "#iot",
+          "#bigdata",
+          "cloud",
+          "devops",
+          "php",
+          "developer",
+          "programmer",
+          "engineer",
+          "big data",
+          "agile",
+          "app",
+          "programming",
+          "ios",
+          "maker",
+          "startups",
+          "developer's",
+          "java",
+          "#devops",
+          "startup"
+        ],
+        "tweet_volume": [
+          15707
+        ]
+      }
+    }
+```
+
+<div id="tailored-audience-permissions">
+  ### テイラードオーディエンス権限
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/369a02c0adc626ff6a06#?env%5BTwitter%20Ads%20API%5D=W3sia2V5IjoiYWNjb3VudF9pZCIsInZhbHVlIjoieW91cl9hZHNfYWNjb3VudF9pZCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidmVyc2lvbiIsInZhbHVlIjoiNSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfa2V5IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX2tleSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfc2VjcmV0IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX3NlY3JldCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiYWNjZXNzX3Rva2VuIiwidmFsdWUiOiJ5b3VyX2FjY2Vzc190b2tlbiIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidG9rZW5fc2VjcmV0IiwidmFsdWUiOiJ5b3VyX3Rva2VuX3NlY3JldCIsImVuYWJsZWQiOnRydWV9XQ==">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idtailored_audiencestailored_audience_idpermissions">
+  #### GET accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions[](#get-accounts-account-id-tailored-audiences-tailored-audience-id-permissions "Permalink to this headline")
+</div>
+
+指定したテーラードオーディエンス（Tailored Audience）に関連付けられている一部またはすべての権限の詳細を取得します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/5/accounts/:account_id/tailored_audiences/:tailored_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                           | Description                                                                                                                                                                                                                                                |
+| :------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                               | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くほとんどの Advertiser API リクエストで必須のパラメータです。指定するアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                              |
+| tailored&#95;audience&#95;id  <br />*required*                 | リクエストで操作するテーラードオーディエンスを指定します。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                                                          |
+| count  <br />*optional*                                        | 各リクエストごとに取得を試みるレコード数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000`                                                                                                                                                    |
+| cursor  <br />*optional*                                       | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow`                                                                                                                    |
+| granted&#95;account&#95;ids  <br />*optional*                  | カンマ区切りの識別子のリストを指定して、レスポンスを必要なアカウントのみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                                |
+| sort&#95;by  <br />*optional*                                  | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc`                                                                                                                  |
+| tailored&#95;audience&#95;permission&#95;ids  <br />*optional* | カンマ区切りの識別子のリストを指定して、レスポンスを必要なテーラードオーディエンス権限のみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                                |
+| with&#95;total&#95;count  <br />*optional*                     | `total_count` レスポンス属性を含めます。<br /><br />**Note**: このパラメータと `cursor` は排他的です。<br /><br />**Note**: `total_count` を含むリクエストには、より低いレート制限（現在は 15 分あたり 200 回）が適用されます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/5/accounts/18ce54d4x5t/tailored_audiences/1nmth/permissions`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "tailored_audience_id": "1nmth"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "tailored_audience_id": "1nmth",
+          "permission_level": "READ_ONLY",
+          "id": "ri",
+          "created_at": "2017-06-08T23:17:59Z",
+          "granted_account_id": "18ce54aymz3",
+          "updated_at": "2017-06-08T23:17:59Z",
+          "deleted": false
+        }
+      ]
+    }
+
+```
+
+<div id="post-accountsaccount_idtailored_audiencestailored_audience_idpermissions">
+  #### POST accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions[](#post-accounts-account-id-tailored-audiences-tailored-audience-id-permissions "Permalink to this headline")
+</div>
+
+指定したオーディエンスを、特定のアカウントと共有できるようにする新しい permission オブジェクトを作成します。
+
+**注**: tailored audience の permission を作成または変更するには、そのオーディエンスが、permission を変更しようとしているアカウントに所有されている必要があります。特定のオーディエンスのレスポンス内に含まれる `is_owner` レスポンス属性を確認することで、tailored audience の所有者を確認できます。
+
+**注**: オーディエンスは、同じビジネス配下の広告アカウント間、またはオーディエンスを所有している広告アカウントが `SHARE_AUDIENCE_OUTSIDE_BUSINESS` アカウント機能を持っている場合にのみ共有できます。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/5/accounts/:account_id/tailored_audiences/:tailored_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                           | Description                                                                                                                                                                                                                     |
+| :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id  <br />*required*               | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで、一般的に必須パラメータです。指定されたアカウントは、認証済みユーザーに紐づいている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| granted&#95;account&#95;id  <br />*required*   | tailored audience の permission を付与したい相手のアカウントです。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                      |
+| permission&#95;level  <br />*required*         | `granted_account_id` が tailored audience に対して持つアクセス権の種類です。<br /><br />Type: enum<br /><br />Possible values: `READ_ONLY`, `READ_WRITE`                                                                                          |
+| tailored&#95;audience&#95;id  <br />*required* | リクエストで操作対象となる tailored audience への参照です。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                                     |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`POST https://ads-api.x.com/5/accounts/18ce54d4x5t/tailored_audiences/2906h/permissions?granted_account_id=18ce54aymz3&permission_level=READ_ONLY`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "granted_account_id": "18ce54aymz3",
+          "permission_level": "READ_ONLY",
+          "tailored_audience_id": "2906h"
+        }
+      },
+      "data": {
+        "tailored_audience_id": "2906h",
+        "permission_level": "READ_ONLY",
+        "id": "14m",
+        "created_at": "2017-09-12T23:49:34Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-09-12T23:49:34Z",
+        "deleted": false
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idtailored_audiencestailored_audience_idpermissionstailored_audience_permission_id">
+  #### DELETE accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions/:tailored&#95;audience&#95;permission&#95;id[](#delete-accounts-account-id-tailored-audiences-tailored-audience-id-permissions-tailored-audience-permission-id "Permalink to this headline")
+</div>
+
+指定した Tailored Audience の共有権限を取り消します。
+
+**注意**: Tailored Audience の権限を作成または変更するには、そのオーディエンスが、権限を変更しようとしているアカウントに所有されている必要があります。特定のオーディエンスに対するレスポンス内の `is_owner` 属性を確認することで、その Tailored Audience の所有権を確認できます。
+
+権限が取り消されると、付与されていたアカウント（`granted_account_id`）は将来のキャンペーンでそのオーディエンスをターゲティングできなくなることが保証されます。既存のキャンペーンは共有オーディエンスを利用して継続実行されます。キャンペーンは停止されず、キャンペーンからオーディエンスが削除されることもありません。オーディエンスの共有権限が取り消された後は、そのキャンペーンをコピーすることはできません。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/5/accounts/:account_id/tailored_audiences/:tailored_audience_id/permissions/:tailored_audience_permission_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                          | Description                                                                                                                                                                                                                       |
+| :------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                              | 利用するアカウントの識別子です。リソースパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで、一般的に必須パラメータです。指定されたアカウントは、認証されたユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| tailored&#95;audience&#95;id  <br />*required*                | リクエストで操作対象となる Tailored Audience への参照です。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                       |
+| tailored&#95;audience&#95;permission&#95;id  <br />*required* | リクエストで操作対象となる Tailored Audience 権限への参照です。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                                        |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/5/accounts/18ce54d4x5t/tailored_audiences/1nmth/permissions/ri`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "tailored_audience_permission_id": "ri",
+          "tailored_audience_id": "1nmth"
+        }
+      },
+      "data": {
+        "tailored_audience_id": "1nmth",
+        "permission_level": "READ_ONLY",
+        "id": "ri",
+        "created_at": "2017-06-08T23:17:59Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-08-30T18:29:35Z",
+        "deleted": true
+      }
+    }
+```
+
+<div id="targeted-audiences">
+  ### ターゲットオーディエンス
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idcustom_audiencescustom_audience_idtargeted">
+  #### GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/targeted[](#get-accounts-account-id-custom-audiences-custom-audience-id-targeted "Permalink to this headline")
+</div>
+
+指定した `custom_audience_id` をターゲティングしているアクティブな、またはすべてのラインアイテムとキャンペーンのリストを取得します
+
+| Name                                         | Description                                                                                                                                                                                                                       |
+| :------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで一般的に必須のパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | リクエストで操作対象となるカスタムオーディエンスへの参照です。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                                               |
+| with&#95;active  <br />*optional*            | `false` の場合、`servable=false` ステータスのラインアイテムもレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `true`  <br />Possible values: `true`, `false`                                                                                |
+| cursor  <br />*optional*                     | 次の結果ページを取得するためのカーソルを指定します。詳細は [Pagination](/ja/x-ads-api/introduction) を参照してください。  <br />  <br />Type: string  <br />  <br />Example: `8x7v00oow`                                                                                    |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h/targeted`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_id": "2906h",
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "campaign_id": "59hod",
+          "campaign_name": "test-campaign",
+          "line_items": [
+            {
+              "id": "5gzog",
+              "name": "test-line-item",
+              "servable": true
+            }
+          ]
+        },
+        {
+          "campaign_id": "arja7",
+          "campaign_name": "Untitled campaign",
+          "line_items": [
+            {
+              "id": "bjw1q",
+              "name": null,
+              "servable": true
+            }
+          ]
+        }
+      ]
+    }
+```
+
+<div id="custom-audiences-users">
+  ### カスタムオーディエンスユーザー
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="post-accountsaccount_idcustom_audiencescustom_audience_idusers">
+  #### POST accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/users[](#post-accounts-account-id-custom-audiences-custom-audience-id-users "Permalink to this headline")
+</div>
+
+このエンドポイントを使用すると、パートナーは指定された `custom_audience_id` に対してユーザーを追加、更新、削除できます。また、このエンドポイントはユーザーごとに複数のユーザー識別子タイプも受け付けます。
+
+リクエストの `users` フィールドで提供されるデータのうち、`partner_user_id` を**除く**すべては、`SHA256` を使用してハッシュ化したうえで、[正規化](/ja/x-ads-api/audiences#twitter-user-id-normalization) する必要があります。
+
+**バッチリクエスト**
+
+* 現在の最大バッチサイズは **このエンドポイントに対して** `2500` です。バッチサイズは、リクエストごとの操作数（`Update`/`Delete`）によって決まります。たとえば、1 つの配列内に 2500 を超える操作オブジェクト（`{"operation_type": "Update/Delete", [..] }`）が存在するとエラーになります。
+* このエンドポイントで受け付け可能な POST リクエストボディの最大サイズは `5,000,000` バイトです。
+* このエンドポイントのレート制限は、1 分間ウィンドウあたり 1500 回です。
+* すべてのパラメータはリクエストボディで送信され、`Content-Type` として `application/json` が必須です。
+* バッチリクエストは、グループとしてまとめて失敗または成功し、エラーと成功の両方の API レスポンスで、最初のリクエストのアイテムの順序が保持されます。
+
+**バッチレスポンス**
+
+Ads API から返されるレスポンスには、`success_count` と `total_count` の 2 つのフィールドが含まれます。これらの値は常に等しくなければならず、バックエンドによって処理されたリクエスト内のレコード数を表します。リクエストボディで送信されたレコード数が `success_count` および `total_count` と**等しくない**状況はエラー状態として扱う必要があり、再試行が必要です。
+
+**バッチエラー**
+
+* リクエストレベルのエラー（例: 最大バッチサイズ超過）は、レスポンスの `errors` オブジェクト内に表示されます。
+* アイテムレベルのエラー（例: 必須パラメータの欠落）は、レスポンスの `operation_errors` オブジェクト内に表示されます。
+* `operation_errors` 内のエラーのインデックスは、入力アイテム内のインデックスを表し、そのアイテムに対応するエラーメッセージが含まれます。
+
+<div id="resource-url">
+  #### リソース URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/users`
+
+<div id="parameters">
+  #### パラメーター[](#parameters "Permalink to this headline")
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| operation&#95;type  <br />*required* | 各 `users` グループごとに実行される操作タイプ。<br /><br />Type: enum<br /><br />Possible values: `Update`, `Delete` |
+| params  <br />*required* | `users` 配列、`effective_at` タイムスタンプ、`expires_at` タイムスタンプを含む JSON オブジェクト。<br /><br />Type: JSON |
+| users  <br />*required* | 個々のユーザーに関するすべてのパラメーターを含む JSON オブジェクトの配列。<br /><br />Type: JSON |
+| effective&#95;at  <br />*optional* | カスタムオーディエンスの関連付けが有効になる UTC 時刻。[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で表現されます。指定がない場合は現在の日時が使用されます。<br /><br />Type: string<br /><br />Example: `2017-07-05T07:00:00Z` |
+| expires&#95;at  <br />*optional* | カスタムオーディエンスの関連付けが失効する UTC 時刻。指定した時刻は `effective_at` の値より後である必要があります。[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で表現されます。指定がない場合は、リクエストのタイムスタンプから 13 か月後が使用されます。<br /><br />Type: string<br /><br />Example: `2017-07-05T07:00:00Z` |
+
+`users` オブジェクトに対するマルチキー方式に基づき、このオブジェクトの各要素を以下に示します。
+
+| Name | Description |
+| :--- | :--- |
+| email  <br />*optional* | ユーザーのメールアドレス。<br /><br />Type: Array[String] |
+| device&#95;id  <br />*optional* | IDFA/AdID/Android ID<br /><br />Type: Array[String] |
+| handle  <br />*optional* | ユーザーが所有する @handle。<br /><br />Type: Array[String] |
+| twitter&#95;id  <br />*optional* | ユーザーが所有する X ID。<br /><br />Type: Array[String] |
+| phone&#95;number  <br />*optional* | ユーザーの電話番号。<br /><br />Type: Array[String] |
+| partner&#95;user&#95;id  <br />*optional* | パートナーのシステムにおけるユーザーの ID。<br /><br />Type: Array[String] |
+
+<div id="example-request">
+  #### リクエスト例[](#example-request "Permalink to this headline")
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/1nmth/users`
+
+```
+    [
+      {
+        "operation_type": "Update",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "email": [
+                "4798b8bbdcf6f2a52e527f46a3d7a7c9aefb541afda03af79c74809ecc6376f3"
+              ],
+              "handle": [
+                "7352f353c460e74c7ae226952d04f8aa307b12329c5512ec8cb6f1a0f8f9b2cb",
+                "49e0be2aeccfb51a8dee4c945c8a70a9ac500cf6f5cb08112575f74db9b1470d"
+              ]
+            },
+            {
+              "email": [
+                "5bf13d5ad4200407c5bc8b9bb578e425d05ef936fd488e3799a9d0806669223c"
+              ],
+              "twitter_id": [
+                "34d56c7159a7eea941f359653029410f813f65a1d2d13ecc5ccbdd5a8cb755cf",
+                "00e7b76c9739dec57f4c4a20ec021a20ffcf26bd00f519b17ea00f0ed6048f85"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "operation_type": "Delete",
+        "params": {
+          "effective_at": "2018-05-15T00:00:00Z",
+          "expires_at": "2019-01-01T07:00:00Z",
+          "users": [
+            {
+              "device_id": [
+                "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+              ],
+              "email": [
+                "4798b8bbdcf6f2a52e527f46a3d7a7c9aefb541afda03af79c74809ecc6376f3"
+              ],
+              "handle": [
+                "461222f5dd690a20651c3d19848015cb0369db3f8e937571ffb775de70750847"
+              ],
+              "twitter_id": [
+                "c623c7e163984493b46c547088542e95d0aaa529bc52bbecce3ff91eb6b7843b"
+              ]
+            },
+            {
+              "email": [
+                "5bf13d5ad4200407c5bc8b9bb578e425d05ef936fd488e3799a9d0806669223c"
+              ],
+              "twitter_id": [
+                "858cdc7f313f84a3f3c48e9a6323307c1ef1bb7439b8e3623e140454b0fd8fa5",
+                "bb074e154657b91d99bd1bb3757409149670e8ae7a0fe9136fae29a26a7881c8"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+<div id="example-response">
+  #### レスポンス例[](#example-response "この見出しへの固定リンク")
+</div>
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_id": "1nmth"
+        }
+      },
+      "data": {
+        "success_count": 4,
+        "total_count": 4
+      }
+    }
+```
+
+<div id="custom-audience-permissions">
+  ### カスタムオーディエンス権限
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/369a02c0adc626ff6a06#?env%5BTwitter%20Ads%20API%5D=W3sia2V5IjoiYWNjb3VudF9pZCIsInZhbHVlIjoieW91cl9hZHNfYWNjb3VudF9pZCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidmVyc2lvbiIsInZhbHVlIjoiNSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfa2V5IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX2tleSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfc2VjcmV0IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX3NlY3JldCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiYWNjZXNzX3Rva2VuIiwidmFsdWUiOiJ5b3VyX2FjY2Vzc190b2tlbiIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidG9rZW5fc2VjcmV0IiwidmFsdWUiOiJ5b3VyX3Rva2VuX3NlY3JldCIsImVuYWJsZWQiOnRydWV9XQ==">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idcustom_audiencescustom_audience_idpermissions">
+  #### GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/permissions[](#get-accounts-account-id-custom-audiences-custom-audience-id-permissions "Permalink to this headline")
+</div>
+
+指定されたカスタムオーディエンスに関連付けられている一部またはすべての権限の詳細を取得します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                         | Description                                                                                                                                                                                                                                              |
+| :----------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                             | 利用対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                     |
+| custom&#95;audience&#95;id  <br />*required*                 | リクエストで操作対象となるカスタムオーディエンスを指す参照です。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                                                     |
+| count  <br />*optional*                                      | 1 回のリクエストで取得を試行するレコード数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000`                                                                                                                                                |
+| cursor  <br />*optional*                                     | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow`                                                                                                                  |
+| granted&#95;account&#95;ids  <br />*optional*                | 識別子のカンマ区切りリストを指定することで、レスポンスを指定したアカウントのみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                           |
+| sort&#95;by  <br />*optional*                                | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](/ja/x-ads-api/fundamentals/sorting) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc`                                                                                                        |
+| custom&#95;audience&#95;permission&#95;ids  <br />*optional* | 識別子のカンマ区切りリストを指定することで、レスポンスを指定したカスタムオーディエンス権限のみに絞り込みます。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                            |
+| with&#95;total&#95;count  <br />*optional*                   | `total_count` レスポンス属性を含めます。<br /><br />**注**: このパラメータと `cursor` は相互排他的です。<br /><br />**注**: `total_count` を含むリクエストはレート制限がより低くなり、現在は 15 分あたり 200 回に設定されています。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/1nmth/permissions`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_id": "1nmth"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "custom_audience_id": "1nmth",
+          "permission_level": "READ_ONLY",
+          "id": "ri",
+          "created_at": "2017-06-08T23:17:59Z",
+          "granted_account_id": "18ce54aymz3",
+          "updated_at": "2017-06-08T23:17:59Z",
+          "deleted": false
+        }
+      ]
+    }
+```
+
+<div id="post-accountsaccount_idcustom_audiencescustom_audience_idpermissions">
+  #### POST accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/permissions[](#post-accounts-account-id-custom-audiences-custom-audience-id-permissions "Permalink to this headline")
+</div>
+
+指定されたオーディエンスを、特定のアカウントと共有できるようにする新しい権限オブジェクトを作成します。
+
+**Note**: カスタムオーディエンスの権限を作成または変更するには、そのオーディエンスが、権限を変更しようとしているアカウントによって所有されている必要があります。特定のオーディエンスのレスポンスに含まれる `is_owner` 属性を確認することで、カスタムオーディエンスの所有者を確認できます。
+
+**Note**: オーディエンスは、同一ビジネス内の広告アカウント間、またはオーディエンスを所有する広告アカウントが `SHARE_AUDIENCE_OUTSIDE_BUSINESS` アカウント機能を有している場合にのみ共有できます。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/permissions`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                                                                          |
+| :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで、一般的に必須パラメータとなります。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| granted&#95;account&#95;id  <br />*required* | カスタムオーディエンスに対する権限を付与したい付与先アカウントです。<br /><br />Type: string<br /><br />Example: `18ce54aymz3`                                                                                                                                         |
+| permission&#95;level  <br />*required*       | `granted_account_id` に付与されるカスタムオーディエンスへのアクセスレベルです。<br /><br />Type: enum<br /><br />Possible values: `READ_ONLY`, `READ_WRITE`                                                                                                       |
+| custom&#95;audience&#95;id  <br />*required* | リクエストで操作対象となるカスタムオーディエンスを参照します。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                                                  |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+```
+POST https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h/permissions?granted_account_id=18ce54aymz3&permission_level=READ_ONLY
+```
+
+**レスポンス例[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "granted_account_id": "18ce54aymz3",
+          "permission_level": "READ_ONLY",
+          "custom_audience_id": "2906h"
+        }
+      },
+      "data": {
+        "custom_audience_id": "2906h",
+        "permission_level": "READ_ONLY",
+        "id": "14m",
+        "created_at": "2017-09-12T23:49:34Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-09-12T23:49:34Z",
+        "deleted": false
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idcustom_audiencescustom_audience_idpermissionscustom_audience_permission_id">
+  #### DELETE accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id/permissions/:custom&#95;audience&#95;permission&#95;id[](#delete-accounts-account-id-custom-audiences-custom-audience-id-permissions-custom-audience-permission-id "Permalink to this headline")
+</div>
+
+指定された Custom Audience の共有権限を取り消します。
+
+**注**: Custom Audience の権限を作成または変更する場合、そのオーディエンスは権限の作成または変更を行おうとしているアカウントが所有している必要があります。特定のオーディエンスに対するレスポンス内の `is_owner` レスポンス属性を確認することで、その Custom Audience の所有者を確認できます。
+
+権限が取り消されると、付与されていたアカウント（`granted_account_id`）は、今後のキャンペーンでそのオーディエンスをターゲティングできないことが保証されます。既存のキャンペーンは共有オーディエンスを使って引き続き配信されます。キャンペーンは停止されず、オーディエンスもキャンペーンから削除されません。オーディエンス共有権限が取り消された後は、そのキャンペーンをコピーすることはできません。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id/permissions/:custom_audience_permission_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                        | Description                                                                                                                                                                                                                   |
+| :---------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                            | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで一般的に必須パラメータです。指定されたアカウントは、認証済みユーザーに紐づいている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required*                | リクエストで操作対象となる Custom Audience を参照します。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                     |
+| custom&#95;audience&#95;permission&#95;id  <br />*required* | リクエストで操作対象となる Custom Audience 権限を参照します。<br /><br />Type: string<br /><br />Example: `ri`                                                                                                                                      |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/1nmth/permissions/ri`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "custom_audience_permission_id": "ri",
+          "custom_audience_id": "1nmth"
+        }
+      },
+      "data": {
+        "custom_audience_id": "1nmth",
+        "permission_level": "READ_ONLY",
+        "id": "ri",
+        "created_at": "2017-06-08T23:17:59Z",
+        "granted_account_id": "18ce54aymz3",
+        "updated_at": "2017-08-30T18:29:35Z",
+        "deleted": true
+      }
+    }
+```
+
+<div id="custom-audiences">
+  ### カスタムオーディエンス
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idcustom_audiences">
+  #### GET accounts/:account&#95;id/custom&#95;audiences[](#get-accounts-account-id-custom-audiences "Permalink to this headline")
+</div>
+
+現在のアカウントに関連付けられている一部またはすべてのCustom Audiencesの詳細を取得します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                          | Description                                                                                                                                                                                                                                                       |
+| :-------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*              | 利用するアカウントの識別子です。リソースのパス内に現れ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべてのAdvertiser APIリクエストで一般的に必須パラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`                                      |
+| count  <br />*optional*                       | 1回のリクエストで取得を試みるレコードの件数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000`                                                                                                                                                         |
+| cursor  <br />*optional*                      | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow`                                                                                                                           |
+| permission&#95;scope  <br />*optional*        | 自分が所有しているリスト、または共有されているリストにレスポンスをフィルタリングできます。デフォルトでは、このパラメータを指定しない場合、自分が所有しているオーディエンスのみが表示されます。<br /><br />Type: enum<br /><br />Default: `OWNER`  <br />Possible values: `OWNER`, `SHARED`                                                                       |
+| q  <br />*optional*                           | リソースを `name` で絞り込むための任意のクエリです。<br /><br />**Note**: 大文字・小文字を区別しない前方一致でマッチングを行います。<br /><br />Type: string<br /><br />Min, Max length: `1`, `255`                                                                                                                  |
+| sort&#95;by  <br />*optional*                 | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](/ja/x-ads-api/fundamentals/sorting) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc`                                                                                                                 |
+| custom&#95;audience&#95;ids  <br />*optional* | カンマ区切りの識別子リストを指定することで、レスポンスを対象のCustom Audiencesのみに絞り込みます。最大200個のIDを指定できます。<br /><br />Type: string<br /><br />Example: `1nmth`                                                                                                                                    |
+| with&#95;deleted  <br />*optional*            | 削除済みの結果をレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false`                                                                                                                                                  |
+| with&#95;total&#95;count  <br />*optional*    | `total_count` レスポンス属性を含めます。<br /><br />**Note**: このパラメータと `cursor` は同時に使用できません。<br /><br />**Note**: `total_count` を含むリクエストには、現在15分あたり200回に設定されている、より低いレート制限が適用されます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences?custom_audience_ids=1nmth`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "custom_audience_ids": [
+            "1nmth"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "targetable": true,
+          "name": "twurl-using-subshell-for-file",
+          "targetable_types": [
+            "CRM",
+            "EXCLUDED_CRM"
+          ],
+          "audience_type": "CRM",
+          "description": null,
+          "permission_level": "READ_WRITE",
+          "owner_account_id": "18ce54d4x5t",
+          "id": "1nmth",
+          "reasons_not_targetable": [],
+          "created_at": "2017-01-08T08:19:58Z",
+          "updated_at": "2017-01-08T16:21:13Z",
+          "partner_source": "OTHER",
+          "deleted": false,
+          "audience_size": 1470
+        }
+      ]
+    }
+```
+
+<div id="get-accountsaccount_idcustom_audiencescustom_audience_id">
+  #### GET accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id[](#get-accounts-account-id-custom-audiences-custom-audience-id "Permalink to this headline")
+</div>
+
+現在のアカウントに関連付けられている特定のカスタムオーディエンス（Custom Audiences）を取得します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                                                                   |
+| :------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くほとんどの Advertiser API リクエストで必須パラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | このリクエストで操作するカスタムオーディエンス（Custom Audience）を指定します。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                           |
+| with&#95;deleted  <br />*optional*           | 削除済みの結果もレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false`                                                                                                              |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "custom_audience_id": "2906h",
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "data": {
+        "targetable": false,
+        "name": "developers",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "owner_account_id": "18ce54d4x5t",
+        "id": "2906h",
+        "reasons_not_targetable": [],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-22T23:34:26Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": 140321
+      }
+    }
+```
+
+<div id="post-accountsaccount_idcustom_audiences">
+  #### POST accounts/:account&#95;id/custom&#95;audiences[](#post-accounts-account-id-custom-audiences "この見出しへのパーマリンク")
+</div>
+
+現在のアカウントに関連付けられた新しいプレースホルダー用カスタムオーディエンス（Custom Audience）を作成します。
+
+**Resource URL[](#resource-url "この見出しへのパーマリンク")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences`
+
+**Parameters[](#parameters "この見出しへのパーマリンク")**
+
+| Name                             | Description                                                                                                                                                                                                                     |
+| :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id  <br />*required* | 利用するアカウントの識別子です。リソースのパス内に現れ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| name  <br />*required*           | このオーディエンスの表示名です。一意の name 値を使用する必要があります。そうしないとエラーになります。<br /><br />Type: string<br /><br />Example: `ads api users`                                                                                                              |
+| description  <br />*optional*    | このオーディエンスの説明です。<br /><br />Type: string<br /><br />Example: `Collection of all users of the Ads API`                                                                                                                            |
+
+**Example Request[](#example-request "この見出しへのパーマリンク")**
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences?name=developers`
+
+**Example Response[](#example-response "この見出しへのパーマリンク")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "developers",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "owner_account_id": "18ce54d4x5t",
+        "id": "2906h",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-22T23:34:26Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": null
+      },
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "name": "developers"
+        }
+      }
+    }
+```
+
+<div id="put-accountsaccount_idcustom_audiencescustom_audience_id">
+  #### PUT accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id[](#put-accounts-account-id-custom-audiences-custom-audience-id "Permalink to this headline")
+</div>
+
+現在のアカウントに関連付けられている特定のカスタムオーディエンスを更新します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                                                                |
+| :------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 利用するアカウントの識別子です。リソースパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは認証済みユーザーに紐づいている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | リクエスト内で操作対象となるカスタムオーディエンスへの参照です。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                                       |
+| name  <br />*optional*                       | このオーディエンスの表示名です。一意の name 値を使用する必要があります。従わない場合はエラーになります。<br /><br />Type: string<br /><br />Example: `ads api users`                                                                                                        |
+| description  <br />*optional*                | このオーディエンスの説明です。<br /><br />Type: string<br /><br />Example: `Collection of all users of the Ads API`                                                                                                                       |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h?name=developers_changed`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "developers_changed",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "is_owner": true,
+        "id": "2906h",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-22T23:34:26Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": null
+      },
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "name": "developers_changed"
+        }
+      }
+    }
+```
+
+<div id="post-batchaccountsaccount_idcustom_audiences">
+  #### POST batch/accounts/:account&#95;id/custom&#95;audiences[](#post-batch-accounts-account-id-custom-audiences "Permalink to this headline")
+</div>
+
+Custom Audiences をバッチで作成することができます。オーディエンスに関する情報は [Custom Audiences Overview](/ja/x-ads-api/audiences) ページを参照してください。
+
+**注:** このバッチエンドポイントは現在 **クローズドベータ** であり、一部の広告主のみが利用できます。このベータ期間中は、モバイルカスタムオーディエンスに基づく Flexible Audiences のみ作成可能です。
+
+**バッチリクエスト**
+
+* 現在の最大バッチサイズは 10 です。
+* すべてのパラメータはリクエストボディで送信され、`Content-Type` として `application/json` の指定が必須です。
+* バッチリクエストはグループとして一括で成功または失敗し、エラー・成功いずれの場合も、すべての API レスポンスで最初のリクエスト内のアイテム順序が保持されます。
+
+**バッチレスポンス**
+
+バッチ API レスポンスは、順序が保証されたアイテムのコレクションを返します。それ以外の構造は、対応する単一アイテムエンドポイントと同一です。
+
+**バッチエラー**
+
+* リクエストレベルのエラー（例: 最大バッチサイズ超過）は、レスポンス内の `errors` オブジェクトに表示されます。
+* アイテムレベルのエラー（例: 必須パラメータの不足）は、レスポンス内の `operation_errors` オブジェクトに表示されます。
+
+**Flexible Audiences**
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+* Flexible Audiences は一度作成すると変更できません。
+* Custom Audiences は、ブールロジックの組み合わせを用いたツリー構造で渡され、その組み合わせによって Flexible Audiences が作成されます。
+* Flexible Audience を作成する際に使用できる Custom Audiences のリーフノードは最大 10 個です。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/batch/accounts/:account_id/custom_audiences`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                                   | Description                                                                                                                                                                                                                        |
+| :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*                       | 利用するアカウントの識別子です。リソースパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常は必須パラメータです。指定されたアカウントは、認証済みユーザーに紐づいている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t`        |
+| audience&#95;type  <br />*required*                    | 作成するオーディエンスのタイプです。<br /><br />Type: enum<br /><br />Possible values: `FLEXIBLE`, `MOBILE_AUDIENCE`                                                                                                                                 |
+| child&#95;segments  <br />*required*                   | ターゲットにしたいカスタムオーディエンスのメンバーのサブセットを定義するオブジェクトを含む配列です。各オブジェクトには `custom_audience_id`、`frequency`、`frequency_comparator`、`lookback_window`、`negate`、および場合によっては追加の `child_segments` を含める必要があります。<br /><br />Type: array                  |
+| name  <br />*required*                                 | オーディエンスの表示名です。name の値は一意である必要があります。そうでない場合はエラーになります。<br /><br />Type: string<br /><br />Example: `my_flexible_audience_name`                                                                                                       |
+| operation&#95;type  <br />*required*                   | 各アイテムごとに実行される操作タイプです。<br /><br />Type: enum<br /><br />Possible values: `Create`, `Update`, `Delete`                                                                                                                               |
+| boolean&#95;operator  <br />*sometimes required*       | 親（包含している）オブジェクト内の子セグメント間の論理関係です。親オブジェクトで child&#95;segments が空でない場合は必須です。<br /><br />Type: enum<br /><br />Possible values: `AND`, `OR`                                                                                            |
+| lookback&#95;window  <br />*sometimes required*        | ユーザーが特定のアクションを実行し、指定されたカスタムオーディエンスの条件を満たした期間（日数）の範囲を指定する整数値です。<br /><br />Type: int<br /><br />Possible values: `1`, `7`, `14`, `30`                                                                                               |
+| segments  <br />*sometimes required*                   | ターゲットにしたいカスタムオーディエンスのメンバーのサブセットを定義する、`boolean_operator` と `child_segments` を含むオブジェクトです。<br /><br />Type: object                                                                                                                    |
+| custom&#95;audience&#95;id  <br />*sometimes required* | 子セグメントとして使用するカスタムオーディエンスの id です。<br /><br />Type: string<br /><br />Example: `tyfo`                                                                                                                                                |
+| frequency  <br />*optional*                            | ユーザーが特定のアクションを実行し、指定されたカスタムオーディエンスの条件を満たした頻度を、`lookback_window` 内で指定する整数値です。<br /><br />Type: int<br /><br />Default value: `1`                                                                                                    |
+| frequency&#95;comparator  <br />*optional*             | リクエスト内で渡される `frequency` に対する比較演算子です。<br /><br />**Note**: 以下の値において、`GTE` は「以上」、`LT` は「未満」などを意味します。<br /><br />Type: string<br /><br />Possible values: `NUM_GTE`, `NUM_GT`, `NUM_EQ`, `NUM_LTE`, `NUM_LT` Default value: `NUM_GTE` |
+| negate  <br />*optional*                               | セグメントを否定し、その結果そのセグメントを組み合わせから除外します。<br /><br />Type: boolean<br /><br />Default value: `true`  <br />Possible values: `true`, `false`                                                                                              |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`POST https://ads-api.x.com/12/batch/accounts/18ce54d4x5t/custom_audiences`
+
+```
+    [
+      {
+        "operation_type":"Create",
+        "params":{
+          "name":"my_flexible_audience_name",
+          "audience_type":"FLEXIBLE",
+          "segments":{
+            "boolean_operator":"AND",
+            "child_segments":[
+              {
+                "custom_audience_id":"TYIF",
+                "frequency":1,
+                "frequency_comparator":"NUM_GT",
+                "lookback_window":30,
+                "negate":true,
+                "child_segments":[
+
+                ]
+              },
+              {
+                "boolean_operator":"OR",
+                "child_segments":[
+                  {
+                    "custom_audience_id":"TXR1",
+                    "lookback_window":30,
+                    "child_segments":[
+
+                    ]
+                  },
+                  {
+                    "custom_audience_id":"TYFO",
+                    "frequency":1,
+                    "frequency_comparator":"NUM_GT",
+                    "lookback_window":30,
+                    "negate":true,
+                    "child_segments":[
+
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+```
+
+**レスポンス例[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "my_flexible_audience_name",
+        "targetable_types": [
+          "FLEXIBLE",
+          "EXCLUDED_FLEXIBLE"
+        ],
+        "audience_type": "FLEXIBLE",
+        "id": "13ld7",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "metadata": [
+          {
+            "custom_audience_id": "13ld7",
+            "account_id": "qsx3w2",
+            "name": "my_flexible_audience_name",
+            "audience_source": "FLEXIBLE_AUDIENCE",
+            "upload_status": "UPLOADED",
+            "segments": {
+              "boolean_operator": "AND",
+              "frequency": 1,
+              "frequency_comparator": "NUM_GTE",
+              "negate": false,
+              "child_segments": [
+                {
+                  "custom_audience_id": "tyif",
+                  "lookback_window": 30,
+                  "frequency": 1,
+                  "frequency_comparator": "NUM_GT",
+                  "negate": true,
+                  "child_segments": [
+
+                  ]
+                },
+                {
+                  "boolean_operator": "OR",
+                  "frequency": 1,
+                  "frequency_comparator": "NUM_GTE",
+                  "negate": false,
+                  "child_segments": [
+                    {
+                      "custom_audience_id": "txr1",
+                      "lookback_window": 30,
+                      "frequency": 1,
+                      "frequency_comparator": "NUM_GTE",
+                      "negate": false,
+                      "child_segments": [
+
+                      ]
+                    },
+                    {
+                      "custom_audience_id": "tyfo",
+                      "lookback_window": 30,
+                      "frequency": 1,
+                      "frequency_comparator": "NUM_GT",
+                      "negate": true,
+                      "child_segments": [
+
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "created_at": "2015-11-10T21:26:43Z",
+        "updated_at": "2015-11-11T01:11:47Z",
+        "partner_source": "OTHER",
+        "deleted": false,
+        "audience_size": null
+      },
+      "request": [
+        {
+          "params": {
+            "name": "my_flexible_audience_name",
+            "audience_type": "FLEXIBLE",
+            "segments": {
+              "boolean_operator": "AND",
+              "child_segments": [
+                {
+                  "custom_audience_id": "TYIF",
+                  "lookback_window": 30,
+                  "frequency": 1,
+                  "frequency_comparator": "NUM_GT",
+                  "negate": true,
+                  "child_segments": [
+
+                  ]
+                },
+                {
+                  "boolean_operator": "OR",
+                  "child_segments": [
+                    {
+                      "custom_audience_id": "TXR1",
+                      "lookback_window": 30,
+                      "child_segments": [
+
+                      ]
+                    },
+                    {
+                      "custom_audience_id": "TYFO",
+                      "lookback_window": 30,
+                      "frequency": 1,
+                      "frequency_comparator": "NUM_GT",
+                      "negate": true,
+                      "child_segments": [
+
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "account_id": "qsx3w2"
+          },
+          "operation_type": "Create"
+        }
+      ]
+    }
+```
+
+<div id="delete-accountsaccount_idcustom_audiencescustom_audience_id">
+  #### DELETE accounts/:account&#95;id/custom&#95;audiences/:custom&#95;audience&#95;id[](#delete-accounts-account-id-custom-audiences-custom-audience-id "Permalink to this headline")
+</div>
+
+現在のアカウントに属する指定の Custom Audience を削除します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/custom_audiences/:custom_audience_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                                         | Description                                                                                                                                                                                                                    |
+| :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required*             | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで原則として必須のパラメータです。指定されたアカウントは認証済みユーザーに紐づいている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| custom&#95;audience&#95;id  <br />*required* | リクエストで操作対象となる Custom Audience への参照です。<br /><br />Type: string<br /><br />Example: `2906h`                                                                                                                                      |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/custom_audiences/2906h`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": {
+        "targetable": false,
+        "name": "developers",
+        "targetable_types": [
+          "CRM",
+          "EXCLUDED_CRM"
+        ],
+        "audience_type": "CRM",
+        "description": null,
+        "permission_level": "READ_WRITE",
+        "owner_account_id": "18ce54d4x5t",
+        "id": "2906h",
+        "reasons_not_targetable": [
+          "TOO_SMALL"
+        ],
+        "created_at": "2017-08-22T23:34:26Z",
+        "updated_at": "2017-08-30T18:09:00Z",
+        "partner_source": "OTHER",
+        "deleted": true,
+        "audience_size": null
+      },
+      "request": {
+        "params": {
+          "custom_audience_id": "2906h",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="do-not-reach-lists">
+  ### Do Not Reach リスト
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_iddo_not_reach_lists">
+  #### GET accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists[](#get-accounts-account-id-do-not-reach-lists "Permalink to this headline")
+</div>
+
+現在のアカウントに関連付けられている Do Not Reach List の一部またはすべての詳細を取得します。
+
+**注**: `account_id` が持てる Do Not Reach List は最大 1 つまでです。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/do_not_reach_lists`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name                               | Description                                                                                                                                                                                                                     |
+| :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id  <br />*required*   | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API のリクエストで一般的に必須パラメータです。指定されたアカウントは、認証済みユーザーに紐付いている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| with&#95;deleted  <br />*optional* | 削除済み結果をレスポンスに含めるかどうかを指定します。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false`                                                                                                        |
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`GET https://ads-api.x.com/12/accounts/18ce54bgxky/do_not_reach_lists`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54bgxky"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "targetable": false,
+          "name": "Do Not Reach List",
+          "description": "test DNRL",
+          "id": "4kzrq",
+          "reasons_not_targetable": [
+            "TOO_SMALL"
+          ],
+          "created_at": "2021-10-28T22:09:29Z",
+          "list_size": null,
+          "updated_at": "2021-11-04T03:33:06Z",
+          "deleted": false
+        }
+      ]
+    }
+```
+
+<div id="post-accountsaccount_iddo_not_reach_lists">
+  #### POST accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists[](#post-accounts-account-id-do-not-reach-lists "この見出しへのパーマリンク")
+</div>
+
+現在のアカウントに関連付けられた新しい Do Not Reach リストを作成します。
+
+**注意**: `account_id` ごとに保持できる Do Not Reach リストは最大 1 つだけです。
+
+**Resource URL[](#resource-url "この見出しへのパーマリンク")**
+
+`https://ads-api.x.com/12/accounts/:account_id/do_not_reach_lists`
+
+**Parameters[](#parameters "この見出しへのパーマリンク")**
+
+| Name                             | Description                                                                                                                                                                                                                      |
+| :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id  <br />*required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| description  <br />*optional*    | この Do Not Reach リストの説明です。<br /><br />Type: string<br /><br />Example: `A list of users to exclude`                                                                                                                               |
+
+**Example Request[](#example-request "この見出しへのパーマリンク")**
+
+`POST https://ads-api.x.com/12/accounts/18ce54bgxky/do_not_reach_lists?description=A list of users to exclude`
+
+**Example Response[](#example-response "この見出しへのパーマリンク")**
+
+```
+    {
+      "request": {
+        "params": {
+          "description": "A list of users to exclude",
+          "account_id": "18ce54bgxky"
+        }
+      },
+      "data": {
+        "targetable": false,
+        "name": "Do Not Reach List",
+        "description": "A list of users to exclude",
+        "id": "4ofrq",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2022-02-08T23:02:48Z",
+        "list_size": null,
+        "updated_at": "2022-02-08T23:02:48Z",
+        "deleted": false
+      }
+    }
+```
+
+<div id="post-batchaccountsaccount_iddo_not_reach_listsdo_not_reach_list_idusers">
+  #### POST batch/accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists/:do&#95;not&#95;reach&#95;list&#95;id/users[](#post-batch-accounts-account-id-do-not-reach-lists-do-not-reach-list-id-users "この見出しへのパーマリンク")
+</div>
+
+このエンドポイントでは、指定された `do_not_reach_list_id` に対してユーザーを追加・更新・削除できます。このエンドポイントは、有効なユーザー識別子としてメールアドレスのみを受け付けます。
+
+リクエストの `emails` フィールドで提供されるすべてのデータは、`SHA256` を使用してハッシュ化し、さらに [正規化](/ja/x-ads-api/audiences#e-mail-normalization) されている必要があります。
+
+**注意事項**
+
+* 1 つの `account_id` につき、Do Not Reach List は最大 1 つまでしか保持できません
+* このリストに追加されるユーザーには、現在のタイムスタンプから 13 か月未満となるように `expires_at` タイムスタンプを必ず設定する必要があります
+* Do Not Reach List API は `effective_at` タイムスタンプを受け付けず、デフォルトで現在のタイムスタンプが適用されます
+* Do Not Reach List は、アカウント内の任意またはすべてのカスタムオーディエンスからユーザーを削除することはなく、そのアカウントで配信されるすべてのキャンペーンに対する除外ターゲティングとして機能します
+
+**バッチリクエスト**
+
+* このエンドポイントにおける現在の最大バッチサイズは `2500` です。バッチサイズは、リクエストごとの操作数（`Update`/`Delete`）によって決まります。例えば、1 つの配列内に 2500 を超える操作オブジェクト（`{"operation_type": "Update/Delete", [..] }`）が含まれていると、エラーになります。
+* このエンドポイントが受け付けるリクエスト POST 本文の最大サイズは `5,000,000` バイトです。
+* このエンドポイントのレート制限は、1 分あたり 1500 リクエストです。
+* すべてのパラメータはリクエストボディで送信され、`application/json` の `Content-Type` が必須です。
+* バッチリクエストは 1 つのグループとして一括で成功または失敗し、エラー・成功どちらの API レスポンスでも、最初のリクエストにおける項目の順序が保持されます。
+
+**バッチレスポンス**
+
+Ads API によって返されるレスポンスには、`success_count` と `total_count` の 2 つのフィールドが含まれます。これらの値は常に等しくなければならず、バックエンドで処理されたリクエスト内のレコード数を表します。リクエストボディで送信されたレコード数が `success_count` および `total_count` と等しくない場合はエラー状態として扱い、再試行が必要です。
+
+**バッチエラー**
+
+* リクエストレベルのエラー（例: 最大バッチサイズ超過）は、レスポンス内の `errors` オブジェクトに示されます。
+* アイテムレベルのエラー（例: 必須パラメータの欠如）は、レスポンス内の `operation_errors` オブジェクトに示されます。
+* `operation_errors` 内のエラーのインデックスは、入力アイテム内のインデックスを指し、そのインデックスに対応するエラーメッセージが含まれます。
+
+**リソース URL[](#resource-url "この見出しへのパーマリンク")**
+
+`https://ads-api.x.com/12/batch/accounts/:account_id/do_not_reach_lists/:do_not_reach_list_id/users`
+
+**パラメータ[](#parameters "この見出しへのパーマリンク")**
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 利用するアカウントの識別子です。リソースパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで一般的に必須パラメータです。指定したアカウントは、認証されたユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| do&#95;not&#95;reach&#95;list&#95;id  <br />*required* | リクエストで操作対象となる Do Not Reach List を参照します。<br /><br />Type: string<br /><br />Example: `2906h` |
+| operation&#95;type  <br />*required* | `users` グループごとに実行される操作タイプです。<br /><br />Type: enum<br /><br />Possible values: `Update`, `Delete` |
+| params  <br />*required* | `emails` 配列と `expires_at` タイムスタンプを含む JSON オブジェクトです。<br /><br />Type: JSON |
+| users  <br />*required* | 個々のユーザーに対するすべてのパラメータを含む JSON オブジェクトの配列です。<br /><br />Type: JSON |
+| expires&#95;at  <br />*optional* | ユーザーの関連付けが失効する UTC 時刻です。指定する時刻は、現在のタイムスタンプより後でなければなりません。[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で表現します。デフォルトは現在のタイムスタンプから 13 か月後です。<br /><br />Type: string<br /><br />Example: `2017-07-05T07:00:00Z` |
+
+`users` オブジェクトが複数キーを持つ構造であることから、このオブジェクトの各要素については以下のとおり個別に説明します。
+
+| Name                               | Description                                       |
+| :--------------------------------- | :------------------------------------------------ |
+| email  <br />*optional*            | ユーザーのメールアドレス（複数可）。<br /><br />Type: Array[String] |
+| phone&#95;number  <br />*optional* | ユーザーの電話番号（複数可）。<br /><br />Type: Array[String]    |
+
+**リクエスト例[](#example-request "Permalink to this headline")**
+
+```
+`POST https://ads-api.x.com/12/batch/accounts/18ce54bgxky/do_not_reach_lists/4kzro/users`
+
+    [
+      {
+        "operation_type": "Update",
+        "params": {
+          "expires_at": "2023-01-22T00:00:00Z",
+          "users": [
+            {
+              "email": [
+                "FEAD76F6ADF99FFFB997AA4E3C8AD38FF531BC4C956DBD03CD0163F744D8AABC"
+              ],
+              "phone_number": [
+                "CCABF1B62A202E0FE28BC6C014983C89A65451DD4482BD66A0ADB65366F38A9A"
+              ]
+            },
+            {
+              "email": [
+                "FEAD76F6ADF99FFFB997AA4E3C8AD38FF531BC4C956DBD03CD0163F744D8AABA"
+              ],
+              "phone_number": [
+                "CCABF1B62A202E0FE28BC6C014983C89A65451DD4482BD66A0ADB65366F38A9E"
+              ]
+            }
+          ]
+        }
+      }
+    ]
+```
+
+**レスポンス例[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "data": [
+        {
+          "success_count": 2,
+          "total_count": 2
+        }
+      ],
+      "request": [
+        {
+          "params": {
+            "do_not_reach_list_id": "4ofrq",
+            "expires_at": "2023-01-22T00:00:00Z",
+            "account_id": "18ce54bgxky"
+          },
+          "operation_type": "Update"
+        }
+      ]
+    }
+```
+
+<div id="delete-accountsaccount_iddo_not_reach_listsdo_not_reach_list_id">
+  #### DELETE accounts/:account&#95;id/do&#95;not&#95;reach&#95;lists/:do&#95;not&#95;reach&#95;list&#95;id[](#delete-accounts-account-id-do-not-reach-lists-do-not-reach-list-id "Permalink to this headline")
+</div>
+
+現在のアカウントに属する、指定した Do Not Reach List を削除します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://ads-api.x.com/12/accounts/:account_id/do_not_reach_lists/:do_not_reach_list_id`
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+なし
+
+**Example Request[](#example-request "Permalink to this headline")**
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54bgxky/do_not_reach_lists/4ofrp`
+
+**Example Response[](#example-response "Permalink to this headline")**
+
+```
+    {
+      "request": {
+        "params": {
+          "do_not_reach_list_id": "4ofrp",
+          "account_id": "18ce54bgxky"
+        }
+      },
+      "data": {
+        "targetable": false,
+        "name": "Do Not Reach List",
+        "description": null,
+        "id": "4ofrp",
+        "reasons_not_targetable": [
+          "PROCESSING",
+          "TOO_SMALL"
+        ],
+        "created_at": "2022-02-08T23:02:07Z",
+        "list_size": null,
+        "updated_at": "2022-02-08T23:02:21Z",
+        "deleted": true
+      }
+    }
+```

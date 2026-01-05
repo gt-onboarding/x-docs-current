@@ -1,0 +1,142 @@
+---
+title: v1 到 v2（Enterprise）
+sidebarTitle: v1 到 v2（Enterprise）
+keywords: ["Enterprise 到 v2 计数", "Enterprise 计数迁移", "GNIP 到 v2 计数", "Enterprise 计数迁移", "迁移 Enterprise 计数"]
+---
+
+<div id="enterprise-compared-to-x-api-v2">
+  ### Enterprise 与 X API v2 对比
+</div>
+
+**相似之处**
+
+* 粒度
+* 分页
+* 时区
+
+**不同之处**
+
+* 端点 URL
+* 应用和项目要求
+* 可用时间段
+* 响应数据格式
+* HTTP 方法
+* 请求时间格式
+* 请求参数
+* 过滤操作符
+
+<div id="similarities">
+  #### 相似之处
+</div>
+
+**粒度**
+
+虽然用于选择返回数据粒度的参数不同（Enterprise 版本使用 `bucket`，v2 版本使用 `granularity`），但该参数可以接受的取值相同，默认行为也一致：
+
+* `day`
+* `hour`（默认）
+* `minute`
+
+**分页**
+
+虽然 v2 提供了额外的分页功能（新增的分页参数允许你通过 `since_id` 和 `until_id` 使用帖子 ID 进行导航），但 Enterprise 和 v2 都允许你通过时间进行分页（Enterprise 使用 `fromDate` 和 `toDate`，v2 使用 `start_time` 和 `end_time`）。
+
+如果你使用的是 Enterprise 版本，你将使用 `next` 参数进行分页，下一页的 token 字段名为 `next`，并且位于响应对象的根级。
+
+如果你使用的是 v2，你可以使用 `next_token` 或 `pagination_token` 参数进行分页，并且下一页的 token 将位于响应中的 `meta.next_token`。
+ 
+
+**时区**
+
+如分页部分所述，你可以在 Enterprise 和 v2 中使用时间在不同的数据页之间进行导航。在这两种情况下，当使用这些参数时，你都将使用 UTC 作为时区。
+
+<div id="differences">
+  #### 差异
+</div>
+
+**Endpoint URL**
+
+* Enterprise 端点：
+  * 30 天 - `http://gnip-api.x.com/search/30day/accounts/:account_name/:label/counts.json`
+  * 全量归档（full-archive）- `http://gnip-api.x.com/search/fullarchive/accounts/:account_name/:label/counts.json`
+* X API v2 端点：
+  * 最近（7 天）- `https://api.x.com/2/tweets/counts/recent`
+  * 全量归档（full-archive）- `https://api.x.com/2/tweets/counts/all`
+
+**应用和项目要求**
+
+在对请求进行认证时，X API v2 的端点要求你使用与某个[开发者应用](/zh/resources/fundamentals/developer-apps)及其所属[项目](/zh/resources/fundamentals/developer-apps)关联的凭证。所有 X API v1.1 端点都可以使用来自独立应用或与项目关联的应用的凭证。
+ 
+
+**可用的时间区间**
+
+Enterprise API 和 X API v2 都提供端点，用于获取整个帖子全量归档中的帖子数量数据。
+
+但是，X API v2 不像 Enterprise API 那样提供 30 天时间区间的端点。相反，它提供前文提到的全量归档端点，或 7 天时间区间的端点，与 [v2 搜索帖子端点](/zh/x-api/posts/search/introduction) 保持一致。
+ 
+
+**响应数据格式**
+
+通过 Enterprise 和 X API v2 返回的数据格式之间存在一些细微差异：
+
+* Enterprise 的计数数据位于 `results` 对象中，而 v2 的计数数据位于一个 `data` 对象中。
+* Enterprise 的计数字段名为 `timePeriod`（开始时间）和 `count`，而 v2 将时间区间拆分为 `start` 和 `end` 字段（使用与 Enterprise 不同的日期/时间格式，在请求时间格式中有说明），并将 `count` 字段重命名为 `tweet_count`。
+* Enterprise 的元数据在根级别包含 `totalCount`、`next` 和 `requestParameters` 对象。而 v2 不包含 `requestParameters` 对象，并将以下字段移动/重命名到位于根级别的 `meta` 对象中：`total_tweet_count` 和 `next_token`。
+   
+
+**HTTP 方法**
+
+该 API 的 Enterprise 版本允许你使用带 JSON body 的 POST HTTP 方法，或带查询字符串的 GET HTTP 方法来发送请求。
+
+v2 只允许你使用带查询字符串的 GET HTTP 方法。
+ 
+
+**请求时间格式**
+
+该端点的 Enterprise 版本在分页参数和 `timePeriod` 响应字段中使用以下日期/时间格式：`YYYYMMDDHHmm`
+
+v2 端点在分页参数以及 `start` 和 `end` 响应字段中使用 ISO 8601/RFC 3339 日期/时间格式：`YYYY-MM-DDTHH:mm:ssZ`
+
+**请求参数**
+
+下表是 Enterprise 和 X API v2 的请求参数对照：
+
+| Enterprise | Search Posts v2 |
+| :--- | :--- |
+| query | query |
+| bucket | granularity |
+| fromDate (YYMMDDHHmm) | start&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+| toDate (YYMMDDHHmm) | end&#95;time (YYYY-MM-DDTHH:mm:ssZ) |
+|     | since&#95;id |
+|     | until&#95;id |
+| next | next&#95;token 和 pagination&#95;token |
+
+**过滤运算符**
+
+尽管 Enterprise 和 X API v2 之间的大部分运算符是相同的，但在运算符可用性上存在一些差异，并且在 X API v2 版本中引入了一些新的运算符。
+
+要查看 X API v2、Enterprise，甚至 premium 可用运算符的完整对照表，请访问[帖子计数迁移概览页面](/zh/x-api/posts/counts/migrate/overview)。
+
+<div id="api-reference-index">
+  ## API 参考文档索引
+</div>
+
+如需完整的 API 参考文档，请从下方选择一个端点。
+
+<div id="recent-post-counts">
+  ### 近期帖子数量统计
+</div>
+
+|     |     |
+| :--- | :--- |
+| **获取过去 7 天内符合查询条件的帖子数量统计** | `[GET /2/tweets/counts/recent](/x-api/posts/tweet-counts#api-reference-index/get-tweets-counts-recent)` |
+
+<div id="full-archive-post-counts">
+  ### 全量存档帖子计数
+</div>
+
+仅适用于拥有 [Pro 和 Enterprise 访问权限](/zh/x-api/getting-started/about-x-api) 的用户
+
+|     |     |
+| :--- | :--- |
+| **获取与查询条件匹配的帖子计数** | `[GET /2/tweets/counts/all](/x-api/posts/tweet-counts#api-reference-index/get-tweets-counts-all)` |

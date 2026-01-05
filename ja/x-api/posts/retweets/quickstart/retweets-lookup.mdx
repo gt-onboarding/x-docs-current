@@ -1,0 +1,138 @@
+---
+title: リツイートの取得
+sidebarTitle: リツイートの取得
+keywords: ["リツイート 取得", "リツイート クイックスタート", "リツイート 取得方法", "リツイート チュートリアル", "リツイート ガイド", "リツイート 例"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-retweets-lookup-endpoint">
+  ### Retweets ルックアップエンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使って Retweets ルックアップエンドポイントに最初のリクエストを送信するまでの手順を説明します。さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatformTwitter-API-v2-sample-code) の GitHub リポジトリを参照してください。
+
+<div id="prerequisites">
+  #### 前提条件
+</div>
+
+このガイドを完了するには、リクエストを認証するための [keys and tokens](/ja/resources/fundamentals/authentication) 一式が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+* [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+* developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+* App の「Keys and tokens」ページに移動して必要な認証情報を生成し、すべての認証情報を安全な場所に保存してください。
+
+<div id="steps-to-build-a-retweets-lookup-request">
+  #### リポスト検索リクエストを構築する手順
+</div>
+
+**ステップ1: ツールまたはライブラリから始める**
+
+このエンドポイントへのリクエストを行うために使用できるツール、コード例、ライブラリは複数ありますが、ここではプロセスを簡素化するために Postman を使用します。
+
+X API v2 Postman コレクションをお使いの環境に読み込むには、以下のボタンをクリックしてください:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加する
+</Button>
+
+X API v2コレクションをPostmanに読み込んだら、「Retweets」フォルダーに移動して「Retweeted by」を選択します。
+
+**ステップ2: リクエストを認証する**
+
+X APIに適切にリクエストを送信するには、権限を確認する必要があります。このエンドポイントでは、[OAuth 2.0 アプリ専用フロー](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)、または[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)のいずれかの認証方法を使用してリクエストを認証する必要があります。
+
+簡略化のため、このリクエストではOAuth 2.0 アプリ専用フローを使用しますが、非公開[メトリクス](/ja/x-api/fundamentals/metrics)やリポストをリクエストする場合は、他の認証方法を使用する必要があります。
+
+OAuth 2.0 アプリ専用フローを利用するには、キーとトークン、特に[アプリアクセストークン](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（アプリ専用 Bearer Token とも呼ばれます）を Postman に追加する必要があります。これを行うには、Postman の右上隅にある「X API v2」という名前の環境を選択し、（環境ドロップダウンの横にある目のアイコンをクリックして）キーとトークンを &quot;initial value&quot; フィールドと &quot;current value&quot; フィールドに追加します。
+
+正しく設定されている場合、これらの変数はリクエストの認証タブに自動的に読み込まれます。
+
+**ステップ3：ポストを指定する**
+
+このエンドポイントでは、リポストしたユーザーを取得したいポストIDを指定する必要があります。ポストのIDは、X上でそのポストに移動し、URLの末尾にある数値コードを確認することで取得できます。例えば、次のURLのポストIDは1354143047324299264です。
+
+[https://x.com/TwitterDev/status/1354143047324299264](https://x.com/TwitterDev/status/1354143047324299264)
+
+Postmanで「Params」タブに移動し、このユーザー名を id パス変数の「Value」列(セクションの下部)に入力します。ユーザー名の前後にスペースが入らないように注意してください。
+
+|        |                         |
+| :----- | :---------------------- |
+| **キー** | **値**                   |
+| `id`   | リツイートしたユーザーを取得したいポストのID |
+
+**ステップ4: 取得するフィールドを特定して指定する**
+
+ステップ3の後に「Send」ボタンをクリックすると、レスポンスにデフォルトの[userオブジェクト](/ja/x-api/fundamentals/data-dictionary#user)フィールド(id、name、username)が返されます。
+
+id、name、username以外の追加フィールドを受け取りたい場合は、リクエストに[fields](/ja/x-api/fundamentals/fields)パラメータや[expansions](/ja/x-api/fundamentals/expansions)パラメータを指定して、それらのフィールドを明示する必要があります。
+
+この演習では、異なるオブジェクトから3つの追加のフィールドセットをリクエストします:
+
+1. プライマリユーザーオブジェクトに追加される `user.created_at` フィールド。
+2. 返されるユーザーに関連付けられたピン留めポストオブジェクトのデフォルトフィールドは、id と text です。
+3. 関連するポストオブジェクトに含まれる追加の tweet.created&#95;at フィールド。
+
+Postmanで「Params」タブに移動し、「Query Params」テーブルに以下のキー:値のペアを追加します:
+
+|              |                         |                      |
+| :----------- | :---------------------- | :------------------- |
+| **キー**       | **値**                   | **返されるフィールド**        |
+| user.fields  | created&#95;at          | user.created&#95;at  |
+| expansions   | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at          | tweet.created&#95;at |
+
+「送信」ボタンの横に以下のURLが表示されるはずです:
+
+`https://api.x.com/2/tweets/1354143047324299264/retweeted_by?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**ステップ5: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンをクリックします。すると、次の例のようなレスポンスが返ってきます。
+
+```
+{
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "現在、600人以上のフォロワーを持つすべてのユーザーがスペースをホストできます。\n\n私たちが学んだことに基づくと、これらのアカウントは既存のオーディエンスがあるため、ホスティングで良い体験をする可能性が高いです。スペースを作成する機能をすべての人に提供する前に、いくつかのことに焦点を当てています。🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+}
+```

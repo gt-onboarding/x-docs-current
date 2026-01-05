@@ -1,0 +1,265 @@
+---
+title: 构建查询
+sidebarTitle: 构建查询
+keywords: ["构建查询", "搜索查询", "查询生成器", "搜索运算符", "查询语法", "构建搜索查询", "查询指南"]
+---
+
+<div id="building-queries-for-search-posts">
+  ## 为帖子搜索构建查询
+</div>
+
+搜索端点通过单个 GET 请求接收一个查询，并返回与该查询匹配的一组历史帖子。查询由一系列运算符构成，用于匹配帖子上的各种属性。 
+
+<div id="table-of-contents">
+  ### 目录
+</div>
+
+* [构建查询](#build)
+* [查询限制](#limits)
+* [运算符可用情况](#availability)
+* [运算符类型：可独立使用与需搭配连接词使用](#types)
+* [布尔运算符和分组](#boolean)
+* [运算顺序](#order-of-operations)
+* [标点符号、变音符号和大小写敏感](#punctuation)
+* [精确度与效率](#specificity)
+* [引用帖子匹配行为](#quote-tweets)
+* [迭代式构建查询](#iterative)
+* [将查询添加到请求中](#adding-a-query)
+* [查询示例](#examples)
+* [运算符列表](#list)
+
+<div id="building-a-query">
+  ### 构建查询语句
+</div>
+
+<div id="query-limitations">
+  #### 查询限制
+</div>
+
+您的查询会根据您所使用的[访问级别](/zh/x-api/getting-started/about-x-api)而受到限制。 
+
+如果您具有 Basic 或 Pro 访问权限，则在最近搜索端点中，查询长度最多为 512 个字符。 
+
+如果您具有 Pro 访问权限，则在全量归档搜索端点中，查询长度最多为 1,024 个字符。 
+
+<div id="operator-availability">
+  #### 运算符可用性
+</div>
+
+大多数运算符对所有开发者都可用，但有一些仅限特定访问级别使用。我们在 [list of operators](/zh/x-api/posts/search/integrate/operators) 表格中使用以下标记来说明每个运算符适用的访问级别：
+
+* **Core operators：** 在使用任何 [Project](/zh/resources/fundamentals/projects) 时可用。
+* **Advanced operators：** 在使用具有特定访问级别的 Project 时可用。
+
+<div id="operator-types-standalone-and-conjunction-required">
+  #### 运算符类型：独立运算符与需搭配使用的运算符
+</div>
+
+**独立运算符（standalone operators）** 可以单独使用，也可以与任何其他运算符（包括那些需要搭配使用的运算符）组合使用。
+
+例如，下面的查询可以正常运行，因为它使用了独立运算符 `#hashtag`：
+
+`#xapiv2`
+
+**需搭配使用的运算符（conjunction-required operators）** 不能在查询中单独使用；只有在查询中至少包含一个独立运算符时，才能与之搭配使用。原因是如果单独使用这些运算符，查询条件会过于宽泛，从而匹配到数量极其庞大的帖子。
+
+例如，下面的查询不受支持，因为它们只包含需搭配使用的运算符：
+
+`has:media`
+
+`has:links OR is:retweet`
+
+如果我们加入一个独立运算符，例如短语 `"X data"`，那么该查询就可以正常运行。
+
+`"X data" has:mentions (has:media OR has:links)`
+
+<div id="boolean-operators-and-grouping">
+  #### 布尔运算符与分组
+</div>
+
+如果你希望在单个查询中串联多个运算符，可以使用以下方式：
+
+|     |     |
+| :--- | :--- |
+| **AND 逻辑** | 使用空格分隔的连续运算符会产生布尔 “AND” 逻辑，这意味着只有在两个条件都满足时才会匹配帖子。例如，`snow day #NoSchool` 将匹配同时包含词语 snow 和 day 以及话题标签 #NoSchool 的帖子。 |
+| **OR 逻辑** | 使用 OR 分隔的连续运算符会产生 OR 逻辑，这意味着只要任一条件满足就会匹配帖子。例如，指定 `grumpy OR cat OR #meme` 将匹配任何至少包含 grumpy 或 cat 其中之一，或话题标签 #meme 的帖子。 |
+| **NOT 逻辑，取反** | 在关键字（或任何运算符）前添加短横线 (-) 可以对其取反（NOT）。例如，`cat #meme -grumpy` 将匹配包含话题标签 #meme 和词语 cat、且不包含词语 grumpy 的帖子。一个常见的查询子句是 `-is:retweet`，它不会匹配转推，因此只会匹配原始帖子、引用帖子和回复。所有运算符都可以被取反，但被取反的运算符不能单独使用。 |
+| **分组** | 你可以使用括号将运算符分组在一起。例如，`(grumpy cat) OR (#meme has:images)` 将返回：要么包含词语 grumpy 和 cat 的帖子，要么包含话题标签 #meme 且带有图片的帖子。请注意，系统会先应用 AND，再应用 OR。 |
+
+**关于取反的说明**
+
+运算符 is:nullcast 必须始终以取反形式（`-is:nullcast`）使用。
+
+被取反的运算符不能单独使用。
+
+不要对一组用括号分组在一起的运算符整体取反。相反，应对每个单独的运算符分别取反。例如，请不要使用 `skiing -(snow OR day OR noschool)`，而建议使用 `skiing -snow -day -noschool`。 
+
+<div id="order-of-operations">
+  #### 运算顺序
+</div>
+
+在同时使用 AND 和 OR 逻辑时，下列运算顺序将决定你的查询是如何被解析的。
+
+1. 先组合通过 AND 逻辑连接的运算符
+2. 再应用通过 OR 逻辑连接的运算符
+
+例如：
+
+* `apple OR iphone ipad` 会被解析为 `apple OR (iphone ipad)`
+* `ipad iphone OR android` 会被解析为 `(iphone ipad) OR android`
+
+为消除不确定性并确保查询按你的意图被解析，请在合适的地方使用括号将词语分组。
+
+例如：
+
+* `(apple OR iphone) ipad`
+* `iphone (ipad OR android)`
+
+<div id="punctuation-diacritics-and-case-sensitivity">
+  #### 标点符号、变音符号和大小写
+</div>
+
+如果你在关键字或话题标签查询中使用带有重音或变音符号的字符，它会匹配帖子文本中，既包含带重音和变音符号的词项，也包含使用普通字符的词项。例如，包含关键字 `Diacrítica` 或话题标签 `#cumpleaños` 的查询，将匹配 *Diacrítica* 或 *#cumpleaños*，也会匹配没有重音符号 í 或 eñe 的 *Diacritica* 或 *#cumpleanos*。
+
+带重音或变音符号的字符与普通字符一视同仁，并不会被视为词边界。例如，关键字为 `cumpleaños` 的查询，只会匹配包含单词 *cumpleaños* 的活动，不会匹配包含 *cumplea*、*cumplean* 或 *os* 的活动。
+
+所有运算符在评估时都不区分大小写。例如，查询 `cat` 会匹配包含以下任意形式的帖子：*cat*、*CAT*、*Cat*。
+
+[filtered stream](/zh/x-api/posts/filtered-stream) 的匹配行为与 Search Posts 不同。在[构建 filtered stream 规则](/zh/x-api/posts/filtered-stream#building-rules-for-filtered-stream)时，需要注意：包含重音和变音符号的关键字和话题标签，只会匹配同样包含该重音和变音符号的词项，而不会匹配使用普通字符代替的词项。
+
+例如，包含关键字 `Diacrítica` 或话题标签 `#cumpleaños` 的 filtered stream 规则，只会匹配词项 *Diacrítica* 和 *#cumpleaños*，不会匹配没有重音符号 í 或 eñe 的 *Diacritica* 或 *#cumpleanos*。
+
+<div id="specificity-and-efficiency">
+  #### 精准度和效率
+</div>
+
+在开始构建查询时，需要牢记以下几点。
+
+* 通常不建议在查询中只使用一个宽泛、独立的运算符，比如单个关键词或 #hashtag 话题标签，因为这很可能会匹配到海量帖子。构建更完善的查询可以得到更具体的一组匹配帖子，并有助于减少返回数据中的噪声，从而减少你为寻找有价值洞察而需要筛选的内容。 
+  * 例如，如果你的查询只是关键词 `happy`，你每天可能会得到 200,000 - 300,000 条帖子。
+  * 添加更多条件运算符会缩小搜索结果范围，例如 `(happy OR happiness) place_country:GB -birthday -is:retweet`
+* 编写高效的查询还有助于你遵守查询长度的字符限制。字符计数包括整个查询字符串中的所有字符，包括空格和运算符。
+  * 例如，下面的查询长度为 59 个字符：`(happy OR happiness) place_country:GB -birthday -is:retweet`
+
+<div id="quote-tweet-matching-behavior">
+  #### 引用帖子匹配行为
+</div>
+
+当使用 Search Posts 端点时，运算符不会匹配被引用的原始帖子中的内容，但会匹配引用帖子中包含的内容。
+
+但是，请注意，[filtered stream](/zh/x-api/posts/filtered-stream) 会同时匹配被引用的原始帖子中的内容和引用帖子的内容。
+
+<div id="iteratively-building-a-query">
+  #### 逐步构建查询
+</div>
+
+<div id="test-your-query-early-and-often">
+  ##### 尽早并频繁地测试你的查询
+</div>
+
+第一次就让查询返回「正确」结果的情况很少见。X 上有海量内容，其中许多在一开始可能并不显而易见，而且上文介绍的查询语法也可能难以直接贴合你想要的搜索需求。在构建查询的过程中，定期对其进行测试非常重要。
+
+在本节中，我们将从下面这个查询开始，并根据测试过程中得到的结果对其进行调整： 
+
+`happy OR happiness`
+
+<div id="use-results-to-narrow-the-query">
+  ##### 使用结果来缩小查询范围
+</div>
+
+在测试查询时，你应该检查返回的帖子，确认其中是否包含你期望获取的数据。从一个较宽泛的查询和一个帖子匹配结果的超集开始，可以让你先审查结果，再逐步收窄查询，以过滤掉不需要的结果。  
+
+在我们测试示例查询时，注意到返回了多种不同语言的帖子。在这种情况下，我们只想接收英文帖子，因此要添加 `lang:` 运算符：
+
+`(happy OR happiness) lang:en`
+
+测试返回了许多为他人送上生日祝福的帖子，因此我们要添加 `-birthday` 作为排除关键词运算符。我们还只想接收原创帖子，所以添加了否定的 `-is:retweet` 运算符：
+
+`(happy OR happiness) lang:en -birthday -is:retweet`
+
+<div id="adjust-for-inclusion-where-needed">
+  ##### 在需要时调整以包含更多结果
+</div>
+
+如果你发现没有收到预期的数据，并且确定存在本应被返回的帖子，那么你可能需要通过移除某些会过滤掉目标数据的运算符来放宽查询条件。
+
+在我们的示例中，我们注意到在个人时间线中还有其他表达我们所寻找情绪的帖子，但并未包含在测试结果中。为了确保更广的覆盖范围，我们将添加关键词 `excited` 和 `elated`。
+
+`(happy OR happiness OR excited OR elated) lang:en -birthday -is:retweet`
+
+<div id="adjust-for-popular-trendsbursts-over-the-time-period">
+  ##### 针对该时间范围内的热门趋势/突发高峰进行调整
+</div>
+
+在 X 上，趋势变化非常迅速。维护查询是一个需要持续进行的过程。如果你打算长时间使用某个查询，建议你定期查看自己接收到的数据，以判断是否需要进行调整。
+
+在我们的示例中，我们注意到开始收到一些祝别人“happy holidays”的帖子。由于我们不希望这些帖子包含在结果中，因此我们将添加一个用于排除这些结果的 `-holidays` 关键词。
+
+`(happy OR happiness OR excited OR elated) lang:en -birthday -is:retweet -holidays`
+
+<div id="adding-a-query-to-your-request">
+  ### 将查询添加到请求中
+</div>
+
+要将查询添加到你的请求中，你必须使用 `query` 参数。与其他查询参数一样，你必须确保对你构建的查询进行 HTTP 编码。
+
+下面是一个使用 cURL 命令的示例，其中包含额外的 `tweet.fields` 和 `max_results` 参数。如果你想使用此命令，请务必将 `$BEARER_TOKEN` 替换为你自己的 [Bearer Token](/zh/resources/fundamentals/authentication#oauth-2-0)：
+
+```bash
+curl https://api.x.com/2/tweets/search/recent?query=cat%20has%3Amedia%20-grumpy&tweet.fields=created_at&max_results=100 -H "Authorization: Bearer $BEARER_TOKEN"
+```
+
+<div id="query-examples">
+  ### 查询示例
+</div>
+
+<div id="tracking-a-natural-disaster">
+  #### 监测自然灾害
+</div>
+
+下面这个查询会匹配来自气象机构和监测站、讨论 2017 年袭击休斯敦的飓风 Harvey 的原始帖子。
+
+下面是未进行 HTTP 编码时查询的样子：
+
+`has:geo (from:NWSNHC OR from:NHC\_Atlantic OR from:NWSHouston OR from:NWSSanAntonio OR from:USGS\_TexasRain OR from:USGS_TexasFlood OR from:JeffLindner1) -is:retweet`
+
+下面是进行 HTTP 编码后，并包含查询参数和 recent search URI 时查询的样子：
+
+`https://api.x.com/2/tweets/search/recent?query=-is%3Aretweet%20has%3Ageo%20(from%3ANWSNHC%20OR%20from%3ANHC\_Atlantic%20OR%20from%3ANWSHouston%20OR%20from%3ANWSSanAntonio%20OR%20from%3AUSGS\_TexasRain%20OR%20from%3AUSGS_TexasFlood%20OR%20from%3AJeffLindner1)`
+
+<div id="reviewing-the-sentiment-of-a-conversation">
+  #### 分析一段对话的情感倾向
+</div>
+
+下一个规则可用于更好地理解围绕话题标签 *#nowplaying* 展开的对话情感，但范围仅限于在北美发布的帖子。
+
+下面是两个不同的查询（一个用于正向情感，一个用于负向情感）在未进行 HTTP 编码时的样子：
+
+`#nowplaying (happy OR exciting OR excited OR favorite OR fav OR amazing OR lovely OR incredible) (place\_country:US OR place\_country:MX OR place_country:CA) -horrible -worst -sucks -bad -disappointing`
+
+`#nowplaying (horrible OR worst OR sucks OR bad OR disappointing) (place\_country:US OR place\_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible`
+
+下面是该查询在包含 HTTP 编码、`query` 参数和 recent search URI 时的样子：
+
+`https://api.x.com/2/tweets/search/recent?query=%23nowplaying%20(happy%20OR%20exciting%20OR%20excited%20OR%20favorite%20OR%20fav%20OR%20amazing%20OR%20lovely%20OR%20incredible)%20(place\_country%3AUS%20OR%20place\_country%3AMX%20OR%20place_country%3ACA)%20-horrible%20-worst%20-sucks%20-bad%20-disappointing`
+
+`https://api.x.com/2/tweets/search/recent?query=%23nowplaying%20(horrible%20OR%20worst%20OR%20sucks%20OR%20bad%20OR%20disappointing)%20(place\_country%3AUS%20OR%20place\_country%3AMX%20OR%20place_country%3ACA)%20-happy%20-exciting%20-excited%20-favorite%20-fav%20-amazing%20-lovely%20-incredible`
+
+<div id="find-posts-that-relate-to-a-specific-post-annotation">
+  #### 查找与特定 Post 注解相关的帖子
+</div>
+
+此规则用于搜索原始帖子，这些帖子满足以下条件：包含一张宠物（且不是猫）的图片，并且帖子中识别出的语言为日语。为此，我们使用了 `context:` 运算符来利用 [Post 注解](/zh/x-api/fundamentals/post-annotations) 功能。我们首先使用 [Post 查找](/zh/x-api/posts/lookup/introduction) 端点和 `tweet.fields=context_annotations` 字段参数，来确定在查询中需要使用哪些 domain.entity ID：
+
+* 与猫相关的帖子会返回 `domain` 66（Interests and Hobbies 分类），以及 entity 852262932607926273（Cats）。
+* 与宠物相关的帖子会返回 `domain` 65（Interests and Hobbies 垂直领域），以及 entity 852262932607926273（Pets）。
+
+下面是不带 HTTP 编码时的查询示例：
+
+`context:65.852262932607926273 -context:66.852262932607926273 -is:retweet has:images lang:ja`
+
+下面是带有 HTTP 编码、query 参数以及 recent search URI 的查询示例：
+
+`https://api.x.com/2/tweets/search/recent?query=context%3A65.852262932607926273%20-context%3A66.852262932607926273%20-is%3Aretweet%20has%3Aimages%20lang%3Aja`
+
+试试这个[查询生成工具](https://developer.x.com/apitools/query?query=)，以获得更多帮助。

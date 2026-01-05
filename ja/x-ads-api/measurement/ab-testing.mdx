@@ -1,0 +1,979 @@
+---
+title: A/Bテスト
+keywords: ["ABテスト", "A/Bテスト", "スプリットテスト", "広告テスト", "キャンペーンテスト", "テストキャンペーン"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="overview">
+  ## 概要
+</div>
+
+<div id="introduction">
+  ### はじめに
+</div>
+
+A/B テストを使用すると、広告主は X 上でリーチしているユーザーをセグメント化し、キャンペーンのパフォーマンスを最適化する最善の方法を把握し、マーケティング戦略の立案に役立つインサイトを収集できます。
+
+これらのセグメントは「ユーザーグループ分割」と呼ばれ、ランダムかつ相互排他的に構成されます。ランダム化により、成果に影響を与える要因は均等に分配されます。言い換えると、グループ間や想定される行動に本質的な違いはありません。このため、1 つのバリエーションを特定のユーザーグループのみに適用し、他のグループには適用しなかった場合、キャンペーンパフォーマンスの差はそのバリエーションに起因すると考えることができます。
+
+一度に多くのバリエーションをテストすることも可能ですが、1 回のテストでは 1 つのバリエーションのみを検証することを強く推奨します。これにより、観測されたキャンペーンパフォーマンスの差を生み出している原因となる要因を切り分けることができます。
+
+バリエーションはキャンペーン単位で設定されます。たとえば、広告主が新しいクリエイティブの有効性をテストしたい場合は、クリエイティブ以外は同一の 2 つのキャンペーンを作成する必要があります。将来的には、ラインアイテム単位でのバリエーション設定をサポートする予定です。
+
+<div id="use-cases">
+  ### ユースケース
+</div>
+
+A/B テストは主に次の 2 つの目的で利用されます。(1) 投資を最適化するために、X 上で何が最も効果的かを把握したいパフォーマンス広告主向けの「最適化」ユースケースと、(2) 得られたインサイトを活用してマーケティング戦略の立案に役立てたいブランド広告主向けの「学習」ユースケースです。 
+
+API は、次の項目を含むあらゆるキャンペーン変数に対する A/B テストをサポートします。
+
+* クリエイティブ 
+
+* ターゲティング 
+
+* 入札タイプ
+
+* 入札単価
+
+<div id="ab-testing">
+  ## A/B テスト
+</div>
+
+A/B テストを利用すると、広告主は X 上でリーチしているユーザーをセグメントし、キャンペーンパフォーマンスを最適化する最良の方法を把握したり、マーケティング戦略の立案に役立つ示唆を得たりすることができます。
+
+これらのセグメント（ユーザーグループ分割とも呼びます）はランダムに割り当てられ、互いに排他的です。ランダム化によって、成果に影響を与える要因は均等に分配されます。つまり、グループ間や期待される行動に本質的な違いはありません。したがって、あるユーザーグループにだけ 1 つのバリエーションを適用し、他のグループには適用しなかった場合、キャンペーンパフォーマンスの差はそのバリエーションに起因すると考えることができます。
+
+一度に多くのバリエーションをテストすることも可能ですが、1 回のテストでは 1 つのバリエーションのみをテストすることを強く推奨します。これにより、観測されたキャンペーンパフォーマンスの差を生み出している原因となる要因を切り分けることができます。
+
+バリエーションはキャンペーンレベルまたは広告グループレベルのいずれかで設定します。広告グループは Ads API の [line item](https://developer.x.com/en/docs/twitter-ads-api/campaign-management/api-reference/line-items) を通じて設定します。広告グループレベルのバリエーションの例として、新しいクリエイティブの有効性をテストしたい場合、広告主は 2 つの同一の広告グループを含む 1 つのキャンペーンを作成し、両グループの違いはクリエイティブのみになるようにします。
+
+<div id="use-cases">
+  ### ユースケース
+</div>
+
+A/B テストは主に、次の 2 つのユースケースを想定しています。(1) 投資を最適化するために、X 上で何が最も効果的かを把握したい運用型広告主向けのパフォーマンス最適化ユースケース、(2) 得られた知見をマーケティング戦略の立案に活用したいブランディング広告主向けの学習ユースケースです。 
+
+API は、次のようなあらゆるキャンペーン変数に対する A/B テストをサポートします。
+
+* クリエイティブ
+
+* ターゲティング
+
+* 入札タイプ
+
+* 入札単価
+
+<div id="attributes">
+  ### 属性
+</div>
+
+A/B テストはネストされた構造として表現されます。A/B テスト自体を表すトップレベルのフィールドと、それぞれを説明する一連のフィールドを持つユーザーグループオブジェクトの配列があります。
+
+大まかに言うと、すべての A/B テストには次の情報が含まれている必要があります。
+
+* テストの期間。`start_time` フィールドと `end_time` フィールドで表されます
+
+* 分割が行われるレベル。`entity_type` フィールドで表されます
+
+* 最低 2 個（最大 30 個）のユーザーグループ。各ユーザーグループは `user_groups` 配列内のオブジェクトとして表されます
+
+各ユーザーグループには、*必ず* 次の情報を含める必要があります。
+
+* 対象のユーザーグループに割り当てるユーザーの割合。`size` フィールドで表されます
+
+* 対象のユーザーグループのユーザープールを構成するキャンペーン ID / ラインアイテム ID。`entity_ids` 配列で表されます
+
+任意で、A/B テストおよびユーザーグループに対して `name` と `description` の値を設定できます。バリデーションルールやその他の制約に関する情報は、後述を参照してください。
+
+ID や作成日時などのその他のメタデータも含まれますが、これらは X によって自動的に設定されます。
+
+キャンペーンレベルの A/B テストエンティティの例を以下に示します。
+
+```json
+{
+  "created_at": "2020-12-01T00:00:00Z",
+  "created_by": {
+    "user_id": "756201191646691328",
+    "username": "apimctestface"
+  },
+  "deleted": false,
+  "description": "documentation example",
+  "end_time": "2020-12-05T01:00:00Z",
+  "entity_type": "CAMPAIGN",
+  "id": "hr7l0",
+  "name": "first AB test",
+  "start_time": "2020-12-01T01:00:00Z",
+  "status": "SCHEDULED",
+  "user_groups": [
+    {
+      "id": "p1bcx",
+      "name": "first group",
+      "description": null,
+      "size": "50.0",
+      "entity_ids": [
+        "f2qcw",
+        "f2tht"
+      ]
+    },
+    {
+      "id": "p1bcy",
+      "name": "second group",
+      "description": "second AB test group",
+      "size": 50,
+      "entity_ids": [
+        "f2rqi",
+        "f2tws"
+      ]
+    }
+  ],
+  "updated_at": "2020-12-01T00:00:00Z",
+  "updated_by": {
+    "user_id": "756201191646691328",
+    "username": "apimctestface"
+  }
+}
+```
+
+ラインアイテムレベルの A/B テストエンティティの例を次に示します。
+
+```json
+{
+   "created_by":{
+      "user_id":"756201191646691328",
+      "username":"apimctestface"
+   },
+   "name":"Test2e",
+   "start_time":"2022-08-15T00:00:00Z",
+   "updated_by":{
+      "user_id":"756201191646691328",
+      "username":"apimctestface"
+   },
+   "description":"2つ目のABテスト",
+   "entity_type":"LINE_ITEM",
+   "end_time":"2022-08-30T00:00:00Z",
+   "id":"1ul",
+   "user_groups":[
+      {
+         "name":"1つ目のグループ",
+         "size":"50.0",
+         "description":"1つ目のグループの説明",
+         "entity_ids":[
+            "ij9dh"
+         ],
+         "id":"4xe"
+      },
+      {
+         "name":"2つ目のグループ",
+         "size":"50.0",
+         "description":"2つ目のグループの説明",
+         "entity_ids":[
+            "ihng8"
+         ],
+         "id":"4xf"
+      }
+   ],
+   "status":"SCHEDULED",
+   "created_at":"2022-08-11T00:10:50Z",
+   "updated_at":"2022-08-11T00:10:50Z",
+   "deleted":false
+}
+```
+
+<div id="usage">
+  ### 使用方法
+</div>
+
+以下のサブセクションでは、A/B テストの作成と更新について説明します。取得および削除の動作は、他のすべての Ads API エンドポイントと同様です。
+
+<div id="creating">
+  #### 作成
+</div>
+
+[POST accounts/:account&#95;id/ab&#95;tests](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/ab-tests) エンドポイントを使用して A/B テストを作成します。このエンドポイントでは、JSON 形式の POST ボディのみが受け付けられます。Content-Type は application/json に設定する必要があります。
+
+広告主が 2 つ以上のキャンペーンを設定した後に、A/B テストを作成できます。上述のとおり、A/B テストにはテスト期間、分割レベル、少なくとも 2 つのユーザーグループを必ず含める必要があります。各ユーザーグループでは、そのグループに割り当てるユーザーの割合と、そのユーザープールを構成するキャンペーン ID を指定する必要があります。これらの各項目については、以下でさらに詳しく説明します。
+
+テスト期間:
+
+* start&#95;time と end&#95;time の値は、次の条件を満たす必要があります
+
+  * （A/B テストを作成した時点から見て）将来の時刻であること
+
+  * キャンペーン／ラインアイテムのフライト期間と重なっていること
+
+* テストは、アプリ以外のキャンペーンの場合は少なくとも 1 日間、アプリベースのキャンペーンの場合は少なくとも 5 日間継続する必要があります
+
+分割レベル:
+
+* entity&#95;type は CAMPAIGN または LINE&#95;ITEM に設定できます
+
+ユーザーグループ:
+
+* 各ユーザーグループは user&#95;groups 配列内のオブジェクトとして表されます
+
+  * 少なくとも 2 つのユーザーグループが必要です
+
+  * 最大 30 個のユーザーグループまで指定できます
+
+* 各ユーザーグループのサイズは、1.00 から 99.00 の数値を文字列で表現した値で設定します
+
+  * **注意**: サイズ値の合計は、*すべてのオブジェクト間で* **必ず** 100.00 になる必要があります
+
+* キャンペーン ID は、各ユーザーグループの entity&#95;ids 配列内で指定する必要があります
+
+任意で、A/B テスト全体、または 1 つ以上のユーザーグループに対して name と description を設定できます。
+
+次のリクエストは、キャンペーンレベルで 4 日間実施され、ユーザーを 2 つのユーザーグループにそれぞれ 50% ずつ割り当てる A/B テストを作成します。最初のユーザーグループはキャンペーン f2qcw と f2tht を基にしており、2 番目のユーザーグループはキャンペーン f2rqi と f2tws を基にしています。このリクエストでは、エンティティの一部に name と description も追加しています。
+
+twurl -X POST -H ads-api.x.com &quot;/8/accounts/18ce54d4x5t/ab&#95;tests&quot; -d &#39;&#123;&quot;end&#95;time&quot;: &quot;2020-12-05T01:00:00Z&quot;, &quot;entity&#95;type&quot; : &quot;CAMPAIGN&quot;, &quot;start&#95;time&quot;: &quot;2020-12-01T01:00:00Z&quot;, &quot;user&#95;groups&quot;: [&#123;&quot;entity&#95;ids&quot;: [&quot;f2qcw&quot;, &quot;f2tht&quot;], &quot;size&quot;: &quot;50.00&quot;, &quot;name&quot;: &quot;first group&quot;&#125;,&#123;&quot;entity&#95;ids&quot;: [&quot;f2rqi&quot;, &quot;f2tws&quot;], &quot;size&quot;: &quot;50.00&quot;, &quot;name&quot;: &quot;second group&quot;, &quot;description&quot;: &quot;second AB test group&quot;&#125;], &quot;name&quot;: &quot;first AB test&quot;, &quot;description&quot;: &quot;documentation example&quot;&#125;&#39;
+
+```json
+twurl -X POST -H ads-api.x.com "/8/accounts/18ce54d4x5t/ab_tests" -d '{"end_time": "2020-12-05T01:00:00Z", "entity_type" : "CAMPAIGN", "start_time": "2020-12-01T01:00:00Z", "user_groups": [{"entity_ids": ["f2qcw", "f2tht"], "size": "50.00", "name": "first group"},{"entity_ids": ["f2rqi", "f2tws"], "size": "50.00", "name": "second group", "description": "second AB test group"}], "name": "first AB test", "description": "documentation example"}'
+
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "end_time": "2020-12-05T01:00:00Z",
+      "entity_type": "CAMPAIGN",
+      "start_time": "2020-12-01T01:00:00Z",
+      "user_groups": [
+        {
+          "entity_ids": [
+            "f2qcw",
+            "f2tht"
+          ],
+          "size": "50.0",
+          "name": "first group"
+        },
+        {
+          "entity_ids": [
+            "f2rqi",
+            "f2tws"
+          ],
+          "size": "50.0",
+          "name": "second group",
+          "description": "second AB test group"
+        }
+      ],
+      "name": "first AB test",
+      "description": "documentation example"
+    }
+  },
+  "data": {
+    "created_at": "2020-12-01T00:00:00Z",
+    "created_by": {
+      "user_id": "756201191646691328",
+      "username": "apimctestface"
+    },
+    "deleted": false,
+    "description": "documentation example",
+    "end_time": "2020-12-05T01:00:00Z",
+    "entity_type": "CAMPAIGN",
+    "id": "hr7l0",
+    "name": "first AB test",
+    "start_time": "2020-12-01T01:00:00Z",
+    "status": "SCHEDULED",
+    "user_groups": [
+      {
+        "id": "p1bcx",
+        "name": "first group",
+        "description": null,
+        "size": "50.0",
+        "entity_ids": [
+          "f2qcw",
+          "f2tht"
+        ]
+      },
+      {
+        "id": "p1bcy",
+        "name": "second group",
+        "description": "second AB test group",
+        "size": "50.0",
+        "entity_ids": [
+          "f2rqi",
+          "f2tws"
+        ]
+      }
+    ],
+    "updated_at": "2020-12-01T00:00:00Z",
+    "updated_by": {
+      "user_id": "756201191646691328",
+      "username": "apimctestface"
+    }
+  }
+}
+```
+
+**ラインアイテムレベルでの A/B テストの場合**
+
+キャンペーンレベルとラインアイテムレベルでの A/B テストの主な違いは、`entity_type` の値です。ラインアイテムレベルで A/B テストを行う場合は、`entity_type` = `LINE_ITEM` に設定する必要があります。これは、すでに作成済みの A/B テストに対して、この後に行うすべてのアクションに適用されます。 
+
+要件:
+
+1. A/B テスト対象のキャンペーン内のすべてのラインアイテムをスプリットテストに含める必要があります。
+2. ラインアイテムレベルでは、均等な分割のみが許可されます。
+3. 1 つのスプリットテストで許可されるユーザーグループ（ラインアイテム）の数は 5 以下でなければなりません。 
+4. 1 つのユーザーグループにつき 1 つのラインアイテムのみが許可されます。
+
+<div id="updating">
+  ### 更新
+</div>
+
+[PUT accounts/:account&#95;id/ab&#95;tests/:ab&#95;test&#95;id](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/ab-tests) エンドポイントを使用して、A/B テストを更新します。このエンドポイントでは、リクエスト内で JSON データを送信する必要があります。Content-Type は application/json に設定する必要があります。
+
+他の更新系エンドポイントと同様に、[PUT accounts/:account&#95;id/ab&#95;tests/:ab&#95;test&#95;id](/ja/x-ads-api/measurement/ab-testing#get-accounts-account-id-ab-tests) エンドポイントでは、URL 内で A/B テストの ID を指定する必要があります。一般的に、A/B テストはステータスが SCHEDULED の間のみ更新できます。例外が 1 つだけあり、ステータスが LIVE の間でも A/B テストの end&#95;time を更新することが可能です。
+
+このエンドポイントは、オブジェクト ID を含む一部だけの JSON をサポートします。次の原則が適用されます。
+
+* オブジェクトまたは要素を追加または削除する場合は、配列全体（およびそのサブ構造）を渡します。これは **置換** 操作です
+
+* それ以外の場合は、キー名または ID を参照して、既存の *フィールド* を変更（変更・追加・削除）します
+
+  * フィールドを削除するには、その値を null に設定します
+
+  * 渡されなかったフィールドは変更されません
+
+たとえば、先ほど作成した A/B テストに 3 つ目のユーザーグループを追加するには、新しく追加したいユーザーグループオブジェクトに加え、既存の 2 つのユーザーグループオブジェクトを含んだ user&#95;groups 配列を送信する必要があります。これは user&#95;groups 配列を *再作成* するイメージです。最初からそのように作成するかのようにデータを渡してください（ユーザーグループオブジェクトの ID は渡さないでください）。更新リクエスト内の user&#95;groups 配列は、次のように表現できます。
+
+```json
+[
+  {
+    "entity_ids": [
+      "f2qcw",
+      "f2tht"
+    ],
+    "size": "30.0",
+    "name": "first group"
+  },
+  {
+    "entity_ids": [
+      "f2rqi",
+      "f2tws"
+    ],
+    "size": "30.0",
+    "name": "second group",
+    "description": "second AB test group"
+  },
+  {
+    "entity_ids": [
+      "i1vwr",
+      "i1xre"
+    ],
+    "size": "40.0"
+  }
+]
+```
+
+オブジェクト間の size の値の合計が、引き続き 100.00 になっている点に注意してください。もし最初の 2 つのオブジェクト（以前はそれぞれ 50.00 に設定されていた）の値を更新していなかった場合、このリクエストは失敗していたことになります。
+
+一方で、単に最初のユーザーグループに description を追加したいだけであれば、update リクエスト内の user&#95;groups 配列は次のように表現されます。
+
+```json
+[
+  {
+    "id": "p1bcx",
+    "description": "updated using a PUT request"
+  }
+]
+```
+
+ユーザーグループオブジェクトをidで指定し、変更したいフィールドだけを含めます。
+
+<div id="request-examples">
+  #### リクエスト例
+</div>
+
+このセクションでは、更新リクエストの追加例を示します。これらは連続して呼び出されるものと考えてください。JSON ブロブは可読性を高めるために整形してあります。レスポンスは省略されています。
+
+次の変更を行うには、リクエストは次のようになります。（これは上で使用した例と同じものです。）
+
+1. 名前と説明のない 3 番目のユーザーグループを追加する
+
+2. 各ユーザーグループのユーザーの割合を変更する
+
+twurl -X PUT -H ads-api.x.com &quot;/8/accounts/18ce54d4x5t/ab&#95;tests/hr7l0&quot; -d &#39;
+
+```json
+twurl -X PUT -H ads-api.x.com "/8/accounts/18ce54d4x5t/ab_tests/hr7l0" -d '
+{
+  "user_groups": [
+    {
+      "entity_ids": [
+        "f2qcw",
+        "f2tht"
+      ],
+      "size": "30.00",
+      "name": "first group"
+    },
+    {
+      "entity_ids": [
+        "f2rqi",
+        "f2tws"
+      ],
+      "size": "30.00",
+      "name": "second group",
+      "description": "second AB test group"
+    },
+    {
+      "entity_ids": [
+        "i1vwr",
+        "i1xre"
+      ],
+      "size": "40.00"
+    }
+  ]
+}'
+```
+
+次の変更を行うには、リクエストは次のようになります。
+
+1. A/Bテストの説明を削除します
+
+2. 最初のユーザーグループに説明を追加します
+
+3. 2番目のユーザーグループにエンティティ ID（f2syz）を追加します
+
+twurl -X PUT -H ads-api.x.com &quot;/8/accounts/18ce54d4x5t/ab&#95;tests/hr7l0&quot; -d &#39;
+
+```json
+twurl -X PUT -H ads-api.x.com "/8/accounts/18ce54d4x5t/ab_tests/hr7l0" -d '
+{
+  "description": null,
+  "user_groups": [
+    {
+      "id": "p1bcx",
+      "description": "first AB test group"
+    },
+    {
+      "id": "p1bcy",
+      "entity_ids": [
+        "f2rqi",
+        "f2tws",
+        "f2syz"
+      ]
+    }
+  ]
+}'
+```
+
+3 番目の変更では、新しいエンティティ ID に加えて、既存の 2 つのエンティティ ID も渡す必要があります。3 つ目のユーザーグループには変更が行われていない点に注意してください。
+
+次の変更を行う場合、リクエストは次のようになります。
+
+1. 2 つ目のユーザーグループを削除します
+
+2. 各ユーザーグループに含まれるユーザーの割合を変更します
+
+```json
+twurl -X PUT -H ads-api.x.com "/8/accounts/18ce54d4x5t/ab_tests/hr7l0" -d '
+{
+  "user_groups": [
+    {
+      "entity_ids": [
+        "f2qcw",
+        "f2tht"
+      ],
+      "size": "55.00",
+      "name": "first group"
+    },
+    {
+      "entity_ids": [
+        "i1vwr",
+        "i1xre"
+      ],
+      "size": "45.00"
+    }
+  ]
+}'
+```
+
+<div id="api-reference">
+  ## APIリファレンス
+</div>
+
+<div id="ab-tests">
+  ### ABテスト
+</div>
+
+[]()
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idab_tests">
+  #### GET accounts/:account&#95;id/ab&#95;tests
+</div>
+
+一部またはすべての A/B テストの詳細を取得します。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/ab_tests`
+
+<div id="parameters">
+  ##### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで一般的に必須のパラメータです。指定したアカウントは認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| ab&#95;test&#95;ids  <br />*optional* | カンマ区切りの識別子のリストを指定することで、レスポンスを目的の A/B テストのみに限定します。最大 200 個の ID を指定できます。<br /><br />Type: string<br /><br />Example: `hr7l0` |
+| count  <br />*optional* | 各リクエストで取得を試みるレコード数を指定します。<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | 次の結果ページを取得するためのカーソルを指定します。詳細は [Pagination](/ja/x-ads-api/introduction) を参照してください。<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| live&#95;during  <br />*optional* | 指定された日付範囲の間に実施中、または実施予定であった/ある A/B テストのみにレスポンスを限定します。指定した日付範囲と開始・終了時刻が一部または完全に重なる A/B テストが返されます。<br /><br />値はカンマ区切りの日付として指定し、[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で表現します。より早い日付を先に指定してください。<br /><br />Type: string<br /><br />Example: `2020-11-01T08:00:00Z,2020-12-01T08:00:00Z` |
+| q  <br />*optional* | `name` でリソースを絞り込むための任意のクエリです。すべてを取得する場合はこのパラメータを省略します。<br /><br />Type: string<br /><br />Min, Max length: `1`, `80` |
+| sort&#95;by  <br />*optional* | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](/ja/x-ads-api/fundamentals/sorting) を参照してください。<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| status  <br />*optional* | 指定したステータスを持つ A/B テストのみにレスポンスを限定します。<br /><br />Type: enum<br /><br />Possible values: `COMPLETED`, `LIVE`, `SCHEDULED` |
+| user&#95;id  <br />*optional* | 指定したユーザー ID によって作成された A/B テストのみにレスポンスを限定します。<br /><br />**Note**: `username` と同時には指定できません。<br /><br />Type: long<br /><br />Example: `756201191646691328. |
+| username  <br/>_optional_ | 指定したユーザー名（`username`）によって作成された A/B テストのみにレスポンスを限定します。先頭の "@" 記号は含めないでください。<br/><br/>**Note**: `user&#95;id`と同時には指定できません。<br/><br/>Type: string<br/><br/>Example:`apimctestface. |
+| with&#95;deleted  <br />*optional* | 削除済みの結果をレスポンスに含めます。<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/ab_tests`
+
+<div id="example-response">
+  ##### レスポンス例
+</div>
+
+```json
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "data": [
+        {
+          "created_at": "2022-05-25T00:00:00Z",
+          "created_by": {
+            "user_id": "756201191646691328",
+            "username": "apimctestface"
+          },
+          "deleted": false,
+          "description": "documentation example",
+          "end_time": "2022-05-30T01:00:00Z",
+          "entities": [
+            {
+              "id": "p1bcx",
+              "account_id": "18ce54d4x5t"
+            },
+            {
+              "id": "p1bcy",
+              "account_id": "18ce54d4x5t"
+            }
+          ],
+          "entity_type": "CAMPAIGN",
+          "id": "hr7l0",
+          "name": "first AB test",
+          "start_time": "2022-05-25T01:00:00Z",
+          "status": "SCHEDULED",
+          "user_groups": [
+            {
+              "id": "p1bcx",
+              "name": "first group",
+              "description": null,
+              "size": "50.0",
+              "entity_ids": [
+                "f2qcw",
+                "f2tht"
+              ]
+            },
+            {
+              "id": "p1bcy",
+              "name": "second group",
+              "description": "second AB test group",
+              "size": "50.0",
+              "entity_ids": [
+                "f2rqi",
+                "f2tws"
+              ]
+            }
+          ],
+          "updated_at": "2022-05-25T00:00:00Z",
+          "updated_by": {
+            "user_id": "756201191646691328",
+            "username": "apimctestface"
+          }
+        }
+      ],
+      "next_cursor": null
+    }
+```
+
+<div id="post-accountsaccount_idab_tests">
+  #### POST accounts/:account&#95;id/ab&#95;tests
+</div>
+
+新しい A/B テストを作成します。
+
+すべてのパラメータはリクエストボディで送信し、`Content-Type` ヘッダーには `application/json` を指定する必要があります。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/ab_tests`
+
+##### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで原則として必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| end&#95;time  <br />*required* | A/B テストが終了する時刻を、ISO 8601 形式で指定します。<br /><br />Type: string<br /><br />Example: `2020-10-02T00:00:00Z` |
+| entity&#95;type  <br />*required* | ユーザーグループを分割する際に使用するエンティティの種類です。<br /><br />Type: enum<br /><br />Possible values: `CAMPAIGN`, `LINE_ITEM` |
+| start&#95;time  <br />*required* | A/B テストが開始する時刻を、ISO 8601 形式で指定します。<br /><br />Type: string<br /><br />Example: `2022-05-30T00:00:00Z` |
+| user&#95;groups  <br />*required* | ユーザーグループを表します。詳細は下の表を参照してください。2〜30 のユーザーグループを指定できます。<br /><br />Type: array of objects |
+| description  <br />*optional* | A/B テストの説明です。最大長：1,024 文字。<br /><br />Type: string<br /><br />Example: `documentation example` |
+| name  <br />*optional* | A/B テストの名前です。最大長：255 文字。<br /><br />Type: string<br /><br />Example: `first AB test` |
+
+<div id="user-groups">
+  #### ユーザーグループ
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| entity&#95;ids  <br />*required* | エンティティ ID の配列。<br /><br />**Note**: 各エンティティは 1 つの A/B テストにのみ関連付けることができます。<br /><br />Type: array<br /><br />Example: `["dxi0l", "e66bl"]` |
+| size  <br />*required* | このユーザーグループに割り当てるユーザーの割合。数値を文字列として表し、小数点以下は最大 2 桁までとします。たとえば 40% は 40、40.0、または 40.00 のいずれかで表します。<br /><br />**Note**: 各オブジェクトの size の値は、合計が必ず 100.00 になる必要があります。<br /><br />Type: array<br /><br />Min, Max: `1.00`, `99.00` |
+| description  <br />*optional* | ユーザーグループの説明。最大長: 1,024 文字。<br /><br />Type: string<br /><br />Example: `second AB test group` |
+| name  <br />*optional* | ユーザーグループの名前。最大長: 255 文字。<br /><br />Type: string<br /><br />Example: `first group` |
+
+### リクエスト例
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/ab_tests -d '{"end_time": "2022-05-30T01:00:00Z", "entity_type" : "CAMPAIGN", "start_time": "2022-05-25T01:00:00Z", "user_groups": [{"entity_ids": ["f2qcw", "f2tht"], "size": "50.00", "name": "first group"},{"entity_ids": ["f2rqi", "f2tws"], "size": "50.00", "name": "second group", "description": "second AB test group"}], "name": "first AB test", "description": "documentation example"}'`
+
+### レスポンス例
+
+```json
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "end_time": "2022-05-30T01:00:00Z",
+          "entity_type": "CAMPAIGN",
+          "start_time": "2022-05-25T01:00:00Z",
+          "user_groups": [
+            {
+              "entity_ids": [
+                "f2qcw",
+                "f2tht"
+              ],
+              "size": "50.0",
+              "name": "first group"
+            },
+            {
+              "entity_ids": [
+                "f2rqi",
+                "f2tws"
+              ],
+              "size": "50.0",
+              "name": "second group",
+              "description": "second AB test group"
+            }
+          ],
+          "name": "first AB test",
+          "description": "documentation example"
+        }
+      },
+      "data": {
+        "created_at": "2022-05-25T00:00:00Z",
+        "created_by": {
+          "user_id": "756201191646691328",
+          "username": "apimctestface"
+        },
+        "deleted": false,
+        "description": "documentation example",
+        "end_time": "2022-05-30T01:00:00Z",
+        "entities": [
+          {
+            "id": "p1bcx",
+            "account_id": "18ce54d4x5t"
+          },
+          {
+            "id": "p1bcy",
+            "account_id": "18ce54d4x5t"
+          }
+        ],
+        "entity_type": "CAMPAIGN",
+        "id": "hr7l0",
+        "name": "first AB test",
+        "start_time": "2022-05-25T01:00:00Z",
+        "status": "SCHEDULED",
+        "user_groups": [
+          {
+            "id": "p1bcx",
+            "name": "first group",
+            "description": null,
+            "size": "50.0",
+            "entity_ids": [
+              "f2qcw",
+              "f2tht"
+            ]
+          },
+          {
+            "id": "p1bcy",
+            "name": "second group",
+            "description": "second AB test group",
+            "size": "50.0",
+            "entity_ids": [
+              "f2rqi",
+              "f2tws"
+            ]
+          }
+        ],
+        "updated_at": "2022-05-25T00:00:00Z",
+        "updated_by": {
+          "user_id": "756201191646691328",
+          "username": "apimctestface"
+        }
+      }
+    }
+```
+
+<div id="put-accountsaccount_idab_testsab_test_id">
+  #### PUT accounts/:account&#95;id/ab&#95;tests/:ab&#95;test&#95;id
+</div>
+
+指定した A/B テストを更新します。
+
+すべてのパラメータはリクエストボディで送信され、`Content-Type` は `application/json` である必要があります。
+
+このエンドポイントは、オブジェクト ID を含む部分的な JSON をサポートします。次の原則が適用されます。
+
+* オブジェクトまたは要素を追加または削除するには、配列全体（およびそのサブ構造）を送信します。これは**置換**操作です
+  * 配列を再作成するイメージで考えてください
+* それ以外の場合は、キー名または ID を参照して既存のフィールドを変更（追加・削除・更新）します
+  * フィールドを削除するには、その値を `null` に設定します
+  * 送信されなかったフィールドは変更されません
+
+一般的に、A/B テストは `status` が `SCHEDULED` の間のみ更新できます。例外として、`LIVE` の間でも A/B テストの `end_time` を更新することが可能です。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/18ce54d4x5t/:ab_test_id`
+
+##### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](/ja/x-ads-api/campaign-management#accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| ab&#95;test&#95;id  <br />*required* | リクエストで操作対象となる A/B テストを参照する ID です。<br /><br />Type: string<br /><br />Example: `hr7l0` |
+| description  <br />*optional* | A/B テストの説明です。最大長は 1,024 文字です。<br /><br />**注**: A/B テストの `status` が `SCHEDULED` のときにのみ更新できます。<br /><br />Type: string<br /><br />Example: `documentation example` |
+| end&#95;time  <br />*optional* | A/B テストが終了する時刻を、ISO 8601 形式で指定します。<br /><br />**注**: A/B テストの `status` が `SCHEDULED` または `LIVE` のときにのみ更新できます。<br /><br />Type: string<br /><br />Example: `2020-10-02T00:00:00Z` |
+| name  <br />*optional* | A/B テストの名前です。最大長は 255 文字です。<br /><br />**注**: A/B テストの `status` が `SCHEDULED` のときにのみ更新できます。<br /><br />Type: string<br /><br />Example: `first AB test` |
+| start&#95;time  <br />*optional* | A/B テストが開始される時刻を、ISO 8601 形式で指定します。<br /><br />**注**: A/B テストの `status` が `SCHEDULED` のときにのみ更新できます。<br /><br />Type: string<br /><br />Example: `2022-05-30T00:00:00Z` |
+| user&#95;groups  <br />*required* | ユーザーグループを表します。詳しくは下の表を参照してください。<br /><br />**注**: A/B テストの `status` が `SCHEDULED` のときにのみ更新できます。<br /><br />Type: array of objects |
+
+<div id="user-groups">
+  #### ユーザーグループ
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| id  <br />*場合によっては必須* | リクエスト内で操作対象となるユーザーグループオブジェクトを参照するための値です。<br /><br />**Note**: ユーザーグループオブジェクトの *フィールド* を変更（更新、追加、削除）する場合に必須です。<br /><br />**Note**: ユーザーグループオブジェクト全体を追加または削除する場合は、id を指定しないでください。<br /><br />Type: string<br /><br />Example: `p1bcx` |
+| description  <br />*任意* | ユーザーグループの説明です。最大長は 1,024 文字です。<br /><br />**Note**: このフィールドを `null` 値で指定すると、値が未設定（削除）されます。<br /><br />Type: string<br /><br />Example: `second AB test group` |
+| entity&#95;ids  <br />*任意* | エンティティ ID の配列です。<br /><br />**Note**: これは置換操作です。以前に設定されていた値はすべて上書きされます。<br /><br />**Note**: エンティティは 1 つの A/B テストにのみ関連付けることができます。<br /><br />Type: array<br /><br />Example: `["dxi0l", "e66bl"]` |
+| name  <br />*任意* | ユーザーグループの名前です。最大長は 255 文字です。<br /><br />**Note**: このフィールドを `null` 値で指定すると、値が未設定（削除）されます。<br /><br />Type: string<br /><br />Example: `first group` |
+| size  <br />*任意* | このユーザーグループに割り当てるユーザーの割合です。数値を文字列として表し、小数点以下は最大 2 桁までとします。たとえば 40% は 40、40.0、または 40.00 のいずれかで表します。<br /><br />**Note**: すべての *オブジェクト* における size の値の合計は必ず 100.00 になる必要があります。<br /><br />Type: string<br /><br />Min, Max: `1.00`, `99.00` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+このリクエストでは次の変更を行います。
+
+1. A/Bテストの説明を削除します
+2. 終了時刻を変更します
+3. 最初のユーザーグループに説明を追加します
+4. 各ユーザーグループ内のユーザー割合を変更します
+5. 2番目のユーザーグループにエンティティ ID（`f2syz`）を追加します
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/ab_tests/hr7l0 -d '{"description": null, "end_time": "2022-06-01T01:00:00Z", "user_groups": [{"id": "p1bcx", "description": "first AB test group", "size": "60.00"},{"id": "p1bcy", "size": "40.00", "entity_ids": ["f2rqi", "f2tws", "f2syz"]}]}'`
+
+<div id="example-response">
+  ##### レスポンス例
+</div>
+
+```json
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "ab_test_id": "hr7l0",
+          "description": null,
+          "end_time": "2022-06-01T01:00:00Z",
+          "user_groups": [
+            {
+              "id": "p1bcx",
+              "description": "first AB test group",
+              "size": "60.0"
+            },
+            {
+              "id": "p1bcy",
+              "size": "40.0",
+              "entity_ids": [
+                "f2rqi",
+                "f2tws",
+                "f2syz"
+              ]
+            }
+          ]
+        }
+      },
+      "data": {
+        "created_at": "2020-05-25T00:00:00Z",
+        "created_by": {
+          "user_id": "756201191646691328",
+          "username": "apimctestface"
+        },
+        "deleted": false,
+        "description": null,
+        "end_time": "2022-06-01T01:00:00Z",
+        "entities": [
+          {
+            "id": "p1bcx",
+            "account_id": "18ce54d4x5t"
+          },
+          {
+            "id": "p1bcy",
+            "account_id": "18ce54d4x5t"
+          }
+        ],
+        "entity_type": "CAMPAIGN",
+        "id": "hr7l0",
+        "name": "first AB test",
+        "start_time": "2022-05-25T01:00:00Z",
+        "status": "SCHEDULED",
+        "user_groups": [
+          {
+            "id": "p1bcx",
+            "name": "first group",
+            "description": "first AB test group",
+            "size": "60.0",
+            "entity_ids": [
+              "f2qcw",
+              "f2tht"
+            ]
+          },
+          {
+            "id": "p1bcy",
+            "name": "second group",
+            "description": "second AB test group",
+            "size": "40.0",
+            "entity_ids": [
+              "f2rqi",
+              "f2tws",
+              "f2syz"
+            ]
+          }
+        ],
+        "updated_at": "2022-05-25T00:17:23Z",
+        "updated_by": {
+          "user_id": "756201191646691328",
+          "username": "apimctestface"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idab_testsab_test_id">
+  #### DELETE accounts/:account&#95;id/ab&#95;tests/:ab&#95;test&#95;id
+</div>
+
+指定された A/B Test を削除します。
+
+**注記**: A/B Test の削除は元に戻せません。削除後に同じリソースを再度削除しようとした場合は、HTTP 404 が返されます。
+
+<div id="resource-url">
+  ##### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/ab_tests/:ab_test_id`
+
+##### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| ab&#95;test&#95;id  <br />*required* | このリクエストで対象とする A/B テストへの参照。<br /><br />Type: string<br /><br />Example: `hr7l0` |
+
+<div id="example-request">
+  ##### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/ab_tests/hr7l0`
+
+### レスポンス例
+
+```json
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t",
+          "ab_test_id": "hr7l0"
+        }
+      },
+      "data": {
+        "created_at": "2022-05-25T00:00:00Z",
+        "created_by": {
+          "user_id": "756201191646691328",
+          "username": "apimctestface"
+        },
+        "deleted": true,
+        "description": null,
+        "end_time": "2022-06-01T01:00:00Z",
+        "entities": [
+          {
+            "id": "p1bcx",
+            "account_id": "18ce54d4x5t"
+          },
+          {
+            "id": "p1bcy",
+            "account_id": "18ce54d4x5t"
+          }
+        ],
+        "entity_type": "CAMPAIGN",
+        "id": "hr7l0",
+        "name": "first AB test",
+        "start_time": "2022-05-25T01:00:00Z",
+        "status": "SCHEDULED",
+        "user_groups": [
+          {
+            "id": "p1bcx",
+            "name": "first group",
+            "description": "first AB test group",
+            "size": "60.0",
+            "entity_ids": [
+              "f2qcw",
+              "f2tht"
+            ]
+          },
+          {
+            "id": "p1bcy",
+            "name": "second group",
+            "description": "second AB test group",
+            "size": "40.0",
+            "entity_ids": [
+              "f2rqi",
+              "f2tws",
+              "f2syz"
+            ]
+          }
+        ],
+        "updated_at": "2022-06-02T00:18:31Z",
+        "updated_by": {
+          "user_id": "756201191646691328",
+          "username": "apimctestface"
+        }
+      }
+    }
+```

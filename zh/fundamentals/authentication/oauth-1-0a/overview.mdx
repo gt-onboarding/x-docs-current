@@ -1,0 +1,63 @@
+---
+title: OAuth 1.0a
+sidebarTitle: 概览
+keywords: ["OAuth 1.0a", "OAuth 1.0", "OAuth 1.0a 认证", "OAuth 1.0a 用户上下文", "三方 OAuth", "OAuth 1.0a 流程"]
+---
+
+import { Button } from "/snippets/zh/button.mdx";
+
+<div id="oauth-10a">
+  ## OAuth 1.0a
+</div>
+
+X 开发者平台上的许多端点使用 OAuth 1.0a 方法来代表某个 X 账号执行操作或发起 API 请求。举例来说，如果你拥有一个 X 开发者应用，只要某个 X 账号的用户完成对你应用的认证，你就可以代表该账号发起 API 请求。
+
+请注意：如果你不熟悉 HMAC-SHA1 和百分号编码（percent-encoding）等概念，我们建议你查看下方的“有用工具”部分，其中列出了一些能够大大简化认证流程的 API 客户端。
+
+<div id="key-concepts">
+  ### 关键概念
+</div>
+
+<div id="signing-a-request-with-keys-and-tokens">
+  #### 使用密钥和令牌为请求签名
+</div>
+
+你必须通过在 Authorization 请求头中传递若干生成的密钥和令牌，为每个 API 请求进行签名。首先，你可以在 [X 开发者应用](/zh/resources/fundamentals/developer-apps) 的详情页面生成多个密钥和令牌，包括以下内容：
+
+|     |     |
+| :--- | :--- |
+| API key 和 secret：<br /><br />`oauth_consumer_key`<br /><br />`oauth_consumer_secret` | 可以将它们理解为在发起 API 请求时代表你的 X 开发者应用的用户名和密码。 |
+| Access token 和 secret：<br /><br />`oauth_token`<br /><br />`oauth_token_secret` | 访问令牌（Access token）和访问令牌密钥（access token secret）是特定于用户的凭证，用于对 OAuth 1.0a API 请求进行身份验证。它们指明了该请求代表的是哪个 X 账号。<br /><br />如果你希望你的应用代表与你的开发者账号关联的同一个 X 账号发起请求，可以在 [X 开发者应用](/zh/resources/fundamentals/developer-apps) 的详情页面生成你自己的访问令牌和令牌密钥（token secret）。<br /><br />如果你想为其他用户生成访问令牌，请参阅下文“代表用户发起请求”。 |
+
+<div id="making-requests-on-behalf-of-users">
+  #### 代表用户发起请求
+</div>
+
+在创建签名时，你需要一组访问令牌，用来标识你将要代其发起请求的用户。
+
+你可以在[应用详情页面](https://developer.x.com/content/developer-twitter/en/apps)生成一组访问令牌，它代表拥有该 X 开发者应用的 X 账号。但如果你希望代表其他 X 账号发起请求，那么该账号的所有者必须在[三方 OAuth 流程](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)中登录其账号并向你授予访问权限。此流程的输出是一组访问令牌（`oauth_token` 和 `oauth_token_secret`），可用于发起 OAuth 1.0a 请求。
+
+一旦你拥有这些密钥和令牌，你就可以[从头创建签名](/zh/resources/fundamentals/authentication#creating-a-signature)。除非你非常了解自己在做什么，或者正在使用下面提到的工具之一向需要 OAuth 1.0a 的端点发起请求，否则我们不建议这样做。
+
+作为参考，下面是一个已签名的 cURL 请求示例，所有生成的令牌都通过 Authorization 头部传入：
+
+```bash
+curl --request POST \
+  --url 'https://api.x.com/1.1/statuses/update.json?status=Hello%20world' \
+  --header 'authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"' \
+```
+
+<Note>
+  **注意：** 用户访问令牌十分敏感，必须妥善保护。当生成访问令牌时，它所代表的用户是在信任你的应用能够确保其安全。如果 API 密钥和用户访问令牌的安全同时被攻破，你的应用可能会暴露私密信息和账号功能的访问权限。我们鼓励你进一步了解[如何保护密钥和访问令牌](/zh/resources/fundamentals/developer-apps)。
+</Note>
+
+<div id="useful-tools">
+  ### 实用工具
+</div>
+
+[签名请求](/zh/resources/fundamentals/authentication#creating-a-signature) 的过程比较复杂。我们建议你使用可以自动生成大部分身份验证令牌的 API 客户端库：
+
+|     |     |
+| :--- | :--- |
+| [Postman](https://www.getpostman.com/) | 一款 API 客户端，可用于构建并发送 REST API 请求。阅读我们的“[Postman 入门](/zh/tutorials/postman-getting-started)”教程以进一步了解此工具。 |
+| [Insomnia](https://insomnia.rest/) | Insomnia 是一款 REST API 客户端，具备 Cookie 管理、环境变量、代码生成以及身份验证等功能，支持 Mac、Windows 和 Linux。 |

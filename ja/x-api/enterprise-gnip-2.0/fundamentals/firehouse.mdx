@@ -1,0 +1,451 @@
+---
+title: コンプライアンス Firehose API
+keywords: ["compliance firehose", "firehose API", "compliance API", "enterprise firehose", "compliance stream", "firehose"]
+---
+
+> **ご注意ください**
+>
+> X API v2 向けに、新しいコンプライアンスツールである [batch compliance](/ja/x-api/compliance/batch-compliance) をリリースしました。この新しいツールを使用すると、大規模なポストまたはユーザー ID のデータセットをアップロードし、それぞれのコンプライアンスステータスを取得して、データセットをコンプライアンス準拠の状態にするためにどのデータに対して対応が必要かを判断できます。
+
+> さらに、batch compliance と compliance firehose の両方が、ポスト編集をサポートするように更新されました。compliance firehose には、新しい `tweet_edit` イベントが追加されています。詳細については、[コンプライアンスデータオブジェクト](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) のドキュメントを参照してください。ポスト編集メタデータがどのように機能するかについては、[Edit Posts 基本事項](/ja/x-api/fundamentals/edit-posts) のページを参照してください。
+
+<div id="overview">
+  ## 概要
+</div>
+
+`Enterprise`
+
+X の中核的な価値観の 1 つは、ユーザーの声を守り、尊重することです。これには、ユーザーが X 上で共有することを選択したコンテンツを削除・変更・編集する際の期待や意図を尊重することも含まれます。これは、世界最大級の公共かつリアルタイムな情報プラットフォームの長期的な健全性にとって極めて重要であると考えています。X はコントロールをユーザーの手に委ね、各ユーザーが自分自身の X 体験を制御できるようにしています。X データを受け取るビジネス利用者には、エンドユーザーの期待と意図を尊重する責任があると私たちは考えています。
+
+X プラットフォーム上で発生しうるコンプライアンスイベントの種類について詳しくは、記事 [Honoring User Intent on X](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse#honoring-user-intent-on-twitter) を参照してください。
+
+API を通じて X データを利用するあらゆる開発者や企業には、ユーザーコンテンツの変更を尊重するために、合理的なあらゆる手段を講じる義務があります。この義務は、削除、変更、共有オプションの変更（例: コンテンツが非公開または保留状態になる場合）などのユーザーイベントにも及びます。これは、ユーザーが自分のポストを編集した場合も含まれます。この義務があなたの X データの利用にどのような影響を与えるかについては、[Developer Policy](https://developer.x.com/en/developer-terms/policy) および／または X Data Agreement に記載されている具体的な文言を参照してください。
+
+X は、これらのユーザーコンプライアンスイベントに関する情報や、特定のポストまたはユーザーが公開されているかどうかに関する情報を提供するために、次のソリューションを提供しています。これらのソリューションの概要と一般的な統合パターンについて、以下で簡単に説明します。
+
+<div id="get-statuseslookup-and-get-userslookup">
+  #### GET statuses/lookup および GET users/lookup
+</div>
+
+* フォーマット: REST API。参照: [GET statuses/lookup](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) および [GET users/lookup](https://developer.x.com/en/docs/x-api/v1/accounts-and-users/follow-search-get-users/api-reference/get-users-lookup)。
+
+* これらのエンドポイントは、常にポスト編集の最新バージョンを返します。編集機能導入後に作成されたポストを表すすべてのポストオブジェクトには、ポスト編集のメタデータが含まれます。これは、編集されていないポストでも同様です。
+
+* すべてのポストについて、作成から 30 分を過ぎて行われた取得リクエストでは、そのポストの最終状態が返されます。
+
+* API リクエストの一部として呼び出し元によって指定された、特定のポストまたはユーザーの可用性に関する情報を返します。
+
+* 特定のポスト / ユーザーの現在の可用性状態を、その都度スポットチェックする用途で使用できます。
+
+* 特定のポストまたはユーザーの、ある時点における現在の状態を確認する必要があるお客様に最適です。
+
+* これらの API は、お客様がコンテンツの可用性を確認する必要がある場合に利用できる有用な手段を提供します。たとえば次のような場合です:
+  1. ポストを表示する場合
+  2. ポストまたはユーザーと 1:1 の形でエンゲージする場合
+  3. 許可されたファイルダウンロードを通じて X コンテンツを第三者に配信する場合
+  4. ポストを長期間保存する場合
+
+<div id="compliance-firehose-enterprise-only">
+  #### Compliance Firehose（Enterprise 限定）
+</div>
+
+* 形式: Streaming API。詳細は [Compliance Firehose](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse#api-reference) を参照してください。
+* X 上の[コンプライアンスアクティビティ](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects)のリアルタイムストリームを提供します。これらのアクティビティには、ポストが編集されたタイミングなどが含まれます。
+* プラットフォーム上で新しいコンプライアンスイベントが発生した際に、一連の保存済みデータ全体でコンプライアンス状態を維持するために利用できます。
+* 大量の X データを長期間にわたって取得および保存するお客様に最適です。
+
+<div id="guides">
+  ## ガイド
+</div>
+
+<div id="compliance-best-practices">
+  ### **コンプライアンスのベストプラクティス**
+</div>
+
+<div id="recommendations-best-practices">
+  #### **推奨事項とベストプラクティス**
+</div>
+
+* **数値型の Post ID と User ID を保存するデータストレージスキーマを構築する**: ユーザーメッセージの処理では、そのユーザーのすべてのポストに対してアクションを行う必要があります。そのため、すべてのコンプライアンスメッセージが数値 ID のみで配信されることから、数値 ID に基づいてポストとユーザーの関係を保持できるよう、ストレージスキーマを設計することが重要です。データ利用者は、Post ID と User ID の両方でコンプライアンスイベントを監視し、ローカルデータストアを適切に更新できる必要があります。
+
+* **すべてのコンプライアンスステータスに対応するスキーマを構築する**: さまざまなアプリケーションでコンプライアンス処理をどのように扱うかによっては、データストアに他のメタデータを追加する必要がある場合があります。たとえば、データ利用者は、status&#95;withheld メッセージの影響を受ける国でコンテンツの表示を制限しやすくするため、既存のデータベースにメタデータを追加することを選択するかもしれません。
+
+* **Retweet の削除処理**: Retweet（リツイート）は特別な種類のポストであり、元のメッセージが Retweet 内のオブジェクトにネストされた形で含まれています。この場合、Retweet には 2 つの Post ID が参照されます — Retweet 自体の ID と、（ネストされたオブジェクト内に含まれる）元のメッセージの ID です。元のメッセージが削除されると、その元の ID に対してポスト削除メッセージが発行されます。ポスト削除イベントは通常、すべての Retweet に対する削除イベントをトリガーします。ただし、場合によってはすべてが送信されないことがあり、クライアントシステムは Retweet 削除が不完全であっても許容できるようにしておく必要があります。元の ID の削除だけで、以降のすべての Retweet を削除するには十分であるべきです。Retweet を保存する際には元の Post ID を参照として保持し、ポスト削除イベントを受信したときに参照されているすべての Retweet を削除することがベストプラクティスです。
+
+<div id="compliance-data-objects">
+  ### コンプライアンスデータオブジェクト
+</div>
+
+<div id="compliance-firehose-api">
+  #### **Compliance Firehose API**
+</div>
+
+想定されるコンプライアンスイベントの種類には、ポスト（または「status」）イベントとユーザーイベントが含まれます。これらには、以下で説明する複数のタイプがあります。  
+
+次の点にご注意ください。
+
+* ユーザーのステータスについては[こちら](https://support.x.com/articles/14016)、削除されたポストに関する開発者ポリシーについては[こちら](https://dev.x.com/overview/terms/policy#3.Update_Respect_Users_Control_and_Privacy)をご覧ください。
+* Compliance Firehose は、`tweet_edit` イベントを提供するよう更新されています。
+* いくつかのユーザー削除、保護、凍結イベントは必ずしも恒久的なものではなく、状態が無制限に切り替わる可能性があります。これらには、user&#95;delete、user&#95;undelete、user&#95;protect、user&#95;unprotect、user&#95;suspend、user&#95;unsuspend が含まれます。
+* user&#95;delete は、ユーザーがアカウントの user&#95;undelete を選択していない場合に限り、30 日後に status&#95;delete が続きます。ユーザーが user&#95;delete を取り消し、そのユーザーのすべてのポストに対する削除が 30 日後に発生しない可能性があります。
+* user&#95;suspend は、ユーザーが user&#95;unsuspend イベントの対象とならない限り有効なままのアクションです。これらについては 30 日間ルールは適用されません。
+
+エンドユーザーのプライバシーと意図を尊重するために、各イベントタイプをどのように処理すべきかを理解するには、「Recommended Action」列を参照してください。
+
+| Original Message Type | Object | Permanent (Yes/No) | Recommended Action |
+| :--- | :--- | :--- | :--- |
+| delete | Status | Yes | 関連するポストを削除します。 |
+| status&#95;withheld | Status | Yes | status&#95;withheld メッセージに記載されている特定の国で、関連するポストを非表示にします。 |
+| drop | Status | No  | ポストを一般公開ビューから削除します。 |
+| undrop | Status | No  | ステータスは再び表示され、公開ポストとして扱われる場合があります。 |
+| tweet&#95;edit | Status | Yes | 編集内容を反映し、該当する場合は新しい編集内容を表示します。 |
+| user&#95;delete | User | No  | 関連するユーザーのすべてのポストを非表示または削除します。 |
+| user&#95;undelete | User | No  | 関連するユーザーのすべてのポストは、再び表示され、公開ポストとして扱われる場合があります。 |
+| user&#95;protect | User | No  | 関連するユーザーのすべてのポストを非表示または削除します。 |
+| user&#95;unprotect | User | No  | 関連するユーザーのすべてのポストは、再び表示され、公開ポストとして扱われる場合があります。 |
+| user&#95;suspend | User | No  | 関連するユーザーのすべてのポストを非表示または削除します。 |
+| user&#95;unsuspend | User | No  | 関連するユーザーのすべてのポストは、再び表示され、公開ポストとして扱われる場合があります。 |
+| scrub&#95;geo | User | Yes | scrub&#95;geo メッセージ内で指定されたポストより前に、そのユーザーが行ったすべてのポストについて、X が提供したすべてのジオデータを削除します。なお、その後のポストには利用可能なジオデータが含まれている場合があります。 |
+| user&#95;withheld | User | Yes | user&#95;withheld メッセージに記載されている特定の国で、関連するユーザーのポストを非表示にします。 |
+| delete | Favorite | Yes | 関連する「いいね」/「お気に入り」を削除します。 |
+
+<div id="payload-examples">
+  #### **ペイロード例**
+</div>
+
+上記の表で説明した各コンプライアンスイベントごとのペイロード例を以下に示します。
+
+**ポストの編集**
+
+```json
+{"tweet_edit":
+   {
+     "id": "1557445923210514432"
+     "initial_tweet_id": "1557433858676740098",
+     "edit_tweet_ids": ["1557433858676740098", "1557445923210514432"],
+     "timestamp_ms": "1660155761384"
+   }
+ }
+```
+
+<div id="post-delete">
+  ##### ポストの削除
+</div>
+
+```json
+{
+  "delete": {
+    "status": {
+      "id": 601430178305220600,
+      "id_str": "601430178305220608",
+      "user_id": 3198576760,
+      "user_id_str": "3198576760"
+    },
+    "timestamp_ms": "1432228155593"
+  }
+}
+```
+
+<div id="post-withheld">
+  ##### 差し止められたポスト
+</div>
+
+```json
+{
+  "status_withheld": {
+    "status": {
+      "id": 601430178305220600,
+      "id_str": "601430178305220608",
+      "user_id": 3198576760,
+      "user_id_str": "3198576760"
+    },
+    "withheld_in_countries": [
+      "XY"
+    ],
+    "timestamp_ms": "1432228155593"
+  }
+}
+```
+
+<div id="drop">
+  ##### ドロップ
+</div>
+
+```json
+{
+  "drop": {
+    "status": {
+      "id": 601430178305220600,
+      "id_str": "601430178305220600",
+      "user_id": 3198576760,
+      "user_id_str": "3198576760"
+    },
+    "timestamp_ms": "1432228155593"
+  }
+}
+```
+
+<div id="undrop">
+  ##### ドロップ解除
+</div>
+
+```json
+{
+  "undrop": {
+    "status": {
+      "id": 601430178305220600,
+      "id_str": "601430178305220600",
+      "user_id": 3198576760,
+      "user_id_str": "3198576760"
+    },
+    "timestamp_ms": "1432228155593"
+  }
+}
+```
+
+<div id="scrub-geo">
+  #### 位置情報消去
+</div>
+
+```json
+{
+  "scrub_geo": {
+    "user_id": 519761961,
+    "up_to_status_id": 411552403083628540,
+    "up_to_status_id_str": "411552403083628544",
+    "user_id_str": "519761961",
+    "timestamp_ms": "1432228180345"
+  }
+}
+```
+
+<div id="user-delete">
+  ##### ユーザー削除
+</div>
+
+```json
+{
+  "user_delete": {
+    "id": 771136850,
+    "timestamp_ms": "1432228153548"
+  }
+}
+```
+
+<div id="user-undelete">
+  ##### ユーザー削除の取り消し
+</div>
+
+```json
+{
+  "user_undelete": {
+    "id": 796250066,
+    "timestamp_ms": "1432228149062"
+  }
+}
+```
+
+<div id="user-withheld">
+  ##### ユーザー提供保留
+</div>
+
+```json
+{
+  "user_withheld": {
+    "user": {
+      "id": 1375036644,
+      "id_str": "1375036644"
+    },
+    "withheld_in_countries": [
+      "XY"
+    ],
+    "timestampMs": "2014-08-27T23:49:41.839+00:00"
+  }
+}
+```
+
+<div id="user-protect">
+  ##### ユーザーを保護
+</div>
+
+```json
+{
+  "user_protect": {
+    "id": 3182003550,
+    "timestamp_ms": "1432228177137"
+  }
+}
+```
+
+<div id="user-unprotect">
+  ##### ユーザー保護解除
+</div>
+
+```json
+{
+  "user_unprotect": {
+    "id": 2911076065,
+    "timestamp_ms": "1432228180113"
+  }
+}
+```
+
+<div id="user-suspend">
+  ##### ユーザー凍結
+</div>
+
+```json
+{
+  "user_suspend": {
+    "id": 3120539094,
+    "timestamp_ms": "1432228194217"
+  }
+}
+```
+
+<div id="user-unsuspend">
+  ##### ユーザーの凍結解除
+</div>
+
+```json
+{
+  "user_unsuspend": {
+    "id": 3293130873,
+    "timestamp_ms": "1432228193828"
+  }
+}
+```
+
+<div id="integrating-compliance-firehose">
+  ### Compliance Firehose の統合
+</div>
+
+Compliance Firehose は、X プラットフォーム上で発生するコンプライアンスイベントをリアルタイムで配信するストリーミング API です。コンプライアンスイベントと、それが X 上でどのように生成されるかを理解するには、記事 [Honoring User Intent on X](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse#honoring-user-intent-on-twitter) を参照してください。
+
+ポストとユーザーのイベントはそれぞれ独立して配信され、それぞれを独立して処理する必要がある点に注意してください（つまり、ポストの削除はユーザーイベントを意味せず、その逆も同様です）。いくつかのユーザーイベントは必ずしも恒久的なものではなく、状態が無限に切り替わる可能性があります。これには、user&#95;delete、user&#95;undelete、user&#95;protect、user&#95;unprotect、user&#95;suspend、user&#95;unsuspend が含まれます。
+
+user&#95;delete が行われたユーザーについては、そのユーザーがアカウントの user&#95;undelete を選択していない場合に限り、30 日後に status&#95;delete が続きます。ユーザーによって user&#95;delete が取り消され、そのユーザーのすべてのポストに対する削除が 30 日後に発生しない可能性もあります。
+
+user&#95;suspend は、ユーザーが user&#95;unsuspend イベントの対象とならない限り有効なままのアクションです。これらは 30 日間という期間におけるいかなる変更の対象にもなりません。
+
+コンプライアンスイベントをソフトウェアのユーザーに直接表示したり、製品や顧客体験に組み込んだりすることは決して適切ではありません。これらは、コンプライアンスを維持し、X ユーザーの行動を尊重することのみを目的としています。
+
+<div id="integrating-with-the-compliance-firehose">
+  #### **Compliance Firehose との統合**
+</div>
+
+Compliance Firehose をお使いのシステムに統合するには、次のことが可能な統合を構築する必要があります。
+
+1. Compliance Firehose の各ストリーミング API パーティションへのストリーミング接続を確立する
+2. 大量のデータを処理する – 非同期プロセスを使用して、ストリーム取り込みと追加処理を分離する
+3. いかなる理由で切断された場合でも、ストリーミングパーティションへ自動的に再接続する
+4. 上記のガイダンスに従って保存しているポストおよびユーザーデータに関連するコンプライアンスイベントを処理する
+
+<div id="honoring-user-intent-on-twitter">
+  ### X におけるユーザーの意図の尊重
+</div>
+
+私たちは、X ユーザーのプライバシーと意図を尊重することが、世界最大級の公開リアルタイム情報プラットフォームの長期的な健全性を維持するうえで極めて重要であると考えています。X はプライバシー設定をユーザー自身の手に委ねており、各個人が自分自身の X での体験をコントロールできるようにしています。X データを利用するビジネスユーザーとして、私たちには、この信頼と尊重の環境を維持するために、エンドユーザーのプライバシーと行動を尊重するという共通の責任があります。
+
+プラットフォーム上での表示方法に影響を与える、ポストやユーザーアカウントに起こりうることには、さまざまなものがあります。プライバシーと意図に影響を与えるアクションは、Status（ポスト）レベルと User レベルの両方で定義されています。これらのアクションには次のようなものが含まれます。
+
+<div id="user">
+  #### ユーザー
+</div>
+
+| Action | Description |
+| :--- | :--- |
+| Protect Account | X ユーザーは、いつでも自分のアカウントを非公開にしたり、非公開を解除したりできます。非公開アカウントの場合、そのアカウントのポストを閲覧できる相手は、ユーザーが1人ずつ手動で承認する必要があります。  <br />詳細については、[公開ポストと非公開ポストについて](https://support.x.com/articles/14016-about-public-and-protected-tweets)を参照してください。 |
+| Delete Account | X ユーザーは、いつでも自分のアカウントと、それに紐づくすべてのステータスメッセージ（ポスト）を削除できます。X は、ユーザーが削除を取り消してアカウントを再有効化する可能性に備え、削除後30日間はアカウント情報を保持します。 |
+| Scrub Geo | X ユーザーは、過去のポストから位置情報データをいつでもすべて削除できます。これは「scrub geo」として知られています。 |
+| Suspend Account | X は、X ルールに違反しているアカウント、またはハッキングや不正アクセスが疑われるアカウントを凍結する権利を有します。アカウント凍結の解除（unsuspend）は、X のみが行うことができます。 |
+| Withhold Account | X は、必要に応じて特定の国において特定のコンテンツへのアクセスを制限（withhold）する権利を有します。制限されたアカウントの制限解除（unwithhold）は、X のみが行うことができます。  <br />詳細については、[国別に制限されたコンテンツについて](https://support.x.com/articles/20169222-country-withheld-content)を参照してください。 |
+
+<div id="status">
+  #### ステータス
+</div>
+
+| アクション | 説明 |
+| :--- | :--- |
+| ステータスの削除 | Xユーザーは、いつでもステータスを削除できます。削除されたステータスは元に戻すことができず、恒久的に削除されます。 |
+| ステータスの保留 | Xは、特定の国における特定のコンテンツへのアクセスを、必要に応じて事後的に制限（保留）する権利を有します。保留されたステータスを保留解除できるのはXのみです。   <br />詳細については、[Country Withheld Content](https://support.x.com/articles/20169222-country-withheld-content)を参照してください。 |
+
+<div id="keeping-track-of-user-and-status-changes">
+  #### ユーザーおよびステータスの変更の追跡
+</div>
+
+ユーザーまたはステータスの状態は、上記のいずれかのアクションによっていつでも変化する可能性があり、その結果、X データの利用者は関連するすべてのコンテンツの可用性およびプライバシーをどのように取り扱うべきかが影響を受けます。これらのアクションが発生すると、ステータスまたはユーザーの状態が変更されたことを示す対応するコンプライアンスメッセージが送信されます。
+
+<div id="api-reference">
+  ## API リファレンス
+</div>
+
+<div id="get-compliancefirehose">
+  ### **GET compliance/firehose**
+</div>
+
+<div id="methods">
+  #### メソッド
+</div>
+
+| メソッド | 説明 |
+| :--- | :--- |
+| [GET /compliance/:stream](#Connect) | データストリームに接続します |
+
+<div id="authentication">
+  #### 認証
+</div>
+
+Compliance Firehose API へのすべてのリクエストでは、console.gnip.com のアカウントにログインする際に使用する有効なメールアドレスとパスワードの組み合わせに基づく HTTP Basic 認証を使用する必要があります。各リクエストごとに、認証情報を Authorization ヘッダーで送信する必要があります。
+
+<div id="get-compliancestream">
+  #### GET /compliance/:stream
+</div>
+
+Compliance firehose データストリームへの永続的な接続を確立します。この接続を通じてコンプライアンスイベントが配信されます。
+
+|                             |                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| :-------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Request Method**          | HTTP GET                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Connection Type**         | Keep-Alive                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **URL**                     | ダッシュボードのストリームの API Help ページに記載されており、次の構造に似ています。  <br />  <br /><br />[https://gnip-stream.x.com/stream/compliance/accounts/:account&#95;name/publishers/twitter/:stream&#95;label.json?partition=1](https://gnip-stream.x.com/stream/compliance/accounts/:account_name/publishers/twitter/:stream_label.json?partition=1)<br /><br />**Note:** &quot;partition&quot; パラメータは必須です。ストリーム全体を取得するには、全体の 12.5% ずつを含む 8 つすべてのパーティションに接続する必要があります。 |
+| **Compression**             | Gzip。Gzip 圧縮を使用してストリームに接続するには、接続リクエストで Accept-Encoding ヘッダーを送信するだけです。ヘッダーは次のようになります。  <br />  <br />Accept-Encoding: gzip                                                                                                                                                                                                                                                                                                                  |
+| **Character Encoding**      | UTF-8                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **Response Format**         | JSON。レスポンス形式として JSON を使用するよう、リクエストヘッダーで JSON 形式を指定してください。                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Rate Limit**              | 60 秒あたり 10 リクエスト。                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Read Timeout**            | クライアント側で読み取りタイムアウトを設定し、30 秒を超える値に設定してください。                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Support for Tweet edits** | すべてのポストの編集は &quot;tweet&#95;edit&quot; コンプライアンスイベントをトリガーします。詳細については [Compliance Data Objects](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse#compliance-data-objects) のドキュメントを参照してください。                                                                                                                                                                                                                                                 |
+
+**Example Curl Request**
+
+次のサンプルリクエストは、コマンドラインで cURL を使用して実行した例です。
+
+```bash
+curl --compressed -v -uexample@customer.com "https://gnip-stream.x.com/stream/compliance/accounts/:account_name/publishers/twitter/:stream_label.json?partition=1"
+```
+
+*注:* 上記のリクエストは、Compliance firehose の `partition=1` にのみ接続しています。このストリームを完全に受信するには、8 個すべてのパーティションに接続する必要があります。
+
+<div id="response-codes">
+  #### レスポンスコード
+</div>
+
+これらのリクエストに対して、API からは次のレスポンスが返される可能性があります。ほとんどのエラーコードについては、ボディ内に詳細を含む文字列が返されます。200 以外のレスポンスが返された場合、クライアントは再接続を試みる必要があります。
+
+| Status | Text | Definition |
+| :--- | :--- | :--- |
+| 200 | Success | 接続が正常に確立され、新しいアクティビティが到着し次第ストリーム経由で送信されます。 |
+| 401 | Unauthorized | 不正な認証情報により HTTP 認証に失敗しました。リクエストで認証情報を正しく使用していることを確認するため、console.gnip.com にその認証情報でログインしてください。 |
+| 406 | Not Acceptable | 一般的には、クライアントがストリームからの gzip エンコーディングを受け入れるためのヘッダーを正しく含めなかった場合に発生しますが、その他の状況で発生する場合もあります。JSON メッセージには、「This connection requires compression. To enable compression, send an &#39;Accept-Encoding: gzip&#39; header in your request and be ready to uncompress the stream as it is read on the client end.」のような内容が含まれます。 |
+| 429 | Rate Limited | アプリが接続リクエストの上限を超えました。 |
+| 503 | Service Unavailable | X サーバー側の問題です。指数バックオフパターンを用いて再接続してください。この問題に関する通知が [X API Status Page](https://api.twitterstat.us/) に掲載されていない場合は、サポートにお問い合わせください。 |
+
+<div id="other-recommendations-best-practices">
+  #### その他の推奨事項とベストプラクティス
+</div>
+
+* **数値形式の Tweet ID と User ID を保存するデータストレージスキーマを構築する**: ユーザーに関するメッセージでは、そのユーザーからのすべてのポストに対してアクションを実行する必要があります。そのため、すべてのコンプライアンスメッセージは数値 ID のみで配信されるため、数値 ID に基づいてポストとユーザーの関係を維持できるようにストレージスキーマを設計することが重要です。データ利用者は、ポスト ID とユーザー ID の両方でコンプライアンスイベントを監視し、ローカルデータストアを適切に更新できる必要があります。
+
+* **すべてのコンプライアンスステータスに対応するスキーマを構築する**: 各種アプリケーションでコンプライアンス関連の処理をどのように行うかによっては、データストアに他のメタデータを追加する必要が生じる場合があります。たとえば、データ利用者は、`status_withheld` メッセージの影響を受ける国でコンテンツの表示を制限しやすくするために、既存のデータベースにメタデータを追加することを選択する場合があります。
+
+* **リポスト削除の処理**: リポストは、元のメッセージがリポスト内のオブジェクトとしてネストされる、特別な種類のポストです。この場合、リポスト内には 2 つのポスト ID が参照されます — リポスト自体の ID と、（ネストされたオブジェクト内に含まれる）元のメッセージの ID です。元のメッセージが削除されると、元の ID に対してポスト削除メッセージが発行されます。その後、すべてのリポストに対して追加の削除メッセージが発行されることはありません。元の ID の削除だけで、その後のすべてのリポストを削除したものとみなすのに十分です。

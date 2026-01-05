@@ -1,0 +1,318 @@
+---
+title: "ポストアノテーション"
+keywords: ["アノテーション", "ポストアノテーション", "エンティティアノテーション", "コンテキストアノテーション", "NER", "固有表現認識", "トピック", "エンティティ", "コンテキスト情報"]
+---
+
+<div id="overview">
+  ## 概要
+</div>
+
+Post オブジェクトを返すすべての v2 エンドポイントから返される Post オブジェクトには、注釈が追加されています。Post 注釈は、ポスト自体に関するコンテキスト情報を把握するための手段を提供します。すべてのポスト（100%）が対象となりますが、ポスト本文の内容により、実際に注釈が付与されるのは一部のポストに限られます。
+
+1. **エンティティ注釈 (NER):** エンティティには、人、場所、製品、組織などが含まれ、ペイロードの `entity` セクションで提供されます。これらはポスト本文で明示的に言及されている内容（固有表現認識）に基づき、プログラムによって自動的に割り当てられます。
+
+2. **コンテキスト注釈:** ポスト本文の分析から導出されるコンテキスト注釈には、ドメインとエンティティのペアが含まれ、これにより、これまで発見が難しかったトピックに関するポストを見つけやすくします。現在、ポストを分類するために 80 以上のドメインを使用しています。利用可能なコンテキスト注釈エンティティの CSV ファイルは、[GitHub リポジトリ](https://github.com/xdevplatform/twitter-context-annotations) から入手できます。
+
+<div id="post-annotation-types">
+  ## ポストのアノテーションタイプ
+</div>
+
+<div id="entities">
+  ### エンティティ
+</div>
+
+エンティティアノテーションは、`entities` フィールド内でプログラムによって定義されたエンティティであり、ペイロード内でアノテーションとして反映されます。各アノテーションには信頼度スコアがあり、ポスト本文のどの位置でエンティティが特定されたか（`start` フィールドと `end` フィールドを使用）を示します。
+
+エンティティアノテーションの種類は次のとおりです。
+
+* **Person** - 例: Barack Obama、Daniel、George W. Bush
+* **Place** - 例: Detroit、Cali、San Francisco
+* **Product** - 例: Mountain Dew、Mozilla Firefox
+* **Organization** - 例: Chicago White Sox、IBM
+* **Other** - 例: Diabetes、Super Bowl 50
+
+<div id="context">
+  ### コンテキスト
+</div>
+
+*最終更新日: 2022年6月*
+
+コンテキストアノテーションは、ペイロードの `context_annotations` フィールドで提供されます。これらは、ポストの本文内のキーワード、ハッシュタグ、ハンドルなどのセマンティック解析に基づいて推定され、ドメインおよび／またはエンティティのラベルとして付与されます。現在、以下の表に示すように、80以上のドメインを利用しています。
+
+| Domain Categories                           | Domain Codes                            |
+| :------------------------------------------- | :--------------------------------------- |
+| 3: TV Shows                                 | 46: ブランドカテゴリ                     |
+| 4: TV Episodes                              | 47: ブランド                             |
+| 6: Sports Events                            | 48: 製品                                 |
+| 10: Person                                  | 54: ミュージシャン                       |
+| 11: Sport                                   | 55: 音楽ジャンル                         |
+| 12: Sports Team                             | 56: 俳優                                 |
+| 13: Place                                   | 58: エンターテインメント著名人          |
+| 22: TV Genres                               | 60: アスリート                           |
+| 23: TV Channels                             | 65: 関心・趣味のバーティカル             |
+| 26: Sports League                           | 66: 関心・趣味のカテゴリ                 |
+| 27: American Football Game                  | 67: 関心・趣味                           |
+| 28: NFL Football Game                       | 68: ホッケーの試合                       |
+| 29: Events                                  | 71: ビデオゲーム                         |
+| 31: Community                               | 78: ビデオゲームパブリッシャー           |
+| 35: Politicians                             | 79: ビデオゲームハードウェア             |
+| 38: Political Race                          | 83: クリケットの試合                     |
+| 39: Basketball Game                         | 84: 書籍                                 |
+| 40: Sports Series                           | 85: 書籍ジャンル                         |
+| 43: Soccer Match                            | 86: 映画                                 |
+| 44: Baseball Game                           | 87: 映画ジャンル                         |
+| 45: Brand Vertical                          | 88: 政治機関                             |
+| 46: Brand Category                          | 89: 音楽アルバム                         |
+| 47: Brand                                   | 90: ラジオ局                             |
+| 48: Product                                 | 91: ポッドキャスト                       |
+| 54: Musician                                | 92: スポーツ著名人                       |
+| 55: Music Genre                             | 93: コーチ                               |
+| 56: Actor                                   | 94: ジャーナリスト                       |
+| 58: Entertainment Personality               | 95: TVチャンネル [Entity Service]        |
+| 60: Athlete                                 | 109: 繰り返し発生するトレンド            |
+| 65: Interests and Hobbies Vertical          | 110: バイラルアカウント                  |
+| 66: Interests and Hobbies Category          | 114: コンサート                          |
+| 67: Interests and Hobbies                   | 115: ビデオゲームカンファレンス          |
+| 68: Hockey Game                             | 116: ビデオゲームトーナメント            |
+| 71: Video Game                              | 117: 映画祭                               |
+| 78: Video Game Publisher                    | 118: 授賞式                               |
+| 79: Video Game Hardware                     | 119: 祝日                                 |
+| 83: Cricket Match                           | 120: デジタルクリエイター                |
+| 84: Book                                    | 122: 架空のキャラクター                  |
+| 85: Book Genre                              | 130: マルチメディアフランチャイズ        |
+| 86: Movie                                   | 131: 統一Twitterタクソノミー             |
+| 87: Movie Genre                             | 136: ビデオゲーム分野の著名人            |
+| 88: Political Body                          | 137: eスポーツチーム                      |
+| 89: Music Album                             | 138: eスポーツ選手                        |
+| 90: Radio Station                           | 139: ファンコミュニティ                   |
+| 91: Podcast                                 | 149: eスポーツリーグ                      |
+| 92: Sports Personality                      | 152: 食品                                 |
+| 93: Coach                                   | 155: 天気                                 |
+| 94: Journalist                              | 156: 都市                                 |
+| 95: TV Channel [Entity Service]             | 157: 大学・短期大学                       |
+| 109: Reoccurring Trends                     | 158: 観光スポット                         |
+| 110: Viral Accounts                         | 159: 州                                   |
+| 114: Concert                                | 160: 国                                   |
+| 115: Video Game Conference                  | 162: エクササイズ＆フィットネス          |
+| 116: Video Game Tournament                  | 163: 旅行                                 |
+| 117: Movie Festival                         | 164: 学問分野                             |
+| 118: Award Show                             | 165: テクノロジー                         |
+| 119: Holiday                                | 166: 株式                                 |
+| 120: Digital Creator                        | 167: 動物                                 |
+| 122: Fictional Character                    | 171: ローカルニュース                     |
+| 130: Multimedia Franchise                   | 172: グローバルTV番組                     |
+| 131: Unified Twitter Taxonomy               | 173: Google Product Taxonomy              |
+| 136: Video Game Personality                 | 174: デジタル資産と暗号資産               |
+| 137: eSports Team                           | 175: 緊急イベント                         |
+| 138: eSports Player                         |                                         |
+
+*注:* ドメイン 131（Unified Twitter Taxonomy）は、X のユーザー向けインタレスト分類体系を指します。この分類体系は、[Topics](https://blog.x.com/en_us/topics/product/2020/topics-behind-the-tweets) などのプラットフォーム上の機能を支えるために利用されています。
+
+<div id="requesting-annotations">
+  ## アノテーションのリクエスト方法
+</div>
+
+<div id="sample-request">
+  ### リクエスト例
+</div>
+
+```bash
+curl --location --request GET 'https://api.x.com/2/tweets/1212092628029698048?tweet.fields=context_annotations,entities' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+<div id="sample-response">
+  ### レスポンス例
+</div>
+
+```
+{
+    "data": {
+        "context_annotations": [
+            {
+                "domain": {
+                    "id": "119",
+                    "name": "Holiday",
+                    "description": "Holidays like Christmas or Halloween"
+                },
+                "entity": {
+                    "id": "1186637514896920576",
+                    "name": "New Years Eve"
+                }
+            },
+            {
+                "domain": {
+                    "id": "119",
+                    "name": "Holiday",
+                    "description": "Holidays like Christmas or Halloween"
+                },
+                "entity": {
+                    "id": "1206982436287963136",
+                    "name": "Happy New Year: It’s finally 2020 everywhere!",
+                    "description": "Catch fireworks and other celebrations as people across the globe enter the new year.\nPhoto via @GettyImages"
+                }
+            },
+            {
+                "domain": {
+                    "id": "45",
+                    "name": "Brand Vertical",
+                    "description": "Top level entities that describe a Brand's industry"
+                }
+            },
+            {
+                "domain": {
+                    "id": "46",
+                    "name": "Brand Category",
+                    "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+                },
+                "entity": {
+                    "id": "781974596752842752",
+                    "name": "Services"
+                }
+            },
+            {
+                "domain": {
+                    "id": "47",
+                    "name": "Brand",
+                    "description": "Brands and Companies"
+                },
+                "entity": {
+                    "id": "10045225402",
+                    "name": "Twitter"
+                }
+            }
+        ],
+        "entities": {
+            "annotations": [
+                {
+                    "start": 144,
+                    "end": 150,
+                    "probability": 0.626,
+                    "type": "Product",
+                    "normalized_text": "Twitter"
+                }
+            ],
+            "urls": [
+                {
+                    "start": 222,
+                    "end": 245,
+                    "url": "https://t.co/yvxdK6aOo2",
+                    "expanded_url": "https://x.com/LovesNandos/status/1211797914437259264/photo/1",
+                    "display_url": "pic.x.com/yvxdK6aOo2"
+                }
+            ]
+        },
+        "id": "1212092628029698048",
+        "text": "私たちは、APIの最高の未来バージョンは、皆さんと一緒に構築することから生まれると信じています。Twitterプラットフォーム上で構築するすべての人々と共に、また素晴らしい一年を。新年も皆さんと一緒に働き続けることを楽しみにしています。https://t.co/yvxdK6aOo2"
+    }
+}
+```
+
+<div id="sample-app">
+  ### サンプルアプリ
+</div>
+
+[Glitch 上の Post Entity Extractor](https://tweet-entity-extractor.glitch.me/) を利用すると、ポスト内のコンテキストアノテーションを簡単に確認でき、この機能の仕組みを理解できます。
+
+<div id="frequently-asked-questions">
+  ## よくある質問
+</div>
+
+<div id="context-annotations">
+  ### コンテキスト注釈
+</div>
+
+以下の質問は、ポスト注釈のコンテキスト注釈要素に関するものです。詳細については、[概要](/ja/x-api/fundamentals/post-annotations) ページを参照してください。
+
+<AccordionGroup>
+  <Accordion title="Twitter の context annotations はどのように機能しますか？">
+    X ではポストを意味的に分類しています。つまり、特定のトピックに関連するキーワード、ハッシュタグ、@handle のリストをキュレーションしているということです。ポストに指定したテキストが含まれている場合、そのポストには適切なラベルが付与されます。これは、モデルを特定のテキスト（この場合はポスト）の分類用に学習させ、その出力／分類結果に確率スコアを付与する機械学習アプローチとは異なります。
+  </Accordion>
+
+  <Accordion title="提供されるデータが完全で信頼できることを、どのように確認できますか？">
+    Twitter のアノテーションは、数年にわたり洗練されてきたリサーチおよび品質保証（QA）プロセスを用いて、ドメインの専門家によってキュレーションされています。このプロセスは、高い適合率と再現率を維持できる範囲でデータトラッキングを拡張するためのカスタムツールによって支えられています。さらに、データは社内チームによって定期的に監査されており、過去数四半期にわたって一貫しておおよそ 80% の適合率スコアを達成しています。
+  </Accordion>
+
+  <Accordion title="どのように精度を担保していますか？">
+    チームメンバーは、高い適合率と再現率を確保するために、日々エンティティのQAを行っています。加えて、社内チームによる四半期ごとの監査も実施しており、すべてのドメインにわたって 10,000 件のポストを手作業でレビューし、適合率スコアを算出しています。
+  </Accordion>
+
+  <Accordion title="何を追跡するかはどのように決めているのですか？">
+    スポーツやテレビのような一部のドメインでは、グラフを構築するために自動取り込みを活用しています。News ドメインでは、Twitter Moments チームによって公開されたストーリーに関するデータを追跡しています。それ以外のドメインについては、チームがさまざまなリサーチ手法を用いて、プラットフォーム上で活発に会話が行われているトピックを特定し、追跡対象としています。
+  </Accordion>
+
+  <Accordion title="Tweet Annotations では、注釈対象としてどの程度過去までのポストがサポートされていますか？">
+    エンティティが公開された時点でデータの追跡を開始します。そのため、特定のエンティティの追跡が開始される前に公開されたポストにはアノテーションを付与しません。たとえば、新興ブランドや企業がタクソノミーに追加された場合、そのアノテーションが追加される前にそのブランドについて投稿されたポストに対して、さかのぼってアノテーションを付与することはありません。
+  </Accordion>
+
+  <Accordion title="Twitter は英語以外の言語のポストにもコンテキストアノテーションを付与できますか？ その場合、どの言語が対象で、アノテーションが付与されるポストのカバレッジは変わりますか。">
+    はい。言語対応状況はドメインや市場によって異なる場合があります。英語と日本語は、主要な大規模エンティティのほとんどで利用できます。以下は、現在対応している言語と主な市場の一覧です。
+
+    1. English (US, UK)
+    2. Japanese (Japan)
+    3. Portuguese (Brazil)
+    4. Spanish (Argentina, Mexico, Spain)
+    5. Hindi (India)
+    6. Arabic (Saudi Arabia)
+    7. Turkish (Turkey)
+    8. Indonesian (Indonesia)
+    9. Russian (Russia)
+    10. French (France)
+
+    近日対応予定 (~2021年下半期):
+
+    1. German (Germany)
+    2. Tamil (India)
+
+    以下は、注釈付きポストの割合が高い順に並べた上位15か国の表です。
+
+    | Rank | Country code | Country       | % of Tweets annotated |
+    | :--- | :----------- | :------------ | :-------------------- |
+    | 1    | IN           | India         | 41%                   |
+    | 2    | VN           | Vietnam       | 36%                   |
+    | 3    | GB           | Great Britain | 36%                   |
+    | 4    | EC           | Ecuador       | 35%                   |
+    | 5    | PE           | Peru          | 33%                   |
+    | 6    | US           | United States | 32%                   |
+    | 7    | CA           | Canada        | 32%                   |
+    | 8    | AU           | Australia     | 31%                   |
+    | 9    | JP           | Japan         | 31%                   |
+    | 10   | PH           | Philippines   | 30%                   |
+    | 11   | SG           | Singapore     | 30%                   |
+    | 12   | MY           | Malaysia      | 30%                   |
+    | 13   | MX           | Mexico        | 30%                   |
+    | 14   | GB           | Great Britain | 29%                   |
+    | 15   | NG           | Nigeria       | 29%                   |
+  </Accordion>
+
+  <Accordion title="Twitter はポストに注釈を付ける際、どのような「セマンティクス」を前提にしていますか？">
+    ポスト注釈は、ポストに注釈を付与するため、次の意味的な要素で構成されています。
+
+    * アカウント - 特定のハンドルからのポスト、またはそのハンドルへのメンションを含むポストに注釈を付与できます
+    * ハッシュタグ
+    * キーワード／フレーズ
+
+    PowerTrack などのフィルタリング用ストリーミング API に慣れているお客様の場合、注釈で使用される意味要素は、ポストのストリームをフィルタリングするために定義されるブールロジックのルールと原理的には同様です。あるポストがこれらの意味的な条件にマッチすると、そのポストには対応するタグが付与されます。
+  </Accordion>
+
+  <Accordion title="一部のポストにはエンティティが関連付けられているのに対し、他のポストには関連付けられていないのはなぜですか？">
+    できる限り多くのポストに注釈を付与することを目標としていますが、いくつかの理由により、注釈が付与されないポストもあります。
+
+    * 一部のポストは意味的な情報量が十分でないため、現在の注釈ルールではラベル付け／タグ付けできません
+    * 一部のポストは特定のトピックに結びつきません
+    * ポストが、グラフにまだ存在しないごく短命なトピックに関するものです
+    * 対応していない言語／市場である場合があります
+    * 対応している言語／市場であっても、すでに追跡しているトピックに関連するトピックや、特定の用語／アカウント／ハッシュタグがグラフにまだ含まれていない場合があります
+  </Accordion>
+
+  <Accordion title="複数のドメイン（例: [3,30]）がある場合でも、Entity IDは同じままですか？">
+    エンティティは複数のドメインに属することができます。ドメインIDは変わりますが、エンティティのidは変わりません。Donald Glover は人物（ドメイン 10）、俳優（ドメイン 56）、ミュージシャン（ドメイン 54）ですが、彼のエンティティのidは 875072662527029248 のままです。
+  </Accordion>
+
+  <Accordion title="番組や映画をトラッキングする期間はあらかじめ決まっていますか？ つまり、リリースのどれくらい前からどれくらい後までトラッキングされますか？">
+    トラッキングはリリースの1か月前から開始されます。Marvel映画のような人気の大作の場合は、今後のリリースについてのティザーが始まった時点からトラッキングを開始できます。
+  </Accordion>
+
+  <Accordion title="映画にも、テレビ番組と同様のロケールフィルターはありますか？">
+    いいえ、違います。
+  </Accordion>
+</AccordionGroup>

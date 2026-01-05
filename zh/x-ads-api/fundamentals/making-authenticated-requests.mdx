@@ -1,0 +1,147 @@
+---
+title: 发起认证请求
+keywords: ["Ads API authentication", "authenticated requests", "Ads API auth", "OAuth Ads API", "Ads API requests", "authentication"]
+---
+
+要访问 X Ads API 的端点，你的应用必须使用 TLS 向 https://ads-api.x.com 安全地发送已认证的 Web 请求。
+
+下文将概述如何发起已认证的 API 请求、如何设置 [Twurl](https://github.com/twitter/twurl#getting-started) 与 API 交互，以及如何扩展你的应用以支持 OAuth 1.0a，并代表你的 Ads 账号发起请求。
+
+<div id="requirements">
+  ## 前提条件
+</div>
+
+在向 X Ads API 发起经过认证的请求之前，你需要：
+
+* 一个[已批准的开发者账号](/zh/resources/fundamentals/developer-portal)
+* 一个已通过 [Ads API](/zh/x-ads-api/introduction) 访问审批的应用
+* 通过[应用管理 UI](/zh/resources/fundamentals/developer-apps) 获取的 API key 和 secret，以及
+* 面向具有 X Ads 账号访问权限用户的[访问令牌](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)
+
+<div id="using-the-api">
+  ## 使用 API
+</div>
+
+Advertising API 可通过 https://ads-api.x.com 访问。[标准 REST API](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/overview) 和 Advertising API 可以在同一个客户端应用中同时使用。Advertising API 要求使用 HTTPS，因此任何通过 HTTP 访问端点的尝试都会返回错误消息。
+
+Ads API 输出 JSON 格式的响应。所有标识符都是字符串，且所有字符串均为 UTF-8。Advertising API 采用[版本控制机制](/zh/x-ads-api/fundamentals/versioning)，其版本作为任一资源 URL 中的第一个路径元素进行指定。
+
+`https://ads-api.x.com/&lt;version&gt;/accounts`
+
+<div id="http-verbs-typical-response-codes">
+  ## HTTP 动词和典型响应代码
+</div>
+
+Ads API 中使用了四种 HTTP 动词：
+
+* **GET** 获取数据 
+* **POST** 创建新数据，例如广告系列
+* **PUT** 更新现有数据，例如广告单元
+* **DELETE** 删除数据。
+
+尽管删除是永久性的，但在大多数基于 GET 的方法中，仍然可以通过在请求资源时显式包含参数 `with_deleted=true` 来查看已删除的数据。否则，对已删除记录的请求将返回 HTTP 404 状态码。
+
+成功的请求会返回 2xx 范围内的 HTTP 响应代码，并在创建、删除或更新资源时附带表示该对象的 JSON 响应。
+
+使用 HTTP PUT 更新数据时，只有指定的字段会被更新。你可以通过将参数设为空字符串来清除一个可选值。比如，下面这组参数会清除任何已经指定的 `end_time`：`&end_time=&paused=false`。
+
+有关错误响应的更多信息，请参阅[错误代码和响应](/zh/x-ads-api/fundamentals/error-codes-and-responses)。
+
+<div id="in-line-parameters">
+  ## 内联参数
+</div>
+
+大多数资源 URL 都包含一个或多个内联参数。许多 URL 还会在查询字符串中显式声明参数，或者在 POST 或 PUT 请求中通过请求体传递参数。
+
+内联参数在每个资源的 **Resource Path** 部分中通过前缀冒号（“:”）标识。例如，如果你正在处理的账户被标识为 `"abc1"`，并且你正在[检索与某个账户关联的广告系列](/zh/x-ads-api/campaign-management#campaigns)，则可以通过 URL `https://ads-api.x.com/6/accounts/abc1/campaigns` 访问该列表。通过在资源 URL（`https://ads-api.x.com/6/accounts/:account_id/campaigns`）中指定所描述的内联 `account_id` 参数，则表示你已将请求限定为仅检索与该账户关联的对象。
+
+<div id="using-access-tokens">
+  ## 使用访问令牌
+</div>
+
+X Ads API 使用签名的 HTTPS 请求来验证应用的身份，并获取该应用代表终端用户发起 API 请求时所拥有的权限，这些权限由用户的访问令牌来表示。所有对 Ads API 的 HTTP 调用都必须通过 HTTPS 协议发送，并包含一个 Authorization 请求头（使用 OAuth 1.0a）。
+
+你需要在应用中添加对生成 OAuth 1.0a Authorization 请求头的支持，才能集成 X Ads API。不过，由于生成签名请求的过程较为复杂，我们强烈建议合作伙伴使用现有的库，这些库要么已经支持 X API，要么已经实现 OAuth 1.0a 请求处理——以下是[推荐的 OAuth 库](/zh/resources/fundamentals/authentication#oauth-1-0a-2)和[身份验证代码示例](/zh/resources/fundamentals/authentication#oauth-1-0a-2)列表。
+
+请注意，如果合作伙伴在使用已知库时遇到身份验证错误，我们可以提供协助，但无法为自定义的 OAuth 实现提供支持。
+
+<div id="http-oauth">
+  ## HTTP 与 OAuth
+</div>
+
+与 X REST API v1.1 类似，Advertising API 需要同时使用 [OAuth 1.0A](/zh/resources/fundamentals/authentication) 和 HTTPS。可以通过 [应用管理控制台](/zh/resources/fundamentals/developer-apps) 获取 API key。还必须使用访问令牌（Access Token）来表示“当前用户”。当前用户指的是具有广告投放能力的 X 账户。
+
+强烈建议合作伙伴使用现有的 OAuth 库，而不是自行实现。使用已知库时我们可以提供调试支持，但如果你自行实现 OAuth，则无法提供支持。请参阅可供使用的 [libraries](/zh/resources/fundamentals/authentication#oauth-1-0a-2)。
+
+API 对 HTTP 1.1 和 OAuth 有严格要求。请确保在准备 OAuth 签名基字符串之前，已在 URL 和 POST 请求体中正确[编码保留字符](https://tools.ietf.org/html/rfc3986#section-2.2)。特别是，Advertising API 在指定时间时使用 “:” 字符，在提供选项集合时使用 “,” 字符。这两个字符都属于以下保留字符集合：
+
+| Symbol | URL Encoded |
+| :--- | :--- |
+| !   | %21 |
+| #   | %23 |
+| $   | %24 |
+| &amp;   | %26 |
+| &#39;   | %27 |
+| (   | %28 |
+| )   | %29 |
+| *   | %2A |
+| +   | %2B |
+| ,   | %2C |
+| /   | %2F |
+| :   | %3A |
+| ;   | %3B |
+| =   | %3D |
+| ?   | %3F |
+| @   | %40 |
+| [   | %5B |
+| ]   | %5D |
+
+<div id="making-your-first-api-request-with-twurl">
+  ## 使用 Twurl 发起你的第一个 API 请求
+</div>
+
+X 维护了一个命令行工具 [Twurl](https://developer.x.com/en/docs/tutorials/using-twurl)，它支持 OAuth 1.0a 授权请求头，可作为 [cURL](https://en.wikipedia.org/wiki/CURL) 的替代工具。Twurl 提供了一种简单方式，让你在将认证集成到应用之前，先发起已授权的 API 请求并探索 Ads API。
+
+在[安装并授权 Twurl](https://github.com/twitter/twurl#getting-started) 之后，你可以快速生成访问令牌，并向 Ads API 发起已授权的请求。
+
+```bash
+twurl -H "ads-api.x.com" "/5/accounts/"
+```
+
+可以花点时间，通过这个使用 API 创建广告系列的[分步教程](/zh/x-ads-api/campaign-management#creating-a-campaign-step-by-step)，来熟悉 Twurl 和 API。
+
+<div id="testing-with-postman">
+  ## 使用 Postman 进行测试
+</div>
+
+对于不熟悉命令行工具的开发者，我们也为 X Ads API 的各个端点提供了 Postman 集合（Postman collection）。
+
+[Postman](https://www.getpostman.com/products) 是业界最流行的 API 开发工具之一。它是一个 HTTP 客户端，拥有出色的用户界面，可以让你更轻松地发起复杂的 API 请求，并提高工作效率。
+
+要安装 Postman 并开始使用 Ads API 的 Postman 集合，请参阅我们的[设置指南](https://github.com/xdevplatform/postman-twitter-ads-api#installation)。
+
+<Button href="https://app.getpostman.com/run-collection/369a02c0adc626ff6a06#?env%5BTwitter%20Ads%20API%5D=W3sia2V5IjoiYWNjb3VudF9pZCIsInZhbHVlIjoieW91cl9hZHNfYWNjb3VudF9pZCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidmVyc2lvbiIsInZhbHVlIjoiNiIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfa2V5IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX2tleSIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiY29uc3VtZXJfc2VjcmV0IiwidmFsdWUiOiJ5b3VyX2NvbnN1bWVyX3NlY3JldCIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoiYWNjZXNzX3Rva2VuIiwidmFsdWUiOiJ5b3VyX2FjY2Vzc190b2tlbiIsImVuYWJsZWQiOnRydWV9LHsia2V5IjoidG9rZW5fc2VjcmV0IiwidmFsdWUiOiJ5b3VyX3Rva2VuX3NlY3JldCIsImVuYWJsZWQiOnRydWV9XQ==">
+  在 Postman 中运行
+</Button>
+
+<div id="extending-your-application-to-make-authenticated-requests">
+  ### 扩展你的应用以发起已授权请求
+</div>
+
+在熟悉了使用 Twurl 向 Ads API 发起请求之后，就可以开始在你的应用中添加对生成 OAuth 1.0a 身份验证头的支持。
+
+[OAuth 1.0a](/zh/resources/fundamentals/authentication) 身份验证头包含用于同时验证应用和用户身份的信息，并可防止请求被篡改。你的应用需要为每个 API 请求创建一个新的 Authorization 头。许多编程语言都有开源库可以帮助创建这个身份验证头，从而向 X 发起 API 请求。
+
+以下是使用 C#、PHP、Ruby 和 Python 的一些示例——[代码示例](/zh/resources/fundamentals/authentication#oauth-1-0a-2)。
+
+<div id="custom-implementation">
+  ## 自定义实现
+</div>
+
+在某些场景下，你需要在没有开源库支持的情况下实现 OAuth 1.0a 认证。[授权请求](/zh/resources/fundamentals/authentication#authorizing-a-request) 中提供了关于如何实现创建 Authorization 头逻辑的详细说明。我们强烈建议使用由社区维护的库。
+
+大致步骤如下：
+
+1. 为请求头收集 7 个以 oauth&#95; 开头的键值对
+2. 使用这些键值对生成一个 [OAuth 1.0a HMAC-SHA1 签名](/zh/resources/fundamentals/authentication#creating-a-signature)
+3. 使用上述值构建 [Authorization 头](/zh/resources/fundamentals/authentication#authorizing-a-request)

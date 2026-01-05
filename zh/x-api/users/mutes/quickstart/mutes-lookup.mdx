@@ -1,0 +1,146 @@
+---
+title: 静音查询
+sidebarTitle: 静音查询
+keywords: ["静音查询快速入门", "静音查询快速入门指南", "静音查询教程", "静音查询指南", "静音功能快速入门"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-mutes-lookup-endpoint">
+  ## 开始使用静音查找端点
+</div>
+
+本快速入门指南将帮助你使用 Postman 向静音查找端点发出第一个请求。
+
+如果你想查看不同语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。
+
+<Note>
+  **先决条件**
+
+  要完成本指南，你需要准备一组用于对请求进行身份验证的 [keys and tokens](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审核。
+  * 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 以及关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+  * 前往你的开发者应用的 “Keys and tokens” 页面以生成所需凭据。请确保将所有凭据保存在安全的位置。
+</Note>
+
+<div id="steps-to-build-a-mutes-lookup-request">
+  ### 构建静音查询请求的步骤
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### 步骤一：从工具或库开始
+</div>
+
+有多种工具、代码示例和库可用于向此 endpoint 发起请求，但在这里我们将使用 Postman 工具来简化流程。
+
+要将 X API v2 Postman 集合加载到你的环境中，请点击以下按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 之后，导航到“Mutes”文件夹，并选择“Mutes lookup”。
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### 步骤二：对请求进行认证
+</div>
+
+要正确地向 X API 发起请求，你需要确认自己是否拥有相应的访问权限。对于此 endpoint，你必须使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 或 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 对请求进行认证。
+
+在本示例中，我们将使用 OAuth 1.0a User Context。
+
+你必须将你的密钥和令牌——具体来说是 API Key、API Secret Key、OAuth 1.0a 用户 Access Token 和 OAuth 1.0a 用户 Access Token Secret——添加到 Postman 中。你可以在 Postman 右上角选择名为“X API v2”的 environment，然后将你的密钥和令牌添加到 &quot;initial value&quot; 和 &quot;current value&quot; 字段中（点击环境下拉菜单旁的眼睛图标）。
+
+如果已正确完成上述操作，这些变量会自动被填充到该请求的 Authorization 选项卡中。
+ 
+
+<div id="step-three-specify-a-user">
+  #### 步骤三：指定用户
+</div>
+
+使用此端点时，你必须指定你的用户 ID 或已认证用户的 ID，才能查看你或该已认证用户已静音了哪些账户。
+
+在 Postman 中，转到“Params”选项卡，在“Path Variables”（本节底部）中的 id 的“Value”列里输入已认证用户 ID，注意不要在 ID 前后包含空格。
+
+在“Path Variables”部分上方，你会看到可以添加可选的“Query Params”（查询参数）。在本示例中，我们将选中参数 max&#95;results，并输入值 5。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Parameter Type** |
+| `id` | （你的用户 ID） | Path |
+| max&#95;results | 5   | Query |
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### 步骤四：确定并指定你想要检索的字段
+</div>
+
+如果你在步骤三之后点击 &quot;Send&quot; 按钮，你将在响应中收到默认的 [user 对象](/zh/x-api/fundamentals/data-dictionary#user) 字段：id、name 和 username。
+
+如果你希望在 id、name 和 username 之外接收更多字段，你必须在请求中通过 [fields](/zh/x-api/fundamentals/fields) 和/或 [expansions](/zh/x-api/fundamentals/expansions) 参数来指定这些字段。
+
+在本练习中，我们将从不同对象中请求三组额外字段：
+
+1. 主用户对象中额外的 user.created&#95;at 字段。
+2. 返回用户所关联的置顶帖子对象的默认字段：id 和 text。
+3. 关联 Post 对象中额外的 tweet.created&#95;at 字段。
+
+在 Postman 中，切换到 &quot;Params&quot; 选项卡，并在 &quot;Query Params&quot; 表中添加以下 key:value 键值对：
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | user.created&#95;at |
+| expansions | pinned&#95;tweet&#95;id | tweet.id, tweet.text |
+| tweet.fields | created&#95;at | includes.tweets.created&#95;at |
+
+现在，你应该会在 &quot;Send&quot; 按钮旁边看到一个类似的 URL，其中包含你自己的用户 ID，而不是示例 ID：
+
+`https://api.x.com/2/users/1324848235714736129/muting?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at&max_results=5`
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### 步骤五：发出请求并查看响应
+</div>
+
+在完成所有设置后，点击 “Send” 按钮，您将收到类似于下面示例的响应：
+
+```
+{
+  "data": [
+    {
+      "username": "TwitterDev",
+      "created_at": "2013-12-14T04:35:55.000Z",
+      "id": "2244994945",
+      "name": "Twitter Dev",
+      "pinned_tweet_id": "1430984356139470849"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-08-26T20:03:51.000Z",
+        "id": "1430984356139470849",
+        "text": "Help us build a better Twitter Developer Platform!\n \nTake the annual developer survey &gt;&gt;&gt; https://t.co/9yTbEKlJHH https://t.co/fYIwKPzqua"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 1
+  }
+}
+```
+
+<div id="step-six-paginate-through-your-results">
+  #### 步骤六：对结果进行分页
+</div>
+
+你可能会注意到，在响应体的底部有一个 `meta` 对象。如果你收到了一个 `next_token`，这就表明还有另一页结果可以获取。要获取下一页结果，你需要取出 `next_token` 字段的值，并在下一次请求中将其作为额外的 `pagination_token` 查询参数的值添加到请求中。
+ 
+
+|     |     |
+| :--- | :--- |
+| **键** | **值** |
+| pagination&#95;token | 1710819323648428707 |
+
+在添加了这个额外参数之后发送请求时，由于我们在步骤三中将 `max_results` 指定为 5，接下来的五条结果会在后续的响应负载中返回。你可以不断重复这一过程，直到所有结果都被返回；但你也可以使用 `max_results` 参数在每个请求中最多请求 1000 个用户，这样就不必对结果进行那么频繁的分页。

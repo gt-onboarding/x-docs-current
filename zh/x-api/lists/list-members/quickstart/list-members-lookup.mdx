@@ -1,0 +1,160 @@
+---
+title: 列表成员查询
+sidebarTitle: 列表成员查询
+keywords: ["列表成员查询快速入门", "列表成员查询", "获取列表成员快速入门", "列表成员资格查询"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<Note>
+  **请注意：** 本指南假定你已经完成了[快速开始概览](/zh/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group)中列出的所有前提条件。
+</Note>
+
+<div id="steps-to-build-a-list-members-lookup-request">
+  ### 构建列表成员查询请求的步骤
+</div>
+
+**第一步：在 Postman 中选择 List 端点集合**
+
+在将 X API v2 集合加载到 Postman 后，导航到 “List” 文件夹，选择其中的 “List members” 文件夹，然后选择 “Members lookup”。
+
+**第二步：确定并指定你想要获取成员的 List**
+
+你必须指定一个你希望获取成员的 List。你可以通过访问 x.com，点击某个 List，然后查看浏览器地址栏中的 URL 来找到该 List 的 ID。例如，下面这个 URL 中的 List ID 是 84839422。
+
+https://x.com/i/lists/84839422
+
+目标 ID 可以是任意有效的 List ID。在 Postman 中，导航到 “Params” 选项卡，将你的 ID 输入到 id 路径变量的 “Value” 列中。请务必不要在任何 ID 的前后包含空格。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 84839422（List ID） |
+
+**第三步：确定并指定你希望获取哪些字段**
+
+如果你在完成第三步后点击 “Send” 按钮，你将在响应中收到默认的 [user object](/zh/x-api/fundamentals/data-dictionary#user) 字段：id、name 和 username。
+
+如果你希望在 id、name 和 username 之外获取其他字段，你需要在请求中通过 [字段](/zh/x-api/fundamentals/fields) 和/或 [扩展字段](/zh/x-api/fundamentals/expansions) 参数来指定这些字段。
+
+在本练习中，我们将从不同对象中请求三组额外字段：
+
+* 主 user 对象中的额外 user.created&#95;at 字段。
+* 使用 expansions 参数请求完整的 [Post object](/zh/x-api/fundamentals/data-dictionary#tweet)。
+* 关联 Post 对象中的额外 tweet.created&#95;at 字段。
+
+在 Postman 中，导航到 “Params” 选项卡，在 “Query Params” 表中添加以下键值对：
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | `created_at` |
+| expansions | pinned&#95;tweet&#95;id | `includes.tweets.id,  <br/>includes.tweets.text  <br/>` |
+| tweet.fields | created&#95;at | `includes.tweets.created_at` |
+
+你现在应当会在 “Send” 按钮旁边看到类似如下的 URL：
+
+`https://api.x.com/2/lists/84839422/members?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**第四步：发送请求并查看响应**
+
+完成所有设置后，点击 “Send” 按钮，你将收到与下面示例响应类似的返回结果：
+
+```
+{
+  "data": [
+    {
+      "pinned_tweet_id": "1353789891348475905",
+      "id": "1319036828964454402",
+      "created_at": "2020-10-21T22:04:47.000Z",
+      "name": "Birdwatch",
+      "username": "birdwatch"
+    },
+    {
+      "id": "1244731491088809984",
+      "created_at": "2020-03-30T21:02:29.000Z",
+      "name": "Twitter Thailand",
+      "username": "TwitterThailand"
+    },
+    {
+      "id": "1194267639100723200",
+      "created_at": "2019-11-12T14:56:22.000Z",
+      "name": "Twitter Retweets",
+      "username": "TwitterRetweets"
+    },
+    {
+      "id": "1168976680867762177",
+      "created_at": "2019-09-03T19:59:02.000Z",
+      "name": "Twitter Able",
+      "username": "TwitterAble"
+    },
+    {
+      "pinned_tweet_id": "1451239134798942208",
+      "id": "1065249714214457345",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "name": "Spaces",
+      "username": "TwitterSpaces"
+    },
+    {
+      "id": "1049385226424786944",
+      "created_at": "2018-10-08T19:45:09.000Z",
+      "name": "Twitter Miami",
+      "username": "TwitterMiami"
+    },
+    {
+      "pinned_tweet_id": "1438533888498876420",
+      "id": "1004367799588880384",
+      "created_at": "2018-06-06T14:21:58.000Z",
+      "name": "Twitter México",
+      "username": "TwitterMexico"
+    },
+    {
+      "pinned_tweet_id": "1370178223846297602",
+      "id": "773578328498372608",
+      "created_at": "2016-09-07T17:47:00.000Z",
+      "name": "Twitter Together",
+      "username": "TwitterTogether"
+    },
+    {
+      "id": "766296039036948480",
+      "created_at": "2016-08-18T15:29:47.000Z",
+      "name": "Moments MENA",
+      "username": "momentsmena"
+    },
+    {
+      "id": "738118487122419712",
+      "created_at": "2016-06-01T21:22:15.000Z",
+      "name": "Twitter Asians",
+      "username": "TwitterAsians"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-01-25T19:40:36.000Z",
+        "id": "1353789891348475905",
+        "text": "Want to help build a new community-driven approach to tackling misleading information? Join us — sign up for Birdwatch! \n\nhttps://t.co/FSsqNznPy1"
+      },
+      {
+        "created_at": "2021-10-21T17:29:07.000Z",
+        "id": "1451239134798942208",
+        "text": "the time has arrived -- we’re now rolling out the ability for everyone on iOS and Android to host a Space\n\nif this is your first time hosting, welcome! here’s a refresher on how https://t.co/cLH8z0bocy"
+      },
+      {
+        "created_at": "2021-09-16T16:03:00.000Z",
+        "id": "1438533888498876420",
+        "text": "Algunos le dicen amor, pero yo le digo:\n\n‌    ∧＿∧　 \n（｡･ω･｡)つ━☆・*\n⊂     　ノ 　　　・゜+.\n　しーＪ　　　°。+ *´¨)\n　　　　　 　　　☆ RECALENTADO ☆ \n#VivaMéxico"
+      },
+      {
+        "created_at": "2021-03-12T01:01:59.000Z",
+        "id": "1370178223846297602",
+        "text": "我们依然飞翔\n\n……因为无论 2020 年试图击倒我们多少次，我们都重新站起来，并以同理心、敏捷性、创新和领导力作出回应。\n\n在我们的 2020 年包容性与多样性年度报告中了解更多 #UntilWeAllBelong"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 10,
+    "next_token": "5349804505549807616"
+  }
+}
+```

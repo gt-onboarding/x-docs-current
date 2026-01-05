@@ -1,0 +1,96 @@
+---
+title: はじめに
+sidebarTitle: はじめに
+keywords: ["コミュニティ参照", "コミュニティ取得", "コミュニティ参照（単一）", "ID 指定コミュニティ", "コミュニティ情報", "コミュニティ API"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<Note>
+  **アカウントのセットアップ**
+
+  これらのエンドポイントにアクセスするには、次が必要です。
+
+  * 承認済みの [開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)
+  * [プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) のキーとトークンを使用して認証すること
+
+  X API v2 エンドポイントへのアクセス方法の詳細は、[はじめにガイド](/ja/x-api/getting-started/getting-access) を参照してください。
+</Note>
+
+**はじめに**
+
+<div id="authentication">
+  ### 認証
+</div>
+
+このエンドポイントは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication)、[OAuth 2.0 アプリ専用フロー](https://developer.x.com(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使用して認証できます。
+ 
+
+<div id="making-a-request">
+  ### リクエストの送信
+</div>
+
+次のように、id（`1758747817642700922`）を指定して Communities Lookup エンドポイントを呼び出すことができます。
+
+```
+      curl --location 'https://api.x.com/2/communities/1758747817642700922' --header 'Authorization: ••••••'
+```
+
+リクエストが成功すると、以下のような JSON レスポンスが表示されます。
+
+```
+{
+    "data": {
+        "access": "Public",
+        "description": "アニメコミュニティへようこそ！アニメファンが集まってお気に入りの番組を共有し、アニメに関するあらゆることを語り合う場所です。",
+        "join_policy": "Open",
+        "name": "Anime Community"
+    }
+}
+```
+
+<div id="community-fields">
+  ### コミュニティフィールド
+</div>
+
+Community Fields を指定することで、コミュニティに関連付けられた追加データを取得できます。
+
+利用可能な Community Fields は次のとおりです。
+
+| Field value | Type | Description |     |
+| :--- | :--- | :--- | :--- |
+| created&#95;at | date (ISO 8601) | コミュニティの作成日時。 |     |
+| id  | string | コミュニティの一意の識別子。 |     |
+| name | string | コミュニティの名前。 |     |
+| description | string | コミュニティの説明テキスト（指定されている場合）。 |     |
+| access | string | コミュニティのアクセスレベル。  <br />  <br />次のいずれかです:<br /><br />* `Public`<br />* `Closed` |     |
+| join&#95;policy | string | コミュニティの参加ポリシー。  <br />  <br />次のいずれかです:<br /><br />* `Open`<br />* `RestrictedJoinRequestsDisabled`<br />* `RestrictedJoinRequestsRequireAdminApproval`<br />* `RestrictedJoinRequestsRequireModeratorApproval`<br />* `SuperFollowRequired` |     |
+| member&#95;count | integer | コミュニティに参加しているメンバー数。 |     |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+Communities Lookup エンドポイントは、以下のように追加のコミュニティフィールドを指定して呼び出すことができます（id `1758747817642700922` を使用）:
+
+```
+curl --location 'https://api.x.com/2/communities/1758747817642700922?community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: ••••••'
+```
+
+**レスポンス例**
+
+リクエストが成功すると、次のようなJSONレスポンスが返ってきます。
+
+```
+{
+    "data": {
+        "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+        "access": "Public",
+        "member_count": 40369,
+        "created_at": "2024-02-17T06:58:50.000Z",
+        "join_policy": "Open",
+        "name": "Anime Community",
+        "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI="
+    }
+}
+```

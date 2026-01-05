@@ -1,0 +1,114 @@
+---
+title: ポストの編集
+keywords: ["edit tweets enterprise", "enterprise edit tweets", "edit posts enterprise", "tweet edits enterprise", "edit metadata enterprise"]
+---
+
+Enterprise エンドポイントは更新され、編集されたポストのメタデータが提供されるようになりました。&#95;Edit Posts &#95;機能は、2022 年 9 月 1 日に X 従業員向けのテストとして初めて導入されました。この日以降、対象となるポストは 30 分間、最大 5 回まで編集可能になりました。*2022 年 9 月 29 日以降に作成されたポストのすべてのオブジェクト*には、そのポストが一度も編集されていない場合でも、ポスト編集メタデータが含まれます。ポストが編集されるたびに、新しいポスト ID が作成されます。ポストの編集履歴は、元の ID から開始して、これらの ID を連結することで表すことができます。さらに、編集チェーン内のいずれかのポストが削除されると、そのチェーン内のすべてのポストも削除されます。
+
+これらのメタデータは自動的に含まれます。利用可能な編集履歴をポストオブジェクトの一部として含めるために、リクエストパラメータを指定する必要はありません。
+
+これらの新しいメタデータによって、開発者は次のことを把握できます。
+
+* ポストが作成時に編集可能であったかどうか。一部のポスト（投票付きポストや予約ポストなど）は編集できません。
+* ポストは 30 分間編集可能で、最大 5 回まで編集できます。編集可能なポストについては、編集可能な残り時間と、あと何回編集できるかを確認できます。
+* 編集済みバージョンのポストを表示しているかどうか。ほとんどの場合、特定の過去バージョンがポスト ID で要求されない限り、API は最新バージョンのポストを返します。
+
+ルートレベルに 3 つの新しいポスト属性が追加されました。
+
+* **edit&#95;history** - ポストの編集履歴に関連付けられているすべてのポスト ID を提供します。&quot;initial&#95;tweet&#95;id&quot; 属性は元のポストを示し、&quot;edit&#95;tweet&#95;ids&quot; 属性はその編集履歴に関連付けられたすべての ID を提供する配列です。ポストが編集されていない場合、この配列には単一の ID が含まれます。
+
+```
+"edit_history": {
+    "initial_tweet_id": "1283764123"
+    "edit_tweet_ids": ["1283764123"]
+  }
+```
+
+* **edit&#95;controls** - 30 分間の編集ウィンドウの終了時刻と、残りの編集可能回数を示す属性を提供します。
+
+```
+"edit_controls": {  
+     "editable\_until\_ms": 1660155761384
+     "edits_remaining": 3   
+  }
+```
+
+* **editable** - ポストが作成された時点で編集可能だったかどうかを示します。 
+
+&quot;editable&quot;: true
+
+ほとんどのポストは編集可能です。ただし、次の種類のポストは編集対象外です。 
+
+* ポストがプロモーション対象である
+* ポストに投票（poll）が含まれている
+* 自分のスレッド以外への返信ポストである
+* ポストが Retweet（リツイート）である（なお、Quote Tweet（引用ポスト）は編集可能です）
+* ポストが nullcast されている
+* コミュニティポスト
+* Super Follow ポスト
+* コラボレーションポスト
+
+**編集されていないポストの属性例**
+
+以下の JSON は、ポスト編集機能が追加された後に投稿されたポストに含まれる編集メタデータを示しています。次の例は、編集履歴がないポストの場合です。 
+
+`"edit_tweet_ids"` 配列には 1 つの ID のみが含まれている点に注意してください。
+
+```
+{
+  "created_at": "Wed Aug 16 18:29:02 +0000 2022",
+  "id": 1557433858676740098,
+  "id_str": "1557433858676740098",
+  "text": "I wonder if I will every use teh edit button",
+  "edit_history": {
+    "initial_tweet_id": "1557433858676740098",
+    "edit_tweet_ids": ["1557433858676740098"]
+  },
+  "edit_controls": {
+    "editable_until_ms": 1660155761384,
+    "edits_remaining": 5
+  },
+  "editable": true
+}
+```
+
+**編集されたポストの属性の例**
+
+以下の JSON は、編集ポスト機能が追加された後に投稿されたポストに含まれる編集メタデータを示しています。この例は、1 回だけ編集されたポストのものです。 
+
+`"edit_tweet_ids"` 配列には 2 つの ID があり、1 つは元のポスト、もう 1 つは編集後のポストの ID であることに注意してください。
+
+```
+{
+  "created_at": "Wed Aug 16 18:35:42 +0000 2022",
+  "id": 1557445923210514432,
+  "id_str": "1557445923210514432",
+  "text": "I wonder if I will ever use the edit button",
+  "edit_history": {
+    "initial_tweet_id": "1557433858676740098",
+    "edit_tweet_ids": ["1557433858676740098", "1557445923210514432"]
+  },
+  "edit_controls": {
+    "editable_until_ms": 1660155761384,
+    "edits_remaining": 4
+  },
+  "editable": true
+}
+```
+
+**コンプライアンスサポート**
+
+[Compliance Firehose](/ja/x-api/enterprise-gnip-2.0/fundamentals/firehouse) と v2 の [batch compliance endpoint](/ja/x-api/compliance/batch-compliance/introduction) が、ポストの編集に対応するように更新されました。 
+
+新しい &quot;tweet&#95;edit&quot; イベントタイプが Compliance Firehose に追加されました。
+
+```
+{
+  "tweet_edit": {
+    "id": <tweetId>,
+    "initial_tweet_id": <tweetId>,
+    "edit_tweet_ids": [<tweetId1>, <tweetId2>, <tweetId3> ...],
+    "timestamp_ms": "<timestampMsStr>"
+  }
+}
+```

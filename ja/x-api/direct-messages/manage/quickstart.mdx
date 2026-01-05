@@ -1,0 +1,150 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["ダイレクトメッセージ管理 クイックスタート", "DM 管理 クイックスタート", "DM 送信 クイックスタート", "DM 管理 クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-direct-message-endpoints">
+  ## ダイレクトメッセージ管理エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、HTTP リクエストの管理および送信を行うツールである Postman を使って、ダイレクトメッセージエンドポイントへの最初のリクエストを行う方法を説明します。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ガイドをご覧ください。
+
+Python ベースの例を確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。加えて、公式の [X Developer Platform software development kits (SDKs)](/ja/x-api/tools-and-libraries/sdks) も、これらのダイレクトメッセージエンドポイントをサポートするように更新される予定です。  
+
+<Note>
+  **前提条件**
+
+  このガイドを完了するには、リクエストの認証に使用する [キーとトークン](/ja/resources/fundamentals/authentication) のセットが必要です。これらのキーとトークンは、次の手順で生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal で、[プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-building-manage-direct-message-requests">
+  ### manage Direct Message リクエストを構築する手順
+</div>
+
+この例では、1 件のリクエストで新しいグループ会話を作成し、最初のメッセージを追加します。その後、作成した会話に 2 つ目のメッセージを追加します。
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### Step one: Start with a tool or library
+</div>
+
+Direct Message 管理エンドポイントの利用を開始するにあたり、ここではプロセスを簡略化するために Postman ツールを使用します。XDev が作成した X API v2 リクエストのサンプルコレクションを使って、新しい Direct Message を作成し、Direct Message 会話イベントを一覧表示する 6 つのエンドポイントを確認していきます。
+
+コレクションのほとんどはあらかじめ入力されていますが、これらの API リクエストをホストするために作成した X アプリに基づいて、いくつかの詳細を入力する必要があります。まずはコレクションを読み込む／更新するところから始めましょう。
+
+X API v2 Postman コレクションを自分の環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Manage Direct Messages」フォルダに移動します。このフォルダの Authorization タブは、可能な範囲で事前設定されており、X アプリの認証情報を共有するために、いくつかの設定を更新できます。このフォルダには、新しい Direct Message を作成するための 3 つのエンドポイントも含まれています。あわせて、「Direct Message lookup」フォルダもあり、Direct Message 会話イベント（送受信メッセージに加え、会話参加者が参加・退出したタイミングを含む）を取得する 3 つのエンドポイントが用意されています。 
+
+グループ会話の作成は X API v2 の新しく魅力的な機能であるため、この例ではそれに焦点を当てます。ここでは &quot;New group DM and conversation&quot; のサンプルを使用します。このリクエストを使って、Direct Message のグループ会話を作成します。
+
+次のステップは、エンドポイントで認証を行うことです。
+
+**Step two: Authenticate your request**
+
+X API に正しくリクエストを送信するには、その操作を行う権限が自分にあることを確認する必要があります。このエンドポイントへのリクエストを成功させるために、ここでは [OAuth 2.0 Authorization Code Flow with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) を使用します。Postman 内でアクセストークンを生成できます。 
+
+Postman では、認証方式をフォルダレベルまたはリクエストレベルで設定できます。ここでは、フォルダレベルで認証情報を設定します。
+
+「Manage Direct Messages」フォルダに移動し、「Authorization」タブを選択して、Type が “OAuth 2.0” に設定されていること、および &quot;Add auth data to&quot; が &quot;Request Headers&quot; に設定されていることを確認します。&quot;Current Token&quot; セクションで、&quot;header Prefix&quot; が Bearer に設定されていることを確認してください。  
+
+新しいトークンを設定および生成するには、次の操作を行います。
+
+1. &quot;Manage DMs&quot; などのトークン名を作成します。
+
+2. **Grant Type** が Authorization Code (with PKCE) に設定されていることを確認します。
+
+3. **Callback URL** を設定します。Callback URL を、[v2 Dev Portal](https://developer.x.com/en/portal/dashboard) 上のアプリケーションに関連付けられている Callback URL と完全に一致するように更新する必要があります。この例で使用している X アプリでは、Callback URL は [*https://www.example.com*.](https://www.example.com/) に設定されています（厳密に一致している必要があるため、[*https://example.com*](https://example.com) では動作しない点に注意してください）。 
+
+4. **Auth URL** が [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize) に設定されていることを確認します。
+
+5. **Access Token URL** が [https://api.x.com/2/oauth2/token.](https://api.x.com/2/oauth2/token) に設定されていることを確認します。**Client ID** - Developer Portal から OAuth 2.0 client ID をコピー＆ペーストします。**Client Secret** - 機密クライアントとなる種類のアプリを使用している場合にのみ必要です。その場合は、Developer Portal から OAuth 2.0 Client Secret をコピー＆ペーストします。 
+
+6. **Scope** が dm.read、dm.write、tweet.read、users.read に設定されていることを確認します。
+
+7. **State** が “state” に設定されていることを確認します。
+
+8. **Client Authentication** が Send as Basic Auth header に設定されていることを確認します。
+
+9. **Get New Access Token** と表示されている箇所をクリックし、「Sign-in with X」フローの一部として &quot;Authorize app&quot; をクリックします。
+
+10. &quot;Proceed&quot; ボタンをクリックし、その後 &quot;Use Token&quot; をクリックしてトークンを生成します。 
+
+11. &quot;Save&quot; ボタンをクリックして、これらの設定内容を保存します。
+
+X にログインしていないというメッセージが表示される場合があります。このエラーが表示された場合は、Postman 内で、代理でポストしようとしている X アカウントにログインする必要があります。
+
+これらの OAuth 2.0 の詳細をフォルダーレベルで設定したら、各サンプルの「Authorization」タブに移動し、Type が「Inherit auth from parent」に設定されていることを確認します。
+
+このトークンはまもなく有効期限が切れるため、「Get New Access Token」ボタンをクリックして再生成する必要があります。これをクリックすると「Sign-in with X」プロセスが開始され、新しいトークンが発行されてリクエストに使用できるようになります。
+
+<div id="step-three-specify-the-direct-message-conversation-participants-and-message-contents">
+  #### ステップ 3: ダイレクトメッセージの会話参加者とメッセージ内容を指定する
+</div>
+
+「Body」タブに移動し、サンプルの JSON オブジェクトを編集します。`participant_ids` 属性に、ダイレクトメッセージを送信したいアカウントを指定します。
+
+`{
+   "message": {"text": "Hello to just you two, this is a new group conversation."},
+   "participant_ids": ["944480690","906948460078698496"],
+   "conversation_type": "Group"
+}`
+
+<div id="step-four-make-your-request-and-review-the-response">
+  #### ステップ4：リクエストを送信してレスポンスを確認する
+</div>
+
+すべての設定が完了したら、「Send」ボタンをクリックします。すると、以下のサンプルレスポンスと同様のレスポンスが返ってきます。なお、上でアクセストークンを作成してから有効期限が切れてしまっている場合は、そのフォルダーの Authorization タブに戻り、「Get New Access Token」をクリックして新しいトークンを発行してください。
+
+```
+{
+   "data": {
+       "dm_conversation_id": "1582103724607971328",
+       "dm_event_id": "1582103724607971332"
+   }
+}
+```
+
+返されたレスポンスの &quot;data&quot; オブジェクトに dm&#95;conversation&#95;id と dm&#95;event&#95;id が含まれていれば、新しいダイレクトメッセージ会話を正常に作成できています。この会話に関連するイベントの取得を始めるには、Direct Message lookup クイックスタートガイドに進んでください。
+
+<div id="step-five-add-another-message-to-that-group-conversation">
+  #### ステップ5：そのグループ会話に別のメッセージを追加する
+</div>
+
+「Add DM to conversation」の例を選択し、「Params」タブを選択します。「Path Variables」内の dm&#95;conversation&#95;id を、上で作成した会話の ID に更新します。
+
+|                            |                     |
+| :------------------------- | :------------------ |
+| **Key**                    | **Value**           |
+| dm&#95;conversation&#95;id | 1582103724607971328 |
+
+この会話 ID を使用すると、リクエストパスは次のようになります: [https://api.x.com/2/dm&#95;conversations/1582103724607971328/messages](https://api.x.com/2/dm_conversations/1582103724607971328/messages)
+
+また、「Body」タブの内容を、送信したいメッセージテキストを含むリクエスト用 JSON に更新します。
+
+```
+{
+   "text": "Adding a new message to our group conversation..."
+}
+```
+
+すべての設定が完了したら、「Send」ボタンをクリックします。すると、次の例のようなレスポンスが返ってきます。
+
+```
+{
+   "data": {
+       "dm_conversation_id": "1582103724607971328",
+       "dm_event_id": "1582106224379559940"
+   }
+}
+```

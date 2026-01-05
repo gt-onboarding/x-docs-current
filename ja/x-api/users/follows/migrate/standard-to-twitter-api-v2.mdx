@@ -1,0 +1,66 @@
+---
+title: v1 から v2 へ
+sidebarTitle: v1 から v2 へ
+keywords: ["v1.1 から v2 への移行", "フォローの移行", "フォローを移行する", "Standard v1.1 から v2 のフォロー機能へ", "v1 から v2 へのフォロー移行", "移行ガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="manage-follows-standard-v11-compared-to-x-api-v2">
+  #### フォロー管理：標準 v1.1 と X API v2 の比較
+</div>
+
+標準 v1.1 の [POST friendships/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create) および [POST friendships/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/follow-search-get-users/api-reference/post-friendships-destroy) エンドポイントを使用している場合、このガイドでは、標準エンドポイントと X API v2 のフォロー管理エンドポイントとの類似点と相違点を理解できるように説明します。
+
+* **類似点**
+  * OAuth 1.0a User Context
+* **相違点**
+  * エンドポイントの URL
+  * アプリおよびプロジェクトの要件
+  * HTTP メソッド
+  * リクエストパラメータ
+
+     
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**OAuth 1.0a User Context 認証方式**
+
+エンドポイントの両バージョンは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#oauth-1-0a-2) をサポートしています。したがって、これまで v1.1 の標準的な manage follows エンドポイントのいずれかを使用していた場合でも、X API v2 のエンドポイントに移行した後も同じ認証方式を引き続き使用できます。 
+
+<div id="differences">
+  #### 相違点
+</div>
+
+**エンドポイント URL**
+
+* Standard v1.1 エンドポイント:
+  * POST https://api.x.com/1.1/friendships/create.json
+    (ユーザーをフォローする)
+  * POST https://api.x.com/1.1/friendships/destroy.json
+    (ユーザーのフォローを解除する)
+* X API v2 エンドポイント:
+  * POST https://api.x.com/2/users/:id/following
+    (ユーザーをフォローする)
+  * DELETE https://api.x.com/2/users/:source&#95;user&#95;id/following/:target&#95;user&#95;id
+    (ユーザーのフォローを解除する) 
+
+**アプリとプロジェクトの要件**
+
+X API v2 エンドポイントでは、リクエストを認証する際に、[開発者アプリ](/ja/resources/fundamentals/developer-apps) と、それに関連付けられた [プロジェクト](/ja/resources/fundamentals/projects) の認証情報を使用する必要があります。すべての X API v1.1 エンドポイントでは、スタンドアロンのアプリ、またはプロジェクトに関連付けられたアプリのいずれかの認証情報を使用できます。
+
+**リクエストパラメータ**
+
+次の Standard v1.1 のリクエストパラメータには、X API v2 における対応パラメータがあります。
+
+| Standard v1.1 | X API v2 |
+| :--- | :--- |
+| No equivalent | id (POST), source&#95;user&#95;id (DELETE) |
+| user&#95;id | target&#95;user&#95;id |
+| screen&#95;name | No equivalent |
+
+Standard v1.1 のパラメータはクエリパラメータとして渡される一方で、X API v2 のパラメータはボディパラメータ（POST エンドポイントの場合）またはパスパラメータ（DELETE エンドポイントの場合）として渡される点に注意してください。
+
+また、Standard v1.1 エンドポイントを使用する場合、v2 の id および source&#95;user&#95;id は必須ではありません。これは、OAuth 1.0a User Context を使用して渡されるアクセストークンから、どのユーザーがフォロー/フォロー解除を開始したかが推論されるためです。 

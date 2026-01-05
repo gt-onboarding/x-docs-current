@@ -1,0 +1,178 @@
+---
+title: 概要
+sidebarTitle: 概要
+keywords: ["検索連携", "検索概要", "検索ガイド", "検索実装", "ポスト検索連携"]
+---
+
+<div id="how-to-integrate-with-the-search-posts-endpoints">
+  ## Search ポストエンドポイントとの統合方法
+</div>
+
+このページでは、recent search エンドポイントまたはfull-archive search エンドポイントをシステムに統合する際に知っておくべき、いくつかのツールと重要な概念について説明します。ページは次のセクションに分かれています。
+
+* [便利なツール](#helpful-tools)
+* 重要な概念
+  * [認証](#authentication)
+
+  * [developer portal、プロジェクト、アプリ](#developer-portal)
+
+  * [レート制限](#rate-limits)
+
+  * [フィールドとexpansions](#fields-expansions)
+
+  * [メトリクス](#metrics)
+
+  * [検索クエリの作成](#queries)
+
+  * [ページネーション](#pagination)
+
+  * [ポスト数の上限](#tweet-caps) 
+
+  * [ポストの編集](#tweet-edits) 
+
+<div id="helpful-tools">
+  ### 便利なツール
+</div>
+
+いくつかの主要な概念を説明する前に、これらのエンドポイントの機能をテストし始める際には、次のいずれかのツールまたはコードサンプルを使用することをおすすめします。
+
+<div id="code-samples">
+  #### コードサンプル
+</div>
+
+お好みのプログラミング言語でこれらのエンドポイントを使い始めたい場合は、[GitHub ページ](https://github.com/xdevplatform/Twitter-API-v2-sample-code)に、出発点として利用できるさまざまなコードサンプルを用意しています。[Python クライアント](https://github.com/xdevplatform/search-tweets-python)や [Ruby クライアント](https://github.com/xdevplatform/search-tweets-ruby)なども含まれています。
+
+<div id="libraries">
+  #### ライブラリ
+</div>
+
+スムーズに始めるために、多数提供されている[コミュニティ製サードパーティライブラリ](/ja/x-api/tools-and-libraries/overview)を活用してください。適切なバージョンタグを目印にすれば、v2エンドポイントに対応したライブラリを見つけることができます。
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman は、これらのエンドポイントをテストするのに便利なツールです。各 Postman リクエストには、そのエンドポイントで利用できるすべてのパラメータが含まれており、どのような項目が利用可能かをすばやく把握するのに役立ちます。Postman コレクションの詳細については、[Using Postman](/ja/tutorials/postman-getting-started) ページをご覧ください。
+ 
+
+<div id="key-concepts">
+  ### 重要な概念
+</div>
+
+<div id="authentication">
+  #### 認証
+</div>
+
+すべての X API v2 エンドポイントでは、「キーとトークン（keys and tokens）」とも呼ばれる一連の認証情報を使ってリクエストを認証する必要があります。recent search エンドポイントに対するリクエストの認証には、OAuth 1.0a User Context、OAuth 2.0 アプリ専用フロー、または OAuth 2.0 Authorization Code with PKCE のいずれかを使用できます。full archive search エンドポイントを使用する場合は、OAuth 2.0 アプリ専用フローを使用しなければなりません。
+
+[OAuth 2.0 アプリ専用フロー](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) では、リクエストに [OAuth 2.0 App Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) を渡すだけで済みます。App Access Token は、developer App 内から直接生成することも、[POST oauth2/token](/ja/resources/fundamentals/authentication#post-oauth2-token) エンドポイントを使用して生成することもできます。
+
+[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) では、API キー、ユーザーのアクセストークン、その他いくつかのパラメータを使用して[認可ヘッダーを作成](https://developer-staging.x.com/resources/fundamentals/authentication/authorizing-a-request)し、それをリクエストに渡す必要があります。アクセストークンは、リクエストを代理して行う対象ユーザーに紐づいている必要があります。別のユーザーのアクセストークン一式を生成したい場合は、そのユーザーが [3-legged OAuth フロー](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用してあなたのアプリを認可しなければなりません。
+
+なお、OAuth 1.0a の利用は難しいことがあります。この認証方式に慣れていない場合は、[ライブラリ](/ja/x-api/tools-and-libraries/overview) を使用するか、Postman のようなツールを使うか、あるいは OAuth 2.0 を使用してリクエストを認証することをおすすめします。これらのエンドポイントからポストや非公開メトリクスをリクエストしたい場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE のいずれかを使用する必要があります。これにより、そのコンテンツを所有するユーザーから適切な権限を得ていることが保証されます。
+
+[OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) は、アプリケーションのスコープや複数デバイス間での認可フローを、より細かく制御できるようにします。OAuth 2.0 では、ユーザーに代わって特定の権限を付与する、きめ細かいスコープを選択できます。
+
+アプリで OAuth 2.0 を有効にするには、developer portal の App 設定セクションにあるアプリの認証設定で有効化する必要があります。
+
+<Note>
+  **ご注意ください**
+
+  以下の [fields](/ja/x-api/fundamentals/fields) をリクエストする場合は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code が必要です。
+
+  * tweet.fields.non&#95;public&#95;metrics
+  * tweet.fields.promoted&#95;metrics
+  * tweet.fields.organic&#95;metrics
+  * media.fields.non&#95;public&#95;metrics
+  * media.fields.promoted&#95;metrics
+  * media.fields.organic&#95;metrics
+</Note>
+
+####
+
+developer portal、プロジェクト、および開発者アプリ
+
+いずれの X API v2 エンドポイントを利用する場合でも、まずは[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)し、そのアカウント内にプロジェクトを作成し、そのプロジェクト内に開発者アプリを作成する必要があります。その開発者アプリ内のキーとトークンは、これらの検索エンドポイントで利用できます。
+
+recent search エンドポイントへのリクエストには、任意の [アクセスレベル](/ja/x-api/getting-started/about-x-api) を持つプロジェクトのキーとトークンを使用できます。ただし、full archive search エンドポイントにリクエストするには、Pro または Enterprise のアクセスレベルを持つプロジェクトを使用する必要があります。[Enterprise アクセス](/ja/x-api/getting-started/getting-access)をお持ちの場合は、追加のオペレーターや、より長いクエリを使用できることなど、追加機能を利用できます。
+ 
+
+<div id="rate-limits">
+  #### レート制限
+</div>
+
+毎日、何万もの開発者が X API へリクエストを送信しています。リクエスト量を管理するため、各エンドポイントには[レート制限](/ja/x-api/fundamentals/rate-limits)が設定されており、各開発者がアプリまたは認証済みユーザーに代わって実行できるリクエスト数に上限があります。
+
+これらのエンドポイントには、使用する認証方式に応じて異なるレート制限が適用されます。アプリレベルのレート制限は、OAuth 2.0 アプリ専用フローを使用してリクエストを行うアプリに適用されます。一方、ユーザーレベルのレート制限は、OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE を使用して、特定の認可済みユーザーに代わって行われるリクエストに適用されます。これら 2 種類のレート制限は、15 分間のウィンドウ内でのリクエスト頻度に基づいています。
+
+例えば、OAuth 2.0 アプリ専用フローによる認証を使用して recent search エンドポイントにリクエストを行うアプリは、15 分間で 450 件のリクエスト（ページネーションのリクエストを含む）を実行できます。同じアプリは、同じ 15 分間の枠内で、2 人の異なる認証済みユーザー（OAuth 1.0a User Context または OAuth 2.0 Authorization Code with PKCE を使用）について、それぞれの認証済みユーザーごとに recent search エンドポイントへのリクエストを最大 180 件（ページネーションのリクエストを含む）まで実行できます。
+ 
+
+<div id="fields-and-expansions">
+  #### フィールドと expansions
+</div>
+
+X API v2 では、[fields](/ja/x-api/fundamentals/fields) と [expansions](/ja/x-api/fundamentals/expansions) を使用して、API から取得したいデータを正確に選択できます。`expansions` パラメータを使用すると、ペイロード内で参照されているオブジェクトを展開できます。たとえば、このエンドポイントでは、`expansions` パラメータを使用して poll、place、media などのオブジェクトをリクエストできます。
+
+`fields` パラメータでは、さまざまなデータオブジェクトの中から、どのフィールドを受け取りたいかを正確に指定できます。デフォルトでは、これらのエンドポイントから返される主要な Post オブジェクトには、`id` フィールドと `text` フィールド（加えて、その機能が導入された後に作成されたポストに対する `edit_history_tweet_ids`）が含まれます。`author_id` や `public_metrics` などの追加フィールドを受け取りたい場合は、それらを `fields` パラメータで明示的にリクエストする必要があります。連携での利用を検討すべき重要なフィールドとしては、poll データ、[metrics](/ja/x-api/fundamentals/metrics)、[Post annotations](/ja/x-api/fundamentals/post-annotations)、および [conversation ID](/ja/x-api/fundamentals/conversation-id) の各フィールドがあります。
+
+[X API v2 data dictionary](/ja/x-api/fundamentals/data-dictionary) には、[fields と expansions を併用する方法](/ja/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) に関するガイドを追加しました。
+ 
+
+<div id="metrics">
+  #### メトリクス
+</div>
+
+X API v2 エンドポイントでは、リクエストに適切な[フィールド](/ja/x-api/fundamentals/fields)を指定することで、返されるオブジェクトからメトリクスを直接取得できます。
+
+ポストのメトリクスには、ユーザーのプライバシーおよび次のレスポンスフィールドに関連するいくつかの制限があることに注意してください。
+
+* tweet.fields.non&#95;public&#95;metrics
+* tweet.fields.promoted&#95;metrics
+* tweet.fields.organic&#95;metrics
+* media.fields.non&#95;public&#95;metrics
+* media.fields.promoted&#95;metrics
+* media.fields.organic&#95;metrics
+
+これらのフィールドには非公開のメトリクスデータが含まれます。つまり、recent search エンドポイントを使用してこれらのデータを取得するには、ポストの投稿者からそのデータを代理で取得することを許可されている必要があり、そのために [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) を使用する必要があります。recent search でのみこの認証方法を使用できるため、full archive search エンドポイント経由でこれらのメトリクスを取得することはできません。
+
+たとえば、ユーザー ID 1234 のポストの `non_public_metrics` を取得するには、そのユーザーに紐づくアクセストークンをリクエストに含める必要があります。ユーザーにあなたのアプリを承認してもらい、[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)を使用することで、そのユーザーに紐づくアクセストークン一式を取得できます。
+
+`non_public_metrics`、`organic_metrics`、および `promoted_metrics` は、過去 30 日以内に作成されたポストに対してのみ利用可能です。つまり、これらのフィールドをリクエストすると、結果は自動的に過去 30 日以内のポストのみが含まれるように調整されます。
+
+これらのフィールドがリクエストされた場合、認証済みユーザーによって作成されたポストのみが返され、それ以外のポストにはエラーメッセージが返されます。
+ 
+
+<div id="building-search-queries">
+  #### 検索クエリの構築
+</div>
+
+これらのエンドポイントの中心的な機能は、単一の検索クエリを使用して、返されるポストをフィルタリングすることです。これらのクエリは、メッセージのキーワード、ハッシュタグ、URL などのポストおよびユーザー属性にマッチするオペレーターで構成されます。オペレーターは、ブール演算や括弧を使ってクエリ内で組み合わせることで、クエリのマッチング動作をより細かく調整できます。
+
+詳しくは、[クエリの構築方法](/ja/x-api/posts/search/integrate/build-a-query) に関するガイドを参照してください。
+
+<div id="pagination">
+  #### ページネーション
+</div>
+
+これらのエンドポイントでは、レスポンスを高速に返すためにページネーションを利用しています。単一のレスポンスで送信できる結果数（最近検索では最大 100 件のポスト、フルアーカイブ検索では最大 500 件）を超える場合は、ページネーションを行う必要があります。`max_results` パラメーターを使用して 1 ページあたりに返す結果数を指定し、`pagination_token` パラメーターを使用して次のページの結果を取得します。詳細については、[ページネーションガイド](/ja/x-api/fundamentals/pagination)を参照してください。
+
+<div id="post-caps">
+  #### ポスト上限
+</div>
+
+Search Posts エンドポイントには、ページネーションの有無にかかわらず、1 か月あたりに返せるポストの数に上限があります。
+
+どの search エンドポイントを使用しても、返されるポストはプロジェクトレベルの [Post caps](/ja/x-api/fundamentals/post-cap) に対してカウントされます。利用状況は developer portal に表示され、「月」の起点は [developer portal dashboard](https://developer.x.com/en/portal/dashboard) に表示されるサブスクリプションの更新日です。
+
+**ポストの編集**
+
+編集可能なポストは、元のポストが公開されてから 30 分間に最大 5 回まで編集できます。search エンドポイントは常にポストの最新バージョンを返します。公開から 30 分以上経過したポストのみをリクエストする場合は、常にそのポストの最終バージョンを受け取ります。ただし、ほぼリアルタイムのユースケースがあり、直近 30 分以内に公開されたポストをクエリしている場合は、それらのポストは受信後に編集されている可能性があります。これらのポストは Search Posts または Post Lookup エンドポイントを使って再取得し、最終状態を確認できます。ポストの編集がどのように機能するかについて詳しくは、[Post edits fundamentals](/ja/x-api/fundamentals/edit-posts) ページを参照してください。  
+
+**次のステップ**
+
+[Search Posts エンドポイントへの最初のリクエストを送信する](/ja/x-api/posts/search/quickstart/recent-search)
+
+[API Reference ページでパラメータ、フィールドなどの一覧を確認する](/ja/x-api/posts/recent-search)
+
+[サポートを受ける、またはエラーをトラブルシュートする](https://developer.x.com/en/support/x-api)

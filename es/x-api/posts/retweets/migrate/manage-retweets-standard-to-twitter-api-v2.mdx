@@ -1,0 +1,61 @@
+---
+title: Administrar Retweets
+sidebarTitle: Administrar Retweets
+keywords: ["migración de administración de Retweets", "administrar Retweets de v1.1 a v2", "migrar la administración de Retweets", "Retweets de Standard a v2", "migración de Retweets"]
+---
+
+<div id="manage-retweets-standard-v11-compared-to-x-api-v2">
+  ### Administrar Retweets: estándar v1.1 frente a X API v2
+</div>
+
+Si has estado trabajando con los endpoints estándar de la v1.1 [POST statuses/retweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-retweet-id) y [POST statuses/unretweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-unretweet-id), el objetivo de esta guía es ayudarte a entender las similitudes y diferencias entre los endpoints estándar y los endpoints de Retweets de X API v2.
+
+* **Similitudes**
+  * Autenticación
+* **Diferencias**
+  * URLs de los endpoints y métodos HTTP
+  * Limitaciones de las solicitudes
+  * Requisitos de la aplicación y el proyecto
+  * Parámetros de las solicitudes
+
+<div id="similarities">
+  #### Similitudes
+</div>
+
+**Autenticación**
+
+Tanto los endpoints estándar de v1.1 como los de X API v2 que gestionan Retweets ([POST statuses/retweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-retweet-id) y [POST statuses/unretweet/:id](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-statuses-unretweet-id)) utilizan [Contexto de usuario de OAuth 1.0a](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication). Por lo tanto, si antes utilizabas uno de los endpoints estándar de v1.1 para obtener Retweets, puedes seguir utilizando el mismo método de autenticación si migras a la versión de X API v2. 
+
+<div id="differences">
+  #### Diferencias
+</div>
+
+**URLs de endpoints y métodos HTTP**
+
+* Endpoints estándar v1.1:
+  * https://api.x.com/1.1/statuses/retweet/:id.json
+    (Retuitea una Publicación. Devuelve la Publicación original con los detalles del Retweet incorporados)
+  * https://api.x.com/1.1/statuses/unretweet/:id.json
+    (Deshace un Retweet. Devuelve la Publicación original con los detalles del Retweet incorporados)
+* Endpoint de X API v2:
+  * https://api.x.com/2/tweets/:id/retweets
+    (Retuitea una Publicación determinada)
+  * https://api.x.com/2/users/:id/retweets/:source&#95;tweet&#95;id
+    (Deshace un Retweet de una Publicación determinada)
+
+**Requisitos de Aplicación y Proyecto**
+
+Los endpoints de X API v2 requieren que uses credenciales de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada a un [Proyecto](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de Aplicaciones independientes o Aplicaciones asociadas a un Proyecto.
+
+**Parámetros de solicitud**
+
+Los siguientes parámetros de solicitud estándar v1.1 aceptaban dos parámetros de consulta de solicitud (user&#95;id o screen&#95;name). X API v2 solo acepta el ID de usuario numérico, y debe pasarse como parte de la ruta del endpoint.
+
+| Estándar v1.1 | X API v2 |
+| :--- | :--- |
+| **id** | **id** |
+| **includes&#95;entities** | Sin equivalente |
+
+Ten en cuenta que los parámetros estándar v1.1 se pasan como parámetros de consulta, mientras que los parámetros de X API v2 se pasan como parámetros de cuerpo para el endpoint POST o parámetros de ruta para el endpoint DELETE.
+
+Además, no se requiere un id del usuario que retuitea una Publicación al usar los endpoints estándar v1.1, ya que los [Tokens de acceso](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) pasados con [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication) infieren qué usuario está iniciando el Retweet o deshaciendo un Retweet. 

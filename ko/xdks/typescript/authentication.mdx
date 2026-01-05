@@ -1,0 +1,227 @@
+---
+title: "인증"
+sidebarTitle: "인증"
+---
+
+TypeScript SDK는 다양한 사용 사례에 맞게 여러 인증 방법을 지원합니다.
+
+<div id="bearer-token-app-only-auth">
+  ## Bearer Token (앱 전용 인증)
+</div>
+
+읽기 전용 작업과 공개 데이터에 액세스할 때 사용:
+
+<CodeGroup dropdown>
+
+```typescript quickstart.ts theme={null}
+import { 
+  Client, 
+  type ClientConfig,
+  type Users
+} from '@xdevplatform/xdk';
+
+const config: ClientConfig = { bearerToken: 'your-bearer-token' };
+
+const client: Client = new Client(config);
+
+async function main(): Promise<void> {
+  const userResponse: Users.GetByUsernameResponse = await client.users.getByUsername('XDevelopers');
+  const username: string = userResponse.data?.username!;
+  console.log(username);
+}
+
+main();
+```
+
+```javascript quickstart.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const userResponse = await client.users.getByUsername('XDevelopers');
+const username = userResponse.data.username;
+console.log(username);
+```
+
+</CodeGroup>
+
+<div id="oauth-10a-user-context">
+  ## OAuth 1.0a (사용자 컨텍스트)
+</div>
+
+레거시 애플리케이션이나 특정 사용 사례에 사용하는 방식입니다:
+
+<CodeGroup dropdown>
+
+```typescript oauth1.ts theme={null}
+import { 
+  Client, 
+  OAuth1,
+  type OAuth1Config,
+  type ClientConfig,
+  type Users
+} from '@xdevplatform/xdk';
+
+const oauth1Config: OAuth1Config = {
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  accessToken: 'user-access-token',
+  accessTokenSecret: 'user-access-token-secret'
+};
+
+const oauth1: OAuth1 = new OAuth1(oauth1Config);
+
+const config: ClientConfig = {
+  oauth1: oauth1,
+};
+
+const client: Client = new Client(config);
+
+async function main(): Promise<void> {
+  const response: Users.GetMeResponse = await client.users.getMe();
+
+  const me = response.data;
+  console.log(me);
+}
+
+main();
+
+```
+
+```javascript oauth1.js theme={null}
+import { Client, OAuth1 } from '@xdevplatform/xdk';
+
+const oauth1 = new OAuth1({
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  accessToken: 'user-access-token',
+  accessTokenSecret: 'user-access-token-secret'
+});
+
+const client = new Client({ oauth1: oauth1 });
+
+const response = await client.users.getMe();
+const me = response.data;
+console.log(me);
+
+```
+
+</CodeGroup>
+
+<div id="oauth-20-user-context">
+  ## OAuth 2.0 (사용자 컨텍스트)
+</div>
+
+사용자 기반 작업의 경우:
+
+<CodeGroup dropdown>
+
+```typescript oauth2.ts theme={null}
+import { 
+  Client, 
+  OAuth2,
+  generateCodeVerifier,
+  generateCodeChallenge,
+  type OAuth2Config,
+  type ClientConfig,
+  type OAuth2Token
+} from '@xdevplatform/xdk';
+
+(async (): Promise<void> => {
+  const oauth2Config: OAuth2Config = {
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'https://example.com',
+    scope: ['tweet.read', 'users.read', 'offline.access'],
+  };
+
+  const oauth2: OAuth2 = new OAuth2(oauth2Config);
+
+  const state: string = 'example-state';
+  const codeVerifier: string = generateCodeVerifier();
+  const codeChallenge: string = await generateCodeChallenge(codeVerifier);
+  
+  oauth2.setPkceParameters(codeVerifier, codeChallenge);
+  
+  const authUrl: string = await oauth2.getAuthorizationUrl(state);
+
+  // 사용자가 authUrl에 접속해 앱을 승인합니다
+  // 승인 후, 사용자는 code 파라미터와 함께 다시 리디렉션됩니다
+  // 콜백 URL에서 code를 추출합니다(예: 쿼리 파라미터에서)
+  const authCode: string = 'code-from-callback-url'; // OAuth 콜백에서 실제 code로 교체하세요
+
+  const tokens: OAuth2Token = await oauth2.exchangeCode(authCode, codeVerifier);
+
+  const config: ClientConfig = {
+    accessToken: tokens.access_token,
+  };
+
+  const client: Client = new Client(config);
+});
+
+```
+
+```javascript oauth2.js theme={null}
+import { Client, OAuth2, generateCodeVerifier, generateCodeChallenge } from '@xdevplatform/xdk';
+
+(async () => {
+  const oauth2 = new OAuth2({
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'https://example.com',
+    scope: ['tweet.read', 'users.read', 'offline.access'],
+  });
+
+  const state = 'example-state';
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  oauth2.setPkceParameters(codeVerifier, codeChallenge);
+  const authUrl = await oauth2.getAuthorizationUrl(state);
+
+  // 사용자가 authUrl에 접속해 앱을 승인합니다
+  // 승인 후, 사용자는 code 파라미터와 함께 다시 리디렉션됩니다
+  // 콜백 URL에서 code를 추출합니다(예: 쿼리 파라미터에서)
+  const authCode = 'code-from-callback-url'; // OAuth 콜백에서 실제 code로 교체하세요
+
+  const tokens = await oauth2.exchangeCode(authCode, codeVerifier);
+
+  const client = new Client({ accessToken: tokens.access_token });
+
+  const response = await client.users.getMe();
+  const me = response.data;
+  console.log(me);
+});
+```
+
+</CodeGroup>
+
+<div id="environment-variables">
+  ## 환경 변수
+</div>
+
+민감한 자격 증명은 환경 변수에 저장하세요.
+
+```bash
+# .env
+X_API_BEARER_TOKEN=your-bearer-token
+X_API_CLIENT_ID=your-client-id
+X_API_CLIENT_SECRET=your-client-secret
+```
+
+<CodeGroup dropdown>
+  ```typescript env.ts theme={null}
+  import { Client } from '@xdevplatform/xdk';
+
+  const client = new Client({ bearerToken: process.env.X_API_BEARER_TOKEN });
+  ```
+
+  ```javascript env.js theme={null}
+  import { Client } from '@xdevplatform/xdk';
+
+  const client = new Client({ bearerToken: process.env.X_API_BEARER_TOKEN });
+  ```
+</CodeGroup>
+
+<Info>
+  JavaScript/TypeScript용 XDK를 사용한 보다 자세한 코드 예제는 [code samples GitHub repo](https://github.com/xdevplatform/samples/tree/main/javascript)를 참고하세요.
+</Info>
