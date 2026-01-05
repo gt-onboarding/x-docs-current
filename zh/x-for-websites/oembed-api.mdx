@@ -1,0 +1,133 @@
+---
+title: oEmbed API
+description: "oEmbed API 以兼容 [oEmbed](http://oembed.com/) 的格式返回简单的嵌入式 HTML。"
+mode: wide
+keywords: ["oEmbed", "oEmbed API", "嵌入 API", "嵌入帖子", "嵌入内容", "oEmbed 格式", "嵌入 HTML"]
+---
+
+你可以使用 oEmbed API 以编程方式获取嵌入内容，例如 [帖子](https://developer.x.com/en/docs/twitter-for-websites/embedded-tweets/overview) 和 [时间线](https://developer.x.com/en/docs/twitter-for-websites/timelines/overview)。 
+
+oEmbed API 的响应会返回一个 HTML 代码片段，当[在页面中包含 X 的小部件 JavaScript](https://developer.x.com/web/javascript/loading) 时，它会被自动识别。
+
+请注意，该 API 更适合用于批量任务，我们建议使用功能强大的 [publish.x.com](https://publish.x.com/#) 工具来嵌入内容。
+
+<Tabs>
+  <Tab title="嵌入式时间线">
+    当在页面中[包含 X 的小部件 JavaScript](https://developer.x.com/web/javascript/loading) 时，返回的 HTML 片段会被自动识别为一个[嵌入式时间线](https://developer.x.com/en/docs/twitter-for-websites/timelines/overview)。
+
+    oEmbed 端点允许通过在 HTML 标记中设置相应属性来自定义嵌入式时间线的最终外观，这些属性会由默认随 HTML 响应一同返回的 X JavaScript 进行解析。随着 X 添加新功能或调整时间线呈现方式，返回标记的格式可能会随时间发生变化。
+
+    对于通过时间线 URL 指定的 X 时间线，会以兼容 [oEmbed](https://oembed.com/) 的 JSON 格式返回。支持用户和列表时间线。建议在你的服务器上根据 `cache_age` 属性指定的建议缓存时长缓存该时间线标记。
+
+    ## 资源 URL
+
+    *[https://publish.x.com/oembed](https://publish.x.com/oembed)*
+
+    ## 资源信息
+
+    |         |      |
+    | :------ | :--- |
+    | 响应格式    | JSON |
+    | 是否需要认证？ | 否    |
+    | 是否有速率限制 | 否    |
+
+    ## 参数
+
+    | 名称              | 描述                                                                                                                                                                                                                     | 示例                                                                                                                                                             |
+    | :-------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | **url**         | 要嵌入的 X 时间线的 URL                                                                                                                                                                                                        | *   [https://x.com/TwitterDev](https://x.com/TwitterDev)<br /> *[https://x.com/TwitterDev/lists/national-parks](https://x.com/TwitterDev/lists/national-parks) |
+    | limit           | 显示最多 N 条内容，其中 N 为 1 到 20（含）之间的值                                                                                                                                                                                        | 6                                                                                                                                                              |
+    | maxwidth        | 设置小部件的最大宽度。必须在 180 和 1200（含）之间                                                                                                                                                                                         | 300                                                                                                                                                            |
+    | maxheight       | 设置小部件的最大高度。必须大于 200                                                                                                                                                                                                    | 400                                                                                                                                                            |
+    | omit&#95;script | 不在响应中包含 `script` 元素                                                                                                                                                                                                    | 1                                                                                                                                                              |
+    | lang            | 支持的 X [语言代码](/zh/en/docs/twitter-for-websites/twitter-for-websites-supported-languages/overview "Twitter language code")                                                                                                  | es                                                                                                                                                             |
+    | theme           | 设置为 `dark` 时，时间线将以浅色文字配深色背景显示                                                                                                                                                                                          | dark                                                                                                                                                           |
+    | chrome          | 通过以空格分隔的标记移除时间线显示组件<br /><br />*   `noheader` - 隐藏页眉<br />*   `nofooter` - 隐藏页脚（如果可见）<br />*   `noborders` - 移除所有边框：包括小部件周围、帖子之间以及单个帖子内部的边框<br />*   `noscrollbar` - 裁剪并隐藏时间线滚动条（如果可见）<br />*   `transparent` - 移除背景颜色 | noheader%20nofooter                                                                                                                                            |
+    | aria&#95;polite | 为添加到时间线的帖子设置一个 [ARIA 实时区域礼貌等级](https://www.w3.org/TR/wai-aria/states_and_properties#aria-live) 值（例如 `assertive`）                                                                                                       | assertive                                                                                                                                                      |
+    | dnt             | 设置为 `true` 时，你站点上的该时间线及其嵌入页面不会被用于包括[个性化推荐](https://support.x.com/articles/20169421)和[个性化广告](https://support.x.com/articles/20170405)在内的相关用途                                                                            | true                                                                                                                                                           |
+
+    ## 示例请求
+
+    ```bash
+    curl --request GET --url 'https://publish.x.com/oembed?url=https%3A%2F%2Ftwitter.com%2FInterior%2Fstatus%2F507185938620219395'
+    twurl -H publish.x.com "/oembed?url=https://x.com/Interior/status/463440424141459456"
+    ```
+
+    ## 示例响应
+
+    ```json
+
+    {
+      "url": "https://x.com/TwitterDev",
+      "title": "",
+      "html": "<a class=\"twitter-timeline\" href=\"https://x.com/TwitterDev\">TwitterDev 的帖子</a>\n<script async src=\"//platform.x.com/widgets.js\" charset=\"utf-8\"></script>",
+      "width": null,
+      "height": null,
+      "type": "rich",
+      "cache_age": "3153600000",
+      "provider_name": "Twitter",
+      "provider_url": "https://x.com",
+      "version": "1.0"
+    }
+    ```
+  </Tab>
+
+  <Tab title="嵌入式帖子">
+    当[页面中包含 X 的小部件 JavaScript](https://developer.x.com/web/javascript/loading) 时,返回的 HTML 代码段将自动被识别为[嵌入式帖子](https://developer.x.com/web/embedded-tweets)。
+
+    oEmbed 端点允许通过在 HTML 标记中设置相应属性来自定义嵌入式帖子的最终外观,这些属性默认由与 HTML 响应捆绑的 X JavaScript 解释。随着 X 添加新功能或调整其帖子表示方式,返回标记的格式可能会随时间发生变化。
+
+    帖子回退标记应缓存在您的服务器上,缓存时长不超过 `cache_age` 属性所指定的建议缓存生命周期。
+
+    ## 资源 URL
+
+    *[https://publish.x.com/oembed](https://publish.x.com/oembed)*
+
+    ## 资源信息
+
+    |           |      |
+    | :-------- | :--- |
+    | 响应格式      | JSON |
+    | 是否需要身份验证？ | 否    |
+    | 是否有速率限制   | 否    |
+
+    ## 参数
+
+    | 名称                                                                                                                               | 默认值     | 说明                                                                                                                                                                                                                                   |
+    | :------------------------------------------------------------------------------------------------------------------------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `url`必需  <br />字符串                                                                                                               |         | 要嵌入的帖子 URL                                                                                                                                                                                                                           |
+    | `maxwidth`  <br />Int `[220..550]`                                                                                               | `325`   | 以整像素表示的已渲染帖子最大宽度。若提供的值低于或高于允许范围，将分别被调整为支持的最小或最大宽度并返回；重置后的宽度值会体现在返回的 `width` 属性中。请注意，X 不支持 oEmbed 的 `maxheight` 参数。帖子本质上是文本，因此其高度不可预测，无法像图像或视频那样缩放。相应地，oEmbed 响应不会提供 `height` 的值。需要帖子具有固定高度的实现应参考下面的 `hide_thread` 和 `hide_media` 参数。 |
+    | `hide_media`  <br />布尔、字符串或整数                                                                                                    | `false` | 当该参数设置为 `true`、`"t"` 或 `1` 时，帖子中的链接不会展开为照片、视频或链接预览。                                                                                                                                                                                  |
+    | `hide_thread`  <br />布尔值、字符串或整数                                                                                                  | `false` | 当设置为 `true`、`"t"` 或 `1` 时，如果请求的帖子是对另一条帖子的回复，则在该会话串中不会显示上一条帖子的折叠视图。                                                                                                                                                                   |
+    | `omit_script`  <br />Boolean、String 或 Int                                                                                        | `false` | 当设置为 `true`、`"t"` 或 `1` 时，用于加载 `widgets.js` 的 `<script>` 将不会被返回。你的网页需要自行引入 `widgets.js`，以便在所有 X 小部件（包括[嵌入式帖子](https://developer.x.com/web/embedded-tweets)）中使用。                                                                      |
+    | `align`  <br />枚举 `{left,right,center,none}`                                                                                     | `none`  | 指定嵌入的帖子在页面中相对于父元素应左对齐、右对齐还是居中显示。                                                                                                                                                                                                     |
+    | `lang`  <br />枚举类型（[语言](https://developer.x.com/en/docs/twitter-for-websites/twitter-for-websites-supported-languages/overview)） | `en`    | 请求将以指定的 [嵌入式帖子支持的 X 语言](https://developer.x.com/web/overview/languages) 返回 HTML 和已渲染的帖子。                                                                                                                                             |
+    | `theme`  <br />枚举类型 `{light, dark}`                                                                                              | `light` | 将其设置为 `dark` 时，帖子将以浅色文字显示在深色背景上。                                                                                                                                                                                                     |
+    | `dnt`  <br />布尔值                                                                                                                 | `false` | 当设置为 `true` 时，该帖子及其在你的网站上的嵌入页面将不会被用于诸如[个性化推荐](https://support.x.com/articles/20169421)和[个性化广告](https://support.x.com/articles/20170405)等用途。                                                                                          |
+
+    ## 请求示例
+
+    ```bash
+    curl --request GET --url 'https://publish.x.com/oembed?url=https%3A%2F%2Ftwitter.com%2Ftwiterdev'
+    twurl -H publish.x.com "/oembed?url=https://x.com/TwitterDev"
+    ```
+
+    ## 示例响应
+
+    ```json
+    {
+      "url": "https:\/\/twitter.com\/Interior\/status\/463440424141459456",
+      "author_name": "美国内政部",
+      "author_url": "https:\/\/twitter.com\/Interior",
+      "html": "<blockquote class=\"twitter-tweet\"><p lang=\"en\" dir=\"ltr\">没有比这更美的日落了 <a href=\"https:\/\/twitter.com\/GrandTetonNPS?ref_src=twsrc%5Etfw\">@GrandTetonNPS<\/a>. <a href=\"https:\/\/twitter.com\/hashtag\/nature?src=hash&amp;ref_src=twsrc%5Etfw\">#nature<\/a> <a href=\"https:\/\/twitter.com\/hashtag\/sunset?src=hash&amp;ref_src=twsrc%5Etfw\">#sunset<\/a> <a href=\"http:\/\/t.co\/YuKy2rcjyU\">pic.x.com\/YuKy2rcjyU<\/a><\/p>&mdash; 美国内政部 (@Interior) <a href=\"https:\/\/twitter.com\/Interior\/status\/463440424141459456?ref_src=twsrc%5Etfw\">2014年5月5日<\/a><\/blockquote>\n<script async src=\"https:\/\/platform.x.com\/widgets.js\" charset=\"utf-8\"><\/script>\n",
+      "width": 550,
+      "height": null,
+      "type": "rich",
+      "cache_age": "3153600000",
+      "provider_name": "X",
+      "provider_url": "https:\/\/twitter.com",
+      "version": "1.0"
+    }
+    ```
+  </Tab>
+</Tabs>

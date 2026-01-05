@@ -1,0 +1,4616 @@
+---
+title: 广告素材
+keywords: ["广告素材", "广告创意", "素材管理", "广告素材 API", "管理素材", "广告创意"]
+---
+
+import { Button } from "/snippets/zh/button.mdx";
+
+<div id="overview">
+  ## 概览
+</div>
+
+创意素材（Creatives）是指在广告活动中可以被推广的任何实体。帖子可以包含文本、图片、GIF、视频或卡片。卡片可以包含图片或视频。
+
+图片、GIF 或视频类创意素材可通过 [POST media/upload](/zh/x-api/media/upload-media#post-media-upload) 上传——这是一个仅支持图片的简单上传端点——或者通过 POST media/upload（分片上传）端点上传。这些可以添加到
+
+卡片：
+
+* POST accounts/:account&#95;id/cards
+  帖子：
+* POST accounts/:account&#95;id/tweets - 要将卡片添加到帖子中，请使用 `card_uri` 参数。
+  预定发布的帖子：
+* POST accounts/:account&#95;id/scheduled&#95;tweets
+
+如需了解卡片的更多详情，请参阅 Cards 页面。Promoted Video 页面提供了将视频与卡片或帖子关联的详细信息。
+
+<div id="cards">
+  ### 卡片
+</div>
+
+Ads API 支持多种可用于帖子中的卡片类型，这些帖子随后可以在广告活动中推广。**注意**：一旦帖子发布，卡片详情将会公开可见，其中可能包括卡片所属用户的相关信息。
+
+<div id="image">
+  #### 图片
+</div>
+
+以下图片规范适用于 [Cards](/zh/x-ads-api/creatives#cards-2) 中使用的素材。图片大小必须不超过 3MB，且宽度至少为 800px。此外，我们支持以下宽高比：
+
+* 网站卡片：1:1 和 1.91:1
+* 图片应用下载卡片：1:1 和 1.91:1
+* 投票卡片：1.91:1
+* 图片会话卡片：1.91:1
+* 图片私信卡片：1.91:1
+
+我们支持以下图片格式：.bmp、.jpeg 和 .png。
+
+<div id="video">
+  #### 视频
+</div>
+
+以下视频规格适用于在 [Cards](/zh/x-ads-api/creatives#cards-2) 中使用的素材。我们支持以下宽高比。
+
+* 视频网站：16:9 和 1:1
+* 视频应用下载：16:9 和 1:1
+* 投票：16:9
+* 视频对话：16:9
+* 视频私信：16:9
+
+<div id="promoted-video">
+  ### 推广视频
+</div>
+
+本文档简要概述了通过 Ads API 上传和推广视频的流程。
+
+Ads API 支持在[帖子](/zh/x-ads-api/creatives#tweets-2)以及以下卡片中使用 Promoted Video：
+
+* [视频网站卡片](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [视频应用下载卡片](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [视频对话卡片](/zh/x-ads-api/creatives#video-conversation-cards)
+
+首先，使用 [POST media/upload (chunked)](https://developer.x.com/en/docs/media/upload-media/api-reference/post-media-upload-init.html) 端点上传视频。然后使用 `media_id`，通过 POST accounts/:account&#95;id/videos 端点将该视频与广告账户关联。视频的 `id`（有时称为 `media_key`）将在后续请求中使用。该字符串以一个整数值开头，后接下划线，并以一个长整型数值结尾。例如：`13_875943225764098048`。
+
+<div id="promoted-video-in-tweets">
+  #### 帖子中的推广视频
+</div>
+
+要创建帖子，请使用 [POST accounts/:account&#95;id/tweet](/zh/x-ads-api/creatives#get-accounts-account-id-tweets) 端点，并提供该视频的 `id`。在此步骤中，你还可以提供视频标题、描述以及号召性用语（CTA）。这些值会直接展示给用户。
+
+<div id="promoted-video-in-cards">
+  #### 卡片中的推广视频
+</div>
+
+Video App Download 和 Video Conversation 卡片支持添加海报图像。使用 [POST media/upload](https://developer.x.com/en/docs/media/upload-media/api-reference/post-media-upload.html) 端点上传一张用于这些卡片的图像。
+
+使用以下端点之一创建卡片：
+
+* [POST accounts/:account&#95;id/cards/video&#95;website](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [POST accounts/:account&#95;id/cards/video&#95;app&#95;download](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [POST accounts/:account&#95;id/cards/video&#95;conversation](https://devcommunity.x.com/t/ads-api-version-11/168814)
+
+并使用视频的 `id`，以及可选的图像 `media_id`（作为海报图像）。
+
+最后，使用 POST accounts/:account&#95;id/tweet 端点创建帖子。通过 `card_uri` 参数将卡片附加到帖子上。
+
+<div id="general-information">
+  #### 一般信息
+</div>
+
+有关通过 API 上传视频的详细指南，请参阅[视频上传指南](https://developer.x.com/en/docs/media/upload-media/uploading-media.html)。
+
+视频也可以作为前贴片素材进行推广。有关详细说明，请参阅[视频观看量前贴片目标指南](/zh/x-ads-api/campaign-management#video-views-preroll-objective)。
+
+* （自 2015-10-22 起）在上传将用于推广内容的视频时，所有发往 [POST media/upload (chunked)](https://developer.x.com/en/docs/media/upload-media/api-reference/post-media-upload-init.html) 端点的 `INIT` 命令请求，其 `media_category` 参数必须设置为 `amplify_video`。使用该新参数可确保视频被异步预处理，并为在推广内容中使用做好准备。上传视频后，可以使用 `STATUS` 命令检查异步处理是否完成。
+* 目前允许的推广视频最大长度为 10 分钟，且文件大小须不超过 500MB。
+* 上传的视频应为 mp4 或 mov 格式。
+* 上传的视频通常会较快完成处理，但处理时间可能会因视频长度和文件大小而有所不同。
+* 上传的封面图像应为 png 或 jpg 格式。对长宽比或尺寸没有要求，但封面图像会调整以适配视频播放器。
+
+<div id="guides">
+  ## 指南
+</div>
+
+### 定时发布帖子
+
+<div id="introduction">
+  #### 介绍
+</div>
+
+Scheduled Tweets 功能允许广告主或用户创建一个可以安排在未来某个时间发布的帖子。除了可以创建和管理这些帖子之外，API 还支持将这些帖子与广告单元（line item）关联，以便在帖子发布后进行推广。这样，广告主就可以提前创建原生帖子，并在任何关键活动开始前规划他们的活动素材。例如，可以预先设置一个帖子创意，使其在新产品发布的同时立即发布。
+
+Scheduled Tweets API 端点提供的完整功能集如下所示：
+
+* 创建、修改和查看新创建的预定帖子
+* 将一个 Scheduled Tweet 与广告单元（line item）关联
+* 查询和管理现有的预定帖子
+* 一旦预定帖子发布，获取已发布帖子的 `id`
+
+<div id="api-endpoints">
+  #### API 端点
+</div>
+
+与上述功能相关的全部端点如下：
+
+<div id="scheduled-tweet-management">
+  #### 定时帖子管理
+</div>
+
+* [GET accounts/:account&#95;id/scheduled&#95;tweets](/zh/x-ads-api/creatives#get-accounts-account-id-scheduled-tweets)（检索所有定时帖子的列表）
+* [GET accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#get-accounts-account-id-scheduled-tweets)（使用其 `id` 查询特定定时帖子）
+* [POST accounts/:account&#95;id/scheduled&#95;tweets](/zh/x-ads-api/creatives#post-accounts-account-id-scheduled-tweets)（创建新的定时帖子）
+* [PUT accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#example-request-39)（修改现有定时帖子）
+* [DELETE accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#example-request-40)（使用其 `id` 删除定时帖子）
+* [GET accounts/:account&#95;id/scheduled&#95;tweets/preview/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#scheduled-tweets-2)（预览现有定时帖子）
+
+<div id="scheduled-promoted-tweets">
+  #### 预定推广帖子
+</div>
+
+* [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/zh/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets)（获取所有预定推广帖子的列表）
+* [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/zh/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id)（根据其 `id` 查询预定推广帖子）
+* [POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/zh/x-ads-api/campaign-management#post-accounts-account-id-scheduled-promoted-tweets)（创建新的预定推广帖子）
+* [DELETE accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/zh/x-ads-api/campaign-management#delete-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id)（根据其 `id` 删除现有的预定推广帖子）
+
+<div id="scheduled-tweet-view">
+  #### 预定帖子视图
+</div>
+
+* [GET accounts/:account&#95;id/scheduled&#95;tweets/preview/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#scheduled-tweets-2)（查看现有的预定帖子）
+
+由于预定帖子作为独立于“实时”帖子的实体存在，对这些帖子进行创建或编辑时会运行两套不同的验证。第一套验证规则会在创建预定帖子的步骤中执行，具体包括：
+
+<div id="scheduled-tweet-create">
+  #### 定时帖子创建：
+</div>
+
+* 验证已认证用户是否有权限为指定的 @handle 创建自然帖子。要创建“仅推广”帖子，已认证用户必须是拥有 [帖子创作权限](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/authenticated-user-access#get-accounts-account-id-authenticated-user-access) 的账号用户。
+* 验证在距 `scheduled_at` 时间前后 15 分钟的时间窗口内，预定创建的帖子数量不超过 30 条。出现 SCHEDULED&#95;TWEET&#95;LIMIT&#95;EXCEEDED 错误消息表示在同一未来 15 分钟时间段内安排了过多的定时帖子。广告主需要删除一条现有的定时帖子，或将 `scheduled_at` 时间向前或向后调整。
+
+<div id="scheduled-tweet-goes-live">
+  #### 定时帖子发布：
+</div>
+
+* 这些验证规则会在 scheduled&#95;at 指定的时间点运行，并且与通过 API 创建常规帖子时应用的规则完全相同。例如，如果定时帖子同时包含图片和 GIF，则该定时帖子不会发布，其 scheduled&#95;status 将被设置为 FAILED。
+
+<div id="workflow">
+  #### 工作流
+</div>
+
+**创建新的预定帖子**
+
+可以使用 [POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) 端点创建新的预定帖子。此端点具有以下必需参数：`scheduled_at` 时间；如果帖子中未包含任何媒体实体，还必须提供帖子 `text`。此外，该端点还提供了一些附加选项，使你能够通过 `as_user_id` 参数代表其他 @handle 创建预定帖子，并可添加卡片（`card_uri`）和媒体（`media_ids`）。请注意，一个帖子只能包含同一类型的实体，即视频、GIF 或图片中的一种。`nullcast` 参数用于控制该帖子是否为“仅推广”帖子。所有新创建的预定帖子默认都是“仅推广”（`nullcast=true`）。如果 `nullcast=false`，则会创建一个自然（Organic）预定帖子。
+
+一旦预定帖子创建成功，响应中将包含一个 `id` 字段，表示预定帖子本身的唯一标识符。除了此字段外，还会返回一个名为 `tweet_id` 的字段。该字段最初为 `null`，在帖子正式发布后，该字段会被填充为该“已发布”帖子的 ID。
+
+```
+twurl -H 'ads-api.x.com' -X POST "/6/accounts/:account_id/scheduled_tweets" -d 'scheduled_at=2017-12-24T23:59:00Z&text=Happy Holidays!'
+```
+
+这将创建如下计划发布的帖子：
+
+```json
+{
+  "request": {
+    "params": {
+      "text": "Happy Holidays!",
+      "scheduled_at": "2017-12-24T23:59:00Z"
+    }
+  },
+  "data": {
+    "completed_at": null,
+    "id_str": "917507899668099072",
+    "text": "Happy Holidays!",
+    "user_id": "3271358660",
+    "scheduled_status": "SCHEDULED",
+    "id": 917507899668099100,
+    "nullcast": true,
+    "created_at": "2017-10-09T21:51:44Z",
+    "scheduled_at": "2017-12-24T23:59:00Z",
+    "card_uri": null,
+    "updated_at": "2017-10-09T21:51:44Z",
+    "tweet_id": null,
+    "media_keys": []
+  }
+}
+```
+
+一旦此预定帖子发布上线，`tweet_id` 字段就会被填入该“实时”帖子的 id。
+
+**查看预定帖子**
+
+随后，你可以使用 [GET accounts/:account&#95;id/tweet&#95;previews](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweet-previews#get-accounts-account-id-tweet-previews) 端点，并结合上一步中的预定帖子 `id`，生成该帖子的预览。API 响应中将包含一个 iframe URL，可直接用于渲染该预定帖子的预览。相关的 CSS 和图片将由 X 直接提供。
+
+```
+twurl -H ads-api.x.com -X GET "/6/accounts/18ce54bgxky/tweet_previews?tweet_type=SCHEDULED&tweet_ids=917507899668099072
+```
+
+```json
+{
+  "request": {
+    "params": {
+      "tweet_type": "已定时",
+      "tweet_ids": [
+        "917507899668099072"
+      ],
+      "account_id": "18ce54bgxky"
+    }
+  },
+  "data": [
+    {
+      "tweet_id": "1126633863155871744",
+      "preview": "<\iframe class='tweet-preview' src='https://ton.smf1.x.com/ads-manager/tweet-preview/index.html?data=H4sIAAAAAAAAAK1WTW%2FjNhD9Kyyv9dqSZdmOgALJbhJsCyxaIDkUWBUEJY0lNhSpklRSN%2FV%2F71CyZbm297S%2BWJxPzpt5I71T9wbgaELeaW6AOygYxyN9rlryhW9JcEPmUbKIkuiG%2FBjgj8yD8IZOqChoEobz5TKK1ssojOP1KlwtFl7BrDMY4oIW%2FTatlMzB3z7JZ940W%2FJZS1Hwrf0Btc60Kve3oMmGSwsTWgjbSL7tXJjhqgSafA0mYfzHhIJywgmwNHmnFbeV4yU%2Bf0WN3daZlvtDa8Gw2htrdRCZXrlDU92aHIPStA2CKOekMrD5KaWVc02SztIZps%2Bh0rIAg27TXNcpJQYk2ii90VLqt7R3ht%2B4cQoMeVClUIAPd03Th01nvDfx0ClmoJFYk0aouGst82gqROaKskf03KCr7LLvXnXN02K3QTHFaziovYdH0seL5qswitfLZTBq6FGIRfSe9Lm1FTfkY%2BX%2FFcpPAlNRC7eufdFSY1%2BxASh84oo8YitzYXM9IZ%2FuaNcQ1HjMbQc61l0VXDmYlsJVbTYVGq0KwPCi2cf5tQFFnjR2zyDU6YycwX%2Fr3oRzvfKpwTaSZ8NfQUoU%2FUsetanxAV79VElhHbm1oIrSiILcvvgquqSN0Q7y8Uz2TQdjWa5bhZP8IUShEeh8IvIxkVB7SY%2FyKctaIL%2B0kgQrMp8n0SKJ10eWxZ4t%2FBXHUzg4idu6nOnNxsIQ1Yka2D9aDc0sQTNQPJP%2B2sgqvPUrGLERozL68ToNLRELvBj4VuZaOSOy1mmsdAi2dxaWOeyhlRzVl6TYozMnhHIjJLCM5y%2BlwaweHOn96afg%2FuHhnl60ETUvgR1HpJsQntkptrcuO0bOOhuLg1NBPfyH6Swrpw2W9O24rBu8kwH8DuEdns9Kv1hLc5rsxBaTLcN1HIdhHIVRuFov5wtMXH748vO2%2BP0jUzjFXE7%2FbMa3%2BFZl3z1ZxhWyjv2fwlfy9NaY6LhO0lm4WC3WcRSvlqO4UqiXYT7C%2B7vwcT7SWlFAxg3LtMHNfH2ODnZ4kIPVPRo9jnN1r5eDNup%2BIy2y5GxuDrQqYMNb6dje9or44HOyQYTnWs%2FXXoD7%2Ba8WrGO4hwZuK%2B2Qt%2F32tAPhB%2B4xt238qjVQtpIbuuvIP6wbjfAIhStncO3eZ0f9keMHmYHuo%2BCwFoJ%2BDfktdEF0JPfebbxgct30b%2BdhY%2B51u%2FGm2U2IR7rW%2FbJU%2FdcBfpEchHjwoO52%2FwENmVvErwgAAA%3D%3D'>"
+    }
+  ]
+}
+```
+
+上方显示的是新创建的预定帖子的示例视图
+
+**将预定帖子关联到 line item（广告单元）**
+
+虽然预定帖子可用于创建自然（Organic）帖子，我们也允许合作伙伴创建“仅推广”（Promoted-Only，`nullcast=true`）帖子，这两种类型都可以关联到某个 line item。为此，我们还提供了一个 [POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#post-accounts-account-id-scheduled-promoted-tweets) 端点。该端点在一次 API 调用中只允许将一条预定推广帖子关联到一个 line item。若要将多条预定帖子关联到同一个 line item，则需要进行多次 API 调用。
+
+请注意，无法修改已经存在的预定推广帖子。
+
+```
+twurl -H 'ads-api.x.com' -X POST "/6/accounts/:account_id/scheduled_promoted_tweets" -d 'line_item_id=a44qc&scheduled_tweet_id=917507899668099072'
+```
+
+```json
+{
+  "data": {
+    "line_item_id": "a44qc",
+    "id": "26576",
+    "created_at": "2017-10-09T22:24:16Z",
+    "updated_at": "2017-10-09T22:24:16Z",
+    "scheduled_tweet_id": "917507899668099072",
+    "tweet_id": null,
+    "deleted": false
+  },
+  "request": {
+    "params": {
+      "line_item_id": "a44qc",
+      "scheduled_tweet_id": 917507899668099100,
+      "account_id": "aaaaa"
+    }
+  }
+}
+```
+
+此 endpoint 只是为指定的预定帖子（Scheduled Tweet）与某个 line item 创建一条关联。一旦 campaign/line item 的投放日期进入当前时间范围，该 line item 将自动开始投放对应的“上线”帖子。虽然在此步骤中我们会验证预定帖子是否处于 `SCHEDULED` 状态，以及该预定帖子是否适用于给定的投放目标，但不会执行其他校验。任何适用于该 line item 和预定帖子的其余校验规则，会在帖子实际“上线”时执行。
+
+为确保广告投放不会出现问题，建议将预定帖子的 `scheduled_at` 时间设置在 campaign/line item 投放日期开始之前。
+
+例如，假设预定帖子设置为在 campaign 开始日期之后才上线（并且只有一个帖子与一个 line item 关联），那么 campaign 将处于 `ACTIVE` 状态，但由于预定帖子尚未上线，将没有任何创意可用于投放。
+
+**预定帖子管理（Scheduled Tweet Management）**
+
+其余的一组 endpoints 允许 API 使用者管理其所有预定帖子（Scheduled Tweets）和预定推广帖子（Scheduled Promoted Tweets）。这些 API 可用于返回所有预定帖子的列表，可选地按给定状态进行筛选，也可用于通过 `id` 查询指定的预定帖子。
+
+<div id="what-happens-when-a-scheduled-tweet-goes-live">
+  #### 当已排程帖子正式发布时会发生什么？
+</div>
+
+当某条已排程帖子即将发布（也就是在 `scheduled_at` 时间点）时，将进行以下更新：
+
+* 系统会创建对应的“正式发布”帖子，但这一步最多可能有 1 秒的延迟
+* `tweet_id` 会被添加到以下实体中：
+* 已排程帖子
+* 推广的已排程帖子
+* 会创建一个新的推广帖子实体
+
+<div id="best-practices">
+  #### 最佳实践
+</div>
+
+在创建或推广预定发布的帖子时，建议遵循以下最佳实践：
+
+* 在创建预定发布的帖子时，确保该帖子是有效的（例如，一个帖子只能包含图片、视频或 GIF 三者之一，而不能是三者的任意组合）
+* 确保广告系列的投放日期（即 `start_time` 和 `end_time`）与该预定发布帖子的 `scheduled_at` 时间保持一致
+* 预定发布的帖子不应被安排在距离当前时间一年（365 天）之后
+* 目前不支持预定发布帖子的预览功能（即在创建前预览预定发布帖子的功能）
+
+### 媒体库
+
+<div id="introduction">
+  #### 介绍
+</div>
+
+Media Library 端点支持管理 X Ads 账户的图片、GIF 和视频。媒体库中的素材可用于帖子和卡片的创建，并且可以在多个[创意](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/overview)中重复使用，从而避免多次上传相同的素材。
+
+<div id="api-endpoints">
+  #### API 端点
+</div>
+
+* [POST media/upload](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload#post-media-upload) 或 [POST media/upload (chunked)](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload-init#post-media-upload-init)（上传媒体）
+* [POST accounts/:account&#95;id/media&#95;library](https://developer.x.com/x-ads-api/creatives#get-accounts-account-id-media-library#post-accounts-account-id-media-library)（将媒体添加到媒体库）
+
+<div id="adding-to-the-library">
+  #### 添加到媒体库
+</div>
+
+将媒体添加到媒体库需要两个步骤。首先，使用 [POST media/upload](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload#post-media-upload) 端点或 [POST media/upload (chunked)](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload-init#post-media-upload-init) 这一组端点上传资源。（有关我们的分块上传流程的详细信息，请参阅 [Chunked media upload](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/uploading-media/chunked-media-upload) 指南。）
+
+```
+twurl -X POST -H upload.x.com "/1.1/media/upload.json?additional_owners=756201191646691328" --file latte.jpeg --file-field "media"
+```
+
+```json
+{
+   "media_id":966947208837742592,
+   "media_id_string":"966947208837742592",
+   "size":74194,
+   "expires_after_secs":86400,
+   "image":{
+      "image_type":"image/jpeg",
+      "w":800,
+      "h":418
+   }
+}
+```
+
+接下来，使用该媒体 ID，通过 [POST accounts/:account&#95;id/media&#95;library](https://developer.x.com/x-ads-api/creatives#get-accounts-account-id-media-library#post-accounts-account-id-media-library) 端点将该媒体添加到广告账户的媒体库中。
+
+```
+twurl -X POST -H ads-api.x.com "/9/accounts/18ce54d4x5t/media_library?file_name=latte.jpeg&media_category=TWEET_IMAGE&media_key=966947208837742592&name=Latte"
+```
+
+```json
+{
+   "request":{
+      "params":{
+         "name":"Latte",
+         "file_name":"latte.jpeg",
+         "media_category":"TWEET_IMAGE",
+         "account_id":"18ce54d4x5t",
+         "media_key":966947208837742592
+      }
+   },
+   "data":{
+      "tweeted":false,
+      "name":"Latte",
+      "file_name":"latte.jpeg",
+      "media_url":"https://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+      "media_category":"TWEET_IMAGE",
+      "media_key":"3_966947208837742592",
+      "created_at":"2018-02-23T08:05:54Z",
+      "media_status":"TRANSCODE_COMPLETED",
+      "media_key":"966947208837742592",
+      "media_type":"IMAGE",
+      "updated_at":"2018-02-23T08:06:17Z",
+      "deleted":false
+   }
+}
+```
+
+**注意：** 在上传后立即使用图片、GIF 或视频发帖，也会将这些媒体添加到媒体库中。
+
+<div id="request-parameters">
+  #### 请求参数
+</div>
+
+所有发往 Media Library 的 POST 请求都需要一个媒体标识符。该值会在上传步骤中返回。使用 media&#95;id（如上例所示）时，还必须指定一个 media&#95;category。media&#95;category 共有四种可能的取值：AMPLIFY&#95;VIDEO、TWEET&#95;GIF、TWEET&#95;IMAGE 和 TWEET&#95;VIDEO。
+
+另外，可以为 Media Library 中的对象设置 name 和 file&#95;name 值。这些属性可帮助用户区分媒体库中同一媒体的不同变体。
+
+对于视频，还可以设置标题和描述。这些值应作为 video&#95;title 和 video&#95;description 请求参数，与 [POST accounts/:account&#95;id/tweet](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) 端点一同传递。在帖子中，这些文本会显示在视频下方。
+
+<div id="attributes">
+  #### 属性
+</div>
+
+Media Library 中正式引入了 `media_key` 概念。它是媒体库中对象的唯一标识符。media key 是一种字符串形式的值，格式如下：13&#95;875943225764098048。在我们所有卡片相关的端点中均已完全支持使用这些 media key。
+
+此外，Media Library 的响应还包含 `media_id`，以字符串形式表示。对于当前尚不接受 media key 的资源，将包含该字段：[帖子](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)*、[帖子预览](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#get-accounts-account-id-tweet-preview)* 和 [计划发布的帖子](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets)。我们正致力于在所有资源中全面支持 media key。
+
+`aspect_ratio` 属性会在 GIF 和视频的响应中返回。它可用于筛选媒体，以便用于只接受特定纵横比的卡片中。
+
+*这些端点支持 `video_id` 参数，它是一个 media key。
+
+<div id="usage">
+  #### 使用方法
+</div>
+
+在本节中，下面的图片将被用在一条帖子中，并用于创建一个网站卡片。
+
+```
+twurl -H ads-api.x.com "/9/accounts/18ce54d4x5t/media_library/3_966947208837742592"
+```
+
+```json
+{
+   "request":{
+      "params":{
+         "account_id":"18ce54d4x5t",
+         "media_key":"3_966947208837742592"
+      }
+   },
+   "data":{
+      "tweeted":false,
+      "name":"Latte",
+      "file_name":"latte.jpeg",
+      "media_url":"https://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+      "media_category":"TWEET_IMAGE",
+      "media_key":"3_966947208837742592",
+      "created_at":"2018-02-23T08:05:54Z",
+      "media_status":"TRANSCODE_COMPLETED",
+      "media_key":"966947208837742592",
+      "media_type":"IMAGE",
+      "updated_at":"2018-02-23T08:06:17Z",
+      "deleted":false
+   }
+}
+```
+
+**帖子**
+
+我们可以在创建帖子时，通过使用 media&#95;keys 来引用这些图像。
+
+```
+twurl -X POST -H ads-api.x.com "/9/accounts/18ce54d4x5t/tweet?text=coffee&media_keys=966947208837742592&as_user_id=756201191646691328&trim_user=true"
+```
+
+```json
+{
+   "data":{
+      "created_at":"Fri Feb 23 08:20:05 +0000 2018",
+      "id":966950781302665218,
+      "id_str":"966950781302665218",
+      "text":"coffee https://t.co/T772Hx5GNT",
+      "truncated":false,
+      "entities":{
+         "hashtags":[
+
+         ],
+         "symbols":[
+
+         ],
+         "user_mentions":[
+
+         ],
+         "urls":[
+
+         ],
+         "media":[
+            {
+               "id":966947208837742592,
+               "id_str":"966947208837742592",
+               "indices":[
+                  7,
+                  30
+               ],
+               "media_url":"http://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+               "media_url_https":"https://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+               "url":"https://t.co/T772Hx5GNT",
+               "display_url":"pic.x.com/T772Hx5GNT",
+               "expanded_url":"https://x.com/apimctestface/status/966950781302665218/photo/1",
+               "type":"photo",
+               "sizes":{
+                  "thumb":{
+                     "w":150,
+                     "h":150,
+                     "resize":"crop"
+                  },
+                  "large":{
+                     "w":800,
+                     "h":418,
+                     "resize":"fit"
+                  },
+                  "medium":{
+                     "w":800,
+                     "h":418,
+                     "resize":"fit"
+                  },
+                  "small":{
+                     "w":680,
+                     "h":355,
+                     "resize":"fit"
+                  }
+               }
+            }
+         ]
+      },
+      "source":"Ads API Internal Test App",
+      "in_reply_to_status_id":null,
+      "in_reply_to_status_id_str":null,
+      "in_reply_to_user_id":null,
+      "in_reply_to_user_id_str":null,
+      "in_reply_to_screen_name":null,
+      "user":{
+         "id":756201191646691328,
+         "id_str":"756201191646691328"
+      },
+      "geo":null,
+      "coordinates":null,
+      "place":null,
+      "contributors":[
+         2417045708
+      ],
+      "retweet_count":0,
+      "favorite_count":0,
+      "favorited":false,
+      "retweeted":false,
+      "possibly_sensitive":false,
+      "scopes":{
+         "followers":false
+      },
+      "lang":"en"
+   },
+   "request":{
+      "params":{
+         "as_user_id":756201191646691328,
+         "text":"coffee",
+         "account_id":"18ce54d4x5t",
+         "media_keys":[
+            966947208837742592
+         ],
+         "trim_user":true
+      }
+   }
+}
+```
+
+**网站卡片（Website Card）**
+
+我们所有的卡片端点都支持 media key。我们将通过引用该图片的 media&#95;key 来创建这个[网站卡片](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/website#post-accounts-account-id-cards-website)。
+
+```
+twurl -X POST -H ads-api.x.com "/11/accounts/18ce54d4x5t/cards"
+```
+
+```json
+{
+  "name": "components create cards",
+  "components": [
+    {
+      "type": "MEDIA",
+      "media_key": "3_1323490622599176192"
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android"
+      }
+    }
+  ]
+}
+```
+
+然后我们使用其 card&#95;uri 将该卡片与一条帖子关联起来。
+
+<div id="identifying-cards">
+  ### 识别 Card 卡片
+</div>
+
+<div id="introduction">
+  #### 介绍
+</div>
+
+Card 是一种可自定义的广告格式，它使用媒体，并且可以与网站、应用或号召性用语（call to action）关联，以推动特定的用户互动，例如发起私信（Direct Message）。它们可以附加到帖子、计划发送的帖子或草稿帖子上。
+
+在帖子对象中，可以通过两种方式引用 Card：使用 Card 的 `card_uri` 或其 `preview_url`。每种方式的示例值如下所示。
+
+| card&#95;uri | preview&#95;url |
+| :--- | :--- |
+| card://1043282691834048513 | https://cards.x.com/cards/18ce54d4x5t/68w3s |
+
+**注意**：从 Ads API 版本 3 开始，对于新创建的 Card，在 cards 响应中仅会生成并返回 `card_uri`。
+
+**注意**：从 Ads API 版本 5 开始，cards 响应中将不再返回 `preview_url`。
+
+在帖子对象的响应中，引用类型取决于创建该帖子的方式。换句话说，如果帖子是使用 `card_uri` 请求参数创建的，则响应中会出现该 `card_uri` 值。另一方面，如果在帖子文本中包含了 `preview_url`，则响应中会出现该预览 URL。
+
+<div id="identifying-tweets-with-card_uri">
+  #### 使用 card&#95;uri 识别帖子
+</div>
+
+对于使用卡片的 URI 值创建的帖子，请在 card&#95;uri 响应属性中查找对该卡片的引用。下面的示例响应使用了 [GET accounts/:account&#95;id/tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#get-accounts-account-id-tweets) 端点。
+
+```
+$ twurl -H ads-api.x.com "/9/accounts/18ce54d4x5t/tweets?trim_user=true&tweet_type=PUBLISHED&tweet_ids=1043551275923591168"
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        "1043551275923591168"
+      ],
+      "tweet_type": "PUBLISHED",
+      "trim_user": true,
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "coordinates": null,
+      "retweeted": false,
+      "source": "Ads API Internal Test App",
+      "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "user_mentions": [],
+        "urls": []
+      },
+      "display_text_range": [
+        0,
+        15
+      ],
+      "favorite_count": 0,
+      "in_reply_to_status_id_str": null,
+      "geo": null,
+      "id_str": "1043551275923591168",
+      "scopes": {
+        "followers": false
+      },
+      "in_reply_to_user_id": null,
+      "truncated": false,
+      "retweet_count": 0,
+      "scheduled_status": null,
+      "id": 1043551275923591168,
+      "in_reply_to_status_id": null,
+      "nullcast": true,
+      "created_at": "Sat Sep 22 17:23:07 +0000 2018",
+      "place": null,
+      "scheduled_at": null,
+      "tweet_type": "PUBLISHED",
+      "favorited": false,
+      "card_uri": "card://1043282691834048513",
+      "full_text": "Tracking a card",
+      "lang": "en",
+      "contributors": [
+        2417045708
+      ],
+      "in_reply_to_screen_name": null,
+      "in_reply_to_user_id_str": null,
+      "user": {
+        "id": 756201191646691328,
+        "id_str": "756201191646691328"
+      },
+      "tweet_id": "1043551275923591168"
+    }
+  ]
+}
+```
+
+如果使用 Standard API，请在请求中使用 include&#95;card&#95;uri=true。
+
+无论使用哪个端点，只有当帖子是通过 card URI 创建时，响应中才会返回 card&#95;uri 响应属性。
+
+对于已计划发送和草稿的帖子对象，响应中将始终包含 card&#95;uri 响应属性。
+
+<div id="identifying-tweets-with-preview_url">
+  #### 使用 preview&#95;url 识别帖子
+</div>
+
+对于通过在帖子文本中包含预览 URL 而创建的帖子，该 URL 可以在 entities[&quot;urls&quot;][i][&quot;expanded&#95;url&quot;] 中找到（text 字段中包含缩短后的 t.co URL），其中 i 为数组索引（一个帖子可以包含多个 URL）。
+
+对于预定发布和草稿的帖子对象，预览 URL 将始终出现在 text 字段中。
+
+<div id="fetching-cards">
+  #### 获取卡片
+</div>
+
+若要检索特定卡片的更多信息，我们提供两个端点：[GET accounts/:account&#95;id/cards/all](https://developer.x.com/en/docs/ads/creatives/api-reference/cards-fetch.html#get-accounts-account-id-cards-all) 和 [GET accounts/:account&#95;id/cards/all/:card&#95;id](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/cards-fetch#get-accounts-account-id-cards-all-card-id)。前者可通过 card&#95;uri 获取卡片，后者则通过卡片 ID 获取。卡片 ID 位于 preview&#95;url 的末尾。在上面的示例中，ID 为 68w3s。
+
+<div id="identifying-media">
+  ### 媒体识别
+</div>
+
+#### 简介
+
+媒体（图片、GIF 和视频）可以添加到帖子和卡片中。此外，视频可以用作前贴片广告素材，图片可以在 [X Audience Platform](https://developer.x.com/en/docs/ads/measurement/overview/twitter-audience-platform) 上进行推广。本节介绍如何在这些实体中查找媒体引用。
+
+有两种类型的媒体标识符：ID 和 key。每种类型的示例值如下所示。
+
+| **媒体 ID** | **媒体 key** |
+| :--- | :--- |
+| 1029825579531807971 | 13&#95;1029825579531807971 |
+
+媒体 key 由 ID 前加上一个数字前缀和一个下划线构成。
+
+<div id="image">
+  #### 图片
+</div>
+
+下表显示了当前在每个与图片相关的资源的响应中可用的标识符类型，以及对应的属性名称。
+
+| **Resource** | **Identifier** | **Attribute(s)** |
+| :--- | :--- | :--- |
+| Image cards | None |  |
+| Tweet | Both | `entities["media"]["id_str"]`  `entities["media"]["media_key"]` |
+| Scheduled Tweet | Both | `media_ids` and `media_keys` |
+| Draft Tweet | Both | `media_ids` and `media_keys` |
+| Account Media | None |  |
+| Media Library | Both | `media_id` and `media_key` |
+
+Image cards 和 Account Media 中的图片不包含对任何媒体标识符的引用。帖子（Tweet）只包含媒体 ID。计划发布和草稿帖子同时包含媒体 ID 和媒体 key。Media Library 也同时返回这两者。
+
+对于帖子，`entities["media"]` 数组中对象的 `id` 和 `id_str` 字段对应于媒体 ID。对于包含多张图片的帖子，每个媒体实体的引用只能在 `extended_entities["media"]` 中找到。
+
+除了标识符引用之外，通常还需要能够获取图片的 URL。
+
+| **Resource** | **Attribute(s)** | **Format** |
+| :--- | :--- | :--- |
+| Image cards | `image` | .jpg |
+| Tweet* | `entities["media"][0]["media_url"]` or `extended_entities["media"][i]["media_url"]` | .jpg |
+| Scheduled Tweet | None |  |
+| Draft Tweet | None |  |
+| Account Media | `media_url` | .jpg |
+| Media Library | `media_url` | .jpg |
+
+* 该 URL 的位置取决于帖子是包含单张图片还是多张图片。
+
+所有 image cards 都包含一个 `image` 响应属性，其中包含 X 图片 URL。（对于 image app download cards，此属性名为 `wide_app_image`。）
+
+对于帖子，media URL 的位置取决于媒体类型以及所使用的端点。对于只包含一张图片的帖子，URL 可以在 `entities["media"][0]["media_url"]` 中找到，这对 Ads API 和 Standard API 都适用。但是，当帖子包含多张图片时，这些 URL 只能在 `extended_entities["media"][i]["media_url"]` 中找到。这仅在 Standard API 中可用。
+
+<div id="video">
+  #### 视频
+</div>
+
+下表显示了当前在各个与视频相关的资源响应中可用的标识符类型，以及对应的属性名称。
+
+| **资源** | **标识符** | **属性** |
+| :--- | :--- | :--- |
+| 视频卡片 | 可能是任一类型 | `video_content_id` |
+| 视频投票卡片 | 无 |  |
+| 帖子 | 两者都有 | `entities["media"]["id_str"]`  `entities["media"]["media_key"]` |
+| 计划发布的帖子 | 两者都有 | `media_ids` 和 `media_keys` |
+| 草稿帖子 | 两者都有 | `media_ids` 和 `media_keys` |
+| 账号媒体 | 媒体键 | `video_id` |
+| 媒体库 | 两者都有 | `media_id` 和 `media_key` |
+
+虽然视频卡片（带视频的投票卡片除外）包含一个 `video_content_id` 响应属性，但返回值的类型并不一致。有些情况下，它是媒体ID；在另一些情况下，它是媒体键。
+
+关于如何访问视频URL的信息如下所示。
+
+| **资源** | **属性** | **格式** |
+| :--- | :--- | :--- |
+| 视频卡片 | `video_url` 和 `video_hls_url` | .vmap  .m3u8 |
+| 带视频的帖子 | `extended_entities["media"][i]["video_info"]["variants"][j]["url"]` | .mp4 |
+| 计划发布的帖子 | 无 |  |
+| 草稿帖子 | 无 |  |
+| 账号媒体 | 无 |  |
+| 媒体库 | `media_url` | .mp4 |
+
+视频卡片包含 `video_url` 和 `video_hls_url` 响应属性，分别对应 .vmap 和 .m3u8 URL。
+
+<div id="media-library">
+  #### 媒体库
+</div>
+
+有时需要获取有关媒体资产的更多信息。比如，对于视频卡片，你可能需要获取 mp4 URL，而不是 vmap URL。这些信息可以在媒体库中获取。关于可用信息的详细内容，请参阅我们的[媒体库指南](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/guides/media-library)。大多数属于该广告账户的 FULL 级可推广用户的资产都可以在媒体库中找到，但也有一些例外。
+
+**获取媒体**
+
+如上所述，图片卡片不包含对媒体 id 或 media key 的引用。因此，无法通过媒体库获取其资产。[Account Media](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/account-media#account-media) 中的图片也同样如此。
+
+在创建视频卡片之前，要求其视频资产必须已经在媒体库中（或在其前身 Videos 资源中）。因此，这些资产始终可以在媒体库中检索到。Account Media 中的 PREROLL 资产也同样如此。
+
+最后，帖子中的媒体始终保证存在于媒体库中。
+
+下表总结了在考虑资源响应是否包含可用于查找的标识符时，哪些资产可以在媒体库中检索。
+
+| **Resource** | **In the Media Library** |
+| :--- | :--- |
+| Image cards | No |
+| Video cards | Yes* |
+| Tweets (any media)** | Yes |
+| Scheduled Tweets | Yes |
+| Draft Tweets | Yes |
+| Account media images | No |
+| Account media videos (`PREROLL`) | Yes |
+
+* 对于其 `video_content_id` 为 media key 的卡片。当该值是 media ID 时，资产仍然存在于媒体库中，但检索它需要在其前添加一个数字前缀和下划线。\
+** 帖子只返回 media ID。虽然资产保证存在于媒体库中，但获取它需要在其前添加一个数字前缀和下划线。
+
+**与 Account Media 的交互**
+
+在以下两种情况下，添加到媒体库的媒体资产会自动添加到 Account Media 资源中。
+
+* 当 AMPLIFY&#95;VIDEO 资产被添加到媒体库时，它会作为 PREROLL 创意类型的 Account Media 资产自动添加。
+* 当具有特定尺寸的图片（参见我们[枚举页面](https://developer.x.com/content/developer-twitter/en/docs/ads/general/overview/enums)中的 “Creative Types”）被添加到媒体库时，它们会被自动添加为 Account Media 资产。创意类型（例如 INTERSTITIAL）取决于图片尺寸。
+
+<div id="tweets">
+  ### 帖子
+</div>
+
+#### 简介
+
+X Ads API 支持三种类型的帖子：已发布、预定发布和草稿。
+
+<div id="nullcasted-tweets">
+  #### Nullcasted 帖子
+</div>
+
+帖子可以是仅推广（nullcasted，亦称“Promoted-only”）或自然的。仅推广帖子在发布后不会出现在用户的公开时间线上，但它们依然是公开的。另一方面，自然帖子会展示给用户的关注者，并会出现在用户的公开时间线上。
+
+**创建帖子**
+
+三个创建帖子的端点都支持一个布尔类型的 `nullcast` 参数，使 API 使用者可以选择创建仅推广或自然帖子。仅推广帖子可以由用户本人创建，也可以由任何被授权代替该用户创建帖子的主体创建。自然帖子只能由[完全可推广用户](https://developer.x.com/content/developer-twitter/en/docs/tutorials/ads-api-hierarchy-terminology#promotable-users)创建。
+
+**更新帖子**
+
+可以更新计划发布和草稿帖子的 `nullcast` 属性。对于计划发布的帖子，可以在该帖子的 `scheduled_at` 时间之前进行编辑。草稿帖子可以无限期编辑。但一旦发布，就无法将帖子从仅推广更改为自然，或反之。
+
+<div id="promoting-tweets">
+  #### 推广帖子
+</div>
+
+只有已发布和预定发布的帖子可以被推广。它们可以是 nullcasted 或自然（organic）的内容；对此没有限制。只要事先获得许可，广告主可以推广自己的帖子，也可以推广其他用户的帖子。（参见：[Promoting another user&#39;s Tweets](https://developer.x.com/content/developer-twitter/en/docs/tutorials/promoting-another-users-content) 了解更多信息。）
+
+在单个广告系列中可以推广多条帖子。同样，一条帖子也可以在一个或多个广告系列中被推广。
+
+要推广已发布的帖子，请使用 [POST accounts/:account&#95;id/promoted&#95;tweets endpoint](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/promoted-tweets#post-accounts-account-id-promoted-tweets) 端点。这会将已发布的帖子与某个广告项目（line item）关联。要推广预定发布的帖子，请使用 [POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#post-accounts-account-id-scheduled-promoted-tweets) 端点。
+
+<div id="tweet-ids">
+  #### 帖子 ID
+</div>
+
+已发布、已排期和草稿帖子的 ID 是[数值型](https://developer.x.com/content/developer-twitter/en/docs/basics/twitter-ids)——它们是 64 位无符号整数。例如，下面这个已发布帖子的 ID 是 1166476031668015104。
+
+当已发布或已排期的帖子被推广时，会创建一个对应的推广帖子实体。这些实体有各自的 ID，为字母数字组合的字符串，并以 base-36 编码的值表示。例如，将上面的已发布帖子与投放单 6c62d 关联进行推广时，将返回如下 API 响应。
+
+```
+$ twurl -X POST -H ads-api.x.com "/9/accounts/18ce54d4x5t/promoted_tweets?line_item_id=6c62d&tweet_ids=1166476031668015104"
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        1166476031668015104
+      ],
+      "line_item_id": "6c62d",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": [
+    {
+      "line_item_id": "6c62d",
+      "id": "3qwlq6",
+      "entity_status": "ACTIVE",
+      "created_at": "2019-09-12T21:39:10Z",
+      "updated_at": "2019-09-12T21:39:10Z",
+      "approval_status": "ACCEPTED",
+      "tweet_id": "1166476031668015104",
+      "deleted": false
+    }
+  ],
+  "total_count": 1
+}
+```
+
+除了在创建请求中传入的帖子 ID 和 line item ID 之外，响应中还包含一个值为 3qw1q6 的 id 字段，即推广帖子的 ID。
+
+<div id="carousels">
+  ### 轮播
+</div>
+
+<div id="introduction">
+  #### 介绍
+</div>
+
+X Ads API 支持创建和获取视频轮播和图片轮播。轮播是一种卡片类型，可以包含 2 到 6 个媒体素材。轮播卡片可以将用户引导至某个网站，或鼓励他们安装移动应用。有关轮播、其优势、最佳实践和常见问题的更多信息，请参阅我们的 [Carousel Ads on X](https://business.x.com/en/advertising/carousels.html) 页面。
+
+轮播与任何其他卡片类型一样，可以用于帖子，这些帖子随后可以被推广。工作流程与您已经熟悉的流程相同：
+
+1. 上传媒体
+2. 创建卡片
+3. 创建帖子
+4. 推广帖子
+
+唯一的区别在于卡片的创建方式。其他卡片创建请求接受查询参数，而轮播卡片创建请求只接受 JSON 格式的 POST 请求体。
+
+<div id="endpoints">
+  #### 端点
+</div>
+
+Ads API 支持创建和检索轮播卡片。
+
+要创建任意类型的轮播卡片，请使用 [POST accounts/:account&#95;id/cards](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#post-accounts-account-id-cards) 端点。要检索轮播卡片，请使用 [GET accounts/:account&#95;id/cards](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#get-accounts-account-id-cards) 端点。
+
+<div id="json-post-body">
+  #### JSON POST Body
+</div>
+
+轮播是由两个组件创建的。第一个组件指定要使用的媒体资源，第二个组件指定与网站或应用相关的信息。
+
+具体来说，一个轮播卡片按以下顺序由这些组件构成：
+
+* 一个 `SWIPEABLE_MEDIA` 组件，它接收一个 media key 数组
+* *以下组件中的一个*：
+* 一个 `DETAILS` 组件，用于指定网站信息
+* 一个 `BUTTON` 组件，用于指定应用信息
+
+`SWIPEABLE_MEDIA` 组件必须包含一个 `media_keys` 数组，你可以在其中指定 2 到 6 个图片或视频。传入 media key 的顺序决定了它们的渲染顺序。
+
+```
+{
+  "type": "SWIPEABLE_MEDIA",
+  "media_keys": [
+    "13_1089771253848666112",
+    "13_1191948012077092867"
+  ]
+}
+```
+
+提醒一下，你可以通过向 [GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/media-library#get-accounts-account-id-media-library) 端点发起请求来获取 media key。
+
+第二个组件对象的结构取决于你是希望将用户引导至网站，还是鼓励他们安装应用。下表对这两种选项进行了总结。（**注意**：表中列出的所有键都是必需的。）
+
+|        | **网站**                                                             | **应用**                                            |
+| :----- | :----------------------------------------------------------------- | :------------------------------------------------ |
+| 指定组件类型 | `"type": "DETAILS"`                                                | `"type": "BUTTON"`                                |
+| 标题/标签  | `"title": "X"`                                                     | `"label": { "type": "ENUM", "value": "INSTALL" }` |
+| 目标     | `"destination": { "type": "WEBSITE", "url": "https://www.x.com" }` | `"destination": { "type": "APP", ... }`           |
+
+综合以上设置，下面展示了一个网站轮播的 JSON POST 请求体示例。
+
+```
+{
+  "name": "website carousel",
+  "components": [
+    {
+      "type": "SWIPEABLE_MEDIA",
+      "media_keys": [
+        "13_1089771253848666112",
+        "13_1191948012077092867"
+      ]
+    },
+    {
+      "type": "DETAILS",
+      "title": "X",
+      "destination": {
+        "type": "WEBSITE",
+        "url": "https://www.x.com"
+      }
+    }
+  ]
+}
+```
+
+`BUTTON` 组件中的应用目标对象需要一个国家代码以及至少一个应用标识符。它们还可以可选地包含深度链接。有关这些字段的说明，请参阅[参考文档](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#app-destination)。
+
+综合以上内容，下面展示了一个应用轮播的 JSON POST 请求正文示例。
+
+```
+{
+  "name": "app carousel",
+  "components": [
+    {
+      "type": "SWIPEABLE_MEDIA",
+      "media_keys": [
+        "13_1089771253848666112",
+        "13_1191948012077092867"
+      ]
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android",
+        "iphone_app_id": "333903271"
+      }
+    }
+  ]
+}
+```
+
+<div id="example">
+  #### 示例
+</div>
+
+本节演示如何创建视频网站轮播卡片，以及如何在帖子中使用它。正如上文所述，工作流程与您已经习惯的一样：上传媒体、创建卡片、创建帖子。唯一的区别在于卡片的创建方式。
+
+**媒体**
+
+首先，可以上传新的媒体素材或使用现有素材。有关如何上传新的媒体素材并将其添加到媒体库的详细信息，请参阅我们的[媒体库指南](https://developer.x.com/en/docs/twitter-ads-api/creatives/guides/media-library)。
+
+在媒体素材添加到媒体库之后，使用 [GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/media-library#get-accounts-account-id-media-library) 端点获取它们。使用 `media_type` 请求参数将结果限定为特定的媒体类型。
+
+```
+$ twurl -H ads-api.x.com "/10/accounts/18ce54d4x5t/media_library?media_type=VIDEO"
+```
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_type": "VIDEO"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "tweeted": true,
+      "duration": 5283,
+      "name": "Sunrise",
+      "file_name": "sunrise.mp4",
+      "description": null,
+      "media_url": "https://video.twimg.com/amplify_video/1089771253848666112/vid/1280x720/tyL-pUBP7GgkS9bl.mp4?tag=9",
+      "poster_media_key": "3_1089771253848666112",
+      "media_key": "13_1089771253848666112",
+      "created_at": "2019-01-28T06:24:48Z",
+      "media_status": "TRANSCODE_COMPLETED",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/1089771253848666112/img/WOYvToSRZFXUSDzd.jpg",
+      "title": null,
+      "media_type": "VIDEO",
+      "aspect_ratio": "16:9",
+      "updated_at": "2019-08-23T19:05:33Z",
+      "deleted": false
+    },
+    {
+      "tweeted": true,
+      "duration": 15248,
+      "name": "snow",
+      "file_name": "snow.mp4",
+      "description": "二、三，然后到四",
+      "media_url": "https://video.twimg.com/amplify_video/1191948012077092867/vid/1280x720/2cOvadcctqqea6Hx.mp4?tag=13",
+      "poster_media_key": "3_1191948012077092867",
+      "media_key": "13_1191948012077092867",
+      "created_at": "2019-11-06T05:18:46Z",
+      "media_status": "TRANSCODE_COMPLETED",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/1191948012077092867/img/IUbhTRd62SEeIVTf.jpg",
+      "title": "One",
+      "media_type": "VIDEO",
+      "aspect_ratio": "16:9",
+      "updated_at": "2020-03-27T22:23:18Z",
+      "deleted": false
+    }
+  ]
+}
+```
+
+**创建轮播**
+
+使用 [POST accounts/:account&#95;id/cards](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#post-accounts-account-id-cards) 端点来创建轮播。使用上一个请求返回的 media keys。请注意，传入 media keys 的顺序将决定它们在轮播中的呈现顺序。
+
+```
+$ twurl -A "Content-Type: application/json" -X POST -H ads-api.x.com "/10/accounts/18ce54d4x5t/cards" -d '{"name":"website carousel","components":[{"type": "SWIPEABLE_MEDIA","media_keys":["13_1089771253848666112","13_1191948012077092867"]},{"type": "DETAILS","title": "X","destination":{"type":"WEBSITE", "url":"https://www.x.com"}}]}'
+```
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "website carousel",
+    "components": [
+      {
+        "type": "SWIPEABLE_MEDIA",
+        "media_keys": [
+          "13_1089771253848666112",
+          "13_1191948012077092867"
+        ]
+      },
+      {
+        "type": "DETAILS",
+        "title": "X",
+        "destination": {
+          "type": "WEBSITE",
+          "url": "https://www.x.com/",
+          "tco_url": "https://t.co/dyTMHWKWZb"
+        }
+      }
+    ],
+    "id": "ars7m",
+    "created_at": "2020-11-11T07:51:47Z",
+    "card_uri": "card://1326432421105995776",
+    "updated_at": "2020-11-11T07:51:47Z",
+    "deleted": false,
+    "card_type": "UNIFIED"
+  }
+}
+```
+
+请注意，与其他 card 一样，carousel card 的响应也包含一个 `card_uri`，在创建帖子时会用到它。
+
+**帖子**
+
+使用 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/tweets#post-accounts-account-id-tweet) 端点来创建你的帖子。使用上一个请求的响应中返回的 `card_uri`。（响应已截断以提高可读性。）
+
+```
+$ twurl -H ads-api.x.com "/9/accounts/18ce54d4x5t/tweet_previews?tweet_type=PUBLISHED&tweet_ids=1326434098324385792"
+```
+
+```
+{
+  "data": {
+    "created_at": "Wed Nov 11 07:58:27 +0000 2020",
+    "id": 1326434098324385792,
+    "id_str": "1326434098324385792",
+    "text": "Swipe",
+    "truncated": false,
+    "entities": {
+      "hashtags": [],
+      "symbols": [],
+      "user_mentions": [],
+      "urls": []
+    },
+    "source": "Ads API Internal Test App",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user": {
+      "id": 756201191646691300,
+      "id_str": "756201191646691328",
+      ...
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": [
+      2417045708
+    ],
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "scopes": {
+      "followers": false
+    },
+    "lang": "en"
+  },
+  "request": {
+    "params": {
+      "text": "Swipe",
+      "as_user_id": 756201191646691300,
+      "card_uri": "card://1326432421105995776",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+**帖子预览**
+
+使用 [GET accounts/:account&#95;id/tweet&#95;previews](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/tweet-previews#get-accounts-account-id-tweet-previews) 端点来查看帖子预览。
+
+<div id="creative-metadata-tagging">
+  ### 创意元数据标记
+</div>
+
+#### 简介
+
+本指南面向创意合作伙伴、代理商和创意开发者，帮助你为 X 活动中使用的素材添加标签，从而更好地了解单个素材的价值和表现。
+
+**注意：** 媒体素材只能由创建该媒体素材的合作伙伴或开发者添加标签。如果媒体素材的使用者并未创建该媒体素材，请勿进行元数据标记。
+
+Creative Metadata Tagging 能够为由创意合作伙伴创建的图片和视频提供归因，而不受素材上传到 X 的具体位置或上传主体的限制。为了在创意素材与创意合作伙伴之间建立关联，我们采用了 [XMP](https://exiftool.org/TagNames/XMP.html) 标准。
+
+<div id="tagging-creative-assets">
+  #### 为创意素材添加标签
+</div>
+
+下表展示了当前在每个与图片相关的资源响应中可用的标识符类型，以及对应的属性名称。为创意素材添加标签需要使用标记工具。推荐使用 [ExifTool](https://exiftool.org/)，它是一个跨平台的 Perl 库以及用于读取、写入和编辑元信息的[命令行应用程序](https://exiftool.org/exiftool_pod.html)。请参阅其支持的所有[文件类型](https://exiftool.org/#supported)。
+
+请按照提供的[ExifTool 安装说明](https://exiftool.org/install.html)进行操作。[Homebrew](https://formulae.brew.sh/) 也提供了软件包，通过提供适用于 macOS 和 Linux 的 [exiftool 安装命令](https://formulae.brew.sh/formula/exiftool)进一步简化安装流程。通过在命令行中输入 exiftool -ver 并查看返回的工具版本号，确认工具是否已正确安装。在 [ExifTool 文档](https://exiftool.org/) 中了解更多 ExifTool 命令参数的信息。
+
+创意合作伙伴可以在新的或现有的创意素材上，将其 X app&#95;id 写入 contributor XMP 标签和 date 标签，以此分配元数据标签。[上传媒体](https://developer.x.com/en/docs/twitter-api/v1/media/upload-media/overview)时，创意素材将遵循现有的尺寸限制。 
+
+**注意：** X 对 contributor XMP 标签的使用，可确保元数据仅为 X 上的广告活动捕获取值。
+
+`exiftool -contributor="<YOUR APP ID>" -creative_file.jpg`
+
+`exiftool -date="<date>" -creative_file.jpg`
+
+app&#95;id 可以在 [开发者门户](https://developer.x.com/en/portal/dashboard) 的 Projects &amp; Apps 下找到。示例：16489123
+
+下面的示例将 app&#95;id 作为 contributor 标签、将 date 作为 date 标签添加到图片中：
+
+```
+app_id:858382169
+```
+
+```
+date:2022-03-13
+```
+
+```
+creative_file: eiffel_tower.jpg
+```
+
+```
+exiftool -contributor=858382169 eiffel_tower.jpg
+```
+
+```
+   1 image files updated
+```
+
+```
+exiftool -date=2022-03-13 eiffel_tower.jpg
+```
+
+```
+  1 image files updated
+```
+
+验证你的图像是否已正确添加标签： 
+
+`exiftool -xmp:all -G1 <filename>`
+
+示例：
+
+`exiftool -xmp:all -G1 eiffel_tower.jpg`
+
+```
+[XMP]        XMP 工具包            : Image::ExifTool 12.30
+```
+
+```
+[XMP]        Contributor            : 858382169
+```
+
+```
+[XMP]        Date                   : 2022:03:13
+```
+
+<div id="questions">
+  #### 有疑问？
+</div>
+
+如需确认你的标记和归因是否已成功，请将已完成标记的示例素材发送至 adsapi-program@x.com，以便 X 方代表进行审核。
+
+<div id="api-reference">
+  ## API 参考
+</div>
+
+<div id="account-media">
+  ### 账户媒体
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idaccount_media">
+  #### GET accounts/:account&#95;id/account&#95;media
+</div>
+
+检索与当前账号关联的部分或全部媒体的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/account_media`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，通常是所有 Advertiser API 请求的必需参数，[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 除外。指定的账户必须与已认证的用户关联。 类型：string 示例：`18ce54d4x5t` |
+| account&#95;media&#95;ids   *可选* | 通过指定逗号分隔的标识符列表，将响应范围限定为仅包含所需的账户媒体。最多可提供 200 个 ID。 类型：string 示例：`3wpx` |
+| count   *可选* | 指定每个独立请求尝试检索的记录数。 类型：int 默认值：`200` 最小值、最大值：`1`、`1000` |
+| creative&#95;types   *可选* | 将响应范围限定为仅包含与指定创意类型匹配的账户媒体。可以通过逗号分隔枚举值来指定多个创意类型。 类型：enum 可能的取值：`BANNER`、`BANNER_TABLET`、`INTERSTITIAL`、`INTERSTITIAL_LANDSCAPE`、`INTERSTITIAL_LANDSCAPE_TABLET`、`INTERSTITIAL_TABLET`、`MEDIUM_RECTANGLE`、`PREROLL`、`VAST_PREROLL` |
+| cursor   *可选* | 指定一个游标以获取下一页结果。有关更多信息，请参阅[分页](https://developer.x.com/x-ads-api/introduction)。 类型：string 示例：`8x7v00oow` |
+| sort&#95;by   *可选* | 按受支持的属性以升序或降序排序。有关更多信息，请参阅[排序](https://developer.x.com/x-ads-api/fundamentals/sorting)。 类型：string 示例：`created_at-asc` |
+| with&#95;deleted   *可选* | 在请求中包含已删除的结果。 类型：boolean 默认值：`false` 可能的取值：`true`、`false` |
+| with&#95;total&#95;count   *可选* | 包含 `total_count` 响应属性。**注意**：此参数与 `cursor` 互斥。**注意**：包含 `total_count` 的请求将具有较低的速率限制，目前设置为每 15 分钟 200 次。 类型：boolean 默认值：`false` 可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/account_media?account_media_ids=3wpx`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_media_ids": [
+        "3wpx"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "video_id": "13_771791717175468032",
+      "media_url": null,
+      "creative_type": "PREROLL",
+      "id": "3wpx",
+      "created_at": "2016-09-02T19:27:52Z",
+      "updated_at": "2016-09-02T19:27:52Z",
+      "deleted": false
+    }
+  ]
+}
+```
+
+获取与当前账户关联的特定账户媒体对象。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/account_media/:account_media_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| account&#95;media&#95;id   *必填* | 你在此请求中要操作的账户媒体的引用。 类型：string 示例：`2pnfd` |
+| with&#95;deleted   *可选* | 在响应中包含已删除的结果。 类型：boolean 默认值：`false`  可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/account_media/2pnfd`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_media_id": "2pnfd",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "video_id": null,
+    "media_url": "https://pbs.twimg.com/ad_img/890749735862026242/Up07zMym?format=jpg&name=orig",
+    "creative_type": "INTERSTITIAL_LANDSCAPE_TABLET",
+    "id": "2pnfd",
+    "created_at": "2017-07-28T01:44:41Z",
+    "updated_at": "2017-07-28T01:44:41Z",
+    "deleted": false
+  }
+}
+```
+
+删除当前账号下指定的账户媒体对象。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/account_media/:account_media_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。 类型：string  示例：`18ce54d4x5t` |
+| account&#95;media&#95;id   *required* | 你在该请求中操作的账户媒体的引用。 类型：string  示例：`2pnfd` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/account_media/2pnfd`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "video_id": null,
+    "media_url": "https://pbs.twimg.com/ad_img/890749735862026242/Up07zMym?format=jpg&name=orig",
+    "creative_type": "INTERSTITIAL_LANDSCAPE_TABLET",
+    "id": "2pnfd",
+    "created_at": "2017-07-28T01:44:41Z",
+    "updated_at": "2017-08-25T17:16:26Z",
+    "deleted": true
+  },
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "account_media_id": "2pnfd"
+    }
+  }
+}
+```
+
+<div id="cards">
+  ### 卡片
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+**注意**：要将卡片与帖子关联，请在调用 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)、[POST statuses/update](https://developer.x.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update#post-statuses-update)、[POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) 或 [POST accounts/:account&#95;id/draft&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/draft-tweets#post-accounts-account-id-draft-tweets) 这些端点时使用 `card_uri` 参数。
+
+检索与当前账户关联的部分或全部卡片的详细信息。
+
+**注意**：这里只会返回使用 POST accounts/:account&#95;id/cards 端点创建的卡片。使用其他端点创建的卡片不会被返回。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 以外所有 Advertiser API 请求所需的必填参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| card&#95;types   *optional* | 通过指定以逗号分隔的枚举值列表，将响应限定为所需的卡片类型。 类型：enum 可能的取值：`IMAGE_APP`、`IMAGE_CAROUSEL_APP`、`IMAGE_CAROUSEL_WEBSITE`、`IMAGE_MULTI_DEST_CAROUSEL_WEBSITE`、`IMAGE_WEBSITE`、`MIXED_MEDIA_MULTI_DEST_CAROUSEL_WEBSITE`、`MIXED_MEDIA_SINGLE_DEST_CAROUSEL_APP`、`MIXED_MEDIA_SINGLE_DEST_CAROUSEL_WEBSITE`、`VIDEO_APP`、`VIDEO_CAROUSEL_APP`、`VIDEO_CAROUSEL_WEBSITE`、`VIDEO_MULTI_DEST_CAROUSEL_WEBSITE`、`VIDEO_WEBSITE` |
+| card&#95;id   *optional* | 通过指定以逗号分隔的标识符列表，将响应限定为所需的卡片。最多可提供 200 个卡片 ID。 类型：string 示例：`1044294149527166979,1044301099031658496` |
+| card&#95;uris   *optional* | 通过指定以逗号分隔的标识符列表，将响应限定为所需的卡片。最多可提供 200 个卡片 URI 值。 类型：string 示例：`card://1044294149527166979,card://1044301099031658496` |
+| count   *optional* | 指定每个单独请求尝试检索的记录数。 类型：int 默认值：`100` 最小值、最大值：`1`、`200` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。更多信息请参见 [分页](https://developer.x.com/x-ads-api/introduction)。 类型：string 示例：`8x7v00oow` |
+| include&#95;legacy&#95;cards   *optional* | 在响应中包含旧版网站和应用卡片。旧版卡片是指其资源 URL 使用以下格式的卡片：accounts/:account&#95;id/cards/:card&#95;type。更多背景信息请参见 [此开发者论坛帖子](https://devcommunity.x.com/t/new-cards-endpoints-and-carousel-ads/145782/6)。 类型：boolean 默认值：`false` 可能的取值：`true`、`false` |
+| q   *optional* | 用于按 `name` 限定卡片范围的可选查询。省略此参数以检索所有卡片。最大长度：80 个字符。**注意**：此操作执行不区分大小写的前缀匹配。 类型：string 示例：`dtc` |
+| sort&#95;by   *optional* | 按支持的属性以升序或降序排序。更多信息请参见 [排序](https://developer.x.com/x-ads-api/fundamentals/sorting)。 类型：string 示例：`created_at-asc` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 类型：boolean 默认值：`false` 可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards?count=1`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "count": 1,
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": "8wzvldqtc",
+  "data": [
+    {
+      "name": "deep link",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1073727809120419840",
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-28T20:47:52Z",
+      "deleted": false,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+检索当前账号下某个卡片的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/:card_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 广告账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求都必需的参数。指定的账户必须与已通过身份验证的用户关联。 类型：string 示例：`18ce54d4x5t` |
+| card&#95;id   *required* | 卡片的 id。 类型：string 示例：`1044294149527166979` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 类型：boolean 默认值：`false`  可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/1321554298900107264`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_id": "1321554298900107264"
+    }
+  },
+  "data": [
+    {
+      "name": "深层链接",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1073727809120419840",
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-28T20:47:52Z",
+      "deleted": false,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+<div id="post-accountsaccount_idcards">
+  #### POST accounts/:account&#95;id/cards
+</div>
+
+创建一个与指定账户关联的新卡片。
+
+创建卡片的请求只接受 JSON 格式的 POST 请求体。`Content-Type` 必须设置为 `application/json`。
+
+有关详细的使用示例，请参阅我们的[轮播指南](https://developer.x.com/en/docs/twitter-ads-api/creatives/guides/carousels)。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards`
+
+#### 参数
+
+JSON POST 请求正文必须包含卡片的 `name` 和一个 `components` 数组。组件以对象形式表示，用于描述该卡片面向广告主的属性。
+
+下面的示例展示了有效负载的一般结构（其中的信息不可直接使用）。
+
+```
+{
+  "name": "some name",
+  "components": [
+    {
+      "type": "TYPE_ENUM",
+      "key": "value"
+    }
+  ]
+}
+```
+
+下面是关于组件的更多信息。
+
+| Name                              | Description                                                                                                                                                                                                         |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id   *required*       | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| name   *required*                 | 卡片的名称。最大长度：80 个字符。 类型：string  示例：`component based card`                                                                                                                                                             |
+| components   *sometimes required* | 描述用于创建卡片的组件。更多信息见下文。不能与 `slides` 同时指定。**注意**：组件的顺序很重要。 类型：array of objects                                                                                                                                          |
+| slides   *sometimes required*     | 使用该数组的数组来创建 Multi-Destination Carousels。将每张卡片描述为组件的分组。每个 slide 都应是对一张卡片的完整表示。不能与 `components` 同时指定。**注意**：各个 slide 的顺序很重要。 类型：array of array                                                                        |
+
+<div id="components">
+  #### 组件
+</div>
+
+每个组件都必须包含一个 `type` 字段，用于确定对象的 schema。Ads API 支持以下组件类型，分为基于媒体和基于描述的组件。
+
+* 媒体：
+* `MEDIA`：单个视频或图片
+* `SWIPEABLE_MEDIA`：2–6 个视频或图片
+* 描述：
+* `DETAILS`
+* `BUTTON`
+
+每个组件都有一组必需字段（除了 `type` 键之外）。这些字段列在下表中。
+
+| 组件 `type`         | 字段                      | 值类型              |
+| :---------------- | :---------------------- | :--------------- |
+| `MEDIA`           | `media_key`             | string           |
+| `SWIPEABLE_MEDIA` | `media_keys`            | array of strings |
+| `DETAILS`         | `title`   `destination` | string   object  |
+| `BUTTON`          | `label`   `destination` | object   object  |
+
+下面是在 `components` 数组中的一个 `BUTTON` 组件示例（故意省略 `name` 键）。（省略号表示需要在这些位置补充更多信息。）
+
+```
+{
+  "components": [
+    {
+      "type": "BUTTON",
+      "label": {
+        ...
+      },
+      "destination": {
+        ...
+      }
+    }
+  ]
+}
+```
+
+指定组件对象的顺序决定了它们自上而下的渲染顺序。Cards 必须由一个基于媒体的组件以及一个 `DETAILS` 或 `BUTTON` 组件创建。基于描述的组件会渲染在媒体下方，并且具有关联的目标，要么是 URL，要么是移动应用。
+
+**Label**
+
+Label 定义显示在按钮上的文本，因此只适用于 `BUTTON` 组件。Label 对象有两个必填键：`type` 和 `value`。`type` 必须设置为 `ENUM`，而 `value` 可以是：`BOOK`、`CONNECT`、`INSTALL`、`OPEN`、`ORDER`、`PLAY` 或 `SHOP` 之一。
+
+在前一个示例的基础上，下面展示了 `BUTTON` 组件中的 `label` 对象。
+
+```
+{
+  "components": [
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        ...
+      }
+    }
+  ]
+}
+```
+
+**目标地址**
+
+目标地址是广告主希望将用户引导至的去向。在 `DETAILS` 或 `BUTTON` 组件中始终为必填项。目标地址类型有两种：`WEBSITE` 或 `APP`。
+
+**注意**：网站目标地址只能与 `DETAILS` 组件一起使用，而 App 目标地址只能与 `BUTTON` 组件一起使用。
+
+**网站目标地址**
+
+| Name              | Description                                                                  |
+| :---------------- | :--------------------------------------------------------------------------- |
+| type   *required* | 目标地址的类型，用于决定其架构。 类型：enum  可能的取值：`WEBSITE`                                    |
+| url   *required*  | 将用户重定向到的网站的 URL。 类型：string  示例：`https://devcommunity.x.com/c/advertiser-api` |
+
+**App 目标地址**
+
+| Name                                                        | Description                                                                                                                  |
+| :---------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| type   *required*                                           | 目标地址的类型，用于决定其架构。 类型：enum  可能的取值：`APP`                                                                                        |
+| country&#95;code   *required*                               | 应用销售所在国家/地区的 [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) 双字母代码。 类型：string  示例：`US`                |
+| googleplay&#95;app&#95;id   *sometimes required*            | Google Play 应用包名。 **注意**：以下字段中至少需要提供一个：`ios_app_store_identifier` 或 `googleplay_app_id`。 类型：string  示例：`com.twitter.android` |
+| ios&#95;app&#95;store&#95;identifier   *sometimes required* | iOS App Store 标识符。 **注意**：以下字段中至少需要提供一个：`ios_app_store_identifier` 或 `googleplay_app_id`。 类型：string  示例：`333903271`          |
+| googleplay&#95;deep&#95;link   *optional*                   | 指向所推广的 Android 应用的深度链接。 **注意**：仅在已提供 `googleplay_app_id` 时可用。 类型：string                                                      |
+| ios&#95;deep&#95;link   *optional*                          | 指向所推广的 iOS 应用的深度链接。 **注意**：仅在已提供 `ios_app_store_identifier` 时可用。 类型：string                                                   |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards`
+
+```
+{
+  "name": "components create cards",
+  "components": [
+    {
+      "type": "MEDIA",
+      "media_key": "3_1323490622599176192"
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android"
+      }
+    }
+  ]
+}
+```
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "components create cards",
+    "components": [
+      {
+        "type": "MEDIA",
+        "media_key": "3_1323490622599176192"
+      },
+      {
+        "type": "BUTTON",
+        "label": {
+          "type": "ENUM",
+          "value": "INSTALL"
+        },
+        "destination": {
+          "type": "APP",
+          "country_code": "US",
+          "googleplay_app_id": "com.twitter.android"
+        }
+      }
+    ],
+    "created_at": "2020-11-11T05:42:25Z",
+    "card_uri": "card://1326399865065238531",
+    "id": "1321554298900107264",
+    "updated_at": "2020-11-11T05:42:25Z",
+    "deleted": false,
+    "card_type": "IMAGE_APP"
+  }
+}
+```
+
+更新当前账号下指定的卡片。
+
+卡片编辑请求只接受 JSON 格式的 POST 请求体。`Content-Type` 必须设置为 `application/json`。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/1321554298900107264`
+
+#### 参数
+
+JSON POST 请求正文必须包含要更新的参数。请求会使用负载中指定的参数来**替换**每个字段。组件以对象形式表示，用于描述卡片中面向广告主的属性。
+
+下面的示例展示了负载的一般结构（但其中的数据不可实际使用）。
+
+```
+{
+  "name": "some name",
+  "components": [
+    {
+      "type": "TYPE_ENUM",
+      "key": "value"
+    }
+  ]
+}
+```
+
+有关 **POST accounts/:account&#95;id/cards** 中组件和幻灯片的更多信息。
+
+| Name                        | Description                                                                                                                                                                                                          |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id   *required* | 被使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| name   *optional*           | 卡片名称。最大长度：80 个字符。 类型：string  示例：`component based card`                                                                                                                                                               |
+| components   *optional*     | 描述用于更新卡片的组件。更多信息见下文。不能与 `slides` 同时指定。**注意**：组件的顺序很重要。 类型：array of objects                                                                                                                                           |
+| slides   *optional*         | 使用此“数组的数组”来更新 Multi-Destination Carousels。将每个卡片描述为组件的分组。每个幻灯片（slide）都应为一个卡片的完整表示。不能与 `components` 同时指定。**注意**：每个幻灯片的顺序很重要。 类型：array of array                                                                         |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+此示例会同时更新名称，并从上述示例的 components 字段中移除其中一个 media&#95;keys 值。
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/1321554298900107264`
+
+```
+{
+  "name": "changed name",
+  "components": [
+    {
+      "type": "SWIPEABLE_MEDIA",
+      "media_keys": [
+        "3_1075096386931052545"
+      ]
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "OPEN"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android",
+        "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+      }
+    }
+  ]
+}
+```
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_id": "1321554298900107264"
+    }
+  },
+  "data": [
+    {
+      "name": "changed name",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-29T20:47:52Z",
+      "deleted": false,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+删除当前账号下指定的 card。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/:card_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 投放账户的标识符。该参数出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 以外所有 Advertiser API 请求中的必需参数。指定的账户必须与已通过身份验证的用户关联。 类型：字符串  示例：`18ce54d4x5t` |
+| card&#95;id   *必填* | 要删除的卡片的 id。 类型：字符串  示例：`1044294149527166979` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/1321554298900107264`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_id": "1321554298900107264"
+    }
+  },
+  "data": [
+    {
+      "name": "deep link",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1073727809120419840",
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-29T20:47:52Z",
+      "deleted": true,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+<div id="cards-fetch">
+  ### 获取卡片
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+通过 `card_uri` 获取与当前账户关联的多个卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/all`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所操作账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证的用户关联。 Type: string  Example: `18ce54d4x5t` |
+| card&#95;uris   *required* | 通过指定以逗号分隔的标识符列表，使响应仅包含所需的 cards。最多可提供 200 个 card URI 值。 Type: string  Example: `card://1044294149527166979,card://1044301099031658496` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/all?card_uris=card://1044294149527166979,card://1044301099031658496`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_uris": [
+        "card://1044294149527166979",
+        "card://1044301099031658496"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": [
+    {
+      "name": "X App",
+      "googleplay_app_id": "com.twitter.android",
+      "image_display_height": "836",
+      "country_code": "US",
+      "id": "692xn",
+      "wide_app_image": "https://pbs.twimg.com/media/Dc263l9VwAAAeEH.jpg",
+      "created_at": "2018-09-24T18:35:01Z",
+      "image_display_width": "1600",
+      "card_uri": "card://1044294149527166979",
+      "updated_at": "2018-09-24T18:35:01Z",
+      "app_cta": "INSTALL",
+      "deleted": false,
+      "card_type": "IMAGE_APP_DOWNLOAD"
+    },
+    {
+      "video_poster_height": "9",
+      "name": "Developer Platform",
+      "website_shortened_url": "https://t.co/zadeUSVD18",
+      "video_height": "9",
+      "video_url": "https://video.twimg.com/amplify_video/vmap/991374284135137280.vmap",
+      "content_duration_seconds": "24",
+      "video_owner_id": "756201191646691328",
+      "video_content_id": "13_991374284135137280",
+      "website_display_url": "developer.x.com",
+      "id": "6933h",
+      "video_width": "16",
+      "video_hls_url": "https://video.twimg.com/amplify_video/991374284135137280/pl/sQrBsE9mFvNep9Cx.m3u8?tag=2",
+      "website_dest_url": "https://developer.x.com",
+      "created_at": "2018-09-24T19:02:38Z",
+      "card_uri": "card://1044301099031658496",
+      "title": "Developer Platform",
+      "website_url": "https://developer.x.com",
+      "updated_at": "2018-09-24T19:02:38Z",
+      "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/991374284135137280/img/YbbGQHvWRjoFgrLz.jpg",
+      "video_poster_width": "16",
+      "deleted": false,
+      "card_type": "VIDEO_WEBSITE"
+    }
+  ]
+}
+```
+
+通过 `card_id` 检索与当前账户关联的特定卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/all/:card_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用广告账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证的用户关联。 类型：字符串 示例：`18ce54d4x5t` |
+| card&#95;id   *必填* | 请求中要操作的卡片（card）的标识符。 类型：字符串 示例：`508pf` |
+| with&#95;deleted   *可选* | 是否在请求中包含已删除的结果。 类型：布尔值 默认值：`false`  可选取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/all/508pf`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_id": "508pf",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "video_poster_height": "9",
+    "name": "video website card",
+    "video_height": "9",
+    "video_url": "https://video.twimg.com/amplify_video/vmap/867520357225418752.vmap",
+    "content_duration_seconds": "21",
+    "video_owner_id": "756201191646691328",
+    "video_content_id": "13_867520357225418752",
+    "website_display_url": "developer.x.com",
+    "id": "508pf",
+    "video_width": "16",
+    "video_hls_url": "https://video.twimg.com/amplify_video/867520357225418752/pl/TPHeH5ZlHFCa2TeJ.m3u8",
+    "website_dest_url": "https://developer.x.com/en/docs/ads/creatives/api-reference/video-website#post-accounts-account-id-cards-video-website",
+    "created_at": "2017-11-10T09:00:35Z",
+    "card_uri": "card://928910245920829440",
+    "title": "VWC",
+    "website_url": "https://t.co/F81hp59pUF",
+    "updated_at": "2018-01-05T05:43:31Z",
+    "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/867520357225418752/img/E3pnXM0sCKnRsFih.jpg",
+    "video_poster_width": "16",
+    "deleted": false,
+    "card_type": "VIDEO_WEBSITE"
+  }
+}
+```
+
+<div id="draft-tweets">
+  ### 帖子草稿
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_iddraft_tweets">
+  #### GET accounts/:account&#95;id/draft&#95;tweets
+</div>
+
+检索与当前账户关联的部分或全部草稿帖子的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| count   *optional* | 指定每个请求尝试检索的记录数量。 类型：int 默认值：`100` 最小值、最大值：`1`、`200` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。有关更多信息，请参阅[分页](https://developer.x.com/x-ads-api/introduction)。 类型：string 示例：`c-jh1g0ryb` |
+| user&#95;id   *optional* | 指定要为其检索草稿帖子的用户。如果未设置，默认为该账户上的 `FULL` 可推广用户。 类型：string 示例：`756201191646691328` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets?count=1`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "count": 1
+    }
+  },
+  "data": [
+    {
+      "name" null,
+      "text": "hello, world",
+      "user_id": "756201191646691328",
+      "id": "994791681219231744",
+      "nullcast": true,
+      "created_at": "2018-05-11T04:09:53Z",
+      "card_uri": null,
+      "updated_at": "2018-05-11T04:09:53Z",
+      "media_keys": []
+    }
+  ],
+  "next_cursor": "c-jh1g0ryb"
+}
+```
+
+获取与当前账号关联的特定草稿帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/:draft_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账号的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账号必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | 你在请求中要操作的草稿帖子的引用。 类型：string 示例：`994788364334325760` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/994788364334325760`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "draft_tweet_id": "994788364334325760"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "#TwitterDev",
+    "user_id": "756201191646691328",
+    "id": "994788364334325760",
+    "nullcast": true,
+    "created_at": "2018-05-11T03:56:42Z",
+    "card_uri": "card://958225772740714496",
+    "updated_at": "2018-05-11T03:56:42Z",
+    "media_keys": []
+  }
+}
+```
+
+<div id="post-accountsaccount_iddraft_tweets">
+  #### POST accounts/:account&#95;id/draft&#95;tweets
+</div>
+
+为该账号的完整可推广用户（默认）或在 `as_user_id` 参数中指定的用户创建一条草稿帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 广告账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 以外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| as&#95;user&#95;id   *required* | 代表哪位广告主发布帖子时所使用的广告主用户 ID。广告主必须通过 [ads.x.com](https://ads.x.com/) 授予你的账号（或多个账号）访问其广告账户的权限。获得此权限后，你可以使用自己账号的 OAuth 令牌而非广告主的令牌来调用 API。 类型：string 示例：`756201191646691328` |
+| text   *sometimes required* | 状态更新的文本内容。如果未指定 `media_keys`，则为必填。 类型：string 示例：`Just setting up my X.` |
+| card&#95;uri   *optional* | 使用任一卡片响应（如果有）中的 `card_uri` 值，将卡片与帖子关联。 类型：string 示例：`card://960880280705392541` |
+| media&#95;keys   *optional* | 通过指定以逗号分隔的标识符列表，将媒体与帖子关联。最多可包含 4 张图片、1 个动图 GIF 或 1 个视频。 **注意**：媒体资源必须位于该账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 类型：string 示例：`13_1153584529292270722` |
+| nullcast   *optional* | 是否创建 nullcast（“仅推广”）帖子。 类型：boolean 默认值：`true`  可能的取值：`true`、`false` |
+| name   *optional* | 草稿帖子的名称。最大长度：80 个字符。 类型：string 示例：`Tweet with name` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets?as_user_id=756201191646691328&text=刚设置好我的 X。`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "text": "Just setting up my X.",
+      "as_user_id": "756201191646691328"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "Just setting up my X.",
+    "user_id": "756201191646691328",
+    "id": "994747471329873920",
+    "nullcast": true,
+    "created_at": "2018-05-11T01:14:13Z",
+    "card_uri": null,
+    "updated_at": "2018-05-11T01:14:13Z",
+    "media_keys": []
+  }
+}
+```
+
+更新当前账户的指定草稿帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/:draft_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 投放账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求必需的参数。指定的账户必须与已通过身份验证的用户关联。 类型：string；示例：`18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | 你在请求中要操作的 Draft Tweet 的引用。 类型：string；示例：`994747471329873920` |
+| card&#95;uri   *optional* | 使用任意 cards 响应中的 `card_uri` 值（如果可用）将卡片与帖子关联。 **注意**：若要取消设置（移除），请在不提供值的情况下指定此参数。 类型：string；示例：`card://970582057284129151` |
+| media&#95;keys   *optional* | 通过指定以逗号分隔的标识符列表，将媒体与帖子关联。最多可包含 4 张图片、1 个动画 GIF 或 1 个视频。 **注意**：媒体资产必须位于该账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 **注意**：若要取消设置（移除），请在不提供值的情况下指定此参数。 类型：string；示例：`13_1153584529292270722` |
+| nullcast   *optional* | 是否创建一个 nullcast（“仅推广”）帖子。 类型：boolean；可能的值：`true`、`false` |
+| text   *optional* | 状态更新的文本内容。 类型：string；示例：`just setting up my twttr` |
+| name   *optional* | Draft Tweet 的名称。最大长度：80 个字符。 类型：string；示例：`Tweet with name` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/994747471329873920?text=just setting up my twttr`
+
+#### 响应示例
+
+```
+{
+  "request": {
+    "params": {
+      "draft_tweet_id": 994747471329873920,
+      "text": "just setting up my twttr"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "just setting up my twttr",
+    "user_id": "756201191646691328",
+    "id": "994747471329873920",
+    "nullcast": true,
+    "created_at": "2018-05-11T01:14:13Z",
+    "card_uri": null,
+    "updated_at": "2018-05-11T01:16:59Z",
+    "media_keys": []
+  }
+}
+```
+
+永久删除当前账户中指定的草稿帖子。
+
+**注意**：我们**强烈**建议在使用草稿的元数据创建帖子或定时帖子之后删除对应草稿。
+
+**注意**：这是一次彻底删除操作。因此，已删除的草稿帖子无法恢复。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/:draft_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已通过身份验证的用户关联。类型：string  示例：`18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | 你在此请求中操作的草稿帖子的引用。类型：string  示例：`994787835663155200` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/994787835663155200`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "draft_tweet_id": "994787835663155200"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "hello, world",
+    "user_id": "756201191646691328",
+    "id": "994787835663155200",
+    "nullcast": true,
+    "status": "DELETED",
+    "created_at": "2018-05-11T03:54:36Z",
+    "card_uri": null,
+    "updated_at": "2018-05-11T04:07:31Z",
+    "media_keys": []
+  }
+}
+```
+
+<div id="post-accountsaccount_iddraft_tweetspreviewdraft_tweet_id">
+  #### POST accounts/:account&#95;id/draft&#95;tweets/preview/:draft&#95;tweet&#95;id
+</div>
+
+在移动设备上预览 Draft Tweet。
+
+成功的请求会向已通过认证的用户当前登录的每台设备发送通知。点击通知将打开时间线，用户可以在其中查看并与 Draft Tweet 交互，以测试自动播放、音量、全屏、视频网站卡片停靠等行为。
+
+**注意**：设备上的预览仅对接收到通知的用户可见。
+
+**注意**：只有 X 官方应用才会收到通知。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/preview/:draft_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | 你在本次请求中要操作的草稿帖子的引用。 类型：string  示例：`996132315829948416` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/preview/996132315829948416`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "draft_tweet_id": "996132315829948416"
+    }
+  },
+  "message": "See @apimctestface's notifications in the X app to preview your Tweet."
+}
+```
+
+<div id="image-conversation-cards">
+  ### 图片会话卡片
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+**注意**：要将卡片与帖子关联，请在 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)、[POST statuses/update](https://developer.x.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update#post-statuses-update) 或 [POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) 端点中使用 `card_uri` 参数。
+
+<div id="get-accountsaccount_idcardsimage_conversation">
+  #### GET accounts/:account&#95;id/cards/image&#95;conversation
+</div>
+
+获取与当前账户关联的部分或全部 Image Conversation Card 的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求都必需的参数。指定的账户必须与已认证用户关联。 类型：string  示例：`18ce54d4x5t` |
+| card&#95;ids   *optional* | 通过提供以逗号分隔的标识符列表，将响应限定为仅包含所需的 image conversation 卡片。最多可以提供 200 个 ID。 类型：string  示例：`59woh` |
+| count   *optional* | 指定每个单独请求尝试检索的记录数。 类型：int  默认值：`200`   最小值、最大值：`1`，`1000` |
+| cursor   *optional* | 指定一个游标以获取下一页结果。有关更多信息，请参阅 [Pagination](https://developer.x.com/x-ads-api/introduction)。 类型：string  示例：`8x7v00oow` |
+| q   *optional* | 一个可选查询，用于根据 `name` 限定返回的卡片。省略此参数以检索所有内容。最大长度：80 个字符。 **注意**：此查询执行不区分大小写的前缀匹配。 类型：string  示例：`night` |
+| sort&#95;by   *optional* | 按支持的属性进行升序或降序排序。有关更多信息，请参阅 [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting)。 类型：string  示例：`created_at-asc` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 类型：boolean  默认值：`false`   可能的值：`true`，`false` |
+| with&#95;total&#95;count   *optional* | 在响应中包含 `total_count` 属性。 **注意**：此参数与 `cursor` 互斥。 **注意**：包含 `total_count` 的请求具有更低的速率限制，目前设置为每 15 分钟 200 次。 类型：boolean  默认值：`false`   可能的值：`true`，`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation?card_ids=59woh`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "image_conversation",
+      "card_ids": [
+        "59woh"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "name": "image conversation card",
+      "first_cta": "#moon",
+      "image_display_height": "670",
+      "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+      "thank_you_text": "thanks",
+      "id": "59woh",
+      "first_cta_tweet": "stars",
+      "media_key": "3_957113581522141184",
+      "created_at": "2018-01-27T04:58:42Z",
+      "image_display_width": "1280",
+      "card_uri": "card://923498485702009837",
+      "title": "Full moon",
+      "updated_at": "2018-01-27T04:58:42Z",
+      "deleted": false,
+      "card_type": "IMAGE_CONVERSATION"
+    }
+  ]
+}
+```
+
+获取与当前账号关联的特定图片会话卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation/:card_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 要使用的广告账户的标识符。该参数出现在资源路径中，一般是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必填参数。指定的账户必须与已通过身份验证的用户关联。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | 你在该请求中要操作的 image conversation card（图片会话卡片）的标识。  Type: string  Example: `59woh` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation/59woh`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "image_conversation",
+      "card_id": "59woh",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "image conversation card",
+    "first_cta": "#moon",
+    "image_display_height": "670",
+    "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+    "thank_you_text": "thanks",
+    "id": "59woh",
+    "first_cta_tweet": "stars",
+    "media_key": "3_957113581522141184",
+    "created_at": "2018-01-27T04:58:42Z",
+    "image_display_width": "1280",
+    "card_uri": "card://923498485702009837",
+    "title": "Full moon",
+    "updated_at": "2018-01-27T04:58:42Z",
+    "deleted": false,
+    "card_type": "IMAGE_CONVERSATION"
+  }
+}
+```
+
+<div id="post-accountsaccount_idcardsimage_conversation">
+  #### POST accounts/:account&#95;id/cards/image&#95;conversation
+</div>
+
+创建一个与指定帐户关联的新的图片会话卡片。
+
+有关向我们的端点上传图片的有用信息，请参阅[上传媒体](https://developer.x.com/rest/public/uploading-media)。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| first&#95;cta   *必填* | 第一个选项的号召性用语（Call-To-Action，CTA）话题标签（hashtag）。最大长度：20 个字符（不包括 #）。 类型：string 示例：`#ShareNow` |
+| first&#95;cta&#95;tweet   *必填* | 在点击第一个 CTA 时使用的帖子文本。 类型：string 示例：`I Heart @AdsAPI` |
+| media&#95;key   *必填* | 要在此卡片中使用的图片的媒体 key。 **注意**：图片必须位于账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 **注意**：图片宽度至少为 800px，且宽高比必须为 1.91:1。 类型：string 示例：`3_1151345051104991073` |
+| name   *必填* | 卡片名称。 类型：string 示例：`image conversation card` |
+| thank&#95;you&#95;text   *必填* | 在 CTA 被点击后显示的文本。最大长度：23 个字符。 类型：string 示例：`Thank you` |
+| second&#95;cta   *有时必填* | 第二个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string **注意**：如果未设置 `title`，则必填。示例：`#ShareAgain` |
+| second&#95;cta&#95;tweet   *有时必填* | 在点击第二个 CTA 时使用的帖子文本。 **注意**：当设置了 `second_cta` 时必填。 类型：string 示例：`I Heart @AdsAPI Again` |
+| title   *有时必填* | 卡片标题，显示在图片下方、CTA 上方。最大长度：23 个字符。 类型：string **注意**：如果未设置 `second_cta`，则必填。示例：`Start a conversation` |
+| third&#95;cta   *可选* | 第三个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string 示例：`#ShareMore` |
+| third&#95;cta&#95;tweet   *有时必填* | 在点击第三个 CTA 时使用的帖子文本。 类型：string **注意**：当设置了 `third_cta` 时必填。示例：`I Heart @TwitterDev` |
+| fourth&#95;cta   *可选* | 第四个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string 示例：`#ShareExtra` |
+| fourth&#95;cta&#95;tweet   *有时必填* | 在点击第四个 CTA 时使用的帖子文本。 类型：string **注意**：当设置了 `fourth_cta` 时必填。示例：`I Heart @TwitterDev Again` |
+| unlocked&#95;image&#95;media&#95;key   *可选* | 在即时解锁场景中使用的图片的 `media_key`。这是一个只写字段。在响应中，API 会为该图片提供一个 X URL。 **注意**：图片必须位于账户的媒体库中。 **注意**：图片宽度至少为 800px，且宽高比必须为 5:2。 类型：string 示例：`3_883112887618682880` |
+| thank&#95;you&#95;url   *可选* | 与感谢文本一起显示的 URL。 类型：string 示例：`https://example.com/thankyou` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation?media_key=3_957113581522141184&name=image conversation card&first_cta=#moon&first_cta_tweet=stars&thank_you_text=thanks&title=Full moon`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "image conversation card",
+    "first_cta": "#moon",
+    "image_display_height": "670",
+    "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+    "thank_you_text": "thanks",
+    "id": "59woh",
+    "first_cta_tweet": "stars",
+    "media_key": "3_957113581522141184",
+    "created_at": "2018-01-27T04:58:42Z",
+    "image_display_width": "1280",
+    "card_uri": "card://923498485702009837",
+    "title": "Full moon",
+    "updated_at": "2018-01-27T04:58:42Z",
+    "deleted": false,
+    "card_type": "IMAGE_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "name": "image conversation card",
+      "first_cta": "#moon",
+      "image_display_height": "670",
+      "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+      "thank_you_text": "thanks",
+      "media_key": "3_957113581522141184",
+      "account_id": "18ce54d4x5t",
+      "first_cta_tweet": "stars",
+      "image_display_width": "1280",
+      "title": "Full moon",
+      "card_type": "IMAGE_CONVERSATION"
+    }
+  }
+}
+```
+
+更新当前账户下指定的图像会话卡片。
+
+有关向我们的端点上传图像的实用信息，请参阅[上传媒体](https://developer.x.com/rest/public/uploading-media)。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation/:card_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 以外所有 Advertiser API 请求的必需参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| card&#95;id   *必填* | 你在请求中要操作的图像会话卡片的标识。 类型：string  示例：`4i0qg` |
+| first&#95;cta   *可选* | 第一个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string  示例：`#ShareNow` |
+| first&#95;cta&#95;tweet   *可选* | 当第一个 CTA 被点击时要使用的帖子文案。 类型：string  示例：`I Heart @AdsAPI` |
+| second&#95;cta   *可选* | 第二个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string  **注意**：当 `title` 未设置时必填。 示例：`#ShareAgain` |
+| second&#95;cta&#95;tweet   *可选* | 当第二个 CTA 被点击时要使用的帖子文案。 **注意**：当设置了 `second_cta` 时必填。 类型：string  示例：`I Heart @AdsAPI Again` |
+| third&#95;cta   *可选* | 第三个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string  示例：`#ShareMore` |
+| third&#95;cta&#95;tweet   *可选* | 当第三个 CTA 被点击时要使用的帖子文案。 类型：string  **注意**：当设置了 `third_cta` 时必填。 示例：`I Heart @TwitterDev` |
+| fourth&#95;cta   *可选* | 第四个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：string  示例：`#ShareExtra` |
+| fourth&#95;cta&#95;tweet   *可选* | 当第四个 CTA 被点击时要使用的帖子文案。 类型：string  **注意**：当设置了 `fourth_cta` 时必填。 示例：`I Heart @TwitterDev Again` |
+| media&#95;key   *可选* | 要在此卡片中使用的图像的 media key。 **注意**：该图像必须位于账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 **注意**：图像最小宽度为 800px，且宽高比必须为 1.91:1。 类型：string  示例：`3_1151345051104991073` |
+| name   *可选* | 卡片的名称。 类型：string  示例：`moon card` |
+| thank&#95;you&#95;text   *可选* | 在 CTA 被点击后显示的文本。最大长度：23 个字符。 类型：string  示例：`Thank you` |
+| thank&#95;you&#95;url   *可选* | 与感谢文本一起显示的 URL。 类型：string  示例：`https://example.com/thankyou` |
+| title   *可选* | 卡片的标题，显示在图像下方、CTA 上方。最大长度：23 个字符。 类型：string  **注意**：当 `second_cta` 未设置时必填。 示例：`Start a conversation` |
+| unlocked&#95;image&#95;media&#95;key   *可选* | 在即时解锁场景中将使用的图像的 `media_key`。这是一个只写字段。在响应中，API 会为该图像提供一个 X URL。 **注意**：该图像必须位于账户的媒体库中。 **注意**：图像最小宽度为 800px，且宽高比必须为 5:2。 类型：string  示例：`3_883112887618682880` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation/59woh?name=moon card`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "moon card",
+    "id": "59woh",
+    "created_at": "2018-01-27T04:58:42Z",
+    "card_uri": "card://923498485702009837",
+    "updated_at": "2018-01-29T21:04:39Z",
+    "deleted": false,
+    "card_type": "IMAGE_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_type": "IMAGE_CONVERSATION",
+      "card_id": "59woh",
+      "name": "moon card"
+    }
+  }
+}
+```
+
+永久删除当前账号下指定的图像会话卡片。
+
+**注意**：这是一次硬删除操作，被删除的卡片将无法恢复或重新获取。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation/:card_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账号的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账号必须与已通过身份验证的用户关联。类型：string  示例：`18ce54d4x5t` |
+| card&#95;id   *必填* | 请求中要操作的 image conversation card 的引用。类型：string  示例：`4i0qe` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation/4i0qe`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "image conversation card",
+    "id": "4i0qe",
+    "created_at": "2017-07-07T00:03:01Z",
+    "updated_at": "2017-08-23T13:26:23Z",
+    "deleted": true,
+    "card_type": "IMAGE_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "card_id": "4i0qe",
+      "card_type": "image_conversation",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+### 媒体库
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idmedia_library">
+  #### GET accounts/:account&#95;id/media&#95;library
+</div>
+
+获取当前账户关联的部分或全部媒体库对象的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。  Type: string  Example: `18ce54d4x5t` |
+| count   *optional* | 指定每个请求尝试检索的记录数量。  Type: int  Default: `20`   Min, Max: `1`, `50` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。有关更多信息，请参阅 [Pagination](https://developer.x.com/x-ads-api/introduction)。  Type: string  Example: `c-1` |
+| media&#95;type   *optional* | 将响应限定为所需的媒体类型。  Type: enum  Possible values: `GIF`, `IMAGE`, `VIDEO` |
+| q   *optional* | 一个可选查询，用于根据 `name`、`title`、`file_name` 和 `description` 字段限定资源。 **注意**：此操作执行不区分大小写的 *term* 匹配。  Type: string  Min, Max length: `1`, `255` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library?count=1`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "count": 1
+    }
+  },
+  "data": [
+    {
+      "tweeted": true,
+      "name": null,
+      "file_name": "coffee https://t.co/4tcPU9XUon",
+      "media_url": "https://pbs.twimg.com/media/DJvnJf_UEAAXnzC.jpg",
+      "media_category": "TWEET_IMAGE",
+      "media_key": "3_908573900237180928",
+      "created_at": "2017-09-15T06:11:12Z",
+      "media_status": "TRANSCODE_COMPLETED",
+      "media_type": "IMAGE",
+      "updated_at": "2017-11-16T06:00:01Z",
+      "deleted": false
+    }
+  ],
+  "next_cursor": "c-1"
+}
+```
+
+获取与当前账户关联的指定媒体库对象。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library/:media_key`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 被操作账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必填参数。指定的账户必须与已通过身份验证的用户关联。类型：string  示例：`18ce54d4x5t` |
+| media&#95;key   *required* | 你在请求中要操作的媒体库对象的引用。类型：string  示例：`13_909110614026444802` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library/13_909110614026444802`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "13_909110614026444802"
+    }
+  },
+  "data": {
+    "tweeted": true,
+    "duration": 39973,
+    "name": null,
+    "file_name": "buildings https://t.co/xFdzrHM5QG",
+    "description": null,
+    "media_url": "https://video.twimg.com/amplify_video/909110614026444802/vid/1280x720/mfahmfkKVjjk1nGm.mp4",
+    "media_category": "AMPLIFY_VIDEO",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/909110614026444802/img/QZUNoaiCia0UFNrw.jpg",
+    "poster_media_key": "3_909110614026444802",
+    "media_key": "13_909110614026444802",
+    "created_at": "2017-09-16T17:43:55Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "title": "buildings",
+    "media_type": "VIDEO",
+    "aspect_ratio": "16:9",
+    "updated_at": "2017-09-27T13:04:00Z",
+    "deleted": false
+  }
+}
+```
+
+将一个媒体对象关联到当前账户。有关更多详细信息，请参阅我们的 [媒体库指南](https://developer.x.com/en/docs/ads/creatives/guides/media-library)。
+
+**注意**：当将媒体类别为 `AMPLIFY_VIDEO` 的视频添加到媒体库时，它会自动可作为 `PREROLL` [account&#95;media](https://developer.x.com/en/docs/ads/creatives/api-reference/account-media#get-accounts-account-id-account-media) 资产使用。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是所有 Advertiser API 请求（[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 除外）的必需参数。指定的账户必须与已通过身份验证的用户关联。Type: string  Example: `18ce54d4x5t` |
+| media&#95;key   *required* | 已上传内容的 `media_key`。在指定了 `media_category` 时，`media_key` 会在 POST media/upload 响应中返回。Type: string  Example: `3_931236738554519552` |
+| description   *optional* | 在发布为帖子时显示在视频下方的描述。最大长度：200 个字符。默认情况下，此内容不会在帖子中显示。要显示视频的 `description`，请在 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) 端点中使用 `video_description` 参数。**注意**：只能用于视频。Type: string  Example: `This is the description under the video.` |
+| file&#95;name   *optional* | 媒体库对象的文件名。最大长度：255。文件名可以在 ads.x.com 的 Media Library 界面中每个媒体资产的媒体详情里看到。当未设置 `file_name` 时，该字段为空。Type: string  Example: `coffee.jpeg` |
+| name   *optional* | 媒体库对象的名称。最大长度：100。这是 ads.x.com 的 Media Library 界面中每个媒体资产下方显示的标签。当未设置 `name` 时，标签将显示为 “Untitled”。Type: string  Example: `Latte` |
+| poster&#95;media&#95;key   *optional* | 使用已上传图像的 `media_key` 为视频指定海报图像。如果未指定，将使用第一帧。**注意**：只能用于视频。Type: string  Example: `3_890599134483242005` |
+| title   *optional* | 在发布为帖子时显示在视频下方的标题（主标题）。最大长度：70 个字符。默认情况下，此内容不会在帖子中显示。要显示视频的 `title`，请在 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) 端点中使用 `video_title` 参数。**注意**：只能用于视频。Type: string  Example: `Video title` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library?media_key=3_931236738554519552`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "3_931236738554519552"
+    }
+  },
+  "data": {
+    "tweeted": false,
+    "name": null,
+    "file_name": null,
+    "media_url": "https://pbs.twimg.com/media/DOxq4TtV4AAlvh_.jpg",
+    "media_category": "TWEET_IMAGE",
+    "media_key": "3_931236738554519552",
+    "created_at": "2017-11-16T19:05:14Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "media_type": "IMAGE",
+    "updated_at": "2017-11-16T19:05:23Z",
+    "deleted": false
+  }
+}
+```
+
+更新当前账户下指定的媒体库对象。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library/:media_key`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，通常是所有 Advertiser API 请求（[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 除外）的必需参数。指定的账户必须与已通过身份验证的用户关联。 类型：string 示例：`18ce54d4x5t` |
+| media&#95;key   *required* | 你在请求中要操作的媒体库对象的引用。 类型：string 示例：`16_844800354743074820` |
+| description   *optional* | 帖子中视频下方显示的描述。最大长度：200 个字符。默认情况下，该内容不会在帖子中呈现。若要显示视频的 `description`，请在 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) 端点中使用 `video_description` 参数。 **注意**：只能用于视频。 类型：string 示例：`This is the description under the video.` |
+| file&#95;name   *optional* | 媒体库对象的文件名。最大长度：255。文件名可以在 ads.x.com 上 Media Library UI 中每个媒体资源的媒体详情中看到。当未设置 `file_name` 时，该字段为空。 类型：string 示例：`coffee.jpeg` |
+| name   *optional* | 媒体库对象的名称。最大长度：100。这是 ads.x.com 上 Media Library UI 中每个媒体资源下方显示的标签。当未设置 `name` 时，标签将显示为 &quot;Untitled&quot;。 类型：string 示例：`Latte` |
+| poster&#95;media&#95;key   *optional* | 使用已上传图片的 `media_key` 为视频指定海报图像。 **注意**：只能用于视频。 类型：string 示例：`3_885003359340375465` |
+| title   *optional* | 帖子中视频下方显示的标题（主标题）。最大长度：70 个字符。默认情况下，该内容不会在帖子中呈现。若要显示视频的 `title`，请在 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) 端点中使用 `video_title` 参数。 **注意**：只能用于视频。 类型：string 示例：`Video title` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library/16_844800354743074820?title=cat GIF&description=in space`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "16_844800354743074820",
+      "title": "cat GIF",
+      "description": "in space"
+    }
+  },
+  "data": {
+    "tweeted": true,
+    "duration": null,
+    "name": null,
+    "file_name": null,
+    "description": "in space",
+    "media_url": "https://video.twimg.com/tweet_video/C7lVclqVwAQqTCZ.mp4",
+    "media_category": "TWEET_GIF",
+    "poster_media_url": "https://pbs.twimg.com/tweet_video_thumb/C7lVclqVwAQqTCZ.jpg",
+    "poster_media_key": "3_844800354743074820",
+    "media_key": "16_844800354743074820",
+    "created_at": "2017-10-20T09:51:54Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "title": "cat GIF",
+    "media_type": "GIF",
+    "aspect_ratio": "125:79",
+    "updated_at": "2017-10-23T06:37:56Z",
+    "deleted": false
+  }
+}
+```
+
+删除当前账号下指定的媒体库对象。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library/:media_key`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。类型：string  示例：`18ce54d4x5t` |
+| media&#95;key   *required* | 你在请求中要操作的媒体库对象的引用。类型：string  示例：`7_860318603387600896` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library/7_860318603387600896`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "7_860318603387600896"
+    }
+  },
+  "data": {
+    "tweeted": true,
+    "duration": 14330,
+    "name": "mountains-on-ads.x.com",
+    "file_name": "mountains.mp4",
+    "description": "",
+    "media_url": "https://video.twimg.com/ext_tw_video/860318603387600896/pu/vid/1280x720/xI3DbvWKxdvICsFW.mp4",
+    "media_category": "TWEET_VIDEO",
+    "poster_media_url": "https://pbs.twimg.com/media/C_B3bTRVYAAFBFt.jpg",
+    "poster_media_key": "3_860318839740915712",
+    "media_key": "7_860318603387600896",
+    "created_at": "2017-05-05T02:21:53Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "title": "uploaded on ads.x.com",
+    "media_type": "VIDEO",
+    "aspect_ratio": "16:9",
+    "updated_at": "2017-05-05T02:26:58Z",
+    "deleted": true
+  }
+}
+```
+
+<div id="poll-cards">
+  ### 投票卡片
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idcardspoll">
+  #### GET accounts/:account&#95;id/cards/poll
+</div>
+
+获取当前账户下部分或全部投票卡片的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求都需要的参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| card&#95;ids   *optional* | 通过指定以逗号分隔的标识符列表，将响应范围限制为所需的投票卡片。最多可提供 200 个 ID。 类型：string 示例：`57i77` |
+| count   *optional* | 指定每个请求尝试检索的记录数。 类型：int 默认值：`200` 最小值、最大值：`1`、`1000` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。有关更多信息，请参阅 [Pagination](https://developer.x.com/x-ads-api/introduction)。 类型：string 示例：`8x7v00oow` |
+| q   *optional* | 一个可选查询，用于按 `name` 限定卡片范围。省略此参数可检索全部内容。最大长度：80 个字符。**注意**：此操作执行不区分大小写的前缀匹配。 类型：string 示例：`night` |
+| sort&#95;by   *optional* | 按受支持的属性以升序或降序排序。有关更多信息，请参阅 [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting)。 类型：string 示例：`created_at-asc` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 类型：boolean 默认值：`false` 可能的取值：`true`、`false` |
+| with&#95;total&#95;count   *optional* | 在响应中包含 `total_count` 属性。**注意**：此参数与 `cursor` 互斥。**注意**：包含 `total_count` 的请求将具有更低的速率限制，目前设置为每 15 分钟 200 次。 类型：boolean 默认值：`false` 可能的取值：`true`、`false` |
+
+#### 请求示例
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll?card_ids=57i77`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "poll",
+      "card_ids": [
+        "57i77"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "video_poster_height": "9",
+      "name": "best coast poll",
+      "start_time": "2018-01-09T04:51:34Z",
+      "first_choice": "East",
+      "video_height": "9",
+      "video_url": "https://video.twimg.com/amplify_video/vmap/950589518557540353.vmap",
+      "content_duration_seconds": "8",
+      "second_choice": "West",
+      "end_time": "2018-01-16T04:51:34Z",
+      "id": "57i77",
+      "video_width": "16",
+      "video_hls_url": "https://video.twimg.com/amplify_video/950589518557540353/vid/1280x720/BRkAhPxFoBREIaFA.mp4",
+      "created_at": "2018-01-09T04:51:34Z",
+      "duration_in_minutes": "10080",
+      "card_uri": "card://950590850777497601",
+      "updated_at": "2018-01-09T04:51:34Z",
+      "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/950589518557540353/img/nZ1vX_MXYqmvbsXP.jpg",
+      "video_poster_width": "16",
+      "deleted": false,
+      "card_type": "VIDEO_POLLS"
+    }
+  ]
+}
+```
+
+获取与当前账户关联的特定投票卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll/:card_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所操作广告账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必填参数。指定的账户必须与已通过身份验证的用户关联。 类型：string 示例：`18ce54d4x5t` |
+| card&#95;id   *必填* | 你在请求中要操作的投票卡片的引用。 类型：string 示例：`57i8t` |
+| with&#95;deleted   *可选* | 在请求中包含已删除的结果。 类型：boolean 默认值：`false`  可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll/57i8t`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "poll",
+      "card_id": "57i8t",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "text only poll",
+    "start_time": "2018-01-09T05:03:05Z",
+    "first_choice": "Morning",
+    "second_choice": "Evening",
+    "end_time": "2018-01-11T05:03:05Z",
+    "id": "57i8t",
+    "created_at": "2018-01-09T05:03:05Z",
+    "duration_in_minutes": "2880",
+    "card_uri": "card://950593749658189824",
+    "updated_at": "2018-01-09T05:03:05Z",
+    "deleted": false,
+    "card_type": "TEXT_POLLS"
+  }
+}
+```
+
+<div id="post-accountsaccount_idcardspoll">
+  #### POST accounts/:account&#95;id/cards/poll
+</div>
+
+创建一个与指定账号关联的新投票卡片。此端点支持创建包含图片、视频或不含任何媒体的投票卡片。带媒体的投票卡片称为 Media Forward Polls。
+
+**注意**：Media Forward Polls 产品目前处于测试阶段，并且需要启用 `PROMOTED_MEDIA_POLLS` 账号功能。
+
+**注意**：无法通过 PUT 更新投票卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是所有 Advertiser API 请求（[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 除外）所必需的参数。指定的账户必须与已认证的用户关联。 Type: string  Example: `18ce54d4x5t` |
+| duration&#95;in&#95;minutes   *required* | 投票保持开启的时长（以分钟为单位）。在达到指定的 `duration_in_minutes` 后，投票将关闭，不再接受投票。这对应于响应中的 `end_time`。 **注意**：计时从卡片被创建时开始，而不是从其被添加到帖子时开始。 Type: int  Min, Max: `5`, `10080` |
+| first&#95;choice   *required* | 第一个投票选项。最大长度：25 个字符。 Type: string  Example: `One` |
+| name   *required* | 卡片的名称。 Type: string  Example: `poll card` |
+| second&#95;choice   *required* | 第二个投票选项。最大长度：25 个字符。 Type: string  Example: `Two` |
+| fourth&#95;choice   *optional* | 第四个投票选项。最大长度：25 个字符。 **注意**：使用此参数时，必须设置第一、第二和第三个选项。 Type: string  Example: `Four` |
+| media&#95;key   *optional* | 要在此卡片中使用的媒体库图片或视频的 `media_key`。这是一个只写字段。在响应中，API 会为此媒体提供一个 X URL。 **注意**：图片或视频必须位于账户的媒体库中。 **注意**：图片的最小宽度为 800px，且宽高比必须为 1.91:1。 |
+| third&#95;choice   *optional* | 第三个投票选项。最大长度：25 个字符。 **注意**：使用此参数时，必须设置第一和第二个选项。 Type: string  Example: `Three` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll?duration_in_minutes=10080&first_choice=East&second_choice=West&media_key=13_950589518557540353&name=best coast poll`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "first_choice": "East",
+      "name": "best coast poll",
+      "second_choice": "West",
+      "media_key": "13_950589518557540353",
+      "duration_in_minutes": 10080
+    }
+  },
+  "data": {
+    "video_poster_height": "9",
+    "name": "best coast poll",
+    "start_time": "2018-01-09T04:51:34Z",
+    "first_choice": "East",
+    "video_height": "9",
+    "video_url": "https://video.twimg.com/amplify_video/vmap/950589518557540353.vmap",
+    "content_duration_seconds": "8",
+    "second_choice": "West",
+    "end_time": "2018-01-16T04:51:34Z",
+    "id": "57i77",
+    "video_width": "16",
+    "video_hls_url": "https://video.twimg.com/amplify_video/950589518557540353/vid/1280x720/BRkAhPxFoBREIaFA.mp4",
+    "created_at": "2018-01-09T04:51:34Z",
+    "duration_in_minutes": "10080",
+    "card_uri": "card://950590850777497601",
+    "updated_at": "2018-01-09T04:51:34Z",
+    "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/950589518557540353/img/nZ1vX_MXYqmvbsXP.jpg",
+    "video_poster_width": "16",
+    "deleted": false,
+    "card_type": "VIDEO_POLLS"
+  }
+}
+```
+
+永久删除当前账号下指定的投票卡片。
+
+注意：这是一次硬删除。因此，已删除的卡片无法恢复。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll/:card_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用广告账户的标识符。该值出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求必需的参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| card&#95;id   *required* | 在请求中操作的投票卡片的引用。 类型：string  示例：`57i9t` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll/57i9t`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "poll with image",
+    "start_time": "2018-01-09T05:10:51Z",
+    "id": "57i9t",
+    "created_at": "2018-01-09T05:10:51Z",
+    "updated_at": "2018-01-09T05:11:04Z",
+    "deleted": true,
+    "card_type": "IMAGE_POLLS"
+  },
+  "request": {
+    "params": {
+      "card_id": "57i9t",
+      "card_type": "poll",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+<div id="preroll-call-to-actions">
+  ### 前贴片行动号召
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idpreroll_call_to_actions">
+  #### GET accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions
+</div>
+
+获取当前账户下广告单元（line item）关联的部分或全部前贴片号召性用语（preroll Call-To-Actions，CTAs）的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 被使用的账户标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。 Type: string  Example: `18ce54d4x5t` |
+| line&#95;item&#95;ids   *optional* | 通过指定以逗号分隔的标识符列表，将响应范围限定为仅包含与指定 line item 关联的 preroll CTA。最多可提供 200 个 ID。 Type: string  Example: `8v53k` |
+| count   *optional* | 指定每个独立请求尝试检索的记录数。 Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| cursor   *optional* | 指定一个游标以获取下一页结果。有关更多信息，请参阅 [Pagination](https://developer.x.com/x-ads-api/introduction)。 Type: string  Example: `8x7v00oow` |
+| preroll&#95;call&#95;to&#95;action&#95;ids   *optional* | 通过指定以逗号分隔的标识符列表，将响应范围限定为仅包含所需的 preroll CTA。最多可提供 200 个 ID。 Type: string  Example: `8f0` |
+| sort&#95;by   *optional* | 按受支持的属性以升序或降序排序。有关更多信息，请参阅 [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting)。 Type: string  Example: `created_at-asc` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| with&#95;total&#95;count   *optional* | 在响应中包含 `total_count` 属性。**注意**：此参数与 `cursor` 互斥。**注意**：包含 `total_count` 的请求将具有更低的速率限制，目前设置为每 15 分钟 200 次。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions?line_item_ids=8v53k`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "line_item_ids": [
+        "8v53k"
+      ]
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "line_item_id": "8v53k",
+      "call_to_action_url": "https://www.x.com",
+      "call_to_action": "VISIT_SITE",
+      "id": "8f0",
+      "created_at": "2017-07-07T19:28:40Z",
+      "updated_at": "2017-07-07T19:28:40Z",
+      "deleted": false
+    }
+  ]
+}
+```
+
+获取与此账户关联的特定号召性用语（CTA）。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions/:preroll_call_to_action_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，并且通常是所有 Advertiser API 请求（[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 除外）的必需参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| preroll&#95;call&#95;to&#95;action&#95;id   *必填* | 标识你在此请求中要操作的 preroll call to action。 类型：string  示例：`8f0` |
+| with&#95;deleted   *可选* | 在请求中包含已删除的结果。 类型：boolean  默认值：`false`   可能取值：`true`，`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions/8f0`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "preroll_call_to_action_id": "8f0",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "VISIT_SITE",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-07-07T19:28:40Z",
+    "deleted": false
+  }
+}
+```
+
+<div id="post-accountsaccount_idpreroll_call_to_actions">
+  #### POST accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions
+</div>
+
+为 `PREROLL_VIEWS` line item 设置可选的号召性用语（CTA）。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。 Type: string  Example: `18ce54d4x5t` |
+| call&#95;to&#95;action   *required* | 广告中所显示按钮的 CTA 文本。 Type: enum  Possible values: `GO_TO`, `SEE_MORE`, `SHOP`, `VISIT_SITE`, `WATCH_NOW` |
+| call&#95;to&#95;action&#95;url   *required* | 当点击 CTA 按钮时用于重定向用户的 URL。 Type: string  Example: `https://www.x.com` |
+| line&#95;item&#95;id   *required* | 在请求中所操作的 line item（广告单元）的引用。 Type: string  Example: `8v53k` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions?line_item_id=8v53k&call_to_action=VISIT_SITE&call_to_action_url=https://www.x.com`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "VISIT_SITE",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-07-07T19:28:40Z",
+    "deleted": false
+  },
+  "request": {
+    "params": {
+      "line_item_id": "8v53k",
+      "call_to_action": "VISIT_SITE",
+      "call_to_action_url": "https://www.x.com",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+更新 `PREROLL_VIEWS` 广告项目的可选号召性用语（Call-to-Action，CTA）。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions/:preroll_call_to_action_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 被使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已通过身份验证的用户关联。  Type: string  Example: `18ce54d4x5t` |
+| preroll&#95;call&#95;to&#95;action&#95;id   *required* | 用于指向本次请求中要操作的 preroll CTA 的标识符。  Type: string  Example: `8f0` |
+| call&#95;to&#95;action   *optional* | 广告中所展示按钮的 CTA 文本。  Type: enum  Possible values: `GO_TO`, `SEE_MORE`, `SHOP`, `VISIT_SITE`, `WATCH_NOW` |
+| call&#95;to&#95;action&#95;url   *optional* | 当点击 CTA 按钮时用于重定向用户的 URL。  Type: string  Example: `https://www.x.com` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions/8f0?call_to_action=WATCH_NOW`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "WATCH_NOW",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-09-09T05:51:26Z",
+    "deleted": false
+  },
+  "request": {
+    "params": {
+      "preroll_call_to_action_id": "8f0",
+      "call_to_action": "WATCH_NOW",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+删除属于当前账号的指定 preroll 号召性用语（CTA）。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions/:preroll_call_to_action_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 以外所有 Advertiser API 请求必需的参数。指定的账户必须与已认证的用户关联。 类型：字符串  示例：`18ce54d4x5t` |
+| preroll&#95;call&#95;to&#95;action&#95;id   *required* | 在请求中所操作的前贴片 CTA（preroll CTA）的引用。 类型：字符串  示例：`8f0` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions/8f0`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "VISIT_SITE",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-08-30T06:08:21Z",
+    "deleted": true
+  },
+  "request": {
+    "params": {
+      "preroll_call_to_action_id": "8f0",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+<div id="scheduled-tweets">
+  ### 计划发布的帖子
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idscheduled_tweets">
+  #### GET accounts/:account&#95;id/scheduled&#95;tweets
+</div>
+
+检索与当前账号关联的部分或全部预定发送帖子的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 被使用的广告账户标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求必需的参数。指定的账户必须与已认证的用户关联。Type: string  Example: `18ce54d4x5t` |
+| count   *optional* | 指定每个独立请求尝试检索的记录数量。Type: int  Default: `100`   Min, Max: `1`, `200` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。有关更多信息，请参阅 [Pagination](https://developer.x.com/x-ads-api/introduction)。Type: string  Example: `c-j3cn6n40` |
+| user&#95;id   *optional* | 指定要为其检索预定帖子（Scheduled Tweets）的用户。如果未设置，则默认为该账户上的 `FULL` promotable 用户。Type: long  Example: `756201191646691328` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets?count=1`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "count": 1
+    }
+  },
+  "data": [
+    {
+      "name": "test name",
+      "completed_at": "2017-06-18T22:00:05Z",
+      "text": "where you want to be",
+      "user_id": "756201191646691328",
+      "scheduled_status": "SUCCESS",
+      "id": "875828692081037312",
+      "nullcast": true,
+      "created_at": "2017-06-16T21:33:27Z",
+      "scheduled_at": "2017-06-18T22:00:00Z",
+      "card_uri": null,
+      "updated_at": "2017-06-19T18:02:20Z",
+      "tweet_id": "876560168963645440",
+      "media_keys": []
+    }
+  ],
+  "next_cursor": "c-j41uw400"
+}
+```
+
+获取与当前账号关联的特定计划发布帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets/:scheduled_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 投放账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求中必需的参数。指定的账户必须与已认证用户关联。 类型：string  示例：`18ce54d4x5t` |
+| scheduled&#95;tweet&#95;id   *required* | 你在请求中要操作的预定帖子（Scheduled Tweet）的标识符。 类型：string  示例：`917438609065623552` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets/917438609065623552`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "scheduled_tweet_id": "917438609065623552"
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "text": "",
+    "user_id": "756201191646691328",
+    "scheduled_status": "SCHEDULED",
+    "id": "917438609065623552",
+    "nullcast": true,
+    "created_at": "2017-10-09T17:16:24Z",
+    "scheduled_at": "2018-01-01T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-10-09T17:16:24Z",
+    "tweet_id": null,
+    "media_keys": [
+      "3_917438348871983104"
+    ]
+  }
+}
+```
+
+<div id="post-accountsaccount_idscheduled_tweets">
+  #### POST accounts/:account&#95;id/scheduled&#95;tweets
+</div>
+
+为该账号的完整可投放用户（默认）或通过 `as_user_id` 参数指定的用户创建一条预定发布的帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已认证用户关联。 类型：string 示例：`18ce54d4x5t` |
+| scheduled&#95;at   *必填* | 帖子应被发布（或上线）的时间，以 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 格式表示。**注意**：帖子最多只能安排在未来一年内。**注意**：帖子只能按分钟粒度进行预定发布；秒将被忽略。 类型：string 示例：`2017-12-31T23:59:00Z` |
+| as&#95;user&#95;id   *必填* | 代表其发布帖子的广告主的用户 ID。广告主必须通过 [ads.x.com](https://ads.x.com/) 授予你的账号访问其广告账户的权限。该权限允许你使用自己账号的 OAuth 令牌，而不是广告主的令牌，来调用 API。 类型：long 示例：`756201191646691328` |
+| text   *有时必填* | 你的状态更新文本。如果未指定 `media_keys`，则该字段为必填。 类型：string 示例：`just setting up my twttr` |
+| card&#95;uri   *可选* | 使用任一卡片响应中的 `card_uri` 值（如果可用）将卡片与帖子关联。 类型：string 示例：`card://855591459410511943` |
+| media&#95;keys   *可选* | 通过指定用逗号分隔的标识符列表，将媒体与帖子关联。可包含最多 4 张图片、1 个动画 GIF 或 1 个视频。**注意**：媒体素材必须位于该账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 类型：string 示例：`13_1153584529292270722` |
+| nullcast   *可选* | 是否创建一个 nullcast（“仅推广”）帖子。 类型：boolean 默认值：`true` 可能的取值：`true`、`false` |
+| name   *可选* | 预定帖子的名称。最大长度：80 个字符。 类型：string 示例：`Tweet with name` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets?as_user_id=756201191646691328&media_keys=3_917438348871983104&scheduled_at=2018-01-01`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "media_keys": [
+        "3_917438348871983104"
+      ],
+      "scheduled_at": "2018-01-01T00:00:00Z",
+      "as_user_id": 756201191646691328
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "text": "",
+    "user_id": "756201191646691328",
+    "scheduled_status": "SCHEDULED",
+    "id": "917438609065623552",
+    "nullcast": true,
+    "created_at": "2017-10-09T17:16:24Z",
+    "scheduled_at": "2018-01-01T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-10-09T17:16:24Z",
+    "tweet_id": null,
+    "media_keys": [
+      "3_917438348871983104"
+    ]
+  }
+}
+```
+
+更新当前账号下指定的计划发布的帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets/:scheduled_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。  Type: string  Example: `18ce54d4x5t` |
+| scheduled&#95;tweet&#95;id   *required* | 你在请求中要操作的计划帖子（Scheduled Tweet）的引用（ID）。  Type: string  Example: `870321875435442177` |
+| card&#95;uri   *optional* | 使用任意 card 响应中的 `card_uri` 值（如果有），将一张卡片与该帖子关联。 **注意**：如需取消设置（移除），在请求中仅指定此参数但不提供值。 Type: string  Example: `card://875146925316386347` |
+| media&#95;keys   *optional* | 通过指定以逗号分隔的标识符列表，将媒体与该帖子关联。最多可包含 4 张图片、1 个动画 GIF 或 1 个视频。 **注意**：媒体资产必须位于该账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 **注意**：如需取消设置（移除），在请求中仅指定此参数但不提供值。 Type: string  Example: `13_1153584529292270722` |
+| nullcast   *optional* | 是否创建一个 nullcast（或“仅推广”）帖子。 Type: boolean  Possible values: `true`, `false` |
+| scheduled&#95;at   *optional* | 帖子应当被发布（上线）的时间，以 [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 格式表示。 Type: string  Example: `2017-12-31T23:59:59Z` |
+| text   *optional* | 你的状态更新文本。 Type: string  Example: `just setting up my twttr` |
+| name   *optional* | 计划帖子的名称。最大长度：80 个字符。 Type: string  Example: `Tweet with name` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets/875057751231037440?text=winter solstice`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "scheduled_tweet_id": "875057751231037440",
+      "text": "winter solstice"
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "scheduled_status": "SCHEDULED",
+    "text": "winter solstice",
+    "user_id": "756201191646691328",
+    "id": "875057751231037440",
+    "nullcast": true,
+    "created_at": "2017-06-14T18:30:00Z",
+    "scheduled_at": "2017-12-21T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-06-14T18:30:00Z",
+    "tweet_id": null,
+    "media_keys": []
+  }
+}
+```
+
+永久删除当前账号中指定的预定帖子。
+
+**注意**：这是不可恢复的硬删除操作。因此，无法找回已删除的预定帖子。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets/:scheduled_tweet_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求都必须提供的参数。指定的账户必须与已认证的用户关联。 Type: string  Example: `18ce54d4x5t` |
+| scheduled&#95;tweet&#95;id   *required* | 你在该请求中要操作的已排期帖子的引用。 Type: string  Example: `870321875435442177` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets/875064008595787776`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "scheduled_tweet_id": 875064008595787776
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "scheduled_status": "DELETED",
+    "text": "hello, world",
+    "user_id": "756201191646691328",
+    "id": "875064008595787776",
+    "nullcast": true,
+    "created_at": "2017-06-14T18:54:52Z",
+    "scheduled_at": "2017-06-15T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-06-14T19:01:16Z",
+    "tweet_id": null,
+    "media_keys": []
+  }
+}
+```
+
+<div id="tweet-previews">
+  ### 帖子预览
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idtweet_previews">
+  #### GET accounts/:account&#95;id/tweet&#95;previews
+</div>
+
+预览已发布、已排期或草稿状态的帖子。
+
+* 支持在单个 API 请求中预览*多个*帖子——最多 200 条
+* 准确、最新地呈现帖子的布局和样式
+* 支持所有最新格式和卡片类型
+* 返回一个 iframe
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/tweet_previews`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账号的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账号必须与已通过认证的用户关联。类型：string  示例：`18ce54d4x5t` |
+| tweet&#95;ids   *required* | 以逗号分隔的标识符列表。最多可提供 200 个 ID。**注意**：这些 ID 应与指定的 `tweet_type` 相对应。例如，如果传入的是一个已排期帖子的 ID，但指定了 `tweet_type=PUBLISHED`，则不会返回该 ID 的预览。类型：long  示例：`1122911801354510336,1102836745790316550` |
+| tweet&#95;type   *required* | 指定的 `tweet_ids` 对应的帖子类型。类型：enum  可能的取值：`DRAFT`, `PUBLISHED`, `SCHEDULED` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/tweet_previews?tweet_ids=1122911801354510336,1102836745790316550&tweet_type=PUBLISHED`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        "1122911801354510336",
+        "1102836745790316550"
+      ],
+      "tweet_type": "PUBLISHED",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": [
+    {
+      "tweet_id": "1122911801354510336",
+      "preview": "<iframe class='tweet-preview' src='https://ton.twimg.com/ads-manager/tweet-preview/index.html?data=H4sIAAAAAAAAANVYW2%2FbNhT%2BKwJf59iiZDuSgWLI0suyrUXbZBuGaiAoibbZUKRGUk7TIP99h6Jsy4mdC5CX%2BiUiz%2F0cfueQuUH2ijGLZsENKjSjlpWEwhK9VzI4qXUQpQE%2BnuF4FofBTyH8gijEKRogXqIZxlGUYpyEOJ6MJziM46kjEGM1qNhDBbl5IwSx7JszsuIlU8EVyw23DGhWN7JwPqDZnArDBqjkphb0uhUgmsoFQ7Mv4QDH%2Fw4Qk5Zbzgya3aAlNUtLF%2FD9BSjmusqV6BaNYZpUjlnJ9Zb2xFtgVY0uQCnKmjCMCxosNZu%2FytDS2trMslE2oqU5ojUf2ituLdPDQlUZCjQTwCXVXAmhrjIvzi48T3BSmuBUVbUC214x6PEsLnWSaFYLiEpBqqhtDHHZlJCZA0Sf0fsMbWz7ZTvSIUkD1WaSSFqxNdlJuFw6fceTKdQZp3g6nk5THEdJr7D3iRCU14ROPp4F74sLZuycFi7YHUMIElkVdksVCuoNhQHSOZXBWyhxwU2hBsHpCWoLtfauZKCJ1x3zmbQqcHq4XARUlgHYNSBQa2VZ0T9BvkBMG1KoRsKpO8KwqTmT5c6W4MYd%2Fm7H29xBxMWyCX5rRBDhACezyXQWJVtEtCebruAwwUne0dvYgqj53LCNVssrRr4ruUn8ginCJM1Fz%2B0V03zOexv%2BLOzqFgAI8IxJsF4oaTXPG6sg1LvauCEWUmsEBfK%2BXcjqPSHI5ZwLRnJaXC40WHXZEU4ehe0P7eXhFV0w0lauRZEHUW4cgKpFC59Ry2OykV2yavMXZ6N8MawhpIf1khabnXbzUuotrO%2BFvjeWetfYDi8YA3TE4yTGx%2BNJMgnTJJpko9cXvxefT%2BtzIpWuqBh%2BrftePBTZixvLqZTQGbYxPWjHc3tDdzCfjfAYvqbROMY9%2FYLLy8PnxEDHz6kmudIlePEoHyzEYa52KhykAlrunZ%2FtYGFz2ghLOuZD%2B3ekfDPhDnUeun4D2up%2FDTQjYti2eUhlAcG%2BvZkN9jcoJPa6dh1RukZw2zaBTdtRkB0uofVs5GAIFmxL30J9vadZO8jX3SH07ch1oz1bW4x3Yn3UK2N4DkMCYoGxzFfb6KEv137cbppqRwP%2FC6pLR%2BoafTRJpnEaHuPpDFJZKdLOerKd9f4AOqn2%2FOFwPI5DHKZpGOPpJBmnrqU6cpuouxh0hCNHOALCETdHJas1a%2B8OQy5XVMAQG6CcS8jjgsC68Y539olZKm2ZhN7eKr5BXTXOLz6ffXjnxhZkeC25AxQLAMlG32nJ%2Fjz%2F6zVOXO1cQaDypGy0b6WGwVZpnqA4GjsF7o4DcLjipV0%2BQQjGzVZobZyXT5GMSQroPR5HyRiuZfAVJWFP2ZLxxdI%2BQVHqhFZUcnv9xBSWbMUEHCDdv0k5LeualA5Bzy3HQa1dQOpKdlekR5Xuudb0EiPMs31rj3y%2Fq9KqFnx%2B7bGQje5XAhqvyEbmk%2F7FvEmrt6sPrE5Pvw2ruEl%2Bhuvtq8h5BLde17AedeT1OjXBR%2Bg4cxgG%2FWy%2FdKJBkNHqxXO0qmi9L1NDR%2BiZ9zPUwLzr2z97f%2FLujbtxt9TO%2Bg16ZPjtuEDssqny%2FcUCiWz0T56%2F%2B%2FTr6u%2FPX9Xbhf7jezdvOyxjYBygNayOI1hQ0c2I2zvu%2F7COE0H1j%2Bz%2Btx8wgHY0Pnt49aDbPs14zsglu%2B4mcatvo7xedw2w0P%2BGTsAL1pv18No9qTlqHy3Gv89w7LBJmxLeWTu8cBkom6J9xcF8bopLtonJGd6%2BaG4HAWpvDv5VJv2%2FDIKbzSYsrG7Y7e3%2FCm%2FIC8QQAAA%3D'>"
+    },
+    {
+      "tweet_id": "1102836745790316550",
+      "preview": "<iframe class='tweet-preview' src='https://ton.twimg.com/ads-manager/tweet-preview/index.html?data=H4sIAAAAAAAAAO1YbW%2FbNhD%2BK4K%2Bzo3eZdlAMQQttqZrt6FNEXRVIVASJTOhSIWkHDeB%2F%2FuOomXLb%2BuHdQWGzV8s3T13vCOPz539ZKsHjJU9t57sQmCkcJkheLWvO2y9RcJyI8udzkN%2F7ofWDy58LN%2F1ZvbEJqU99zzXT4J4GkbTmRt4cRS5WpFJJcDFCS3YVR2lmcIrvcgNWmJpLZRq5Tx1UkddFDx16mUU8Lv4UhQAV6JjhQ7LnleISjyxSyJbir70PjKBWI3t%2BSd3En2e2JgpogiW9vzJXiC5UKiG50%2BgkV%2BanNPNSyexyBoN5mwQiUHZ4JIgeHwyGbpumLjh1PcDfxZ6XpSE4wyPtXpnWEkKHcSneOLPBpcZLAEmOtk%2B1zaXF%2BqBNDXk3KSOTkY9ZEtSYp6pRdfkqXPCPdh1qQNWYPFz%2BfHls7v7y6s3dZm%2Fci9u29oeLZb1%2B7pZUv6ja%2B5SO3uOw6kZaEsKHYhSWJhQ9rB41SJWQiUe%2BR2boJY0hcJSVajAqSMVUp2EBI6rLnX6FEGnC%2BpLi3UEC644vEryaOqlz18%2FPMCp6zpebL4F1hgwKQRv7bXZ4a4ZoL5rsPE0GmErojRUNojSDTJODDBIgmMgRULX8cblBjn13UMkQCu4pZ3og16vP6%2F1dincb9e4%2FP8v4%2F9EGfeSf2UZm%2BMirOIaj2SLC03nwMlQcV480RVXdr2AZQ2hlEhdx9MYnC2RIIgp2dd3ThSgwHUSQBKgLTiDCwE1Mdqi1Gna8MQR98pzxfQXZQT61IlDdxXEcC7Rm1fsHl96H8sau%2Fer1xew2I%2FQfJ4HsCmjCP0o%2Fr4Rwo6svAQivLvqXn14mRD%2FD%2BnWuX91NkJv%2Bp1D1GWyghJJnbD56HePt%2FjXG%2FJbVd3cHsR4EBFqW0qKvjxSZ%2FWsaXH94d2bbxhdS1Nn5r17CF7cTMurt6%2Ffh7fJRRN0yRDT5wMyntioLIkOCNHM8NdQ3sDLVAetGQTLQpBWw4wANzkuS5RrAEw7MOE0nGFFHo2on3oM0UveiUK7STvXDQpkLQSunqejXFEp9wjJtgSmgGC84pTyh9SY4muDsS5LaXyBqdH0xJ8J3FKYsHhm6CjTPYTB4HZGafrIMaAftE7bblTnLGGPMGYZQw0e1NpC76X2N41iGEO9mReHcTzzAj8ZtbNjJSRlPNmXv19Zb4vrDd1q4hwvZO%2BRMWgpNxUGqveIWT%2FBuFkQWfCJ9eJyKDUT3f6xXjHFLe2HsNqCJmDBuhIMWsEV8NxomjXngoXMCt4xGIqfeSAUBDr6ngjoT8%2FmG4lZc39gX3TW645avmd5yTyK536yG9hjPXijJdQPgajGfjtVZLyqJN56VaTB2SOU4CCogacx09W4C3uJBanISGBqYd83heEcIsPMNnwiSN4pDqkeeiMyA%2F5hkiJQn5LqHnBoBHtZEYqzHBV3tYBV9e5QbW%2B7%2Fcc%2BiSENqvHhFIP2J4oeA01YLXCz%2FfZSJ68vWlZ%2Fxe%2BJgeUbuFdkSwY7%2FclcDqajPSwsBrcjCJPAg8kiidxZ4kep8%2FL6l%2BLdi%2FZ9xriAVr8Zh45W%2Bfoo9vcXyxFjwAyHJH5mHYM2Cx3ceWD2EJ5iPwy8kX9K2N35OpHQE3IkspyLEqL4Kg5e6HlU%2Fwv1rBZuy1H97H7k4gp1VGUb8Dn5gZUhE6Jvnbm6RgC0et8BGWUS78iDcQU32NCb3N797S0c2izTRLDuSWBLOxx2hzCgnq0dzMQF3ul3V32QCdz%2FzzCwg2voSLPRCdHujm%2FMxreeS0lyaBKQi4Rmu9xlD7zcmiF4S6pD%2Bxxz0Xpi6TNouOFTZv6LsJ62QnjRfXi9%2FhONbe6QHREAAA%3D%3D'>"
+    }
+  ]
+}
+```
+
+<div id="tweets">
+  ### 帖子
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+<div id="get-accountsaccount_idtweets">
+  #### GET accounts/:account&#95;id/tweets
+</div>
+
+获取账号的完整可推广用户（默认）或通过 `user_id` 参数指定用户的帖子详情。该用户可以是该账号下的任一[可推广用户](https://developer.x.com/en/docs/ads/campaign-management/api-reference/promotable-users)。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/tweets`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 投放账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 以外所有 Advertiser API 请求必需的参数。指定的账户必须与已认证用户关联。 Type: string  Example: `18ce54d4x5t` |
+| tweet&#95;type   *required* | 指定的 `tweet_ids` 对应的帖子类型。 Type: enum  Possible values: `DRAFT`, `PUBLISHED`, `SCHEDULED` |
+| count   *optional* | 指定每个独立请求尝试检索的记录数。 Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。有关更多信息，请参阅 [Pagination](https://developer.x.com/x-ads-api/introduction)。 Type: string  Example: `AAAAAFhLRpQLNF-sGBSgAA` |
+| include&#95;mentions&#95;and&#95;replies   *optional* | 是否从可用帖子列表中过滤掉提及和回复。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| name   *optional* | 一个可选查询，用于按 `name` 限定帖子范围。省略此参数以检索全部。最大长度：80 个字符。 **Note**: 此操作执行不区分大小写的前缀匹配。 Type: string  Example: `dtc` |
+| timeline&#95;type   *optional* | 是否返回 nullcast（即 “Promoted-only”）帖子、自然帖子，或两者皆返回。 Type: enum  Default: `NULLCAST`   Possible values: `ALL`, `NULLCAST`, `ORGANIC` |
+| trim&#95;user   *optional* | 是否在帖子响应中排除用户对象。启用后，返回的用户对象中仅包含该帖子的作者用户 ID。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| tweet&#95;ids   *optional* | 逗号分隔的标识符列表。最多可提供 200 个 ID。 **Note**: 这些 ID 应与指定的 `tweet_type` 相对应。例如，如果传入的是一个预定帖子 ID，则 `tweet_type` **必须** 为 `SCHEDULED`，该帖子才会在响应中返回。 Type: long  Example: `1122911801354510336,1102836745790316550` |
+| user&#95;id   *optional* | 指定要限定帖子范围的用户。如果未设置，则默认为该账户上的 `FULL` 可投放用户。 Type: long  Example: `756201191646691328` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/tweets?tweet_ids=1166476031668015104&tweet_type=PUBLISHED&trim_user=true`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        "1166476031668015104"
+      ],
+      "tweet_type": "PUBLISHED",
+      "trim_user": true,
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "coordinates": null,
+      "retweeted": false,
+      "name": null,
+      "source": "<a href="https://ads-api.x.com" rel="nofollow">Ads API Internal Test App</a>",
+      "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "user_mentions": [],
+        "urls": []
+      },
+      "display_text_range": [
+        0,
+        9
+      ],
+      "favorite_count": 0,
+      "in_reply_to_status_id_str": null,
+      "geo": null,
+      "id_str": "1166476031668015104",
+      "scopes": {
+        "followers": false
+      },
+      "in_reply_to_user_id": null,
+      "truncated": false,
+      "retweet_count": 0,
+      "id": 1166476031668015104,
+      "in_reply_to_status_id": null,
+      "conversation_settings": "EVERYONE",
+      "nullcast": true,
+      "created_at": "Tue Aug 27 22:22:12 +0000 2019",
+      "place": null,
+      "scheduled_at": null,
+      "tweet_type": "PUBLISHED",
+      "favorited": false,
+      "full_text": "hello, v6",
+      "lang": "es",
+      "contributors": [
+        2417045708
+      ],
+      "in_reply_to_screen_name": null,
+      "in_reply_to_user_id_str": null,
+      "user": {
+        "id": 756201191646691328,
+        "id_str": "756201191646691328"
+      },
+      "tweet_id": "1166476031668015104"
+    }
+  ]
+}
+```
+
+<div id="post-accountsaccount_idtweet">
+  #### POST accounts/:account&#95;id/tweet
+</div>
+
+为该账户的完整可推广用户（默认）或 `as_user_id` 参数中指定的用户创建帖子。支持创建非公开投放（默认）和自然帖子。非公开投放帖子不会出现在公共时间线上，也不会推送给关注者。这两种类型都可以用于广告投放活动。
+
+如果已认证用户不是此账户的 `FULL` 可推广用户，请通过调用 [GET accounts/:account&#95;id/authenticated&#95;user&#95;access](https://developer.x.com/en/docs/ads/campaign-management/api-reference/authenticated-user-access#get-accounts-account-id-authenticated-user-access) 端点来确定其是否有权限代表该用户发帖。权限值 `TWEET_COMPOSER` 表明该用户可以使用此端点代表 `FULL` [可推广用户](https://developer.x.com/en/docs/ads/campaign-management/api-reference/promotable-users#get-accounts-account-id-promotable-users) 创建非公开投放帖子。
+
+当使用 [upload.x.com 端点](https://developer.x.com/rest/reference/post/media/upload) 处理媒体时，请将 `additional_owners` 参数中的 `user_id` 值设置为与调用此端点时传入的 `as_user_id` 相同的值。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/tweet`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 要使用的广告账户标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。  Type: string  Example: `18ce54d4x5t` |
+| as&#95;user&#95;id   *required* | 代表其投放广告的广告主用户 ID，即你代其发布帖子时所对应的用户。广告主必须通过 [ads.x.com](https://ads.x.com/) 授予你的账号（或多个账号）访问其广告账户的权限。该权限允许你使用自己账号的 OAuth 令牌而不是广告主的令牌来调用 API。  Type: long  Example: `756201191646691328` |
+| text   *sometimes required* | 状态更新的文本。如果未指定 `media_keys`，则为必填。  Type: string  Example: `hello, world` |
+| card&#95;uri   *optional* | 使用任意 cards 响应中的 `card_uri` 值（如果可用），将卡片与帖子关联。  Type: string  Example: `card://853503245793641682` |
+| conversation&#95;settings   *optional* | 选择谁可以回复此帖子。任何被提及的用户始终可以回复。 **注意**：该字段在 POST 请求的响应中*不会*返回，但在发起 GET 请求时会返回。 **注意**：此参数仅在 Ads API v8 及更高版本中有效。  Type: enum  Default: `EVERYONE`   Possible values: `EVERYONE`, `FOLLOWING`, `MENTIONED_USERS` |
+| media&#95;keys   *optional* | 通过指定以逗号分隔的标识符列表，将媒体与帖子关联。最多可包含 4 张图片、1 个动图 (GIF) 或 1 个视频。  Type: string  Example: `13_1153584529292270722` |
+| name   *optional* | 帖子的名称。最大长度：80 个字符。  Type: string  Example: `Tweet with name` |
+| nullcast   *optional* | 是否创建 nullcast（或“仅推广”）的帖子。 **注意**：仅可为已认证用户创建自然帖子 (`nullcast=false`)。  Type: boolean  Default: `true`   Possible values: `true`, `false` |
+| trim&#95;user   *optional* | 是否在帖子响应中排除 user 对象。启用时，返回的 user 对象中仅包含发帖作者的用户 ID。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| tweet&#95;mode   *optional* | 响应应为兼容模式还是扩展模式。更多信息参见[此处](https://developer.x.com/overview/api/upcoming-changes-to-tweets#rendering-modes)。  Type: string  Possible values: `compat`, `extended` |
+| video&#95;cta   *optional* | 视频的行动号召 (CTA)。  Type: enum  Possible values: `VISIT_SITE`, `WATCH_NOW` |
+| video&#95;cta&#95;value   *optional* | 视频上对应 CTA 的值。  Type: string  Example: `https://dev.x.com` |
+| video&#95;description   *optional* | 显示在视频下方的描述。最大长度：200 个字符。  Type: string  Example: `Integrate with the X advertising platform` |
+| video&#95;title   *optional* | 显示在视频下方的标题（主标题）。最大长度：70 个字符。  Type: string  Example: `X Ads API` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/tweet?text=hello, world&as_user_id=756201191646691328&trim_user=true`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "created_at": "Sat Jun 24 05:08:30 +0000 2017",
+    "id": 878479925472251906,
+    "id_str": "878479925472251906",
+    "text": "hello, world",
+    "name": null,
+    "truncated": false,
+    "entities": {
+      "hashtags": [],
+      "symbols": [],
+      "user_mentions": [],
+      "urls": []
+    },
+    "source": "<a href='"https://ads-api.x.com"' rel='"nofollow"'>Ads API Internal Test App</a>",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user": {
+      "id": 756201191646691328,
+      "id_str": "756201191646691328"
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "favorited": false,
+    "retweeted": false,
+    "scopes": {
+      "followers": false
+    },
+    "lang": "en"
+  },
+  "request": {
+    "params": {
+      "text": "hello, world",
+      "trim_user": true,
+      "as_user_id": 756201191646691328,
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+更新当前账号下指定帖子的 `name`。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/tweets/:tweet_id/name`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必填参数。指定的账户必须与已通过身份验证的用户关联。  Type: string  Example: `18ce54d4x5t` |
+| tweet&#95;id   *必填* | 在此请求中你要操作的帖子的引用。  Type: long  Example: `994747471329873920` |
+| name   *可选* | 帖子的名称。最大长度：80 个字符。  Type: string  Example: `Tweet with name` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/tweets/994747471329873920/name?name=new Tweet name`
+
+#### 响应示例
+
+```
+{
+  "request": {
+    "params": {
+      "tweet_id": 994747471329873920,
+      "name": "new Tweet name",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+      "coordinates": null,
+      "retweeted": false,
+      "name": "new Tweet name",
+      "conversation_settings": "EVERYONE",
+      "source": "<a href="https://ads-api.x.com" rel="nofollow">Ads API Internal Test App</a>",
+      "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "user_mentions": [],
+        "urls": []
+      },
+      "display_text_range": [
+        0,
+        5
+      ],
+      "favorite_count": 0,
+      "in_reply_to_status_id_str": null,
+      "geo": null,
+      "id_str": "994747471329873920",
+      "scopes": {
+        "followers": false
+      },
+      "in_reply_to_user_id": null,
+      "truncated": false,
+      "retweet_count": 0,
+      "scheduled_status": null,
+      "id": 994747471329873920,
+      "in_reply_to_status_id": null,
+      "nullcast": true,
+      "created_at": "Wed Jan 01 00:00:00 +0000 2020",
+      "place": null,
+      "scheduled_at": null,
+      "tweet_type": "PUBLISHED",
+      "favorited": false,
+      "full_text": "hello",
+      "lang": "en",
+      "contributors": null,
+      "in_reply_to_screen_name": null,
+      "in_reply_to_user_id_str": null,
+      "user": {
+        "utc_offset": null,
+        "name": "Tushar Bhushan",
+        "friends_count": 1065,
+        "screen_name": "imit8me",
+        "location": "San Francisco, CA",
+        "protected": false,
+        "url": "https://tushdante.github.io",
+        "profile_image_url": "http://pbs.twimg.com/profile_images/618551153131786241/g-MIydXB_normal.jpg",
+        "profile_background_color": "C0DEED",
+        "profile_use_background_image": true,
+        "is_translator": false,
+        "geo_enabled": true,
+        "description": "Open Sorcerer / Partner Engineer @twitter / Space Traveller | Former evangelist @sendgrid @keen_io",
+        "profile_link_color": "1DA1F2",
+        "id_str": "3271358660",
+        "listed_count": 31,
+        "default_profile_image": false,
+        "followers_count": 407,
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/618551153131786241/g-MIydXB_normal.jpg",
+        "profile_sidebar_border_color": "C0DEED",
+        "profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+        "favourites_count": 5993,
+        "following": null,
+        "default_profile": true,
+        "withheld_in_countries": [],
+        "id": 3271358660,
+        "profile_background_tile": false,
+        "contributors_enabled": false,
+        "follow_request_sent": null,
+        "created_at": "Tue Jul 07 22:34:58 +0000 2015",
+        "profile_sidebar_fill_color": "DDEEF6",
+        "translator_type": "regular",
+        "lang": null,
+        "profile_text_color": "333333",
+        "notifications": null,
+        "verified": false,
+        "time_zone": null,
+        "profile_banner_url": "https://pbs.twimg.com/profile_banners/3271358660/1474853576",
+        "statuses_count": 500,
+        "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+        "is_translation_enabled": false
+      },
+      "tweet_id": "994747471329873920"
+    }
+}
+```
+
+<div id="video-conversation-cards">
+  ### 视频会话卡片
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  在 Postman 中运行
+</Button>
+
+**注意**：要将卡片与帖子关联，请在 [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)、[POST statuses/update](https://developer.x.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update#post-statuses-update) 或 [POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) 等端点中使用 `card_uri` 参数。
+
+<div id="get-accountsaccount_idcardsvideo_conversation">
+  #### GET accounts/:account&#95;id/cards/video&#95;conversation
+</div>
+
+获取与当前账户关联的一个或多个视频会话卡片的详细信息。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 被使用的广告账户标识符。出现在资源路径中，通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求所必需的参数。指定的账户必须与已通过身份验证的用户关联。 类型：string  示例：`18ce54d4x5t` |
+| card&#95;ids   *optional* | 通过指定以逗号分隔的标识符列表，将响应范围限定为所需的视频会话卡片。最多可提供 200 个 ID。 类型：string  示例：`5a86h` |
+| count   *optional* | 指定每个请求尝试检索的记录数。 类型：int  默认值：`200`   最小值、最大值：`1`、`1000` |
+| cursor   *optional* | 指定用于获取下一页结果的游标。有关更多信息，请参阅 [分页](https://developer.x.com/x-ads-api/introduction)。 类型：string  示例：`8x7v00oow` |
+| q   *optional* | 一个可选查询，用于按 `name` 限定卡片范围。省略此参数可检索所有卡片。最大长度：80 个字符。 **注意**：此查询执行不区分大小写的前缀匹配。 类型：string  示例：`night sky` |
+| sort&#95;by   *optional* | 按受支持的属性以升序或降序排序。有关更多信息，请参阅 [排序](https://developer.x.com/x-ads-api/fundamentals/sorting)。 类型：string  示例：`created_at-asc` |
+| with&#95;deleted   *optional* | 在请求中包含已删除的结果。 类型：boolean  默认值：`false`   可能的取值：`true`、`false` |
+| with&#95;total&#95;count   *optional* | 在响应中包含 `total_count` 属性。 **注意**：此参数与 `cursor` 互斥。 **注意**：包含 `total_count` 的请求将具有更低的速率限制，目前设置为每 15 分钟 200 次。 类型：boolean  默认值：`false`   可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation?card_ids=5a86h`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "video_conversation",
+      "card_ids": [
+        "5a86h"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "name": "video conversation card",
+      "first_cta": "#APIs",
+      "video_height": "9",
+      "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+      "thank_you_text": "Build it",
+      "video_owner_id": "756201191646691328",
+      "media_key": "13_958388276489895936",
+      "id": "5a86h",
+      "video_width": "16",
+      "first_cta_tweet": "Ads API",
+      "created_at": "2018-01-30T17:53:04Z",
+      "card_uri": "card://958397665015775232",
+      "title": "Developers",
+      "updated_at": "2018-01-30T17:53:04Z",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+      "deleted": false,
+      "card_type": "VIDEO_CONVERSATION"
+    }
+  ]
+}
+```
+
+获取当前账号关联的指定视频会话卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation/:card_id`
+
+#### 参数
+
+| 名称 | 描述 |
+| :--- | :--- |
+| account&#95;id   *必填* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证的用户关联。  类型：string  示例：`18ce54d4x5t` |
+| card&#95;id   *必填* | 你在此请求中要操作的视频对话卡片的标识符。  类型：string  示例：`4i0ya` |
+| with&#95;deleted   *可选* | 在请求中包含已删除的结果。  类型：boolean  默认值：`false`   可能的取值：`true`、`false` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation/5a86h`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "video_conversation",
+      "card_id": "5a86h",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "video conversation card",
+    "first_cta": "#APIs",
+    "video_height": "9",
+    "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+    "thank_you_text": "Build it",
+    "video_owner_id": "756201191646691328",
+    "media_key": "13_958388276489895936",
+    "id": "5a86h",
+    "video_width": "16",
+    "first_cta_tweet": "Ads API",
+    "created_at": "2018-01-30T17:53:04Z",
+    "card_uri": "card://958397665015775232",
+    "title": "Developers",
+    "updated_at": "2018-01-30T17:53:04Z",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+    "deleted": false,
+    "card_type": "VIDEO_CONVERSATION"
+  }
+}
+```
+
+<div id="post-accountsaccount_idcardsvideo_conversation">
+  #### POST accounts/:account&#95;id/cards/video&#95;conversation
+</div>
+
+创建一个与指定账号关联的新视频对话卡片。
+
+有关将图像上传到我们端点的实用信息，请参阅[上传媒体](https://developer.x.com/rest/public/uploading-media)。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation`
+
+#### 参数
+
+| 名称                                          | 说明                                                                                                                                                                                                                                 |
+| :------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id   *必填*                       | 要使用的账户的标识符。出现在资源路径中，通常是所有广告主 API 请求（[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 除外）的必需参数。指定的账户必须与已通过认证的用户关联。  Type: string  Example: `18ce54d4x5t`                 |
+| first&#95;cta   *必需*                        | 第一个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包括 #）。类型：string  示例：`#APIs`                                                                                                                                                                      |
+| first&#95;cta&#95;tweet   *必填*              | 在用户点击第一个 CTA 时使用的帖子文案。  类型：string  示例：`Ads API`                                                                                                                                                                                    |
+| media&#95;key   *必填*                        | 要在此卡片中使用的视频的媒体 key。 **注意**：该视频必须位于账号的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。 **注意**：视频的宽高比必须为 16:9。 Type: string  Example: `13_1168079965037467209`           |
+| name   *必需*                                 | 卡片名称。 Type: string  Example: `video conversation card`                                                                                                                                                                             |
+| thank&#95;you&#95;text   *必填*               | 点击 CTA 按钮后显示的文本。最大长度：23 个字符。 类型：字符串  示例：`Build it`                                                                                                                                                                                 |
+| title   *在某些情况下必填*                          | 卡片标题，出现在视频下方、CTA 上方。最大长度：23 个字符。 类型：string  **注意**：当未设置 `second_cta` 时为必填项。 示例：`Developers`                                                                                                                                        |
+| second&#95;cta   *有时必填*                     | 第二个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不计入 #）。 类型：string  **注意**：如果未设置 `title`，则为必填。 示例：`#ShareAgain`                                                                                                                                    |
+| second&#95;cta&#95;tweet   *有时为必填项*         | 当用户点击第二个 CTA 时使用的帖子文本。  **注意**：如果设置了 `second_cta`，则必填。  类型：string  示例：`I Heart @AdsAPI Again`                                                                                                                                      |
+| poster&#95;media&#95;key   *可选*             | 用于此卡片的海报图像的 media key。若未指定，则将使用第一帧。  **注意**：该视频必须已添加到账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。  类型：long  示例：`3_882726458191298561`                           |
+| third&#95;cta   *可选*                        | 第三个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不包含 #）。类型：string 示例：`#ShareMore`                                                                                                                                                                  |
+| third&#95;cta&#95;tweet   *有时为必填项*          | 当用户点击第三个 CTA 时使用的帖子文本。类型：字符串  **注意**：如果已设置 `third_cta`，则为必填。示例：`I Heart @TwitterDev`                                                                                                                                               |
+| fourth&#95;cta   *可选*                       | 第四个选项的号召性（CTA）话题标签。最大长度：20 个字符（不包括 #）。 类型：字符串  示例：`#ShareExtra`                                                                                                                                                                    |
+| fourth&#95;cta&#95;tweet   *在某些情况下必填*       | 在点击第四个 CTA 时使用的帖子文本。 类型：字符串  **注意**：如果已设置 `fourth_cta`，则必填。 示例：`I Heart @TwitterDev Again`                                                                                                                                         |
+| thank&#95;you&#95;url   *可选*                | 要与感谢文案一起显示的 URL。类型：string 示例：`https://example.com/thankyou`                                                                                                                                                                        |
+| unlocked&#95;image&#95;media&#95;key   *可选* | 将在即时解锁场景中使用的图片的 `media_key`。这是一个只写字段。在响应中，API 会返回此图片的 X URL。**注意**：该图片必须位于账号的媒体库中。**类型**：string  示例: `3_883112887618682880`                                                                                                        |
+| unlocked&#95;video&#95;media&#95;key   *可选* | 将在即时解锁场景中使用的、来自 [GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/ads/creatives/api-reference/media_library#get-accounts-account-id-media-library) 端点的视频标识符。  类型：string  示例：`13_867520357225418752` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation?first_cta=#APIs&first_cta_tweet=Ads API&name=video conversation card&thank_you_text=Build it&title=Developers&media_key=13_958388276489895936`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "video conversation card",
+    "first_cta": "#APIs",
+    "video_height": "9",
+    "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+    "thank_you_text": "Build it",
+    "video_owner_id": "756201191646691328",
+    "media_key": "13_958388276489895936",
+    "id": "5a86h",
+    "video_width": "16",
+    "first_cta_tweet": "Ads API",
+    "created_at": "2018-01-30T17:53:04Z",
+    "card_uri": "card://958397665015775232",
+    "title": "Developers",
+    "updated_at": "2018-01-30T17:53:04Z",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+    "deleted": false,
+    "card_type": "VIDEO_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "video_poster_height": "9",
+      "name": "video conversation card",
+      "first_cta": "#APIs",
+      "video_height": "9",
+      "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+      "thank_you_text": "Build it",
+      "video_owner_id": "756201191646691328",
+      "media_key": "13_958388276489895936",
+      "account_id": "18ce54d4x5t",
+      "video_width": "16",
+      "first_cta_tweet": "Ads API",
+      "title": "Developers",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+      "video_poster_width": "16",
+      "card_type": "VIDEO_CONVERSATION"
+    }
+  }
+}
+```
+
+更新当前帐号所属的指定视频对话卡片。
+
+有关将媒体上传到我们的端点的实用信息，请参阅[上传媒体](https://developer.x.com/rest/public/uploading-media)。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation/:card_id`
+
+#### 参数
+
+| 名称                                          | 说明                                                                                                                                                                                                                           |
+| :------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account&#95;id   *必填*                       | 所使用账户的标识符。出现在资源路径中，并且通常是所有广告主 API 请求（[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 请求除外）中必需的参数。指定的账户必须与已认证用户关联。  Type: string  Example: `18ce54d4x5t`          |
+| card&#95;id   *必需*                          | 用于指定本次请求中所操作的视频会话卡片的引用值。 Type: string  Example: `5a86h`                                                                                                                                                                      |
+| first&#95;cta   *可选*                        | 第一个选项的行动号召（CTA）话题标签。最大长度：20 个字符（不包含 #）。类型：string  示例：`#APIs`                                                                                                                                                                 |
+| first&#95;cta&#95;tweet   *可选*              | 当点击第一个 CTA 时要使用的帖子文本。  Type: string  Example: `Ads API`                                                                                                                                                                      |
+| second&#95;cta   *可选*                       | 第二个选项的号召性用语（CTA）hashtag。最大长度：20 个字符（不含 #）。 类型：string  **注意**：当 `title` 未设置时为必填。 示例：`#ShareAgain`                                                                                                                             |
+| second&#95;cta&#95;tweet   *可选*             | 当用户点击第二个 CTA 时要使用的帖子文本。 **注意**：如果已设置 `second_cta`，则为必填项。 类型：string  示例：`I Heart @AdsAPI Again`                                                                                                                               |
+| third&#95;cta   *可选*                        | 第三个选项的号召性用语（CTA）话题标签。最大长度：20 个字符（不计入 #）。 Type: string  Example: `#ShareMore`                                                                                                                                                 |
+| third&#95;cta&#95;tweet   *可选*              | 当点击第三个 CTA 时使用的帖子文本。 类型：string  **注意**：如果已设置 `third_cta`，则为必填。 示例：`I Heart @TwitterDev`                                                                                                                                      |
+| fourth&#95;cta   *可选*                       | 第四个选项的行动号召（CTA）话题标签。最大长度：20 个字符（不包括 #）。类型：string  示例：`#ShareExtra`                                                                                                                                                           |
+| fourth&#95;cta&#95;tweet   *可选*             | 当点击第四个 CTA 时要使用的帖子文本。 类型：字符串  **注意**：如果设置了 `fourth_cta`，则为必填。 示例：`I Heart @TwitterDev Again`                                                                                                                                 |
+| media&#95;key   *可选*                        | 要在此卡片中使用的视频的 media key。  **注意**：该视频必须位于账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 中。  **注意**：必须使用 16:9 的宽高比。  类型：string  示例：`13_1168079965037467209`       |
+| name   *可选*                                 | 卡片名称。  Type: string  Example: `developers card`                                                                                                                                                                              |
+| poster&#95;media&#95;key   *可选*             | 用于此卡片的封面图像的媒体 key。 如果未指定，将使用视频的第一帧。 **注意**：该视频必须位于账户的 [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 媒体库中。 类型：long  示例：`3_882726458191298561`                      |
+| thank&#95;you&#95;text   *可选*               | 在点击 CTA 后显示的文本。最大长度为 23 个字符。 Type: string  Example: `Build it`                                                                                                                                                               |
+| thank&#95;you&#95;url   *可选*                | 与感谢文本一同显示的 URL。 类型：string  示例：`https://example.com/thankyou`                                                                                                                                                                 |
+| title   *可选*                                | 卡片的标题，显示在视频下方、CTA 上方。最大长度：23 个字符。 类型：string  **注意**：当未设置 `second_cta` 时为必填项。 示例：`Start a conversation`                                                                                                                       |
+| unlocked&#95;image&#95;media&#95;key   *可选* | 将在即时解锁场景中使用的图像的 `media_key`。这是一个只写字段。在响应中，API 会为此图像提供一个指向 X 的 URL。**注意**：该图像必须位于该账户的媒体库中。  Type: string  Example: `3_883112887618682880`                                                                                     |
+| unlocked&#95;video&#95;media&#95;key   *可选* | 来自 [GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#get-accounts-account-id-media-library) 端点的视频标识符，将在即时解锁场景中使用。 类型：字符串 示例：`13_867520357225418752` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation/5a86h?name=developers card`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "developers card",
+    "first_cta": "#APIs",
+    "video_height": "9",
+    "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+    "thank_you_text": "Build it",
+    "video_owner_id": "756201191646691328",
+    "media_key": "13_958388276489895936",
+    "id": "5a86h",
+    "video_width": "16",
+    "first_cta_tweet": "Ads API",
+    "created_at": "2018-01-30T17:53:04Z",
+    "card_uri": "card://958397665015775232",
+    "title": "Developers",
+    "updated_at": "2018-01-30T18:02:15Z",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+    "deleted": false,
+    "card_type": "VIDEO_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_type": "VIDEO_CONVERSATION",
+      "card_id": "5a86h",
+      "name": "developers card"
+    }
+  }
+}
+```
+
+永久删除当前账号下指定的视频会话卡片。
+
+**注意**：这是一次硬删除操作，因此无法找回已删除的卡片。
+
+<div id="resource-url">
+  #### 资源 URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation/:card_id`
+
+#### 参数
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 所使用账户的标识符。出现在资源路径中，并且通常是除 [GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) 之外所有 Advertiser API 请求的必需参数。指定的账户必须与已认证用户关联。类型：string  示例：`18ce54d4x5t` |
+| card&#95;id   *required* | 你在该请求中所使用的视频会话卡片的引用。类型：string  示例：`4i0ya` |
+
+<div id="example-request">
+  #### 示例请求
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation/4i0ya`
+
+<div id="example-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "name": "video conversation card",
+    "id": "4i0ya",
+    "created_at": "2017-07-07T01:36:39Z",
+    "updated_at": "2017-08-23T13:29:13Z",
+    "deleted": true,
+    "card_type": "VIDEO_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "card_id": "4i0ya",
+      "card_type": "video_conversation",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```

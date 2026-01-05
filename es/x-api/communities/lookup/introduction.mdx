@@ -1,0 +1,96 @@
+---
+title: Introducción
+sidebarTitle: Introducción
+keywords: ["búsqueda de comunidades", "obtener comunidades", "búsqueda de comunidad", "comunidad por id", "información de comunidades", "API de comunidades"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<Note>
+  **Configuración de la cuenta**
+
+  Para acceder a estos endpoints, necesitas:
+
+  * Una [cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info) aprobada.
+  * Autenticarte con las claves y tokens de una [developer App](/es/resources/fundamentals/developer-apps) que se encuentre dentro de un [Proyecto](/es/resources/fundamentals/projects). 
+
+  Obtén más información sobre cómo obtener acceso a los endpoints de X API v2 en nuestra [guía de introducción](/es/x-api/getting-started/getting-access).
+</Note>
+
+**Primeros pasos**
+
+<div id="authentication">
+  ### Autenticación
+</div>
+
+Puedes autenticar este endpoint mediante [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), [OAuth 2.0 solo para la aplicación](https://developer.x.com(/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2).
+ 
+
+<div id="making-a-request">
+  ### Realizar una solicitud
+</div>
+
+Puedes llamar al endpoint de Communities Lookup proporcionando un id como se muestra a continuación (usando el id `1758747817642700922`):
+
+```
+      curl --location 'https://api.x.com/2/communities/1758747817642700922' --header 'Authorization: ••••••'
+```
+
+Si la solicitud se completa correctamente, verás la respuesta JSON como se muestra a continuación:
+
+```
+{
+    "data": {
+        "access": "Public",
+        "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+        "join_policy": "Open",
+        "name": "Anime Community"
+    }
+}
+```
+
+<div id="community-fields">
+  ### Campos de Comunidad
+</div>
+
+Puedes obtener datos adicionales asociados con una comunidad especificando los campos de Comunidad.
+
+Los siguientes campos de Comunidad están disponibles:
+
+| Valor de campo | Tipo | Descripción |     |
+| :--- | :--- | :--- | :--- |
+| created&#95;at | date (ISO 8601) | Fecha y hora de creación de la Comunidad. |     |
+| id  | string | El identificador único de la Comunidad. |     |
+| name | string | El nombre de la Comunidad. |     |
+| description | string | El texto de la descripción de la Comunidad, si se ha proporcionado. |     |
+| access | string | El nivel de acceso de la Comunidad.  <br />  <br />Puede ser uno de:<br /><br />* `Public`<br />* `Closed` |     |
+| join&#95;policy | string | La política para unirse a la Comunidad.  <br />  <br />Puede ser una de:<br /><br />* `Open`<br />* `RestrictedJoinRequestsDisabled`<br />* `RestrictedJoinRequestsRequireAdminApproval`<br />* `RestrictedJoinRequestsRequireModeratorApproval`<br />* `SuperFollowRequired` |     |
+| member&#95;count | integer | El número de miembros que se han unido a la Comunidad. |     |
+
+<div id="example-request">
+  #### Ejemplo de solicitud
+</div>
+
+Puedes llamar al endpoint Communities Lookup con campos adicionales de la comunidad, como se muestra a continuación (usando el ID `1758747817642700922`):
+
+```
+curl --location 'https://api.x.com/2/communities/1758747817642700922?community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: ••••••'
+```
+
+**Ejemplo de respuesta**
+
+Si la solicitud se realiza correctamente, verás la respuesta JSON que se muestra a continuación:
+
+```
+{
+    "data": {
+        "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+        "access": "Public",
+        "member_count": 40369,
+        "created_at": "2024-02-17T06:58:50.000Z",
+        "join_policy": "Open",
+        "name": "Anime Community",
+        "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI="
+    }
+}
+```

@@ -1,0 +1,869 @@
+---
+title: Límites de frecuencia
+keywords: ["límites de frecuencia", "límites de frecuencia de la API", "límites de solicitudes", "limitación de frecuencia", "restricción de solicitudes", "ventana de 15 minutos", "errores de límites de frecuencia"]
+---
+
+Cada día, muchos miles de desarrolladores realizan solicitudes a la X API. Para ayudar a gestionar el gran volumen de estas solicitudes, se establecen límites en la cantidad de solicitudes que se pueden realizar. Estos límites ayudan a ofrecer una API confiable y escalable en la que nuestra comunidad de desarrolladores confía.
+
+El número máximo de solicitudes permitidas se basa en un intervalo de tiempo, normalmente durante un período o ventana de tiempo específicos. El intervalo más común es de quince minutos. Por ejemplo, un endpoint con un límite de 900 solicitudes por 15 minutos permite hasta 900 solicitudes en cualquier intervalo de 15 minutos.
+
+Los límites de frecuencia dependen del método de autenticación. Por ejemplo, si usas [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), cada conjunto de [tokens de acceso](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) de los usuarios tiene su propio límite de frecuencia por período. Alternativamente, si usas [OAuth 2.0 Bearer Token](/es/resources/fundamentals/authentication#oauth-2-0), tu aplicación tendrá su propio límite independiente por período de tiempo. Cuando se exceden estos límites, la API devuelve un error.
+
+<div id="table-of-contents">
+  ## Tabla de contenidos
+</div>
+
+* [Límites de frecuencia de X API v2](#v2-limits)
+* [Límites de frecuencia de X API Enterprise](#v2-limits-enterprise)
+* [Límites de frecuencia y método de autenticación](#auth)
+* [Encabezados HTTP y códigos de respuesta](#headers-and-codes)
+* [Recuperación tras alcanzar los límites de frecuencia](#recovering)
+* [Consejos para evitar alcanzar los límites de frecuencia](#tips)
+
+<div id="x-api-v2-rate-limits">
+  ## Límites de frecuencia de X API v2
+</div>
+
+La siguiente tabla muestra los límites de frecuencia de cada plan de pago de X API. Estos límites también están disponibles en la sección de productos del [portal para desarrolladores](/es/resources/fundamentals/developer-portal).
+
+<table class="rate-limit-table">
+  <thead>
+    <tr>
+      <th>Endpoint</th>
+      <th>Límite del plan Pro <button data-feather-tooltip-target="" tabindex="0" aria-label="más información" class="IconButton IconButton--infoIcon IconButton--small index__lightThemeColor--1bIsd" type="button"><span aria-hidden="true" class="Icon Icon--info" /></button></th>
+      <th>Límite del plan Básico <button data-feather-tooltip-target="" tabindex="0" aria-label="más información" class="IconButton IconButton--infoIcon IconButton--small index__lightThemeColor--1bIsd" type="button"><span aria-hidden="true" class="Icon Icon--info" /></button></th>
+      <th>Límite del plan Gratis <button data-feather-tooltip-target="" tabindex="0" aria-label="más información" class="IconButton IconButton--infoIcon IconButton--small index__lightThemeColor--1bIsd" type="button"><span aria-hidden="true" class="Icon Icon--info" /></button></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td colspan="4"><strong>Publicaciones</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/post-delete-by-post-id">DELETE /2/tweets/:id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">17 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />17 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/causes-the-user-in-the-path-to-unlike-the-specified-post">DELETE /2/users/:id/likes/:tweet&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/causes-the-user-in-the-path-to-unretweet-the-specified-post">DELETE /2/users/:id/retweets/:tweet&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/post-lookup-by-post-ids">GET /2/tweets</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />450 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/post-lookup-by-post-id">GET /2/tweets/:id</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />450 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/returns-user-objects-that-have-liked-the-provided-post-id">GET /2/tweets/:id/liking&#95;users</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/retrieve-posts-that-quote-a-post">GET /2/tweets/:id/quote&#95;tweets</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/returns-user-objects-that-have-retweeted-the-provided-post-id">GET /2/tweets/:id/retweeted&#95;by</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/full-archive-search-counts">GET /2/tweets/counts/all</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Básico">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/recent-search-counts">GET /2/tweets/counts/recent</a></td>
+      <td data-label="Pro Limit">300 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Basic Limit">5 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Free Limit">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/full-archive-search-counts">GET /2/tweets/search/all</a></td>
+      <td data-label="Límite de Pro">1 solicitud por segundo<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud por segundo<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite de Basic">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/recent-search-counts">GET /2/tweets/search/recent</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />450 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">60 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />60 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/filtered-stream">GET /2/tweets/search/stream</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Básico">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/rules-lookup">GET /2/tweets/search/stream/rules</a></td>
+      <td data-label="Límite Pro">450 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Basic">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Límite Free">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/returns-post-objects-liked-by-the-provided-user-id">GET /2/users/:id/liked&#95;tweets</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/user-mention-timeline-by-user-id">GET /2/users/:id/mentions</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />450 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Basic">10 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/user-home-timeline-by-user-id">GET /2/users/:id/timelines/reverse&#95;chronological</a></td>
+      <td data-label="Pro Limit">180 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Basic Limit">5 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Free Limit">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/user-posts-timeline-by-user-id">GET /2/users/:id/tweets</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1500 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />10 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/returns-repost-of-user">GET /2/users/reposts&#95;of&#95;me</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratis">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/creation-of-a-post">POST /2/tweets</a></td>
+      <td data-label="Límite Pro">100 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />10000 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1667 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">17 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />17 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/adddelete-rules">POST /2/tweets/search/stream/rules</a></td>
+      <td data-label="Límite Pro">100 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Básico">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/causes-the-user-in-the-path-to-like-the-specified-post">POST /2/users/:id/likes</a></td>
+      <td data-label="Límite Pro">1000 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">200 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/causes-the-user-in-the-path-to-repost-the-specified-post">POST /2/users/:id/retweets</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/hide-replies">PUT /2/tweets/:tweet&#95;id/hidden</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Usuarios</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/unfollow-user">DELETE /2/users/:source&#95;user&#95;id/following/:target&#95;user&#95;id</a></td>
+      <td data-label="Pro Limit">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Basic Limit">5 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Free Limit">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/unmute-user-by-user-id">DELETE /2/users/:source&#95;user&#95;id/muting/:target&#95;user&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/user-lookup-by-ids">GET /2/users</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/user-lookup-by-id">GET /2/users/:id</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/returns-user-objects-that-are-blocked-by-provided-user-id">GET /2/users/:id/blocking</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratis">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/returns-user-objects-that-are-muted-by-the-provided-user-id">GET /2/users/:id/muting</a></td>
+      <td data-label="Pro Limit">15 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Basic Limit">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Free Limit">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/user-lookup-by-usernames">GET /2/users/by</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/user-lookup-by-username">GET /2/users/by/username/:username</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">3 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />3 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/user-lookup-me">GET /2/users/me</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">250 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">25 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/user-search">GET /2/users/search</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Básico">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/follow-user">POST /2/users/:id/following</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/mute-user-by-user-id">POST /2/users/:id/muting</a></td>
+      <td data-label="Pro Limit">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Basic Limit">5 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Free Limit">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Spaces</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/spaces/space-lookup-up-space-ids">GET /2/spaces</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratis">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/spaces/space-lookup-by-space-id">GET /2/spaces/:id</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/spaces/retrieve-the-list-of-users-who-purchased-a-ticket-to-the-given-space">GET /2/spaces/:id/buyers</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/spaces/retrieve-posts-from-a-space">GET /2/spaces/:id/tweets</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APP</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APP</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APP</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/spaces/space-lookup-by-their-creators">GET /2/spaces/by/creator&#95;ids</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / segundo<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / segundo<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratis">1 solicitud / segundo<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/spaces/search-for-spaces">GET /2/spaces/search</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Mensajes directos</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/delete-dm">DELETE /2/dm&#95;events/:id</a></td>
+      <td data-label="Límite Pro">1500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />4000 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Basic">200 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />2500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Free">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/get-dm-events-for-a-dm-conversation">GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+
+      <td data-label="Límite gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/get-dm-events-for-a-dm-conversation">GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/get-recent-dm-events">GET /2/dm&#95;events</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/get-dm-events-by-id">GET /2/dm&#95;events/:id</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/create-a-new-dm-conversation">POST /2/dm&#95;conversations</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1440 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite básico">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/send-a-new-message-to-a-dm-conversation">POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1440 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/direct-messages/send-a-new-message-to-a-user">POST /2/dm&#95;conversations/with/:participant&#95;id/messages</a></td>
+      <td data-label="Límite Pro">1440 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1440 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite Gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Listas</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/delete-list">DELETE /2/lists/:id</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/remove-a-list-member">DELETE /2/lists/:id/members/:user&#95;id</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratis">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Punto de conexión"><a href="/es/x-api/lists/unfollow-a-list">DELETE /2/users/:id/followed&#95;lists/:list&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/unpin-a-list">DELETE /2/users/:id/pinned&#95;lists/:list&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/list-lookup-by-list-id">GET /2/lists/:id</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/users/returns-user-objects-that-are-members-of-a-list-by-the-provided-list-id">GET /2/lists/:id/members</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/list-posts-timeline-by-list-id">GET /2/lists/:id/tweets</a></td>
+      <td data-label="Límite Pro">900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />900 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/get-a-users-list-memberships">GET /2/users/:id/list&#95;memberships</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />75 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Basic">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Free">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/get-a-users-owned-lists">GET /2/users/:id/owned&#95;lists</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/get-a-users-pinned-lists">GET /2/users/:id/pinned&#95;lists</a></td>
+      <td data-label="Límite Pro">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />500 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/create-list">POST /2/lists</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite básico">100 solicitudes / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/add-a-list-member">POST /2/lists/:id/members</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/follow-a-list">POST /2/users/:id/followed&#95;lists</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/pin-a-list">POST /2/users/:id/pinned&#95;lists</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/lists/update-list">PUT /2/lists/:id</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Guardados</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/bookmarks/remove-a-bookmarked-post">DELETE /2/users/:id/bookmarks/:tweet&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/bookmarks/bookmarks-by-user">GET /2/users/:id/bookmarks</a></td>
+      <td data-label="Límite Pro">180 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">10 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/bookmarks/introduction">GET /2/users/:id/bookmarks/folders</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/posts/bookmarks/introduction">GET /2/users/:id/bookmarks/folders/:folder&#95;id</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Extremo"><a href="/es/x-api/bookmarks/add-post-to-bookmarks">POST /2/users/:id/bookmarks</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Cumplimiento</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/compliance/list-compliance-jobs">GET /2/compliance/jobs</a></td>
+      <td data-label="Pro Limit">150 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Basic Limit">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Free Limit">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/compliance/get-compliance-job">GET /2/compliance/jobs/:job&#95;id</a></td>
+      <td data-label="Límite Pro">150 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite básico">5 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/compliance/create-compliance-job">POST /2/compliance/jobs</a></td>
+      <td data-label="Límite Pro">150 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite básico">15 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Uso</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/usage/post-usage">GET /2/usage/tweets</a></td>
+      <td data-label="Límite Pro">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite básico">50 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite gratuito">1 solicitud / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Tendencias</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/trends/trends">GET /2/trends/by/woeid/:id</a></td>
+      <td data-label="Límite Pro">75 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite básico">15 solicitudes / 15 minutos<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+
+      <td data-label="Límite gratuito">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/trends/introduction">GET /2/users/personalized&#95;trends</a></td>
+      <td data-label="Límite Pro">10 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />200 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />20 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 24 horas<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Comunidades</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/communities/lookup/introduction">GET /2/communities/:id</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/es/x-api/communities/search/introduction">GET /2/communities/search</a></td>
+      <td data-label="Límite Pro">300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />300 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Básico">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />25 solicitudes / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+      <td data-label="Límite Gratuito">1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR USUARIO</strong><br />1 solicitud / 15 min<br /><strong class="index__tenPx--K47R6">POR APLICACIÓN</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div id="rate-limits-and-authentication-method">
+  ## Límites de frecuencia y método de autenticación
+</div>
+
+Los límites de frecuencia se establecen tanto a nivel de la aplicación de desarrollador como del token de acceso de usuario:
+
+* **[OAuth 2.0 Bearer Token](/es/resources/fundamentals/authentication/oauth-2-0/application-only): Límite de frecuencia de la aplicación**
+  Este método te permite realizar un cierto número de solicitudes en nombre de tu aplicación de desarrollador. Cuando utilizas este método de autenticación, los límites se determinan por las solicitudes realizadas con un Bearer Token.
+  * Ejemplo: Con un límite de 450 solicitudes por intervalo de 15 minutos, puedes realizar 450 solicitudes en nombre de tu aplicación dentro de ese intervalo.
+
+* **[Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens): Límite de frecuencia de usuario**
+  Este método permite realizar solicitudes en nombre de un usuario de X identificado por el token de acceso de usuario. Por ejemplo, si recuperas métricas privadas de Publicaciones, autentícate con tokens de acceso de usuario para ese usuario, generados mediante el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
+  * Ejemplo: Con un límite de 900 solicitudes por 15 minutos por usuario, puedes realizar hasta 900 solicitudes por usuario en ese período de tiempo.
+
+...
+
+<div id="http-headers-and-response-codes">
+  ## Encabezados HTTP y códigos de respuesta
+</div>
+
+Usa los encabezados HTTP para entender en qué punto se encuentra tu aplicación respecto a un límite de frecuencia determinado, en función de la solicitud más reciente realizada.
+
+* `x-rate-limit-limit`: límite máximo de solicitudes para el endpoint
+* `x-rate-limit-remaining`: solicitudes restantes para la ventana de 15 minutos
+* `x-rate-limit-reset`: tiempo restante antes de que se restablezca el límite de frecuencia (en segundos desde la época UTC)
+
+<div id="error-responses">
+  ### Respuestas de error
+</div>
+
+Si una aplicación excede el límite de frecuencia de un endpoint, la API devolverá una respuesta [HTTP 429 “Too Many Requests”](http://tools.ietf.org/html/rfc6585) con el siguiente mensaje de error en el cuerpo de la respuesta:
+
+```json
+{ "errors": [ { "code": 88, "message": "Rate limit exceeded" } ] }
+```
+
+<div id="recovering-from-a-rate-limit">
+  ## Recuperación tras alcanzar un límite de frecuencia
+</div>
+
+Cuando se superan estos límites de frecuencia, el endpoint devuelve un error 429 &quot;Too many requests&quot;. Como se explica a continuación, cuando se producen errores de límite de frecuencia, una práctica recomendada es examinar las cabeceras HTTP que indican cuándo se reinicia el límite y pausar las solicitudes hasta entonces.<br />Cuando se produce un error de &quot;too many requests&quot; o de límite de frecuencia, es necesario reducir la frecuencia con la que se realizan solicitudes. Cuando se alcanza un error de límite de frecuencia, se puede comprobar la cabecera HTTP `x-rate-limit-reset:` para saber cuándo se restablecerá el límite de frecuencia<br /><br />. Otro patrón habitual se basa en el backoff exponencial (exponential backoff), en el que el tiempo entre solicitudes empieza siendo pequeño (por ejemplo, unos segundos) y luego se duplica antes de cada reintento. Esto se mantiene hasta que una solicitud tiene éxito o se alcanza un tiempo máximo razonable entre solicitudes (por ejemplo, unos minutos).<br /><br /> Idealmente, el cliente debería ser consciente de los límites de frecuencia existentes y poder pausar las solicitudes hasta que expire la ventana que se ha superado. Si superas un límite de 15 minutos, entonces tiene sentido esperar uno o dos minutos antes de volver a intentarlo.<br /><br /> Ten en cuenta que, más allá de estos límites en el número de solicitudes, el nivel de acceso Standard Basic proporciona hasta 500.000 Publicaciones al mes mediante los endpoints de búsqueda reciente y flujo filtrado. Si has superado el límite mensual en el número de Publicaciones, entonces tiene más sentido que tu aplicación muestre una notificación, conozca su día de renovación mensual y detenga las solicitudes hasta ese día.
+
+<div id="tips-to-avoid-being-rate-limited">
+  ### Consejos para evitar límites de frecuencia
+</div>
+
+Los siguientes consejos están pensados para ayudarte a programar de forma defensiva y reducir la probabilidad de que se apliquen límites de frecuencia. Algunas funciones de la aplicación que quizá quieras ofrecer son simplemente imposibles debido a estos límites, especialmente en lo que respecta a la actualidad de los resultados. Si tu aplicación requiere información en tiempo real, consulta los endpoints de streaming filtrado y muestreado.
+
+<div id="caching">
+  #### Caché
+</div>
+
+Almacena en caché las respuestas de la API cuando preveas un uso frecuente. En lugar de llamar a la API en cada carga de página, guarda la respuesta localmente.
+
+<div id="prioritize-active-users">
+  #### Prioriza usuarios activos
+</div>
+
+Si tu sitio hace un seguimiento de muchos usuarios de X (por ejemplo, consultando su estado actual o estadísticas sobre su uso de X), considera solicitar datos únicamente de los usuarios que hayan iniciado sesión recientemente en tu sitio.
+
+<div id="adapt-to-the-search-results">
+  #### Adáptate a los resultados de búsqueda
+</div>
+
+Si tu aplicación supervisa un gran volumen de términos de búsqueda, realiza consultas con menos frecuencia para las búsquedas que no arrojan resultados que para aquellas que sí los tienen. Al aplicar un backoff puedes mantenerte al día en las consultas que son populares sin desperdiciar recursos solicitando consultas que casi nunca cambian. Como alternativa, considera usar el filtered stream endpoint y aplicar tus consultas de búsqueda como filtros.
+
+<div id="denylist">
+  #### Lista de denegación
+</div>
+
+Si una aplicación abusa de los límites de frecuencia, se añadirá a la lista de denegación. Las aplicaciones en la lista de denegación no pueden obtener una respuesta de X API. Si tú o tu aplicación estáis en la lista de denegación y crees que ha habido un error, puedes usar nuestros [formularios de soporte de la plataforma](https://support.x.com/forms/platform) para solicitar asistencia. Incluye la siguiente información:
+
+1. Explica por qué crees que tu aplicación fue incluida en la lista de denegación.
+2. Si ya no estás sujeto a límites de frecuencia, describe en detalle cómo solucionaste el problema.

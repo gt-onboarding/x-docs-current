@@ -1,0 +1,87 @@
+---
+title: 介绍
+sidebarTitle: 介绍
+description: "X API v2 提供了三个时间线端点：按时间倒序排列的首页时间线、用户帖子时间线，以及用户提及时间线。详情见下文。"
+keywords: ["时间线", "首页时间线", "用户时间线", "提及时间线", "帖子时间线", "倒序时间线", "时间线 API"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+这三个时间线端点支持编辑后的帖子。这些端点将始终返回最新的编辑版本以及完整的编辑历史。任何在 30 分钟编辑窗口结束后获取的帖子都将代表其最终版本。编辑元数据包含一个数组，其中包含该帖子完整编辑历史中所有版本的 ID。对于没有编辑历史的帖子，该数组只包含一个 ID。对于已被编辑过的帖子，该数组包含多个 ID，按编辑顺序递增排列，数组最后一个位置是最新版本。要进一步了解帖子编辑的工作机制，请参阅 [Edit Posts 基础知识](/zh/x-api/fundamentals/edit-posts) 页面。
+
+<div id="reverse-chronological-home-timeline">
+  ## 按时间倒序的主页时间线
+</div>
+
+此端点用于检索已认证用户及其所关注账号最近发布的帖子、转发和回复。
+
+由于你是代表某个用户发出请求，必须使用 [OAuth 2.0 Authorization Code Flow with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication) 对这些端点进行身份验证。此端点对每个用户的速率限制为每 15 分钟 180 个请求。此端点可以返回时间线上最近 7 天创建的所有帖子，以及无论创建日期如何、最近的 800 条帖子。
+
+<div id="user-post-timeline">
+  ## 用户帖子时间线
+</div>
+
+用户帖子时间线端点提供对特定 X 账号已发布帖子（Posts）的访问。检索某个用户的帖子可以让你构建诸如在用户界面中展示时间线、分析用户的帖子以更好地理解其内容，或以编程方式基于其帖子创建互动工作流等用例。此端点可让你访问单个 X 账号的最新帖子、转发（Retweets）、回复以及引用帖子（Quote Tweets），类似于在用户个人资料时间线上所看到的内容。
+
+下面是 @XDevelopers 的用户时间线：
+
+用户帖子时间线端点是一个 REST 端点，它接收单个路径参数来指示目标用户（通过用户 ID 标识）。该端点可以返回该用户最近的 3,200 条帖子、转发、回复和引用帖子。
+
+帖子按时间倒序返回，从最新的开始。结果会[分页](/zh/x-api/fundamentals/pagination)，每页最多 100 条帖子。会提供分页令牌，用于在大量帖子结果中逐页遍历。当前页面中包含的最新和最旧帖子的 Post ID 也会作为元数据提供，可用于轮询时间线以获取最新帖子。用户帖子时间线还支持指定 start&#95;time 和 end&#95;time 参数，以仅接收在特定时间窗口内创建的帖子。 
+
+用户帖子时间线端点支持 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数，并返回 [新的 JSON 数据格式](/zh/x-api/fundamentals/data-dictionary)。
+
+要成功向该端点发起请求，你需要使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication)、[OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 认证方式为你的请求授权。当请求非公开指标（nonpublic metrics）、推广指标（promoted metrics）或受保护用户的时间线时，你必须使用 OAuth 1.0a 用户上下文（OAuth 1.0a User Context）或 OAuth 2.0 Authorization Code with PKCE。
+
+用户帖子时间线端点旨在支持两种常见的使用模式： 
+
+* “获取某用户的历史帖子”：向用户帖子时间线发起请求，以便在特定的最近时间范围内，按时间顺序接收目标用户发布的帖子。可以使用 start&#95;time 和 end&#95;time 设置时间范围，并对完整结果进行分页。在某些情况下，如果该用户账号中的帖子总数不超过 3,200 条，则可以检索到该用户的全部发帖历史。返回的帖子将取决于其是否公开可见以及请求所使用的认证方式。
+
+* “轮询新帖子”：持续向用户帖子时间线发起请求，以检索某一特定用户新发布的帖子。可以将上一次接收到的最后一个 Post ID 作为参数，用于获取自上次帖子以来的新帖子。
+
+<div id="user-mention-timeline">
+  ## 用户提及时间线
+</div>
+
+用户提及时间线端点允许你请求提及特定 X 用户的帖子，例如，如果某个 X 账号在帖子中提到了 @XDevelopers。返回结果还会包括对该被请求用户帖子所发表的回复。获取某个用户被提及的帖子，可以帮助你构建体验，例如快速发现谁在回复该用户的帖子、谁在提及该用户，或者以编程方式围绕这些帖子创建互动工作流。该端点允许你获取单个用户最近的被提及帖子及其回复，类似于你在 X 上该用户的[提及通知](https://x.com/notifications/mentions)中所看到的内容。
+
+用户提及时间线是一个 REST 端点，它接收单个路径参数，用于指明目标用户（通过用户 ID）。该端点最多可以返回该用户最近的 800 条被提及记录。
+
+帖子按时间倒序返回，从最新的开始。[分页](/zh/x-api/fundamentals/pagination)结果中，每页最多包含 100 条帖子。会提供分页令牌，以便在大量帖子结果中分页浏览。给定页面中所包含的最新和最旧帖子对应的帖子 ID 也会作为元数据返回，这些 id 还可以用于轮询时间线以获取最新帖子，或用于类似 v1.1 [mentions&#95;timeline](https://developer.x.com/en/docs/twitter-api/v1/tweets/timelines/api-reference/get-statuses-mentions_timeline) 端点那样在时间线上导航。该端点还支持指定 start&#95;time 和 end&#95;time 参数，以获取在特定时间窗口内创建的帖子。 
+
+要成功向该端点发起请求，你需要使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)、[OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 认证方式为请求授权。当你请求非公开指标、推广指标或受保护用户的时间线时，必须使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE。
+
+用户提及时间线端点支持 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数，并返回[新的 JSON 数据格式](/zh/x-api/fundamentals/data-dictionary)。
+
+<Info>
+  **账号设置**
+
+  要访问这些端点，你需要：
+
+  * 一个已获批准的[开发者账号](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * 使用位于某个[项目](/zh/resources/fundamentals/projects)中的[开发者应用](/zh/resources/fundamentals/developer-apps)所提供的密钥和令牌进行认证。 
+
+  在我们的[入门指南](/zh/x-api/getting-started/getting-access)中进一步了解如何获取 X API v2 端点的访问权限。
+</Info>
+
+<div className="flex space-x-2">
+  <Button href="/zh/x-api/posts/timelines/quickstart/reverse-chron-quickstart">
+    快速开始
+  </Button>
+
+  <Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+    在 Postman 中运行
+  </Button>
+
+  <Button href="https://developer.x.com/apitools/api?endpoint=%2F2%2Fusers%2F%7Bid%7D%2Ftweets&method=get">
+    使用 API Explorer 试用
+  </Button>
+</div>
+
+**相关资源**
+
+[了解如何使用 Postman 发送请求](/zh/tutorials/postman-getting-started)
+
+[排查错误](https://developer.x.com/en/support/x-api)
+
+[访问此端点的 API 参考页面]((/x-api/posts/tweets-lookup#curl-requests &quot;Visit the API reference page for this endpoint&quot;)

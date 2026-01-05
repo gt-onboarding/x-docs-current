@@ -1,0 +1,2724 @@
+---
+title: "X API v2 데이터 사전"
+keywords: ["데이터 사전", "객체 모델", "트윗 객체", "사용자 객체", "API 객체", "데이터 구조", "JSON 스키마", "API 응답", "트윗 필드", "사용자 필드"]
+---
+
+<div id="object-model">
+  ## 객체 모델
+</div>
+
+<div id="tweet">
+  ### 트윗
+</div>
+
+트윗은 Twitter 전반의 모든 요소를 구성하는 기본 단위입니다. Tweet 객체에는 `id`, `text`, `created_at`와 같은 루트 레벨(root-level) 필드가 다수 포함되어 있습니다. Tweet 객체는 `user`, `media`, `poll`, `place` 등을 포함한 여러 하위 객체의 부모 객체이기도 합니다. Tweet 객체의 이러한 루트 레벨 필드를 요청할 때는 필드 파라미터 `tweet.fields`를 사용하십시오.
+
+Tweet 객체는 user 리소스에서 조회하고 확장할 수 있습니다. 요청한 트윗과 관련된 추가 트윗은 Tweet 리소스에서도 조회하고 확장할 수 있습니다. 이 객체는 user 리소스에서 `?expansions=pinned_tweet_id`를 사용하거나 Tweet 리소스에서 `?expansions=referenced_tweets.id`를 사용하여, 기본 필드만 포함된 객체를 가져오기 위해 확장(expansion)에 사용할 수 있습니다. 객체를 완성하기 위해 추가 필드를 요청할 때는 필드 파라미터 `tweet.fields`와 함께 확장(expansion)을 사용하십시오.
+
+| 필드 값                                             | 유형           | 설명                                                                                                                      | 활용 방법                                                  |
+| :----------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- |
+| **id (기본)**                                      | string       | 요청된 트윗을 식별하는 고유 식별자입니다.                                                                                                 | 프로그램을 통해 특정 트윗을 조회할 때 사용합니다.                           |
+| **text(기본값)**                                    | 문자열          | 트윗의 실제 UTF-8 텍스트입니다. 허용되는 문자에 대한 자세한 내용은 [twitter-text](https://github.com/twitter/twitter-text/)를 참조하세요.               | 키워드 추출 및 감성 분석/분류에 사용.                                 |
+| **edit&#95;history&#95;tweet&#95;ids (default)** | 객체           | 트윗의 모든 버전을 나타내는 고유 식별자입니다. 수정 이력이 없는 트윗은 ID가 하나만 있습니다. 수정 이력이 있는 트윗은 여러 개의 ID가 있습니다.                                    | 이 정보를 사용하여 트윗의 수정 이력을 조회할 수 있습니다.                      |
+| **article**                                      | object       | 이 트윗에 포함된 Article의 메타데이터를 담고 있습니다.                                                                                      | Article의 텍스트와 엔티티를 가져오는 데 사용합니다.                       |
+| **attachments**                                  | object       | 해당 트윗에 포함된(있는 경우) 첨부 객체의 종류를 지정합니다.                                                                                     | 요청한 expansions에서 반환되는 객체를 이해하는 데 사용합니다.                |
+| **author&#95;id**                                | string       | 이 트윗을 작성한 사용자의 고유 식별자입니다.                                                                                               | User 객체 복원 및 동료 검토용 데이터셋 공유.                           |
+| **card&#95;uri**                                 | string       | 이 트윗에 포함된 Card의 URI입니다.                                                                                                 |                                                        |
+| **community&#95;id**                             | string       | 해당 게시물이 속한 커뮤니티의 고유 식별자입니다.                                                                                             |                                                        |
+| **context&#95;annotations**                      | 배열           | 트윗의 컨텍스트 주석을 포함합니다.                                                                                                     | 엔터티 인식/추출, 토픽 분석.                                      |
+| **conversation&#95;id**                          | 문자열          | 직접 답글과 답글에 대한 답글을 포함하는 해당 대화의 원본 트윗 id입니다.                                                                              | 트윗을 기준으로 대화 내용을 재구성하는 데 사용합니다.                         |
+| **created&#95;at**                               | 날짜(ISO 8601) | 트윗이 생성된 시각.                                                                                                             | 시계열 분석 및 트윗 생성 시점 파악에 유용합니다.                           |
+| **display&#95;text&#95;range**                   | 배열           | 표시되는 텍스트 범위의 시작 인덱스와 끝 인덱스를 포함하는 배열입니다.                                                                                 | 긴 게시물에서 기본적으로 어떤 텍스트 구간이 표시되는지 알 때 유용합니다.              |
+| **edit&#95;controls**                            | object       | 트윗을 얼마나 더 오래 수정할 수 있는지와 남은 수정 횟수를 나타냅니다.                                                                                | 이 값을 사용해 트윗이 수정 가능한지 확인할 수 있습니다.                       |
+| **entities**                                     | object       | 트윗 텍스트에서 추출한 엔티티입니다. 자세한 내용은 Twitter Objects의 entities를 참조하세요.                                                          | 해시태그, URL, 멘션 등의 추가 정보를 제공합니다.                         |
+| **geo**                                          | object       | 지오태그가 지정된 트윗의 위치 또는 장소를 나타냅니다.                                                                                          | 지오태그된 트윗의 위치를 파악하는 데 사용합니다.                            |
+| **in&#95;reply&#95;to&#95;user&#95;id**          | 문자열          | 표시된 트윗이 답글인 경우, 이 필드에는 원본 트윗 작성자의 id가 포함됩니다.                                                                            | 트윗이 다른 트윗에 대한 답글인지 판단합니다.                              |
+| **lang**                                         | 문자열          | Twitter에서 감지한 경우에 한해, 트윗의 언어를 나타냅니다.                                                                                    | 트윗을 사용된 언어에 따라 분류합니다.                                  |
+| **non&#95;public&#95;metrics**                   | 객체           | 요청 시점에 해당 트윗이 받은 비공개 참여 메트릭입니다. 사용자 컨텍스트 인증이 필요합니다.                                                                     | 트윗으로 발생한 총 노출 수를 확인합니다.                                |
+| **note&#95;tweet**                               | object       | 장문 게시물(&gt;280자 초과)의 전체 텍스트를 포함합니다.                                                                                     | 게시물 전문을 가져옵니다.                                         |
+| **organic&#95;metrics**                          | 객체           | 요청 시점의 트윗에 대해 오가닉 컨텍스트에서 추적되는 참여 메트릭입니다. 사용자 컨텍스트 인증이 필요합니다.                                                            | 해당 트윗의 오가닉 참여를 측정합니다.                                  |
+| **possibly&#95;sensitive**                       | boolean      | 콘텐츠가 민감한 것으로 분류될 수 있는지를 나타냅니다.                                                                                          | 특정 유형의 콘텐츠 확산을 연구하는 데 사용합니다.                           |
+| **promoted&#95;metrics**                         | object       | 요청 시점 기준으로 프로모션 환경에서 추적된 트윗의 참여 메트릭입니다. 사용자 컨텍스트 인증이 필요합니다.                                                             | 트윗이 프로모션 중이었을 때의 참여도를 측정합니다.                           |
+| **public&#95;metrics**                           | object       | 요청 시점 기준 트윗의 공개 참여 메트릭입니다.                                                                                              | 트윗의 참여도를 측정합니다.                                        |
+| **referenced&#95;tweets**                        | 배열           | 이 트윗이 참조하는 트윗들의 목록으로, 리트윗, 인용 트윗, 답글 등을 포함합니다.                                                                          | 리트윗 등과 관련된 대화 맥락을 파악합니다.                               |
+| **reply&#95;settings**                           | 문자열          | 지정된 트윗에 누가 답글을 남길 수 있는지를 나타냅니다. 가능한 값은 &quot;everyone&quot;, &quot;mentioned&#95;users&quot;, &quot;followers&quot;입니다. | 해당 트윗의 답글 허용 대상을 파악합니다.                                |
+| **withheld**                                     | object       | [게시가 제한된 콘텐츠](https://help.x.com/en/rules-and-policies/tweet-withheld-by-country)에 대한 제한 세부 정보를 포함합니다.                  |                                                        |
+| **scopes**                                       | 객체           | 트윗의 공개 범위에 대한 세부 정보를 포함합니다.                                                                                             | 누가 게시물을 볼 수 있는지 나타냅니다. 프로모션 게시물에만 포함됩니다.               |
+| **media&#95;metadata**                           | 배열           | 트윗에 첨부된 미디어의 메타데이터를 포함합니다.                                                                                              | 트윗 미디어 첨부의 `alt_text`와 같은 추가 메타데이터를 조회하는 데 사용할 수 있습니다. |
+
+**트윗 객체 가져오기**
+
+**요청 예시**
+
+다음 요청에서는 [Tweets lookup](/ko/resources/fundamentals/rate-limits) 엔드포인트를 사용해 트윗 객체에 대한 필드를 요청합니다. `$BEARER_TOKEN`은 여러분이 생성한 [Bearer Token](/ko/resources/fundamentals/authentication)으로 반드시 교체해야 합니다.
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1212092628029698048&tweet.fields=attachments,author_id,context_annotations,created_at,entities,geo,id,in_reply_to_user_id,lang,possibly_sensitive,public_metrics,referenced_tweets,text,withheld&expansions=referenced_tweets.id' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+**응답 예시**
+
+```
+{
+  "data": [
+    {
+      "text": "우리는 최고의 API 미래 버전이 여러분과 함께 만들어질 것이라고 믿습니다. Twitter 플랫폼에서 개발하시는 모든 분들과 함께하는 또 한 해의 멋진 여정을 기원합니다. 새해에도 여러분과 계속 협력하기를 기대합니다. https://t.co/yvxdK6aOo2",
+      "edit_history_tweet_ids": [
+        "1212092628029698048"
+      ],
+      "lang": "en",
+      "in_reply_to_user_id": "2244994945",
+      "entities": {
+        "urls": [
+          {
+            "start": 222,
+            "end": 245,
+            "url": "https://t.co/yvxdK6aOo2",
+            "expanded_url": "https://x.com/LovesNandos/status/1211797914437259264/photo/1",
+            "display_url": "pic.x.com/yvxdK6aOo2",
+            "media_key": "16_1211797899316740096"
+          }
+        ],
+        "annotations": [
+          {
+            "start": 42,
+            "end": 44,
+            "probability": 0.5359,
+            "type": "Other",
+            "normalized_text": "API"
+          },
+          {
+            "start": 144,
+            "end": 150,
+            "probability": 0.9832,
+            "type": "Other",
+            "normalized_text": "Twitter"
+          }
+        ]
+      },
+      "author_id": "2244994945",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1212092627178287104"
+        }
+      ],
+      "id": "1212092628029698048",
+      "public_metrics": {
+        "retweet_count": 7,
+        "reply_count": 3,
+        "like_count": 38,
+        "quote_count": 1
+      },
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "29",
+            "name": "Events [Entity Service]",
+            "description": "실제 이벤트. "
+          },
+          "entity": {
+            "id": "1186637514896920576",
+            "name": " New Years Eve"
+          }
+        },
+        {
+          "domain": {
+            "id": "29",
+            "name": "Events [Entity Service]",
+            "description": "실제 이벤트. "
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "전 세계 사람들이 새해를 맞이하며 펼치는 불꽃놀이와 축하 행사를 확인하세요.\n사진 제공: @GettyImages "
+          }
+        },
+        {
+          "domain": {
+            "id": "119",
+            "name": "Holiday",
+            "description": "크리스마스나 할로윈 같은 휴일"
+          },
+          "entity": {
+            "id": "1186637514896920576",
+            "name": " New Years Eve"
+          }
+        },
+        {
+          "domain": {
+            "id": "119",
+            "name": "Holiday",
+            "description": "크리스마스나 할로윈 같은 휴일"
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "전 세계 사람들이 새해를 맞이하며 펼치는 불꽃놀이와 축하 행사를 확인하세요.\n사진 제공: @GettyImages "
+          }
+        },
+        {
+          "domain": {
+            "id": "30",
+            "name": "Entities [Entity Service]",
+            "description": "Entity Service 최상위 도메인, Entity Service의 모든 항목이 이 도메인에 포함되어야 합니다"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "브랜드 및 기업"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "131",
+            "name": "Unified Twitter Taxonomy",
+            "description": "사용자 관심사 분류 체계. "
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "131",
+            "name": "Unified Twitter Taxonomy",
+            "description": "사용자 관심사 분류 체계. "
+          },
+          "entity": {
+            "id": "847868745150119936",
+            "name": "Family & relationships",
+            "description": "취미 및 관심사"
+          }
+        },
+        {
+          "domain": {
+            "id": "131",
+            "name": "Unified Twitter Taxonomy",
+            "description": "사용자 관심사 분류 체계. "
+          },
+          "entity": {
+            "id": "1196446161223028736",
+            "name": "Social media"
+          }
+        },
+        {
+          "domain": {
+            "id": "29",
+            "name": "Events [Entity Service]",
+            "description": "실제 이벤트. "
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "전 세계 사람들이 새해를 맞이하며 펼치는 불꽃놀이와 축하 행사를 확인하세요.\n사진 제공: @GettyImages "
+          }
+        },
+        {
+          "domain": {
+            "id": "119",
+            "name": "Holiday",
+            "description": "크리스마스나 할로윈 같은 휴일"
+          },
+          "entity": {
+            "id": "1206982436287963136",
+            "name": "Happy New Year: It’s finally 2020 everywhere!",
+            "description": "전 세계 사람들이 새해를 맞이하며 펼치는 불꽃놀이와 축하 행사를 확인하세요.\n사진 제공: @GettyImages "
+          }
+        }
+      ],
+      "created_at": "2019-12-31T19:26:16.000Z",
+      "attachments": {
+        "media_keys": [
+          "16_1211797899316740096"
+        ]
+      },
+      "possibly_sensitive": false
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "text": "이러한 출시는 그동안 여러분이 제공해 주신 피드백 없이는 불가능했을 것입니다. 시간과 아이디어를 기여해 주신 모든 분들께 진심으로 감사드립니다. 더 많은 피드백이 있으신가요? 알려주세요 ⬇️ https://t.co/Vxp4UKnuJ9",
+        "edit_history_tweet_ids": [
+          "1212092627178287104"
+        ],
+        "lang": "en",
+        "in_reply_to_user_id": "2244994945",
+        "entities": {
+          "urls": [
+            {
+              "start": 187,
+              "end": 210,
+              "url": "https://t.co/Vxp4UKnuJ9",
+              "expanded_url": "https://twitterdevfeedback.uservoice.com/forums/921790-twitter-developer-labs",
+              "display_url": "twitterdevfeedback.uservoice.com/forums/921790-…",
+              "status": 200,
+              "title": "피드백 채널 업데이트",
+              "description": "우리는 여러분의 의견과 피드백을 바탕으로 개발자 플랫폼을 공개적으로 구축합니다. 지난 한 해 동안 여러분과 여러분 앱의 사용자로부터 직접 의견을 듣는 것이 여러분이 파악하도록 도와주신 사용 사례에 맞는 개발자 제품을 구축하는 데 큰 도움이 되었습니다. 우리는 이를 제품 구축 방식으로 정착시키고자 하며, 앞으로 피드백 채널을 통합할 예정입니다. 여러분이 계신 곳에서 만나기 오늘부터 더 빈번한 직접 소통을 위해 UserVoice 피드백 채널을 중단할 예정입니다...",
+              "unwound_url": "https://devcommunity.x.com/t/updates-on-our-feedback-channels/169706"
+            }
+          ]
+        },
+        "author_id": "2244994945",
+        "referenced_tweets": [
+          {
+            "type": "replied_to",
+            "id": "1212092626247110657"
+          }
+        ],
+        "id": "1212092627178287104",
+        "public_metrics": {
+          "retweet_count": 2,
+          "reply_count": 1,
+          "like_count": 19,
+          "quote_count": 0
+        },
+        "created_at": "2019-12-31T19:26:16.000Z",
+        "possibly_sensitive": false
+      }
+    ]
+  }
+```
+
+<div id="user">
+  ### User
+</div>
+
+user 오브젝트에는 참조된 사용자에 대한 Twitter 사용자 계정 메타데이터가 포함됩니다. user 오브젝트는 [users lookup](/ko/x-api/users/lookup/introduction) 엔드포인트에서 반환되는 기본 오브젝트입니다. 이 엔드포인트에서 추가 user 필드를 요청하려면 `user.fields` 매개변수를 사용하면 됩니다.
+
+user 오브젝트는 Tweet 오브젝트의 하위 오브젝트로도 포함되며, 확장되어 제공될 수 있습니다. 이 오브젝트는 기본 필드만 포함된 축약된 오브젝트를 가져오기 위해 `?expansions=author_id` 또는 `?expansions=in_reply_to_user_id`로 expansions를 사용할 수 있습니다. 오브젝트를 완전하게 가져오기 위해 추가 필드를 요청할 때는 `user.fields` 필드 매개변수와 함께 expansions를 사용하십시오.
+ 
+
+| 필드 값                             | 유형           | 설명                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 사용 방법                                                                                                                                                                                                   |
+| :------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| id (기본)                          | string       | 해당 사용자의 고유 식별자입니다.<br /><br />`"id": "2244994945"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 프로그램에서 특정 Twitter 사용자의 정보를 조회할 때 사용합니다.                                                                                                                                                                 |
+| name (기본값)                       | string       | 사용자가 프로필에 지정한 이름입니다. 반드시 사람의 이름일 필요는 없습니다. 일반적으로 최대 50자까지 허용되지만, 이 제한은 변경될 수 있습니다.<br /><br />`"name": "Twitter Dev"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |                                                                                                                                                                                                         |
+| username (기본값)                   | string       | 이 사용자가 자신을 나타낼 때 사용하는 Twitter 화면 이름, 핸들 또는 별칭입니다. username은 고유하지만 변경될 수 있습니다. 일반적으로 최대 15자까지 허용되지만, 일부 예전 계정은 더 긴 이름을 사용하고 있을 수 있습니다.<br /><br />`"username": "TwitterDev"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |                                                                                                                                                                                                         |
+| 소속                               | object       | 사용자의 소속에 대한 상세 정보를 포함합니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 사용자의 소속 배지를 조회하는 데 사용할 수 있습니다.                                                                                                                                                                          |
+| confirmed&#95;email              | string       | 인증된 사용자의 확인된 이메일 주소.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |                                                                                                                                                                                                         |
+| connection&#95;status            | 배열           | 인증된 사용자와 조회 대상 사용자 간의 관계 유형 목록을 제공합니다. 예를 들어 팔로잉, 팔로우됨, 팔로우 요청 보냄, 팔로우 요청 받음, 차단, 뮤트 등의 관계를 포함합니다.<br /><br />&quot;connection&#95;status&quot;: [  <br />           &quot;follow&#95;request&#95;received&quot;,  <br />           &quot;follow&#95;request&#95;sent&quot;,  <br />           &quot;blocking&quot;,  <br />           &quot;followed&#95;by&quot;,  <br />           &quot;following&quot;,  <br />           &quot;muting&quot;  <br />]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 인증된 사용자와 조회 중인 사용자 사이의 관계 상태를 파악하는 데 사용할 수 있습니다.                                                                                                                                                        |
+| created&#95;at                   | 날짜(ISO 8601) | 사용자 계정이 Twitter에 생성된 UTC 기준 날짜 및 시간입니다.<br /><br />`"created_at": "2013-12-14T04:35:55.000Z"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 사용자가 트위터를 이용해 온 기간을 파악하는 데 사용할 수 있습니다                                                                                                                                                                   |
+| description                      | 문자열          | 사용자가 제공한 경우 이 사용자의 프로필 설명(바이오라고도 함) 텍스트입니다.<br /><br />`"description": "The voice of the X Dev team and your official source for updates, news, and events, related to the X API."`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                                                                                                                                                                                         |
+| entities                         | object       | 사용자의 프로필 설명에서 특별한 의미를 갖는 텍스트에 대한 세부 정보를 포함합니다.<br /><br />`"entities": {  <br/>       "url": {  <br/>           "urls": [  <br/>               {  <br/>                   "start": 0,  <br/>                   "end": 23,  <br/>                   "url": "https://t.co/3ZX3TNiZCY",  <br/>                   "expanded_url": "/content/developer-twitter/en/community",  <br/>                   "display_url": "developer.x.com/en/community"  <br/>               }  <br/>           ]  <br/>       },  <br/>       "description": {  <br/>           "urls": [  <br/>               {  <br/>                   "start": 0,  <br/>                   "end": 23,  <br/>                   "url": "https://t.co/3ZX3TNiZCY",  <br/>                   "expanded_url": "/content/developer-twitter/en/community",  <br/>                   "display_url": "developer.x.com/en/community"  <br/>               },  <br/>           "hashtags": [  <br/>               {  <br/>                   "start": 23,  <br/>                   "end": 30,  <br/>                   "tag": "DevRel"  <br/>               },  <br/>               {  <br/>                   "start": 113,  <br/>                   "end": 130,  <br/>                   "tag": "BlackLivesMatter"  <br/>               },  <br/>           "mentions": [  <br/>               {  <br/>                   "start": 0,  <br/>                   "end": 10,  <br/>                   "tag": "TwitterDev"  <br/>               },  <br/>           "cashtags": [  <br/>               {  <br/>                   "start": 12,  <br/>                   "end": 16,  <br/>                   "tag": "twtr"  <br/>               }  <br/>           ]  <br/>       }  <br/>   }` | 엔티티는 설명에 포함된 해시태그, URL, 사용자 멘션, 캐시태그에 대한 추가 정보를 제공하는 JSON 객체입니다. 자세한 내용은 각 엔티티를 참조하십시오.<br /><br />모든 사용자 ******start****** 인덱스는 포함(inclusive) 인덱스이며, 모든 사용자 ******end****** 인덱스는 제외(exclusive) 인덱스입니다. |
+| is&#95;identity&#95;verified     | boolean      | 해당 사용자가 ID 신원 인증을 마쳤는지 나타냅니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |                                                                                                                                                                                                         |
+| 위치                               | string       | 사용자가 제공한 경우, 사용자 프로필에 지정된 위치입니다. 이 값은 자유 입력 값이므로 실제로 유효한 위치를 나타내지 않을 수 있지만, 위치 쿼리를 사용해 검색할 때 유사 일치 방식으로 평가될 수 있습니다.<br /><br />`"location": "127.0.0.1"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |                                                                                                                                                                                                         |
+| most&#95;recent&#95;tweet&#95;id | string       | 이 사용자가 가장 최근에 작성한 트윗의 고유 식별자입니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 사용자의 가장 최근 트윗을 확인하는 데 사용합니다.                                                                                                                                                                            |
+| parody                           | boolean      | 이 사용자 계정에 Parody 라벨이 부여되어 있는지 여부를 나타냅니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |                                                                                                                                                                                                         |
+| pinned&#95;tweet&#95;id          | string       | 이 사용자의 고정된 트윗의 고유 식별자입니다.<br /><br />`"pinned_tweet_id": "1255542774432063488"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 사용자 프로필 상단에 고정된 트윗을 확인합니다. 사용자의 언어를 추정하는 데 활용할 수 있습니다.                                                                                                                                                  |
+| profile&#95;banner&#95;url       | 문자열          | 이 사용자의 프로필에 표시되는 프로필 배너의 URL입니다.<br /><br />`"profile_banner_url": "https://pbs.twimg.com/profile_banners/1716450569358098432/1721022977"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 이 사용자의 프로필 배너를 다운로드하는 데 사용할 수 있습니다.                                                                                                                                                                     |
+| profile&#95;image&#95;url        | string       | 이 사용자의 프로필에 표시되는 프로필 이미지 URL입니다.<br /><br />`"profile_image_url": "https://pbs.twimg.com/profile_images/1267175364003901441/tBZNFAgA_normal.jpg"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 이 사용자의 프로필 이미지를 다운로드하는 데 사용할 수 있습니다.                                                                                                                                                                    |
+| protected                        | boolean      | 이 사용자가 자신의 트윗을 보호하기로 선택했는지를 나타냅니다(즉, 이 사용자의 트윗이 비공개인지).<br /><br />`"protected": false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |                                                                                                                                                                                                         |
+| public&#95;metrics               | object       | 이 사용자의 활동과 관련된 세부 정보를 포함합니다.<br /><br />`"public_metrics": {             "followers_count": 507902,             "following_count": 1863,             "tweet_count": 3561,             "listed_count": 1550         }`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Twitter 사용자의 도달 범위나 영향력을 파악하고, 사용자의 관심사 범위를 정량화하며, Twitter에서의 참여 수준을 측정하는 데 활용할 수 있습니다.                                                                                                                 |
+| receives&#95;your&#95;dm         | boolean      | 이 사용자가 인증된 사용자의 다이렉트 메시지를 수신할지 여부를 나타냅니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |                                                                                                                                                                                                         |
+| subscription                     | 객체           | 해당 사용자가 인증된 사용자를 구독 중인지 여부에 대한 세부 정보를 포함합니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |                                                                                                                                                                                                         |
+| subscription&#95;type            | 문자열          | 인증된 사용자가 보유한 X Premium 구독 유형을 나타내는 문자열입니다. 예: `None`, `Basic`, `Premium`, `PremiumPlus`. 해당 사용자가 인증된 사용자가 아닌 경우 항상 `None`을 반환합니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |                                                                                                                                                                                                         |
+| url                              | string       | 사용자 프로필에 설정된 URL(있는 경우)입니다.<br /><br />`"url": "https://t.co/3ZX3TNiZCY"`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Twitter 사용자가 프로필에 입력한 URL입니다. 개인 홈페이지일 수도 있지만, 그렇지 않을 수도 있습니다.                                                                                                                                          |
+| verified                         | boolean      | 해당 사용자가 인증된 Twitter 사용자(verified Twitter user)인지 여부를 나타냅니다.<br /><br />`"verified": true`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 이 Twitter 사용자가 인증된 계정인지 여부를 나타냅니다. 인증된 계정은 공적 관심을 받는 계정이 진짜 계정임을 사람들에게 알려 줍니다.                                                                                                                          |
+| verified&#95;followers&#95;count | string       | 사용자의 인증된 팔로워 수를 나타내는 문자열 값입니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                                                                         |
+| verified&#95;type                | 문자열          | 사용자가 보유한 인증 유형을 나타내는 문자열입니다. 예: &quot;blue&quot;, &quot;business&quot;, &quot;government&quot;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                                                                         |
+| withheld                         | 객체           | 해당되는 경우 [게시가 제한된 콘텐츠](https://help.x.com/en/rules-and-policies/tweet-withheld-by-country)에 대한 제한 세부 정보를 포함합니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |                                                                                                                                                                                                         |
+
+**user 오브젝트 가져오기**
+
+**샘플 요청**
+
+다음 요청에서는 [users lookup](/ko/x-api/users/lookup/introduction) 엔드포인트에서 해당 사용자에 대한 필드를 요청합니다. `$BEARER_TOKEN`을 직접 생성한 [Bearer Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)으로 교체했는지 확인하세요.
+
+```{
+  curl --request GET 'https://api.x.com/2/users?
+  ids=2244994945&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,url,username,verified,withheld&expansions=pinned_tweet_id'
+  --header 'Authorization: Bearer $BEARER_TOKEN'
+  }
+```
+
+**응답 예시**
+
+```{
+    "data": [
+        {
+            "id": "2244994945",
+            "name": "Twitter Dev",
+            "username": "TwitterDev",
+            "location": "127.0.0.1",
+            "entities": {
+                "url": {
+                    "urls": [
+                        {
+                            "start": 0,
+                            "end": 23,
+                            "url": "https://t.co/3ZX3TNiZCY",
+                            "expanded_url": "/content/developer-twitter/en/community",
+                            "display_url": "developer.x.com/en/community"
+                        }
+                    ]
+                },
+                "description": {
+                    "hashtags": [
+                        {
+                            "start": 23,
+                            "end": 30,
+                            "tag": "DevRel"
+                        },
+                        {
+                            "start": 113,
+                            "end": 130,
+                            "tag": "BlackLivesMatter"
+                        }
+                    ]
+                }
+            },
+            "verified": true,
+            "description": "The voice of Twitter's #DevRel team, and your official source for updates, news, & events about Twitter's API. \n\n#BlackLivesMatter",
+            "url": "https://t.co/3ZX3TNiZCY",
+            "profile_image_url": "https://pbs.twimg.com/profile_images/1267175364003901441/tBZNFAgA_normal.jpg",
+            "protected": false,
+            "pinned_tweet_id": "1255542774432063488",
+            "created_at": "2013-12-14T04:35:55.000Z"
+        }
+    ],
+    "includes": {
+        "tweets": [
+            {
+                "id": "1255542774432063488",
+                "text": "이 전례 없는 시기에 Twitter에서 일어나는 일들은 세계가 팬데믹을 더 잘 이해하고 대응하는 데 도움이 될 수 있습니다. \n\n자격을 갖춘 개발자와 연구자들이 실시간으로 공개 대화를 연구할 수 있도록 무료 COVID-19 스트림 엔드포인트를 출시합니다. https://t.co/BPqMcQzhId"
+            }
+        ]
+    }
+}
+```
+
+<div id="space">
+  ### Space
+</div>
+
+Space는 실시간 오디오 대화를 통해 표현과 상호작용을 가능하게 합니다. Space 데이터 사전에는 Space와 관련된 메타데이터가 포함되며, 모든 세부 정보는 실시간으로 업데이트됩니다.
+
+User 객체는 user 리소스에서 찾을 수 있고, 해당 리소스에서 확장해 가져올 수 있습니다. 이러한 객체는 `expansions` 쿼리 파라미터에 `host_ids`, `creator_id`, `speaker_ids`, `mentioned_user_ids` 중 최소 하나를 추가하여 확장할 수 있습니다.
+
+트윗과 달리 Space는 일시적이며, 종료되거나 생성자가 취소하면 더 이상 사용할 수 없습니다. 앱에서 Space 데이터를 처리할 때는 최신 정보를 반환할 책임이 있으며, 플랫폼에서 더 이상 제공되지 않는 데이터는 제거해야 합니다. [Spaces lookup endpoints](/ko/x-api/spaces/lookup/introduction)를 사용하면 사용자의 기대와 의도를 존중하고 준수하고 있는지 확인할 수 있습니다.
+
+| Field Value          | Type            | Description                                                                                                 | How it can be used                                      |
+| :-------------------- | :--------------- | :----------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| id (default)         | string          | 요청된 Space의 고유 식별자입니다.<br />`"id": "1zqKVXPQhvZJB"`                                    | 응답에 포함된 Space를 고유하게 식별합니다.     |
+| state (default)      | string          | Space가 시작되었는지, 시작 예정인지, 종료되었는지를 나타냅니다.<br />`"state": "live"`                          | 실시간 또는 예약된 Space를 필터링합니다.                        |
+| created&#95;at           | date (ISO 8601) | 이 Space가 생성된 시간입니다.<br />`"created_at": "2021-07-04T23:12:08.000Z"`                                  | Space가 언제 생성되었는지 파악하고 시간 기준으로 정렬합니다.   |
+| creator&#95;id             | string           | Space 생성자의 고유 식별자입니다.<br />`"creator_id": "2244994945"`                           |             |
+| ended&#95;at             | date (ISO 8601) | 해당하는 경우, Space가 종료된 시간입니다.<br />`"ended_at": "2021-07-04T00:11:44.000Z"`                       | 실시간 Space가 언제 종료되었는지 확인하여 실행 시간을 계산합니다. |
+| host&#95;ids             | array           | Space 호스트의 고유 식별자입니다.<br />`"host_ids": ["2244994945", "6253282"]`                           | User 객체로 확장하여 참여도를 분석합니다.             |
+| lang                 | string          | 감지된 경우, Space의 언어입니다.<br />`"lang": "en"`                                                       | 언어별로 Space를 분류합니다.                            |
+| is&#95;ticketed          | boolean         | 티켓이 필요한 Space인지 여부를 나타냅니다.<br />`"is_ticketed": false`                                            | 관심 콘텐츠를 강조하는 데 사용합니다.                          |
+| invited&#95;user&#95;ids     | array           | 발언자로 초대된 user ID 리스트입니다.<br />`"invited_user_ids": ["2244994945", "6253282"]`                    | User 객체로 확장하여 참여도를 분석합니다.             |
+| participant&#95;count    | integer         | 호스트와 스피커를 포함하여 Space에 참여한 사용자 수입니다.<br />`"participant_count": 420`                   | 참여도를 파악하고 보고서를 생성합니다.                  |
+| subscriber&#95;count     | integer         | Space에 알림을 설정한 사용자 수입니다.<br />`"subscriber_count": 36`                                | 이벤트에 대한 관심도를 파악합니다.                              |
+| scheduled&#95;start      | date (ISO 8601) | Space의 예약 시작 시간입니다.<br />`"scheduled_start": "2021-07-14T08:00:00.000Z"`                       | 캘린더 알림과 연동하는 데 사용합니다.                  |
+| speaker&#95;ids          | array           | 어느 시점에든 발언한 사용자 리스트입니다.<br />`"speaker_ids": ["2244994945", "6253282"]`                         | User 객체로 확장하여 참여도를 분석합니다.             |
+| started&#95;at           | date (ISO 8601) | Space의 실제 시작 시간입니다.<br />`"started_at": "2021-07-14T08:00:12.000Z"`                                 | Space의 시작 시간을 확인합니다.                             |
+| title                | string          | Space의 제목입니다.<br />`"title": "Say hello to the Space data object!"`                                     | 키워드, 해시태그, 멘션을 파악합니다.                |
+| topic&#95;ids            | array           | Space 생성자가 선택한 토픽의 ID입니다.<br />`"topic_ids": ["2244994945", "6253282"]`                    | 키워드, 해시태그, 멘션을 파악합니다.                |
+| updated&#95;at           | date (ISO 8601) | Space 메타데이터가 마지막으로 업데이트된 시간입니다.<br />`"updated_at": "2021-07-11T14:44:44.000Z"`                                | 정보를 최신 상태로 유지합니다.                            |
+
+**Space 객체 가져오기 **
+
+**샘플 요청**
+
+다음 요청에서는 [Spaces 조회 endpoint](/ko/x-api/spaces/lookup/introduction)를 사용하여 Space에 대한 필드를 요청합니다. `$BEARER_TOKEN`은 반드시 직접 생성한 [Bearer Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)으로 교체하세요.
+
+```bash
+curl "https://api.x.com/2/spaces/1DXxyRYNejbKM?space.fields=created_at,creator_id,created_athost_ids,lang,is_ticketed,invited_user_ids,participant_count,scheduled_start,speaker_ids,started_at,state,title,updated_at&expansions=creator_id,host_ids,invited_user_ids,speaker_ids" --header "Authorization: Bearer $BEARER_TOKEN"
+```
+
+** 예시 응답 **
+
+```
+{
+  "data": {
+    "id": "1zqKVXPQhvZJB",
+    "state": "live",
+    "created_at": "2021-07-04T23:12:08.000Z",
+    "host_ids": [
+      "2244994945",
+      "6253282"
+    ],
+    "lang": "en",
+    "is_ticketed": false,
+    "invited_user_ids": [
+      "2244994945",
+      "6253282"
+    ],
+    "participant_count": 420,
+    "scheduled_start": "2021-07-14T08:00:00.000Z",
+    "speaker_ids": [
+      "2244994945",
+      "6253282"
+    ],
+    "started_at": "2021-07-14T08:00:12.000Z",
+    "title": "Say hello to the Space data object!",
+    "updated_at": "2021-07-11T14:44:44.000Z"
+  },
+  "includes": {
+    "users": [
+      {
+        "id": "2244994945",
+        "name": "Twitter Dev",
+        "username": "TwitterDev"
+      },
+      {
+        "id": "6253282",
+        "name": "Twitter API",
+        "username": "TwitterAPI"
+      }
+    ]
+  }
+}
+```
+
+<div id="list">
+  ### List
+</div>
+
+List 오브젝트에는 참조된 List를 설명하는 [Twitter Lists](https://help.x.com/en/using-twitter/twitter-lists) 메타데이터가 포함됩니다. List 오브젝트는 List 조회 엔드포인트에서 반환되는 기본 오브젝트입니다. 이 엔드포인트에서 추가 List 필드를 요청하려면 `list.fields` 파라미터를 사용하면 됩니다.
+
+List 오브젝트는 다른 데이터 오브젝트의 자식으로 존재하지 않습니다. 그러나 user 오브젝트는 user 리소스에서 찾은 뒤 확장할 수 있습니다. 이 오브젝트들은 `expansions` 쿼리 파라미터에 `owner_id`를 추가하여 확장할 수 있습니다. 기본 List 오브젝트를 완성하기 위해 추가 필드를 요청할 때에는 `list.fields` 필드 파라미터를 사용하고, 확장된 오브젝트를 완성하기 위해서는 `user.fields`를 사용하십시오.
+
+| 필드 값               | 타입              | 설명                                                                                                                                  | 사용 방법                                                    |
+| :----------------- | :-------------- | :---------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| id (default)       | string          | 이 List의 고유 식별자입니다.<br />`"id": "2244994945"`                                                                                        | 이를 사용하여 특정 List에 대한 정보를 프로그래밍 방식으로 조회할 수 있습니다.           |
+| name (default)     | string          | List를 생성할 때 지정한 List의 이름입니다.<br />`"name": "Twitter Lists"`                                                                         |                                                          |
+| created&#95;at     | date (ISO 8601) | List가 생성된 UTC 날짜 및 시간입니다.<br />`"created_at": "2013-12-14T04:35:55.000Z"`                                                           | List가 X에서 얼마나 오래 운영되고 있는지 확인할 수 있습니다.                    |
+| description        | string          | 사용자에게 List에 대해 알려 주는 짧은 설명입니다.<br />`"description": "People that are active members of the Bay area cycling community on Twitter."` |                                                          |
+| follower&#95;count | integer         | 이 List를 팔로우하는 사용자 수를 표시합니다.<br />`"follower_count": 198`                                                                            |                                                          |
+| member&#95;count   | integer         | 이 List의 멤버 수를 표시합니다.<br />`"member_count": 60`                                                                                      |                                                          |
+| private            | boolean         | List가 비공개인지 여부를 나타냅니다.<br />`"private": false`                                                                                      |                                                          |
+| owner&#95;id       | string          | 이 List 소유자의 고유 식별자입니다.<br />`"owner_id": "1255542774432063488"`                                                                     | 이 사용자가 다른 List를 소유하는지 확인하고 User 오브젝트를 확장하는 데 사용할 수 있습니다. |
+
+**User 오브젝트 가져오기**
+
+**샘플 요청**
+
+다음 요청에서는 [List lookup by ID](/ko/x-api/lists/list-lookup/introduction) 엔드포인트에서 해당 List의 user에 대한 필드를 요청합니다. `$BEARER_TOKEN`을 생성한 [Bearer Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)으로 교체하십시오.
+
+```bash
+curl --request GET 'https://api.x.com/2/lists/1355797419175383040?list.fields=created_at,description,private,follower_count,member_count,owner_id&expansions=owner_id' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+** 예시 응답**
+
+```
+{
+  "data": {
+    "name": "Twitter Comms",
+    "member_count": 60,
+    "id": "1355797419175383040",
+    "private": false,
+    "description": "",
+    "follower_count": 198,
+    "owner_id": "257366942",
+    "created_at": "2021-01-31T08:37:48.000Z"
+  },
+  "includes": {
+    "users": [
+      {
+        "created_at": "2011-02-25T07:51:26.000Z",
+        "name": "Ashleigh Hay 🤸🏼‍♀️",
+        "id": "257366942",
+        "username": "shleighhay",
+        "verified": false
+      }
+    ]
+  }
+}
+```
+
+<div id="media">
+  ### Media
+</div>
+
+Media는 트윗에 첨부된 이미지, GIF 또는 비디오를 의미합니다. media 객체는 어떤 엔드포인트에서도 기본(primary) 객체는 아니지만, Tweet 객체 안에서 조회하고 확장(expansion)할 수 있습니다. 이 객체는 `?expansions=attachments.media_keys`를 사용해 기본 필드만 포함된 축약 객체 형태로 확장할 수 있습니다. 객체를 완성하기 위해 추가 필드를 요청할 때는 `media.fields` 필드 파라미터와 함께 expansions를 사용하십시오.
+
+| Field value                | Type    | Description                                                                                                        | How it can be used                                        |
+|:----------------------------|:---------|:--------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------|
+| media&#95;key (default)       | string  | 확장된 미디어 콘텐츠의 고유 식별자입니다. <br /> ` "media_key": "13_1263145212760805376"`                 | 미디어를 프로그래밍 방식으로 조회하는 데 사용할 수 있습니다            |
+| type (default)             | string  | 콘텐츠 유형입니다(animated&#95;gif, photo, video). <br /> ` "type": "video"`                                        | 미디어를 사진, GIF 또는 비디오로 분류할 수 있습니다            |
+| url                        | string  | Twitter에서 미디어 파일에 직접 접근할 수 있는 URL입니다.                                                                        | 사진에 대해 URL 필드를 포함한 Media 객체를 반환합니다       |
+| duration&#95;ms                | integer | type이 video일 때 제공됩니다. 비디오 길이를 밀리초 단위로 나타냅니다. <br /> ` "duration_ms": 46947`               |                                                          |
+| height                     | integer | 이 콘텐츠의 세로 길이(픽셀)입니다. <br /> ` "height": 1080`                                                        |                                                          |
+| non&#95;public&#95;metrics         | object  | 요청 시점의 미디어 콘텐츠에 대한 비공개 참여 메트릭입니다. 사용자 컨텍스트 인증이 필요합니다. <br /> ` "non_public_metrics": { "playback_0_count": 1561, "playback_100_count": 116, "playback_25_count": 559, "playback_50_count": 305, "playback_75_count": 183,}` | 비디오 참여도를 파악합니다. 예를 들어, 사용자가 비디오의 각 4분의 1 지점까지 얼마나 재생했는지 확인할 수 있습니다. |
+| organic&#95;metrics            | object  | 요청 시점의 미디어 콘텐츠에 대해 오가닉 컨텍스트에서 수집된 참여 메트릭입니다. 사용자 컨텍스트 인증이 필요합니다. <br /> ` "organic_metrics": { "playback_0_count": 1561, "playback_100_count": 116, "playback_25_count": 559, "playback_50_count": 305, "playback_75_count": 183, "view_count": 629}` | 오가닉 미디어 참여도를 파악합니다.                      |
+| preview&#95;image&#95;url          | string  | 이 콘텐츠의 정적 플레이스홀더 미리보기 이미지 URL입니다. <br /> ` "preview_image_url": "https://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg"` |                                                          |
+| promoted&#95;metrics           | object  | 요청 시점의 미디어 콘텐츠에 대해 광고(프로모션) 컨텍스트에서 수집된 참여 메트릭입니다. 사용자 컨텍스트 인증이 필요합니다. <br /> ` "promoted_metrics": { "playback_0_count": 259, "playback_100_count": 15, "playback_25_count": 113, "playback_50_count": 57, "playback_75_count": 25, "view_count": 124}` | 트윗이 프로모션되었을 때의 미디어 참여도를 파악합니다.  |
+| public&#95;metrics             | object  | 요청 시점의 미디어 콘텐츠에 대한 공개 참여 메트릭입니다. <br /> ` "public_metrics": { "view_count": 6865141}` | 트윗에 첨부된 비디오의 전체 조회 수를 파악합니다. |
+| width                      | integer | 이 콘텐츠의 가로 길이(픽셀)입니다. <br /> ` "width": 1920`                                                          |                                                          |
+| alt&#95;text                   | string  | 접근성을 활성화하고 지원하기 위한 이미지 설명입니다. 최대 1000자까지 입력할 수 있습니다. 현재는 alt 텍스트를 이미지에만 추가할 수 있습니다. <br /> ` "alt_text": "Rugged hills along the Na Pali coast on the island of Kauai"` | 사용자가 시각 장애가 있는 경우를 대비해 이미지에 대한 텍스트 설명을 제공하는 데 사용할 수 있습니다. |
+| variants                   | array   | 각 미디어 객체는 서로 다른 해상도나 포맷을 가진 여러 표시 또는 재생 변형(variant)을 가질 수 있습니다. <br /> ` "variants": [{ "bit_rate": 632000, "content_type": "video/mp4", "url": "https://video.twimg.com/ext_tw_video/1527322141724532740/pu/vid/320x568/lnBaR2hCqE-R_90a.mp4?tag=12"}]` |                                                          |
+
+**미디어 객체 가져오기**
+
+**샘플 요청**
+
+다음 요청에서는 [Tweet 조회](/ko/x-api/posts/lookup/introduction) 엔드포인트에서 트윗에 첨부된 미디어 객체의 필드를 요청합니다. 미디어는 트윗의 하위 객체이므로 `attachment.media_keys` 확장이 필요합니다. `$BEARER_TOKEN`을 직접 발급받은 [Bearer Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)으로 반드시 교체해야 합니다.
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1263145271946551300&expansions=attachments.media_keys&media.fields=duration_ms,height,media_key,preview_image_url,public_metrics,type,url,width,alt_text' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+```
+{
+  "data": [
+    {
+      "text": "테스트, 테스트...\n\n원하는 사람과 정확히 대화할 수 있는 새로운 방법입니다. 전 세계적으로 소수의 사용자를 대상으로 시작하고 있으니, 실제로 작동하는 모습을 보려면 👀 주시하세요. https://t.co/pV53mvjAVT",
+      "id": "1263145271946551300",
+      "attachments": {
+        "media_keys": [
+          "13_1263145212760805376"
+        ]
+      }
+    }
+  ],
+  "includes": {
+    "media": [
+      {
+        "duration_ms": 46947,
+        "type": "video",
+        "height": 1080,
+        "media_key": "13_1263145212760805376",
+        "public_metrics": {
+          "view_count": 6909260
+        },
+        "preview_image_url": "https://pbs.twimg.com/media/EYeX7akWsAIP1_1.jpg",
+        "width": 1920
+      }
+    ]
+  }
+}
+```
+
+<div id="poll">
+  ### Poll
+</div>
+
+트윗에 포함된 투표는 어떤 엔드포인트에서도 기본(primary) 객체는 아니지만, 트윗 객체 안에서 조회하고 expansions로 확장할 수 있습니다. 이 객체는 기본 필드만 포함된 요약 객체를 가져오기 위해 `?expansions=attachments.poll_ids`로 확장할 수 있습니다. 객체를 완성하기 위해 추가 필드를 요청할 때는 필드 파라미터인 `poll.fields`를 expansions와 함께 사용합니다.
+
+| Field value          | Type            | Description                                                                                                                       |
+| :------------------- | :-------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| id (default)         | string          | 확장된 투표의 고유 식별자입니다.                                                                                                                |
+|                      |                 | `{"id": "1199786642791452673"}`                                                                                                   |
+| options (default)    | array           | 참조된 투표에서 각 선택지를 설명하는 객체들을 포함합니다.                                                                                                  |
+|                      |                 | `{"options": [ { "position": 1, "label": "“C Sharp”", "votes": 795 }, { "position": 2, "label": "“C Hashtag”", "votes": 156 } ]}` |
+| duration&#95;minutes | integer         | 이 투표의 전체 지속 시간을 지정합니다.                                                                                                            |
+|                      |                 | `{"duration_minutes": 1440}`                                                                                                      |
+| end&#95;datetime     | date (ISO 8601) | 이 투표의 종료 일시를 지정합니다.                                                                                                               |
+|                      |                 | `{"end_datetime": "2019-11-28T20:26:41.000Z"}`                                                                                    |
+| voting&#95;status    | string          | 이 투표가 여전히 활성 상태로 투표를 받을 수 있는지, 아니면 투표가 종료되었는지를 나타냅니다.                                                                             |
+|                      |                 | `{"voting_status": "closed"}`                                                                                                     |
+
+**투표 객체 가져오기**
+
+**샘플 요청**
+
+다음 요청에서는 [Tweets lookup](/ko/x-api/posts/lookup/introduction) 엔드포인트에서 트윗에 첨부된 투표 객체의 필드를 요청합니다. 투표는 트윗의 하위 객체이므로 `attachments.poll_ids` expansions가 필요합니다. `$BEARER_TOKEN`을 본인에게 발급된 [Bearer Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)으로 반드시 교체하세요.
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1199786642791452673&expansions=attachments.poll_ids&poll.fields=duration_minutes,end_datetime,id,options,voting_status' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+**응답 예시**
+
+```
+{
+  "data": [
+    {
+      "text": "C#",
+      "id": "1199786642791452673",
+      "attachments": {
+        "poll_ids": [
+          "1199786642468413448"
+        ]
+      }
+    }
+  ],
+  "includes": {
+    "polls": [
+      {
+        "id": "1199786642468413448",
+        "voting_status": "closed",
+        "duration_minutes": 1440,
+        "options": [
+          {
+            "position": 1,
+            "label": "“C Sharp”",
+            "votes": 795
+          },
+          {
+            "position": 2,
+            "label": "“C Hashtag”",
+            "votes": 156
+          }
+        ],
+        "end_datetime": "2019-11-28T20:26:41.000Z"
+      }
+    ]
+  }
+}
+```
+
+<div id="place">
+  ### Place
+</div>
+
+트윗에 태그된 장소(place)는 어떤 endpoint에서도 기본(primary) 오브젝트는 아니지만, 트윗 리소스에서 조회 및 확장할 수 있습니다. 이 오브젝트는 `?expansions=geo.place_id` 를 사용해 expansions 파라미터로 확장할 수 있으며, 이 경우 기본 필드만 포함된 요약된 오브젝트를 가져옵니다. 전체 오브젝트를 완성하기 위해 추가 필드를 요청할 때는 필드 파라미터 `place.fields` 와 함께 expansions를 사용하세요.
+
+| Field value             | Type   | Description                                             | How it can be used              |
+| :---------------------- | :----- | :------------------------------------------------------ | :------------------------------ |
+| full&#95;name (default) | string | 더 길고 상세한 장소 이름입니다.                                      | 트윗을 특정 장소 이름 기준으로 분류하는 데 사용     |
+|                         |        | `"full_name": "Manhattan, NY"`                          |                                 |
+| id (default)            | string | 트윗에 태그된 관심 지점일 경우, 확장된 place의 고유 식별자입니다.                | 이 값을 사용해 프로그래밍 방식으로 place를 조회   |
+|                         |        | `"id": "01a9a39529b27f36"`                              |                                 |
+| contained&#95;within    | array  | 참조된 place를 포함하는, 알려진 place의 id를 반환합니다.                  |                                 |
+| country                 | string | 이 place가 속한 국가의 전체 이름입니다.                               | 트윗을 국가 이름 기준으로 분류하는 데 사용        |
+|                         |        | `"country": "United States"`                            |                                 |
+| country&#95;code        | string | 이 place가 속한 국가의 ISO Alpha-2 국가 코드입니다.                   | 트윗을 국가 코드 기준으로 분류하는 데 사용        |
+|                         |        | `"country_code": "US"`                                  |                                 |
+| geo                     | object | GeoJSON 형식의 place 세부 정보를 포함합니다.                         |                                 |
+|                         |        | `json                                                 |                                 |
+|                         |        | &quot;geo&quot;:                                        |                                 |
+|                         |        | &quot;type&quot;: &quot;Feature&quot;,                  |                                 |
+|                         |        | &quot;bbox&quot;: [                                     |                                 |
+|                         |        | -74.026675,                                             |                                 |
+|                         |        | 40.683935,                                              |                                 |
+|                         |        | -73.910408,                                             |                                 |
+|                         |        | 40.877483                                               |                                 |
+|                         |        | ],                                                      |                                 |
+|                         |        | &quot;properties&quot;: {}                              |                                 |
+|                         |        | &#125;                                                  |                                 |
+|                         |        | `                                                     |                                 |
+| name                    | string | 이 place의 짧은 이름입니다.                                      | 트윗을 특정 장소 이름 기준으로 분류하는 데 사용     |
+|                         |        | `"name": "Manhattan"`                                   |                                 |
+| place&#95;type          | string | 이 place 정보가 나타내는 정보의 구체적인 유형(예: 도시 이름, 관심 지점 등)을 지정합니다. | 트윗을 특정 유형의 place 기준으로 분류하는 데 사용 |
+|                         |        | `"place_type": "city"`                                  |                                 |
+
+**place 오브젝트 가져오기**
+
+**샘플 요청**
+
+다음 요청에서는 [Tweets lookup](/ko/x-api/posts/lookup/introduction) endpoint에서 트윗에 연결된 place 오브젝트의 필드를 요청합니다. place는 트윗의 하위 오브젝트이므로 `geo.place_id` expansion이 필요합니다. `$BEARER_TOKEN` 을 직접 생성한 [Bearer Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 값으로 바꾸어 사용해야 합니다.
+
+```bash
+curl --request GET 'https://api.x.com/2/tweets?ids=1136048014974423040&expansions=geo.place_id&place.fields=contained_within,country,country_code,full_name,geo,id,name,place_type' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+**예시 응답**
+
+```
+{
+  "data": [
+    {
+      "text": "DevRel 팀의 @jessicagarson이 이끄는 새로운 Twitter Developer Labs 프로그램의 라이브 데모를 공유합니다 #TapIntoTwitter https://t.co/ghv7f4dW5M",
+      "id": "1136048014974423040",
+      "geo": {
+        "place_id": "01a9a39529b27f36"
+      }
+    }
+  ],
+  "includes": {
+    "places": [
+      {
+        "geo": {
+          "type": "Feature",
+          "bbox": [
+            -74.026675,
+            40.683935,
+            -73.910408,
+            40.877483
+          ],
+          "properties": {}
+        },
+        "country_code": "US",
+        "name": "Manhattan",
+        "id": "01a9a39529b27f36",
+        "place_type": "city",
+        "country": "United States",
+        "full_name": "Manhattan, NY"
+      }
+    ]
+  }
+}
+```
+
+<div id="direct-message-events">
+  ### 다이렉트 메시지 이벤트
+</div>
+
+다이렉트 메시지(DM) 대화는 여러 이벤트로 구성됩니다. X API v2는 현재 세 가지 이벤트 유형을 지원합니다: MessageCreate, ParticipantsJoin, ParticipantsLeave.
+
+DM 이벤트 객체는 [Direct Message lookup](/ko/x-api/direct-messages/lookup/introduction) 엔드포인트에서 반환되며, [Manage Direct Messages](/ko/x-api/direct-messages/lookup/introduction) 엔드포인트를 통해 다이렉트 메시지가 성공적으로 생성되면 MessageCreate 이벤트가 생성됩니다.
+
+DM 이벤트를 요청하면 기본적으로 세 가지 이벤트 객체 속성(또는 필드)이 포함됩니다: id, event&#95;type, text. 추가 이벤트 필드를 받으려면 [fields](/ko/x-api/fundamentals/fields) 매개변수인 dm&#95;event.fields를 사용하여 다른 필드를 선택합니다. 사용 가능한 기타 이벤트 필드는 다음과 같습니다: dm&#95;conversation&#95;id, created&#95;at, sender&#95;id, attachments, participant&#95;ids, referenced&#95;tweets.
+
+이 필드들 가운데 일부는 다이렉트 메시지 이벤트와 관련된 다른 X 객체의 ID를 제공합니다:
+
+* sender&#95;id - 메시지를 보낸 계정 또는 그룹 대화에 참가자를 초대한 계정의 ID
+* partricipants&#95;ids - 계정 ID 배열입니다. ParticipantsJoin 및 ParticipantsLeave 이벤트의 경우, 이 배열에는 해당 이벤트를 생성한 계정의 단일 ID가 포함됩니다
+* attachments - 발신자가 X에 업로드한 콘텐츠에 대한 미디어 ID를 제공합니다
+* referenced&#95;tweets - text 필드에서 트윗 URL이 발견되면, 해당 트윗의 ID가 응답에 포함됩니다
+
+sender&#95;id, participant&#95;ids, referenced&#95;tweets.id, attachments.media&#95;keys에 대한 [expansions](/ko/x-api/fundamentals/expansions)를 사용하면 이러한 X 객체 ID를 확장할 수 있습니다.
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **Field value** | **Type** | **Description** | **How it can be used** |
+| id (default) | string | 이벤트의 고유 식별자입니다.<br /><br />&quot;id&quot;: &quot;1050118621198921728&quot; | 이를 사용하여 프로그래밍 방식으로 특정 대화 이벤트를 조회할 수 있습니다(v1.1 엔드포인트에서 사용 가능). |
+| event&#95;type (default) | string | 이벤트 유형을 설명합니다. 현재 세 가지 유형을 지원합니다:<br /><br />* MessageCreate<br />    <br />* ParticipantsJoin<br />    <br />* ParticipantsLeave<br />    <br /><br />&quot;event&#95;type&quot;: &quot;MessageCreate&quot; | 대화 기록을 조회할 때 메시지가 언제 생성되었는지, 그리고 그룹 대화의 경우 참가자가 언제 참여하고 떠났는지를 파악하는 데 사용합니다. 모든 GET 메서드는 event&#95;type= 쿼리 매개변수를 사용해 특정 이벤트 유형으로 필터링하는 기능을 지원합니다. |
+| text (default) | string | 다이렉트 메시지의 실제 UTF-8 텍스트입니다.<br /><br />&quot;text&quot;: &quot;Hello, just you!&quot; | 챗봇에서 메시지 내용을 분석하고 자동 응답을 결정하는 데 사용할 수 있습니다. 대화 검색 기능을 구축하는 데도 사용할 수 있습니다. |
+| entities          | object | DM 텍스트에서 파싱된 엔티티입니다.                                       | 해시태그, URL, 멘션 등에 대한 추가 정보를 제공합니다. |
+| sender&#95;id | string | 이벤트를 생성한 User의 ID입니다. 응답에서 이 객체를 확장하려면 sender&#95;id를 expansion에 포함하고, user.fields 쿼리 매개변수를 사용하여 관심 있는 User 객체 속성을 지정합니다.<br /><br />&quot;sender&#95;id&quot;: &quot;906948460078698496&quot; | MessageCreate 또는 ParticipantsJoin 이벤트를 생성한 User 객체를 조회하는 데 사용합니다. |
+| participant&#95;ids | array (of strings) | 그룹 대화에 참여하거나 떠나는 참가자의 ID입니다. 새 그룹 대화를 생성할 때도 사용됩니다. 응답에서 이 객체를 확장하려면 participant&#95;ids를 expansion에 포함하고, user.fields 쿼리 매개변수를 사용하여 관심 있는 User 객체 속성을 지정합니다.<br /><br />&quot;participant&#95;ids&quot;: [<br /><br />     &quot;906948460078698496&quot;<br /><br />] | 그룹 대화에 참여하거나 떠나는 참가자의 User 객체를 조회하는 데 사용합니다. |
+| dm&#95;conversation&#95;id | string | 이벤트가 속한 대화의 고유 식별자입니다.<br /><br />&quot;dm&#95;conversation&#95;id&quot;: &quot;1584988213961031680&quot; | 이를 사용하여 프로그래밍 방식으로 특정 대화에서 이벤트를 조회하고, 해당 대화에 다이렉트 메시지를 추가할 수 있습니다. |
+| created&#95;at | date (ISO 8601) | 트윗의 생성 시각(UTC)입니다.<br /><br />&quot;created&#95;at&quot;: &quot;2019-06-04T23:12:08.000Z&quot; | 다이렉트 메시지가 언제 생성되었는지, 또는 대화 참가자가 언제 참여하고 떠났는지 파악하는 데 사용할 수 있습니다. |
+| referenced&#95;tweets | array | 다이렉트 메시지 텍스트에서 언급된 트윗의 ID입니다. 응답에서 이 객체를 확장하려면 referenced&#95;tweets.id를 expansion에 포함하고, tweet.fields 쿼리 매개변수를 사용하여 관심 있는 Tweet 객체 속성을 지정합니다.<br /><br />&quot;referenced&#95;tweets&quot;: [<br /><br />    <br /><br />&quot;id&quot;: &quot;1578868150510456833&quot;<br /><br />    <br /><br />] | 다이렉트 메시지가 트윗을 참조하는 경우, 이 ID를 사용하여 해당 트윗의 세부 정보를 조회할 수 있습니다. |
+| attachments | object | 첨부된 미디어가 있는 다이렉트 메시지의 경우, 업로드된 콘텐츠(사진, 동영상 또는 GIF)의 media key를 제공합니다. 응답에서 이 객체를 확장하려면 attachments.media&#95;keys를 expansion에 포함하고, media.fields 쿼리 매개변수를 사용하여 관심 있는 media 객체 속성을 지정합니다. 현재는 하나의 첨부만 지원됩니다.<br /><br />&quot;attachments&quot;: <br /><br />    &quot;media&#95;keys&quot;: [<br /><br />        &quot;3&#95;1136048009270239232&quot;<br /><br />    ]<br /><br /> | 다이렉트 메시지에 첨부된 미디어 객체를 파악하는 데 사용합니다. |
+
+**다이렉트 메시지 이벤트 객체 가져오기**
+
+**샘플 요청**
+
+이 예제에서는 일대일 대화와 관련된 이벤트를 가져오는 요청을 구성해 보겠습니다. 이 요청은 기본적인 다이렉트 메시지 이벤트 필드와 함께, 참조된 트윗 및 해당 작성자에 대한 추가 필드를 반환합니다. 다음을 요청하는 쿼리를 작성해 보겠습니다:
+
+* 생성 시각과 어떤 대화(dm&#95;conversation)의 일부인지와 같은 기본 이벤트 속성
+* 다이렉트 메시지를 보낸 계정의 ID와 설명
+* 참조된 트윗의 텍스트 및 게시 시각
+* 참조된 트윗 작성자의 계정 ID와 설명
+
+이러한 속성을 반환하려면 요청 쿼리에 다음을 포함해야 합니다:
+
+`?dm_event.fields=id,sender_id,text,created_at,dm_conversation_id&expansions=sender_id,referenced_tweets.id&tweet.fields=created_at,text,author_id&user.fields=description`
+
+```bash
+      curl --request GET 'https://api.x.com/2/dm_conversations/with/:participant_id/dm_events?tweet.fields=created_at,text,author_id&user.fields=description&expansions=sender_id,participant_ids,referenced_tweets.id&dm_event.fields=id,sender_id,text,participant_ids,created_at,'
+    --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+반드시 $BEARER&#95;TOKEN을 여러분이 생성한 [Bearer Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)으로 교체하세요.
+
+**응답 예시**
+
+```
+      {
+	"data": [{
+			"id": "1585047616894574596",
+			"sender_id": "944480690",
+			"text": "Hello, just you!",
+			"created_at": "2022-10-25T23:16:15.000Z",
+			"event_type": "MessageCreate",
+			"dm_conversation_id": "944480690-906948460078698496"
+		},
+		{
+			"id": "1581048670673260549",
+			"sender_id": "944480690",
+			"text": "Simple Tweet link: https://t.co/IYFbRIdXHg",
+			"referenced_tweets": [{
+				"id": "1578900353814519810"
+			}],
+			"created_at": "2022-10-14T22:25:52.000Z",
+			"event_type": "MessageCreate",
+			"dm_conversation_id": "944480690-906948460078698496"
+		},
+		{
+			"id": "1580705121553420292",
+			"sender_id": "944480690",
+			"text": "Adding a new 1-to-1 Direct Message.",
+			"created_at": "2022-10-13T23:40:43.000Z",
+			"event_type": "MessageCreate",
+			"dm_conversation_id": "944480690-906948460078698496"
+		}
+	],
+	"includes": {
+		"users": [{
+				"name": "API Demos",
+				"description": "Hosting TwitterDev integrations... @TwitterDev #DevRel",
+				"id": "944480690",
+				"username": "FloodSocial"
+			},
+			{
+				"name": "the SnowBot",
+				"description": "Home of the @TwitterDev SnowBot... Serving snow reports, snow photos, and snow research links... Chatbot is currently being remodeled for Twitter APIv2.",
+				"id": "906948460078698496",
+				"username": "SnowBotDev"
+			}
+		],
+		"tweets": [{
+				"text": "모두에게 콜로라도 물의 해 새해 인사를 하지 못해 좀 미안한 기분이 드네요…\n\n콜로라도의 모든 친구들과 동료들, 새로운 분들과 오래된 분들 모두에게 물의 해 축하드립니다… \n\n너무 풍족하지는 않더라도, 풍족한 물의 해가 되기를 바랍니다…",
+				"id": "1578900353814519810",
+				"created_at": "2022-10-09T00:09:13.000Z",
+				"author_id": "944480690",
+				"edit_history_tweet_ids": [
+					"1578900353814519810"
+				]
+			}
+		]
+	},
+	"meta": {
+		"result_count": 3,
+		"next_token": "18LAA581J5II7LA00C00ZZZZ",
+		"previous_token": "1BLC45G1H8CAL5DG0G00ZZZZ"
+	}
+}
+```
+
+<div id="community">
+  ### 커뮤니티
+</div>
+
+커뮤니티는 X 사용자가 서로 연결하고, 공유하며, 자신이 가장 중요하게 생각하는 논의에 더 가까이 다가갈 수 있도록 마련된 전용 공간입니다.
+
+커뮤니티의 게시물은 X를 사용하는 누구나 볼 수 있지만, 해당 커뮤니티에 속한 사용자만 상호작용하고 논의에 참여할 수 있습니다.
+
+Community 객체에는 커뮤니티와 관련된 메타데이터가 포함됩니다.
+
+| Field value      | Type            | Description                                        |    |
+| :--------------- | :-------------- | :------------------------------------------------- | :- |
+| created&#95;at   | date (ISO 8601) | 커뮤니티가 생성된 시간.                                      |    |
+| id               | string          | 커뮤니티의 고유 식별자.                                      |    |
+| name             | string          | 커뮤니티의 이름.                                          |    |
+| description      | string          | 제공된 경우, 커뮤니티 설명 텍스트.                               |    |
+| access           | string          | 커뮤니티의 접근 수준. <br /><br /> 다음 값 중 하나일 수 있습니다.       |    |
+|                  |                 | - `Public`                                         |    |
+|                  |                 | - `Closed`                                         |    |
+| join&#95;policy  | string          | 커뮤니티의 가입 정책. <br /><br /> 다음 값 중 하나일 수 있습니다.       |    |
+|                  |                 | - `Open`                                           |    |
+|                  |                 | - `RestrictedJoinRequestsDisabled`                 |    |
+|                  |                 | - `RestrictedJoinRequestsRequireAdminApproval`     |    |
+|                  |                 | - `RestrictedJoinRequestsRequireModeratorApproval` |    |
+|                  |                 | - `SuperFollowRequired`                            |    |
+| member&#95;count | integer         | 커뮤니티에 가입한 멤버 수.                                    |    |
+
+**Community 객체 가져오기**
+
+**샘플 요청**
+
+다음 요청에서는 제공된 키워드를 기반으로 커뮤니티 목록을 검색하면서 특정 필드를 지정해 요청합니다. `$BEARER_TOKEN`을 직접 생성한 [Bearer Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)으로 반드시 교체해야 합니다.
+
+```bash
+curl --location 'https://api.x.com/2/communities/search?query=anime&amp;community.fields=access,created_at,description,id,join_policy,member_count,name' --header 'Authorization: $BEARER_TOKEN'
+```
+
+**예시 응답**
+
+```
+{
+  "data": [
+    {
+      "id": "Q29tbXVuaXR5OjE3NTg3NDc4MTc2NDI3MDA5MjI=",
+      "description": "Welcome to the Anime Community! Where anime fans gather to share their favorite shows and discuss everything anime-related.",
+      "join_policy": "Open",
+      "access": "Public",
+      "member_count": 39915,
+      "name": "Anime Community",
+      "created_at": "2024-02-17T06:58:50.000Z"
+    },
+    {
+      "id": "Q29tbXVuaXR5OjE1MDY3OTM5NTMxMDYwNDI4OTE=",
+      "description": "Join and text about anime 🥰",
+      "join_policy": "Open",
+      "access": "Public",
+      "member_count": 26019,
+      "name": "Anime World 🌸",
+      "created_at": "2022-03-24T00:44:07.000Z"
+    },
+    {
+      "id": "Q29tbXVuaXR5OjE0OTY3NzYyMTU5Mzk1MzQ4NDk=",
+      "description": "For all anime lovers and creators!",
+      "join_policy": "Open",
+      "access": "Public",
+      "member_count": 5612,
+      "name": "Anime",
+      "created_at": "2022-02-24T09:17:13.000Z"
+    }
+  ],
+  "meta": {
+    "next_token": "7140dibdnow9c7btw481s8m561gat797rboud5r80xvzm"
+  }
+}
+```
+
+<div id="how-to-use-fields-and-expansions">
+  ## 필드와 expansions 사용 방법
+</div>
+
+기본적으로 X API v2 데이터 객체는 [fields](/ko/x-api/fundamentals/fields) 또는 [expansions](/ko/x-api/fundamentals/expansions) 매개변수를 사용하지 않고 요청을 보내면, 일부 기본 필드만 포함합니다. 이 가이드는 응답에서 추가 객체와 필드를 받기 위해 요청에 `fields` 및 `expansions` 쿼리 매개변수를 사용하는 방법을 설명합니다.
+
+이 가이드에서는 아래 트윗 스크린샷을 예시로 여러 필드를 요청해 보겠습니다.
+ 
+
+![이 이미지는 @X가 게시한 트윗의 스크린샷입니다. 트윗 텍스트, 사용자 이름, 게시 날짜와 시간, 소스, 공개 메트릭을 볼 수 있으며, 동영상도 포함되어 있습니다.](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/ScreenShotDataDictionaryGuide.png.twimg.1920.png)
+
+스크린샷에서 볼 수 있듯이, 트윗에는 트윗 작성자, 트윗 메트릭, 생성 타임스탬프, 동영상, 동영상 조회 수 등 눈에 보이는 여러 정보가 포함되어 있습니다. 이 밖에도 스크린샷에는 보이지 않지만 여전히 요청할 수 있는 여러 데이터가 존재합니다. 
+
+API에 요청을 보낼 때 기본 응답은 단순하며, 기본 트윗 필드(id와 text)만 포함합니다. 또한 사용 중인 엔드포인트에서 기본적으로 반환되는 주요 객체만 받게 되며, 이 주요 객체와 관련될 수 있는 연관 데이터 객체는 포함되지 않습니다.
+
+이러한 단순한 기본 구조와 fields 및 expansions 매개변수를 함께 사용하면, 사용 사례에 따라 필요한 필드만 선택적으로 요청할 수 있습니다. 
+ 
+
+<div id="requesting-additional-fields-and-objects">
+  #### 추가 필드 및 객체 요청
+</div>
+
+먼저 트윗 ID와 [GET /tweets 엔드포인트](/ko/x-api/posts/lookup/introduction)를 사용하여 [트윗 객체](/ko/x-api/fundamentals/data-dictionary#tweet)를 요청합니다.
+
+요청:
+
+```bash
+curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969' \
+  --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+응답:
+
+```
+{
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "내 트윗에 대한 트윗을 놓치지 마세요. \n\n이제 iOS에서 댓글이 달린 리트윗을 한곳에서 모두 확인할 수 있습니다. https://t.co/oanjZfzC6y"
+        }
+    ]
+}
+```
+
+다음 단계별 가이드에서는 스크린샷에 표시된 추가 데이터를 가져오는 방법을 안내합니다.
+
+1. 요청에 포함하려는 추가 필드를 결정하려면 [object model](/ko/x-api/fundamentals/data-dictionary#tweet)을 참고하거나, 각 엔드포인트의 API reference 페이지에 나열된 필드 목록을 검토하세요.
+
+   이 경우에는 다음과 같은 추가 필드를 요청합니다:
+   attachments, author&#95;id, created&#95;at, public&#95;metrics.
+
+2. 위의 필드들을 값으로 사용해 쉼표로 구분된 목록으로 `tweet.fields` 쿼리 파라미터를 구성합니다:
+   `?tweet.fields=attachments,author_id,created_at,public_metrics`
+
+3. 이전에 보낸 GET /tweets 요청에 쿼리 매개변수를 추가합니다.
+
+요청:
+
+`curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969&tweet.fields=attachments,author_id,created_at,public_metrics' \   --header 'Authorization: Bearer $BEARER_TOKEN'`
+
+응답:
+
+```
+{
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "내 트윗에 대한 트윗을 놓치지 마세요. \n\niOS에서 이제 댓글이 포함된 리트윗을 한곳에서 모두 확인할 수 있습니다. https://t.co/oanjZfzC6y",
+            "author_id": "783214",
+            "public_metrics": {
+                "retweet_count": 5219,
+                "reply_count": 1828,
+                "like_count": 17141,
+                "quote_count": 3255
+            },
+            "attachments": {
+                "media_keys": [
+                    "13_1260294804770041858"
+                ]
+            },
+            "created_at": "2020-05-12T19:44:51.000Z"
+        }
+    ]
+}
+```
+
+4. 다음으로, 트윗에 포함된 동영상과 관련된 필드를 요청합니다. 이를 위해 `expansions` 매개변수에 `attachments.media_keys` 값을 지정하여 요청에 추가합니다.
+
+?expansions=attachments.media&#95;keys
+
+요청:
+
+```bash
+curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969&tweet.fields=attachments,author_id,created_at,public_metrics&expansions=attachments.media_keys' \
+  --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+응답, includes 객체에 미디어 객체가 포함됨:
+
+```
+{
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "내 트윗에 대한 트윗을 놓치지 마세요. \n\niOS에서 이제 댓글이 포함된 리트윗을 한곳에서 모두 확인할 수 있습니다. https://t.co/oanjZfzC6y",
+            "public_metrics": {
+                "retweet_count": 5219,
+                "reply_count": 1828,
+                "like_count": 17141,
+                "quote_count": 3255
+            },
+            "created_at": "2020-05-12T19:44:51.000Z",
+            "attachments": {
+                "media_keys": [
+                    "13_1260294804770041858"
+                ]
+            },
+            "author_id": "783214"
+        }
+    ],
+    "includes": {
+        "media": [
+            {
+                "media_key": "13_1260294804770041858",
+                "type": "video"
+            }
+        ]
+    }
+}
+```
+
+5. 마지막으로 동영상의 조회수와 재생 시간을 요청하겠습니다. 이들은 기본 필드가 아니므로 명시적으로 요청해야 합니다. 요청 시 `media.fields` 매개변수에 쉼표로 구분된 값 `public_metrics`와 `duration_ms`를 사용하세요.
+
+?media.fields=public&#95;metrics,duration&#95;ms
+
+요청:
+ 
+
+`curl --request GET --url 'https://api.x.com/2/tweets?ids=1260294888811347969&tweet.fields=attachments,author_id,created_at,public_metrics&expansions=attachments.media_keys&media.fields=duration_ms,public_metrics' --header 'Authorization: Bearer $BEARER_TOKEN'`
+
+이제 트윗 스크린샷에서 볼 수 있는 모든 데이터가 포함된 응답은 다음과 같습니다:
+
+```
+  {
+    "data": [
+        {
+            "id": "1260294888811347969",
+            "text": "당신의 트윗에 대한 트윗을 놓치지 마세요. \n\niOS에서 이제 댓글이 달린 리트윗을 한 곳에서 모두 볼 수 있습니다. https://t.co/oanjZfzC6y",
+            "author_id": "783214",
+            "public_metrics": {
+                "retweet_count": 5219,
+                "reply_count": 1828,
+                "like_count": 17141,
+                "quote_count": 3255
+            },
+            "created_at": "2020-05-12T19:44:51.000Z",
+            "attachments": {
+                "media_keys": [
+                    "13_1260294804770041858"
+                ]
+            }
+        }
+    ],
+    "includes": {
+        "media": [
+            {
+                "duration_ms": 36503,
+                "media_key": "13_1260294804770041858",
+                "public_metrics": {
+                    "view_count": 1534703
+                },
+                "type": "video"
+            }
+        ]
+    }
+}
+```
+
+총 이 예제에는 다음과 같은 매개변수를 포함합니다:
+
+* ids=1260294888811347969
+* tweet.fields=attachments,author&#95;id,created&#95;at,public&#95;metrics
+* expansions=attachments.media&#95;keys
+* media.fields=public&#95;metrics,duration&#95;ms
+   
+
+이들을 함께 사용하면 전체 쿼리 문자열은 다음과 같습니다:
+
+```
+?ids=1260294888811347969&tweet.fields=attachments,author\_id,created\_at,public\_metrics&expansions=attachments.media\_keys&media.fields=public\_metrics,duration\_ms
+```
+
+<div id="x-api-v2-example-payloads">
+  ## X API v2 페이로드 예시
+</div>
+
+<div id="tweet">
+  ### 트윗
+</div>
+
+```json
+{
+  "data": [
+    {
+      "conversation_id": "1304102743196356610",
+      "id": "1307025659294674945",
+      "possibly_sensitive": false,
+      "public_metrics": {
+        "retweet_count": 11,
+        "reply_count": 2,
+        "like_count": 70,
+        "quote_count": 1
+      },
+      "entities": {
+        "urls": [
+          {
+            "start": 74,
+            "end": 97,
+            "url": "https://t.co/oeF3ZHeKQQ",
+            "expanded_url": "https://dev.to/twitterdev/understanding-the-new-tweet-payload-in-the-twitter-api-v2-1fg5",
+            "display_url": "dev.to/twitterdev/und…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1317156296982867969/2uLfv-Bh?format=jpg&name=orig",
+                "width": 1128,
+                "height": 600
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1317156296982867969/2uLfv-Bh?format=jpg&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "X API v2의 새로운 트윗 페이로드 이해하기",
+            "description": "X는 최근 새로운 기능을 제공하기 위해 처음부터 새롭게 구축한 X API v2를 발표했습니다...",
+            "unwound_url": "https://dev.to/twitterdev/understanding-the-new-tweet-payload-in-the-twitter-api-v2-1fg5"
+          }
+        ]
+      },
+      "text": "새로운 트윗 페이로드 v2의 업데이트 내용을 다룬 글입니다 https://t.co/oeF3ZHeKQQ",
+      "in_reply_to_user_id": "2244994945",
+      "created_at": "2020-09-18T18:36:15.000Z",
+      "author_id": "2244994945",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1304102743196356610"
+        }
+      ],
+      "lang": "en",
+      "source": "Twitter Web App"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "id": "2244994945",
+        "verified": true,
+        "location": "127.0.0.1",
+        "description": "#TwitterDev 팀의 공식 채널이자 #TwitterAPI 관련 업데이트, 뉴스 및 이벤트에 대한 공식 소스입니다.",
+        "pinned_tweet_id": "1293593516040269825",
+        "username": "TwitterDev",
+        "public_metrics": {
+          "followers_count": 513961,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "name": "Twitter Dev",
+        "url": "https://t.co/3ZX3TNiZCY",
+        "protected": false
+      }
+    ],
+    "tweets": [
+      {
+        "conversation_id": "1304102743196356610",
+        "id": "1304102743196356610",
+        "possibly_sensitive": false,
+        "public_metrics": {
+          "retweet_count": 31,
+          "reply_count": 12,
+          "like_count": 104,
+          "quote_count": 4
+        },
+        "entities": {
+          "mentions": [
+            {
+              "start": 146,
+              "end": 158,
+              "username": "suhemparack"
+            }
+          ],
+          "urls": [
+            {
+              "start": 237,
+              "end": 260,
+              "url": "https://t.co/CjneyMpgCq",
+              "expanded_url": "https://x.com/TwitterDev/status/1304102743196356610/video/1",
+              "display_url": "pic.x.com/CjneyMpgCq"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 8,
+              "end": 19,
+              "tag": "TwitterAPI"
+            }
+          ]
+        },
+        "attachments": {
+          "media_keys": [
+            "13_1303848070984024065"
+          ]
+        },
+        "text": "새로운 #TwitterAPI에는 트윗 페이로드에 대한 몇 가지 개선 사항이 포함되어 있습니다. 주요 차이점이 무엇인지 궁금하실 겁니다 🧐\n\n이 영상에서 @SuhemParack은 v1.1 트윗 페이로드와 v2 엔드포인트 사용 시 확인할 수 있는 내용을 비교합니다. https://t.co/CjneyMpgCq",
+        "created_at": "2020-09-10T17:01:37.000Z",
+        "author_id": "2244994945",
+        "lang": "en",
+        "source": "Twitter Media Studio"
+      }
+    ]
+  }
+}
+```
+
+<div id="tweet-reply">
+  ### 트윗 답글
+</div>
+
+```json
+{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1296887091901718529",
+      "text": "@PennMedCDH가 COVID-19 보건 위기를 이해하기 위해 Twitter 데이터를 활용하는 방법을 확인하세요 📊\n\nhttps://t.co/1tdA8uDWes",
+      "referenced_tweets": [
+        {
+          "type": "replied_to",
+          "id": "1296887091901718529"
+        }
+      ],
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 30,
+            "end": 36,
+            "probability": 0.6318,
+            "type": "Product",
+            "normalized_text": "Twitter"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 8,
+            "end": 19,
+            "username": "PennMedCDH"
+          }
+        ],
+        "urls": [
+          {
+            "start": 87,
+            "end": 110,
+            "url": "https://t.co/1tdA8uDWes",
+            "expanded_url": "https://developer.x.com/en/use-cases/success-stories/penn",
+            "display_url": "developer.x.com/en/use-cases/s…",
+            "status": 200,
+            "title": "Penn Medicine 디지털 헬스 센터",
+            "description": "Penn Med 디지털 헬스 센터는 감정, 보고된 증상, 주별 데이터 분석, COVID-19 발병에 대한 국경 데이터를 상세히 보여주는 차트가 포함된 COVID-19 Twitter 지도를 제작했습니다. 또한 Penn Med With You 이니셔티브는 Twitter의 지역별 집계 정보를 활용하여 웹사이트와 문자 메시지 서비스에 정보를 제공합니다. 이 서비스는 해당 정보를 사용하여 관련성 있고 시의적절한 리소스를 배포합니다.",
+            "unwound_url": "https://developer.x.com/en/use-cases/success-stories/penn"
+          }
+        ]
+      },
+      "id": "1296887316556980230",
+      "public_metrics": {
+        "retweet_count": 9,
+        "reply_count": 3,
+        "like_count": 26,
+        "quote_count": 2
+      },
+      "author_id": "2244994945",
+      "in_reply_to_user_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "브랜드 범위를 좁히는 브랜드 버티컬 내 카테고리"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "서비스"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "브랜드",
+            "description": "브랜드 및 기업"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "123",
+            "name": "진행 중인 뉴스 스토리",
+            "description": "'Brexit'와 같은 진행 중인 뉴스 스토리"
+          },
+          "entity": {
+            "id": "1220701888179359745",
+            "name": "COVID-19"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "created_at": "2020-08-21T19:10:05.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "#TwitterDev 팀의 목소리이자 #TwitterAPI 관련 업데이트, 뉴스 및 이벤트에 대한 공식 소스입니다.",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      },
+      {
+        "created_at": "2013-07-23T16:58:03.000Z",
+        "id": "1615654896",
+        "protected": false,
+        "username": "PennMedCDH",
+        "verified": false,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/7eS9RuwIb9",
+                "expanded_url": "http://centerfordigitalhealth.upenn.edu/",
+                "display_url": "centerfordigitalhealth.upenn.edu"
+              }
+            ]
+          },
+          "description": {
+            "mentions": [
+              {
+                "start": 0,
+                "end": 13,
+                "username": "PennMedicine"
+              }
+            ]
+          }
+        },
+        "description": "@PennMedicine의 디지털 헬스 센터는 의료 분야에서 디지털 헬스 기술 발전의 영향을 연구하여 과학을 발전시킵니다.",
+        "public_metrics": {
+          "followers_count": 1348,
+          "following_count": 455,
+          "tweet_count": 1288,
+          "listed_count": 92
+        },
+        "location": "Philadelphia, PA",
+        "name": "Penn Med CDH",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1067488849725726723/MoO3FQ44_normal.jpg",
+        "url": "https://t.co/7eS9RuwIb9"
+      }
+    ],
+    "tweets": [
+      {
+        "lang": "en",
+        "conversation_id": "1296887091901718529",
+        "text": "Dr. @RainaMerchant와 Penn Medicine CDH 팀은 의료의 미래를 구축하는 데 기여하고 있습니다.\n\n팀은 위험 요인 발견부터 대중 감정 파악에 이르기까지 다양한 방식으로 소셜 데이터의 인사이트를 활용하고 있습니다. 🔎",
+        "possibly_sensitive": false,
+        "entities": {
+          "annotations": [
+            {
+              "start": 39,
+              "end": 55,
+              "probability": 0.8274,
+              "type": "Organization",
+              "normalized_text": "Penn Medicine CDH"
+            }
+          ],
+          "mentions": [
+            {
+              "start": 4,
+              "end": 18,
+              "username": "RainaMerchant"
+            }
+          ]
+        },
+        "id": "1296887091901718529",
+        "public_metrics": {
+          "retweet_count": 9,
+          "reply_count": 7,
+          "like_count": 32,
+          "quote_count": 0
+        },
+        "author_id": "2244994945",
+        "source": "Twitter Web App",
+        "created_at": "2020-08-21T19:09:12.000Z"
+      }
+    ]
+  }
+}
+```
+
+<div id="extended-tweet">
+  ### 확장된 트윗
+</div>
+
+```json
+{
+  "data": [
+    {
+      "conversation_id": "1296121314218897408",
+      "id": "1296121314218897408",
+      "possibly_sensitive": false,
+      "public_metrics": {
+        "retweet_count": 54,
+        "reply_count": 9,
+        "like_count": 172,
+        "quote_count": 23
+      },
+      "entities": {
+        "urls": [
+          {
+            "start": 192,
+            "end": 215,
+            "url": "https://t.co/khXhTurm9x",
+            "expanded_url": "https://devcommunity.x.com/t/hide-replies-now-available-in-the-new-twitter-api/140996",
+            "display_url": "devcommunity.com/t/hide-replies…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1296121315514957825/3CI24hSI?format=png&name=orig",
+                "width": 400,
+                "height": 400
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1296121315514957825/3CI24hSI?format=png&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Hide replies now available in the new Twitter API",
+            "description": "오늘 새로운 Twitter API에서 답글 숨기기 엔드포인트의 정식 출시를 발표하게 되어 기쁩니다. 답글 숨기기 엔드포인트를 사용하면 사용자가 자신의 트윗에 대한 답글을 숨기거나 숨김 해제할 수 있는 도구를 구축할 수 있습니다. 사용자는 욕설, 주의를 산만하게 하거나 오해의 소지가 있는 댓글에 덜 주목하거나 대화를 더 흥미롭게 만들기 위해 등 여러 이유로 답글을 관리합니다. 이 엔드포인트를 통해 Twitter 사용자가 답글을 더 빠르고 효율적으로 숨기거나 숨김 해제할 수 있는 도구를 구축할 수 있습니다...",
+            "unwound_url": "https://devcommunity.x.com/t/hide-replies-now-available-in-the-new-twitter-api/140996"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 178,
+            "end": 189,
+            "tag": "TwitterAPI"
+          }
+        ]
+      },
+      "text": "The hide replies endpoint is launching today! \n\nDevelopers can hide replies to Tweets - a crucial way developers can help improve the health of the public conversation using the #TwitterAPI.\n\nhttps://t.co/khXhTurm9x",
+      "created_at": "2020-08-19T16:26:16.000Z",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "Top level interests and hobbies groupings, like Food or Travel"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "Technology",
+            "description": "Technology and computing"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "Computer programming",
+            "description": "Computer programming"
+          }
+        }
+      ],
+      "author_id": "2244994945",
+      "lang": "en",
+      "source": "Twitter Web App"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "id": "2244994945",
+        "verified": true,
+        "location": "127.0.0.1",
+        "description": "The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.",
+        "pinned_tweet_id": "1293593516040269825",
+        "username": "TwitterDev",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "name": "Twitter Dev",
+        "url": "https://t.co/3ZX3TNiZCY",
+        "protected": false
+      }
+    ]
+  }
+}
+```
+
+<div id="tweet-with-media">
+  ### 미디어가 포함된 트윗
+</div>
+
+```json
+{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1293593516040269825",
+      "text": "It’s finally here! 🥁 Say hello to the new #TwitterAPI.\n\nWe’re rebuilding the X API v2 from the ground up to better serve our developer community. And today’s launch is only the beginning.\n\nhttps://t.co/32VrwpGaJw https://t.co/KaFSbjWUA8",
+      "attachments": {
+        "media_keys": [
+          "7_1293565706408038401"
+        ]
+      },
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 78,
+            "end": 88,
+            "probability": 0.4381,
+            "type": "Product",
+            "normalized_text": "X API"
+          }
+        ],
+        "hashtags": [
+          {
+            "start": 42,
+            "end": 53,
+            "tag": "TwitterAPI"
+          }
+        ],
+        "urls": [
+          {
+            "start": 195,
+            "end": 218,
+            "url": "https://t.co/32VrwpGaJw",
+            "expanded_url": "https://blog.x.com/developer/en_us/topics/tools/2020/introducing_new_twitter_api.html",
+            "display_url": "blog.x.com/developer/en_u…",
+            "images": [
+              {
+                "url": "https://pbs.twimg.com/news_img/1336475659279818754/_cmRh7QE?format=jpg&name=orig",
+                "width": 1200,
+                "height": 627
+              },
+              {
+                "url": "https://pbs.twimg.com/news_img/1336475659279818754/_cmRh7QE?format=jpg&name=150x150",
+                "width": 150,
+                "height": 150
+              }
+            ],
+            "status": 200,
+            "title": "Introducing a new and improved X API",
+            "description": "Introducing the new X API - rebuilt from the ground up to deliver new features faster so developers can help the world connect to the public conversation happening on Twitter.",
+            "unwound_url": "https://blog.x.com/developer/en_us/topics/tools/2020/introducing_new_twitter_api.html"
+          },
+          {
+            "start": 219,
+            "end": 242,
+            "url": "https://t.co/KaFSbjWUA8",
+            "expanded_url": "https://x.com/TwitterDev/status/1293593516040269825/video/1",
+            "display_url": "pic.x.com/KaFSbjWUA8"
+          }
+        ]
+      },
+      "id": "1293593516040269825",
+      "public_metrics": {
+        "retweet_count": 958,
+        "reply_count": 171,
+        "like_count": 2848,
+        "quote_count": 333
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "Brands and Companies"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "Top level interests and hobbies groupings, like Food or Travel"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "Technology",
+            "description": "Technology and computing"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "Computer programming",
+            "description": "Computer programming"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "created_at": "2020-08-12T17:01:42.000Z"
+    }
+  ],
+  "includes": {
+    "media": [
+      {
+        "height": 720,
+        "duration_ms": 34875,
+        "media_key": "7_1293565706408038401",
+        "type": "video",
+        "preview_image_url": "https://pbs.twimg.com/ext_tw_video_thumb/1293565706408038401/pu/img/66P2dvbU4a02jYbV.jpg",
+        "public_metrics": {
+          "view_count": 279438
+        },
+        "width": 1280
+      }
+    ],
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "The voice of the #TwitterDev team and your official source for updates, news, and events, related to the #TwitterAPI.",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      }
+    ]
+  }
+}`
+
+
+### Retweet
+
+      `{
+  "data": [
+    {
+      "public_metrics": {
+        "retweet_count": 19,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0
+      },
+      "conversation_id": "1229851574555508737",
+      "id": "1229851574555508737",
+      "entities": {
+        "annotations": [
+          {
+            "start": 28,
+            "end": 38,
+            "probability": 0.261,
+            "type": "Product",
+            "normalized_text": "Alexa Skill"
+          },
+          {
+            "start": 44,
+            "end": 50,
+            "probability": 0.7332,
+            "type": "Product",
+            "normalized_text": "Twitter"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 15,
+            "username": "suhemparack"
+          }
+        ]
+      },
+      "text": "RT @suhemparack: I built an Alexa Skill for Twitter using APL that allows you to view Tweets and Trends on the echo show!\n\nCheck it out her…",
+      "created_at": "2020-02-18T19:33:59.000Z",
+      "possibly_sensitive": false,
+      "author_id": "2244994945",
+      "referenced_tweets": [
+        {
+          "type": "retweeted",
+          "id": "1229843515603144704"
+        }
+      ],
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "브랜드 및 기업"
+          },
+          "entity": {
+            "id": "10026792024",
+            "name": "Amazon"
+          }
+        },
+        {
+          "domain": {
+            "id": "48",
+            "name": "Product",
+            "description": "브랜드에서 제작한 제품. 예: Ford Explorer, Apple iPhone."
+          },
+          "entity": {
+            "id": "968221983803494400",
+            "name": "Amazon - Alexa",
+            "description": "Alexa"
+          }
+        },
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "브랜드 범위를 세분화하는 브랜드 버티컬 내 카테고리"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "Services"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "브랜드 및 기업"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "lang": "en"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "username": "TwitterDev",
+        "name": "Twitter Dev",
+        "location": "127.0.0.1",
+        "url": "https://t.co/3ZX3TNiZCY",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "id": "2244994945",
+        "description": "#TwitterDev 팀의 공식 채널이자 #TwitterAPI 관련 업데이트, 뉴스 및 이벤트에 대한 공식 소스입니다.",
+        "verified": true,
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "pinned_tweet_id": "1293593516040269825",
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "protected": false
+      },
+      {
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1230703695051935747/TbQKe91L_normal.jpg",
+        "username": "suhemparack",
+        "name": "Suhem Parack",
+        "location": "Seattle, WA",
+        "url": "https://t.co/8IkCzClPCz",
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/8IkCzClPCz",
+                "expanded_url": "https://developer.x.com",
+                "display_url": "developer.x.com"
+              }
+            ]
+          },
+          "description": {
+            "mentions": [
+              {
+                "start": 42,
+                "end": 50,
+                "username": "Twitter"
+              }
+            ]
+          }
+        },
+        "id": "857699969263964161",
+        "description": "@Twitter 학술 연구 개발자 관계 담당. Twitter 데이터 연구에 대해 문의하세요. 이전 경력: Amazon Alexa. 개인 의견임",
+        "verified": false,
+        "public_metrics": {
+          "followers_count": 738,
+          "following_count": 512,
+          "tweet_count": 460,
+          "listed_count": 12
+        },
+        "pinned_tweet_id": "1296498078233571329",
+        "created_at": "2017-04-27T20:56:22.000Z",
+        "protected": false
+      }
+    ],
+    "tweets": [
+      {
+        "public_metrics": {
+          "retweet_count": 19,
+          "reply_count": 1,
+          "like_count": 71,
+          "quote_count": 6
+        },
+        "conversation_id": "1229843515603144704",
+        "id": "1229843515603144704",
+        "entities": {
+          "annotations": [
+            {
+              "start": 11,
+              "end": 21,
+              "probability": 0.3342,
+              "type": "Product",
+              "normalized_text": "Alexa Skill"
+            },
+            {
+              "start": 27,
+              "end": 33,
+              "probability": 0.6727,
+              "type": "Product",
+              "normalized_text": "Twitter"
+            }
+          ],
+          "urls": [
+            {
+              "start": 127,
+              "end": 150,
+              "url": "https://t.co/l5J8wq748G",
+              "expanded_url": "https://dev.to/twitterdev/building-an-alexa-skill-for-twitter-using-alexa-presentation-language-1aj0",
+              "display_url": "dev.to/twitterdev/bui…",
+              "status": 200,
+              "unwound_url": "https://dev.to/twitterdev/building-an-alexa-skill-for-twitter-using-alexa-presentation-language-1aj0"
+            }
+          ]
+        },
+        "text": "I built an Alexa Skill for Twitter using APL that allows you to view Tweets and Trends on the echo show!\n\nCheck it out here 👇\n\nhttps://t.co/l5J8wq748G",
+        "created_at": "2020-02-18T19:01:58.000Z",
+        "possibly_sensitive": false,
+        "author_id": "857699969263964161",
+        "context_annotations": [
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "브랜드 및 기업"
+            },
+            "entity": {
+              "id": "10026792024",
+              "name": "Amazon"
+            }
+          },
+          {
+            "domain": {
+              "id": "48",
+              "name": "Product",
+              "description": "브랜드에서 제작한 제품. 예: Ford Explorer, Apple iPhone."
+            },
+            "entity": {
+              "id": "968221983803494400",
+              "name": "Amazon - Alexa",
+              "description": "Alexa"
+            }
+          },
+          {
+            "domain": {
+              "id": "46",
+              "name": "Brand Category",
+              "description": "브랜드 범위를 세분화하는 브랜드 버티컬 내 카테고리"
+            },
+            "entity": {
+              "id": "781974596752842752",
+              "name": "Services"
+            }
+          },
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "브랜드 및 기업"
+            },
+            "entity": {
+              "id": "10045225402",
+              "name": "Twitter"
+            }
+          }
+        ],
+        "source": "Twitter Web App",
+        "lang": "en"
+      }
+    ]
+  }
+}`
+
+
+### Quote Tweet
+
+      `{
+  "data": [
+    {
+      "lang": "en",
+      "conversation_id": "1328399838128467969",
+      "text": "계획대로 아래에 언급된 Labs v2 엔드포인트가 종료되었습니다. X API v2에 대해 질문이 있거나 도움이 필요하시면 포럼에 알려주세요! https://t.co/JaxttUMmjX",
+      "referenced_tweets": [
+        {
+          "type": "quoted",
+          "id": "1327011423252144128"
+        }
+      ],
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 151,
+            "end": 157,
+            "probability": 0.8115,
+            "type": "Product",
+            "normalized_text": "Twitter"
+          }
+        ],
+        "urls": [
+          {
+            "start": 167,
+            "end": 190,
+            "url": "https://t.co/JaxttUMmjX",
+            "expanded_url": "https://x.com/TwitterDev/status/1327011423252144128",
+            "display_url": "twitter.com/TwitterDev/sta…"
+          }
+        ]
+      },
+      "id": "1328399838128467969",
+      "public_metrics": {
+        "retweet_count": 7,
+        "reply_count": 4,
+        "like_count": 29,
+        "quote_count": 1
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "브랜드 범위를 좁히는 브랜드 버티컬 내 카테고리"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "서비스"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "Brand",
+            "description": "브랜드 및 기업"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "Interests and Hobbies Vertical",
+            "description": "음식 또는 여행과 같은 최상위 관심사 및 취미 그룹화"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "기술",
+            "description": "기술 및 컴퓨팅"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "Interests and Hobbies Category",
+            "description": "특이 음식 또는 여행지와 같은 관심사 및 취미 엔티티 그룹화"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "컴퓨터 프로그래밍",
+            "description": "컴퓨터 프로그래밍"
+          }
+        }
+      ],
+      "source": "Twitter Web App",
+      "created_at": "2020-11-16T18:09:36.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "#TwitterDev 팀의 목소리이자 #TwitterAPI 관련 업데이트, 뉴스 및 이벤트의 공식 소스입니다.",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      }
+    ],
+    "tweets": [
+      {
+        "lang": "en",
+        "conversation_id": "1327011423252144128",
+        "text": "👋 Twitter Developer Labs v2 답글 숨기기 및 최근 검색이 다음 주 월요일 11월 16일에 종료된다는 안내 말씀드립니다! v2 #TwitterAPI에서 현재 제공되는 새로운 답글 숨기기 및 최근 검색 엔드포인트로 마이그레이션하시기 바랍니다. 세부 정보: https://t.co/r6z6CI7kEy",
+        "possibly_sensitive": false,
+        "entities": {
+          "annotations": [
+            {
+              "start": 26,
+              "end": 50,
+              "probability": 0.4387,
+              "type": "Product",
+              "normalized_text": "Twitter Developer Labs v2"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 228,
+              "end": 239,
+              "tag": "TwitterAPI"
+            }
+          ],
+          "urls": [
+            {
+              "start": 250,
+              "end": 273,
+              "url": "https://t.co/r6z6CI7kEy",
+              "expanded_url": "https://devcommunity.x.com/t/retiring-labs-v2-recent-search-and-hide-replies/145795",
+              "display_url": "devcommunity.com/t/retiring-lab…",
+              "images": [
+                {
+                  "url": "https://pbs.twimg.com/news_img/1327011425240313856/PkurOyu1?format=jpg&name=orig",
+                  "width": 1200,
+                  "height": 630
+                },
+                {
+                  "url": "https://pbs.twimg.com/news_img/1327011425240313856/PkurOyu1?format=jpg&name=150x150",
+                  "width": 150,
+                  "height": 150
+                }
+              ],
+              "status": 200,
+              "title": "Labs v2 최근 검색 및 답글 숨기기 종료",
+              "description": "얼리 액세스 및 답글 숨기기 공지에서 말씀드린 바와 같이, 다음 Twitter Developer Labs v2 엔드포인트가 11월 16일에 종료됩니다. Labs v2 최근 검색 Labs v2 답글 숨기기 호출 시 이러한 엔드포인트는 HTTP 410 상태로 응답하며 데이터를 반환하지 않습니다. Labs 피드백을 바탕으로 해당 기능을 X API v2에 통합했습니다. 관련 문서는 아래 링크에서 확인할 수 있습니다. 아직 등록하지 않으셨다면 여기를 클릭하여 v2 액세스에 등록하세요...",
+              "unwound_url": "https://devcommunity.x.com/t/retiring-labs-v2-recent-search-and-hide-replies/145795"
+            }
+          ]
+        },
+        "id": "1327011423252144128",
+        "public_metrics": {
+          "retweet_count": 8,
+          "reply_count": 2,
+          "like_count": 33,
+          "quote_count": 4
+        },
+        "author_id": "2244994945",
+        "context_annotations": [
+          {
+            "domain": {
+              "id": "46",
+              "name": "Brand Category",
+              "description": "브랜드 범위를 좁히는 브랜드 버티컬 내 카테고리"
+            },
+            "entity": {
+              "id": "781974596752842752",
+              "name": "서비스"
+            }
+          },
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "브랜드 및 기업"
+            },
+            "entity": {
+              "id": "10045225402",
+              "name": "Twitter"
+            }
+          },
+          {
+            "domain": {
+              "id": "65",
+              "name": "Interests and Hobbies Vertical",
+              "description": "음식 또는 여행과 같은 최상위 관심사 및 취미 그룹화"
+            },
+            "entity": {
+              "id": "848920371311001600",
+              "name": "Technology",
+              "description": "Technology and computing"
+            }
+          },
+          {
+            "domain": {
+              "id": "66",
+              "name": "Interests and Hobbies Category",
+              "description": "특이 음식 또는 여행지와 같은 관심사 및 취미 엔티티 그룹화"
+            },
+            "entity": {
+              "id": "848921413196984320",
+              "name": "Computer programming",
+              "description": "Computer programming"
+            }
+          }
+        ],
+        "source": "Twitter Web App",
+        "created_at": "2020-11-12T22:12:32.000Z"
+      }
+    ]
+  }
+}
+```
+
+<div id="retweeted-quote-tweet">
+  ### 리트윗된 인용 트윗
+</div>
+
+```
+{
+    "data": [
+    {
+      "lang": "ko",
+      "conversation_id": "1225470895902412800",
+      "text": "RT @AureliaSpecker: 📣 작년 11월에 제가 작성한 런던 출퇴근 튜토리얼이 유용하셨다면, 리팩토링된 버전을 확인해 보세요…",
+      "referenced_tweets": [
+        {
+          "type": "retweeted",
+          "id": "1224709550214873090"
+        }
+      ],
+      "possibly_sensitive": false,
+      "entities": {
+        "annotations": [
+          {
+            "start": 42,
+            "end": 47,
+            "probability": 0.6999,
+            "type": "Place",
+            "normalized_text": "London"
+          }
+        ],
+        "mentions": [
+          {
+            "start": 3,
+            "end": 18,
+            "username": "AureliaSpecker"
+          }
+        ]
+      },
+      "id": "1225470895902412800",
+      "public_metrics": {
+        "retweet_count": 12,
+        "reply_count": 0,
+        "like_count": 0,
+        "quote_count": 0
+      },
+      "author_id": "2244994945",
+      "context_annotations": [
+        {
+          "domain": {
+            "id": "46",
+            "name": "Brand Category",
+            "description": "브랜드 범위를 세분화하는 브랜드 버티컬 내 카테고리"
+          },
+          "entity": {
+            "id": "781974596752842752",
+            "name": "서비스"
+          }
+        },
+        {
+          "domain": {
+            "id": "47",
+            "name": "브랜드",
+            "description": "브랜드 및 기업"
+          },
+          "entity": {
+            "id": "10045225402",
+            "name": "Twitter"
+          }
+        },
+        {
+          "domain": {
+            "id": "65",
+            "name": "관심사 및 취미 버티컬",
+            "description": "음식 또는 여행과 같은 최상위 관심사 및 취미 그룹"
+          },
+          "entity": {
+            "id": "848920371311001600",
+            "name": "기술",
+            "description": "기술 및 컴퓨팅"
+          }
+        },
+        {
+          "domain": {
+            "id": "66",
+            "name": "관심사 및 취미 카테고리",
+            "description": "특색 음식 또는 여행지와 같은 관심사 및 취미 엔티티 그룹"
+          },
+          "entity": {
+            "id": "848921413196984320",
+            "name": "컴퓨터 프로그래밍",
+            "description": "컴퓨터 프로그래밍"
+          }
+        }
+      ],
+      "source": "Twitter for iPhone",
+      "created_at": "2020-02-06T17:26:44.000Z"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "id": "2244994945",
+        "protected": false,
+        "username": "TwitterDev",
+        "verified": true,
+        "entities": {
+          "url": {
+            "urls": [
+              {
+                "start": 0,
+                "end": 23,
+                "url": "https://t.co/3ZX3TNiZCY",
+                "expanded_url": "https://developer.x.com/en/community",
+                "display_url": "developer.x.com/en/community"
+              }
+            ]
+          },
+          "description": {
+            "hashtags": [
+              {
+                "start": 17,
+                "end": 28,
+                "tag": "TwitterDev"
+              },
+              {
+                "start": 105,
+                "end": 116,
+                "tag": "TwitterAPI"
+              }
+            ]
+          }
+        },
+        "description": "#TwitterDev 팀의 공식 채널이자 #TwitterAPI 관련 업데이트, 뉴스 및 이벤트에 대한 공식 소스입니다.",
+        "pinned_tweet_id": "1293593516040269825",
+        "public_metrics": {
+          "followers_count": 513962,
+          "following_count": 2039,
+          "tweet_count": 3635,
+          "listed_count": 1672
+        },
+        "location": "127.0.0.1",
+        "name": "Twitter Dev",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1283786620521652229/lEODkLTh_normal.jpg",
+        "url": "https://t.co/3ZX3TNiZCY"
+      },
+      {
+        "created_at": "2013-01-18T23:45:43.000Z",
+        "id": "1102321381",
+        "protected": false,
+        "username": "AureliaSpecker",
+        "verified": false,
+        "entities": {
+          "description": {
+            "mentions": [
+              {
+                "start": 7,
+                "end": 17,
+                "username": "TwitterUK"
+              },
+              {
+                "start": 86,
+                "end": 95,
+                "username": "_dormrod"
+              }
+            ]
+          }
+        },
+        "description": "devrel @TwitterUK • 런던의 스위스인 • 반려식물 집사 • @_dormrod의 전속 미용사",
+        "pinned_tweet_id": "1253069421322567681",
+        "public_metrics": {
+          "followers_count": 1036,
+          "following_count": 1330,
+          "tweet_count": 855,
+          "listed_count": 26
+        },
+        "location": "런던, 영국",
+        "name": "Aurelia Specker",
+        "profile_image_url": "https://pbs.twimg.com/profile_images/1137517534104772608/8FBYgc6G_normal.jpg",
+        "url": ""
+      }
+    ],
+    "tweets": [
+      {
+        "lang": "ko",
+        "conversation_id": "1224709550214873090",
+        "text": "📣 작년 11월에 제가 작성한 런던 출퇴근 튜토리얼이 유용하셨다면, Twitter의 새로운 검색 엔드포인트를 사용하는 리팩토링된 버전을 확인해 보세요 🚇 https://t.co/87XIPZmZBJ\n\n#DEVcommunity #Pythontutorial @TwitterDev @TwitterAPI https://t.co/dXrJYvn3hY",
+        "referenced_tweets": [
+          {
+            "type": "quoted",
+            "id": "1195000047089389573"
+          }
+        ],
+        "possibly_sensitive": false,
+        "entities": {
+          "annotations": [
+            {
+              "start": 22,
+              "end": 27,
+              "probability": 0.7075,
+              "type": "Place",
+              "normalized_text": "London"
+            },
+            {
+              "start": 120,
+              "end": 126,
+              "probability": 0.7355,
+              "type": "Product",
+              "normalized_text": "Twitter"
+            }
+          ],
+          "mentions": [
+            {
+              "start": 206,
+              "end": 217,
+              "username": "TwitterDev"
+            },
+            {
+              "start": 218,
+              "end": 229,
+              "username": "TwitterAPI"
+            }
+          ],
+          "hashtags": [
+            {
+              "start": 176,
+              "end": 189,
+              "tag": "DEVcommunity"
+            },
+            {
+              "start": 190,
+              "end": 205,
+              "tag": "Pythontutorial"
+            }
+          ],
+          "urls": [
+            {
+              "start": 151,
+              "end": 174,
+              "url": "https://t.co/87XIPZmZBJ",
+              "expanded_url": "https://bit.ly/2OrnrCC",
+              "display_url": "bit.ly/2OrnrCC",
+              "status": 200,
+              "unwound_url": "https://dev.to/twitterdev/migrate-to-twitter-s-newly-released-labs-recent-search-endpoint-3npe"
+            },
+            {
+              "start": 230,
+              "end": 253,
+              "url": "https://t.co/dXrJYvn3hY",
+              "expanded_url": "https://x.com/AureliaSpecker/status/1195000047089389573",
+              "display_url": "twitter.com/AureliaSpecker…"
+            }
+          ]
+        },
+        "id": "1224709550214873090",
+        "public_metrics": {
+          "retweet_count": 12,
+          "reply_count": 0,
+          "like_count": 43,
+          "quote_count": 2
+        },
+        "author_id": "1102321381",
+        "context_annotations": [
+          {
+            "domain": {
+              "id": "46",
+              "name": "Brand Category",
+              "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+            },
+            "entity": {
+              "id": "781974596752842752",
+              "name": "Services"
+            }
+          },
+          {
+            "domain": {
+              "id": "47",
+              "name": "Brand",
+              "description": "Brands and Companies"
+            },
+            "entity": {
+              "id": "10045225402",
+              "name": "Twitter"
+            }
+          },
+          {
+            "domain": {
+              "id": "65",
+              "name": "Interests and Hobbies Vertical",
+              "description": "Top level interests and hobbies groupings, like Food or Travel"
+            },
+            "entity": {
+              "id": "848920371311001600",
+              "name": "Technology",
+              "description": "Technology and computing"
+            }
+          },
+          {
+            "domain": {
+              "id": "66",
+              "name": "관심사 및 취미 카테고리",
+              "description": "특색 음식 또는 여행지와 같은 관심사 및 취미 엔티티 그룹"
+            },
+            "entity": {
+              "id": "848921413196984320",
+              "name": "Computer programming",
+              "description": "Computer programming"
+            }
+          }
+        ],
+        "source": "Twitter Web App",
+        "created_at": "2020-02-04T15:01:25.000Z"
+      }
+    ]
+  }
+}
+```

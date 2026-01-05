@@ -1,0 +1,141 @@
+---
+title: 最近の検索
+sidebarTitle: 最近の検索
+keywords: ["最近の検索", "検索クイックスタート", "最近の検索チュートリアル", "ポストを検索", "最近の検索ガイド", "検索例"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-recent-search-endpoint">
+  ## 最近の検索エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、Postman を使用して、指定した一連のフィールドとともに最近の検索エンドポイントへ最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub リポジトリをご覧ください。
+
+<Note>
+  ### **前提条件**
+
+  このガイドを完了するには、リクエストを認証するための一連の[キーとトークン](/ja/resources/fundamentals/authentication)が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access)して、承認を受けてください。
+  * developer portal 上で[プロジェクト](/ja/resources/fundamentals/projects)と、それに関連付けられた[開発者アプリ](/ja/resources/fundamentals/developer-apps)を作成します。
+  * アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-recent-search-request">
+  ### 最近検索リクエストを構築する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントにリクエストを送るために使用できるツール、コード例、ライブラリはいくつかありますが、本書では手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、Search Posts &gt; Recent search request に移動します。
+
+**ステップ 2: リクエストを認証する**
+
+X API に正しくリクエストするには、自分に権限があることを検証する必要があります。このエンドポイントでそれを行うには、[OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)、または [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) のいずれかの認証方法でリクエストを認証する必要があります。
+
+簡単のため、このリクエストでは OAuth 2.0 App-Only を利用します。ただし、プライベートな[メトリクス](/ja/x-api/fundamentals/metrics)やポストをリクエストしたい場合は、他のいずれかの認証方法を使用する必要があります。 
+
+OAuth 2.0 App-Only を利用するには、Postman に [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（App-only Bearer Token とも呼ばれます）を含む自分のキーとトークンを追加する必要があります。これを行うには、Postman 右上の環境ドロップダウンで「X API v2」という名前の環境を選択し、「initial value」と「current value」フィールドにキーとトークンを追加します（環境ドロップダウンの横にある目のアイコンをクリックします）。
+
+正しく設定できていれば、これらの変数はリクエストの「Authorization」タブに自動的に読み込まれます。
+ 
+
+**ステップ 3: 検索クエリを作成する**
+
+各最近検索リクエストには 1 つの[検索クエリ](/ja/x-api/posts/search/integrate/build-a-query)が必要です。この例では、@XDevelopers アカウントが投稿したポストにマッチするクエリを使用します。このクエリでは from オペレーターを使用し、その値を XDevelopers（大文字小文字は区別されません）に設定します。
+
+`from:XDevelopers`
+
+Postman で &quot;Params&quot; タブに移動し、このクエリ、またはカンマ区切りのポスト ID の文字列を `ids` パラメーターの &quot;Value&quot; 列に入力します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| `query` | from:XDevelopers | 最近検索エンドポイントに送信する検索クエリ |
+
+**ステップ 4: 取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に &quot;Send&quot; ボタンをクリックすると、レスポンスにはデフォルトの [Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet)のフィールドである id、text、`edit_history_tweet_ids` が含まれます。id、text、`edit_history_tweet_ids` 以外の追加フィールドを受け取りたい場合は、[field](/ja/x-api/fundamentals/fields) および / または [expansion](/ja/x-api/fundamentals/expansions) パラメーターで、それらのフィールドをリクエスト内に指定する必要があります。
+
+この演習では、異なるオブジェクトから 4 種類のフィールドセットをリクエストします。
+
+1. デフォルトの Post オブジェクトのフィールド。
+2. プライマリユーザーオブジェクトに含まれる追加フィールド tweet.created&#95;at。
+3. 返されるポストに関連する投稿者のユーザーオブジェクトのデフォルトフィールド。
+4. 関連ユーザーオブジェクトの追加フィールド user.description。
+
+Postman で &quot;Params&quot; タブに移動し、&quot;Query Params&quot; テーブルに次の key:value ペアを追加します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `description` | `includes.users.description` |
+
+&quot;Send&quot; ボタンの横に、次の URL が表示されているはずです。
+
+`https://api.x.com/2/tweets/search/recent?query=from:XDevelopers&tweet.fields=created_at&expansions=author_id&user.fields=created_at`
+
+**ステップ5：リクエストを送信し、レスポンスを確認する**
+
+すべての準備が整ったら、「Send」ボタンをクリックします。次のようなレスポンスが返ってきます。
+
+```
+{
+   "data": [
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-11T16:05:06.000Z",
+           "id": "1271111223220809728",
+           "text": "今夜ご視聴ください。@jessicagarsonがお気に入りのPythonパッケージをRで実行する方法をご紹介します。🍿\n\nデータサイエンスのための2つの強力なプログラミング言語を一緒に使用する方法を学び、TwitterのDeveloper Labsの最新検索エンドポイントを使用したライブ例をご覧ください。https://t.co/v178oUZNuj"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-10T19:25:24.000Z",
+           "id": "1270799243071062016",
+           "text": "As we work towards building the new Twitter API, we’ve extended the deprecation timeline for several Labs v1 endpoints. Learn more 📖 https://t.co/rRWaJYJgKk"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-09T18:08:47.000Z",
+           "id": "1270417572001976322",
+           "text": "Annotations help you learn more about a Tweet — they can even help you find topics of interest. 🔬\n\nIn this tutorial, @suhemparack shows us how find Tweets related to COVID-19 using annotations + the filtered stream endpoint.\n\nLearn how you can, too. ⤵️\nhttps://t.co/qwVOgw0zSV"
+       }
+   ],
+   "includes": {
+       "users": [
+           {
+               "description": "The voice of Twitter's #DevRel team, and your official source for updates, news, & events about Twitter's API. \n\n#BlackLivesMatter",
+               "id": "2244994945",
+               "name": "X Developers",
+               "username": "XDevelopers"
+           }
+       ]
+   },
+   "meta": {
+       "newest_id": "1271111223220809728",
+       "oldest_id": "1270417572001976322",
+       "result_count": 3
+   }
+}
+```
+
+**次のステップ**
+
+[API リファレンスを使用してリクエストをカスタマイズする](/ja/x-api/posts/recent-search)
+
+[クエリ演算子の一覧を確認する](/ja/x-api/posts/search/integrate/build-a-query "クエリ演算子の一覧を確認する")
+
+[これらのエンドポイント向けのサンプルコードを使用する](https://github.com/xdevplatform/Twitter-API-v2-sample-code "これらのエンドポイント向けのサンプルコードを使用する")

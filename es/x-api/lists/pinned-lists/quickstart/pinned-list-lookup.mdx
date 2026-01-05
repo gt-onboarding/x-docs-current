@@ -1,0 +1,89 @@
+---
+title: Búsqueda de listas fijadas
+sidebarTitle: Búsqueda de listas fijadas
+keywords: ["guía rápida de búsqueda de listas fijadas", "búsqueda de listas fijadas", "guía rápida de listas fijadas", "guía rápida de búsqueda de listas"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<Note>
+  **Ten en cuenta:** Esta guía supone que ya has completado los requisitos previos de la [descripción general de inicio rápido](/es/x-api/lists/pinned-lists#getting-started-with-the-pinned-list-endpoint-group).
+</Note>
+
+<div id="steps-to-build-a-pinned-list-lookup-request">
+  ### Pasos para crear una solicitud de búsqueda de una Lista fijada
+</div>
+
+**Paso uno: Elige la colección de endpoints de List en Postman**
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta “List”, selecciona la carpeta “Pinned Lists” y luego elige &quot;User&#39;s pinned Lists&quot;.
+ 
+
+**Paso dos: Identifica y especifica al usuario**
+
+Para poder recuperar la Lista fijada de un usuario, debes especificar su id de usuario dentro de la solicitud. El id de usuario debe corresponder al id del usuario que se está autenticando, lo que significa que debes pasar los Tokens de acceso asociados con ese id de usuario al autenticar tu solicitud. En este ejemplo, puedes especificar el id de tu propio usuario. Puedes encontrar tu id de dos maneras:
+
+1. Usando el endpoint [users lookup](/es/x-api/users/lookup/introduction) por nombre de usuario, puedes pasar un nombre de usuario y recibir el campo id.
+2. Mirando tu Token de acceso, verás que la parte numérica es tu id de usuario.
+
+En Postman, navega a la pestaña &quot;Params&quot; e introduce este id de usuario en la columna &quot;Value&quot; del parámetro `id`.
+
+|         |                            |
+| :------ | :------------------------- |
+| **Key** | **Value**                  |
+| `id`    | 2244994945 (id de usuario) |
+
+**Paso tres: Identifica y especifica qué campos te gustaría recuperar**
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás en tu respuesta los campos predeterminados del [objeto List](/es/x-api/fundamentals/data-dictionary#list): `id` y `name`.
+
+Si quieres recibir campos adicionales más allá de `id` y `name`, tendrás que especificar esos campos en tu solicitud con los parámetros [`field`](/es/x-api/fundamentals/fields) y/o [`expansion`](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de diferentes objetos:
+
+* El campo adicional `follower_count` en el objeto List principal.
+* El [objeto de usuario](/es/x-api/fundamentals/data-dictionary#user) completo usando el parámetro de expansión.
+* El campo adicional `tweet.created_at` en el objeto de usuario asociado.
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave-valor a la tabla &quot;Query Params&quot;:
+
+|             |                    |                                                                               |
+| :---------- | :----------------- | :---------------------------------------------------------------------------- |
+| Key         | Value              | Returned fields                                                               |
+| list.fields | follower&#95;count | `follower_count`                                                              |
+| expansions  | owner&#95;id       | `includes.users.id,  <br/>includes.users.name,  <br/>includes.users.username` |
+| user.fields | created&#95;at     | `includes.users.created_at`                                                   |
+
+Ahora deberías ver una URL similar junto al botón “Send”:
+
+`https://api.x.com/2/users/2244994945/pinned_lists?expansions=owner_id&list.fields=follower_count&user.fields=created_at`
+
+**Paso cuatro: Realiza tu solicitud y revisa tu respuesta**
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot;, y recibirás una respuesta similar al siguiente ejemplo de respuesta:
+
+```
+{
+  "data": [
+    {
+      "follower_count": 0,
+      "id": "1454155907651158017",
+      "name": "test list",
+      "owner_id": "2244994945"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "username": "TwitterDev",
+        "id": "2244994945",
+        "created_at": "2013-12-14T04:35:55.000Z",
+        "name": "Twitter Dev"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 1
+  }
+}
+```

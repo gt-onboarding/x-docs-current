@@ -1,0 +1,885 @@
+---
+title: エンゲージメント API
+keywords: ["エンゲージメント API", "Enterprise エンゲージメント API", "エンゲージメントメトリクス", "エンゲージメントデータ", "Enterprise エンゲージメント", "GNIP エンゲージメント"]
+---
+
+<div id="overview">
+  ## 概要
+</div>
+
+[`Enterprise`](https://developer.x.com/en/products/x-api/enterprise)
+
+*これは、当社が提供するマネージドアクセスレベルでのみ利用可能な Enterprise API です。この API を利用するには、まず当社の Enterprise 営業チームと連絡を取り、アカウントを設定する必要があります。 [詳細はこちら](/ja/x-api/enterprise-gnip-2.0/enterprise-gnip)*
+
+Engagement API は、ポストのインプレッションおよびエンゲージメントメトリクスへのアクセスを提供します。多くのメトリクスおよびエンドポイントでは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) を使用して認証する必要がありますが、[OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0) と /totals エンドポイントを使用することで、公開されている「いいね」「リポスト」「返信」および「動画の再生数」のメトリクスにアクセスできます。  
+
+**注:** 一部の X のウェブダッシュボードで報告されるデータと、Engagement API で報告されるデータとの間に差異が見られる場合があります。これらの差異は、ウェブダッシュボードが通常、選択された時間範囲内に発生したエンゲージメントやインプレッションのみを表示することに起因します。たとえば、あるウェブダッシュボードでは暦月の範囲内におけるポストのエンゲージメントのみを表示する一方で、Engagement API では、その月の範囲外であっても、リクエストされた時間範囲内に含まれるエンゲージメントを表示することがあります。このような場合には、Engagement API を正確なデータソースとして扱ってください。
+ 
+
+<div id="request-endpoints">
+  ### リクエストエンドポイント
+</div>
+
+Engagement API には3つのエンドポイントがあります。
+
+<div id="current-totals-totals">
+  #### 現在の合計: [/totals]
+</div>
+
+* リクエストでは、指定したポストに対するインプレッションとエンゲージメントの合計メトリクスが返されます
+* 利用できるメトリクスは次のものに限定されます: Impressions、Engagements、Favorites、Replies、Retweets、Quote Tweets、および Video Views
+* OAuth 1.0a User Context を使用して、**過去90日以内** に作成されたポストの **Impressions** および **Engagements** メトリクスを取得できます
+* OAuth 2.0 Bearer Token を使用して、**任意のポスト** の **Favorites、Retweets、Quote Tweets、Replies**、および **Video Views** メトリクスを取得できます
+* 結果は、リクエストが行われた時点でのインプレッションおよびエンゲージメントの現在の合計値に基づきます
+* ダッシュボードレポートの作成や、さまざまな @ハンドル間でエンゲージメント率を算出する用途に最適です
+* 1 回のリクエストで最大 250 件のポストに対するメトリクスの取得をサポートします
+   
+
+<div id="last-28-hours-28hr">
+  #### 過去28時間: [/28hr]
+</div>
+
+* リクエストでは、インプレッションの合計メトリクス、エンゲージメントの合計メトリクスに加えて、過去28時間に発生した個々のエンゲージメントメトリクスの内訳を返すことができます
+* データはポストID別、また集計された時系列（日別または時間別）でグループ化できます
+* 最近作成されたコンテンツのパフォーマンスを追跡するのに最適です
+* 利用可能なすべてのメトリクスをサポートします
+* 1回のリクエストで最大25件のポストについてメトリクスをリクエストできます
+   
+
+<div id="historical-historical">
+  #### 過去データ: [/historical]
+</div>
+
+* リクエストでは、直近1年分について、ポスト作成時刻ではなくエンゲージメント発生時刻に基づき、インプレッション、エンゲージメント、および個々のエンゲージメントメトリクスの内訳を返すことができます。
+* リクエストは開始日と終了日のパラメータをサポートしており、最大4週間の範囲で、特定の期間に絞り込んで取得することができます。
+* ポストエンゲージメントデータは、過去365日分に制限されています。
+* データはポストIDごと、また、集計した時系列データとして日別または時間別にグループ化できます。
+* 直近のパフォーマンスを過去のベンチマークと比較したり、特定の@handleのパフォーマンスの履歴を把握したりするのに最適です。
+* 利用可能なすべてのメトリクスを取得できます。
+* 1回のリクエストで最大25件のポストのメトリクスを取得できます。
+
+<div id="available-metrics">
+  ### 利用可能なメトリクス
+</div>
+
+以下の表では、Engagement API で利用可能なメトリクスの種類について説明します。
+
+これらのメトリクスの詳細については、[メトリクスの解釈ページ](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#interpreting-the-metrics)をご覧ください。
+
+| 指標                                                                                                                                                    | 利用可能なエンドポイント      | ユーザーコンテキストの要否                                          | 説明                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| :---------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------- | :----------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| インプレッション                                                                                                                                              | すべてのエンドポイント       | はい                                                     | ポストが何回表示されたかを示す件数です。この指標は、過去 90 日以内に投稿されたポストに対してのみ利用可能です。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| エンゲージメント数                                                                                                                                             | すべて               | はい                                                     | ユーザーによるポストへのインタラクションの回数です。この指標は、過去90日以内に作成されたポストに対してのみ利用できます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| いいね数                                                                                                                                                  | すべて               | はい - /28hrs および /Historical<br /><br />いいえ - /totals   | ポストが「いいね」された回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| リツイート                                                                                                                                                 | すべて               | はい - /28hrs &amp; /Historical<br /><br />いいえ - /totals | ポストがリツイートされた回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| quote&#95;tweets                                                                                                                                      | /totals           | 不要 - /totals                                           | ポストがコメント付きで引用リツイートされた回数（Quote とも呼ばれます）。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 返信数                                                                                                                                                   | すべて               | はい - /28hrs および /Historical<br /><br />いいえ - /totals   | そのポストに対して行われた返信の件数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| video&#95;views                                                                                                                                       | すべてのエンドポイント       | はい - /28hrs &amp; /Historical<br /><br />いいえ - /totals | 指定されたポスト内の動画が、少なくとも 2 秒間にわたり 50% 以上表示された回数。<br /><br />動画再生数は、作成から 1800 日以内のポストに対してのみ利用できます。1800 日より前に作成されたポストについて動画再生数をリクエストしようとした場合、レスポンスには、リクエストした他のメトリクスを含む別のオブジェクトとともに、次のオブジェクトが含まれます。<br /><br />&quot;unsupported&#95;for&#95;video&#95;views&#95;tweet&#95;ids&quot;: [&quot;TWEET&#95;ID&quot;]<br /><br />**注意:** X が所有および運営するプラットフォーム（モバイルアプリおよびウェブサイト）上に表示される動画再生数のメトリクスと、/28hr および /historical エンドポイント経由で取得する値との間に差異が生じる場合があります。  <br /><br />*   X のユーザーインターフェースおよび /totals エンドポイントで表示される動画再生数は、対象の動画が投稿されたすべてのポストにまたがって集計された動画再生数を表示します。つまり、このメトリクスには、その動画が別のポストとしてリポストされたあらゆるインスタンスにおける再生数が合算されています。このメトリクスには、GIF の動画再生数は含まれません。<br />*   /28hr および /historical エンドポイントで提供される動画再生数は、メトリクスを取得している特定のポストによって生成された再生数のみを含みます。このメトリクスには、GIF の動画再生数は含まれません。 |
+| media&#95;views                                                                                                                                       | /28hr /historical | 必要                                                     | 動画、GIF、画像を横断して集計した、自動再生およびクリックによるメディアの総表示回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| media&#95;engagements<br /><br />([以前の名称: Media Clicks](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#recent-changes-to-the-engagement-api)) | /28hr /historical | はい                                                     | ポスト内の画像や動画などのメディアがクリックされた回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| url&#95;clicks                                                                                                                                        | /28hr /historical | はい                                                     | ポスト内のURLがクリックされた合計回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| hashtag&#95;clicks                                                                                                                                    | /28hr /historical | はい                                                     | ポスト内のハッシュタグがクリックされた総回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| detail&#95;expands                                                                                                                                    | /28hr /historical | はい                                                     | ポストの詳細を表示するためにクリックされた回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| permalink&#95;clicks                                                                                                                                  | /28hr /historical | はい                                                     | ポストへのパーマリンク（このポスト専用の個別Webページ）がクリックされた回数（件数）。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| app&#95;install&#95;attempts                                                                                                                          | /28hr /historical | はい                                                     | ポストからのアプリインストールイベントの発生回数                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| app&#95;opens                                                                                                                                         | /28hr /historical | はい                                                     | ポストから発生した App Open イベントの発生回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| email&#95;tweet                                                                                                                                       | /28hr /historical | 必要                                                     | ポストがメールで共有された回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| user&#95;follows                                                                                                                                      | /28hr /historical | はい                                                     | このポストからユーザー（ポストの作者）がフォローされた回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| user&#95;profile&#95;clicks                                                                                                                           | /28hr /historical | 必要                                                     | このポストからユーザー（ポストの投稿者）のプロフィールがクリックされた回数。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+<div id="engagement-groupings">
+  ### エンゲージメントのグルーピング
+</div>
+
+グルーピングを使用すると、返されるエンゲージメントメトリクスを任意の方法で整理できます。1 回のリクエストで指定できるグルーピングは最大 3 つまでです。メトリクスは、次のいずれか、または複数の値でグルーピングできます。
+
+*3 つすべてのエンドポイントでサポートされる値:*
+
+* tweet.id
+* engagement.type
+   
+
+*`/28hr` および `/historical` は時系列メトリクスを提供できるため、次の値をサポートします:*
+
+* engagement.day
+* engagement.hour
+
+グルーピングの詳細については、Guides セクション内の [Engagement API Grouping](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings) ページを参照してください。
+
+<div id="guides">
+  ## ガイド
+</div>
+
+<div id="developer-getting-started-guide">
+  ### 開発者向け入門ガイド
+</div>
+
+<div id="introduction">
+  #### はじめに
+</div>
+
+このドキュメントの目的は、開発者向けに Engagement API との連携方法の概要を提供することです。まずは連携する「理由」について説明し、その後で技術的な「方法」の詳細を掘り下げていきます。
+
+<div id="what-does-the-engagement-api-provide">
+  ##### **Engagement API は何を提供しますか？**
+</div>
+
+* Engagement API は、任意の X アカウントが所有するポストについて、過去 90 日間のインプレッションおよびエンゲージメントのデータを提供します（そのアカウントが [3-legged OAuth](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使って、あなたのアプリに自分の代わりにメトリクスをリクエストする権限を付与していることが前提です）。この強力でありながら実装が容易なソリューションにより、インプレッションや URL クリック、#ハッシュタグクリックなど、詳細なエンゲージメント指標にすぐにアクセスできます。
+* Engagement API は、任意のポストに対するいいね、リポスト（Retweet）、引用ポスト（Quote Tweet）、返信、動画再生数の合計（集計メトリクス）を提供します。これは、任意のポストまたはポストのコレクションについて、基本的なエンゲージメントデータを取得する強力な手段として利用できます。
+* Engagement API は、15 以上のパフォーマンスメトリクスを用いてコンテンツのパフォーマンスを正確に測定することで、X 上での ROI を測定できるようにし、ソーシャルリスニング、マーケティング、パブリッシングプラットフォームに新たな価値をもたらします。
+* Engagement API はリクエスト／レスポンス型の API であり、アプリ開発者はポスト ID、必要なメトリクス、および期間を指定してリクエストを送信でき、その条件に対するデータが即時に返されます。
+   
+
+<div id="why-integrate-example-use-cases">
+  ##### **なぜ統合するのか？ ユースケース例**
+</div>
+
+* コンテンツの総リーチを把握し、どれだけ多くの人が閲覧しているかを確認します。動画の再生数、リンクのクリック数、ハッシュタグのクリック数、または自分のアプリのインストール数を確認できます。
+* 総量と時系列の両方のエンゲージメントメトリクスを生成します。
+* 任意の公開ポストについて、基本的なエンゲージメントメトリクス（いいね、Retweet、引用ポスト、返信）を把握します。
+* これらのメトリクスを使って、どのタイプのポストが効果的かを判断し、そのようなポストをより頻繁に投稿して、インプレッション数とコンテンツへのエンゲージメントを増やします。
+* 自分のポストのいずれかが100件のLike、または別のしきい値に達するたびに（別の自社アカウントからのRetweetなどの）マーケティング施策を自動化します。
+* A/Bテストのツールとして、キャンペーン同士をベンチマークし比較します。
+* カスタマーサポート部門向けに、どのタイプのコンテンツが共感を得ているかを分析し、どのように・いつ対応するかを判断します。
+* 自分のプラットフォームから公開されたコンテンツに対して分析情報を表示します。
+   
+
+[Engagement API は 2016 年にローンチされ](https://blog.x.com/official/en_us/a/2016/gnip-s-engagement-api-is-now-generally-available.html)、こうした詳細なエンゲージメントメトリクスを大規模に提供した最初の X API です。Engagement API は扱いやすく、導入企業は処理を自動化できます。以下は代表的な統合事例を紹介するケーススタディです。
+
+* [Measuring campaign success with the Red Cross](https://blog.x.com/developer/en_us/topics/spotlight/2016/measuring-campaign-success-with-the-red-cross.html)[](https://simplymeasured.com/blog/true-twitter-impressions-and-url-clicks-new-from-simply-measured/#sm.0007werel134td8zqf02m2mduumr6)
+
+Engagement API を利用する「理由」を確認したところで、ここからは技術的な詳細を掘り下げていきます。
+
+<div id="integrating-the-engagement-api">
+  #### Engagement API を統合する
+</div>
+
+<div id="introduction-to-api">
+  ##### **API の概要**
+</div>
+
+Engagement API は、JSON でエンコードされたリクエストを受け取り、JSON でエンコードされたエンゲージメントメトリクスを返すシンプルな RESTful API です。リクエストは主に次の 3 つの要素で構成されます（詳細なドキュメントへのリンクは以下を参照してください）。
+
+* ***ポスト id*** の配列
+* 関心のある[メトリクスタイプ](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#EngagementTypes)の配列。タイプには「impressions」「retweets」「hashtag&#95;clicks」「user&#95;follows」などが含まれます。
+* [Engagement groupings](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings)。これは、API レスポンス内でエンゲージメントデータをどのような構造で取得したいかを示す JSON 構造です。
+
+多くの場合、Engagement Types と Groupings はリクエスト間でほとんど変わらず、更新されるのは Post IDs のみです。
+
+Engagement API は[3 つのエンドポイント](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#RequestEndpoints)を提供します。
+
+* **Totals** - ポストに対するエンゲージメントの総計を提供します。一部のメトリクスはすべてのポストについて利用可能ですが、その他は過去 90 日間に限って利用可能です。
+* **28 hour** - 直近 28 時間の時系列エンゲージメントメトリクスを提供します。
+* **Historical** - 2014 年 9 月 1 日以降に投稿されたポストについて、最大 4 週間連続の時系列エンゲージメントメトリクスを提供します。
+
+**/totals** エンドポイントは、**1 回のリクエストで最大 250 件のポスト**に対するメトリクスの取得をサポートします。**/28hour** と **/historical** エンドポイントは、**1 回のリクエストで最大 25 件のポスト**をサポートします。
+
+Engagement API へのアクセス方法を説明した後、API リクエストの実行手順を順を追って解説し、OAuth の概要と、その他の技術リソースへのリンクを提供します。
+
+<div id="getting-api-access">
+  ##### **API アクセスの取得**
+</div>
+
+このドキュメントを読んでいる場合、すでに Engagement API へのアクセス権をお持ちである可能性が高いです。まだ取得していない場合は、Enterprise アカウント担当者に連絡するか、[こちら](/ja/x-api/enterprise-gnip-2.0/enterprise-gnip) から Enterprise アクセスを申請してください。
+
+最初のステップは、承認済みの開発者アカウントで [developer portal](/ja/resources/fundamentals/developer-portal) にアクセスし、[X app](/ja/resources/fundamentals/developer-apps) を作成することです。アクセス権を付与するため、このアプリケーションに紐づく数値の App ID をアカウント担当者に共有する必要があります。開発者アカウントの申請が必要な場合は、[こちら](/ja/resources/fundamentals/developer-apps) から申請できます。
+
+<div id="making-a-request">
+  ##### **リクエストの作成**
+</div>
+
+Engagement API へのリクエストを作成するのはとても簡単です。この例では、次の 2 つの [@XDevelopers](https://x.com/XDevelopers) のポストについて、リポスト（Retweet）、引用ポスト（Quote Tweet）、いいね（Favorite）、返信の合計数を取得してみます。
+
+> 1/ Today we’re sharing our vision for the future of the X API platform![https://t.co/XweGngmxlP](https://t.co/XweGngmxlP)
+>
+> — Twitter Dev (@TwitterDev) [April 6, 2017](https://x.com/TwitterDev/status/850006245121695744)
+
+> Don’t miss the Posts about your Post.
+>
+> Now on iOS, you can see Retweets with comments all in one place. [pic.x.com/oanjZfzC6y](https://t.co/oanjZfzC6y)
+>
+> — X (@X) [May 12, 2020](https://x.com/status/1260294888811347969?ref_src=twsrc%5Etfw)
+
+最初のステップは、JSON 形式で API リクエストを構築することです。これは、配列に入れた 2 つのポスト ID、関心のあるエンゲージメント種別の配列、そしてレスポンス内でメトリクスをどのように整理したいかを示す、任意の名前を付けた「groupings」JSON オブジェクトで構成されます。リクエストは次のようになります。
+
+```json
+{
+  "tweet_ids": [
+    1260294888811347969, 850006245121695744
+  ],
+  "engagement_types": [
+    "retweets", "quote_tweets", "favorites", "replies"
+  ],
+  "groupings": {
+    "engagement-types-by-id": {
+      "group_by": [
+        "Tweet.id", "engagement.type"
+      ]
+    }
+  }
+}
+```
+
+これらの合計メトリクスを取得するために、[https://data-api.x.com/insights/engagement/totals](https://data-api.x.com/insights/engagement/totals) エンドポイントにこの JSON リクエストを POST します。
+
+リクエストが JSON でエンコードされており、かつ Gzip 圧縮されていることを示すために、次のヘッダーを含めます（リクエストボディが大きくなることがあるためです）:
+
+* Content-Type: application/json
+* Accept-Encoding: gzip
+   
+
+リクエストを送信する際には OAuth を使用して認証します。これについては次のセクションでさらに説明します。
+
+API は次のペイロードを返します。
+
+```json
+{
+  "grouping name": {
+    "1260294888811347969": {
+      "favorites": "17111",
+      "quote_tweets": "3254",
+      "replies": "1828",
+      "retweets": "5218"
+    },
+    "850006245121695744": {
+      "favorites": "492",
+      "quote_tweets": "66",
+      "replies": "42",
+      "retweets": "324"
+    }
+  }
+}
+```
+
+レスポンスには、リクエストしたメトリクスが「グルーピング」の定義で説明されている構造になっており、最初の階層でポストのIDごとにメトリクスが一覧になり、その次の階層でエンゲージメントの種類ごとに並んでいることに注意してください。
+
+ここまでの手順はかなりシンプルでした。OAuth での認証が初めての方は、次のセクションも確認してください。
+
+<div id="authenticating-with-oauth">
+  #### OAuth での認証
+</div>
+
+OAuth は、技術業界で非常によく使われている認証標準です。すでに OAuth（おそらく他の X API で）を利用している場合は、言語ごとの OAuth パッケージを使っていて、面倒な詳細をすべて抽象化している可能性が高いでしょう。OAuth を初めて利用する場合は、まず [OAuth with the X API](/ja/resources/fundamentals/authentication) のページを参照するか、直接 [https://oauth.net](https://oauth.net/) にアクセスして詳細を確認してください。そのうえで、利用したい実装言語向けの OAuth パッケージを探して、そこから始めることをおすすめします。これらのパッケージを使う場合、認証までの一般的な流れは、キーとトークンを設定し、何らかの HTTP オブジェクトを作成し、そのオブジェクトを使ってリクエストを送信する、という形になります。
+
+たとえば Ruby の世界では、次の疑似コードは、Ruby の gem「oauth」を使って OAuth 対応のアプリを構築し、POST リクエストを送信するための手順例を表しています。
+
+```js
+require 'oauth'
+
+#JSON リクエストを組み立てる（上記参照）。
+request = make_json_request()
+
+#アプリのコンシューマーキーとシークレットを使用してアプリコンシューマーオブジェクトを構築する。
+consumer = OAuth::Consumer.new(keys['consumer_key'], keys['consumer_secret'], {:site => ‘https://data-api.x.com’})
+#権限を付与するアカウントから提供されたトークンを使用してユーザートークンを構築する。アプリのみのリクエストを行う場合（/totals エンドポイントで権限を必要としないポストを確認する場合）、このステップはスキップできる。
+token = {:oauth_token => keys['access_token'], :oauth_token_secret => keys['access_token_secret']}
+
+#OAuth 対応アプリオブジェクトを作成する。
+app = OAuth::AccessToken.from_hash(consumer, token)
+#POST リクエストを実行する。
+result = app.post(“/insights/engagement/totals", request, {"content-type" => "application/json", "Accept-Encoding" => "gzip"})
+```
+
+Engagement API は、アプリケーション専用認証とユーザーコンテキスト認証の両方をサポートしています。/totals エンドポイントで、あなたが所有していない公開ポストのエンゲージメントメトリクスを収集する場合、ユーザーの許可は不要で、アプリケーション専用認証を使用できます。この場合は、認証にはアプリのキーとシークレットのみを使用します。
+
+OAuth では、ユーザーに関連付けられたトークンを使用して、アプリが「別のユーザーに代わって」API リクエストを行うこともできます。自分が所有するポスト、つまりあなたがユーザートークンを保持しているユーザーによって公開されたポストに対して Engagement メトリクスを生成する場合は、ユーザーコンテキストでリクエストを行うことになります。これは、アプリキーとユーザー固有のアクセストークンの両方で認証することを意味します。これらのユーザーアクセストークンは通常、&#39;[Sign-in with X](/ja/resources/fundamentals/authentication#log-in-with-x)&#39; プロセスを通じて提供されるか、ユーザーから直接取得します（ユーザーからトークンを直接取得する場合は、[twurl](https://github.com/xdevplatform/xurl) を使用する必要がある点に注意してください）。ユーザーがトークンを提供すると、それらは有効期限切れにはならず、ユーザーがトークンをリセットするかパスワードを変更しない限り、そのユーザーに代わって Engagement API でリクエストを行うために使用できます。その場合は、新しいトークンをユーザーから再度提供してもらう必要があります。
+
+どのメトリクスにどの認証が必要かは、[この表](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings)で確認できます。
+
+<div id="selecting-an-engagement-api-endpoint">
+  ### Engagement API エンドポイントの選択
+</div>
+
+Engagement API には、次の 3 つのエンドポイントがあります。
+
+* **[Totals](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement)** - 自社が保有する（&quot;owned&quot;）ポストおよび自社が保有しない（&quot;unowned&quot;）ポストから、選択されたメトリクスの合計値を提供します。一部のメトリクスはすべてのポストに対して利用できますが、その他のメトリクスは直近 90 日以内に投稿されたポストに対してのみ利用できます。1 リクエストあたり最大 250 件のポストをサポートします。
+* **[28 hour](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement)** - 直近 28 時間に投稿された自社保有（&quot;owned&quot;）ポストの時系列エンゲージメントメトリクスを提供します。1 リクエストあたり最大 25 件のポストをサポートします。
+* **[Historical](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-historical)** - 2014 年 9 月 1 日以降に投稿された自社保有（&quot;owned&quot;）ポストについて、最大 4 週間分の連続した期間を対象に、時系列エンゲージメントメトリクスを提供します。1 リクエストあたり最大 25 件のポストをサポートします。
+   
+
+各エンドポイントにはそれぞれ固有の特徴があります。3 つすべてを利用する予定の場合でも、どれがユースケースに最も適しているか検討している場合でも、それぞれの違いを理解することが重要です。
+
+以下では、まずいくつかの重要な概念を紹介し、そのうえで 3 つのエンドポイントを詳しく説明し、最後に一般的に特定のエンドポイントに対応づけられるサンプルユースケースを提示します。これらの情報が、3 つすべてをより効率的に統合するのに役立つこと、あるいは単一のエンドポイントから目的に最も適したものを選ぶ助けとなることを期待しています。
+ 
+
+<div id="key-concepts">
+  #### 重要な概念
+</div>
+
+3 つの Engagement API エンドポイントがそれぞれ提供する機能や取得できるデータの違いを理解するうえで役立つ、いくつかの重要な概念があります。
+ 
+
+<div id="impressions-and-engagement-metrics">
+  ##### インプレッションとエンゲージメントメトリクス
+</div>
+
+インプレッションは、特定のポストが X プラットフォーム上でオーガニックなコンテキストにおいて閲覧された回数を表します。プロモーション（広告）または有料のコンテキストで表示されたポストによって生成されたインプレッションは含まれません。Engagement API 以前は、ポストのインプレッションは潜在的な閲覧回数を示す指標にすぎませんでした。これは、投稿者のアカウントおよびそのコンテンツをリポストしたアカウントのフォロワー数をカウントすることに基づいており、実際にはユーザーがそのポストを見ていないという一般的な状況を考慮していませんでした。
+
+Engagement API によって生成されるインプレッションメトリクスは、ポストが表示用に実際にレンダリングされた回数を示す実測値です。自分のアカウントのフォロワーがポストを見逃した場合、それはインプレッションとしてカウントされません。
+
+Engagement API は、ポストがユーザーに提示されたときにユーザーが取りうる 14 種類の固有のエンゲージメント[メトリクスタイプ](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#available-metrics)に関するメトリクスを提供します。これには、リポスト、いいね、返信、#ハッシュタグやリンク、メディアなどのエンティティのクリック、投稿者のフォロー、投稿者のプロフィール閲覧が含まれます。これらすべての個別アクションは、1 つの Engagements メトリクスに集約されます。
+
+<div id="owned-and-unowned-x-content">
+  ##### 自分が所有する X コンテンツと所有しない X コンテンツ
+</div>
+
+Engagement API では、自分が所有するポストと所有しないポストを明確に区別します。所有ポストとは、自分のアカウントから投稿されたポスト、または Engagement データをリクエストする許可を得ているポストを指します。他の X API と同様に、他の X ユーザー／アカウントから、代理で API リクエストを実行できるアクセストークンを共有してもらうことで、その許可を得ます。これらのトークンを取得する一般的な方法が、[「X でログイン」プロセス](/ja/resources/fundamentals/authentication#log-in-with-x)です。
+
+`/totals` エンドポイントは、所有ポストと非所有ポストの両方についてエンゲージメントデータを提供します。非所有ポストに対しては、ポスト表示で公開されているエンゲージメントメトリクス（Favorite、Retweet、Reply）をリクエストできます。これらのメトリクスについて、Engagement API がもたらす価値は、これらのメトリクスを自動的かつ大規模に取得できる点です。所有ポストに対しては、`/totals` エンドポイントで Impression と（合計）Engagement メトリクスも提供されます。
+
+`/28hr` と `/historical` エンドポイントは、所有ポストに対するメトリクスのみを提供します。つまり、これらのエンドポイントへのリクエストを行う際には、ユーザーコンテキストを渡す必要があります。
+
+<div id="total-and-time-series-engagement-data">
+  ##### 合計および時系列エンゲージメントデータ
+</div>
+
+`/totals` エンドポイントは、その名前が示すとおり、各エンゲージメント種別の合計値のみを返します。返される数値は、そのポストが投稿されてから現在までの最新の累計値を表します。ポストが投稿された直後にメトリクスを繰り返しリクエストすると、これらの合計値は通常、リクエストのたびに変化します。
+
+`/28hr` および `/historical` エンドポイントは、合計値と時系列データの両方を提供できます。時系列データをリクエストする場合、エンゲージメントメトリクスは日次または時間単位のデータに集計できます。   
+
+`/28hr` および `/historical` エンドポイントで時系列データをリクエストする方法については、[engagement groupings](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings) に関するドキュメントを参照してください。
+
+<div id="endpoints-and-example-use-cases">
+  #### エンドポイントとユースケース例
+</div>
+
+上で説明した特性や違いを踏まえると、各エンドポイントは一般的に異なるタイプのユースケースに対応します。自分のユースケースに最適なエンドポイントを選択できるように、以下にいくつかのユーザー要件の例と、それぞれを最もよく満たすエンドポイントを示します。
+
+<div id="totals">
+  ##### **/totals**
+</div>
+
+* 一部のメトリクスタイプ（Impressions、Engagements、Favorites、Retweets、Quote Tweets、Replies、Video Views）にだけアクセスできれば十分です。
+* 自分が所有しているポストだけでなく、任意のポストの基本的なエンゲージメントデータにアクセスしたい。
+* 競合他社とのパフォーマンスを比較したい。
+* 自分が所有していないポストを含むハッシュタグやキャンペーンの基本的なエンゲージメント指標を追跡したい。
+* 日別や時間別に分解されたデータは不要で、リクエスト時点の現在の合計値だけが必要です。
+* レポートやダッシュボードに表示する単一のメトリクスが必要で、データを保存したくない。
+* ページの読み込み時にデータを表示したく、そのためにリクエストを送ってレスポンスを受け取るだけでよい。
+* 1 日あたり数十万から数百万件規模のポストについてデータを取得する必要がある。
+   
+
+<div id="28hr">
+  ##### **/28hr**
+</div>
+
+* すべての 17 種類のメトリクスにアクセスする必要がある。
+* 過去 28 時間以内に投稿された、ごく最近のポストのデータを表示したい。
+* 関心のあるデータを取得するジョブを 1 日に 1 回実行しており、直近 1 日分のデータだけ取得できればよい。
+* メトリクスを日別または時間別に分解して取得する必要がある。
+* ダッシュボードで、アクティビティを 1 時間ごとの時系列でブレイクダウンして表示したい。
+* 1 日あたり数十万件規模のポストに高頻度でアクセスする必要がある。
+* ストレージ機能があり、データを 1 日に 1 回更新して累積カウントを保持できる。
+   
+
+<div id="historical">
+  ##### **/historical**
+</div>
+
+* 17種類すべてのメトリクスにアクセスする必要がある。
+* 2014年9月までさかのぼって作成されたポストの履歴データを取得する必要がある。
+* キャンペーン同士を比較する詳細な履歴分析を提供したい。
+* メトリクスを日別または時間別に分解して取得する必要がある。
+* Engagement API への高いアクセスレベルは必要なく、1日に数百〜数千件程度のポストについてデータを取得できれば十分だ。
+
+<div id="engagement-api-key-characteristics">
+  ### Engagement API の主な特性
+</div>
+
+* **RESTful API** であり、JSON データを提供し、JSON 形式のリクエストボディを持つ POST リクエストをサポートします。
+* **リクエストの種類:** クライアントアプリケーションは次の種類のリクエストを行うことができます:
+  * **Total engagements** -- /totals エンドポイントへの HTTP POST リクエスト
+  * **Last 28-hour engagements** -- /28hr エンドポイントへの HTTP POST リクエスト
+  * **Historical engagements** -- /historical エンドポイントへの HTTP POST リクエスト
+* **OAuth 認証:**
+  * [OAuth 1.0 User Context](/ja/resources/fundamentals/authentication): 利用可能なすべてのメトリクスは、[3-legged OAuth](https://developer.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens) を使用してあなたのアプリを認可したユーザーが所有するポストに対して取得できます。リクエストを行う際には、そのユーザーのアクセストークンを使用する必要があります。[](/ja/resources/fundamentals/authentication)
+  * [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0): 一部のメトリクス (Retweets、Quote Tweets、Replies、Favorites、Video Views) は、任意の公開ポストに対して利用できます。 
+* **リクエストのメタデータおよび構造**: リクエストデータは、Post ID の配列、エンゲージメントタイプの配列、およびエンゲージメントのグルーピング構造から成る JSON オブジェクトです。
+* **1 リクエストあたりのポスト数:**
+  * /totals エンドポイント: 250 Post ID
+  * /28hr エンドポイント: 25 Post ID
+  * /historical エンドポイント: 25 Post ID
+* **エンゲージメントメトリクスの利用可能範囲:**
+  * **/totals** -- ポストが投稿されてから現在までのメトリクス合計。Impressions と Engagements は、過去 90 日以内に公開されたポストについて利用でき、Retweets、Quote Tweets、Replies、Favorites、Video Views はすべてのポストで利用できます。
+  * **/28hr** -- リクエスト時点から直近 28 時間。
+  * **/historical** -- 2014 年 9 月 1 日以降の任意の 28 日間。
+* **メトリクスタイプ**: 各リクエストには [Metric Types](http://support.gnip.com/apis/engagement_api/overview.html#EngagementTypes) の配列が含まれます。利用可能な種類はエンドポイントによって異なり、/totals エンドポイントからリクエストする場合は、ポストがユーザー許諾済みかどうかによっても異なります。
+  * /totals エンドポイント:
+    * すべてのポスト: Favorites、Retweets、Quote Tweets、Replies、Video Views
+    * OAuth 1.0a User Context が必要: Impressions、Engagements、Favorites、Replies、Retweets
+  * /28hr および /historical エンドポイント (Post の所有者のアクセストークンを使用した OAuth 1.0a User Context が必要): Impressions、Engagements、Favorites、Replies、Retweets、URL Clicks、Hashtag Clicks、Detail Click、Permalink Clicks、Media Clicks、App Install Attempts、App Opens、Post Emails、Video Views、Media Views
+* **エンゲージメントグルーピング:** 各リクエストには [Engagement Groupings](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#engagement-api-groupings) の配列が含まれます。これらのグルーピングを使用して、返されるメトリクスの構造をカスタマイズできます。1 つのリクエストには最大 3 つのグルーピングを含めることができます。メトリクスは次の値で構造化できます:
+  * すべてのエンドポイント: Post ID、Engagement Type
+  * /28hr および /historical エンドポイント: 次の追加グルーピングを指定した場合、これらのエンドポイントは時系列データを提供します: Engagement Day、Engagement Hour
+* **インテグレーションに関する前提:** あなたのチームには次の責任があります。
+  * Engagement API に HTTP リクエストを送信し、リクエストに含まれる Post ID に対するエンゲージメントメトリクスを返すクライアントアプリケーションを作成および保守すること。
+* **制限事項**
+* Video Views は、経過日数が 1,800 日以下のポストに対してのみ利用可能です。
+
+<div id="authenticating-with-the-engagement-api">
+  ### Engagement API での認証
+</div>
+
+> **注意**
+>
+> Engagement API を利用開始する前に、X によってあなたの開発者アプリに対する Engagement API へのアクセスが有効化されている必要があります。そのため、認証に使用する予定のアプリ ID を、アカウントマネージャーまたはテクニカルサポートチームに必ず共有してください。
+
+Engagement API では、2 つの認証方法を利用できます: [OAuth 1.0a](/ja/resources/fundamentals/authentication#oauth-1-0a-2) と [OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) です。 
+
+**OAuth 2.0 Bearer Token**（「application-only」とも呼ばれます）は、公開されているエンゲージメントメトリクスへのアクセスを可能にします。この認証方法を使用すると、[/totals endpoint](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-totals) へのリクエスト時に、公開されている任意のポストに対する Favorites（Likes）、Retweets、Quote Tweets、Replies、動画再生数の合計件数を取得できます。 
+
+**OAuth 1.0a**（「user context」とも呼ばれます）は、ユーザーに代わってリクエストを送信し、そのユーザーに紐づく非公開エンゲージメントメトリクスにアクセスすることを可能にします。 
+
+この認証方法が必須となるのは次の場合です:
+
+* [/28hr endpoint](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-28hr) および [/historical endpoint](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement-historical) に送信されるすべてのリクエスト
+* 次のいずれかの非公開メトリクスへのアクセス: Impressions、Engagements、Media Views、Media Engagements、URL Clicks、Hashtag Clicks、Detail Expands、Permalink Clicks、App Install Attempts、App Opens、Email Post、User Follows、User Profile Clicks
+
+OAuth 1.0a を使用してリクエストを送信する場合は、対象となるポストまたは保護されたリソースを所有するユーザーのアクセストークン（アクセストークンおよびシークレット）を含める必要があります。保護されたユーザーデータをリクエストする際に正しいユーザーアクセストークンを指定しなかった場合、Engagement API は `403 Forbidden` エラーを返します。
+
+Engagement API は、たとえそれらのポストを所有するユーザーに代わって認証している場合でも、[保護されたポスト](https://help.x.com/en/safety-and-security/public-and-protected-tweets) のエンゲージメントデータを取得することを許可しません。このようなリクエストを行うと、`400 Bad Request` エラーが返され、メッセージは `"Tweet ID(s) are unavailable"` となります。
+
+自分自身の X アカウント（つまり、開発者アプリを所有しているアカウント）に代わってリクエストを送信する場合は、[developer portal](https://developer.x.com/en/portal/projects-and-apps) 内の開発者アプリの “Keys and tokens” タブから、必要なアクセストークンを直接生成できます。
+
+他のユーザーに代わってリクエストを行う場合は、必要なアクセストークンを取得するために 3-legged OAuth フローを使用する必要があります。これを行う方法の詳細については、次のドキュメントを参照してください: [OAuth 1.0a: how to obtain a user’s access tokens](/ja/resources/fundamentals/authentication#oauth-1-0a-2).
+
+追加の例（OAuth 1.0a を使用した認証方法を含む）については、[X Developers sample Python code for the Engagement API](https://github.com/xdevplatform/enterprise-scripts-python/tree/master/Engagement-API) を確認してください。
+
+<div id="recent-changes-to-the-engagement-api">
+  ### Engagement API の最近の変更点
+</div>
+
+Engagement API は、X 上でのアクティビティのパフォーマンスを監視できる、非常に有用なインプレッションおよびエンゲージメントメトリクスを提供します。X のデータに基づいてマーケティング上の意思決定ができるよう継続的に取り組む中で、X 全体でのメトリクスの一貫性をさらに高める Engagement API の最近の変更点をお知らせできることを嬉しく思います。  
+
+最近、Engagement API を最新化し、X のアナリティクスダッシュボード（analytics.x.com）で使用されているものと同じメトリクス集計手法を採用する変更を展開しました。新しいメトリクスを導入する際には、後方互換性を損なう API の変更が最小限となるよう慎重に検討し、2017 年 10 月 9 日に最初の変更セットをデプロイしました。これらの変更により、あなたやあなたのお客様が X 上のパフォーマンスを確認するあらゆる場所で、一貫性が向上します。変更内容の詳細は以下をご覧ください。
+
+|     |     |
+| :--- | :--- |
+| **Metric** | **変更内容** |
+| engagements | 全体の engagements に含まれるメトリクスを更新し、ポストアナリティクスダッシュボードとの一貫性を持たせました。Engagements は「人々がこのポストとやり取りした回数」を測定します。<br /><br />動画や GIF などのメディアを含むポストについては、engagements メトリクスにメディア再生数が含まれなくなります。メディア再生数は、新しいメトリクス *media&#95;views* から取得できるようになりました。 |
+| media&#95;clicks* | このメトリクスは、新しいメトリクス「*media&#95;engagements*」に置き換えられました。 |
+| video&#95;views | 2018 年 7 月 6 日以降、このメトリクスは「自分が所有していない（unowned）」ポストに対しても [/totals](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement) エンドポイント経由で利用できるようになりました。つまり、アプリ専用認証（app-only authentication）を使用することで、**すべての**ポストの動画再生数にアクセスできます。<br /><br />動画再生数をリクエストできるのは、1800 日より新しいポストのみです。1800 日より古いポストの video views をリクエストしようとした場合、次のレスポンスを受け取ります。<br /><br />&quot;unsupported&#95;for&#95;video&#95;views&#95;tweet&#95;ids&quot;: [&quot;TWEET&#95;ID&quot;]<br /><br />**ご注意**: video&#95;views は、メディア再生数（media&#95;views）とは異なり、MRC 標準である「動画の 50% 以上が 2 秒以上画面上に表示されること」に基づいています。<br /><br />**また、**X が所有・運営するプラットフォーム（モバイルアプリとウェブサイト）に表示される動画再生数と、/28hr および /historical エンドポイント経由で取得する数値との間に差異が生じる場合があります。<br /><br />* X のユーザーインターフェースおよび /totals エンドポイントが返す動画再生数は、対象の動画が投稿されたすべてのポストを横断して集計された値を表示します。つまり、UI に表示されるメトリクスには、その動画がリポストや Retweet されたあらゆるポストでの再生数が合算されています。<br />* /28hr および /historical エンドポイントで提供される動画再生数には、メトリクスを取得している特定のポストによって生成された再生数のみが含まれます。 |
+| media&#95;views | これは、動画、Vine、GIF、画像を対象とした、メディアに対するすべての再生（自動再生およびクリック再生）を集計したものです。<br /><br />**ご注意**: 画像を含むポストは、アナリティクスダッシュボード上では media&#95;views メトリクスが表示されませんが、Engagement API からは返されます。 |
+| media&#95;engagements* | これは、動画、Vine、GIF、画像にわたるメディアに対するクリック数を含みます。このメトリクスは *media&#95;clicks* を置き換えるものです。 |
+| quote&#95;tweets | 2020 年 7 月 7 日以降、このメトリクスは /totals エンドポイント経由で「自分が所有していない（unowned）」ポストに対しても利用可能になりました。つまり、アプリ専用認証を使用することで、すべてのポストについて引用ポスト数にアクセスできます。 |
+
+<div id="interpreting-the-metrics">
+  ### メトリクスの解釈
+</div>
+
+**注:** 一部の X のウェブダッシュボードで報告されるデータと、Engagement API で報告されるデータの間に差異が見られる場合があります。これらの差異は、ウェブダッシュボードが通常、選択された期間内に発生したエンゲージメントおよび／またはインプレッションのみを表示するために生じます。たとえば、ウェブダッシュボードはカレンダーベースの 1 か月の期間内におけるポストのエンゲージメントのみを表示する一方で、Engagement API では、その月の範囲を超えていても、要求した時間範囲内に含まれているエンゲージメントを表示する場合があります。このような場合には、Engagement API を有効な情報源として扱ってください。
+ 
+
+<div id="impressions-and-engagement-data">
+  #### インプレッションおよびエンゲージメントデータ
+</div>
+
+Engagement API は、**オーガニック**なインプレッションおよびエンゲージメントデータを提供します。
+
+インプレッションは、特定のポストが Xプラットフォーム上でオーガニックなコンテキストにおいて表示された回数を表します。プロモーションまたは有料コンテキストで表示されたポストによって発生したインプレッションは**含まれません**。
+
+エンゲージメントは、特定のポストに対して閲覧者が **オーガニック**および**プロモーション**コンテキストの両方で反応した回数を表します。エンゲージメントには、リツイート、いいね、返信、URL クリック、ハッシュタグクリック、メンションクリック、メディアビューなどが含まれますが、これらに限定されません。含まれるエンゲージメントアクションの完全な一覧については、「Engagement Data」セクションを参照してください。 
+
+ベースラインとなるエンゲージメント率を算出するには、分析対象期間において、特定のポストに対するエンゲージメントの総数を、そのポストのインプレッション総数で割ってください。
+
+インプレッションおよびエンゲージメントデータは、自分が所有する @handle のポスト、またはお使いのアプリケーションに対して自分のポストの詳細閲覧を許可した @handle のポストに対してのみ取得できます。内部的には、Engagement API は、契約上の @handle 制限に対してリクエストされた一意の @handle 数を追跡します。クライアント側でも、月を通して @handle のリクエスト使用量を追跡することを推奨します。  
+
+<div id="video-metrics">
+  #### 動画メトリクス
+</div>
+
+X では、プラットフォーム上のメディアのインプレッションを表すメトリクスが複数存在します。1つ目は動画ビュー・メトリクスで、MRC の「動画の 50% 以上が少なくとも 2 秒間表示されている」という標準に基づいています。2つ目は Media Views で、動画、vine、gif、画像に対する、自動再生およびクリック再生のすべてのビューをカウントしたものです。
+
+動画ビュー・メトリクスは、/28hour および /historical エンドポイント経由で自分が所有するポスト向けに利用できるほか、/totals エンドポイント経由ですべての自分が所有していないポスト向けにも利用できます。 
+
+X のユーザーインターフェイス内で使用されている動画ビュー・メトリクスも同じ MRC 標準に基づいていますが、X が所有・運営するプラットフォーム（モバイルアプリおよびウェブサイト）に表示される動画ビュー・メトリクスの値と、各種 Engagement API エンドポイント経由で取得する値との間に差異が生じる場合がある点に注意してください。
+
+* /totals エンドポイントおよび X のユーザーインターフェイスで提供される動画ビューは、対象の動画が投稿されたすべてのポストを合算した動画ビューを表示します。つまり、/totals 経由で配信され X UI に表示されるメトリクスには、その動画が別のポストでリツイートやリポストされたすべてのインスタンスからのビューが合算されています。
+* /28hour および /historical の Engagement API エンドポイントで提供される動画ビューは、メトリクスを取得している特定のポストによって生成されたビューのみを含みます。
+   
+
+1800 日より前のポストについては、動画ビューは提供されない点に注意してください。その代わり、1800 日より前のポストを列挙したオブジェクトが返されます。リクエストしたポストに対するその他すべてのメトリクスは、別のオブジェクトで引き続き取得できます。以下はレスポンスの例です。
+
+```json
+{
+  "unsupported_for_video_views_tweet_ids": [
+    "479311209565413376",
+    "477139122520219648"
+  ],
+  "grouping name": {
+    "479311209565413376": {
+      "favorites": "69",
+      "impressions": "1692",
+      "retweets": "142",
+      "video_views": "0"
+    },
+    "477139122520219648": {
+      "favorites": "10",
+      "impressions": "1023",
+      "retweets": "6",
+      "video_views": "0"
+    },
+    "1397568983931392004": {
+      "favorites": "268",
+      "impressions": "26803",
+      "retweets": "56",
+      "video_views": "17902"
+    }
+  }
+}
+```
+
+Media Views メトリクスは、/28hour および /historical エンドポイントで取得する所有ポストに対してのみ利用できます。
+
+<div id="engagement-api-groupings">
+  ### Engagement API のグルーピング
+</div>
+
+グルーピングを使用すると、返されるエンゲージメントメトリクスを柔軟に整理できます。1 つのリクエストで指定できるグルーピングは最大 3 つです。メトリクスは、次の値のいずれかまたは複数でグループ化できます。
+
+*3 つすべてのエンドポイントでサポートされています:*
+
+* tweet.id
+* engagement.type
+   
+
+*`/28hr` および `/historical` は時系列メトリクスを提供できるため、次もサポートします:*
+
+* engagement.day
+* engagement.hour
+
+グルーピングは指定した順に適用されるため、`group_by` の値の順序を変更することで、結果の形式を変えることができます。4 つの `group_by` 値を含むグルーピングは、次の 2 つの形式のいずれかでのみサポートされます。
+
+```bash
+"group_by": [
+    "tweet.id",
+    "engagement.type",
+    "engagement.day",
+    "engagement.hour"
+  ]
+```
+
+または
+
+```bash
+"group_by": [
+    "engagement.type",
+    "tweet.id",
+    "engagement.day",
+    "engagement.hour"
+]
+```
+
+たとえば、メトリック種別ごとの総計を生成したい場合は、リクエストの一部として次の「groupings」指定を含めてください（リクエストの構成方法の詳細については、[API Reference](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#post-insights-engagement) ページを参照してください）：
+
+```json
+{
+  "engagement_types": [
+    "favorites",
+    "replies",
+    "retweets"
+  ],
+  "groupings": {
+    "Grand Totals": {
+      "group_by": [
+        "engagement.type"
+      ]
+    }
+  }
+}
+```
+
+このグルーピングを指定すると、Engagement API の JSON レスポンスには、メトリクスの種類ごとの合計値を含むルートレベルの `"Grand Totals"` 属性が含まれます。
+
+```json
+{
+  "総計": {
+    "favorites": "12",
+    "replies": "2",
+    "retweets": "2"
+  }
+}
+```
+
+単一のポストに対してポストIDごとにグループ化された4時間分のメトリクス時系列データを生成するには、次の Grouping 仕様をリクエストに含めます。
+
+```json
+{
+  "start": "2016-02-10T17:00:00Z",
+  "end": "2016-02-10T21:00:00Z",
+  "tweet_ids": [
+    "697506383516729344"
+  ],
+  "engagement_types": [
+    "impressions",
+    "engagements"
+  ],
+  "groupings": {
+    "Tweets_MetricType_TimeSeries": {
+      "group_by": [
+        "tweet.id",
+        "engagement.type",
+        "engagement.hour"
+      ]
+    }
+  }
+}
+```
+
+このグルーピングを使用すると、Engagement API の JSON レスポンスには、ポスト ID ごと、さらにメトリクスの種類ごとに分解されたメトリクスと、それに対応する 1 時間単位の時系列データを格納した、ルート階層の `"Tweets_MetricType_TimeSeries"` 属性が含まれます。
+
+```json
+{
+  "Tweets_MetricType_TimeSeries": {
+    "697506383516729344": {
+      "impressions": {
+        "2016-02-10": {
+          "17": "551",
+          "18": "412",
+          "19": "371",
+          "20": "280"
+        }
+      },
+      "engagements": {
+        "2016-02-10": {
+          "17": "8",
+          "18": "6",
+          "19": "3",
+          "20": "0"
+        }
+      }
+    }
+  }
+}
+```
+
+<div id="frequently-asked-questions">
+  ## よくある質問
+</div>
+
+`Enterprise`
+
+<div id="engagement-api">
+  ### Engagement API
+</div>
+
+<AccordionGroup>
+  <Accordion title="Engagement API にはどのようにアクセスできますか？">
+    Engagement API へのアクセスは、Enterprise サブスクリプションを通じて提供されます。営業チームに連絡するには、[このフォーム](/ja/x-api/enterprise-gnip-2.0/enterprise-gnip)にご記入ください。
+  </Accordion>
+
+  <Accordion title="利用状況はどのように「@handle」単位で追跡されますか？">
+    契約に Engagement API で使用できるユニークハンドル数の上限が含まれている場合、X の内部システムは、Engagement API でクエリされたポストを所有する認証済みユーザー数を追跡します。お客様側でも、このユニークハンドル数をクライアント側で管理してください。現在、Engagement API の @handle の利用状況を確認するための Usage API や UI はありません。契約で定められた数より多くの @handle がリクエストされた場合でも、システムが超過をブロックすることはありません。課金月末に、クエリされたユニークな @handle の数が契約数と比較され、契約条件に従って超過料金が請求されます。
+  </Accordion>
+
+  <Accordion title="Engagement API の @handle 利用状況を確認できますか？">
+    現在、Engagement API の @handle の利用状況を確認するための Usage API や UI はありません。契約で定められた数より多くの @handle がリクエストされた場合でも、システムが超過をブロックすることはありません。課金月末に、クエリされたユニークな @handle の数が契約数と比較され、契約条件に従って超過料金が請求されます。
+
+    **ペイロードで返される `engagements` メタデータフィールドが、さまざまなエンゲージメントメトリクス合計値の総和と一致しません。なぜですか？**
+
+    これは想定された動作です。`engagements` メタデータフィールドは、API から返される各種エンゲージメントメトリクスの合計値と常に一致するとは限りません。これは、`engagements` メタデータフィールドに、ペイロード内で個別のメトリクスとして分解されていない追加のエンゲージメントが含まれている場合があるためです。言い換えると、さまざまなエンゲージメントメトリクスの合計値をすべて足し合わせても、ペイロード内で返される `engagements` メトリクスフィールドの値と一致しない場合があります。
+
+    `engagements` メタデータフィールドは、そのポストに対して行われたあらゆるクリックやインタラクションの総体と考えることができます。
+
+    **ペイロードレスポンスの `url_clicks` フィールドが数値を返していますが、実際にはポストに URL が含まれていません。どのようにしてこのようなことが起こるのですか？**
+
+    ハッシュタグのように、別ページへのリンクを生成する要素を含むポストがユーザーにクリックされた場合、そのクリックが URL クリックとしてカウントされることがあるためです。
+     
+  </Accordion>
+
+  <Accordion title="特定のポストのエンゲージメントデータを取得できないのはなぜですか？">
+    特定のポストのエンゲージメントデータを取得できない理由はいくつか考えられます。たとえば、次のような場合です。
+
+    * 代理でデータを取得する際に使用している認証トークンに基づき、リクエストしたポスト ID が利用可能ではない。
+    * /totals エンドポイント向けにリクエストしたポスト ID が 90 日以内のものではなく、そのためインプレッションやエンゲージメントメトリクスを返せない。
+    * リクエストしたポスト ID が、削除されている、またはその他の理由で公開されていないなど、もはや利用できない。
+
+    上記のいずれかのケースで想定される、さまざまな[エラーメッセージ](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#error-messages)を確認してください。
+  </Accordion>
+
+  <Accordion title="Engagement API のレート制限にはどのように対処すればよいですか？">
+    Engagement API にリクエストを送信した際にレスポンスヘッダーで返される `x-per-minute-limit` と `x-per-minute-remaining` の情報を使用して、利用状況を監視できます。
+
+    `x-per-minute-limit` は許容量を示し、`x-per-minute-remaining` は残りの呼び出し回数を示します。
+  </Accordion>
+</AccordionGroup>
+
+<div id="error-troubleshooting-guide">
+  ### エラーのトラブルシューティングガイド
+</div>
+
+<AccordionGroup>
+  <Accordion title="認証に問題が発生しています">
+    Engagement API での認証については、必ず [認証に関するガイドライン](/ja/x-api/enterprise-gnip-2.0/fundamentals/engagement-api#authentication) を確認してください。
+  </Accordion>
+
+  <Accordion title="正しい consumer key と secret、さらに access token と access token secret を渡していますが、次のエラーが返されます。どうすればよいですか？">
+    ```bash
+    [
+        Your account could not be authenticated. Reason: Unknown Authorization Type;
+    ]
+    ```
+
+    /totals エンドポイントで認証を行う際には、アクセストークンや secret を使用しないでください。これらのトークンを含めた状態で、それらのトークンに紐づいていないポストからコンテンツを取得しようとすると、次のようなエラーが返される可能性が高くなります。
+
+    ```bash
+    [
+        Forbidden to access tweets: 1054424731825229824;
+    ]
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<div id="still-cant-find-what-youre-looking-for">
+  ### お探しの情報がまだ見つかりませんか？
+</div>
+
+<AccordionGroup>
+  <Accordion title="まだ解決していない質問があります">
+    技術サポートまでご連絡ください。迅速に対応いたします。
+  </Accordion>
+</AccordionGroup>
+
+<div id="api-reference">
+  ## API リファレンス
+</div>
+
+<div id="post-insightsengagement">
+  ### **POST insights/engagement**
+</div>
+
+<div id="methods">
+  #### **Methods**
+</div>
+
+| Method | Description |
+| :--- | :--- |
+| [POST /insights/engagement/totals](#Totals) | 複数のポストに対する合計インプレッション数とエンゲージメントを取得します。 |
+| [POST /insights/engagement/historical](#Historical) | 最長4週間の期間について、2014年9月1日まで遡って複数のポストに対するインプレッション数とエンゲージメントを取得します。 |
+| [POST /insights/engagement/28hr](#api-28hr) | 直近28時間における複数のポストに対するインプレッション数とエンゲージメントを取得します。 |
+
+<div id="authentication">
+  #### **認証**
+</div>
+
+Engagement API を利用するには HTTPS を使用する必要があり、User Context と Application-Only OAuth の両方をサポートしています。Engagement API へのほとんどのリクエストでは 3-Legged OAuth（User Context の一種）の使用が必要です。これは、Engagement API へのアクセス用としてあなたの Twitter アカウントマネージャーによって登録・承認されたアプリの consumer key と secret に加えて、Tweet の所有者の access token と access token secret を使用してエンドポイントを呼び出すことを意味します。次のリクエストではこの種類の OAuth が必要です。
+
+* /totals に対して、自分が所有する Tweet に限定される Impressions および Engagements メトリック種別を取得するためのあらゆるリクエスト
+* /28hr へのあらゆるリクエスト
+* /historical へのあらゆるリクエスト
+
+Engagement API への一部のリクエストは Application-Only OAuth を使用して実行できます。この場合は、consumer key と secret、または bearer token のいずれかを提供するだけで済みます。次のリクエストはこの種類の OAuth で実行できます。
+
+* /totals に対して、任意の Tweet について取得可能な Favorites、Replies、Retweets、または Video Views メトリック種別を取得するためのあらゆるリクエスト
+
+いずれのリクエストでも、[developer.x.com](https://developer.x.com/en/portal/dashboard) 上のアプリ管理コンソールを使用して Twitter アプリと対応する API key を設定する必要があります。
+
+注意: developer.x.com 上で Twitter アカウントにログインしている場合は、既存の [Twitter apps](/ja/resources/fundamentals/developer-apps) を [Twitter app dashboard](https://developer.x.com/en/apps) から表示および編集できます。
+
+アプリを設定したら、Engagement API に対してアプリからリクエストを行えるようにするため、アプリ ID をアカウント担当者によって承認してもらう必要があります。アクセストークンは「現在のユーザー」を表すために使用する必要があり、別のユーザーに代わって行うリクエストには、有効なトークンで署名しなければなりません。OAuth 署名ベース文字列を準備する前に、URL や POST ボディ内で [予約文字をエンコード](https://tools.ietf.org/html/rfc3986) していることを確認してください。
+
+OAuth の使い方の詳細については、次のリンクを参照してください。
+
+* [OAuth の概要](/ja/resources/fundamentals/authentication)
+* [User Context とも呼ばれる 3 Legged OAuth の使用](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)
+* [Application-Only OAuth の使用](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)
+
+<div id="post-insightsengagementtotals">
+  #### **POST /insights/engagement/totals**
+</div>
+
+`totals` エンドポイントを使用すると、一度に最大 250 件までのポストの現在の合計インプレッション数およびエンゲージメント数を取得できます。
+
+|                     |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| :------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **リクエストメソッド**       | HTTP POST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **URL**             | `https://data-api.x.com/insights/engagement/totals`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **コンテンツタイプ**        | `application/json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **圧縮方式**            | Gzip。Gzip 圧縮を利用してリクエストを行うには、接続リクエストで Accept-Encoding ヘッダーを送信します。  <br />ヘッダーは次のように指定します。  <br />  <br />`Accept-Encoding: gzip`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **POST 形式**         | リクエストは、本文にポストIDの集合と希望するグルーピングを含む JSON オブジェクトを持つ POST リクエストとして送信できます。POST は、`tweets`、`engagements`、`groupings` オブジェクトを要素とする配列として構成されます。各リクエストに含められるポストIDは最大 250 個です。  <br />  <br />POST ボディの例は次のとおりです。  <br />  <br /><br />  &#123;<br />    &quot;tweet&#95;ids&quot;: [<br />        &quot;Tweet ID 1&quot;,<br />        &quot;Tweet ID 2&quot;,<br />        &quot;Tweet ID 3&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;favorites&quot;,<br />        &quot;quote&#95;tweets&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **ポストID**           | エンゲージメントデータを取得する対象のポストのIDを含む配列です。認証に使用している @handle によって作成されたポストについてのみデータをリクエストできる点に注意してください。1回のリクエストで指定できるポストは最大250件までで、ポストIDは文字列として指定する必要があります。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **エンゲージメント種別**      | クエリ対象とするエンゲージメントメトリクスの種類を含む配列です。Totals エンドポイントは、次のエンゲージメントタイプのみをサポートします: `impressions`, `engagements`, `favorites`, `retweets`, `quote_tweets`, `replies`, `video_views`。  <br />`/totals` エンドポイントでは、過去90日以内に作成されたポストに対する `impressions` と `engagements`、およびすべてのポストに対する `favorites`, `retweets`, `quote_tweets`, `replies`, `video_views` を取得できます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **グルーピング**          | Engagement API からの結果は、ニーズに最も適した形になるよう、異なるグループ分けで返すことができます。1 回のリクエストに含められるグルーピングは最大 3 つまでです。  <br />  <br />各グルーピングごとに、アプリケーション内でこのグルーピングタイプを参照しやすくするために、カスタムのグルーピング名を定義できます。  <br />  <br />グルーピング名を定義したら、`tweet.id` および/または `engagement.type` でグループ化するかを選択できます。  <br />  <br />グルーピングは指定した順序が尊重されるため、group&#95;by の値の順序を変更することで、望ましい結果の形式に変えることができます。ポスト ID とメトリクスの種類ごとにメトリクスが分かれて表示されるグルーピングの例は次のとおりです。  <br />  <br /><br />  &quot;groupings&quot;: &#123;<br />      &quot;my grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;<br />        ]<br />      &#125;<br />    &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **POST サイズの上限**     | 1 回のリクエストで指定できるポスト ID は最大 250 件です。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **レスポンス形式**         | JSON。レスポンス形式として JSON を指定するヘッダーをリクエストに含めてください。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **レート制限**           | ご利用のアクセスレベルに応じて契約で定められているとおり、1分単位のレート制限が適用されます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **リクエスト例（公開メトリクス）** | curl --request POST <br />  --url [https://data-api.x.com/insights/engagement/totals](https://data-api.x.com/insights/engagement/totals) <br />  --header &#39;accept-encoding: gzip&#39; <br />  --header &#39;authorization: Bearer &#39; <br />  --header &#39;content-type: application/json&#39; <br />  --data &#39;&#123;<br />                &quot;tweet&#95;ids&quot;: [<br />                    &quot;1070059276213702656&quot;,&quot;1021817816134156288&quot;,&quot;1067094924124872705&quot;<br />                ],<br />                &quot;engagement&#95;types&quot;: [<br />                    &quot;favorites&quot;,&quot;retweets&quot;,&quot;replies&quot;,&quot;quote&#95;tweets&quot;,&quot;video&#95;views&quot;<br />                ],<br />                &quot;groupings&quot;: &#123;<br />                    &quot;perTweetMetricsUnowned&quot;: &#123;<br />                        &quot;group&#95;by&quot;: [<br />                            &quot;tweet.id&quot;,<br />                            &quot;engagement.type&quot;<br />                        ]<br />                    &#125;<br />                &#125;<br />            &#125; <br />  --verbose <br />  --compressed                                                                                                                                                                                                                                                                                                                                                       |
+| **リクエスト例**          | curl --request POST <br />  --url [https://data-api.x.com/insights/engagement/totals](https://data-api.x.com/insights/engagement/totals) <br />  --header &#39;accept-encoding: gzip&#39; <br />  --header &#39;authorization: OAuth oauth&#95;consumer&#95;key=&quot;consumer-key-for-app&quot;,oauth&#95;nonce=&quot;generated-nonce&quot;,oauth&#95;signature=&quot;generated-signature&quot;,oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;generated-timestamp&quot;,oauth&#95;token=&quot;access-token-for-authed-user&quot;, oauth&#95;version=&quot;1.0&quot;&#39; <br />  --header &#39;content-type: application/json&#39; <br />  --data &#39;&#123;<br />                &quot;tweet&#95;ids&quot;: [<br />                    &quot;1060976163948904448&quot;,&quot;1045709644067471360&quot;<br />                ],<br />                &quot;engagement&#95;types&quot;: [<br />                    &quot;favorites&quot;,&quot;replies&quot;,&quot;retweets&quot;,&quot;video&#95;views&quot;,&quot;impressions&quot;,&quot;engagements&quot;<br />                ],<br />                &quot;groupings&quot;: &#123;<br />                    &quot;perTweetMetricsOwned&quot;: &#123;<br />                        &quot;group&#95;by&quot;: [<br />                            &quot;tweet.id&quot;,<br />                            &quot;engagement.type&quot;<br />                        ]<br />                    &#125;<br />                &#125;<br />            &#125;&#39; <br />  --verbose <br />  --compressed |
+| **応答例（公開メトリクス）**    | &#123;<br />  &quot;perTweetMetricsUnowned&quot;: &#123;<br />    &quot;1021817816134156288&quot;: &#123;<br />      &quot;favorites&quot;: &quot;530&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;79&quot;,<br />      &quot;replies&quot;: &quot;147&quot;,<br />      &quot;retweets&quot;: &quot;323&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;,<br />    &quot;1067094924124872705&quot;: &#123;<br />      &quot;favorites&quot;: &quot;1360&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;29&quot;,<br />      &quot;replies&quot;: &quot;56&quot;,<br />      &quot;retweets&quot;: &quot;178&quot;,<br />      &quot;video&#95;views&quot;: &quot;5754512&quot;<br />    &#125;,<br />    &quot;1070059276213702656&quot;: &#123;<br />      &quot;favorites&quot;: &quot;69&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;5&quot;,<br />      &quot;replies&quot;: &quot;7&quot;,<br />      &quot;retweets&quot;: &quot;26&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;<br />  &#125;<br />&#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **レスポンス例**          | &#123;<br />  &quot;perTweetMetricsOwned&quot;: &#123;<br />    &quot;1045709644067471360&quot;: &#123;<br />      &quot;engagements&quot;: &quot;2&quot;,<br />      &quot;favorites&quot;: &quot;0&quot;,<br />      &quot;impressions&quot;: &quot;47&quot;,<br />      &quot;replies&quot;: &quot;0&quot;,<br />      &quot;retweets&quot;: &quot;8&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;5&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;,<br />    &quot;1060976163948904448&quot;: &#123;<br />      &quot;engagements&quot;: &quot;4&quot;,<br />      &quot;favorites&quot;: &quot;0&quot;,<br />      &quot;impressions&quot;: &quot;148&quot;,<br />      &quot;replies&quot;: &quot;1&quot;,<br />      &quot;retweets&quot;: &quot;9&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;2&quot;,<br />      &quot;video&#95;views&quot;: &quot;0&quot;<br />    &#125;<br />  &#125;<br />&#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **利用不可のポストID**      | クエリに利用不可となったポストID（例: 削除されたもの）が含まれている場合でも、利用可能なすべてのポストIDについては適切なデータが返され、利用不可のポストIDは `unavailable_tweet_ids` という配列内に一覧として含まれます。例:  <br /><br />  &#123;<br />    &quot;start&quot;: &quot;2015-11-17T22:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-11-19T02:00:00Z&quot;,<br />    &quot;unavailable&#95;tweet&#95;ids&quot;: [<br />        &quot;323456789&quot;<br />    ],<br />    &quot;group1&quot;: &#123;<br />     &quot;423456789&quot;: &#123;<br />      &quot;favorites&quot;: &quot;67&quot;,<br />      &quot;replies&quot;: &quot;8&quot;,<br />      &quot;retweets&quot;: &quot;26&quot;,<br />      &quot;quote&#95;tweets&quot;: &quot;2&quot;<br />     &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+
+<div id="post-insightsengagement28hr">
+  #### **POST /insights/engagement/28hr**
+</div>
+
+28 時間エンドポイントでは、直近 28 時間分について、最大 25 件のポストのインプレッション数とエンゲージメント数を取得できます。この 28 時間エンドポイントでは、サポートされているすべての個別メトリクスをリクエストすることもできます。サポートされているメトリクスの一覧については、[Metric Availability](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#EngagementTypes) を参照してください。
+
+|                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **リクエストメソッド**     | HTTP POST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **URL**           | `https://data-api.x.com/insights/engagement/28hr`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **Content-Type**  | `application/json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **圧縮形式**          | Gzip。Gzip 圧縮を利用してリクエストを送信するには、接続リクエストで Accept-Encoding ヘッダーを送信します。  <br />ヘッダーは次のように指定します。  <br />  <br />`Accept-Encoding: gzip`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **POST のフォーマット**  | リクエストは、本文がポスト ID のコレクションと希望するグルーピングを含む JSON オブジェクトである POST リクエストとして送信できます。POST 本文は、`tweets`、`engagements`、`groupings` オブジェクトを含む配列として構成されます。各リクエストに含められるポスト ID は最大 25 個です。  <br />  <br />POST 本文の例は次のとおりです。  <br />  <br /><br />  &#123;<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;Tweet ID 1&quot;,<br />       &quot;Tweet ID 2&quot;,<br />       &quot;Tweet ID 3&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;url&#95;clicks&quot;,<br />        &quot;detail&#95;expands&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;,<br />          &quot;engagement.hour&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **ポストID**         | エンゲージメントデータを取得する対象となるポストIDを含む配列です。認証に使用している @handle のアカウントが作成したポストに対してのみデータをリクエストできる点に注意してください。28時間エンドポイントでは、1リクエストあたり最大25件のポストをサポートしており、ポストIDは文字列として指定する必要があります。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **エンゲージメント指標の種類** | 照会対象となるエンゲージメントメトリクスの種類を含む配列です。  <br />  <br />28 時間エンドポイントでは、`impressions`、`engagements`、およびすべての個別のエンゲージメントタイプがメトリクスとしてサポートされています。サポートされるエンゲージメントメトリクスの全リストについては、[Engagement Data](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#AvailableData) を参照してください。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **グループ化**         | Engagement API の結果は、ニーズに最も適した形になるよう、異なるグループ構成で返すことができます。1 回のリクエストに含められるグルーピングは最大 3 つです。  <br />  <br />各グルーピングについて、アプリケーション内でこのグルーピングタイプを参照しやすくするために、カスタムのグルーピング名を定義できます。グルーピング名を定義したら、次の値のうち 1 つ以上でグループ化することができます。  <br />`tweet.id`  <br />`engagement.type`  <br />`engagement.day`  <br />`engagement.hour`  <br />グルーピングは順番どおりに適用されるため、`group&#95;by` の値の順序を変更することで、望ましい結果フォーマットに変更することができます。以下は、ポスト ID、メトリクスタイプ、日ごとにメトリクスを分割して表示するグルーピングの例です。<br /><br />  &quot;groupings&quot;: &#123;<br />    &quot;my grouping name&quot;: &#123;<br />      &quot;group&#95;by&quot;: [<br />        &quot;tweet.id&quot;,<br />        &quot;engagement.type&quot;,<br />        &quot;engagement.day&quot;<br />      ]<br />    &#125;<br />  &#125;<br /><br />  <br />4 つの `group_by` 項目を持つグルーピングは、次のいずれか 2 つの順序を使用する場合にのみ有効です。1 つのグルーピング内で 4 つの `group_by` 項目があり、次のいずれにも該当しないリクエストはエラーを返します。さらに、1 回のリクエストで許可される 4 つの `group_by` 項目を持つグルーピングは 1 つだけです。  <br /><br />&quot;group&#95;by&quot;: [<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.type&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]<br /><br />&quot;group&#95;by&quot;: [<br />    &quot;engagement.type&quot;,<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **POST のサイズ上限**   | 一度のリクエストで指定できるポストIDは最大25件です。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **レスポンス形式**       | JSON。レスポンス形式として JSON を指定するヘッダーをリクエストに含めてください。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **レート制限**         | アクセスレベルに応じて契約で定められたとおり、1分あたりのレート制限が適用されます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **リクエスト例**        | curl -X POST &quot;[https://data-api.x.com/insights/engagement/28hr](https://data-api.x.com/insights/engagement/28hr)&quot; <br />  -H &#39;Accept-Encoding: gzip&#39; <br />  -H &#39;Authorization OAuth oauth&#95;consumer&#95;key=&quot;consumer-key-for-app&quot;,oauth&#95;nonce=&quot;generated-nonce&quot;,oauth&#95;signature=&quot;generated-signature&quot;,oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;generated-timestamp&quot;,oauth&#95;token=&quot;access-token-for-authed-user&quot;, oauth&#95;version=&quot;1.0&quot;&#39; <br />  -d &#39;&#123;<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;123456789&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;hourly-time-series&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;,<br />          &quot;engagement.day&quot;,<br />          &quot;engagement.hour&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;&#39;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **レスポンス例**        | &#123;<br />&quot;start&quot;:&quot;2015-09-14T17:00:00Z&quot;,<br />&quot;end&quot;:&quot;2015-09-15T22:00:00Z&quot;,<br />&quot;hourly-time-series&quot;:&#123;<br />&quot;123456789&quot;:&#123;<br />&quot;インプレッション&quot;:&#123;<br />&quot;2015-09-14&quot;:&#123;<br />&quot;17&quot;:&quot;551&quot;,<br />&quot;18&quot;:&quot;412&quot;,<br />&quot;19&quot;:&quot;371&quot;,<br />&quot;20&quot;:&quot;280&quot;,<br />&quot;21&quot;:&quot;100&quot;,<br />&quot;22&quot;:&quot;19&quot;,<br />&quot;23&quot;:&quot;6&quot;<br />&#125;,<br />&quot;2015-09-15&quot;:&#123;<br />&quot;00&quot;:&quot;5&quot;,<br />&quot;01&quot;:&quot;2&quot;,<br />&quot;02&quot;:&quot;7&quot;,<br />&quot;03&quot;:&quot;3&quot;,<br />&quot;04&quot;:&quot;1&quot;,<br />&quot;05&quot;:&quot;0&quot;,<br />&quot;06&quot;:&quot;0&quot;,<br />&quot;07&quot;:&quot;0&quot;,<br />&quot;08&quot;:&quot;0&quot;,<br />&quot;09&quot;:&quot;0&quot;,<br />&quot;10&quot;:&quot;0&quot;,<br />&quot;11&quot;:&quot;0&quot;,<br />&quot;12&quot;:&quot;0&quot;,<br />&quot;13&quot;:&quot;0&quot;,<br />&quot;14&quot;:&quot;0&quot;,<br />&quot;15&quot;:&quot;0&quot;,<br />&quot;16&quot;:&quot;0&quot;,<br />&quot;17&quot;:&quot;0&quot;,<br />&quot;18&quot;:&quot;0&quot;,<br />&quot;19&quot;:&quot;0&quot;,<br />&quot;20&quot;:&quot;0&quot;,<br />&quot;21&quot;:&quot;0&quot;<br />&#125;<br />&#125;,<br />&quot;エンゲージメント&quot;:&#123;<br />&quot;2015-09-14&quot;:&#123;<br />&quot;17&quot;:&quot;0&quot;,<br />&quot;18&quot;:&quot;0&quot;,<br />&quot;19&quot;:&quot;0&quot;,<br />&quot;20&quot;:&quot;0&quot;,<br />&quot;21&quot;:&quot;0&quot;,<br />&quot;22&quot;:&quot;0&quot;,<br />&quot;23&quot;:&quot;0&quot;<br />&#125;,<br />&quot;2015-09-15&quot;:&#123;<br />&quot;00&quot;:&quot;0&quot;,<br />&quot;01&quot;:&quot;0&quot;,<br />&quot;02&quot;:&quot;0&quot;,<br />&quot;03&quot;:&quot;0&quot;,<br />&quot;04&quot;:&quot;0&quot;,<br />&quot;05&quot;:&quot;0&quot;,<br />&quot;06&quot;:&quot;0&quot;,<br />&quot;07&quot;:&quot;0&quot;,<br />&quot;08&quot;:&quot;0&quot;,<br />&quot;09&quot;:&quot;0&quot;,<br />&quot;10&quot;:&quot;0&quot;,<br />&quot;11&quot;:&quot;0&quot;,<br />&quot;12&quot;:&quot;0&quot;,<br />&quot;13&quot;:&quot;0&quot;,<br />&quot;14&quot;:&quot;0&quot;,<br />&quot;15&quot;:&quot;0&quot;,<br />&quot;16&quot;:&quot;0&quot;,<br />&quot;17&quot;:&quot;0&quot;,<br />&quot;18&quot;:&quot;0&quot;,<br />&quot;19&quot;:&quot;0&quot;,<br />&quot;20&quot;:&quot;0&quot;,<br />&quot;21&quot;:&quot;0&quot;<br />&#125;<br />&#125;<br />&#125;<br />&#125;<br />&#125; |
+| **利用不可のポストID**    | 利用できなくなったポストID（例: 削除されたポストID）を含むクエリの場合、利用可能なすべてのポストIDについては適切なデータが返され、利用できなくなったポストIDは `unavailable_tweet_ids` という配列で参照されます。例えば、次のようになります。  <br /><br />  &#123;<br />    &quot;start&quot;: &quot;2015-11-17T22:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-11-19T02:00:00Z&quot;,<br />    &quot;unavailable&#95;tweet&#95;ids&quot;: [<br />        &quot;323456789&quot;<br />    ],<br />    &quot;group1&quot;: &#123;<br />     &quot;423456789&quot;: &#123;<br />      &quot;favorites&quot;: &quot;67&quot;,<br />      &quot;replies&quot;: &quot;8&quot;,<br />      &quot;retweets&quot;: 26<br />     &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+<div id="post-insightsengagementhistorical">
+  #### **POST /insights/engagement/historical**
+</div>
+
+historical エンドポイントでは、最大 25 件までのポストについて、最長 4 週間までの任意の期間におけるインプレッション数とエンゲージメント数を取得できます。現在、2014 年 9 月 1 日より前のデータは API からリクエストできません。historical エンドポイントでは、サポートされているすべての個別メトリクスをリクエストすることもできます。サポートされているメトリクスの全リストについては、[Metric Availability](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#EngagementTypes) を参照してください。
+
+|                  |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| :--------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **リクエストメソッド**    | HTTP POST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **URL**          | `https://data-api.x.com/insights/engagement/historical`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **コンテンツタイプ**     | `application/json`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **圧縮**           | Gzip。Gzip 圧縮を使用してリクエストを送信するには、接続リクエストに Accept-Encoding ヘッダーを含めます。  <br />ヘッダーは次のようになります。  <br />  <br />`Accept-Encoding: gzip`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **POST リクエスト形式** | リクエストは、本文にポストIDのコレクションと希望するグルーピングを含む JSON オブジェクトを指定した POST リクエストとして送信できます。POST は `tweets`、`engagements`、`groupings` オブジェクトを含む配列としてフォーマットされます。各リクエストには最大 25 個のポストIDを指定できます。各リクエストには、最長 4 週間の期間となるように、カスタムの Start および End 日付を指定できます。  <br />  <br /><br />  &#123;<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;Tweet ID 1&quot;,<br />       &quot;Tweet ID 2&quot;,<br />       &quot;Tweet ID 3&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;url&#95;clicks&quot;,<br />        &quot;detail&#95;expands&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;grouping name&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;,<br />          &quot;engagement.hour&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **開始日時と終了日時**    | リクエストの一部として `start` および `end` の値を使用して、任意の開始日と終了日を指定できます。開始日と終了日は、期間が 4 週間を超えないように指定する必要があります。現時点で指定可能な最も古い開始日は 2014 年 9 月 1 日です。将来日時を終了日に指定することはできません。`start` と `end` の日付が指定されない場合、API は直近の過去 4 週間をデフォルトとして使用します。  <br />  <br />Engagement API から返されるデータの最小粒度は 1 時間単位です。`start` または `end` の値がちょうど 1 時間の境界になっていないリクエストについては、最も近い包含する 1 時間の境界に丸められます。たとえば、&quot;start&quot;:&quot;2015-07-01T12:24:00Z&quot; および &quot;end&quot;:&quot;2015-07-10T08:37:00Z&quot; を指定したリクエストは、&quot;start&quot;:&quot;2015-07-01T12:00:00Z&quot;,&quot;end&quot;:&quot;2015-07-10T09:00:00Z&quot; に丸められます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **ポストID**        | エンゲージメントデータを取得する対象ポストのポストIDを含む配列です。認証に使用している @handle が作成したポストに対してのみデータをリクエストできる点に注意してください。4週間分の履歴エンドポイントでは、1リクエストあたり最大25件までのポストをサポートしており、ポストIDは文字列として指定する必要があります。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **エンゲージメントの種類**  | エンゲージメントメトリクスの種類を指定する配列です。  <br />  <br />4週間の履歴エンドポイントでは、`impressions`、`engagements`、およびすべての個別のエンゲージメントタイプがメトリクスとしてサポートされています。サポートされているエンゲージメントメトリクスの全一覧については、[エンゲージメントデータ](https://developer.x.com/en/docs/x-api/v1/metrics/get-tweet-engagement/overview#AvailableData)を参照してください。  <br />  <br />**注:** 2015年9月15日より前の期間を対象とするクエリでは、`favorites`、`replies`、`retweets` の3つのメトリクスは常に 0 と表示されます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **グループ化**        | Engagement API の結果は、ニーズに最も適した形になるように、さまざまなグルーピングで返すことができます。1 回のリクエストで指定できるグルーピングは最大 3 つまでです。  <br />  <br />各グルーピングごとに、アプリケーション内でこのグルーピングタイプを参照しやすくするためのカスタムのグルーピング名を定義できます。グルーピング名を定義したら、次のいずれか 1 つ以上の値でグループ化することができます。  <br />`tweet.id`  <br />`engagement.type`  <br />`engagement.day`  <br />`engagement.hour`  <br />グルーピングは順番どおりに評価されるため、`group&#95;by` の値の順序を変更することで、望ましい結果フォーマットに変更できます。ポスト ID、メトリクスの種類、日単位でメトリクスを分けて表示するグルーピングの例は次のとおりです。<br /><br />  &quot;groupings&quot;: &#123;<br />    &quot;my grouping name&quot;: &#123;<br />      &quot;group&#95;by&quot;: [<br />        &quot;tweet.id&quot;,<br />        &quot;engagement.type&quot;,<br />        &quot;engagement.day&quot;<br />      ]<br />    &#125;<br />  &#125;<br /><br />  <br />4 つの `group_by` アイテムを含むグルーピングは、次の 2 通りの順序のいずれかを使用している場合にのみ有効です。1 つのグルーピング内で 4 つの `group_by` アイテムを使用していて、次のいずれの順序にも該当しないリクエストはエラーを返します。加えて、1 回のリクエストで許可される 4 つの `group_by` アイテムを持つグルーピングは 1 つだけです。  <br /><br />&quot;group&#95;by&quot;: [<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.type&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]<br /><br />&quot;group&#95;by&quot;: [<br />    &quot;engagement.type&quot;,<br />    &quot;tweet.id&quot;,<br />    &quot;engagement.day&quot;,<br />    &quot;engagement.hour&quot;<br />  ]                            |
+| **POST サイズの上限**  | 1回のリクエストで指定できるポストIDは最大25件です。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **レスポンス形式**      | JSON。リクエストヘッダーでレスポンス形式として JSON を指定してください。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **レート制限**        | アクセスレベルに応じてお客様の契約で定められているとおり、1分単位のレート制限が適用されます。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **リクエスト例**       | curl -XPOST &quot;[https://data-api.x.com/insights/engagement/historical](https://data-api.x.com/insights/engagement/historical)&quot; <br />  -H &#39;Accept-Encoding: gzip&#39; <br />  -H &#39;Authorization OAuth oauth&#95;consumer&#95;key=&quot;consumer-key-for-app&quot;,oauth&#95;nonce=&quot;generated-nonce&quot;,oauth&#95;signature=&quot;generated-signature&quot;,oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;generated-timestamp&quot;,oauth&#95;token=&quot;access-token-for-authed-user&quot;, oauth&#95;version=&quot;1.0&quot;&#39; <br />  -d &#39;&#123;<br />    &quot;start&quot;: &quot;2015-08-01&quot;,<br />    &quot;end&quot;: &quot;2015-08-15&quot;,<br />    &quot;tweet&#95;ids&quot;: [<br />       &quot;123456789&quot;,<br />       &quot;223456789&quot;,<br />       &quot;323456789&quot;<br />    ],<br />      &quot;engagement&#95;types&quot;: [<br />        &quot;impressions&quot;,<br />        &quot;engagements&quot;,<br />        &quot;url&#95;clicks&quot;,<br />        &quot;detail&#95;expands&quot;<br />    ],<br />    &quot;groupings&quot;: &#123;<br />      &quot;types-by-tweet-id&quot;: &#123;<br />        &quot;group&#95;by&quot;: [<br />          &quot;tweet.id&quot;,<br />          &quot;engagement.type&quot;<br />        ]<br />      &#125;<br />    &#125;<br />  &#125;&#39; |
+| **レスポンス例**       | &#123;<br />    &quot;start&quot;: &quot;2015-08-01T00:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-08-15T00:00:00Z&quot;,<br />    &quot;types-by-tweet-id&quot;: &#123;<br />      &quot;123456789&quot;: &#123;<br />        &quot;impressions&quot;: &quot;0&quot;,<br />        &quot;engagements&quot;: &quot;0&quot;,<br />        &quot;url&#95;clicks&quot;: &quot;0&quot;,<br />        &quot;detail&#95;expands&quot;: &quot;0&quot;<br />      &#125;,<br />      &quot;223456789&quot;: &#123;<br />        &quot;impressions&quot;: &quot;788&quot;,<br />        &quot;engagements&quot;: &quot;134&quot;,<br />        &quot;url&#95;clicks&quot;: &quot;30&quot;,<br />        &quot;detail&#95;expands&quot;: &quot;1323&quot;<br />      &#125;,<br />      &quot;323456789&quot;: &#123;<br />        &quot;impressions&quot;: &quot;4&quot;,<br />        &quot;engagements&quot;: &quot;0&quot;,<br />        &quot;url&#95;clicks&quot;: &quot;2&quot;,<br />        &quot;detail&#95;expands&quot;: &quot;0&quot;<br />      &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                      |
+| **利用不可のポストID**   | 利用できなくなった（例：削除された）ポスト ID を含むクエリでは、利用可能なすべてのポスト ID については適切なデータが返され、利用できないポスト ID は `unavailable_tweet_ids` という配列で示されます。例えば、次のようになります。<br /><br />&#123;<br />    &quot;start&quot;: &quot;2015-11-17T22:00:00Z&quot;,<br />    &quot;end&quot;: &quot;2015-11-19T02:27:50Z&quot;,<br />    &quot;unavailable&#95;tweet&#95;ids&quot;: [<br />        &quot;323456789&quot;<br />    ],<br />    &quot;group1&quot;: &#123;<br />     &quot;423456789&quot;: &#123;<br />      &quot;favorites&quot;: &quot;67&quot;,<br />      &quot;replies&quot;: &quot;8&quot;,<br />      &quot;retweets&quot;: 26<br />     &#125;<br />    &#125;<br />  &#125;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+<div id="response-codes">
+  #### **レスポンスコード**
+</div>
+
+| Status | Text | Description |
+| :--- | :--- | :--- |
+| 200 | OK  | リクエストは成功しました。 |
+| 400 | Bad Request | 通常、このレスポンスはリクエスト内に不正な JSON が含まれている場合、またはリクエストで JSON ペイロードがまったく送信されなかった場合に返されます。 |
+| 401 | Unauthorized | 無効な認証情報が原因で HTTP 認証に失敗しました。OAuth のキーとトークンを確認してください。 |
+| 404 | Not Found | リクエストが送信された URL にリソースが見つかりませんでした。誤った URL が使用された可能性があります。 |
+| 429 | Too Many Requests | アプリが API リクエスト数の上限を超えました。 |
+| 500 | Internal Server Error | Gnip 側でエラーが発生しました。指数バックオフ方式を用いてリクエストを再試行してください。 |
+| 502 | Proxy Error | Gnip 側でエラーが発生しました。指数バックオフ方式を用いてリクエストを再試行してください。 |
+| 503 | Service Unavailable | Gnip 側でエラーが発生しました。指数バックオフ方式を用いてリクエストを再試行してください。 |
+
+<div id="error-messages">
+  #### **エラーメッセージ**
+</div>
+
+さまざまな状況において、Engagement API は状況に応じたエラーメッセージを返す場合があります。アプリケーション側では、これらのメッセージを適切に処理できるようにしておく必要があります。以下の表には、これらのエラーメッセージの代表的な例と、その解釈方法を示しています。多くの場合、Engagement API は、より詳細な情報を含む 200 OK レスポンスの一部として、利用可能なデータの一部の結果と特定のエラーメッセージを返す点に注意してください。
+
+| Error Message | 説明 |
+| :--- | :--- |
+| `"errors":["Your account could not be authenticated. Reason: Access token not found"]` | リクエストの認証コンポーネントで発生したエラーです。`Reason` に、エラーのトラブルシューティングに役立つ情報が含まれます。問題を解決できない場合は、`Reason` を含むエラー全文をサポートチームに送信してください。 |
+| `"errors":["1 Tweet ID(s) are unavailable"],"unavailable_tweet_ids": ["TWEET_IDS"]` | リクエストした Tweet ID（複数可）が利用できなくなっています。これは通常、それらのポストが削除されたか、別の理由で公開されなくなったことを示します。 |
+| `"errors":["Impressions & engagements for tweets older than 90 days (*TIME_PERIOD*) are not supported"],"unsupported_for_impressions_engagements_tweet_ids":[*TWEET_IDS*]` | `/totals` エンドポイントに対してリクエストした Tweet ID（複数可）が 90 日以内のポストではないため、インプレッションおよびエンゲージメントのメトリクスの取得対象としてサポートされていません。 |
+| `"errors":["Forbidden to access tweets: *TWEET_IDS*"]` | 第三者の代わりにデータを取得するために使用しているアクセストークンに基づき、リクエストした Tweet ID（複数可）へのアクセスが許可されていません。 |

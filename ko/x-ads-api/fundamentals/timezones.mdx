@@ -1,0 +1,57 @@
+---
+title: 시간대
+keywords: ["시간대", "타임존", "시간대 처리", "시간대 형식", "시간대 변환", "시간대 설정"]
+---
+
+<div id="timezones-accounts-and-billing">
+  ## 시간대, 계정, 과금
+</div>
+
+Datetime 값은 항상 UTC 시간(datetime 값 끝의 Z로 표시됨)으로 반환됩니다. Datetime 값은 ISO 8601 표준 시간대 형식을 사용하여 POST 또는 PUT 명령에서 임의의 시간대로 지정할 수 있습니다. 시간은 [ISO-8601](http://en.wikipedia.org/wiki/ISO_8601)의 일부 형식을 사용해 표현됩니다. 보다 구체적으로, 이 날짜 형식에 대한 strptime 문자열은 `%Y-%m-%dT%l:%M:%S%z`입니다. 광고주의 계정 시간대가 공식 과금 수치가 확정되는 기준 시각을 결정합니다.
+
+계정 수준에서 API를 쿼리할 때 ([GET accounts](/ko/x-ads-api/campaign-management#accounts)), 다음과 같은 시간대 정보를 받게 됩니다:
+
+```json
+    {
+      "request": {
+        "params": {
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "data": {
+        "name": "API McTestface",
+        "business_name": null,
+        "timezone": "America/Los_Angeles",
+        "timezone_switch_at": "2016-07-21T07:00:00Z",
+        "id": "18ce54d4x5t",
+        "created_at": "2016-07-21T22:42:09Z",
+        "salt": "54cb7b5a34183f77d82dd6d0f4329691",
+        "updated_at": "2017-09-09T06:42:14Z",
+        "business_id": null,
+        "approval_status": "ACCEPTED",
+        "deleted": false
+      }
+    }
+```
+
+여기에는 두 개의 타임존 값이 포함됩니다. `timezone`(개요는 [위키백과의 timezones](https://en.wikipedia.org/wiki/Tz_database#Names_of_time_zones)를 참조)과 `timezone_switch_at`입니다. `timezone_switch_at`은 UTC 타임존(+00:00) 기준으로 제공되지만, 항상 지정된 타임존에서의 자정 시각을 나타낸다는 점에 유의하십시오.
+
+광고주의 타임존은 API를 통해 수정할 수 없습니다. 이 속성은 X의 광고주 계정 담당자가 계약/청구 수준에서 설정합니다.
+
+계정이 America/Los&#95;Angeles 타임존에서 새로운 로컬 타임존 값으로 전환되는 날짜에는 데이터가 비는 구간이 발생하므로, 리포트를 생성하고 분석용 엔드포인트를 조회할 때 `timezone_switch_at` 값을 반드시 유의하시기 바랍니다.
+
+<div id="specifying-datetime-values-with-timezone">
+  ### 타임존을 포함한 Datetime 값 지정
+</div>
+
+Datetime 값은 항상 UTC 시간으로 반환됩니다(이는 Datetime 값 끝의 `Z`로 표시됩니다). Datetime 값은 POST 또는 PUT 명령에서 타임존에 대해 [ISO 8601 표준](http://en.wikipedia.org/wiki/ISO_8601) 형식을 사용해, 어떤 타임존으로든 지정할 수 있습니다. 예를 들어, `2017-07-10T08:00:00-0800`은 허용되는 입력 값이며, 자동으로 UTC 값인 `2017-07-10T16:00:00Z`로 변환됩니다.
+
+analytics 엔드포인트를 `granularity`가 `DAY` 또는 `TOTAL`인 상태로 사용할 때, `start_time` 값은 계정 보유자의 로컬 타임존 기준으로, 원하는 날짜의 자정으로 지정해야 합니다. 사용되는 타임존 오프셋은 해당 날짜의 오프셋이 아니라 현재 날짜의 오프셋입니다. 예를 들어, America/Los&#95;Angeles에 위치한 광고 계정이 Pacific Daylight Savings 시간대에 있을 때 UTC 오프셋은 -0700입니다. 따라서 analytics 요청에서는 시간을 `start_time=2017-05-21T07:00:00Z` 또는 `start_time=2017-05-21T00:00:00-0700`으로 지정해야 합니다. 광고 계정이 Asia/Tokyo에 있고, 그곳의 오프셋이 항상 +09:00인 경우, 값은 `start_time=2017-05-20T15:00:00Z` 또는 `start_time=2017-05-21T00:00:00+0900`으로 지정해야 합니다.
+
+<div id="accepted-utc-offset-formats">
+  ### 허용되는 UTC 오프셋 형식
+</div>
+
+[ISO 8601 시간대 지정자](http://en.wikipedia.org/wiki/ISO_8601#Time_zone_designators)를 참고하세요.
+
+지원되는 형식: `Z`, `-HHMM`, `+HHMM`, `-HH:MM`, `+HH:MM`, `-HH`, `+HH`

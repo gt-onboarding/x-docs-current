@@ -1,0 +1,4542 @@
+---
+title: 広告クリエイティブ
+keywords: ["creatives", "ad creatives", "creative management", "ad creative API", "manage creatives", "advertising creatives"]
+---
+
+import { Button } from "/snippets/ja/button.mdx";
+
+<div id="overview">
+  ## 概要
+</div>
+
+クリエイティブとは、キャンペーンでプロモーションできるあらゆるエンティティを指します。ポストにはテキスト、画像、GIF、動画、またはカードを含めることができます。カードには画像または動画を含めることができます。
+
+画像、GIF、または動画のクリエイティブは、[POST media/upload](/ja/x-api/media/upload-media#post-media-upload)（画像のみをサポートするシンプルなアップロードエンドポイント）または POST media/upload (chunked) エンドポイントのいずれかを使用してアップロードします。これらのクリエイティブは、次のオブジェクトに追加できます。
+
+Cards:
+
+* POST accounts/:account&#95;id/cards\
+  Tweets:
+* POST accounts/:account&#95;id/tweets - カードをツイート（ポスト）に追加するには、card&#95;uri パラメータを使用します。\
+  Scheduled Tweets:
+* POST accounts/:account&#95;id/scheduled&#95;tweets
+
+カードの詳細については、Cards ページを参照してください。動画をカードやツイート（ポスト）に関連付ける方法の詳細については、「Promoted Video」ページを参照してください。
+
+<div id="cards">
+  ### カード
+</div>
+
+Ads API は、ポストで利用でき、その後キャンペーンでプロモーション可能な複数のカードタイプをサポートしています。**注記**: 一度ポストされると、カードの詳細は公開されます。これには、そのカードの所有者であるユーザーに関する情報が含まれる場合があります。
+
+<div id="image">
+  #### 画像
+</div>
+
+以下の画像仕様は、[Cards](/ja/x-ads-api/creatives#cards-2) で使用されるアセットに適用されます。画像は 3MB 以下で、幅が 800px 以上である必要があります。また、以下の幅:高さのアスペクト比をサポートします。
+
+* Website: 1:1 および 1.91:1
+* Image App Download: 1:1 および 1.91:1
+* Poll: 1.91:1
+* Image Conversation: 1.91:1
+* Image Direct Message: 1.91:1
+
+サポートしている画像形式は .bmp、.jpeg、.png です。
+
+<div id="video">
+  #### 動画
+</div>
+
+以下の動画仕様は、[Cards](/ja/x-ads-api/creatives#cards-2) で使用するアセットに適用されます。サポートしている縦横比は次のとおりです。
+
+* Video Website: 16:9 および 1:1
+* Video App Download: 16:9 および 1:1
+* Poll: 16:9
+* Video Conversation: 16:9
+* Video Direct Message: 16:9
+
+<div id="promoted-video">
+  ### プロモート動画
+</div>
+
+このドキュメントでは、Ads API を通じて動画をアップロードしてプロモートする手順の概要を説明します。
+
+Ads API は、[ポスト内のプロモート動画](/ja/x-ads-api/creatives#tweets-2)および次のカードでのプロモート動画をサポートしています。
+
+* [Video Website](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [Video App Download](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [Video Conversation](/ja/x-ads-api/creatives#video-conversation-cards)
+
+まず、[POST media/upload (chunked)](https://developer.x.com/en/docs/media/upload-media/api-reference/post-media-upload-init.html) エンドポイントを使用して動画をアップロードします。次に、`media_id` を使用して、POST accounts/:account&#95;id/videos エンドポイントを呼び出し、動画を広告アカウントに関連付けます。動画の `id` は `media_key` と呼ばれることもあり、後続のリクエストで使用されます。これは、先頭が整数で、その後にアンダースコアが続き、最後が long 型の値で終わる形式の文字列です。例: `13_875943225764098048`。
+
+<div id="promoted-video-in-tweets">
+  #### ポスト内のプロモーション動画
+</div>
+
+ポストを作成するには、動画の `id` と併せて [POST accounts/:account&#95;id/tweet](/ja/x-ads-api/creatives#get-accounts-account-id-tweets) エンドポイントを使用します。このステップでは、動画タイトル、説明文、コールトゥアクション（CTA）も指定できます。これらの値はユーザー向けに表示されます。
+
+<div id="promoted-video-in-cards">
+  #### カードでのプロモ動画
+</div>
+
+Video App Download カードと Video Conversation カードでは、ポスター画像を追加できます。これらのカードで使用する画像は、[POST media/upload](https://developer.x.com/en/docs/media/upload-media/api-reference/post-media-upload.html) エンドポイントを使用してアップロードします。
+
+次のいずれかのエンドポイントを使用してカードを作成します。
+
+* [POST accounts/:account&#95;id/cards/video&#95;website](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [POST accounts/:account&#95;id/cards/video&#95;app&#95;download](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [POST accounts/:account&#95;id/cards/video&#95;conversation](https://devcommunity.x.com/t/ads-api-version-11/168814)
+
+動画の `id` と、必要に応じて画像の `media_id`（ポスター画像用）を指定します。
+
+最後に、POST accounts/:account&#95;id/tweet エンドポイントを使用してポストを作成します。カードは、`card_uri` パラメーターを使用してポストに添付されます。
+
+<div id="general-information">
+  #### 一般情報
+</div>
+
+API を通じた動画アップロードの詳細については、[Video Upload Guide](https://developer.x.com/en/docs/media/upload-media/uploading-media.html) を参照してください。
+
+動画はプレロールアセットとしてプロモーションすることもできます。詳しくは [Video Views Pre-roll Objective Guide](/ja/x-ads-api/campaign-management#video-views-preroll-objective) を参照してください。
+
+* （2015-10-22 時点）プロモーション用コンテンツで使用する動画をアップロードする場合、[POST media/upload (chunked)](https://developer.x.com/en/docs/media/upload-media/api-reference/post-media-upload-init.html) エンドポイントへのすべての `INIT` コマンドリクエストで、`media_category` パラメータに `amplify_video` を設定する必要があります。このパラメータを使用すると、動画が非同期で事前処理され、プロモーション用コンテンツで使用できるように準備されます。動画アップロード後の非同期処理の完了状況は、`STATUS` コマンドで確認できます。
+* 現在許可されているプロモーション動画の最大再生時間は 10 分で、ファイルサイズは 500MB 以下です。
+* アップロードする動画は mp4 または mov のいずれかである必要があります。
+* アップロードされた動画は一般的にすばやく処理されますが、処理時間は動画の長さやファイルサイズによって変動します。
+* アップロードするポスター画像は png か jpg 形式である必要があります。アスペクト比やサイズの要件はありませんが、ポスター画像は動画プレーヤーに合わせて調整されます。
+
+<div id="guides">
+  ## ガイド
+</div>
+
+### 予約済みポスト
+
+#### はじめに
+
+予約ポストを使用すると、広告主やユーザーは、後で公開されるようにスケジュールされたポストを作成できます。これらのポストを作成および管理できるだけでなく、API を使用して、それらをラインアイテムに関連付け、ポストが公開された際にプロモーションできるようにすることもできます。これにより、広告主はネイティブポストをあらかじめ作成・用意し、重要な施策に先立ってキャンペーンのクリエイティブを計画できます。たとえば、新製品発表と同時に公開されるようにポストのクリエイティブを事前に用意しておく、といった使い方が可能です。
+
+Scheduled Tweets API エンドポイントで提供される機能は、以下のとおりです。
+
+* 新規の予約ポストを作成、変更、および表示
+* 予約ポストをラインアイテムに関連付ける
+* 既存の予約ポストを検索および管理する
+* 予約ポストが公開されたら、その公開ポストの `id` を取得する
+
+<div id="api-endpoints">
+  #### API エンドポイント
+</div>
+
+上記の機能に関連するエンドポイントの一覧は次のとおりです。
+
+<div id="scheduled-tweet-management">
+  #### 予約済みポストの管理
+</div>
+
+* [GET accounts/:account&#95;id/scheduled&#95;tweets](/ja/x-ads-api/creatives#get-accounts-account-id-scheduled-tweets) (すべての予約済みポストの一覧を取得)
+* [GET accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#get-accounts-account-id-scheduled-tweets) (`id` を使用して特定の予約済みポストを取得)
+* [POST accounts/:account&#95;id/scheduled&#95;tweets](/ja/x-ads-api/creatives#post-accounts-account-id-scheduled-tweets) (新しい予約済みポストを作成)
+* [PUT accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#example-request-39) (既存の予約済みポストを更新)
+* [DELETE accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#example-request-40) (`id` を使用して予約済みポストを削除)
+* [GET accounts/:account&#95;id/scheduled&#95;tweets/preview/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#scheduled-tweets-2) (既存の予約済みポストをプレビュー)
+
+<div id="scheduled-promoted-tweets">
+  #### 予約済みプロモーションポスト
+</div>
+
+* [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/ja/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets) (すべての予約済みプロモーションポストの一覧を取得する)
+* [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/ja/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id) (`id` を使用して予約済みプロモーションポストを取得する)
+* [POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/ja/x-ads-api/campaign-management#post-accounts-account-id-scheduled-promoted-tweets) (新しい予約済みプロモーションポストを作成する)
+* [DELETE accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/ja/x-ads-api/campaign-management#delete-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id) (`id` を使用して既存の予約済みプロモーションポストを削除する)
+
+<div id="scheduled-tweet-view">
+  #### 予約ポストの閲覧
+</div>
+
+* [GET accounts/:account&#95;id/scheduled&#95;tweets/preview/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#scheduled-tweets-2) （既存の予約ポストを表示）
+
+予約ポストは「ライブ」のポストとは別個のエンティティであるという性質上、これらのポストを作成または編集する際には、2 種類の異なる検証が実行されます。最初の検証ルールセットは、予約ポストの作成ステップの際に、特に次のように実行されます。
+
+<div id="scheduled-tweet-create">
+  #### Scheduled Tweet Create:
+</div>
+
+* 認証済みユーザーが、指定された @handle に対してオーガニックポストを作成する権限を持っていることを検証します。Promoted-Only ポストの作成権限を利用するには、認証済みユーザーが [Tweet composer permissions](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/authenticated-user-access#get-accounts-account-id-authenticated-user-access) を持つアカウントユーザーである必要があります。
+* `scheduled_at` で指定した時刻の前後 15 分以内に作成が予定されているポストが 30 件を超えていないことを検証します。`SCHEDULED_TWEET_LIMIT_EXCEEDED` エラーメッセージは、同じ将来の 15 分間の時間枠内にスケジュールされたポストが多すぎることを示します。広告主は既存のスケジュール済みポストを削除するか、`scheduled_at` 時刻を前後いずれかに移動する必要があります。
+
+<div id="scheduled-tweet-goes-live">
+  #### 予約ポストが「公開」されるとき:
+</div>
+
+* これらのバリデーションルールは `scheduled_at` で指定した時刻に実行され、API で通常のポストを作成する際に適用されるルールと同一です。たとえば、予約ポストに画像と GIF の両方が含まれている場合、その予約ポストは公開されず、`scheduled_status` は `FAILED` に設定されます。
+
+<div id="workflow">
+  #### Workflow
+</div>
+
+**新しい予約ポストの作成**
+
+新しい予約ポストは、[POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) エンドポイントを使用して作成できます。このエンドポイントには、必須パラメータとして `scheduled_at` の時刻と、ポスト内にメディアエンティティが含まれていない場合のポストの `text` が必要です。加えて、このエンドポイントには、`as_user_id` パラメータを使用して別の @handle に代わって予約ポストを作成したり、カード（`card_uri`）やメディア（`media_ids`）を追加したりできる、いくつかの追加オプションがあります。なお、1つのポストには同じ種類のエンティティのみを含めることができます。つまり、Video、Gif、Image のいずれか一種類のみです。`nullcast` パラメータは、そのポストが「プロモーション専用」ポストかどうかを制御します。新たに作成されるすべての予約ポストは、デフォルトでは &quot;Promoted-Only&quot;（`nullcast=true`）です。`nullcast=false` の場合は、オーガニックの予約ポストが作成されます。
+
+予約ポストが正常に作成されると、レスポンスには、その予約ポスト自体の一意の識別子を指す `id` フィールドが含まれます。このフィールドに加えて、`tweet_id` という別のフィールドも返されます。このフィールドは最初は `null` ですが、ポストが公開されると、このフィールドには「ライブ」ポストの ID が設定されます。
+
+```
+twurl -H 'ads-api.x.com' -X POST "/6/accounts/:account_id/scheduled_tweets" -d 'scheduled_at=2017-12-24T23:59:00Z&text=Happy Holidays!'
+```
+
+この操作により、次のような予約ポストが作成されます。
+
+```json
+{
+  "request": {
+    "params": {
+      "text": "Happy Holidays!",
+      "scheduled_at": "2017-12-24T23:59:00Z"
+    }
+  },
+  "data": {
+    "completed_at": null,
+    "id_str": "917507899668099072",
+    "text": "Happy Holidays!",
+    "user_id": "3271358660",
+    "scheduled_status": "SCHEDULED",
+    "id": 917507899668099100,
+    "nullcast": true,
+    "created_at": "2017-10-09T21:51:44Z",
+    "scheduled_at": "2017-12-24T23:59:00Z",
+    "card_uri": null,
+    "updated_at": "2017-10-09T21:51:44Z",
+    "tweet_id": null,
+    "media_keys": []
+  }
+}
+```
+
+この予約ポストが公開されると、`tweet_id` フィールドには「ライブ」ポストの ID が格納されます。
+
+**予約ポストを表示する**
+
+[GET accounts/:account&#95;id/tweet&#95;previews](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweet-previews#get-accounts-account-id-tweet-previews) エンドポイントを、前の手順で取得した予約ポストの `id` と組み合わせて使用することで、ポストのプレビューを生成できます。API レスポンスには、予約ポストのプレビューをそのまま表示するために利用できる iframe URL が含まれます。関連する CSS と画像は、X から直接配信されます。
+
+```
+twurl -H ads-api.x.com -X GET "/6/accounts/18ce54bgxky/tweet_previews?tweet_type=SCHEDULED&tweet_ids=917507899668099072
+```
+
+```json
+{
+  "request": {
+    "params": {
+      "tweet_type": "SCHEDULED",
+      "tweet_ids": [
+        "917507899668099072"
+      ],
+      "account_id": "18ce54bgxky"
+    }
+  },
+  "data": [
+    {
+      "tweet_id": "1126633863155871744",
+      "preview": "<\iframe class='tweet-preview' src='https://ton.smf1.x.com/ads-manager/tweet-preview/index.html?data=H4sIAAAAAAAAAK1WTW%2FjNhD9Kyyv9dqSZdmOgALJbhJsCyxaIDkUWBUEJY0lNhSpklRSN%2FV%2F71CyZbm297S%2BWJxPzpt5I71T9wbgaELeaW6AOygYxyN9rlryhW9JcEPmUbKIkuiG%2FBjgj8yD8IZOqChoEobz5TKK1ssojOP1KlwtFl7BrDMY4oIW%2FTatlMzB3z7JZ940W%2FJZS1Hwrf0Btc60Kve3oMmGSwsTWgjbSL7tXJjhqgSafA0mYfzHhIJywgmwNHmnFbeV4yU%2Bf0WN3daZlvtDa8Gw2htrdRCZXrlDU92aHIPStA2CKOekMrD5KaWVc02SztIZps%2Bh0rIAg27TXNcpJQYk2ii90VLqt7R3ht%2B4cQoMeVClUIAPd03Th01nvDfx0ClmoJFYk0aouGst82gqROaKskf03KCr7LLvXnXN02K3QTHFaziovYdH0seL5qswitfLZTBq6FGIRfSe9Lm1FTfkY%2BX%2FFcpPAlNRC7eufdFSY1%2BxASh84oo8YitzYXM9IZ%2FuaNcQ1HjMbQc61l0VXDmYlsJVbTYVGq0KwPCi2cf5tQFFnjR2zyDU6YycwX%2Fr3oRzvfKpwTaSZ8NfQUoU%2FUsetanxAV79VElhHbm1oIrSiILcvvgquqSN0Q7y8Uz2TQdjWa5bhZP8IUShEeh8IvIxkVB7SY%2FyKctaIL%2B0kgQrMp8n0SKJ10eWxZ4t%2FBXHUzg4idu6nOnNxsIQ1Yka2D9aDc0sQTNQPJP%2B2sgqvPUrGLERozL68ToNLRELvBj4VuZaOSOy1mmsdAi2dxaWOeyhlRzVl6TYozMnhHIjJLCM5y%2BlwaweHOn96afg%2FuHhnl60ETUvgR1HpJsQntkptrcuO0bOOhuLg1NBPfyH6Swrpw2W9O24rBu8kwH8DuEdns9Kv1hLc5rsxBaTLcN1HIdhHIVRuFov5wtMXH748vO2%2BP0jUzjFXE7%2FbMa3%2BFZl3z1ZxhWyjv2fwlfy9NaY6LhO0lm4WC3WcRSvlqO4UqiXYT7C%2B7vwcT7SWlFAxg3LtMHNfH2ODnZ4kIPVPRo9jnN1r5eDNup%2BIy2y5GxuDrQqYMNb6dje9or44HOyQYTnWs%2FXXoD7%2Ba8WrGO4hwZuK%2B2Qt%2F32tAPhB%2B4xt238qjVQtpIbuuvIP6wbjfAIhStncO3eZ0f9keMHmYHuo%2BCwFoJ%2BDfktdEF0JPfebbxgct30b%2BdhY%2B51u%2FGm2U2IR7rW%2FbJU%2FdcBfpEchHjwoO52%2FwENmVvErwgAAA%3D%3D'>"
+    }
+  ]
+}
+```
+
+上には、新しく作成された予約ポストの表示例が示されています
+
+**予約ポストをラインアイテムに関連付ける**
+
+予約ポストはオーガニックポストの作成に使用できますが、パートナーは「プロモーション専用」 (`nullcast=true`) ポストを作成することもでき、いずれもラインアイテムに関連付けることができます。これを可能にするために、[POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#post-accounts-account-id-scheduled-promoted-tweets) エンドポイントも提供しています。このエンドポイントでは、1 回の API 呼び出しにつき、1 つのプロモーション用予約ポストのみをラインアイテムに関連付けることができます。同じラインアイテムに複数の予約ポストを関連付けるには、複数回の API 呼び出しが必要です。
+
+既存のプロモーション用予約ポストを変更することはできない点に注意してください。
+
+```
+twurl -H 'ads-api.x.com' -X POST "/6/accounts/:account_id/scheduled_promoted_tweets" -d 'line_item_id=a44qc&scheduled_tweet_id=917507899668099072'
+```
+
+```json
+{
+  "data": {
+    "line_item_id": "a44qc",
+    "id": "26576",
+    "created_at": "2017-10-09T22:24:16Z",
+    "updated_at": "2017-10-09T22:24:16Z",
+    "scheduled_tweet_id": "917507899668099072",
+    "tweet_id": null,
+    "deleted": false
+  },
+  "request": {
+    "params": {
+      "line_item_id": "a44qc",
+      "scheduled_tweet_id": 917507899668099100,
+      "account_id": "aaaaa"
+    }
+  }
+}
+```
+
+This endpoint only creates an association between a given Scheduled Tweet and a line item. Once the campaign/line item flight dates are current, the line item with automatically start serving the corresponding “live” Tweet. While we do validate during this step that the Scheduled Tweet is in the `SCHEDULED` state, and that the given Scheduled Tweet is valid for the given objective, no other validations are run. Any remaining validation rules that apply to the line item and Scheduled Tweet are run when the Tweet goes “live”
+
+このエンドポイントは、指定された予約済みポストとラインアイテムの間に関連付けを作成するだけです。キャンペーン／ラインアイテムのフライト期間が開始すると、そのラインアイテムは対応する「公開」ポストの配信を自動的に開始します。このステップでは、予約済みポストが `SCHEDULED` 状態であること、および指定された予約済みポストが指定のオブジェクティブに対して有効であることは検証しますが、それ以外のバリデーションは行いません。ラインアイテムおよび予約済みポストに適用される残りのバリデーションルールは、ポストが「公開」されるタイミングで実行されます。
+
+In order to ensure that there are no issues with campaign serving it is recommend that the Scheduled Tweet be `scheduled_at` a time prior to the campaign/line item flight dates.
+
+キャンペーン配信に問題が発生しないようにするため、予約済みポストの `scheduled_at` は、キャンペーン／ラインアイテムのフライト日程よりも前の時刻に設定することを推奨します。
+
+For example, let&#39;s say the Scheduled Tweet is set to go live after the campaign start date (and that there is only a single Tweet associated with a single line item), then the campaign will be `ACTIVE`, however given that the Scheduled Tweet is not live yet, there will be no creatives available for serving.
+
+たとえば、予約済みポストがキャンペーン開始日より後に公開されるように設定されており（かつ、1 つのラインアイテムに 1 つのポストのみが紐づいている）とします。この場合、キャンペーン自体は `ACTIVE` になりますが、予約済みポストはまだ公開されていないため、配信可能なクリエイティブが存在しない状態になります。
+
+**Scheduled Tweet Management**
+
+**予約済みポストの管理**
+
+The remaining sets of endpoints allow API consumers to manage all their Scheduled Tweets and Scheduled Promoted Tweets. These APIs can be used to either return a list of all Scheduled Tweets optionally filtered by a given state as well as lookup a given Scheduled Tweet by its `id`.
+
+残りの一連のエンドポイントにより、API 利用者は自身のすべての予約済みポストおよび予約済みプロモーションポストを管理できます。これらの API を使用すると、任意の状態でフィルタしたすべての予約済みポストのリストを取得したり、特定の予約済みポストをその `id` で取得したりできます。
+
+<div id="what-happens-when-a-scheduled-tweet-goes-live">
+  #### スケジュール済みポストが公開されたときに何が起こりますか？
+</div>
+
+特定のスケジュール済みポストが公開される直前、つまり `scheduled_at` の時刻になると、次の更新が行われます。
+
+* 実際に公開される「ライブ」ポストが作成されますが、最大 1 秒程度の遅延が発生する場合があります
+* `tweet_id` が次のエンティティに追加されます：
+  * スケジュール済みポスト
+  * プロモーション用スケジュール済みポスト
+* 新しいプロモーション用ポストのエンティティが作成されます
+
+<div id="best-practices">
+  #### ベストプラクティス
+</div>
+
+予約ポストを作成またはプロモーションする際は、次のベストプラクティスに従うことを推奨します。
+
+* 予約ポストを作成する際は、ポストが有効な内容になっていることを確認してください（たとえば、1 つのポストには画像・動画・GIF のいずれか 1 種類のみを含めることができ、3 種類を組み合わせて含めることはできません）
+* キャンペーンのフライト期間（`start_time` と `end_time`）が、予約ポストの `scheduled_at` の日時と一致していることを確認してください
+* 予約ポストは、現在から 1 年（365 日）を超える未来の日時にはスケジュールしないでください
+* 予約ポストについては、現在ポストのプレビュー機能はサポートされていません（作成前に予約ポストをプレビューできる機能を指します）
+
+### メディアライブラリ
+
+#### はじめに
+
+Media Library エンドポイントは、X 広告アカウントの画像、GIF、動画を管理するための機能を提供します。ライブラリ内のメディアアセットは、ポストやカードの作成に利用できます。また、同じアセットを何度もアップロードする必要がないよう、複数の[クリエイティブ](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/overview)で再利用することも可能です。
+
+<div id="api-endpoints">
+  #### API エンドポイント
+</div>
+
+* [POST media/upload](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload#post-media-upload)（メディアをアップロードする）または[POST media/upload (chunked)](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload-init#post-media-upload-init)（メディアをアップロードする）
+* [POST accounts/:account&#95;id/media&#95;library](https://developer.x.com/x-ads-api/creatives#get-accounts-account-id-media-library#post-accounts-account-id-media-library)（メディアライブラリにメディアを追加する）
+
+<div id="adding-to-the-library">
+  #### ライブラリへの追加
+</div>
+
+メディアをライブラリに追加するには 2 段階のプロセスが必要です。まず、[POST media/upload](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload#post-media-upload) エンドポイント、または [POST media/upload (chunked)](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/api-reference/post-media-upload-init#post-media-upload-init) の一連のエンドポイントのいずれかを使用してアセットをアップロードします。（マルチパートアップロード方式の詳細については、[Chunked media upload](https://developer.x.com/content/developer-twitter/en/docs/media/upload-media/uploading-media/chunked-media-upload) ガイドを参照してください。）
+
+```
+twurl -X POST -H upload.x.com "/1.1/media/upload.json?additional_owners=756201191646691328" --file latte.jpeg --file-field "media"
+```
+
+```json
+{
+   "media_id":966947208837742592,
+   "media_id_string":"966947208837742592",
+   "size":74194,
+   "expires_after_secs":86400,
+   "image":{
+      "image_type":"image/jpeg",
+      "w":800,
+      "h":418
+   }
+}
+```
+
+次に、メディア ID を使用して、[POST accounts/:account&#95;id/media&#95;library](https://developer.x.com/x-ads-api/creatives#get-accounts-account-id-media-library#post-accounts-account-id-media-library) エンドポイントを呼び出し、そのメディアを広告アカウントのライブラリに追加します。
+
+```
+twurl -X POST -H ads-api.x.com "/9/accounts/18ce54d4x5t/media_library?file_name=latte.jpeg&media_category=TWEET_IMAGE&media_key=966947208837742592&name=Latte"
+```
+
+```json
+{
+   "request":{
+      "params":{
+         "name":"Latte",
+         "file_name":"latte.jpeg",
+         "media_category":"TWEET_IMAGE",
+         "account_id":"18ce54d4x5t",
+         "media_key":966947208837742592
+      }
+   },
+   "data":{
+      "tweeted":false,
+      "name":"Latte",
+      "file_name":"latte.jpeg",
+      "media_url":"https://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+      "media_category":"TWEET_IMAGE",
+      "media_key":"3_966947208837742592",
+      "created_at":"2018-02-23T08:05:54Z",
+      "media_status":"TRANSCODE_COMPLETED",
+      "media_key":"966947208837742592",
+      "media_type":"IMAGE",
+      "updated_at":"2018-02-23T08:06:17Z",
+      "deleted":false
+   }
+}
+```
+
+**注:** アップロード後すぐに画像、GIF、または動画をポストすると、そのメディアもライブラリに追加されます。
+
+<div id="request-parameters">
+  #### リクエストパラメーター
+</div>
+
+すべての Media Library の POST リクエストには、メディア識別子が必要です。この値はアップロード処理の際に返されます。上記の例のように `media_id` を使用する場合は、`media_category` も指定する必要があります。使用可能なカテゴリ値は 4 種類あります: AMPLIFY&#95;VIDEO、TWEET&#95;GIF、TWEET&#95;IMAGE、TWEET&#95;VIDEO です。
+
+任意で、Media Library 内のオブジェクトに対して `name` および `file_name` の値を設定できます。これらの属性は、ライブラリ内でメディアのバリエーションを区別するのに役立ちます。
+
+動画の場合は、タイトルおよび説明文を設定することも可能です。これらの値は、[POST accounts/:account&#95;id/tweet](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) エンドポイントで `video_title` および `video_description` リクエストパラメーターとして渡されることを想定しています。ポスト内では、このテキストは動画の下に表示されます。
+
+<div id="attributes">
+  #### 属性
+</div>
+
+Media Library では、`media_key` という概念が正式に導入されています。これはライブラリ内のオブジェクトを一意に識別する識別子です。`media_key` は `13_875943225764098048` のような形式の文字列です。これらはすべてのカード関連エンドポイントで完全にサポートされています。
+
+加えて、Media Library のレスポンスには、文字列として表現された `media_id` も含まれます。これは、現在 media key を受け付けない次のリソース向けに返されます：[ポスト](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)*、[ポストプレビュー](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#get-accounts-account-id-tweet-preview)*、および [予約ポスト](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets)。すべてのエンドポイントで media key をサポートできるよう対応を進めています。
+
+`aspect_ratio` 属性は GIF と動画に対して返されます。これは、特定のアスペクト比のみを受け付けるカードで使用するメディアをフィルタリングするために利用できます。
+
+*これらのエンドポイントはいずれも `video_id` パラメータをサポートしており、これは media key です。
+
+<div id="usage">
+  #### 使用方法
+</div>
+
+このセクションでは、次の画像をポストで使用し、ウェブサイトカードを作成します。
+
+```
+twurl -H ads-api.x.com "/9/accounts/18ce54d4x5t/media_library/3_966947208837742592"
+```
+
+```json
+{
+   "request":{
+      "params":{
+         "account_id":"18ce54d4x5t",
+         "media_key":"3_966947208837742592"
+      }
+   },
+   "data":{
+      "tweeted":false,
+      "name":"Latte",
+      "file_name":"latte.jpeg",
+      "media_url":"https://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+      "media_category":"TWEET_IMAGE",
+      "media_key":"3_966947208837742592",
+      "created_at":"2018-02-23T08:05:54Z",
+      "media_status":"TRANSCODE_COMPLETED",
+      "media_key":"966947208837742592",
+      "media_type":"IMAGE",
+      "updated_at":"2018-02-23T08:06:17Z",
+      "deleted":false
+   }
+}
+```
+
+**ポスト**
+
+`media_keys` を使用して画像を指定し、ポストを作成できます。
+
+```
+twurl -X POST -H ads-api.x.com "/9/accounts/18ce54d4x5t/tweet?text=coffee&media_keys=966947208837742592&as_user_id=756201191646691328&trim_user=true"
+```
+
+```json
+{
+   "data":{
+      "created_at":"Fri Feb 23 08:20:05 +0000 2018",
+      "id":966950781302665218,
+      "id_str":"966950781302665218",
+      "text":"coffee https://t.co/T772Hx5GNT",
+      "truncated":false,
+      "entities":{
+         "hashtags":[
+
+         ],
+         "symbols":[
+
+         ],
+         "user_mentions":[
+
+         ],
+         "urls":[
+
+         ],
+         "media":[
+            {
+               "id":966947208837742592,
+               "id_str":"966947208837742592",
+               "indices":[
+                  7,
+                  30
+               ],
+               "media_url":"http://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+               "media_url_https":"https://pbs.twimg.com/media/DWtJXQNUQAAdPZj.jpg",
+               "url":"https://t.co/T772Hx5GNT",
+               "display_url":"pic.x.com/T772Hx5GNT",
+               "expanded_url":"https://x.com/apimctestface/status/966950781302665218/photo/1",
+               "type":"photo",
+               "sizes":{
+                  "thumb":{
+                     "w":150,
+                     "h":150,
+                     "resize":"crop"
+                  },
+                  "large":{
+                     "w":800,
+                     "h":418,
+                     "resize":"fit"
+                  },
+                  "medium":{
+                     "w":800,
+                     "h":418,
+                     "resize":"fit"
+                  },
+                  "small":{
+                     "w":680,
+                     "h":355,
+                     "resize":"fit"
+                  }
+               }
+            }
+         ]
+      },
+      "source":"Ads API Internal Test App",
+      "in_reply_to_status_id":null,
+      "in_reply_to_status_id_str":null,
+      "in_reply_to_user_id":null,
+      "in_reply_to_user_id_str":null,
+      "in_reply_to_screen_name":null,
+      "user":{
+         "id":756201191646691328,
+         "id_str":"756201191646691328"
+      },
+      "geo":null,
+      "coordinates":null,
+      "place":null,
+      "contributors":[
+         2417045708
+      ],
+      "retweet_count":0,
+      "favorite_count":0,
+      "favorited":false,
+      "retweeted":false,
+      "possibly_sensitive":false,
+      "scopes":{
+         "followers":false
+      },
+      "lang":"en"
+   },
+   "request":{
+      "params":{
+         "as_user_id":756201191646691328,
+         "text":"coffee",
+         "account_id":"18ce54d4x5t",
+         "media_keys":[
+            966947208837742592
+         ],
+         "trim_user":true
+      }
+   }
+}
+```
+
+**ウェブサイトカード**
+
+すべてのカードエンドポイントはメディアキーをサポートしています。画像の media&#95;key を指定して[ウェブサイトカード](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/website#post-accounts-account-id-cards-website)を作成します。
+
+```
+twurl -X POST -H ads-api.x.com "/11/accounts/18ce54d4x5t/cards"
+```
+
+```json
+{
+  "name": "components create cards",
+  "components": [
+    {
+      "type": "MEDIA",
+      "media_key": "3_1323490622599176192"
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android"
+      }
+    }
+  ]
+}
+```
+
+次に、このカードを`card_uri`を使ってポストに関連付けます。
+
+<div id="identifying-cards">
+  ### カードの識別
+</div>
+
+<div id="introduction">
+  #### Introduction
+</div>
+
+カードは、メディアを使用し、ウェブサイトやアプリ、またはダイレクトメッセージの開始など特定のユーザーエンゲージメントを促す行動喚起（call to action）と関連付けることができる、カスタマイズ可能な広告フォーマットです。カードは、ポスト、予約ポスト、下書きポストに追加できます。
+
+カードは、ポストオブジェクト内で `card_uri` か `preview_url` のいずれか一方の方法で参照されます。それぞれの値の例を以下に示します。
+
+| card&#95;uri | preview&#95;url |
+| :--- | :--- |
+| card://1043282691834048513 | https://cards.x.com/cards/18ce54d4x5t/68w3s |
+
+**注記**: Ads API バージョン 3 以降、新しく作成されたカードに対しては、cards レスポンスで生成・返されるのは `card_uri` のみです。
+
+**注記**: Ads API バージョン 5 以降、cards レスポンスでは `preview_url` は返されません。
+
+ポストオブジェクトのレスポンス内でどちらの参照形式が使われるかは、そのポストがどのように作成されたかに依存します。言い換えると、ポストが `card_uri` リクエストパラメーターを使用して作成された場合、そのレスポンスには card URI の値が含まれます。一方で、`preview_url` がポスト本文の一部として含まれていた場合は、そのレスポンスにはプレビュー URL が含まれます。
+
+<div id="identifying-tweets-with-card_uri">
+  #### card&#95;uri を使用したポストの特定
+</div>
+
+card の URI 値を使用して作成されたポストの場合は、card&#95;uri レスポンス属性内にある card への参照を確認します。以下のレスポンス例では、[GET accounts/:account&#95;id/tweets](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/tweets#get-accounts-account-id-tweets) エンドポイントを使用しています。
+
+```
+$ twurl -H ads-api.x.com "/9/accounts/18ce54d4x5t/tweets?trim_user=true&tweet_type=PUBLISHED&tweet_ids=1043551275923591168"
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        "1043551275923591168"
+      ],
+      "tweet_type": "PUBLISHED",
+      "trim_user": true,
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "coordinates": null,
+      "retweeted": false,
+      "source": "Ads API Internal Test App",
+      "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "user_mentions": [],
+        "urls": []
+      },
+      "display_text_range": [
+        0,
+        15
+      ],
+      "favorite_count": 0,
+      "in_reply_to_status_id_str": null,
+      "geo": null,
+      "id_str": "1043551275923591168",
+      "scopes": {
+        "followers": false
+      },
+      "in_reply_to_user_id": null,
+      "truncated": false,
+      "retweet_count": 0,
+      "scheduled_status": null,
+      "id": 1043551275923591168,
+      "in_reply_to_status_id": null,
+      "nullcast": true,
+      "created_at": "Sat Sep 22 17:23:07 +0000 2018",
+      "place": null,
+      "scheduled_at": null,
+      "tweet_type": "PUBLISHED",
+      "favorited": false,
+      "card_uri": "card://1043282691834048513",
+      "full_text": "Tracking a card",
+      "lang": "en",
+      "contributors": [
+        2417045708
+      ],
+      "in_reply_to_screen_name": null,
+      "in_reply_to_user_id_str": null,
+      "user": {
+        "id": 756201191646691328,
+        "id_str": "756201191646691328"
+      },
+      "tweet_id": "1043551275923591168"
+    }
+  ]
+}
+```
+
+Standard API を使用する場合は、リクエストに include&#95;card&#95;uri=true を指定してください。
+
+どのエンドポイントを使用する場合でも、card&#95;uri レスポンス属性は、そのポストが card URI を使用して作成された場合にのみ返されます。
+
+スケジュール済みおよび下書きのポストオブジェクトについては、レスポンスには常に card&#95;uri レスポンス属性が含まれます。
+
+<div id="identifying-tweets-with-preview_url">
+  #### preview&#95;url を使用してポストを識別する
+</div>
+
+ポストのテキストの一部としてプレビュー URL を含めて作成されたポストの場合、その URL は entities[&quot;urls&quot;][i][&quot;expanded&#95;url&quot;] に含まれます（text フィールドには短縮された t.co URL が含まれます）。ここで、i は配列インデックスです（1つのポストには複数の URL を含めることができます）。
+
+予約および下書きポストオブジェクトの場合、プレビュー URL は常に text フィールドに表示されます。
+
+<div id="fetching-cards">
+  #### カードの取得
+</div>
+
+特定のカードに関する追加情報を取得するために、次の 2 つのエンドポイントを提供しています: [GET accounts/:account&#95;id/cards/all](https://developer.x.com/en/docs/ads/creatives/api-reference/cards-fetch.html#get-accounts-account-id-cards-all) と [GET accounts/:account&#95;id/cards/all/:card&#95;id](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/cards-fetch#get-accounts-account-id-cards-all-card-id) です。前者では card&#95;uri を指定してカードを取得でき、後者ではカードの ID を指定して取得できます。カードの ID は preview&#95;url の末尾にあります。上記の例では、ID は 68w3s です。
+
+<div id="identifying-media">
+  ### メディアの特定
+</div>
+
+#### はじめに
+
+メディア（画像、GIF、動画）はポストやカードに追加できます。さらに、動画はプレロールアセットとして使用でき、画像は [X Audience Platform](https://developer.x.com/en/docs/ads/measurement/overview/twitter-audience-platform) 上でプロモーションとして配信できます。本セクションでは、これらのエンティティにまたがってメディア参照を特定する方法について説明します。
+
+メディア識別子には、ID とキーの 2 種類があります。各タイプの値の例を以下に示します。
+
+| **Media ID** | **Media key** |
+| :--- | :--- |
+| 1029825579531807971 | 13&#95;1029825579531807971 |
+
+Media key は、ID の前に数値プレフィックスとアンダースコアを付けたものです。
+
+<div id="image">
+  #### 画像
+</div>
+
+次の表は、各画像関連リソースのレスポンスで現在利用可能な識別子タイプと、それに対応する属性名を示しています。
+
+| **Resource** | **Identifier** | **Attribute(s)** |
+| :--- | :--- | :--- |
+| Image cards | None |  |
+| Tweet | Both | `entities["media"]["id_str"]`  `entities["media"]["media_key"]` |
+| Scheduled Tweet | Both | `media_ids` and `media_keys` |
+| Draft Tweet | Both | `media_ids` and `media_keys` |
+| Account Media | None |  |
+| Media Library | Both | `media_id` and `media_key` |
+
+Image cards と Account Media の画像には、いかなるメディア識別子への参照も含まれません。ポストにはメディア ID のみが含まれます。Scheduled ポストおよび Draft ポストには、メディア ID とメディアキーの両方が含まれます。Media Library も両方を返します。
+
+ポストの場合、entities[&quot;media&quot;] 配列内オブジェクトの id および id&#95;str フィールドがメディア ID に対応します。1 つのポストに複数の画像が含まれている場合は、それぞれのメディアエンティティへの参照は extended&#95;entities[&quot;media&quot;] 内でしか見つかりません。
+
+識別子への参照に加えて、画像の URL にアクセスできることも重要になる場合がよくあります。
+
+| **Resource** | **Attribute(s)** | **Format** |
+| :--- | :--- | :--- |
+| Image cards | `image` | .jpg |
+| Tweet* | `entities["media"][0]["media_url"]` or `extended_entities["media"][i]["media_url"]` | .jpg |
+| Scheduled Tweet | None |  |
+| Draft Tweet | None |  |
+| Account Media | `media_url` | .jpg |
+| Media Library | `media_url` | .jpg |
+
+* この URL の位置は、ポストに 1 枚の画像が含まれているか複数含まれているかによって異なります。
+
+すべての Image cards には、X の画像 URL を含む image というレスポンス属性があります（image app download cards の場合、この名前は wide&#95;app&#95;image です）。
+
+ポストの場合、メディア URL の位置は、メディアの種類と使用しているエンドポイントの両方に依存します。単一画像のポストでは、URL は entities[&quot;media&quot;][0][&quot;media&#95;url&quot;] にあります。これは Ads API と Standard API の両方で同様です。ただし、複数画像を含むポストの場合、URL は extended&#95;entities[&quot;media&quot;][i][&quot;media&#95;url&quot;] にしか存在しません。これは Standard API でのみ利用できます。
+
+<div id="video">
+  #### 動画
+</div>
+
+次の表は、各動画関連リソースのレスポンスで現在利用可能な識別子の種類と、それに対応する属性名を示しています。
+
+| **Resource** | **Identifier** | **Attribute(s)** |
+| :--- | :--- | :--- |
+| Video cards | どちらか一方 | `video_content_id` |
+| Video poll cards | なし |  |
+| ポスト | 両方 | `entities["media"]["id_str"]`  `entities["media"]["media_key"]` |
+| Scheduled ポスト | 両方 | `media_ids` and `media_keys` |
+| Draft ポスト | 両方 | `media_ids` and `media_keys` |
+| Account Media | Media key | `video_id` |
+| Media Library | 両方 | `media_id` and `media_key` |
+
+Video cards（動画付きの投票カードを除く）には `video_content_id` レスポンス属性が含まれますが、返される値の種類に一貫性がありません。メディア ID が返される場合もあれば、メディアキーが返される場合もあります。
+
+動画の URL の取得方法は、以下のとおりです。
+
+| **Resource** | **Attribute(s)** | **Format** |
+| :--- | :--- | :--- |
+| Video cards | `video_url` and `video_hls_url` | .vmap  .m3u8 |
+| 動画付きポスト | `extended_entities["media"][i]["video_info"]["variants"][j]["url"]` | .mp4 |
+| Scheduled ポスト | なし |  |
+| Draft ポスト | なし |  |
+| Account Media | なし |  |
+| Media Library | `media_url` | .mp4 |
+
+Video cards には、.vmap と .m3u8 の URL をそれぞれ持つ `video_url` および `video_hls_url` レスポンス属性が含まれます。
+
+<div id="media-library">
+  #### Media Library
+</div>
+
+メディアアセットについて、追加情報を取得する必要が生じる場合があります。たとえば Video Card では、vmap の URL ではなく mp4 の URL を取得したいケースがあります。これは Media Library から取得できます。利用可能な情報の詳細については、[Media Library Guide](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/guides/media-library) を参照してください。広告アカウントの FULL promotable user に属するアセットのほとんどはライブラリ内にありますが、いくつかの例外があります。
+
+**メディアの取得**
+
+前述のとおり、Image Card には media ID や media key への参照が含まれていません。そのため、Media Library を通じてそれらのアセットを取得することはできません。これは [Account Media](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/account-media#account-media) の画像についても同様です。
+
+Video Card を作成するには、その Video アセットを事前に Media Library（またはその前身である Videos リソース）に含めておく必要があります。そのため、これらのアセットは常に Media Library から取得できます。これは Account Media の PREROLL アセットについても同様です。
+
+最後に、ポスト内のメディアは、常に Media Library に存在することが保証されています。
+
+次の表は、ルックアップに使用できる識別子がリソースレスポンスに含まれているかどうかも踏まえつつ、Media Library から取得可能なアセットをまとめたものです。
+
+| **Resource** | **In the Media Library** |
+| :--- | :--- |
+| Image cards | No |
+| Video cards | Yes* |
+| ポスト（任意のメディア）** | Yes |
+| 予約済みポスト | Yes |
+| 下書きポスト | Yes |
+| Account media images | No |
+| Account media videos (`PREROLL`) | Yes |
+
+* `video_content_id` が media key である Card の場合。値が media ID の場合もアセット自体は Media Library に存在しますが、取得するには先頭に数値とアンダースコアを付与する必要があります。\
+** ポストは media ID のみを返します。アセットが Media Library に存在することは保証されていますが、取得するには先頭に数値とアンダースコアを付与する必要があります。
+
+**Account Media との相互作用**
+
+Media Library に追加されたメディアアセットが、自動的に Account Media リソースにも追加されるケースが 2 つあります。
+
+* AMPLIFY&#95;VIDEO アセットが Media Library に追加されると、自動的に PREROLL というクリエイティブタイプの Account Media アセットとして追加されます。
+* 特定のサイズ（[enumerations ページ](https://developer.x.com/content/developer-twitter/en/docs/ads/general/overview/enums) の「Creative Types」を参照）の画像が Media Library に追加されると、自動的に Account Media アセットとして追加されます。クリエイティブタイプ（例: INTERSTITIAL）は、画像のサイズによって決まります。
+
+<div id="tweets">
+  ### ポスト
+</div>
+
+#### はじめに
+
+X Ads API は、公開済みポスト、予約ポスト、下書きポストの 3 種類をサポートしています。
+
+<div id="nullcasted-tweets">
+  #### ヌルキャストされたポスト
+</div>
+
+ポストは、ヌルキャスト（「Promoted-only」とも呼ばれます）かオーガニックのいずれかです。ヌルキャストされたポストは公開されてもユーザーの公開タイムラインには表示されませんが、公開ステータスであることに変わりはありません。一方、オーガニックポストはユーザーのフォロワーに配信され、ユーザーの公開タイムラインにも表示されます。
+
+**ポストの作成**
+
+3つあるポスト作成エンドポイントはいずれも、ヌルキャストされたポストにするかオーガニックポストにするかを選択できる Boolean 型の `nullcast` パラメータをサポートしています。ヌルキャストされたポストは、そのユーザー本人、またはユーザーに代わってポストを作成する権限を持つユーザーであれば誰でも作成できます。オーガニックポストを作成できるのは、[フルプロモータブルユーザー](https://developer.x.com/content/developer-twitter/en/docs/tutorials/ads-api-hierarchy-terminology#promotable-users)のみです。
+
+**ポストの更新**
+
+予約投稿および下書きポストについては、`nullcast` プロパティを更新することができます。予約投稿の場合、ポストの `scheduled_at` 時刻まで編集が可能です。下書きポストは無期限に編集できます。ただし、一度公開されると、そのポストをヌルキャストからオーガニック、またはその逆に変更することはできません。
+
+<div id="promoting-tweets">
+  #### プロモーションするポスト
+</div>
+
+プロモーションできるのは、公開済みポストと予約済みポストのみです。これらは nullcast（ノルキャスト）でもオーガニックでも構いません。制限はありません。広告主は、自分自身のポストでも、必要な許可を得ている限り他のユーザーのポストでもプロモーションすることができます（詳細は「[Promoting another user&#39;s Tweets](https://developer.x.com/content/developer-twitter/en/docs/tutorials/promoting-another-users-content)」を参照してください）。
+
+1 つのキャンペーンで複数のポストをプロモーションすることができます。同様に、1 つのポストを 1 つ以上のキャンペーンでプロモーションすることもできます。
+
+公開済みポストをプロモーションするには、[POST accounts/:account&#95;id/promoted&#95;tweets エンドポイント](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/promoted-tweets#post-accounts-account-id-promoted-tweets)を使用します。これにより、公開済みポストがラインアイテムに関連付けられます。予約済みポストをプロモーションするには、[POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets エンドポイント](https://developer.x.com/content/developer-twitter/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#post-accounts-account-id-scheduled-promoted-tweets)を使用します。
+
+<div id="tweet-ids">
+  #### ポストID
+</div>
+
+公開済み、予約済み、および下書きのポスト ID は[数値](https://developer.x.com/content/developer-twitter/en/docs/basics/twitter-ids)であり、64 ビット符号なし整数です。たとえば、次の公開済みポストの ID は 1166476031668015104 です。
+
+公開済みまたは予約済みのポストをプロモーションとして配信すると、対応するプロモーション用ポストエンティティが作成されます。これらのエンティティにはそれぞれ ID があり、英数字から成る 36 進数エンコード値として表現されます。たとえば、上記の公開済みポストをプロモーションし、ラインアイテム 6c62d に関連付けると、次のような API レスポンスが返されます。
+
+```
+$ twurl -X POST -H ads-api.x.com "/9/accounts/18ce54d4x5t/promoted_tweets?line_item_id=6c62d&tweet_ids=1166476031668015104"
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        1166476031668015104
+      ],
+      "line_item_id": "6c62d",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": [
+    {
+      "line_item_id": "6c62d",
+      "id": "3qwlq6",
+      "entity_status": "ACTIVE",
+      "created_at": "2019-09-12T21:39:10Z",
+      "updated_at": "2019-09-12T21:39:10Z",
+      "approval_status": "ACCEPTED",
+      "tweet_id": "1166476031668015104",
+      "deleted": false
+    }
+  ],
+  "total_count": 1
+}
+```
+
+作成リクエストに渡されたポストIDとラインアイテムIDに加えて、レスポンスには 3qw1q6 という値を持つ id フィールドが含まれており、これはプロモーション対象のポストIDです。
+
+<div id="carousels">
+  ### カルーセル
+</div>
+
+#### はじめに
+
+X Ads API は、動画カルーセルと画像カルーセルの作成および取得をサポートしています。カルーセルは、2 ～ 6 個のメディアアセットを含めることができるカードタイプの一種です。カルーセルカードは、ユーザーをウェブサイトに誘導したり、モバイルアプリのインストールを促したりすることができます。カルーセルの概要、その利点やベストプラクティス、FAQ については、[Carousel Ads on X](https://business.x.com/en/advertising/carousels.html) ページを参照してください。
+
+カルーセルは、他のカードタイプと同様にポストで使用でき、そのポストをプロモーションとして配信できます。ワークフローは、すでに慣れているものと同じです。
+
+1. メディアをアップロードする
+2. カードを作成する
+3. ポストを作成する
+4. ポストをプロモーションとして配信する
+
+唯一の違いは、カードの作成方法です。他のカード作成リクエストではクエリパラメータを指定できますが、カルーセルカードの作成リクエストでは JSON POST ボディのみを受け付けます。
+
+<div id="endpoints">
+  #### エンドポイント
+</div>
+
+Ads API はカルーセルの作成および取得をサポートしています。
+
+あらゆる種類のカルーセルを作成するには、[POST accounts/:account&#95;id/cards](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#post-accounts-account-id-cards) エンドポイントを使用します。カルーセルを取得するには、[GET accounts/:account&#95;id/cards](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#get-accounts-account-id-cards) エンドポイントを使用します。
+
+<div id="json-post-body">
+  #### JSON POST Body
+</div>
+
+カルーセルは 2 つのコンポーネントを使用して作成されます。1 つ目は使用するメディアアセットを指定し、2 つ目はウェブサイトまたはアプリのいずれかに関する情報を指定します。
+
+具体的には、カルーセルカードは次のコンポーネントをこの順序で使用して作成します。
+
+* メディアキーの配列を受け取る `SWIPEABLE_MEDIA` コンポーネントを 1 つ
+* 次のうち *いずれか 1 つ*：
+* ウェブサイト情報を指定するための `DETAILS` コンポーネント
+* アプリ情報を指定するための `BUTTON` コンポーネント
+
+`SWIPEABLE_MEDIA` コンポーネントには、2～6 個の画像または動画を指定できる `media_keys` 配列を含める必要があります。メディアキーを渡す順序によって、レンダリングされる順序が決まります。
+
+```
+{
+  "type": "SWIPEABLE_MEDIA",
+  "media_keys": [
+    "13_1089771253848666112",
+    "13_1191948012077092867"
+  ]
+}
+```
+
+念のため、[GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/media-library#get-accounts-account-id-media-library) エンドポイントにリクエストを送信することで、メディアキーを取得できます。
+
+2つ目のコンポーネントオブジェクトの構成は、ユーザーをウェブサイトに誘導したいのか、アプリのインストールを促したいのかによって異なります。下の表は、この2つのオプションをまとめたものです。（**注**: 記載されているキーはすべて必須です。）
+
+|               | **ウェブサイト**                                                         | **アプリ**                                           |
+| :------------ | :----------------------------------------------------------------- | :------------------------------------------------ |
+| コンポーネントタイプの指定 | `"type": "DETAILS"`                                                | `"type": "BUTTON"`                                |
+| タイトル/ラベル      | `"title": "X"`                                                     | `"label": { "type": "ENUM", "value": "INSTALL" }` |
+| 遷移先           | `"destination": { "type": "WEBSITE", "url": "https://www.x.com" }` | `"destination": { "type": "APP", ... }`           |
+
+これらを組み合わせると、ウェブサイト向けカルーセルの JSON POST リクエストボディの例は次のとおりです。
+
+```
+{
+  "name": "website carousel",
+  "components": [
+    {
+      "type": "SWIPEABLE_MEDIA",
+      "media_keys": [
+        "13_1089771253848666112",
+        "13_1191948012077092867"
+      ]
+    },
+    {
+      "type": "DETAILS",
+      "title": "X",
+      "destination": {
+        "type": "WEBSITE",
+        "url": "https://www.x.com"
+      }
+    }
+  ]
+}
+```
+
+`BUTTON` コンポーネント内の App destination オブジェクトには、国コードと少なくとも 1 つのアプリ識別子が必要です。オプションでディープリンクを指定することもできます。これらのフィールドの説明については、[リファレンスドキュメント](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#app-destination)を参照してください。
+
+これらを踏まえると、以下のような app carousel の JSON POST リクエストボディの例になります。
+
+```
+{
+  "name": "app carousel",
+  "components": [
+    {
+      "type": "SWIPEABLE_MEDIA",
+      "media_keys": [
+        "13_1089771253848666112",
+        "13_1191948012077092867"
+      ]
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android",
+        "iphone_app_id": "333903271"
+      }
+    }
+  ]
+}
+```
+
+<div id="example">
+  #### 例
+</div>
+
+このセクションでは、動画ウェブサイトカルーセルカードの作成方法と、それをポストで使用する方法を説明します。前述のとおり、ワークフローはこれまでと同じで、メディアをアップロードし、カードを作成し、ポストを作成します。唯一の違いはカードの作成方法です。
+
+**メディア**
+
+まず、新しいメディアアセットをアップロードするか、既存のものを使用します。新しいメディアアセットをアップロードして Media Library に追加する方法の詳細については、[Media Library ガイド](https://developer.x.com/en/docs/twitter-ads-api/creatives/guides/media-library)を参照してください。
+
+メディアアセットが Media Library に登録されたら、[GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/media-library#get-accounts-account-id-media-library) エンドポイントを使って取得します。`media_type` リクエストパラメータを指定して、結果を特定のメディアタイプに絞り込みます。
+
+```
+$ twurl -H ads-api.x.com "/10/accounts/18ce54d4x5t/media_library?media_type=VIDEO"
+```
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_type": "VIDEO"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "tweeted": true,
+      "duration": 5283,
+      "name": "Sunrise",
+      "file_name": "sunrise.mp4",
+      "description": null,
+      "media_url": "https://video.twimg.com/amplify_video/1089771253848666112/vid/1280x720/tyL-pUBP7GgkS9bl.mp4?tag=9",
+      "poster_media_key": "3_1089771253848666112",
+      "media_key": "13_1089771253848666112",
+      "created_at": "2019-01-28T06:24:48Z",
+      "media_status": "TRANSCODE_COMPLETED",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/1089771253848666112/img/WOYvToSRZFXUSDzd.jpg",
+      "title": null,
+      "media_type": "VIDEO",
+      "aspect_ratio": "16:9",
+      "updated_at": "2019-08-23T19:05:33Z",
+      "deleted": false
+    },
+    {
+      "tweeted": true,
+      "duration": 15248,
+      "name": "snow",
+      "file_name": "snow.mp4",
+      "description": "Two, three, and to the four",
+      "media_url": "https://video.twimg.com/amplify_video/1191948012077092867/vid/1280x720/2cOvadcctqqea6Hx.mp4?tag=13",
+      "poster_media_key": "3_1191948012077092867",
+      "media_key": "13_1191948012077092867",
+      "created_at": "2019-11-06T05:18:46Z",
+      "media_status": "TRANSCODE_COMPLETED",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/1191948012077092867/img/IUbhTRd62SEeIVTf.jpg",
+      "title": "One",
+      "media_type": "VIDEO",
+      "aspect_ratio": "16:9",
+      "updated_at": "2020-03-27T22:23:18Z",
+      "deleted": false
+    }
+  ]
+}
+```
+
+**カルーセルの作成**
+
+カルーセルを作成するには、[POST accounts/:account&#95;id/cards](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/cards#post-accounts-account-id-cards) エンドポイントを使用します。前のリクエストで取得した media keys を使用してください。media keys を指定する順序によって、メディアが表示される順序が決まることに注意してください。
+
+```
+$ twurl -A "Content-Type: application/json" -X POST -H ads-api.x.com "/10/accounts/18ce54d4x5t/cards" -d '{"name":"website carousel","components":[{"type": "SWIPEABLE_MEDIA","media_keys":["13_1089771253848666112","13_1191948012077092867"]},{"type": "DETAILS","title": "X","destination":{"type":"WEBSITE", "url":"https://www.x.com"}}]}'
+```
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "website carousel",
+    "components": [
+      {
+        "type": "SWIPEABLE_MEDIA",
+        "media_keys": [
+          "13_1089771253848666112",
+          "13_1191948012077092867"
+        ]
+      },
+      {
+        "type": "DETAILS",
+        "title": "X",
+        "destination": {
+          "type": "WEBSITE",
+          "url": "https://www.x.com/",
+          "tco_url": "https://t.co/dyTMHWKWZb"
+        }
+      }
+    ],
+    "id": "ars7m",
+    "created_at": "2020-11-11T07:51:47Z",
+    "card_uri": "card://1326432421105995776",
+    "updated_at": "2020-11-11T07:51:47Z",
+    "deleted": false,
+    "card_type": "UNIFIED"
+  }
+}
+```
+
+他のカードと同様に、カルーセルカードのレスポンスには `card_uri` が含まれており、これはポストを作成するときに使用します。
+
+**ポスト**
+
+[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/tweets#post-accounts-account-id-tweet) エンドポイントを使用してポストを作成します。前のリクエストのレスポンスで取得した `card_uri` を使用してください。（可読性のため、レスポンスは一部省略しています。）
+
+```
+$ twurl -H ads-api.x.com "/9/accounts/18ce54d4x5t/tweet_previews?tweet_type=PUBLISHED&tweet_ids=1326434098324385792"
+```
+
+```
+{
+  "data": {
+    "created_at": "Wed Nov 11 07:58:27 +0000 2020",
+    "id": 1326434098324385792,
+    "id_str": "1326434098324385792",
+    "text": "Swipe",
+    "truncated": false,
+    "entities": {
+      "hashtags": [],
+      "symbols": [],
+      "user_mentions": [],
+      "urls": []
+    },
+    "source": "Ads API Internal Test App",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user": {
+      "id": 756201191646691300,
+      "id_str": "756201191646691328",
+      ...
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": [
+      2417045708
+    ],
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "favorited": false,
+    "retweeted": false,
+    "possibly_sensitive": false,
+    "scopes": {
+      "followers": false
+    },
+    "lang": "en"
+  },
+  "request": {
+    "params": {
+      "text": "Swipe",
+      "as_user_id": 756201191646691300,
+      "card_uri": "card://1326432421105995776",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+**ポストプレビュー**
+
+[GET accounts/:account&#95;id/tweet&#95;previews](https://developer.x.com/en/docs/twitter-ads-api/creatives/api-reference/tweet-previews#get-accounts-account-id-tweet-previews) エンドポイントを使用して、ポストのプレビューを取得します。
+
+<div id="creative-metadata-tagging">
+  ### クリエイティブメタデータのタグ付け
+</div>
+
+#### はじめに
+
+このガイドは、クリエイティブパートナー、代理店、およびクリエイティブ開発者が、X キャンペーン内で使用されるアセットにタグ付けを行い、個々のアセットの価値とパフォーマンスをより正確に把握できるようにするためのものです。
+
+**注:** メディアアセットにタグ付けできるのは、そのメディアアセットを作成したパートナーまたは開発者のみです。メディアアセットの利用者が、そのメディアアセットの作成者ではない場合は、メタデータタグ付けを実装しないでください。
+
+Creative Metadata Tagging を使用すると、アセットが X のどこにアップロードされるか、またそのアセットをアップロードする組織や個人が誰であるかにかかわらず、クリエイティブパートナーによって作成された画像や動画に対する帰属情報を付与できます。クリエイティブアセットとクリエイティブパートナーを関連付けるために、[XMP](https://exiftool.org/TagNames/XMP.html) 標準が使用されます。
+
+<div id="tagging-creative-assets">
+  #### クリエイティブアセットへのタグ付け
+</div>
+
+次の表は、各画像関連リソースのレスポンスで現在利用可能な識別子の種類と、それに対応する属性名を示しています。クリエイティブアセットにタグを付けるには、タグ付けツールが必要です。[ExifTool](https://exiftool.org/) は、プラットフォームに依存しない Perl ライブラリと、メタ情報の読み取り・書き込み・編集を行うための [コマンドラインアプリケーション](https://exiftool.org/exiftool_pod.html) で構成されており、推奨ツールです。サポートされているすべての [ファイルタイプ](https://exiftool.org/#supported) を参照してください。
+
+[ExifTool インストール手順](https://exiftool.org/install.html) に従ってインストールしてください。[Homebrew](https://formulae.brew.sh/) が提供するソフトウェアパッケージを利用すると、macOS および Linux 向けの [exiftool インストールコマンド](https://formulae.brew.sh/formula/exiftool) により、インストールをさらに簡略化できます。コマンドラインで exiftool -ver と入力し、ツールのバージョン番号が返されることを確認して、インストールが正しく行われたことを検証してください。ExifTool のコマンドパラメータの詳細は [ExifTool ドキュメント](https://exiftool.org/) を参照してください。
+
+クリエイティブパートナーは、新規または既存のクリエイティブアセットに対して、X の app&#95;id を contributor XMP タグおよび date タグとしてメタデータに付与できます。クリエイティブアセットは、[メディアのアップロード](https://developer.x.com/en/docs/twitter-api/v1/media/upload-media/overview) 時に既存のサイズ制限に従います。 
+
+**Note:** X による contributor XMP タグの使用により、メタデータには X 上のキャンペーン専用の値のみが記録されます。
+
+`exiftool -contributor="<YOUR APP ID>" -creative_file.jpg`
+
+`exiftool -date="<date>" -creative_file.jpg`
+
+app&#95;id は、[Developer Portal](https://developer.x.com/en/portal/dashboard) の Projects &amp; Apps セクションで確認できます。例: 16489123
+
+次の例では、画像に対して、contributor タグとして app&#95;id を、date タグとして date を追加しています。
+
+```
+app_id:858382169
+```
+
+```
+date:2022-03-13
+```
+
+```
+creative_file: eiffel_tower.jpg
+```
+
+```
+exiftool -contributor=858382169 eiffel_tower.jpg
+```
+
+```
+   1 image files updated
+```
+
+```
+exiftool -date=2022-03-13 eiffel_tower.jpg
+```
+
+```
+  1 image files updated
+```
+
+画像に正しくタグが付与されていることを確認してください：
+
+`exiftool -xmp:all -G1 <filename>`
+
+例：
+
+`exiftool -xmp:all -G1 eiffel_tower.jpg`
+
+```
+[XMP]        XMP ツールキット            : Image::ExifTool 12.30
+```
+
+```
+[XMP]        Contributor            : 858382169
+```
+
+```
+[XMP]        Date                   : 2022:03:13
+```
+
+<div id="questions">
+  #### ご質問がありますか？
+</div>
+
+タグ付けおよびアトリビューションが正しく行われているか確認したい場合は、タグ付け済みのサンプルアセットを adsapi-program@x.com 宛に送信してください。X の担当者が内容を確認します。
+
+<div id="api-reference">
+  ## API リファレンス
+</div>
+
+<div id="account-media">
+  ### アカウントメディア
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idaccount_media">
+  #### GET accounts/:account&#95;id/account&#95;media
+</div>
+
+現在のアカウントに関連付けられているメディアの一部またはすべての詳細を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/account_media`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *必須* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| account&#95;media&#95;ids   *任意* | カンマ区切りの識別子リストを指定することで、レスポンスを目的のアカウントメディアのみに限定します。最大 200 個の ID を指定できます。  Type: string  Example: `3wpx` |
+| count   *任意* | 個別のリクエストごとに取得するレコード数を指定します。  Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| creative&#95;types   *任意* | 指定したクリエイティブタイプに一致するアカウントメディアのみにレスポンスを限定します。複数のクリエイティブタイプは、列挙型の値をカンマ区切りで指定できます。  Type: enum  Possible values: `BANNER`, `BANNER_TABLET`, `INTERSTITIAL`, `INTERSTITIAL_LANDSCAPE`, `INTERSTITIAL_LANDSCAPE_TABLET`, `INTERSTITIAL_TABLET`, `MEDIUM_RECTANGLE`, `PREROLL`, `VAST_PREROLL` |
+| cursor   *任意* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `8x7v00oow` |
+| sort&#95;by   *任意* | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting) を参照してください。  Type: string  Example: `created_at-asc` |
+| with&#95;deleted   *任意* | 削除済みの結果もレスポンスに含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| with&#95;total&#95;count   *任意* | `total_count` レスポンス属性を含めます。  **注意**：このパラメータと `cursor` は排他的です。  **注意**：`total_count` を含むリクエストはレート制限がより厳しくなり、現在は 15 分あたり 200 リクエストに設定されています。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/account_media?account_media_ids=3wpx`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_media_ids": [
+        "3wpx"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "video_id": "13_771791717175468032",
+      "media_url": null,
+      "creative_type": "PREROLL",
+      "id": "3wpx",
+      "created_at": "2016-09-02T19:27:52Z",
+      "updated_at": "2016-09-02T19:27:52Z",
+      "deleted": false
+    }
+  ]
+}
+```
+
+現在のアカウントに関連付けられている特定のメディアオブジェクトを取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/account_media/:account_media_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象となるアカウントを識別するための識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| account&#95;media&#95;id   *required* | リクエスト内で操作対象となるアカウントメディアを参照するための値です。 Type: string  Example: `2pnfd` |
+| with&#95;deleted   *optional* | リクエストに削除済みの結果も含めます。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/account_media/2pnfd`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_media_id": "2pnfd",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "video_id": null,
+    "media_url": "https://pbs.twimg.com/ad_img/890749735862026242/Up07zMym?format=jpg&name=orig",
+    "creative_type": "INTERSTITIAL_LANDSCAPE_TABLET",
+    "id": "2pnfd",
+    "created_at": "2017-07-28T01:44:41Z",
+    "updated_at": "2017-07-28T01:44:41Z",
+    "deleted": false
+  }
+}
+```
+
+現在のアカウントに属する指定のアカウントメディアオブジェクトを削除します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/account_media/:account_media_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントを識別するための識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くほとんどの Advertiser API リクエストで必須パラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| account&#95;media&#95;id   *required* | リクエスト内で操作対象となるアカウントメディアを示す識別子です。 Type: string  Example: `2pnfd` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/account_media/2pnfd`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "video_id": null,
+    "media_url": "https://pbs.twimg.com/ad_img/890749735862026242/Up07zMym?format=jpg&name=orig",
+    "creative_type": "INTERSTITIAL_LANDSCAPE_TABLET",
+    "id": "2pnfd",
+    "created_at": "2017-07-28T01:44:41Z",
+    "updated_at": "2017-08-25T17:16:26Z",
+    "deleted": true
+  },
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "account_media_id": "2pnfd"
+    }
+  }
+}
+```
+
+<div id="cards">
+  ### カード
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+**注記**: カードをポストに関連付けるには、`card_uri` パラメーターを、[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)、[POST statuses/update](https://developer.x.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update#post-statuses-update)、[POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets)、または [POST accounts/:account&#95;id/draft&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/draft-tweets#post-accounts-account-id-draft-tweets) の各エンドポイントのいずれかに指定してください。
+
+現在のアカウントに関連付けられているカードの一部またはすべての詳細を取得します。
+
+**注記**: このエンドポイントが返すのは、POST accounts/:account&#95;id/cards エンドポイントを使用して作成されたカードのみです。その他のエンドポイントを使用して作成されたカードは返されません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards`
+
+#### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントを識別するための識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、通常は必須パラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;types   *optional* | カンマ区切りの enum 値リストを指定することで、レスポンスを目的のカードタイプのみに絞り込みます。  Type: enum  Possible values: `IMAGE_APP`, `IMAGE_CAROUSEL_APP`, `IMAGE_CAROUSEL_WEBSITE`, `IMAGE_MULTI_DEST_CAROUSEL_WEBSITE`, `IMAGE_WEBSITE`, `MIXED_MEDIA_MULTI_DEST_CAROUSEL_WEBSITE`, `MIXED_MEDIA_SINGLE_DEST_CAROUSEL_APP`, `MIXED_MEDIA_SINGLE_DEST_CAROUSEL_WEBSITE`, `VIDEO_APP`, `VIDEO_CAROUSEL_APP`, `VIDEO_CAROUSEL_WEBSITE`, `VIDEO_MULTI_DEST_CAROUSEL_WEBSITE`, `VIDEO_WEBSITE` |
+| card&#95;id   *optional* | カンマ区切りの識別子リストを指定することで、レスポンスを目的のカードのみに絞り込みます。最大 200 個のカード ID を指定できます。  Type: string  Example: `1044294149527166979,1044301099031658496` |
+| card&#95;uris   *optional* | カンマ区切りの識別子リストを指定することで、レスポンスを目的のカードのみに絞り込みます。最大 200 個のカード URI 値を指定できます。  Type: string  Example: `card://1044294149527166979,card://1044301099031658496` |
+| count   *optional* | 各リクエストで取得を試行するレコード数を指定します。  Type: int  Default: `100`   Min, Max: `1`, `200` |
+| cursor   *optional* | 次ページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `8x7v00oow` |
+| include&#95;legacy&#95;cards   *optional* | レスポンスにレガシーのウェブサイトカードおよびアプリカードを含めます。レガシーカードとは、リソース URL が次の形式になっているカードを指します: accounts/:account&#95;id/cards/:card&#95;type。追加の背景情報については、[こちらの Developer フォーラムの投稿](https://devcommunity.x.com/t/new-cards-endpoints-and-carousel-ads/145782/6) を参照してください。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| q   *optional* | `name` によってカードを絞り込むための任意のクエリです。すべてを取得する場合はこのパラメータを省略します。最大長: 80 文字。  **注**: 大文字・小文字を区別しない前方一致で照合します。  Type: string  Example: `dtc` |
+| sort&#95;by   *optional* | サポートされている属性で、昇順または降順にソートします。詳細は [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting) を参照してください。  Type: string  Example: `created_at-asc` |
+| with&#95;deleted   *optional* | 削除済みの結果をリクエストに含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards?count=1`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "count": 1,
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": "8wzvldqtc",
+  "data": [
+    {
+      "name": "deep link",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1073727809120419840",
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-28T20:47:52Z",
+      "deleted": false,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+現在のアカウントに関連付けられている 1 つのカードの詳細を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジアカウントを識別するための ID です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | カードの id です。  Type: string  Example: `1044294149527166979` |
+| with&#95;deleted   *optional* | リクエストに削除済みの結果を含めるかどうか。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/1321554298900107264`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_id": "1321554298900107264"
+    }
+  },
+  "data": [
+    {
+      "name": "deep link",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1073727809120419840",
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-28T20:47:52Z",
+      "deleted": false,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+<div id="post-accountsaccount_idcards">
+  #### POST accounts/:account&#95;id/cards
+</div>
+
+指定されたアカウントに関連付けられた新しいカードを作成します。
+
+カード作成リクエストは JSON の POST ボディのみを受け付けます。`Content-Type` は `application/json` に設定する必要があります。
+
+詳細な利用例については、[Carousels Guide](https://developer.x.com/en/docs/twitter-ads-api/creatives/guides/carousels) を参照してください。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/cards`
+
+#### パラメーター
+
+JSON の POST ボディには、カードの `name` と `components` の配列を必ず含める必要があります。コンポーネントはオブジェクトとして表現され、カードの広告主向け属性を定義します。
+
+次の例は、ペイロードの一般的な構造を示したもので（実際には動作しない情報も含まれます）、参考用です。
+
+```
+{
+  "name": "some name",
+  "components": [
+    {
+      "type": "TYPE_ENUM",
+      "key": "value"
+    }
+  ]
+}
+```
+
+以下のコンポーネントに関する追加情報です。
+
+| Name                              | Description                                                                                                                                                                                                                                                   |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id   *required*       | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、通常必須のパラメータです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| name   *required*                 | カードの名前です。最大 80 文字です。  Type: string  Example: `component based card`                                                                                                                                                                                           |
+| components   *sometimes required* | カードを作成するために使用するコンポーネントを定義します。詳細は以下を参照してください。`slides` と同時には指定できません。**注記**: コンポーネントの順序は重要です。  Type: array of objects                                                                                                                                            |
+| slides   *sometimes required*     | Multi-Destination Carousel を作成するために、この配列の配列を使用します。各カードをコンポーネントのグループとして記述します。各スライドはカードを完全に表現している必要があります。`components` と同時には指定できません。**注記**: スライドの順序は重要です。  Type: array of array                                                                                  |
+
+<div id="components">
+  #### コンポーネント
+</div>
+
+すべてのコンポーネントには、そのオブジェクトのスキーマを決定する `type` フィールドを含める必要があります。Ads API では、メディアベースおよび説明ベースのコンポーネントに分類された、次のコンポーネントタイプをサポートしています。
+
+* メディア:
+* `MEDIA`: 単一の動画または画像
+* `SWIPEABLE_MEDIA`: 2〜6 個の動画または画像
+* 説明:
+* `DETAILS`
+* `BUTTON`
+
+各コンポーネントには（`type` キーに加えて）、必須フィールドのセットが定義されています。これらは次の表に示します。
+
+| コンポーネント `type`    | フィールド                   | 値の型              |
+| :---------------- | :---------------------- | :--------------- |
+| `MEDIA`           | `media_key`             | string           |
+| `SWIPEABLE_MEDIA` | `media_keys`            | array of strings |
+| `DETAILS`         | `title`   `destination` | string   object  |
+| `BUTTON`          | `label`   `destination` | object   object  |
+
+以下は、`components` 配列内における `BUTTON` コンポーネントの例です（意図的に `name` キーを省略しています）。省略記号は、追加情報を指定する必要がある箇所を示しています。
+
+```
+{
+  "components": [
+    {
+      "type": "BUTTON",
+      "label": {
+        ...
+      },
+      "destination": {
+        ...
+      }
+    }
+  ]
+}
+```
+
+コンポーネントオブジェクトを指定する順序が、それらが上から下へレンダリングされる順序を決定します。カードは 1 つのメディアベースのコンポーネントと、`DETAILS` または `BUTTON` コンポーネントのいずれかを組み合わせて作成する必要があります。説明ベースのコンポーネントはメディアの下にレンダリングされ、URL またはモバイルアプリをリンク先として持ちます。
+
+**Label**
+
+Label はボタンに表示されるテキストを定義するため、`BUTTON` コンポーネントにのみ適用されます。Label オブジェクトには、必須キーが 2 つあります: `type` と `value` です。`type` は `ENUM` に設定する必要があり、`value` には `BOOK`、`CONNECT`、`INSTALL`、`OPEN`、`ORDER`、`PLAY`、`SHOP` のいずれかを指定できます。
+
+前の例に基づき、以下に `BUTTON` コンポーネント内にある `label` オブジェクトを示します。
+
+```
+{
+  "components": [
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        ...
+      }
+    }
+  ]
+}
+```
+
+**遷移先**
+
+遷移先は、広告主がユーザーを誘導しようとする場所です。`DETAILS` コンポーネントまたは `BUTTON` コンポーネント内で常に必須です。遷移先には 2 種類があります: `WEBSITE` と `APP` です。
+
+**注記**: `WEBSITE` の遷移先は `DETAILS` コンポーネントでのみ使用でき、`APP` の遷移先は `BUTTON` コンポーネントでのみ使用できます。
+
+**Website 遷移先**
+
+| Name              | Description                                                                                       |
+| :---------------- | :------------------------------------------------------------------------------------------------ |
+| type   *required* | 遷移先の種類であり、それによってスキーマが決定されます。  Type: enum  Possible values: `WEBSITE`                              |
+| url   *required*  | ユーザーをリダイレクトする Web サイトの URL。  Type: string  Example: `https://devcommunity.x.com/c/advertiser-api` |
+
+**App 遷移先**
+
+| Name                                                        | Description                                                                                                                                           |
+| :---------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type   *required*                                           | 遷移先の種類であり、それによってスキーマが決定されます。  Type: enum  Possible values: `APP`                                                                                      |
+| country&#95;code   *required*                               | アプリが販売されている国を示す、[ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) の 2 文字の国コード。  Type: string  Example: `US`                      |
+| googleplay&#95;app&#95;id   *sometimes required*            | Google Play アプリケーションのパッケージ名。  **注記**: `ios_app_store_identifier` または `googleplay_app_id` の少なくとも一方が必須です。  Type: string  Example: `com.twitter.android` |
+| ios&#95;app&#95;store&#95;identifier   *sometimes required* | iOS App Store の識別子。  **注記**: `ios_app_store_identifier` または `googleplay_app_id` の少なくとも一方が必須です。  Type: string  Example: `333903271`                    |
+| googleplay&#95;deep&#95;link   *optional*                   | プロモーション対象の Android アプリへのディープリンク。  **注記**: `googleplay_app_id` が指定されている場合にのみ使用できます。  Type: string                                                      |
+| ios&#95;deep&#95;link   *optional*                          | プロモーション対象の iOS アプリへのディープリンク。  **注記**: `ios_app_store_identifier` が指定されている場合にのみ使用できます。  Type: string                                                   |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards`
+
+```
+{
+  "name": "components create cards",
+  "components": [
+    {
+      "type": "MEDIA",
+      "media_key": "3_1323490622599176192"
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "INSTALL"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android"
+      }
+    }
+  ]
+}
+```
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "components create cards",
+    "components": [
+      {
+        "type": "MEDIA",
+        "media_key": "3_1323490622599176192"
+      },
+      {
+        "type": "BUTTON",
+        "label": {
+          "type": "ENUM",
+          "value": "INSTALL"
+        },
+        "destination": {
+          "type": "APP",
+          "country_code": "US",
+          "googleplay_app_id": "com.twitter.android"
+        }
+      }
+    ],
+    "created_at": "2020-11-11T05:42:25Z",
+    "card_uri": "card://1326399865065238531",
+    "id": "1321554298900107264",
+    "updated_at": "2020-11-11T05:42:25Z",
+    "deleted": false,
+    "card_type": "IMAGE_APP"
+  }
+}
+```
+
+現在のアカウントに紐づく指定のカードを更新します。
+
+Card の編集リクエストでは、JSON の POST ボディのみを受け付けます。`Content-Type` は `application/json` に設定する必要があります。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/1321554298900107264`
+
+#### パラメーター
+
+JSON の POST リクエストボディには、更新されるパラメーターを含める必要があります。リクエストは、ペイロード内で指定されたパラメーターで各フィールドを**置き換え**ます。コンポーネントはオブジェクトとして表され、カードの広告主向け属性を記述します。
+
+次の例は、ペイロードの一般的な構造を示したものです（ただし、実際には動作しない情報が含まれています）。
+
+```
+{
+  "name": "some name",
+  "components": [
+    {
+      "type": "TYPE_ENUM",
+      "key": "value"
+    }
+  ]
+}
+```
+
+**POST accounts/:account&#95;id/cards** のコンポーネントおよびスライドに関する追加情報。
+
+| Name                        | Description                                                                                                                                                                                                                                                   |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id   *required* | 利用するアカウントの識別子。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須のパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| name   *optional*           | カードの名前。最大文字数: 80 文字。  Type: string  Example: `component based card`                                                                                                                                                                                           |
+| components   *optional*     | カードの更新に使用するコンポーネントを指定します。追加情報は以下を参照してください。`slides` と同時には指定できません。**注**: コンポーネントの順序は重要です。  Type: array of objects                                                                                                                                               |
+| slides   *optional*         | Multi-Destination Carousel を更新するために、この「配列の配列」を使用します。各カードをコンポーネントのグループとして指定します。各スライドは 1 つのカードを完全に表現している必要があります。`components` と同時には指定できません。**注**: 各スライドの順序は重要です。  Type: array of array                                                                           |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+この例では、上記の例の `components` フィールドに対して、name を更新し、`media_keys` の 1 つを削除します。
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/1321554298900107264`
+
+```
+{
+  "name": "changed name",
+  "components": [
+    {
+      "type": "SWIPEABLE_MEDIA",
+      "media_keys": [
+        "3_1075096386931052545"
+      ]
+    },
+    {
+      "type": "BUTTON",
+      "label": {
+        "type": "ENUM",
+        "value": "OPEN"
+      },
+      "destination": {
+        "type": "APP",
+        "country_code": "US",
+        "googleplay_app_id": "com.twitter.android",
+        "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+      }
+    }
+  ]
+}
+```
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_id": "1321554298900107264"
+    }
+  },
+  "data": [
+    {
+      "name": "changed name",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-29T20:47:52Z",
+      "deleted": false,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+現在のアカウントに紐づく指定したカードを削除します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントを識別するための識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | 削除対象のカードの id です。 Type: string  Example: `1044294149527166979` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/1321554298900107264`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_id": "1321554298900107264"
+    }
+  },
+  "data": [
+    {
+      "name": "deep link",
+      "components": [
+        {
+          "type": "SWIPEABLE_MEDIA",
+          "media_keys": [
+            "3_1073727809120419840",
+            "3_1075096386931052545"
+          ]
+        },
+        {
+          "type": "BUTTON",
+          "label": {
+            "type": "ENUM",
+            "value": "OPEN"
+          },
+          "destination": {
+            "type": "APP",
+            "country_code": "US",
+            "googleplay_app_id": "com.twitter.android",
+            "googleplay_deep_link": "twitter://user?screen_name=apimctestface"
+          }
+        }
+      ],
+      "created_at": "2020-10-28T20:47:52Z",
+      "card_uri": "card://1321554298900107264",
+      "id": "1321554298900107264",
+      "updated_at": "2020-10-29T20:47:52Z",
+      "deleted": true,
+      "card_type": "IMAGE_CAROUSEL_APP"
+    }
+  ]
+}
+```
+
+<div id="cards-fetch">
+  ### Cards Fetch
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+現在のアカウントに関連付けられている複数のカードを、`card_uri` を指定して取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/all`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;uris   *required* | カンマ区切りの識別子リストを指定することで、レスポンスを指定したカードのみに限定します。最大 200 個のカード URI 値を指定できます。  Type: string  Example: `card://1044294149527166979,card://1044301099031658496` |
+| with&#95;deleted   *optional* | 削除済みの結果をレスポンスに含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/all?card_uris=card://1044294149527166979,card://1044301099031658496`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "card_uris": [
+        "card://1044294149527166979",
+        "card://1044301099031658496"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": [
+    {
+      "name": "X App",
+      "googleplay_app_id": "com.twitter.android",
+      "image_display_height": "836",
+      "country_code": "US",
+      "id": "692xn",
+      "wide_app_image": "https://pbs.twimg.com/media/Dc263l9VwAAAeEH.jpg",
+      "created_at": "2018-09-24T18:35:01Z",
+      "image_display_width": "1600",
+      "card_uri": "card://1044294149527166979",
+      "updated_at": "2018-09-24T18:35:01Z",
+      "app_cta": "INSTALL",
+      "deleted": false,
+      "card_type": "IMAGE_APP_DOWNLOAD"
+    },
+    {
+      "video_poster_height": "9",
+      "name": "Developer Platform",
+      "website_shortened_url": "https://t.co/zadeUSVD18",
+      "video_height": "9",
+      "video_url": "https://video.twimg.com/amplify_video/vmap/991374284135137280.vmap",
+      "content_duration_seconds": "24",
+      "video_owner_id": "756201191646691328",
+      "video_content_id": "13_991374284135137280",
+      "website_display_url": "developer.x.com",
+      "id": "6933h",
+      "video_width": "16",
+      "video_hls_url": "https://video.twimg.com/amplify_video/991374284135137280/pl/sQrBsE9mFvNep9Cx.m3u8?tag=2",
+      "website_dest_url": "https://developer.x.com",
+      "created_at": "2018-09-24T19:02:38Z",
+      "card_uri": "card://1044301099031658496",
+      "title": "Developer Platform",
+      "website_url": "https://developer.x.com",
+      "updated_at": "2018-09-24T19:02:38Z",
+      "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/991374284135137280/img/YbbGQHvWRjoFgrLz.jpg",
+      "video_poster_width": "16",
+      "deleted": false,
+      "card_type": "VIDEO_WEBSITE"
+    }
+  ]
+}
+```
+
+現在のアカウントに紐づく特定のカードを、`card_id` を指定して取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/all/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジアカウントを識別するための ID です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | リクエスト内で操作対象となるカードを参照するための ID です。  Type: string  Example: `508pf` |
+| with&#95;deleted   *optional* | 削除済みの結果をリクエストに含めるかどうかを指定します。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/all/508pf`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "card_id": "508pf",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "video_poster_height": "9",
+    "name": "video website card",
+    "video_height": "9",
+    "video_url": "https://video.twimg.com/amplify_video/vmap/867520357225418752.vmap",
+    "content_duration_seconds": "21",
+    "video_owner_id": "756201191646691328",
+    "video_content_id": "13_867520357225418752",
+    "website_display_url": "developer.x.com",
+    "id": "508pf",
+    "video_width": "16",
+    "video_hls_url": "https://video.twimg.com/amplify_video/867520357225418752/pl/TPHeH5ZlHFCa2TeJ.m3u8",
+    "website_dest_url": "https://developer.x.com/en/docs/ads/creatives/api-reference/video-website#post-accounts-account-id-cards-video-website",
+    "created_at": "2017-11-10T09:00:35Z",
+    "card_uri": "card://928910245920829440",
+    "title": "VWC",
+    "website_url": "https://t.co/F81hp59pUF",
+    "updated_at": "2018-01-05T05:43:31Z",
+    "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/867520357225418752/img/E3pnXM0sCKnRsFih.jpg",
+    "video_poster_width": "16",
+    "deleted": false,
+    "card_type": "VIDEO_WEBSITE"
+  }
+}
+```
+
+<div id="draft-tweets">
+  ### 下書きポスト
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_iddraft_tweets">
+  #### GET accounts/:account&#95;id/draft&#95;tweets
+</div>
+
+現在のアカウントに紐づく下書きポストの一部またはすべての詳細を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| count   *optional* | 各リクエストごとに取得するレコードの件数を指定します。  Type: int  Default: `100`   Min, Max: `1`, `200` |
+| cursor   *optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `c-jh1g0ryb` |
+| user&#95;id   *optional* | ポストの下書き（Draft Tweets）を取得するユーザーを指定します。設定されていない場合、アカウント上の `FULL` プロモータブルユーザーがデフォルトになります。  Type: string  Example: `756201191646691328` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets?count=1`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "count": 1
+    }
+  },
+  "data": [
+    {
+      "name" null,
+      "text": "hello, world",
+      "user_id": "756201191646691328",
+      "id": "994791681219231744",
+      "nullcast": true,
+      "created_at": "2018-05-11T04:09:53Z",
+      "card_uri": null,
+      "updated_at": "2018-05-11T04:09:53Z",
+      "media_keys": []
+    }
+  ],
+  "next_cursor": "c-jh1g0ryb"
+}
+```
+
+現在のアカウントに紐づいた特定の下書きポストを取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/:draft_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントを識別する ID です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くほとんどの Advertiser API リクエストで必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | リクエストで操作する下書きポスト（Draft Tweet）を参照する ID です。  Type: string  Example: `994788364334325760` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/994788364334325760`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "draft_tweet_id": "994788364334325760"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "#TwitterDev",
+    "user_id": "756201191646691328",
+    "id": "994788364334325760",
+    "nullcast": true,
+    "created_at": "2018-05-11T03:56:42Z",
+    "card_uri": "card://958225772740714496",
+    "updated_at": "2018-05-11T03:56:42Z",
+    "media_keys": []
+  }
+}
+```
+
+<div id="post-accountsaccount_iddraft_tweets">
+  #### POST accounts/:account&#95;id/draft&#95;tweets
+</div>
+
+アカウントのフルプロモーション対象ユーザー（デフォルト）または `as_user_id` パラメーターで指定したユーザーとして、下書きポストを作成します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *必須* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで一般的に必須パラメーターです。指定したアカウントは、認証されたユーザーに紐づいている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| as&#95;user&#95;id   *必須* | ポストを行う広告主ユーザーのユーザー ID です。広告主は、[ads.x.com](https://ads.x.com/) を通じて、あなたのハンドル（または複数のハンドル）に自分の広告アカウントへのアクセス権を付与している必要があります。この権限により、広告主ではなく自分自身のハンドルの OAuth トークンを使って API を呼び出すことができます。  Type: string  Example: `756201191646691328` |
+| text   *条件付き必須* | ステータス更新のテキストです。`media_keys` が指定されていない場合に必須です。  Type: string  Example: `Just setting up my X.` |
+| card&#95;uri   *任意* | 利用可能な場合は、任意のカードレスポンスに含まれる `card_uri` の値を使ってポストにカードを関連付けます。  Type: string  Example: `card://960880280705392541` |
+| media&#95;keys   *任意* | カンマ区切りの識別子リストを指定して、ポストにメディアを関連付けます。最大 4 枚の画像、1 つのアニメーション GIF、または 1 つの動画を含めることができます。 **注記**: メディアアセットはアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 内に存在している必要があります。  Type: string  Example: `13_1153584529292270722` |
+| nullcast   *任意* | nullcast（「Promoted-only」）のポストを作成するかどうかを指定します。  Type: boolean  Default: `true`   Possible values: `true`, `false` |
+| name   *任意* | 下書きポストの名前です。最大長: 80 文字。  Type: string  Example: `Tweet with name` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets?as_user_id=756201191646691328&text=Just setting up my X.`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "text": "Just setting up my X.",
+      "as_user_id": "756201191646691328"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "Just setting up my X.",
+    "user_id": "756201191646691328",
+    "id": "994747471329873920",
+    "nullcast": true,
+    "created_at": "2018-05-11T01:14:13Z",
+    "card_uri": null,
+    "updated_at": "2018-05-11T01:14:13Z",
+    "media_keys": []
+  }
+}
+```
+
+現在のアカウントの指定した下書きポストを更新します。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/:draft_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメーターです。指定したアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | リクエストで操作対象となる下書きポストを参照するための値です。  Type: string  Example: `994747471329873920` |
+| card&#95;uri   *optional* | 利用可能な任意の cards レスポンスから取得した `card_uri` の値を使用して、ポストにカードを関連付けます。  **Note**: このパラメーター名のみを指定して値を指定しないと、未設定（削除）されます。  Type: string  Example: `card://970582057284129151` |
+| media&#95;keys   *optional* | カンマ区切りの識別子リストを指定して、ポストにメディアを関連付けます。画像は最大 4 枚、アニメーション GIF は 1 つ、または動画は 1 本まで含めることができます。  **Note**: メディアアセットはアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) 内に存在している必要があります。  **Note**: このパラメーター名のみを指定して値を指定しないと、未設定（削除）されます。  Type: string  Example: `13_1153584529292270722` |
+| nullcast   *optional* | nullcast（「Promoted-only」）ポストを作成するかどうかを指定します。  Type: boolean  Possible values: `true`, `false` |
+| text   *optional* | ステータス更新のテキストです。  Type: string  Example: `just setting up my twttr` |
+| name   *optional* | 下書きポストの名前です。最大 80 文字です。  Type: string  Example: `Tweet with name` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/994747471329873920?text=just setting up my twttr`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "draft_tweet_id": 994747471329873920,
+      "text": "just setting up my twttr"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "just setting up my twttr",
+    "user_id": "756201191646691328",
+    "id": "994747471329873920",
+    "nullcast": true,
+    "created_at": "2018-05-11T01:14:13Z",
+    "card_uri": null,
+    "updated_at": "2018-05-11T01:16:59Z",
+    "media_keys": []
+  }
+}
+```
+
+現在のアカウントに属する指定された下書きポストを完全に削除します。
+
+**注**: メタデータを使用してポストまたは予約済みポストを作成した後は、その下書きを削除することを**強く**推奨します。
+
+**注**: これは完全削除です。そのため、削除された下書きポストを復元することはできません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/:draft_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 操作対象（leveraged）のアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くほとんどの Advertiser API リクエストで必須となるパラメーターです。指定したアカウントは、認証済みユーザーに紐づいている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | リクエストで操作する Draft ポストを参照する識別子です。  Type: string  Example: `994787835663155200` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/994787835663155200`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "draft_tweet_id": "994787835663155200"
+    }
+  },
+  "data": {
+    "name": null,
+    "text": "hello, world",
+    "user_id": "756201191646691328",
+    "id": "994787835663155200",
+    "nullcast": true,
+    "status": "DELETED",
+    "created_at": "2018-05-11T03:54:36Z",
+    "card_uri": null,
+    "updated_at": "2018-05-11T04:07:31Z",
+    "media_keys": []
+  }
+}
+```
+
+<div id="post-accountsaccount_iddraft_tweetspreviewdraft_tweet_id">
+  #### POST accounts/:account&#95;id/draft&#95;tweets/preview/:draft&#95;tweet&#95;id
+</div>
+
+モバイルデバイス上で下書きポストをプレビューします。
+
+リクエストが成功すると、認証済みユーザーがログインしているすべてのデバイスに通知が送信されます。通知をタップするとタイムラインが開き、そこで下書きポストを表示および操作でき、自動再生、音量、全画面表示、Video Website Card のドッキングなどの動作をテストできます。
+
+**注**: デバイス上でのプレビューは、通知を受け取ったユーザー本人にのみ表示されます。
+
+**注**: 通知は X 公式アプリにのみ送信されます。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/draft_tweets/preview/:draft_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジド・アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| draft&#95;tweet&#95;id   *required* | リクエスト内で操作対象とするドラフトポストへの参照です。  Type: string  Example: `996132315829948416` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/draft_tweets/preview/996132315829948416`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "draft_tweet_id": "996132315829948416"
+    }
+  },
+  "message": "See @apimctestface's notifications in the X app to preview your Tweet."
+}
+```
+
+<div id="image-conversation-cards">
+  ### 画像会話カード
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+**注記**: カードをポストに関連付けるには、`card_uri` パラメーターを、[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)、[POST statuses/update](https://developer.x.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update#post-statuses-update)、または [POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) エンドポイントのいずれかで使用します。
+
+<div id="get-accountsaccount_idcardsimage_conversation">
+  #### GET accounts/:account&#95;id/cards/image&#95;conversation
+</div>
+
+現在のアカウントに関連付けられている一部またはすべての Image Conversation Card の詳細を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;ids   *optional* | カンマ区切りの識別子リストを指定することで、レスポンスを目的の Image Conversation Card のみに限定します。最大 200 個の ID を指定できます。  Type: string  Example: `59woh` |
+| count   *optional* | 各リクエストで取得を試みるレコード数を指定します。  Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| cursor   *optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `8x7v00oow` |
+| q   *optional* | `name` でカードを絞り込むための任意のクエリです。すべてを取得するには、このパラメーターを省略します。最大長は 80 文字です。  **注**: 大文字と小文字を区別しない前方一致で照合します。  Type: string  Example: `night` |
+| sort&#95;by   *optional* | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting) を参照してください。  Type: string  Example: `created_at-asc` |
+| with&#95;deleted   *optional* | 削除済みの結果もレスポンスに含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| with&#95;total&#95;count   *optional* | `total_count` レスポンス属性を含めます。  **注**: このパラメーターと `cursor` は同時には使用できません。  **注**: `total_count` を含むリクエストには、現在 15 分あたり 200 件に設定されている、より低いレート制限が適用されます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation?card_ids=59woh`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "image_conversation",
+      "card_ids": [
+        "59woh"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "name": "image conversation card",
+      "first_cta": "#moon",
+      "image_display_height": "670",
+      "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+      "thank_you_text": "thanks",
+      "id": "59woh",
+      "first_cta_tweet": "stars",
+      "media_key": "3_957113581522141184",
+      "created_at": "2018-01-27T04:58:42Z",
+      "image_display_width": "1280",
+      "card_uri": "card://923498485702009837",
+      "title": "Full moon",
+      "updated_at": "2018-01-27T04:58:42Z",
+      "deleted": false,
+      "card_type": "IMAGE_CONVERSATION"
+    }
+  ]
+}
+```
+
+現在のアカウントに紐づく特定の画像会話カードを取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | リクエスト内で操作対象となる Image Conversation Card への参照です。 Type: string  Example: `59woh` |
+| with&#95;deleted   *optional* | リクエストの結果に削除済みのものを含めます。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation/59woh`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "image_conversation",
+      "card_id": "59woh",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "image conversation card",
+    "first_cta": "#moon",
+    "image_display_height": "670",
+    "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+    "thank_you_text": "thanks",
+    "id": "59woh",
+    "first_cta_tweet": "stars",
+    "media_key": "3_957113581522141184",
+    "created_at": "2018-01-27T04:58:42Z",
+    "image_display_width": "1280",
+    "card_uri": "card://923498485702009837",
+    "title": "Full moon",
+    "updated_at": "2018-01-27T04:58:42Z",
+    "deleted": false,
+    "card_type": "IMAGE_CONVERSATION"
+  }
+}
+```
+
+<div id="post-accountsaccount_idcardsimage_conversation">
+  #### POST accounts/:account&#95;id/cards/image&#95;conversation
+</div>
+
+指定したアカウントに関連付けられた新しい画像会話カードを作成します。
+
+画像をエンドポイントにアップロードする際に役立つ情報については、[Uploading Media](https://developer.x.com/rest/public/uploading-media) を参照してください。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *必須* | 利用するアカウントの識別子です。リソースのパスに含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くほとんどの Advertiser API リクエストで必須のパラメータです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| first&#95;cta   *必須* | 最初のオプションに対する Call-To-Action (CTA) のハッシュタグです。最大長: 20 文字（# は含めません）。 Type: string  Example: `#ShareNow` |
+| first&#95;cta&#95;tweet   *必須* | 最初の CTA がクリックされたときに使用されるポスト本文です。 Type: string  Example: `I Heart @AdsAPI` |
+| media&#95;key   *必須* | このカードで使用される画像のメディアキーです。 **注**: 画像はアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に存在している必要があります。 **注**: 画像の最小幅は 800px で、幅:高さのアスペクト比が 1.91:1 である必要があります。 Type: string  Example: `3_1151345051104991073` |
+| name   *必須* | カードの名前です。 Type: string  Example: `image conversation card` |
+| thank&#95;you&#95;text   *必須* | CTA がクリックされた後に表示されるテキストです。最大長: 23 文字。 Type: string  Example: `Thank you` |
+| second&#95;cta   *場合により必須* | 2 番目のオプションに対する Call-To-Action (CTA) のハッシュタグです。最大長: 20 文字（# は含めません）。 Type: string  **注**: `title` が設定されていない場合は必須です。 Example: `#ShareAgain` |
+| second&#95;cta&#95;tweet   *場合により必須* | 2 番目の CTA がクリックされたときに使用されるポスト本文です。 **注**: `second_cta` が設定されている場合は必須です。 Type: string  Example: `I Heart @AdsAPI Again` |
+| title   *場合により必須* | カードのタイトルです。画像の下、CTA の上に表示されます。最大長: 23 文字。 Type: string  **注**: `second_cta` が設定されていない場合は必須です。 Example: `Start a conversation` |
+| third&#95;cta   *任意* | 3 番目のオプションに対する Call-To-Action (CTA) のハッシュタグです。最大長: 20 文字（# は含めません）。 Type: string  Example: `#ShareMore` |
+| third&#95;cta&#95;tweet   *場合により必須* | 3 番目の CTA がクリックされたときに使用されるポスト本文です。 Type: string  **注**: `third_cta` が設定されている場合は必須です。 Example: `I Heart @TwitterDev` |
+| fourth&#95;cta   *任意* | 4 番目のオプションに対する Call-To-Action (CTA) のハッシュタグです。最大長: 20 文字（# は含めません）。 Type: string  Example: `#ShareExtra` |
+| fourth&#95;cta&#95;tweet   *場合により必須* | 4 番目の CTA がクリックされたときに使用されるポスト本文です。 Type: string  **注**: `fourth_cta` が設定されている場合は必須です。 Example: `I Heart @TwitterDev Again` |
+| unlocked&#95;image&#95;media&#95;key   *任意* | インスタントアンロックシナリオで使用される画像の `media_key` です。これは書き込み専用フィールドです。レスポンスでは、この画像用の X URL を API が返します。 **注**: 画像はアカウントのメディアライブラリに存在している必要があります。 **注**: 画像の最小幅は 800px で、幅:高さのアスペクト比が 5:2 である必要があります。 Type: string  Example: `3_883112887618682880` |
+| thank&#95;you&#95;url   *任意* | お礼のテキストと一緒に表示される URL です。 Type: string  Example: `https://example.com/thankyou` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation?media_key=3_957113581522141184&name=image conversation card&first_cta=#moon&first_cta_tweet=stars&thank_you_text=thanks&title=Full moon`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "image conversation card",
+    "first_cta": "#moon",
+    "image_display_height": "670",
+    "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+    "thank_you_text": "thanks",
+    "id": "59woh",
+    "first_cta_tweet": "stars",
+    "media_key": "3_957113581522141184",
+    "created_at": "2018-01-27T04:58:42Z",
+    "image_display_width": "1280",
+    "card_uri": "card://923498485702009837",
+    "title": "Full moon",
+    "updated_at": "2018-01-27T04:58:42Z",
+    "deleted": false,
+    "card_type": "IMAGE_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "name": "image conversation card",
+      "first_cta": "#moon",
+      "image_display_height": "670",
+      "media_url": "https://pbs.twimg.com/media/DUhZuzxUQAAWZqr.jpg",
+      "thank_you_text": "thanks",
+      "media_key": "3_957113581522141184",
+      "account_id": "18ce54d4x5t",
+      "first_cta_tweet": "stars",
+      "image_display_width": "1280",
+      "title": "Full moon",
+      "card_type": "IMAGE_CONVERSATION"
+    }
+  }
+}
+```
+
+現在のアカウントに属する指定した画像会話カードを更新します。
+
+エンドポイントへの画像アップロードに関する情報については、[メディアのアップロード](https://developer.x.com/rest/public/uploading-media)を参照してください。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation/:card_id`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで一般的に必須のパラメータです。指定したアカウントは認証ユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | このリクエストで操作の対象となる画像会話カード (Image Conversation Card) への参照。  Type: string  Example: `4i0qg` |
+| first&#95;cta   *optional* | 最初のオプション用の Call-To-Action (CTA) ハッシュタグ。最大長: 20 文字（`#` は含めない）。  Type: string  Example: `#ShareNow` |
+| first&#95;cta&#95;tweet   *optional* | 最初の CTA がクリックされたときに使用されるポスト本文。  Type: string  Example: `I Heart @AdsAPI` |
+| second&#95;cta   *optional* | 2 番目のオプション用の Call-To-Action (CTA) ハッシュタグ。最大長: 20 文字（`#` は含めない）。  Type: string  **Note**: `title` が設定されていない場合は必須です。  Example: `#ShareAgain` |
+| second&#95;cta&#95;tweet   *optional* | 2 番目の CTA がクリックされたときに使用されるポスト本文。  **Note**: `second_cta` が設定されている場合は必須です。  Type: string  Example: `I Heart @AdsAPI Again` |
+| third&#95;cta   *optional* | 3 番目のオプション用の Call-To-Action (CTA) ハッシュタグ。最大長: 20 文字（`#` は含めない）。  Type: string  Example: `#ShareMore` |
+| third&#95;cta&#95;tweet   *optional* | 3 番目の CTA がクリックされたときに使用されるポスト本文。  Type: string  **Note**: `third_cta` が設定されている場合は必須です。  Example: `I Heart @TwitterDev` |
+| fourth&#95;cta   *optional* | 4 番目のオプション用の Call-To-Action (CTA) ハッシュタグ。最大長: 20 文字（`#` は含めない）。  Type: string  Example: `#ShareExtra` |
+| fourth&#95;cta&#95;tweet   *optional* | 4 番目の CTA がクリックされたときに使用されるポスト本文。  Type: string  **Note**: `fourth_cta` が設定されている場合は必須です。  Example: `I Heart @TwitterDev Again` |
+| media&#95;key   *optional* | このカードで使用する画像の media key。  **Note**: 画像はアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に存在している必要があります。  **Note**: 最小画像幅は 800px で、幅:高さ のアスペクト比 1.91:1 が必須です。  Type: string  Example: `3_1151345051104991073` |
+| name   *optional* | カードの名前。  Type: string  Example: `moon card` |
+| thank&#95;you&#95;text   *optional* | CTA がクリックされた後に表示されるテキスト。最大長: 23 文字。  Type: string  Example: `Thank you` |
+| thank&#95;you&#95;url   *optional* | お礼テキストとともに表示される URL。  Type: string  Example: `https://example.com/thankyou` |
+| title   *optional* | カードのタイトル。画像の下、CTA の上に表示されます。最大長: 23 文字。  Type: string  **Note**: `second_cta` が設定されていない場合は必須です。  Example: `Start a conversation` |
+| unlocked&#95;image&#95;media&#95;key   *optional* | instant unlock シナリオで使用される画像の `media_key`。このフィールドは書き込み専用です。レスポンスでは、この画像に対する X の URL が API によって返されます。  **Note**: 画像はアカウントのメディアライブラリに存在している必要があります。  **Note**: 最小画像幅は 800px で、幅:高さ のアスペクト比 5:2 が必須です。  Type: string  Example: `3_883112887618682880` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation/59woh?name=moon card`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "moon card",
+    "id": "59woh",
+    "created_at": "2018-01-27T04:58:42Z",
+    "card_uri": "card://923498485702009837",
+    "updated_at": "2018-01-29T21:04:39Z",
+    "deleted": false,
+    "card_type": "IMAGE_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_type": "IMAGE_CONVERSATION",
+      "card_id": "59woh",
+      "name": "moon card"
+    }
+  }
+}
+```
+
+現在のアカウントが所有する、指定した画像会話カードを完全に削除します。
+
+**注**: これはハード削除です。そのため、一度削除されたカードを復元することはできません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/image_conversation/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | このリクエストで操作対象となる Image Conversation Card への参照です。  Type: string  Example: `4i0qe` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/image_conversation/4i0qe`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "image conversation card",
+    "id": "4i0qe",
+    "created_at": "2017-07-07T00:03:01Z",
+    "updated_at": "2017-08-23T13:26:23Z",
+    "deleted": true,
+    "card_type": "IMAGE_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "card_id": "4i0qe",
+      "card_type": "image_conversation",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+### メディアライブラリ
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idmedia_library">
+  #### GET accounts/:account&#95;id/media&#95;library
+</div>
+
+現在のアカウントに関連付けられているメディアライブラリ内のオブジェクトの一部またはすべての詳細情報を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、一般的に必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| count   *optional* | 各リクエストで取得を試みるレコードの件数を指定します。  Type: int  Default: `20`   Min, Max: `1`, `50` |
+| cursor   *optional* | 結果の次のページを取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `c-1` |
+| media&#95;type   *optional* | レスポンスを目的のメディアタイプのみに絞り込みます。  Type: enum  Possible values: `GIF`, `IMAGE`, `VIDEO` |
+| q   *optional* | `name`、`title`、`file_name`、`description` フィールドでリソースを絞り込むための任意のクエリです。  **注意**: 大文字と小文字を区別しない *term* ベースのマッチングを行います。  Type: string  Min, Max length: `1`, `255` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library?count=1`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "count": 1
+    }
+  },
+  "data": [
+    {
+      "tweeted": true,
+      "name": null,
+      "file_name": "coffee https://t.co/4tcPU9XUon",
+      "media_url": "https://pbs.twimg.com/media/DJvnJf_UEAAXnzC.jpg",
+      "media_category": "TWEET_IMAGE",
+      "media_key": "3_908573900237180928",
+      "created_at": "2017-09-15T06:11:12Z",
+      "media_status": "TRANSCODE_COMPLETED",
+      "media_type": "IMAGE",
+      "updated_at": "2017-11-16T06:00:01Z",
+      "deleted": false
+    }
+  ],
+  "next_cursor": "c-1"
+}
+```
+
+現在のアカウントに関連付けられているメディアライブラリ内の特定のオブジェクトを取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library/:media_key`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| media&#95;key   *required* | リクエスト内で操作対象となるメディアライブラリオブジェクトへの参照です。  Type: string  Example: `13_909110614026444802` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library/13_909110614026444802`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "13_909110614026444802"
+    }
+  },
+  "data": {
+    "tweeted": true,
+    "duration": 39973,
+    "name": null,
+    "file_name": "buildings https://t.co/xFdzrHM5QG",
+    "description": null,
+    "media_url": "https://video.twimg.com/amplify_video/909110614026444802/vid/1280x720/mfahmfkKVjjk1nGm.mp4",
+    "media_category": "AMPLIFY_VIDEO",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/909110614026444802/img/QZUNoaiCia0UFNrw.jpg",
+    "poster_media_key": "3_909110614026444802",
+    "media_key": "13_909110614026444802",
+    "created_at": "2017-09-16T17:43:55Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "title": "buildings",
+    "media_type": "VIDEO",
+    "aspect_ratio": "16:9",
+    "updated_at": "2017-09-27T13:04:00Z",
+    "deleted": false
+  }
+}
+```
+
+現在のアカウントにメディアオブジェクトを関連付けます。詳細については、[Media Library ガイド](https://developer.x.com/en/docs/ads/creatives/guides/media-library)を参照してください。
+
+**注記**: `AMPLIFY_VIDEO` メディアカテゴリの動画を Media Library に追加すると、自動的に `PREROLL` の [account&#95;media](https://developer.x.com/en/docs/ads/creatives/api-reference/account-media#get-accounts-account-id-account-media) アセットとして利用できるようになります。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、一般的に必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| media&#95;key   *required* | アップロード済みコンテンツの `media_key` です。`media_category` が指定されている場合、`POST media/upload` のレスポンスで `media_key` が返されます。  Type: string  Example: `3_931236738554519552` |
+| description   *optional* | ポストされたときに動画の下に表示される説明文です。最大長: 200 文字。これはデフォルトではポスト内に表示されません。動画の `description` を表示するには、[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) エンドポイントで `video_description` パラメーターを使用します。  **注**: 動画でのみ使用できます。  Type: string  Example: `This is the description under the video.` |
+| file&#95;name   *optional* | メディアライブラリオブジェクトのファイル名です。最大長: 255 文字。ファイル名は、ads.x.com の Media Library UI 内のすべてのメディアアセットのメディア詳細で確認できます。`file_name` が設定されていない場合、この値は空になります。  Type: string  Example: `coffee.jpeg` |
+| name   *optional* | メディアライブラリオブジェクトの名前です。最大長: 100 文字。これは、ads.x.com の Media Library UI 内のすべてのメディアアセットのラベルとして表示されます。`name` が設定されていない場合、ラベルは &quot;Untitled&quot; になります。  Type: string  Example: `Latte` |
+| poster&#95;media&#95;key   *optional* | アップロード済み画像の `media_key` を使用して、動画のポスター画像を指定します。指定しない場合は、最初のフレームが使用されます。  **注**: 動画でのみ使用できます。  Type: string  Example: `3_890599134483242005` |
+| title   *optional* | ポストされたときに動画の下に表示されるタイトル（見出し）です。最大長: 70 文字。これはデフォルトではポスト内に表示されません。動画の `title` を表示するには、[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) エンドポイントで `video_title` パラメーターを使用します。  **注**: 動画でのみ使用できます。  Type: string  Example: `Video title` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library?media_key=3_931236738554519552`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "3_931236738554519552"
+    }
+  },
+  "data": {
+    "tweeted": false,
+    "name": null,
+    "file_name": null,
+    "media_url": "https://pbs.twimg.com/media/DOxq4TtV4AAlvh_.jpg",
+    "media_category": "TWEET_IMAGE",
+    "media_key": "3_931236738554519552",
+    "created_at": "2017-11-16T19:05:14Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "media_type": "IMAGE",
+    "updated_at": "2017-11-16T19:05:23Z",
+    "deleted": false
+  }
+}
+```
+
+現在のアカウントの指定したメディアライブラリオブジェクトを更新します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library/:media_key`
+
+#### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くほとんどの Advertiser API リクエストで必須のパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| media&#95;key   *required* | リクエストで操作対象となる Media Library オブジェクトを参照するためのキーです。  Type: string  Example: `16_844800354743074820` |
+| description   *optional* | ポストされたときに動画の下に表示される説明文です。最大長: 200 文字。 この説明文はデフォルトではポスト内に表示されません。動画の `description` を表示するには、[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) エンドポイントで `video_description` パラメータを使用してください。  **Note**: 動画でのみ使用できます。  Type: string  Example: `This is the description under the video.` |
+| file&#95;name   *optional* | Media Library オブジェクトのファイル名です。最大長: 255。 ファイル名は、ads.x.com 上の Media Library UI 内の各メディアアセットの詳細で確認できます。`file_name` が設定されていない場合、この値は空になります。  Type: string  Example: `coffee.jpeg` |
+| name   *optional* | Media Library オブジェクトの名前です。最大長: 100。 ads.x.com 上の Media Library UI 内の各メディアアセットのラベルとして表示されます。`name` が設定されていない場合、ラベルは「Untitled」になります。  Type: string  Example: `Latte` |
+| poster&#95;media&#95;key   *optional* | アップロード済み画像の `media_key` を使用して、動画用のポスター画像を指定します。  **Note**: 動画でのみ使用できます。  Type: string  Example: `3_885003359340375465` |
+| title   *optional* | ポストされたときに動画の下に表示されるタイトル（見出し）です。最大長: 70 文字。 このタイトルはデフォルトではポスト内に表示されません。動画の `title` を表示するには、[POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet) エンドポイントで `video_title` パラメータを使用してください。  **Note**: 動画でのみ使用できます。  Type: string  Example: `Video title` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library/16_844800354743074820?title=cat GIF&description=in space`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "16_844800354743074820",
+      "title": "cat GIF",
+      "description": "in space"
+    }
+  },
+  "data": {
+    "tweeted": true,
+    "duration": null,
+    "name": null,
+    "file_name": null,
+    "description": "in space",
+    "media_url": "https://video.twimg.com/tweet_video/C7lVclqVwAQqTCZ.mp4",
+    "media_category": "TWEET_GIF",
+    "poster_media_url": "https://pbs.twimg.com/tweet_video_thumb/C7lVclqVwAQqTCZ.jpg",
+    "poster_media_key": "3_844800354743074820",
+    "media_key": "16_844800354743074820",
+    "created_at": "2017-10-20T09:51:54Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "title": "cat GIF",
+    "media_type": "GIF",
+    "aspect_ratio": "125:79",
+    "updated_at": "2017-10-23T06:37:56Z",
+    "deleted": false
+  }
+}
+```
+
+現在のアカウントの指定したメディアライブラリオブジェクトを削除します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/media_library/:media_key`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| media&#95;key   *required* | リクエストで操作対象となるメディアライブラリオブジェクトを参照するキーです。  Type: string  Example: `7_860318603387600896` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/media_library/7_860318603387600896`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "media_key": "7_860318603387600896"
+    }
+  },
+  "data": {
+    "tweeted": true,
+    "duration": 14330,
+    "name": "mountains-on-ads.x.com",
+    "file_name": "mountains.mp4",
+    "description": "",
+    "media_url": "https://video.twimg.com/ext_tw_video/860318603387600896/pu/vid/1280x720/xI3DbvWKxdvICsFW.mp4",
+    "media_category": "TWEET_VIDEO",
+    "poster_media_url": "https://pbs.twimg.com/media/C_B3bTRVYAAFBFt.jpg",
+    "poster_media_key": "3_860318839740915712",
+    "media_key": "7_860318603387600896",
+    "created_at": "2017-05-05T02:21:53Z",
+    "media_status": "TRANSCODE_COMPLETED",
+    "title": "uploaded on ads.x.com",
+    "media_type": "VIDEO",
+    "aspect_ratio": "16:9",
+    "updated_at": "2017-05-05T02:26:58Z",
+    "deleted": true
+  }
+}
+```
+
+<div id="poll-cards">
+  ### 投票カード
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idcardspoll">
+  #### GET accounts/:account&#95;id/cards/poll
+</div>
+
+現在のアカウントに関連付けられている一部またはすべてのPollカードの詳細情報を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll`
+
+#### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;ids   *optional* | コンマ区切りの識別子リストを指定することで、レスポンスを目的の投票カードのみに絞り込みます。最大 200 個の ID を指定できます。  Type: string  Example: `57i77` |
+| count   *optional* | 個々のリクエストごとに取得するレコード数を指定します。  Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| cursor   *optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `8x7v00oow` |
+| q   *optional* | `name` によってカードを絞り込むための任意指定のクエリです。すべて取得するにはこのパラメータを省略します。最大文字数: 80 文字。  **Note**: 大文字小文字を区別しない前方一致でマッチングを行います。  Type: string  Example: `night` |
+| sort&#95;by   *optional* | サポートされている属性で昇順または降順にソートします。詳細は [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting) を参照してください。  Type: string  Example: `created_at-asc` |
+| with&#95;deleted   *optional* | リクエストに削除済みの結果を含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| with&#95;total&#95;count   *optional* | レスポンスの `total_count` 属性を含めます。  **Note**: このパラメータと `cursor` は排他的です。  **Note**: `total_count` を含むリクエストはレート制限が低くなり、現在は 15 分あたり 200 件に設定されています。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll?card_ids=57i77`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "poll",
+      "card_ids": [
+        "57i77"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "video_poster_height": "9",
+      "name": "best coast poll",
+      "start_time": "2018-01-09T04:51:34Z",
+      "first_choice": "East",
+      "video_height": "9",
+      "video_url": "https://video.twimg.com/amplify_video/vmap/950589518557540353.vmap",
+      "content_duration_seconds": "8",
+      "second_choice": "West",
+      "end_time": "2018-01-16T04:51:34Z",
+      "id": "57i77",
+      "video_width": "16",
+      "video_hls_url": "https://video.twimg.com/amplify_video/950589518557540353/vid/1280x720/BRkAhPxFoBREIaFA.mp4",
+      "created_at": "2018-01-09T04:51:34Z",
+      "duration_in_minutes": "10080",
+      "card_uri": "card://950590850777497601",
+      "updated_at": "2018-01-09T04:51:34Z",
+      "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/950589518557540353/img/nZ1vX_MXYqmvbsXP.jpg",
+      "video_poster_width": "16",
+      "deleted": false,
+      "card_type": "VIDEO_POLLS"
+    }
+  ]
+}
+```
+
+現在のアカウントに関連付けられている特定の投票カードを取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | leveraged アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | リクエストで操作対象となる Poll Card への参照です。  Type: string  Example: `57i8t` |
+| with&#95;deleted   *optional* | リクエストに削除済みの結果も含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll/57i8t`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "poll",
+      "card_id": "57i8t",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "text only poll",
+    "start_time": "2018-01-09T05:03:05Z",
+    "first_choice": "Morning",
+    "second_choice": "Evening",
+    "end_time": "2018-01-11T05:03:05Z",
+    "id": "57i8t",
+    "created_at": "2018-01-09T05:03:05Z",
+    "duration_in_minutes": "2880",
+    "card_uri": "card://950593749658189824",
+    "updated_at": "2018-01-09T05:03:05Z",
+    "deleted": false,
+    "card_type": "TEXT_POLLS"
+  }
+}
+```
+
+<div id="post-accountsaccount_idcardspoll">
+  #### POST accounts/:account&#95;id/cards/poll
+</div>
+
+指定したアカウントに関連付けられた新しい投票カードを作成します。このエンドポイントでは、画像付き、動画付き、またはメディアなしの投票カードを作成できます。メディア付きの投票は Media Forward Polls と呼ばれます。
+
+**注記**: Media Forward Polls プロダクトはベータ版であり、`PROMOTED_MEDIA_POLLS` アカウント機能が必要です。
+
+**注記**: 投票カードを更新（PUT）することはできません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメーターです。指定したアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| duration&#95;in&#95;minutes   *required* | 投票が有効な時間（分単位）。指定した `duration_in_minutes` が経過すると投票は締め切られ、それ以上は投票を受け付けません。これはレスポンス内の `end_time` に対応します。  **Note**: これはカードが作成された時点から開始され、ポストに追加された時点ではありません。  Type: int  Min, Max: `5`, `10080` |
+| first&#95;choice   *required* | 1 番目の投票選択肢。最大文字数: 25 文字。  Type: string  Example: `One` |
+| name   *required* | カードの名前。  Type: string  Example: `poll card` |
+| second&#95;choice   *required* | 2 番目の投票選択肢。最大文字数: 25 文字。  Type: string  Example: `Two` |
+| fourth&#95;choice   *optional* | 4 番目の投票選択肢。最大文字数: 25 文字。  **Note**: このパラメーターを使用する場合は、1 番目、2 番目、および 3 番目の選択肢を設定しておく必要があります。  Type: string  Example: `Four` |
+| media&#95;key   *optional* | このカードで使用される、メディアライブラリ内の画像または動画の `media_key`。これは書き込み専用フィールドです。レスポンスでは、このメディア用の X URL を API が返します。  **Note**: 画像または動画はアカウントのメディアライブラリ内に存在している必要があります。  **Note**: 画像の最小幅は 800px で、幅:高さのアスペクト比が 1.91:1 である必要があります。 |
+| third&#95;choice   *optional* | 3 番目の投票選択肢。最大文字数: 25 文字。  **Note**: このパラメーターを使用する場合は、1 番目と 2 番目の選択肢を設定しておく必要があります。  Type: string  Example: `Three` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll?duration_in_minutes=10080&first_choice=East&second_choice=West&media_key=13_950589518557540353&name=best coast poll`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "first_choice": "East",
+      "name": "best coast poll",
+      "second_choice": "West",
+      "media_key": "13_950589518557540353",
+      "duration_in_minutes": 10080
+    }
+  },
+  "data": {
+    "video_poster_height": "9",
+    "name": "best coast poll",
+    "start_time": "2018-01-09T04:51:34Z",
+    "first_choice": "East",
+    "video_height": "9",
+    "video_url": "https://video.twimg.com/amplify_video/vmap/950589518557540353.vmap",
+    "content_duration_seconds": "8",
+    "second_choice": "West",
+    "end_time": "2018-01-16T04:51:34Z",
+    "id": "57i77",
+    "video_width": "16",
+    "video_hls_url": "https://video.twimg.com/amplify_video/950589518557540353/vid/1280x720/BRkAhPxFoBREIaFA.mp4",
+    "created_at": "2018-01-09T04:51:34Z",
+    "duration_in_minutes": "10080",
+    "card_uri": "card://950590850777497601",
+    "updated_at": "2018-01-09T04:51:34Z",
+    "video_poster_url": "https://pbs.twimg.com/amplify_video_thumb/950589518557540353/img/nZ1vX_MXYqmvbsXP.jpg",
+    "video_poster_width": "16",
+    "deleted": false,
+    "card_type": "VIDEO_POLLS"
+  }
+}
+```
+
+現在のアカウントに属する指定した投票カードを完全に削除します。
+
+注: これは完全削除です。そのため、削除されたカードを復元することはできません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/poll/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパスに含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常、必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | リクエストで操作対象となる投票カード（poll card）への参照です。  Type: string  Example: `57i9t` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/poll/57i9t`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "poll with image",
+    "start_time": "2018-01-09T05:10:51Z",
+    "id": "57i9t",
+    "created_at": "2018-01-09T05:10:51Z",
+    "updated_at": "2018-01-09T05:11:04Z",
+    "deleted": true,
+    "card_type": "IMAGE_POLLS"
+  },
+  "request": {
+    "params": {
+      "card_id": "57i9t",
+      "card_type": "poll",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+<div id="preroll-call-to-actions">
+  ### Preroll Call To Actions
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idpreroll_call_to_actions">
+  #### GET accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions
+</div>
+
+現在のアカウントに属する line item に関連付けられている preroll Call-To-Actions (CTA) の一部またはすべての詳細を取得します。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、一般的に必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  型: string  例: `18ce54d4x5t` |
+| line&#95;item&#95;ids   *optional* | カンマ区切りの識別子リストを指定することで、指定したラインアイテムに関連付けられた preroll CTA のみにレスポンスを絞り込みます。最大 200 個までの ID を指定できます。  型: string  例: `8v53k` |
+| count   *optional* | 個々のリクエストで取得するレコード数を指定します。  型: int  デフォルト: `200`   最小・最大: `1`, `1000` |
+| cursor   *optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [ページネーション](https://developer.x.com/x-ads-api/introduction) を参照してください。  型: string  例: `8x7v00oow` |
+| preroll&#95;call&#95;to&#95;action&#95;ids   *optional* | カンマ区切りの識別子リストを指定することで、目的の preroll CTA のみにレスポンスを絞り込みます。最大 200 個までの ID を指定できます。  型: string  例: `8f0` |
+| sort&#95;by   *optional* | サポートされている属性を基準に、昇順または降順でソートします。詳細は [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting) を参照してください。  型: string  例: `created_at-asc` |
+| with&#95;deleted   *optional* | 削除済みの結果をレスポンスに含めます。  型: boolean  デフォルト: `false`   取りうる値: `true`, `false` |
+| with&#95;total&#95;count   *optional* | `total_count` レスポンス属性を含めます。  **注**: このパラメーターと `cursor` は排他的で、同時に指定することはできません。  **注**: `total_count` を含むリクエストはレート制限がより厳しくなり、現在は 15 分あたり 200 回に設定されています。  型: boolean  デフォルト: `false`   取りうる値: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions?line_item_ids=8v53k`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "line_item_ids": [
+        "8v53k"
+      ]
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "line_item_id": "8v53k",
+      "call_to_action_url": "https://www.x.com",
+      "call_to_action": "VISIT_SITE",
+      "id": "8f0",
+      "created_at": "2017-07-07T19:28:40Z",
+      "updated_at": "2017-07-07T19:28:40Z",
+      "deleted": false
+    }
+  ]
+}
+```
+
+このアカウントに紐づく特定の Call-to-Action（CTA）を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions/:preroll_call_to_action_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| preroll&#95;call&#95;to&#95;action&#95;id   *required* | リクエストで操作対象となる preroll call to action への参照です。 Type: string  Example: `8f0` |
+| with&#95;deleted   *optional* | リクエストのレスポンスに削除済みの結果を含めます。 Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions/8f0`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "preroll_call_to_action_id": "8f0",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "VISIT_SITE",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-07-07T19:28:40Z",
+    "deleted": false
+  }
+}
+```
+
+<div id="post-accountsaccount_idpreroll_call_to_actions">
+  #### POST accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions
+</div>
+
+`PREROLL_VIEWS` ラインアイテムに対するオプションのコールトゥアクション（CTA）を設定します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定されたアカウントは、認証済みユーザーに紐付いている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| call&#95;to&#95;action   *required* | 広告内に表示されるボタンの CTA テキストです。  Type: enum  Possible values: `GO_TO`, `SEE_MORE`, `SHOP`, `VISIT_SITE`, `WATCH_NOW` |
+| call&#95;to&#95;action&#95;url   *required* | CTA ボタンがクリックされたときにユーザーをリダイレクトする URL です。  Type: string  Example: `https://www.x.com` |
+| line&#95;item&#95;id   *required* | リクエスト内で操作するラインアイテムへの参照です。  Type: string  Example: `8v53k` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions?line_item_id=8v53k&call_to_action=VISIT_SITE&call_to_action_url=https://www.x.com`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "VISIT_SITE",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-07-07T19:28:40Z",
+    "deleted": false
+  },
+  "request": {
+    "params": {
+      "line_item_id": "8v53k",
+      "call_to_action": "VISIT_SITE",
+      "call_to_action_url": "https://www.x.com",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+`PREROLL_VIEWS` ラインアイテムのオプションのコールトゥアクション（CTA）を更新します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions/:preroll_call_to_action_id`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| preroll&#95;call&#95;to&#95;action&#95;id   *required* | リクエスト内で対象とする preroll CTA への参照です。  Type: string  Example: `8f0` |
+| call&#95;to&#95;action   *optional* | 広告内で表示されるボタンの CTA テキストです。  Type: enum  Possible values: `GO_TO`, `SEE_MORE`, `SHOP`, `VISIT_SITE`, `WATCH_NOW` |
+| call&#95;to&#95;action&#95;url   *optional* | CTA ボタンがクリックされたときにユーザーをリダイレクトする URL です。  Type: string  Example: `https://www.x.com` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions/8f0?call_to_action=WATCH_NOW`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "WATCH_NOW",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-09-09T05:51:26Z",
+    "deleted": false
+  },
+  "request": {
+    "params": {
+      "preroll_call_to_action_id": "8f0",
+      "call_to_action": "WATCH_NOW",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+現在のアカウントの指定されたプレロール Call-to-Action（CTA）を削除します。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/preroll_call_to_actions/:preroll_call_to_action_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、原則として必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| preroll&#95;call&#95;to&#95;action&#95;id   *required* | リクエスト内で操作対象となるプレロール CTA への参照です。  Type: string  Example: `8f0` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/preroll_call_to_actions/8f0`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "line_item_id": "8v53k",
+    "call_to_action_url": "https://www.x.com",
+    "call_to_action": "VISIT_SITE",
+    "id": "8f0",
+    "created_at": "2017-07-07T19:28:40Z",
+    "updated_at": "2017-08-30T06:08:21Z",
+    "deleted": true
+  },
+  "request": {
+    "params": {
+      "preroll_call_to_action_id": "8f0",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+<div id="scheduled-tweets">
+  ### 予約されたポスト
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idscheduled_tweets">
+  #### GET accounts/:account&#95;id/scheduled&#95;tweets
+</div>
+
+現在のアカウントに関連付けられている一部またはすべての予約済みポストの詳細を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象アカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、通常は必須パラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| count   *optional* | 各リクエストで取得を試みるレコードの件数を指定します。  Type: int  Default: `100`   Min, Max: `1`, `200` |
+| cursor   *optional* | 次の結果ページを取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `c-j3cn6n40` |
+| user&#95;id   *optional* | 予約済みポスト（Scheduled Tweets）を取得する対象ユーザーを指定します。指定しない場合は、そのアカウントの `FULL` プロモータブルユーザーがデフォルトになります。  Type: long  Example: `756201191646691328` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets?count=1`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "count": 1
+    }
+  },
+  "data": [
+    {
+      "name": "test name",
+      "completed_at": "2017-06-18T22:00:05Z",
+      "text": "where you want to be",
+      "user_id": "756201191646691328",
+      "scheduled_status": "SUCCESS",
+      "id": "875828692081037312",
+      "nullcast": true,
+      "created_at": "2017-06-16T21:33:27Z",
+      "scheduled_at": "2017-06-18T22:00:00Z",
+      "card_uri": null,
+      "updated_at": "2017-06-19T18:02:20Z",
+      "tweet_id": "876560168963645440",
+      "media_keys": []
+    }
+  ],
+  "next_cursor": "c-j41uw400"
+}
+```
+
+現在のアカウントに関連付けられている特定の予約済みポストを取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets/:scheduled_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパスに含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| scheduled&#95;tweet&#95;id   *required* | リクエストで操作対象となる Scheduled Tweet（予約ポスト）への参照です。 Type: string  Example: `917438609065623552` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets/917438609065623552`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "scheduled_tweet_id": "917438609065623552"
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "text": "",
+    "user_id": "756201191646691328",
+    "scheduled_status": "SCHEDULED",
+    "id": "917438609065623552",
+    "nullcast": true,
+    "created_at": "2017-10-09T17:16:24Z",
+    "scheduled_at": "2018-01-01T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-10-09T17:16:24Z",
+    "tweet_id": null,
+    "media_keys": [
+      "3_917438348871983104"
+    ]
+  }
+}
+```
+
+<div id="post-accountsaccount_idscheduled_tweets">
+  #### POST accounts/:account&#95;id/scheduled&#95;tweets
+</div>
+
+アカウントのフルプロモーション対象ユーザー（デフォルト）または `as_user_id` パラメータで指定したユーザーとして、予約ポストを作成します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメータです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  型: string  例: `18ce54d4x5t` |
+| scheduled&#95;at   *required* | ポストを公開（または配信開始）する時間を [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で指定します。  **注**: ポストを予約できるのは、最大で 1 年先までです。  **注**: ポストは分単位でのみ予約してください。秒は無視されます。  型: string  例: `2017-12-31T23:59:00Z` |
+| as&#95;user&#95;id   *required* | ポストを投稿する広告主のユーザー ID です。広告主は、[ads.x.com](https://ads.x.com/) を通じて、自身の広告アカウントへのアクセス権をあなたのハンドル（または複数のハンドル）に付与している必要があります。この権限により、広告主のハンドルではなく、あなた自身のハンドルの OAuth トークンを使用して API を呼び出すことができます。  型: long  例: `756201191646691328` |
+| text   *sometimes required* | ステータス更新のテキストです。`media_keys` が指定されていない場合は必須です。  型: string  例: `just setting up my twttr` |
+| card&#95;uri   *optional* | 利用可能な任意の Card レスポンスの `card_uri` 値を使用して、ポストにカードを関連付けます。  型: string  例: `card://855591459410511943` |
+| media&#95;keys   *optional* | カンマ区切りの識別子リストを指定して、ポストにメディアを関連付けます。画像は最大 4 枚、アニメーション GIF は 1 つ、動画は 1 つまで含めることができます。  **注**: メディアアセットは、そのアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に存在している必要があります。  型: string  例: `13_1153584529292270722` |
+| nullcast   *optional* | nullcast（「Promoted-only」）されたポストを作成するかどうか。  型: boolean  デフォルト: `true`   設定可能な値: `true`, `false` |
+| name   *optional* | 予約ポストの名前です。最大長: 80 文字。  型: string  例: `Tweet with name` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets?as_user_id=756201191646691328&media_keys=3_917438348871983104&scheduled_at=2018-01-01`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "media_keys": [
+        "3_917438348871983104"
+      ],
+      "scheduled_at": "2018-01-01T00:00:00Z",
+      "as_user_id": 756201191646691328
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "text": "",
+    "user_id": "756201191646691328",
+    "scheduled_status": "SCHEDULED",
+    "id": "917438609065623552",
+    "nullcast": true,
+    "created_at": "2017-10-09T17:16:24Z",
+    "scheduled_at": "2018-01-01T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-10-09T17:16:24Z",
+    "tweet_id": null,
+    "media_keys": [
+      "3_917438348871983104"
+    ]
+  }
+}
+```
+
+現在のアカウントの指定されたスケジュール済みポストを更新します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets/:scheduled_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 対象となるアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは、認証済みユーザーに紐づいている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| scheduled&#95;tweet&#95;id   *required* | リクエストで操作対象となる予約ポストを参照します。  Type: string  Example: `870321875435442177` |
+| card&#95;uri   *optional* | 利用可能な任意の card レスポンスから取得した `card_uri` 値を使用して、ポストにカードを関連付けます。  **Note**: 値を指定せずにパラメーターのみを指定すると、未設定（削除）として扱われます。  Type: string  Example: `card://875146925316386347` |
+| media&#95;keys   *optional* | カンマ区切りの識別子リストを指定して、ポストにメディアを関連付けます。最大で画像 4 枚、アニメーション GIF 1 つ、または動画 1 本を含めることができます。  **Note**: メディアアセットはアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に存在している必要があります。  **Note**: 値を指定せずにパラメーターのみを指定すると、未設定（削除）として扱われます。  Type: string  Example: `13_1153584529292270722` |
+| nullcast   *optional* | nullcast（「Promoted-only」）ポストを作成するかどうか。  Type: boolean  Possible values: `true`, `false` |
+| scheduled&#95;at   *optional* | ポストが公開（または配信開始）される時刻を、[ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) 形式で指定します。  Type: string  Example: `2017-12-31T23:59:59Z` |
+| text   *optional* | ステータス更新のテキストです。  Type: string  Example: `just setting up my twttr` |
+| name   *optional* | 予約ポストの名前です。最大長: 80 文字。  Type: string  Example: `Tweet with name` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets/875057751231037440?text=winter solstice`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "scheduled_tweet_id": "875057751231037440",
+      "text": "winter solstice"
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "scheduled_status": "SCHEDULED",
+    "text": "winter solstice",
+    "user_id": "756201191646691328",
+    "id": "875057751231037440",
+    "nullcast": true,
+    "created_at": "2017-06-14T18:30:00Z",
+    "scheduled_at": "2017-12-21T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-06-14T18:30:00Z",
+    "tweet_id": null,
+    "media_keys": []
+  }
+}
+```
+
+現在のアカウントの指定した予約済みポストを完全に削除します。
+
+**注意**: この操作はハード削除です。そのため、削除された予約済みポストを後から取得することはできません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/scheduled_tweets/:scheduled_tweet_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須となるパラメーターです。指定したアカウントは認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| scheduled&#95;tweet&#95;id   *required* | リクエストで操作する予約済みポストを指定します。 Type: string  Example: `870321875435442177` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/scheduled_tweets/875064008595787776`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "scheduled_tweet_id": 875064008595787776
+    }
+  },
+  "data": {
+    "name": null,
+    "completed_at": null,
+    "scheduled_status": "DELETED",
+    "text": "こんにちは、世界",
+    "user_id": "756201191646691328",
+    "id": "875064008595787776",
+    "nullcast": true,
+    "created_at": "2017-06-14T18:54:52Z",
+    "scheduled_at": "2017-06-15T00:00:00Z",
+    "card_uri": null,
+    "updated_at": "2017-06-14T19:01:16Z",
+    "tweet_id": null,
+    "media_keys": []
+  }
+}
+```
+
+<div id="tweet-previews">
+  ### ポストのプレビュー
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+<div id="get-accountsaccount_idtweet_previews">
+  #### GET accounts/:account&#95;id/tweet&#95;previews
+</div>
+
+公開済み、予約済み、または下書きのポストをプレビューします。
+
+* 1 回の API リクエストで、最大 200 件までの複数のポストをプレビュー可能
+* ポストのレイアウトとスタイルを正確かつ最新の状態でレンダリング
+* 最新のすべてのフォーマットとカードタイプをサポート
+* iframe を返します
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/tweet_previews`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常、必須パラメーターです。指定したアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| tweet&#95;ids   *required* | カンマ区切りの識別子のリスト。最大 200 個の ID を指定できます。 **注**: ID は指定された `tweet_type` に対応している必要があります。たとえば、予約済みポストの ID が渡されていて `tweet_type=PUBLISHED` が指定されている場合、その ID のプレビューは返されません。  Type: long  Example: `1122911801354510336,1102836745790316550` |
+| tweet&#95;type   *required* | 指定した `tweet_ids` に対するポストの種類。  Type: enum  Possible values: `DRAFT`, `PUBLISHED`, `SCHEDULED` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/tweet_previews?tweet_ids=1122911801354510336,1102836745790316550&tweet_type=PUBLISHED`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        "1122911801354510336",
+        "1102836745790316550"
+      ],
+      "tweet_type": "PUBLISHED",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": [
+    {
+      "tweet_id": "1122911801354510336",
+      "preview": "<iframe class='tweet-preview' src='https://ton.twimg.com/ads-manager/tweet-preview/index.html?data=H4sIAAAAAAAAANVYW2%2FbNhT%2BKwJf59iiZDuSgWLI0suyrUXbZBuGaiAoibbZUKRGUk7TIP99h6Jsy4mdC5CX%2BiUiz%2F0cfueQuUH2ijGLZsENKjSjlpWEwhK9VzI4qXUQpQE%2BnuF4FofBTyH8gijEKRogXqIZxlGUYpyEOJ6MJziM46kjEGM1qNhDBbl5IwSx7JszsuIlU8EVyw23DGhWN7JwPqDZnArDBqjkphb0uhUgmsoFQ7Mv4QDH%2Fw4Qk5Zbzgya3aAlNUtLF%2FD9BSjmusqV6BaNYZpUjlnJ9Zb2xFtgVY0uQCnKmjCMCxosNZu%2FytDS2trMslE2oqU5ojUf2ituLdPDQlUZCjQTwCXVXAmhrjIvzi48T3BSmuBUVbUC214x6PEsLnWSaFYLiEpBqqhtDHHZlJCZA0Sf0fsMbWz7ZTvSIUkD1WaSSFqxNdlJuFw6fceTKdQZp3g6nk5THEdJr7D3iRCU14ROPp4F74sLZuycFi7YHUMIElkVdksVCuoNhQHSOZXBWyhxwU2hBsHpCWoLtfauZKCJ1x3zmbQqcHq4XARUlgHYNSBQa2VZ0T9BvkBMG1KoRsKpO8KwqTmT5c6W4MYd%2Fm7H29xBxMWyCX5rRBDhACezyXQWJVtEtCebruAwwUne0dvYgqj53LCNVssrRr4ruUn8ginCJM1Fz%2B0V03zOexv%2BLOzqFgAI8IxJsF4oaTXPG6sg1LvauCEWUmsEBfK%2BXcjqPSHI5ZwLRnJaXC40WHXZEU4ehe0P7eXhFV0w0lauRZEHUW4cgKpFC59Ry2OykV2yavMXZ6N8MawhpIf1khabnXbzUuotrO%2BFvjeWetfYDi8YA3TE4yTGx%2BNJMgnTJJpko9cXvxefT%2BtzIpWuqBh%2BrftePBTZixvLqZTQGbYxPWjHc3tDdzCfjfAYvqbROMY9%2FYLLy8PnxEDHz6kmudIlePEoHyzEYa52KhykAlrunZ%2FtYGFz2ghLOuZD%2B3ekfDPhDnUeun4D2up%2FDTQjYti2eUhlAcG%2BvZkN9jcoJPa6dh1RukZw2zaBTdtRkB0uofVs5GAIFmxL30J9vadZO8jX3SH07ch1oz1bW4x3Yn3UK2N4DkMCYoGxzFfb6KEv137cbppqRwP%2FC6pLR%2BoafTRJpnEaHuPpDFJZKdLOerKd9f4AOqn2%2FOFwPI5DHKZpGOPpJBmnrqU6cpuouxh0hCNHOALCETdHJas1a%2B8OQy5XVMAQG6CcS8jjgsC68Y539olZKm2ZhN7eKr5BXTXOLz6ffXjnxhZkeC25AxQLAMlG32nJ%2Fjz%2F6zVOXO1cQaDypGy0b6WGwVZpnqA4GjsF7o4DcLjipV0%2BQQjGzVZobZyXT5GMSQroPR5HyRiuZfAVJWFP2ZLxxdI%2BQVHqhFZUcnv9xBSWbMUEHCDdv0k5LeualA5Bzy3HQa1dQOpKdlekR5Xuudb0EiPMs31rj3y%2Fq9KqFnx%2B7bGQje5XAhqvyEbmk%2F7FvEmrt6sPrE5Pvw2ruEl%2Bhuvtq8h5BLde17AedeT1OjXBR%2Bg4cxgG%2FWy%2FdKJBkNHqxXO0qmi9L1NDR%2BiZ9zPUwLzr2z97f%2FLujbtxt9TO%2Bg16ZPjtuEDssqny%2FcUCiWz0T56%2F%2B%2FTr6u%2FPX9Xbhf7jezdvOyxjYBygNayOI1hQ0c2I2zvu%2F7COE0H1j%2Bz%2Btx8wgHY0Pnt49aDbPs14zsglu%2B4mcatvo7xedw2w0P%2BGTsAL1pv18No9qTlqHy3Gv89w7LBJmxLeWTu8cBkom6J9xcF8bopLtonJGd6%2BaG4HAWpvDv5VJv2%2FDIKbzSYsrG7Y7e3%2FCm%2FIC8QQAAA%3D'>"
+    },
+    {
+      "tweet_id": "1102836745790316550",
+      "preview": "<iframe class='tweet-preview' src='https://ton.twimg.com/ads-manager/tweet-preview/index.html?data=H4sIAAAAAAAAAO1YbW%2FbNhD%2BK4K%2Bzo3eZdlAMQQttqZrt6FNEXRVIVASJTOhSIWkHDeB%2F%2FuOomXLb%2BuHdQWGzV8s3T13vCOPz539ZKsHjJU9t57sQmCkcJkheLWvO2y9RcJyI8udzkN%2F7ofWDy58LN%2F1ZvbEJqU99zzXT4J4GkbTmRt4cRS5WpFJJcDFCS3YVR2lmcIrvcgNWmJpLZRq5Tx1UkddFDx16mUU8Lv4UhQAV6JjhQ7LnleISjyxSyJbir70PjKBWI3t%2BSd3En2e2JgpogiW9vzJXiC5UKiG50%2BgkV%2BanNPNSyexyBoN5mwQiUHZ4JIgeHwyGbpumLjh1PcDfxZ6XpSE4wyPtXpnWEkKHcSneOLPBpcZLAEmOtk%2B1zaXF%2BqBNDXk3KSOTkY9ZEtSYp6pRdfkqXPCPdh1qQNWYPFz%2BfHls7v7y6s3dZm%2Fci9u29oeLZb1%2B7pZUv6ja%2B5SO3uOw6kZaEsKHYhSWJhQ9rB41SJWQiUe%2BR2boJY0hcJSVajAqSMVUp2EBI6rLnX6FEGnC%2BpLi3UEC644vEryaOqlz18%2FPMCp6zpebL4F1hgwKQRv7bXZ4a4ZoL5rsPE0GmErojRUNojSDTJODDBIgmMgRULX8cblBjn13UMkQCu4pZ3og16vP6%2F1dincb9e4%2FP8v4%2F9EGfeSf2UZm%2BMirOIaj2SLC03nwMlQcV480RVXdr2AZQ2hlEhdx9MYnC2RIIgp2dd3ThSgwHUSQBKgLTiDCwE1Mdqi1Gna8MQR98pzxfQXZQT61IlDdxXEcC7Rm1fsHl96H8sau%2Fer1xew2I%2FQfJ4HsCmjCP0o%2Fr4Rwo6svAQivLvqXn14mRD%2FD%2BnWuX91NkJv%2Bp1D1GWyghJJnbD56HePt%2FjXG%2FJbVd3cHsR4EBFqW0qKvjxSZ%2FWsaXH94d2bbxhdS1Nn5r17CF7cTMurt6%2Ffh7fJRRN0yRDT5wMyntioLIkOCNHM8NdQ3sDLVAetGQTLQpBWw4wANzkuS5RrAEw7MOE0nGFFHo2on3oM0UveiUK7STvXDQpkLQSunqejXFEp9wjJtgSmgGC84pTyh9SY4muDsS5LaXyBqdH0xJ8J3FKYsHhm6CjTPYTB4HZGafrIMaAftE7bblTnLGGPMGYZQw0e1NpC76X2N41iGEO9mReHcTzzAj8ZtbNjJSRlPNmXv19Zb4vrDd1q4hwvZO%2BRMWgpNxUGqveIWT%2FBuFkQWfCJ9eJyKDUT3f6xXjHFLe2HsNqCJmDBuhIMWsEV8NxomjXngoXMCt4xGIqfeSAUBDr6ngjoT8%2FmG4lZc39gX3TW645avmd5yTyK536yG9hjPXijJdQPgajGfjtVZLyqJN56VaTB2SOU4CCogacx09W4C3uJBanISGBqYd83heEcIsPMNnwiSN4pDqkeeiMyA%2F5hkiJQn5LqHnBoBHtZEYqzHBV3tYBV9e5QbW%2B7%2Fcc%2BiSENqvHhFIP2J4oeA01YLXCz%2FfZSJ68vWlZ%2Fxe%2BJgeUbuFdkSwY7%2FclcDqajPSwsBrcjCJPAg8kiidxZ4kep8%2FL6l%2BLdi%2FZ9xriAVr8Zh45W%2Bfoo9vcXyxFjwAyHJH5mHYM2Cx3ceWD2EJ5iPwy8kX9K2N35OpHQE3IkspyLEqL4Kg5e6HlU%2Fwv1rBZuy1H97H7k4gp1VGUb8Dn5gZUhE6Jvnbm6RgC0et8BGWUS78iDcQU32NCb3N797S0c2izTRLDuSWBLOxx2hzCgnq0dzMQF3ul3V32QCdz%2FzzCwg2voSLPRCdHujm%2FMxreeS0lyaBKQi4Rmu9xlD7zcmiF4S6pD%2Bxxz0Xpi6TNouOFTZv6LsJ62QnjRfXi9%2FhONbe6QHREAAA%3D%3D'>"
+    }
+  ]
+}
+```
+
+<div id="tweets">
+  ### ポスト
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行する
+</Button>
+
+<div id="get-accountsaccount_idtweets">
+  #### GET accounts/:account&#95;id/tweets
+</div>
+
+アカウントのフルプロモータブルユーザー（デフォルト）または `user_id` パラメーターで指定したユーザーについて、そのポストの詳細を取得します。指定できるユーザーは、そのアカウントに紐づくいずれかの[プロモータブルユーザー](https://developer.x.com/en/docs/ads/campaign-management/api-reference/promotable-users)です。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/tweets`
+
+<div id="parameters">
+  #### Parameters
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで一般的に必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| tweet&#95;type   *required* | 指定された `tweet_ids` に対応するポストタイプです。  Type: enum  Possible values: `DRAFT`, `PUBLISHED`, `SCHEDULED` |
+| count   *optional* | 各リクエストごとに取得を試みるレコードの件数を指定します。  Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| cursor   *optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `AAAAAFhLRpQLNF-sGBSgAA` |
+| include&#95;mentions&#95;and&#95;replies   *optional* | 利用可能なポストの一覧からメンションおよび返信を除外するかどうかを指定します。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| name   *optional* | `name` でポストを絞り込むための任意のクエリです。すべてを取得する場合は、このパラメーターを省略します。最大長: 80 文字。  **Note**: 大文字と小文字を区別しない前方一致でマッチングを行います。  Type: string  Example: `dtc` |
+| timeline&#95;type   *optional* | nullcast（いわゆる &quot;Promoted-only&quot;）ポスト、オーガニックポスト、その両方のどれを返すかを指定します。  Type: enum  Default: `NULLCAST`   Possible values: `ALL`, `NULLCAST`, `ORGANIC` |
+| trim&#95;user   *optional* | ポストのレスポンスから user オブジェクトを除外するかどうかを指定します。有効にした場合、返される user オブジェクトの部分は、そのポストの投稿者のユーザー ID のみになります。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| tweet&#95;ids   *optional* | カンマ区切りの識別子の一覧です。最大 200 個の ID を指定できます。  **Note**: これらの ID は、指定された `tweet_type` に対応している必要があります。たとえば、予約投稿ポストの ID を渡す場合、そのポストがレスポンスで返されるようにするには、`tweet_type` を `SCHEDULED` に設定する **必要があります**。  Type: long  Example: `1122911801354510336,1102836745790316550` |
+| user&#95;id   *optional* | ポストの対象とするユーザーを指定します。設定されていない場合、アカウント上の `FULL` プロモーション可能ユーザーがデフォルトになります。  Type: long  Example: `756201191646691328` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/tweets?tweet_ids=1166476031668015104&tweet_type=PUBLISHED&trim_user=true`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "tweet_ids": [
+        "1166476031668015104"
+      ],
+      "tweet_type": "PUBLISHED",
+      "trim_user": true,
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "coordinates": null,
+      "retweeted": false,
+      "name": null,
+      "source": "<a href="https://ads-api.x.com" rel="nofollow">Ads API Internal Test App</a>",
+      "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "user_mentions": [],
+        "urls": []
+      },
+      "display_text_range": [
+        0,
+        9
+      ],
+      "favorite_count": 0,
+      "in_reply_to_status_id_str": null,
+      "geo": null,
+      "id_str": "1166476031668015104",
+      "scopes": {
+        "followers": false
+      },
+      "in_reply_to_user_id": null,
+      "truncated": false,
+      "retweet_count": 0,
+      "id": 1166476031668015104,
+      "in_reply_to_status_id": null,
+      "conversation_settings": "EVERYONE",
+      "nullcast": true,
+      "created_at": "Tue Aug 27 22:22:12 +0000 2019",
+      "place": null,
+      "scheduled_at": null,
+      "tweet_type": "PUBLISHED",
+      "favorited": false,
+      "full_text": "hello, v6",
+      "lang": "es",
+      "contributors": [
+        2417045708
+      ],
+      "in_reply_to_screen_name": null,
+      "in_reply_to_user_id_str": null,
+      "user": {
+        "id": 756201191646691328,
+        "id_str": "756201191646691328"
+      },
+      "tweet_id": "1166476031668015104"
+    }
+  ]
+}
+```
+
+<div id="post-accountsaccount_idtweet">
+  #### POST accounts/:account&#95;id/tweet
+</div>
+
+アカウントの完全プロモート可能ユーザー（デフォルト）または `as_user_id` パラメータで指定したユーザーのポストを作成します。nullcast（デフォルト）およびオーガニックポストの両方の作成に対応しています。nullcast ポストは公開タイムラインに表示されず、フォロワーにも配信されません。どちらのタイプもキャンペーンで使用できます。
+
+認証済みユーザーがこのアカウントの `FULL` 完全プロモート可能ユーザーではない場合、[GET accounts/:account&#95;id/authenticated&#95;user&#95;access](https://developer.x.com/en/docs/ads/campaign-management/api-reference/authenticated-user-access#get-accounts-account-id-authenticated-user-access) エンドポイントにリクエストを行い、このユーザーの代理でポストを作成する権限があるかどうかを確認してください。`TWEET_COMPOSER` のパーミッションが付与されている場合、そのユーザーはこのエンドポイントを使用して `FULL` [完全プロモート可能ユーザー](https://developer.x.com/en/docs/ads/campaign-management/api-reference/promotable-users#get-accounts-account-id-promotable-users) の代理として nullcast ポストを作成できます。
+
+[upload.x.com エンドポイント](https://developer.x.com/rest/reference/post/media/upload) でメディアを使用する場合、このエンドポイントに渡す `as_user_id` の値と同じ `user_id` の値を `additional_owners` パラメータに指定してください。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/tweet`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子。この値はリソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常必須のパラメーターです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| as&#95;user&#95;id   *required* | ポストを投稿する広告主のユーザー ID。広告主は、[ads.x.com](https://ads.x.com/) を通じて、あなたのハンドル（または複数のハンドル）に自分の広告アカウントへのアクセス権を付与する必要があります。この権限により、広告主のハンドルではなく、ご自身のハンドルに紐づく OAuth トークンを使って API を呼び出すことができます。  Type: long  Example: `756201191646691328` |
+| text   *sometimes required* | ステータス更新のテキスト。`media_keys` が指定されていない場合に必須です。  Type: string  Example: `hello, world` |
+| card&#95;uri   *optional* | 利用可能な場合は、任意のカードレスポンスの `card_uri` 値を使用して、このポストにカードを関連付けます。  Type: string  Example: `card://853503245793641682` |
+| conversation&#95;settings   *optional* | このポストに返信できるユーザーの範囲を選択します。メンションされたユーザーは常に返信できます。  **Note**: このフィールドは POST リクエストのレスポンスでは返されませんが、GET リクエストでは返されます。  **Note**: このパラメーターは Ads API v8 以降でのみ機能します。  Type: enum  Default: `EVERYONE`   Possible values: `EVERYONE`, `FOLLOWING`, `MENTIONED_USERS` |
+| media&#95;keys   *optional* | 識別子のカンマ区切りリストを指定して、ポストにメディアを関連付けます。画像は最大 4 枚、アニメーション GIF は最大 1 件、または動画は最大 1 件まで含めることができます。  Type: string  Example: `13_1153584529292270722` |
+| name   *optional* | ポストの名前。最大長: 80 文字。  Type: string  Example: `Tweet with name` |
+| nullcast   *optional* | nullcast（「Promoted-only」）ポストを作成するかどうか。  **Note**: オーガニックなポスト（`nullcast=false`）は、認証されたユーザーに対してのみ作成できます。  Type: boolean  Default: `true`   Possible values: `true`, `false` |
+| trim&#95;user   *optional* | ポストのレスポンスから user オブジェクトを除外するかどうか。有効にすると、返される user オブジェクトはポスト作成者のユーザー ID のみになります。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| tweet&#95;mode   *optional* | レスポンスを互換モードと拡張モードのどちらで返すか。詳細については[こちら](https://developer.x.com/overview/api/upcoming-changes-to-tweets#rendering-modes)を参照してください。  Type: string  Possible values: `compat`, `extended` |
+| video&#95;cta   *optional* | 動画用の CTA（Call-to-Action）。  Type: enum  Possible values: `VISIT_SITE`, `WATCH_NOW` |
+| video&#95;cta&#95;value   *optional* | 動画上の対応する CTA の値。  Type: string  Example: `https://dev.x.com` |
+| video&#95;description   *optional* | 動画の下に表示される説明。最大長: 200 文字。  Type: string  Example: `Integrate with the X advertising platform` |
+| video&#95;title   *optional* | 動画の下に表示されるタイトル（見出し）。最大長: 70 文字。  Type: string  Example: `X Ads API` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/tweet?text=hello, world&as_user_id=756201191646691328&trim_user=true`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "created_at": "Sat Jun 24 05:08:30 +0000 2017",
+    "id": 878479925472251906,
+    "id_str": "878479925472251906",
+    "text": "hello, world",
+    "name": null,
+    "truncated": false,
+    "entities": {
+      "hashtags": [],
+      "symbols": [],
+      "user_mentions": [],
+      "urls": []
+    },
+    "source": "<a href='"https://ads-api.x.com"' rel='"nofollow"'>Ads API Internal Test App</a>",
+    "in_reply_to_status_id": null,
+    "in_reply_to_status_id_str": null,
+    "in_reply_to_user_id": null,
+    "in_reply_to_user_id_str": null,
+    "in_reply_to_screen_name": null,
+    "user": {
+      "id": 756201191646691328,
+      "id_str": "756201191646691328"
+    },
+    "geo": null,
+    "coordinates": null,
+    "place": null,
+    "contributors": null,
+    "retweet_count": 0,
+    "favorite_count": 0,
+    "favorited": false,
+    "retweeted": false,
+    "scopes": {
+      "followers": false
+    },
+    "lang": "en"
+  },
+  "request": {
+    "params": {
+      "text": "hello, world",
+      "trim_user": true,
+      "as_user_id": 756201191646691328,
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```
+
+現在のアカウントの指定したポストの `name` を更新します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/tweets/:tweet_id/name`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| tweet&#95;id   *required* | リクエスト内で操作対象となるポストへの参照です。  Type: long  Example: `994747471329873920` |
+| name   *optional* | ポストの名前です。最大長: 80 文字。  Type: string  Example: `Tweet with name` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/tweets/994747471329873920/name?name=new ポスト名`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "tweet_id": 994747471329873920,
+      "name": "new Tweet name",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+      "coordinates": null,
+      "retweeted": false,
+      "name": "new Tweet name",
+      "conversation_settings": "EVERYONE",
+      "source": "<a href="https://ads-api.x.com" rel="nofollow">Ads API Internal Test App</a>",
+      "entities": {
+        "hashtags": [],
+        "symbols": [],
+        "user_mentions": [],
+        "urls": []
+      },
+      "display_text_range": [
+        0,
+        5
+      ],
+      "favorite_count": 0,
+      "in_reply_to_status_id_str": null,
+      "geo": null,
+      "id_str": "994747471329873920",
+      "scopes": {
+        "followers": false
+      },
+      "in_reply_to_user_id": null,
+      "truncated": false,
+      "retweet_count": 0,
+      "scheduled_status": null,
+      "id": 994747471329873920,
+      "in_reply_to_status_id": null,
+      "nullcast": true,
+      "created_at": "Wed Jan 01 00:00:00 +0000 2020",
+      "place": null,
+      "scheduled_at": null,
+      "tweet_type": "PUBLISHED",
+      "favorited": false,
+      "full_text": "hello",
+      "lang": "en",
+      "contributors": null,
+      "in_reply_to_screen_name": null,
+      "in_reply_to_user_id_str": null,
+      "user": {
+        "utc_offset": null,
+        "name": "Tushar Bhushan",
+        "friends_count": 1065,
+        "screen_name": "imit8me",
+        "location": "San Francisco, CA",
+        "protected": false,
+        "url": "https://tushdante.github.io",
+        "profile_image_url": "http://pbs.twimg.com/profile_images/618551153131786241/g-MIydXB_normal.jpg",
+        "profile_background_color": "C0DEED",
+        "profile_use_background_image": true,
+        "is_translator": false,
+        "geo_enabled": true,
+        "description": "Open Sorcerer / Partner Engineer @twitter / Space Traveller | Former evangelist @sendgrid @keen_io",
+        "profile_link_color": "1DA1F2",
+        "id_str": "3271358660",
+        "listed_count": 31,
+        "default_profile_image": false,
+        "followers_count": 407,
+        "profile_image_url_https": "https://pbs.twimg.com/profile_images/618551153131786241/g-MIydXB_normal.jpg",
+        "profile_sidebar_border_color": "C0DEED",
+        "profile_background_image_url": "http://abs.twimg.com/images/themes/theme1/bg.png",
+        "favourites_count": 5993,
+        "following": null,
+        "default_profile": true,
+        "withheld_in_countries": [],
+        "id": 3271358660,
+        "profile_background_tile": false,
+        "contributors_enabled": false,
+        "follow_request_sent": null,
+        "created_at": "Tue Jul 07 22:34:58 +0000 2015",
+        "profile_sidebar_fill_color": "DDEEF6",
+        "translator_type": "regular",
+        "lang": null,
+        "profile_text_color": "333333",
+        "notifications": null,
+        "verified": false,
+        "time_zone": null,
+        "profile_banner_url": "https://pbs.twimg.com/profile_banners/3271358660/1474853576",
+        "statuses_count": 500,
+        "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme1/bg.png",
+        "is_translation_enabled": false
+      },
+      "tweet_id": "994747471329873920"
+    }
+}
+```
+
+<div id="video-conversation-cards">
+  ### ビデオ会話カード
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Postman で実行
+</Button>
+
+**注記**: カードをポストに関連付けるには、`card_uri` パラメーターを [POST accounts/:account&#95;id/tweet](https://developer.x.com/en/docs/ads/creatives/api-reference/tweets#post-accounts-account-id-tweet)、[POST statuses/update](https://developer.x.com/en/docs/tweets/post-and-engage/api-reference/post-statuses-update#post-statuses-update)、または [POST accounts/:account&#95;id/scheduled&#95;tweets](https://developer.x.com/en/docs/ads/creatives/api-reference/scheduled-tweets#post-accounts-account-id-scheduled-tweets) のいずれかのエンドポイントで使用してください。
+
+<div id="get-accountsaccount_idcardsvideo_conversation">
+  #### GET accounts/:account&#95;id/cards/video&#95;conversation
+</div>
+
+現在のアカウントに紐付いている一部またはすべての Video Conversation Card の詳細情報を取得します。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、一般的に必須パラメーターです。指定されたアカウントは認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;ids   *optional* | カンマ区切りの識別子リストを指定して、レスポンスを対象の video conversation card のみに絞り込みます。最大 200 個の ID を指定できます。  Type: string  Example: `5a86h` |
+| count   *optional* | 1 回のリクエストで取得を試みるレコード数を指定します。  Type: int  Default: `200`   Min, Max: `1`, `1000` |
+| cursor   *optional* | 次のページの結果を取得するためのカーソルを指定します。詳細は [Pagination](https://developer.x.com/x-ads-api/introduction) を参照してください。  Type: string  Example: `8x7v00oow` |
+| q   *optional* | `name` で card を絞り込むための任意のクエリです。すべてを取得する場合はこのパラメーターを省略します。最大長: 80 文字。  **Note**: 大文字・小文字を区別しない前方一致でマッチングを行います。  Type: string  Example: `night sky` |
+| sort&#95;by   *optional* | サポートされている属性で、昇順または降順にソートします。詳細は [Sorting](https://developer.x.com/x-ads-api/fundamentals/sorting) を参照してください。  Type: string  Example: `created_at-asc` |
+| with&#95;deleted   *optional* | 削除済みの結果を取得対象に含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+| with&#95;total&#95;count   *optional* | レスポンスに `total_count` 属性を含めます。  **Note**: このパラメーターと `cursor` は同時に指定できません。  **Note**: `total_count` を含むリクエストはレート制限が低くなり、現在は 15 分あたり 200 に設定されています。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation?card_ids=5a86h`
+
+#### レスポンス例
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "video_conversation",
+      "card_ids": [
+        "5a86h"
+      ],
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "next_cursor": null,
+  "data": [
+    {
+      "name": "video conversation card",
+      "first_cta": "#APIs",
+      "video_height": "9",
+      "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+      "thank_you_text": "Build it",
+      "video_owner_id": "756201191646691328",
+      "media_key": "13_958388276489895936",
+      "id": "5a86h",
+      "video_width": "16",
+      "first_cta_tweet": "Ads API",
+      "created_at": "2018-01-30T17:53:04Z",
+      "card_uri": "card://958397665015775232",
+      "title": "Developers",
+      "updated_at": "2018-01-30T17:53:04Z",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+      "deleted": false,
+      "card_type": "VIDEO_CONVERSATION"
+    }
+  ]
+}
+```
+
+現在のアカウントに関連付けられている特定の動画会話カードを取得します。
+
+#### リソースURL
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation/:card_id`
+
+#### パラメータ
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、通常必須となるパラメータです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | リクエスト内で操作対象となる Video Conversation Card への参照です。  Type: string  Example: `4i0ya` |
+| with&#95;deleted   *optional* | 削除済みの結果をリクエストに含めます。  Type: boolean  Default: `false`   Possible values: `true`, `false` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation/5a86h`
+
+<div id="example-response">
+  #### レスポンスの例
+</div>
+
+```
+{
+  "request": {
+    "params": {
+      "card_type": "video_conversation",
+      "card_id": "5a86h",
+      "account_id": "18ce54d4x5t"
+    }
+  },
+  "data": {
+    "name": "video conversation card",
+    "first_cta": "#APIs",
+    "video_height": "9",
+    "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+    "thank_you_text": "Build it",
+    "video_owner_id": "756201191646691328",
+    "media_key": "13_958388276489895936",
+    "id": "5a86h",
+    "video_width": "16",
+    "first_cta_tweet": "Ads API",
+    "created_at": "2018-01-30T17:53:04Z",
+    "card_uri": "card://958397665015775232",
+    "title": "Developers",
+    "updated_at": "2018-01-30T17:53:04Z",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+    "deleted": false,
+    "card_type": "VIDEO_CONVERSATION"
+  }
+}
+```
+
+<div id="post-accountsaccount_idcardsvideo_conversation">
+  #### POST accounts/:account&#95;id/cards/video&#95;conversation
+</div>
+
+指定したアカウントに紐づく新しいビデオ会話カードを作成します。
+
+エンドポイントへの画像アップロードに役立つ情報については、[メディアのアップロード](https://developer.x.com/rest/public/uploading-media)を参照してください。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation`
+
+#### パラメーター
+
+| 名前                                          | 説明                                                                                                                                                                                                                                                                  |
+| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id   *必須*                       | 利用するアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで、一般的に必須のパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。  Type: string  Example: `18ce54d4x5t` |
+| first&#95;cta   *必須*                        | 1つ目のオプション用のコールトゥアクション（CTA）ハッシュタグ。最大長は20文字（#は文字数に含めません）。  Type: string  Example: `#APIs`                                                                                                                                                                             |
+| first&#95;cta&#95;tweet   *必須*              | 最初のCTAがクリックされたときに使用されるポストのテキスト。  Type: string  Example: `Ads API`                                                                                                                                                                                                   |
+| media&#95;key   *必須*                        | このカードで使用する動画のメディアキー。  **注**: 動画はアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に保存されている必要があります。  **注**: アスペクト比は 16:9 である必要があります。  型: string  例: `13_1168079965037467209`                           |
+| name   *必須*                                 | カードの名称。  Type: string  Example: `video conversation card`                                                                                                                                                                                                           |
+| thank&#95;you&#95;text   *必須*               | CTA をクリックした後に表示されるテキスト。最大文字数: 23文字。 Type: string  Example: `Build it`                                                                                                                                                                                               |
+| title   *場合によって必須*                          | カードのタイトル。動画の下部およびCTAの上部に表示されます。最大長：23文字。 型：string  **注記**: `second_cta` が設定されていない場合に必須です。  例: `Developers`                                                                                                                                                          |
+| second&#95;cta   *必須となる場合があります*             | 2 番目のオプション用の Call-To-Action (CTA) ハッシュタグ。最大文字数: 20 文字（# は含まない）。  Type: string  **Note**: `title` が設定されていない場合は必須です。  Example: `#ShareAgain`                                                                                                                          |
+| second&#95;cta&#95;tweet   *条件付き必須*         | 2 番目の CTA がクリックされたときに使用するポストのテキスト。  **Note**: `second_cta` が設定されている場合は必須です。  Type: string  Example: `I Heart @AdsAPI Again`                                                                                                                                         |
+| poster&#95;media&#95;key   *任意*             | このカードで使用するポスター画像のメディアキーです。指定しない場合は、最初のフレームが使用されます。  **注**: 動画はアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に含まれている必要があります。  Type: long  Example: `3_882726458191298561`                          |
+| third&#95;cta   *任意*                        | 3番目のオプション用のCall-To-Action（CTA）ハッシュタグ。最大20文字（#は文字数に含めません）。  Type: string  Example: `#ShareMore`                                                                                                                                                                      |
+| third&#95;cta&#95;tweet   *条件付き必須*          | 3番目のCTAがクリックされたときに使用されるポストの本文。  Type: string  **注**: `third_cta` が設定されている場合は必須です。  Example: `I Heart @TwitterDev`                                                                                                                                                   |
+| fourth&#95;cta   *任意*                       | 4 番目のオプションの Call-To-Action (CTA) 用ハッシュタグ。最大長は 20 文字（# は含めません）。 Type: string  Example: `#ShareExtra`                                                                                                                                                                 |
+| fourth&#95;cta&#95;tweet   *条件付き必須*         | 4 番目の CTA がクリックされたときに使用されるポストのテキスト。  Type: string  **Note**: `fourth_cta` が設定されている場合は必須です。  Example: `I Heart @TwitterDev Again`                                                                                                                                    |
+| thank&#95;you&#95;url   *任意*                | お礼テキストとともに表示されるURL。  Type: string  Example: `https://example.com/thankyou`                                                                                                                                                                                          |
+| unlocked&#95;image&#95;media&#95;key   *任意* | インスタントアンロックシナリオで使用される画像の `media_key`。これは書き込み専用フィールドです。レスポンスでは、この画像の X URL が API により返されます。**注**: 画像はアカウントのメディアライブラリ内に存在している必要があります。**Type**: string  Example: `3_883112887618682880`                                                                                 |
+| unlocked&#95;video&#95;media&#95;key   *任意* | インスタントアンロックシナリオで使用される、[GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/ads/creatives/api-reference/media_library#get-accounts-account-id-media-library) エンドポイントからの動画の識別子です。  Type: string  Example: `13_867520357225418752`         |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation?first_cta=#APIs&first_cta_tweet=Ads API&name=video conversation card&thank_you_text=Build it&title=Developers&media_key=13_958388276489895936`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "video conversation card",
+    "first_cta": "#APIs",
+    "video_height": "9",
+    "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+    "thank_you_text": "Build it",
+    "video_owner_id": "756201191646691328",
+    "media_key": "13_958388276489895936",
+    "id": "5a86h",
+    "video_width": "16",
+    "first_cta_tweet": "Ads API",
+    "created_at": "2018-01-30T17:53:04Z",
+    "card_uri": "card://958397665015775232",
+    "title": "Developers",
+    "updated_at": "2018-01-30T17:53:04Z",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+    "deleted": false,
+    "card_type": "VIDEO_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "video_poster_height": "9",
+      "name": "video conversation card",
+      "first_cta": "#APIs",
+      "video_height": "9",
+      "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+      "thank_you_text": "Build it",
+      "video_owner_id": "756201191646691328",
+      "media_key": "13_958388276489895936",
+      "account_id": "18ce54d4x5t",
+      "video_width": "16",
+      "first_cta_tweet": "Ads API",
+      "title": "Developers",
+      "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+      "video_poster_width": "16",
+      "card_type": "VIDEO_CONVERSATION"
+    }
+  }
+}
+```
+
+現在のアカウントに属する指定のビデオ会話カードを更新します。
+
+エンドポイントへの画像アップロードに関する有用な情報については、[Uploading Media](https://developer.x.com/rest/public/uploading-media) を参照してください。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation/:card_id`
+
+#### パラメーター
+
+| 名前                                          | 説明                                                                                                                                                                                                                                                      |
+| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| account&#95;id   *必須*                       | 利用対象のアカウントの識別子です。リソースのパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くすべての Advertiser API リクエストで通常は必須パラメータです。指定したアカウントは、認証済みユーザーに関連付けられている必要があります。  型: string  例: `18ce54d4x5t`  |
+| card&#95;id   *必須*                          | リクエストで操作するビデオ会話カードを参照します。  Type: string  Example: `5a86h`                                                                                                                                                                                               |
+| first&#95;cta   *任意*                        | 1番目のオプションで使用する Call-To-Action (CTA) ハッシュタグ。最大長：20文字（「#」は文字数に含めません）。  Type: string  Example: `#APIs`                                                                                                                                                     |
+| first&#95;cta&#95;tweet   *任意*              | 最初のCTAがクリックされたときにポストとして使用されるテキスト。  Type: string  Example: `Ads API`                                                                                                                                                                                     |
+| second&#95;cta   *省略可能*                     | 2 番目のオプション用の Call-To-Action (CTA) ハッシュタグ。最大 20 文字（# は文字数に含めません）。  Type: string  **Note**: `title` が設定されていない場合は必須。  Example: `#ShareAgain`                                                                                                               |
+| second&#95;cta&#95;tweet   *任意*             | 2 番目の CTA がクリックされたときに使用するポスト本文。**注**: `second_cta` が設定されている場合は必須。型: 文字列  例: `I Heart @AdsAPI Again`                                                                                                                                                     |
+| third&#95;cta   *省略可*                       | 3 番目のオプション用の Call-To-Action (CTA) ハッシュタグ。最大長: 20 文字（# は文字数に含めない）。  Type: string  Example: `#ShareMore`                                                                                                                                                  |
+| third&#95;cta&#95;tweet   *任意*              | 3 番目の CTA がクリックされたときに使用されるポストの本文。 型: string  **注意**: `third_cta` が設定されている場合は必須です。 例: `I Heart @TwitterDev`                                                                                                                                              |
+| fourth&#95;cta   *任意*                       | 4 番目のオプションに使用する Call-To-Action (CTA) ハッシュタグ。最大文字数: 20（# は含みません）。 Type: string  Example: `#ShareExtra`                                                                                                                                                   |
+| fourth&#95;cta&#95;tweet   *任意*             | 4 番目の CTA がクリックされたときに使用するポストテキスト。  Type: string  **注**: `fourth_cta` が設定されている場合は必須です。  Example: `I Heart @TwitterDev Again`                                                                                                                             |
+| media&#95;key   *任意*                        | このカードで使用する動画のメディアキー。  **注**: 動画はアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に含まれている必要があります。  **注**: アスペクト比は 16:9 である必要があります。  Type: string  Example: `13_1168079965037467209`       |
+| name   *任意*                                 | カードの名前。  Type: string  Example: `developers card`                                                                                                                                                                                                       |
+| poster&#95;media&#95;key   *任意*             | このカードで使用するポスター画像を指定する media key です。指定しない場合は、動画の最初のフレームが使用されます。  **注**: 動画はアカウントの [Media Library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#media-library) に登録されている必要があります。  Type: long  Example: `3_882726458191298561` |
+| thank&#95;you&#95;text   *任意*               | CTA がクリックされた後に表示されるテキスト。最大 23 文字。  Type: string  Example: `Build it`                                                                                                                                                                                    |
+| thank&#95;you&#95;url   *任意*                | お礼テキストと一緒に表示するURL。  Type: string  Example: `https://example.com/thankyou`                                                                                                                                                                               |
+| title   *任意*                                | カードのタイトルで、動画の下部、CTA の上部に表示されます。最大文字数: 23 文字。  Type: string  **Note**: `second_cta` が設定されていない場合は必須です。  Example: `Start a conversation`                                                                                                                   |
+| unlocked&#95;image&#95;media&#95;key   *任意* | インスタントアンロックシナリオで使用される画像の `media_key` です。これは書き込み専用のフィールドです。レスポンスでは、この画像の X URL が返されます。 **注記**: 画像はアカウントのメディアライブラリに存在している必要があります。 型: string  例: `3_883112887618682880`                                                                                    |
+| unlocked&#95;video&#95;media&#95;key   *任意* | インスタントアンロックシナリオで使用される、[GET accounts/:account&#95;id/media&#95;library](https://developer.x.com/en/docs/ads/creatives/api-reference/media-library#get-accounts-account-id-media-library) エンドポイントの動画の識別子。  Type: string  Example: `13_867520357225418752` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`PUT https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation/5a86h?name=developers card`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "developers card",
+    "first_cta": "#APIs",
+    "video_height": "9",
+    "media_url": "https://video.twimg.com/amplify_video/vmap/958388276489895936.vmap",
+    "thank_you_text": "Build it",
+    "video_owner_id": "756201191646691328",
+    "media_key": "13_958388276489895936",
+    "id": "5a86h",
+    "video_width": "16",
+    "first_cta_tweet": "Ads API",
+    "created_at": "2018-01-30T17:53:04Z",
+    "card_uri": "card://958397665015775232",
+    "title": "Developers",
+    "updated_at": "2018-01-30T18:02:15Z",
+    "poster_media_url": "https://pbs.twimg.com/amplify_video_thumb/958388276489895936/img/W-OL5rZ_MZ19A7Pa.jpg",
+    "deleted": false,
+    "card_type": "VIDEO_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "account_id": "18ce54d4x5t",
+      "card_type": "VIDEO_CONVERSATION",
+      "card_id": "5a86h",
+      "name": "developers card"
+    }
+  }
+}
+```
+
+現在のアカウントに属する指定した動画会話カードを完全に削除します。
+
+**注**: これは完全削除です。そのため、一度削除したカードを取得・復元することはできません。
+
+<div id="resource-url">
+  #### リソース URL
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/cards/video_conversation/:card_id`
+
+#### パラメーター
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id   *required* | レバレッジドアカウントの識別子です。リソースパス内に含まれ、[GET accounts](https://developer.x.com/en/docs/ads/campaign-management/api-reference/accounts#get-accounts) を除くほとんどの Advertiser API リクエストで必須となるパラメーターです。指定されたアカウントは、認証済みユーザーに関連付けられている必要があります。 Type: string  Example: `18ce54d4x5t` |
+| card&#95;id   *required* | リクエスト内で操作対象となる video conversation card への参照です。 Type: string  Example: `4i0ya` |
+
+<div id="example-request">
+  #### リクエスト例
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/cards/video_conversation/4i0ya`
+
+#### レスポンス例
+
+```
+{
+  "data": {
+    "name": "video conversation card",
+    "id": "4i0ya",
+    "created_at": "2017-07-07T01:36:39Z",
+    "updated_at": "2017-08-23T13:29:13Z",
+    "deleted": true,
+    "card_type": "VIDEO_CONVERSATION"
+  },
+  "request": {
+    "params": {
+      "card_id": "4i0ya",
+      "card_type": "video_conversation",
+      "account_id": "18ce54d4x5t"
+    }
+  }
+}
+```

@@ -1,0 +1,163 @@
+---
+title: SDK
+keywords: ["SDK", "ソフトウェア開発キット", "クライアントSDK", "API SDK", "開発者向けSDK", "SDKライブラリ", "公式SDK"]
+---
+
+<div id="introduction">
+  ## はじめに
+</div>
+
+ソフトウェア開発キット（SDK）は、特定のプラットフォームや API 向けに設計されたソフトウェアツールやプログラムのセットです。SDK の目的は、開発者がアプリケーション内で利用できるライブラリやコードベースを提供し、アプリケーションの機能を構築または拡張できるようにすることで、効率よく、かつ最小限のコーディングで実現できるようにすることです。これにより、開発プロセスが大幅に高速化され、時間・コスト・労力を節約できます。
+
+> X Developer Platform では現在、TypeScript/JavaScript および Java で開発する方向けに、2 つの公式 SDK を提供しています。これらを利用することで、利用可能なすべての v2 エンドポイント向けに事前構築された関数を活用しつつ、X API v2 周りの複雑な処理を手作業で実装する必要がなくなり、認証プロセスも簡素化されるため、より効率的に開発できます。これらの SDK は Developer Platform チームが構築・保守しているため、X API v2 の今後のリリースにも常に追随し、最新の状態が保たれます。
+
+これらの SDK は X API をラップしているため、[プロジェクト](/ja/resources/fundamentals/projects) 内にある [開発者アプリ](/ja/resources/fundamentals/developer-apps) の認証情報を使用してリクエストを認証するには、[開発者アカウント](https://developer.x.com/en/portal/dashboard) が必要です。
+
+<div id="installing">
+  #### インストール
+</div>
+
+<Tabs>
+  <Tab title="Java">
+    Java パッケージのインストール方法はいくつかあります（Java 1.8 以上が必要です）。
+
+    * Maven ユーザーの場合: 次の依存関係をプロジェクトの POM ファイルに追加します。
+
+    ```xml
+    <dependency>
+      <groupId>com.twitter</groupId>
+      <artifactId>twitter-api-java-sdk</artifactId>
+      <version>1.1.4</version>
+    </dependency>
+    ```
+
+    * Gradle ユーザーの場合: 次の依存関係をプロジェクトの build ファイルに追加します。
+      `implementation "com.twitter:twitter-api-java-sdk:1.1.4"`
+
+    * その他の場合: まず次のコマンドを実行して JAR を生成します。
+      `mvn clean package`
+      その後、次の JAR を手動でインストールします。
+
+    `target/twitter-api-java-sdk-1.1.4.jar`
+
+    `target/lib/*.jar`
+  </Tab>
+
+  <Tab title="TypeScript">
+    このパッケージは Node.js 14 以上をサポートしています。インストールするには、Node プロジェクトのディレクトリで次のコマンドを実行します。
+    `npm install twitter-api-sdk`
+  </Tab>
+</Tabs>
+
+<div id="client-basics">
+  #### Client の基本
+</div>
+
+認証およびライブラリ Client にアクセスするために、使用するファイルの先頭でクラス（Java）およびパッケージ（TypeScript）を `import` します。ライブラリ Client のメソッドを使用するには、認証情報を渡す必要があります。これは、App-only の Bearer Token、または OAuth 2.0 の user context で認証する場合は client id/client secret の組み合わせのいずれかになります。
+
+以下はその例です。
+
+<Tabs>
+  <Tab title="Java">
+    ```java
+    // クラスをインポート:
+    import com.twitter.clientlib.ApiClient;
+    import com.twitter.clientlib.ApiException;
+    import com.twitter.clientlib.Configuration;
+    import com.twitter.clientlib.auth.*;
+    import com.twitter.clientlib.model.*;
+    import com.twitter.clientlib.TwitterCredentialsBearer;
+    import com.twitter.clientlib.api.TwitterApi;
+
+    // ライブラリ Client をインスタンス化
+    TwitterApi apiInstance = new TwitterApi();
+
+    // 認証情報をインスタンス化（App-only の例）
+    TwitterCredentialsBearer credentials = new TwitterCredentialsBearer(System.getenv("APP-ONLY-ACCESS-TOKEN"));
+
+    // 認証情報をライブラリ Client に渡す
+    apiInstance.setTwitterCredentials(credentials);
+    ```
+  </Tab>
+
+  <Tab title="TypeScript">
+    ```typescript
+    // パッケージをインポート
+    import { Client, auth } from "twitter-api-sdk";
+
+    // まず認証用 Client を初期化
+    const authClient = new auth.OAuth2User({
+     client_id: process.env.CLIENT_ID as string,
+     client_secret: process.env.CLIENT_SECRET as string,
+     callback: "YOUR-CALLBACK",
+     scopes: ["tweet.read", "users.read", "offline.access"],
+    });
+
+    // 認証情報をライブラリ Client に渡す
+    const twitterClient = new Client(authClient);
+    ```
+  </Tab>
+</Tabs>
+
+<div id="authentication-flow">
+  #### 認証フロー
+</div>
+
+SDK をアプリケーション専用（App-only）オプションで認証する場合は、トークンを指定するだけで、ライブラリのクライアントはすぐにエンドポイントメソッドを利用できる状態になります。なお、アプリケーション専用トークンは、ユーザーコンテキスト認証が必要なエンドポイントでは使用できません。
+
+OAuth 2.0 ユーザーコンテキスト認証では、認証クライアントを作成した後に、いくつか追加のステップが必要です。
+
+* 認可 URL を生成する
+* 認可 URL からアプリケーションを認可する
+* コールバックへリダイレクトされる（developer portal の認証設定ページで設定したコールバック URL と一致している必要があります）
+* コードベリファイアを取り出し、アクセストークンと交換する
+
+SDK は、これらの手順を簡略化するためのメソッドを auth クライアント上で提供しています。OAuth 2.0 ユーザーコンテキストで認証してリクエストを行う完全な例については、GitHub リポジトリを参照してください。
+
+* [TypeScript](https://github.com/xdevplatform/twitter-api-typescript-sdk/blob/main/examples/oauth2-callback_pkce_s256.ts)
+
+* [Java](https://github.com/xdevplatform/twitter-api-java-sdk/blob/main/examples/src/main/java/com/twitter/clientlib/auth/OAuth20GetAccessToken.java)
+
+<div id="endpoint-methods">
+  #### エンドポイントメソッド
+</div>
+
+ライブラリクライアントで提供されるメソッドは、各エンドポイントに対応するよう明確に命名されており、すべてのパラメータは引数として渡されます。
+以下は、id によるポストの検索例です:
+
+<Tabs>
+  <Tab title="Java">
+    ```java
+    String id = "1511757922354663425"; // String | 単一のポスト id。
+    Set<String> expansions = new HashSet<>(Arrays.asList("author_id")); // Set<String> | 展開するフィールドをカンマ区切りで指定したリスト。
+    Set<String> tweetFields = new HashSet<>(Arrays.asList("created_at", "lang", "context_annotations")); // Set<String> | 表示するポストフィールドをカンマ区切りで指定したリスト。
+    Set<String> userFields = new HashSet<>(Arrays.asList("created_at", "description", "name")); // Set<String> | 表示するユーザーフィールドをカンマ区切りで指定したリスト。
+
+    try {
+     SingleTweetLookupResponse result = apiInstance.tweets().findTweetById(id, expansions, tweetFields, userFields, null, null, null);
+     System.out.println(result);
+    } catch (ApiException e) {
+     System.err.println("Exception when calling TweetsApi#findTweetById");
+     System.err.println("Status code: " + e.getCode());
+     System.err.println("Reason: " + e.getResponseBody());
+     System.err.println("Response headers: " + e.getResponseHeaders());
+     e.printStackTrace();
+    }
+
+    ```
+  </Tab>
+
+  <Tab title="TypeScript">
+    ```typescript
+    const lookupTweetById = await client.tweets.findTweetById(
+      // ポスト ID
+      "1511757922354663425",
+      {
+        // オプションのパラメータ
+        expansions: ["author_id"],
+        "user.fields": ["created_at", "description", "name"],
+      }
+    );
+    ```
+  </Tab>
+</Tabs>

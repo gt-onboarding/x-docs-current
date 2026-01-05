@@ -1,0 +1,129 @@
+---
+title: "指标"
+keywords: ["指标", "互动指标", "帖子指标", "展现次数", "转发", "点赞", "视频播放量", "数据分析", "公开指标", "私有指标", "自然指标", "推广指标"]
+---
+
+<div id="overview">
+  ## 概览
+</div>
+
+`metrics` 字段允许开发者访问 Post 和媒体对象的公开和非公开互动指标。公开指标对任何拥有开发者账号的用户都可访问，而非公开指标只能由自有/已授权账号（定义见下文）访问。指标包括每个在请求中指定的 Post 的总展示次数、转发（Retweet）、引用帖子（Quote Tweet）、点赞、回复、视频观看次数、视频观看四分位数、URL 和个人资料链接点击次数。如果该 Post 作为 [Ad](https://ads.x.com/) 投放，则还可以选择查看在自然（organic）或推广（promoted）场景下获得的指标细分情况。
+
+公开指标可以通过 [App-only Token](/zh/resources/fundamentals/authentication#oauth-2-0) 认证来请求。非公开指标只能针对自有/已授权的 Posts 请求，这意味着开发者需要使用 [OAuth 2.0](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 用户上下文授权进行认证。
+
+**非公开、自然和推广指标仅对最近 30 天内创建的 Posts 可用。**
+
+<div id="terminology">
+  ### 术语
+</div>
+
+* **已授权账号**：通过授予访问其账号权限而授权你的 [X developer app](/zh/resources/fundamentals/developer-apps) 的 X 账号（任何[应用权限级别](/zh/resources/fundamentals/developer-apps#app-permissions)都允许访问帖子指标）。
+* **已关联账号**：与你的 [X developer app](/zh/resources/fundamentals/developer-apps) 关联的 X 账号。
+* **公开指标**：任何人在 [X](https://x.com/home) 上都可以访问的总计数据，例如点赞数和转发数。
+* **非公开指标**：在 [X](https://x.com/home) 上不对公众展示的总计数据，例如展示次数以及视频观看四分位数据。需要使用 [OAuth 2.0](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 的用户上下文身份验证。
+* **自然指标**：归因于自然投放场景（以常规方式发布和查看）的公开和非公开指标分组。需要使用 [OAuth 2.0](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 的用户上下文身份验证。
+* **付费推广指标**：归因于付费推广场景（作为广告活动的一部分被投放或查看）的公开和非公开指标分组。需要使用 [OAuth 2.0](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 的用户上下文身份验证，并且帖子已在广告中进行推广。
+
+<div id="available-metrics">
+  ## 可用指标
+</div>
+
+| Metric               | API Representations                                                                                                                                                                                                                                     | Description                                                                                                                                                                                                                                                                                                                                                                                |
+|:----------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Impressions**      | `data.non_public_metrics.impression_count`, `data.organic_metrics.impression_count`, `data.promoted_metrics.impression_count`                                                                                                                           | 帖子被查看的次数（不按用户去重）。当帖子任意部分在屏幕上可见时，即计为一次查看。需要 OAuth 1.0a 用户上下文认证。                                                                                                               |
+| **Retweets**         | `data.public_metrics.retweet_count`, `data.organic_metrics.retweet_count`, `data.promoted_metrics.retweet_count`                                                                                                                                       | 帖子被转发的次数。不包含引用帖子（“带评论的转发”）。要获得在 X 客户端中显示的“转发和评论”总数，请将 `retweet_count` 与 `quote_count` 相加。                                           |
+| **Quote Tweets**     | `data.public_metrics.quote_count`                                                                                                                                                                                                                      | 帖子被带新评论（消息）转发的次数。付费场景中不存在引用帖子，因此所有引用帖子都为自然场景（organic）。                                                                                                                                           |
+| **Likes**            | `data.public_metrics.like_count`, `data.organic_metrics.like_count`, `data.promoted_metrics.like_count`                                                                                                                                                 | 帖子被点赞的次数。`public_metrics` 字段返回来自自然和付费场景的点赞总数，以保持与 X 上公开显示的计数一致。                                                                                                   |
+| **Replies**          | `data.public_metrics.reply_count`, `data.organic_metrics.reply_count`, `data.promoted_metrics.reply_count`                                                                                                                                              | 帖子被回复的次数。`public_metrics` 字段返回来自自然和付费场景的回复总数。                                                                                                                                                   |
+| **URL Link Clicks**  | `data.non_public_metrics.url_link_clicks`, `data.organic_metrics.url_link_clicks`, `data.promoted_metrics.url_link_clicks`                                                                                                                             | 用户在帖子中点击 URL 链接或 URL 预览卡片的次数。需要 OAuth 1.0a 用户上下文认证。                                                                                                                                                                  |
+| **User Profile Clicks** | `data.non_public_metrics.user_profile_clicks`, `data.organic_metrics.user_profile_clicks`, `data.promoted_metrics.user_profile_clicks`                                                                                                             | 用户点击帖子中以下部分的次数：显示名称、用户名、头像。需要 OAuth 1.0a 用户上下文认证。                                                                                                                                               |
+| **Video views**      | `includes.media.public_metrics.view_count`, `includes.media.organic_metrics.view_count`, `includes.media.promoted_metrics.view_count`                                                                                                                  | 帖子中所包含视频被观看的次数。该数值是在所有发布了该视频的帖子中聚合的总视频观看次数。需要媒体扩展字段 `expansions=attachment.media_keys`。                                                                |
+| **Video view quartiles** | `includes.media.non_public_metrics.playback_0_count`, `includes.media.non_public_metrics.playback_25_count`, `includes.media.non_public_metrics.playback_50_count`, `includes.media.non_public_metrics.playback_75_count`, `includes.media.non_public_metrics.playback_100_count` | 在视频中播放到各个四分位进度的用户数量。需要 OAuth 1.0a 用户上下文认证以及媒体扩展字段 `expansions=attachment.media_keys`。                                                                                                 |
+
+<div id="requesting-metrics">
+  ## 请求指标
+</div>
+
+<div id="public-metrics">
+  ### 公开指标
+</div>
+
+在下面的请求中，我们会请求获取帖子本身以及所附视频的公开指标，使用如下字段和扩展字段。请务必将 `$BEARER_TOKEN` 替换为你自己生成的 Bearer Token。
+
+* `tweet.fields=public_metrics`
+* `expansions=attachments.media_keys&media.fields=public_metrics`
+
+<div id="sample-request">
+  #### 示例请求
+</div>
+
+```bash
+curl 'https://api.x.com/2/tweets?ids=1204084171334832128&tweet.fields=public_metrics&expansions=attachments.media_keys&media.fields=public_metrics' --header 'Authorization: Bearer $BEARER_TOKEN'
+```
+
+<div id="private-metrics-non-public-organic-metrics">
+  ### 私有指标（非公开、有机指标）
+</div>
+
+下列请求会为帖子及其附带的视频获取非公开指标，并附带更详细的有机指标信息。由于这些字段为私有字段，在 X 上不会公开显示，因此发出该请求时必须使用 [OAuth 2.0](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 或 [OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 用户上下文身份验证。要生成下文所需的 OAuth 1.0a 签名，请参阅我们的[指南](/zh/resources/fundamentals/authentication#creating-a-signature)。
+
+* `tweet.fields=non_public_metrics,organic_metrics`
+* `expansions=attachments.media_keys&media.fields=non_public_metrics,organic_metrics`
+
+#### 请求示例
+
+```bash
+curl 'https://api.x.com/2/tweets/1204084171334832128?tweet.fields=non_public_metrics,organic_metrics&media.fields=non_public_metrics,organic_metrics&expansions=attachments.media_keys' --header 'authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+<div id="sample-response">
+  #### 示例响应
+</div>
+
+```
+{
+  "data": {
+    "attachments": {
+      "media_keys": ["13_1204080851740315648"]
+    },
+    "id": "1263145271946551300",
+    "non_public_metrics": {
+      "impression_count": 956,
+      "url_link_clicks": 9,
+      "user_profile_clicks": 34
+    },
+    "organic_metrics": {
+      "impression_count": 956,
+      "like_count": 49,
+      "reply_count": 2,
+      "retweet_count": 9,
+      "url_link_clicks": 9,
+      "user_profile_clicks": 34
+    },
+    "text": "test"
+  },
+  "includes": {
+    "media": [
+      {
+        "media_key": "13_1204080851740315648",
+        "non_public_metrics": {
+          "playback_0_count": 0,
+          "playback_100_count": 1,
+          "playback_25_count": 2,
+          "playback_50_count": 1,
+          "playback_75_count": 1
+        },
+        "organic_metrics": {
+          "playback_0_count": 0,
+          "playback_100_count": 1,
+          "playback_25_count": 2,
+          "playback_50_count": 1,
+          "playback_75_count": 1,
+          "view_count": 1
+        },
+        "type": "video"
+      }
+    ]
+  }
+}
+```

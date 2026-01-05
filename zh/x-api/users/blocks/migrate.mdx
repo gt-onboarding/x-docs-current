@@ -1,0 +1,87 @@
+---
+title: 迁移指南
+sidebarTitle: 迁移指南
+keywords: ["屏蔽迁移", "屏蔽迁移到 v2", "v1.1 到 v2 屏蔽接口", "屏蔽迁移指南", "迁移屏蔽数据"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="blocks-lookup-standard-v11-compared-to-x-api-v2">
+  ### 屏蔽查询：标准版 v1.1 与 X API v2 的比较
+</div>
+
+如果你一直在使用标准版 v1.1 中的 [GET blocks/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-blocks-ids) 和 [GET blocks/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-blocks-list) 端点，本指南旨在帮助你了解标准版 v1.1 与 X API v2 屏蔽查询端点之间的相似点和差异。
+
+* **相似点**
+  * 身份验证
+* **差异**
+  * 端点 URL
+  * 每次请求的用户数量限制
+  * 应用和项目要求
+  * 响应数据格式
+  * 请求参数
+
+<div id="similarities">
+  #### 相似点
+</div>
+
+**身份验证**
+
+标准 v1.1 和 X API v2 的 blocks 查询端点都使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2)。因此，如果你之前使用的是标准 v1.1 的某个 blocks 查询端点，在迁移到 X API v2 对应端点时，可以继续使用相同的身份验证方法。 
+
+<div id="differences">
+  #### 差异
+</div>
+
+**Endpoint URL**
+
+* 标准 v1.1 端点：
+  * GET https://api.x.com/1.1/blocks/ids.json
+    （被指定用户拉黑的用户 ID 列表）
+  * GET https://api.x.com/1.1/blocks/lists.json
+    （被指定用户拉黑的用户列表）
+* X API v2 端点：
+  * GET https://api.x.com/2/users/:id/blocking
+    （被指定用户 ID 拉黑的用户列表）
+     
+
+**每次请求的用户数量限制**
+
+标准 v1.1 端点允许你在每次请求中返回最多 5000 名用户。新的 v2 端点允许你在每次请求中返回最多 1000 名用户。要返回完整的 1000 名用户，你需要在查询参数中传入 max&#95;results=1000；然后可以将响应载荷中返回的 next&#95;token 作为 pagination&#95;token 查询参数传入下一次请求。
+ 
+
+**应用和项目要求**
+
+在对请求进行认证时，X API v2 端点要求你使用与某个 [开发者应用](/zh/resources/fundamentals/developer-apps) 关联、并且隶属于某个 [项目](/zh/resources/fundamentals/developer-apps) 的凭证。所有 X API v1.1 端点都可以使用来自独立应用或与项目关联的应用的凭证。
+
+**响应数据格式**
+
+标准 v1.1 与 X API v2 端点版本之间最大的差异之一，在于你如何选择要在载荷中返回的字段。
+
+对于标准端点，你会默认收到许多响应字段，然后可以使用参数来指定哪些字段或字段集合应在载荷中返回。
+
+X API v2 版本默认只返回用户的 id、name 和 username 字段。要请求任何其他字段或对象，你需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数。你从此端点请求的任何用户字段都会返回在主用户对象中。任何被扩展的帖子对象及其字段都会返回在响应中的 includes 对象中。然后，你可以通过匹配用户对象与扩展帖子对象中包含的 ID，将任何扩展对象与用户对象关联起来。 
+
+我们鼓励你在各自的指南中更详细地了解这些新参数，或阅读我们的[如何使用 fields 和 expansions](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 指南。 
+
+我们还编写了一个 [数据格式迁移指南](/zh/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)，可帮助你将标准 v1.1 字段映射到较新的 v2 字段。该指南还会为你提供在 v2 请求中需要传入的具体扩展字段和字段参数，以返回特定字段。 
+ 
+
+除了更改你请求某些字段的方式以外，X API v2 还为 API 返回的对象引入了新的 JSON 设计，包括 [P](/zh/x-api/fundamentals/data-dictionary#tweet)ost 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象。
+
+* 在 JSON 根级别，标准端点在 statuses 数组中返回帖子对象，而 X API v2 在 data 数组中返回帖子对象。 
+* X API v2 JSON 不再引用被转发和被引用的 “statuses”，而是引用被转发和被引用的帖子。许多旧版及已弃用字段（例如 contributors 和 user.translator&#95;type）将被移除。 
+* X API v2 不再同时使用 favorites（帖子对象中的字段）和 favourites（用户对象中的字段），而是统一使用术语 like。 
+* X 采用这样的约定：在没有取值（例如为 null）时，JSON 值不会写入载荷。帖子和用户属性只有在具有非空值时才会被包含。 
+   
+
+我们还在 [Post 对象](/zh/x-api/fundamentals/data-dictionary#tweet) 中引入了一组新字段，包括：
+
+* 一个 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 字段
+* 两个新的 [annotations](/zh/x-api/fundamentals/post-annotations) 字段，包括 context 和 entities
+* 若干新的 [metrics](/zh/x-api/fundamentals/metrics) 字段 
+* 一个新的 reply&#95;setting 字段，用于指示谁可以回复某条帖子
+
+**请求参数**
+
+以下标准 v1.1 接口支持两个请求查询参数（user&#95;id 或 screen&#95;name）。X API v2 仅接受数值形式的用户 ID，并且该 ID 必须作为端点路径的一部分传入。

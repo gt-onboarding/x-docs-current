@@ -1,0 +1,336 @@
+---
+title: OAuth API リファレンスインデックス
+sidebarTitle: API リファレンス
+keywords: ["OAuth API リファレンス", "認証 API", "OAuth エンドポイント", "認証エンドポイント", "OAuth リファレンス", "API リファレンス"]
+---
+
+<div id="oauth-10a">
+  ### OAuth 1.0a
+</div>
+
+|     |     |
+| :--- | :--- |
+| **Purpose** | Method |
+| 3-legged OAuth フローおよび Sign in with X のステップ 1  <br />コンシューマーアプリケーションが、ユーザーの認可をリクエストするための OAuth Request Token を取得できるようにします。 | [POST oauth/request&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-request-token) |
+| 3-legged OAuth フローおよび Sign in with X のステップ 2  <br />コンシューマーアプリケーションが、ユーザーの認可をリクエストするために OAuth Request Token を使用できるようにします。 | [GET oauth/authenticate](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) |
+| 3-legged OAuth フローおよび Sign in with X のステップ 2  <br />コンシューマーアプリケーションが、ユーザーの認可をリクエストするために OAuth Request Token を使用できるようにします。 | [GET oauth/authorize](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authorize) |
+| 3-legged OAuth フローおよび Sign in with X のステップ 3  <br />コンシューマーアプリケーションが、OAuth Request Token を OAuth Access Token と交換できるようにします。 | [POST oauth/access&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-access-token) |
+| 登録済みアプリケーションが、発行済みの OAuth Access Token を無効化できるようにします。 | [POST oauth/invalidate&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-invalidate-token) |
+
+<div id="oauth-20-bearer-token">
+  ### OAuth 2.0 Bearer Token
+</div>
+
+|     |     |
+| :--- | :--- |
+| **目的** | メソッド |
+| 登録済みのアプリが OAuth 2 のアプリ専用 Bearer Token を生成し、ユーザーコンテキストなしでアプリを代表して API リクエストを行うために使用できます。 | [POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) |
+| 登録済みのアプリが、発行済みの OAuth 2 アプリ専用 Bearer Token を失効させることができます。 | [POST oauth2/invalidate&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) |
+
+<div id="post-oauthrequest_token">
+  ### POST oauth/request&#95;token
+</div>
+
+Consumer アプリケーションがユーザー認可をリクエストするための OAuth Request Token を取得できるようにします。このメソッドは、[OAuth 1.0 認可フロー](http://oauth.net/core/1.0/#anchor9) の [Section 6.1](https://oauth.net/core/1.0/#auth_step1) に対応します。
+
+**すべての OAuth 認可ステップでは HTTPS の使用が必須です。**
+
+**使用上の注意:** `oauth_nonce` には ASCII 文字のみが受け付けられます。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/request_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | No  |
+| Rate limited? | Yes |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name | Required | Description | Example |
+| :--- | :--- | :--- | :--- |
+| oauth&#95;callback | required | OAuth 1.0a に準拠するために、このパラメータは**必須**です。ここで指定した値は、ユーザーがあなたのアプリケーションによる自分のアカウントへのアクセスを承認した場合に、そのユーザーがリダイレクトされる URL として使用されます。バンド外の PIN モードの場合は、これを `oob` に設定します。これは、デスクトップ / モバイルアプリケーションで使用するカスタムコールバックを指定する方法でもあります。事前登録されたコールバックがあるかどうかに関わらず、このステップでは常に `oauth_callback` を送信してください。<br /><br />このエンドポイントで使用するすべてのコールバック URL は、developer.x.com 上のアプリの設定内で事前に構成しておく必要があります。* | `http://themattharris.local/auth.php` `twitterclient://callback` |
+| x&#95;auth&#95;access&#95;type | optional | アプリケーションがユーザーアカウントに対して要求するアクセスレベルを上書きします。サポートされる値は `read` または `write` です。このパラメータは、開発者が読み取り / 書き込みアプリケーションを登録しつつ、必要に応じて読み取り専用アクセスのみを要求できるようにすることを目的としています。 |     |
+
+コールバック URL を承認する方法の詳細については、[このページ](/ja/resources/fundamentals/developer-apps#callback-urls) を参照してください。
+
+**注意** - developer.x.com 上で X アカウントにログインしている場合は、[X アプリ](/ja/resources/fundamentals/developer-apps) を [X アプリダッシュボード](https://developer.x.com/en/apps) から表示および編集できます。
+
+**Example request[](#example-request "Permalink to this headline")**
+
+Request URL: `POST https://api.x.com/oauth/request_token`
+
+Request POST Body: *N/A*
+
+Authorization Header: `OAuth oauth_nonce="K7ny27JTpKVsTgdyLdDfmQQWVLERj2zAK5BslRsqyw", oauth_callback="http%3A%2F%2Fmyapp.com%3A3005%2Ftwitter%2Fprocess_callback", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1300228849", oauth_consumer_key="OqEqJeafRSF11jBMStrZz", oauth_signature="Pc%2BMLdv028fxCErFyi8KXFM%2BddU%3D", oauth_version="1.0"`
+
+Response: `oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik&oauth_token_secret=Kd75W4OQfb2oJTV0vzGzeXftVAwgMnEK9MumzYcM&oauth_callback_confirmed=true`
+
+<div id="get-oauthauthorize">
+  ### GET oauth/authorize
+</div>
+
+Consumer アプリケーションが OAuth Request Token を使用してユーザー認可をリクエストできるようにします。このメソッドは [OAuth 1.0 認証フロー](http://oauth.net/core/1.0/#anchor9) の [Section 6.2](http://oauth.net/core/1.0/#auth_step2) に対応します。デスクトップアプリケーションは必ずこのメソッドを使用する必要があり、[GET oauth / authenticate](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) は使用できません。
+
+**使用上の注意：** `oauth_callback` がこのメソッドに送信されることはありません。代わりに [POST oauth / request&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth-request-token) に指定してください。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/authorize`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | Yes |
+| Rate limited? | Yes |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Name | Required | Description | Default Value | Example |
+| force&#95;login | optional | 意図したユーザーのアカウントが認可されるよう、ユーザーに認証情報の再入力を強制します。 |     |     |
+| screen&#95;name | optional | OAuth ログイン画面のユーザー名入力欄に、指定された値をあらかじめ入力しておきます。 |     |     |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+Web ブラウザでユーザーを `oauth/authorize` のステップに遷移させる際は、oauth&#95;token パラメータを含めます：
+`https://api.x.com/oauth/authorize?oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik`
+
+<div id="get-oauthauthenticate">
+  ### GET oauth/authenticate
+</div>
+
+Consumer アプリケーションが OAuth の `request_token` を使用して、ユーザーの認可を要求できるようにします。
+
+このメソッドは、コールバック認証フローを使用するアプリケーション向けに、[OAuth 1.0 認証フロー](http://oauth.net/core/1.0/#anchor9)の [Section 6.2](http://oauth.net/core/1.0/#auth_step2) を置き換えるものです。`force_login` パラメータが `true` に設定されていない限り、このメソッドは現在ログイン中のユーザーを、アクセス認可の対象アカウントとして使用します。
+
+このメソッドは、ユーザーがすでにアプリケーションに対する許可を付与している場合、ユーザーがアプリケーションを再承認することなくリダイレクトが行われる点で、[GET oauth / authorize](/ja/resources/fundamentals/authentication/api-reference#get-oauth-authorize) と異なります。この動作を実現するには、[application record](https://developer.x.com/apps) で *Use Sign in with X* 設定を有効にする必要があります。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/authenticate`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | Yes |
+| Rate limited? | Yes |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Name | Required | Description | Default Value | Example |
+| force&#95;login | optional | 正しいユーザーのアカウントが認可されるように、ユーザーに資格情報の入力を強制します。 |     | *true* |
+| screen&#95;name | optional | OAuth ログイン画面のユーザー名入力欄に、指定した値をあらかじめ入力します。 |     |     |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+Web ブラウザーで `oauth/authenticate` ステップにユーザーをリダイレクトし、oauth&#95;token パラメータを含めます。
+`https://api.x.com/oauth/authenticate?oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik`
+
+<div id="post-oauthaccess_token">
+  ### POST oauth/access&#95;token
+</div>
+
+Consumer アプリケーションが OAuth Request Token を OAuth Access Token に交換するためのエンドポイントです。このメソッドは、[OAuth 1.0 認証フロー](http://oauth.net/core/1.0/#anchor9)の [セクション 6.3](http://oauth.net/core/1.0/#auth_step3) に対応します。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/access_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | Yes |
+| Rate limited? | Yes |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Name | Required | Description | Default Value | Example |
+| oauth&#95;token | required | ここで指定する oauth&#95;token は、request&#95;token ステップで返された oauth&#95;token と同じである必要があります。 |     |     |
+| oauth&#95;verifier | required | OAuth のウェブフローを使用する場合、このパラメーターをコールバック URL で返された *oauth&#95;verifier* の値に設定します。アウトオブバンド OAuth を使用している場合、この値を PIN コードに設定します。OAuth 1.0a に準拠するため、このパラメーターは **必須** です。OAuth 1.0a は厳格に適用され、*oauth&#95;verifier* を使用していないアプリケーションは OAuth フローを完了できません。 |     |     |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+`POST https://api.x.com/oauth/access_token?oauth_token=qLBVyoAAAAAAx72QAAATZxQWU6P&oauth_verifier=ghLM8lYmAxDbaqL912RZSRjCCEXKDIzx`
+
+PIN ベースの場合: `POST https://api.x.com/oauth/access_token?oauth_token=9Npq8AAAAAAAx72QBRABZ4DAfY9&oauth_verifier=4868795`
+
+**Example response[](#example-response "Permalink to this headline")**
+
+`oauth_token=6253282-eWudHldSbIaelX7swmsiHImEL4KinwaGloHANdrY&oauth_token_secret=2EEfA6BG5ly3sR3XjE0IBSnlQu4ZrUzPiYTmrkVU&user_id=6253282&screen_name=xapi`
+
+<div id="post-oauthinvalidate_token">
+  ### POST oauth/invalidate&#95;token
+</div>
+
+登録済みアプリケーションは、クライアント認証情報を提示することで、発行済みの OAuth アクセストークンを失効させることができます。いったんアクセストークンが無効化されると、新たに作成を試みた場合は異なるアクセストークンが発行され、失効させたトークンを使用することはできなくなります。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/1.1/oauth/invalidate_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|                          |                                        |
+| :----------------------- | :------------------------------------- |
+| Response formats         | JSON                                   |
+| Requires authentication? | Yes - 無効化したいアクセストークンを持つユーザーコンテキストが必要です |
+| Rate limited?            | Yes                                    |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+```bash
+        curl --request POST
+          --url 'https://api.x.com/1.1/oauth/invalidate_token.json'
+          --header 'authorization: OAuth oauth_consumer_key="CLIENT_KEY",
+         oauth_nonce="AUTO_GENERATED_NONCE", oauth_signature="AUTO_GENERATED_SIGNATURE",
+         oauth_signature_method="HMAC-SHA1", oauth_timestamp="AUTO_GENERATED_TIMESTAMP",
+         oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+**レスポンスの例[](#example-response "Permalink to this headline")**
+
+```bash
+        HTTP/1.1 200 OK
+        Content-Type: application/json; charset=utf-8
+        Content-Length: 127
+        ...
+
+        {"access_token":"ACCESS_TOKEN"}
+```
+
+**トークンが無効化された後のエラー応答の例[](#example-error-response-after-token-has-been-invalidated "この見出しへのパーマリンク")**
+
+```bash
+        HTTP/1.1 401 Authorization Required
+        ...
+
+        {"errors": [{
+          "code": 89,
+          "message": "Invalid or expired token."}
+        ]}
+```
+
+<div id="post-oauth2token">
+  ### POST oauth2/token
+</div>
+
+登録済みアプリケーションが OAuth 2 Bearer Token を取得できるようにします。取得した Bearer Token は、ユーザーコンテキストなしで、そのアプリケーション自身として API リクエストを行うために使用できます。これは [アプリケーション専用認証 (Application-only authentication)](/ja/resources/fundamentals/authentication/oauth-2-0/application-only) と呼ばれます。
+
+Bearer Token は oauth2/invalidate&#95;token を使用して失効させることができます。Bearer Token が一度失効すると、新たに作成を試みた場合は別の Bearer Token が発行され、以前のトークンは使用できなくなります。
+
+1 つのアプリケーションにつき保持できる Bearer Token は 1 つだけです。このメソッドへのリクエストを繰り返し送信した場合、トークンが失効するまでは、すでに存在している同じトークンが返されます。
+
+成功したレスポンスには、付与された Bearer Token を表す JSON 構造体が含まれます。
+
+このメソッドで取得したトークンはキャッシュする必要があります。短時間に繰り返しリクエストを行うと、HTTP 403（コード 99）でリクエストが拒否されます。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth2/token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|                          |                                                              |
+| :----------------------- | :----------------------------------------------------------- |
+| Response formats         | JSON                                                         |
+| Requires authentication? | Yes - Basic 認証（API key をユーザー名として、API key secret をパスワードとして使用） |
+| Rate limited?            | Yes                                                          |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|                |          |                                                                                                                                                                                                |               |                          |
+| :------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------ | :----------------------- |
+| Name           | Required | Description                                                                                                                                                                                    | Default Value | Example                  |
+| grant&#95;type | required | アプリケーションが要求している grant の種類を指定します。現時点では *client&#95;credentials* のみが許可されています。詳細は [Application-Only Authentication](/ja/resources/fundamentals/authentication/oauth-2-0/application-only) を参照してください。 |               | *client&#95;credentials* |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+```bash
+    POST /oauth2/token HTTP/1.1
+    Host: api.x.com
+    User-Agent: My X App v1.0.23
+    Authorization: Basic eHZ6MWV2R ... o4OERSZHlPZw==
+    Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+    Content-Length: 29
+    Accept-Encoding: gzip
+
+    grant_type=client_credentials
+```
+
+**レスポンス例:**
+
+```bash
+    HTTP/1.1 200 OK
+    Status: 200 OK
+    Content-Type: application/json; charset=utf-8
+    ...
+    Content-Encoding: gzip
+    Content-Length: 140
+
+    {"token_type":"bearer","access_token":"AAAA%2FAAA%3DAAAAAAAA"}
+```
+
+<div id="post-oauth2invalidate_token">
+  ### POST oauth2/invalidate&#95;token
+</div>
+
+登録済みアプリケーションは、自身のクライアント認証情報を提示することで、発行済みの OAuth 2.0 Bearer Token を失効させることができます。いったん Bearer Token が無効化されると、新たに作成を試みた場合は別の Bearer Token が発行され、無効化されたトークンは使用できなくなります。
+
+成功したレスポンスには、失効した Bearer Token を表す JSON 構造が含まれます。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth2/invalidate_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|                          |                                                                                                                                          |
+| :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- |
+| Response formats         | JSON                                                                                                                                     |
+| Requires authentication? | Yes - [oAuth 1.0a](/ja/resources/fundamentals/authentication/oauth-1-0a) （アプリケーションのコンシューマー API キーおよびアプリケーション所有者のアクセストークンとアクセストークンシークレットを使用） |
+| Rate limited?            | Yes                                                                                                                                      |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name             | Required | Description                  |
+| :--------------- | :------- | :--------------------------- |
+| access&#95;token | required | 無効化したい Bearer Token の値を指定します |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+```
+        curl --request POST
+          --url 'https://api.x.com/oauth2/invalidate_token?access_token=AAAA%2FAAA%3DAAAAAAAA'
+          --header 'authorization: OAuth oauth_consumer_key="CLIENT_KEY",
+         oauth_nonce="AUTO_GENERATED_NONCE", oauth_signature="AUTO_GENERATED_SIGNATURE",
+         oauth_signature_method="HMAC-SHA1", oauth_timestamp="AUTO_GENERATED_TIMESTAMP",
+         oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+**レスポンス例[](#example-response "この見出しへのパーマリンク")**
+
+```
+         Status: 200 OK
+         Content-Type: application/json; charset=utf-8
+         Content-Length: 135
+         ...
+       {
+        "access_token": "AAAA%2FAAA%3DAAAAAAAA"
+        }
+```

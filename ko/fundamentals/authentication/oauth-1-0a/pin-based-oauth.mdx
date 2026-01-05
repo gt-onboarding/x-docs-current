@@ -1,0 +1,37 @@
+---
+title: PIN 기반 인증
+sidebarTitle: PIN 기반 OAuth
+keywords: ["PIN 기반 OAuth", "PIN OAuth", "OAuth PIN", "PIN 인증", "OAuth 1.0a PIN", "데스크톱 OAuth"]
+---
+
+import { Button } from "/snippets/ko/button.mdx";
+
+<div id="pin-based-authorization">
+  ### PIN 기반 인가
+</div>
+
+PIN 기반 OAuth 플로우는 [3-legged OAuth](/ko/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) 프로세스의 한 종류로, 인가 이후 사용자를 리디렉션하기 위해 웹 브라우저에 접근하거나 웹 브라우저를 임베드할 수 없는 애플리케이션을 위한 것입니다. 이러한 애플리케이션의 예로는 명령줄 애플리케이션, 임베디드 시스템, 게임 콘솔, 그리고 특정 유형의 모바일 앱이 있습니다.
+
+PIN 기반 OAuth 플로우는 `oauth_callback`이 `oob`로 설정된 `request_token` 단계에서 앱에 의해 시작됩니다. `oob`라는 용어는 out-of-band OAuth를 의미합니다. 사용자는 여전히 X에 방문해 로그인하거나 앱을 승인해야 하지만, 접근 권한을 승인해도 애플리케이션으로 자동 리디렉션되지 않습니다. 대신 숫자로 된 PIN 코드를 확인하게 되며, 애플리케이션으로 돌아가 이 값을 입력하라는 안내를 보게 됩니다.
+
+<Note>
+  **Note:** PIN 기반 auth를 사용할 때도 X 앱 설정의 `callback_url`은 여전히 필요합니다.
+</Note>
+
+ 
+
+<div id="implementing-the-pin-based-oauth-flow">
+  #### PIN 기반 OAuth 플로 구현
+</div>
+
+PIN 기반 플로는 [3-legged authorization](/ko/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) (그리고 [Sign in with X](/ko/resources/fundamentals/authentication#log-in-with-x))와 동일한 방식으로 구현되지만, 다음과 같은 차이점이 있습니다:
+
+1. [POST oauth/request&#95;token](/ko/resources/fundamentals/authentication/api-reference#post-oauth-request-token) 호출 시 `oauth_callback` 값은 `oob`로 설정해야 합니다.
+
+2. 사용자가 [GET oauth/authenticate](/ko/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) 또는 [GET oauth/authorize URL](/ko/resources/fundamentals/authentication/api-reference#get-oauth-authorize)를 통해 앱을 승인하기 위해 X로 이동한 후에는, 사용자가 `callback_url`로 리디렉트되지 않고 X에서 생성한 약 7자리 PIN과 해당 PIN을 애플리케이션에 입력하라는 안내가 표시된 화면을 보게 됩니다.
+
+3. 사용자는 이 PIN을 애플리케이션에 입력하고, 애플리케이션은 이 PIN 번호를 [POST oauth/access&#95;token](/ko/resources/fundamentals/authentication/api-reference#post-oauth-access-token)에서 `oauth_verifier`로 사용하여 `access_token`을 획득합니다.
+
+<Note>
+  **Note:** PIN 번호는 재사용할 수 없으며, 획득한 `access_token`은 애플리케이션이 사용자를 대신해 요청을 보낼 때 사용해야 합니다.
+</Note>

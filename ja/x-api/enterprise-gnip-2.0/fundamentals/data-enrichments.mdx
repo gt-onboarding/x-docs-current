@@ -1,0 +1,302 @@
+---
+title: "データエンリッチメント: Enterprise"
+keywords: ["データエンリッチメント", "Enterpriseエンリッチメント", "GNIPエンリッチメント", "データエンリッチメント", "エンリッチされたデータ", "Enterpriseデータエンリッチメント"]
+---
+
+## はじめに
+
+`Enterprise`
+
+Enterprise のエンリッチメントは、一部のデータ API のレスポンスペイロードに含まれる追加のメタデータです。有料サブスクリプションプランでのみ利用できます。
+
+以下の表は、各エンリッチメントの簡単な説明を示しています。
+
+| エンリッチメント: | 説明: |
+| :--- | :--- |
+| Expanded and Enhanced URLs | ポスト本文に含まれる短縮 URL（例: bitly）を自動的に展開し、遷移先ページの HTML の title および description のメタデータを提供します。 |
+| Matching rules object | 取得したポストごとに、どのルールがマッチしたかを示します。レスポンスオブジェクト内で、ルールタグとルール ID を返します。 |
+| Poll metadata | ポスト内に投票（Poll）が存在することを示し、投票の選択肢一覧に加えて、投票の継続時間と終了時刻の両方を含みます。 |
+| Profile geo | 可能な場合には [経度, 緯度] 座標を含む、推定されたユーザープロフィールの位置情報データと、関連する場所に関するメタデータです。 |
+
+<div id="expanded-and-enhanced-urls">
+  ### 展開および拡張された URL
+</div>
+
+Expanded and Enhanced URL エンリッチメントは、ポスト本文に含まれる短縮 URL を自動的に展開し、その結果得られた URL をペイロード内のメタデータとして含めます。加えて、このエンリッチメントはリンク先ページの `title` と `description` に含まれる HTML ページのメタデータも提供します。
+
+**重要な詳細:**
+
+* 短縮リンクを展開するために、システムは指定された URL へ HTTP HEAD リクエストを送信し、最終的な URL に到達するまでリダイレクトをすべて追跡します。この最終的な URL（ページのコンテンツ自体ではありません）がレスポンスのペイロードに含まれます。
+
+* URL エンリッチメントにより、リアルタイムストリームには 5〜10 秒程度の遅延が追加されます。
+
+* Full Archive Search API へのリクエストでは、展開された URL エンリッチメントのデータは、13 か月以内に作成されたポストに対してのみ利用できます。
+
+* URL エンリッチメントは、ポスト内に含まれるポストへのリンク（引用ポストを含む）、Moments へのリンク、およびプロフィールへのリンクには提供されません。 
+   
+
+<div id="post-payload">
+  #### ポストのペイロード
+</div>
+
+Expanded and Enhanced URL のエンリッチメントは、ポストのペイロード内の `entities` オブジェクト、特に `entitites.urls.unwound` オブジェクトに含まれています。ここでは次のメタデータのフィールドが提供されます。
+
+* 展開済み URL - `unwound.url`
+* 展開済み HTTP ステータス - `unwound.status`
+* 展開済み URL の HTML タイトル（最大 300 文字）- `unwound.title`
+* 展開済み URL の HTML 説明（最大 1000 文字）- `unwound.description`
+
+**これは、URL エンリッチメントを含む [entities オブジェクト](/ja/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#x-entities) の例です。**
+
+```
+"entities": {
+    "hashtags": [
+
+    ],
+    "urls": [
+      {
+        "url": "https:\/\/t.co\/HkTkwFq8UT",
+        "expanded_url": "http:\/\/bit.ly\/2wYTb9y",
+        "display_url": "bit.ly\/2wYTb9y",
+        "unwound": {
+          "url": "https:\/\/www.forbes.com\/sites\/laurencebradford\/2016\/12\/08\/11-websites-to-learn-to-code-for-free-in-2017\/",
+          "status": 200,
+          "title": "11 Websites To Learn To Code For Free In 2017",
+          "description": "It\u2019s totally possible to learn to code for free...but what are the best resources to achieve that? Here are 11 websites where you can get started."
+        },
+        "indices": [
+          10,
+          33
+        ]
+      }
+    ],
+    "user_mentions": [
+
+    ],
+    "symbols": [
+
+    ]
+  },
+```
+
+**これは、エンリッチされていないポストのリンクを含む entities オブジェクトの例です：**
+
+```
+"entities": {
+  "urls": [{
+    "url": "https://t.co/SywNbZdDmb",
+    "expanded_url": "https://x.com/XDevelopers/status/1050118621198921728",
+    "display_url": "x.com/XDevelopers/s…",
+     "indices": [
+        142,
+        165
+     ]
+   }
+  ]
+}
+```
+
+<div id="filtering-operators">
+  #### フィルタリング演算子
+</div>
+
+次の演算子は、URL メタデータ内の関連フィールドをフィルタリングし、トークン単位での一致を行います。
+
+**url:**
+
+* 例: “url:tennis”
+* 単語 tennis を含む任意の Expanded URL に対してトークン単位で一致します
+* また、“url:npr.org” のように指定することで、特定のウェブサイトからのリンクを含めたり除外したりするためのフィルタとしても使用できます
+
+**url&#95;title:**
+
+* 例: “url&#95;title:tennis”
+* 単語 tennis を含む任意の Expanded URL の HTML タイトルに対してトークン単位で一致します
+* ペイロードに含まれる HTML タイトル データに対して一致し、このデータは最大 300 文字に制限されています。
+
+**url&#95;description:**
+
+* 例: “url&#95;description:tennis”
+* 単語 tennis を含む任意の Expanded URL の HTML 説明文に対してトークン単位で一致します
+* ペイロードに含まれる HTML 説明文に対して一致し、この説明文は最大 1000 文字に制限されています。
+   
+
+<div id="http-status-codes">
+  #### HTTP Status Codes
+</div>
+
+展開済み URL のエンリッチメントでは、展開しようとしている最終 URL に対する HTTP ステータスコードも提供します。通常は 200 の値になります。その他の 400 番台の値は、URL の解決に問題があることを示します。
+
+URL を展開しようとすると、さまざまなステータスコードが返される可能性があります。URL を展開する処理の途中でリダイレクトが発生した場合は、次のいずれかになるまでリダイレクトを無制限にたどります。
+
+* 200 番台のコードに到達した場合（成功）
+* リダイレクトではないコードに到達した場合（失敗）
+* 最終 URL が妥当な時間内に解決できずタイムアウトした場合（408 - Timeout を返す）
+* 何らかの例外が発生した場合
+   
+
+例外が発生した場合は、以下のとおり理由と返されるステータスコードを対応付けます。
+
+| Reason | Status Code Returned |
+| :--- | :--- |
+| SSL Exceptions | 403 (Forbidden) |
+| Unwinding not allowed by URL | 405 |
+| Socket Timeout | 408 (Timeout) |
+| Unknown Host Exception | 404 (Not Found) |
+| Unsupported Operation | 404 (Not Found) |
+| Connect Exception | 404 (Not Found) |
+| Illegal Argument | 400 (Bad Request) |
+| Everything else | 400 (Bad Request) |
+
+<div id="matching-rules">
+  ### マッチングルール
+</div>
+
+matching rules エンリッチメントは、受信したポストに対してどのルール、またはどのルールの組み合わせがマッチしたかを示すメタデータオブジェクトです。これは主に PowerTrack ストリームで使用されます。
+
+マッチングは、ルール内に含まれる語句に対する厳密一致で行われ、アクティビティのコンテンツを句読点あり／なしの両方でスキャンします。マッチングは大文字と小文字を区別しません。コンテンツにルールで定義されたすべての語句が含まれていると判断された場合、マッチの原因となったルールを示すルートレベルの matching&#95;rules オブジェクトが生成されます。
+
+**PowerTrack**
+
+PowerTrack（リアルタイム、Replay、Historical）経由で配信されるポストには、次のように matching&#95;rules オブジェクトが含まれます：
+
+```
+"matching_rules": [{
+        "tag": null,
+        "id": 907728589029646336,
+        "id_str": "907728589029646336"
+    }]
+```
+
+PowerTrack では、`matching_rules` オブジェクトには、ある結果にマッチしたルールが*すべて*反映されます。言い換えると、特定のポストに複数のルールがマッチした場合でも、そのポストは 1 回だけ配信されますが、`matching_rules` 要素にはマッチしたすべてのルールが含まれます。
+
+<div id="poll-metadata">
+  ### 投票メタデータ
+</div>
+
+投票メタデータは、すべての製品（Realtime &amp; Historical APIs）で利用できる無償のエンリッチメントであり、エンリッチされたネイティブ形式のペイロードに含まれます。このメタデータは、ポスト内に投票が含まれていることを示し、投票の選択肢一覧に加えて、投票期間と終了時刻も含みます。このエンリッチメントにより、投票の存在を容易に把握できるようになり、表示用の投票付きポストを正しくレンダリングできます。
+
+<div id="important-details">
+  ##### 重要な詳細情報:
+</div>
+
+* すべての Enterprise API（PowerTrack、Replay、Search、Historical PowerTrack）で利用可能
+  * *注:* Replay と Historical PowerTrack については、このメタデータが最初に利用可能になったのは 2017/02/22 です。
+* 投票情報や投票結果は含まれません
+* 現在、フィルター／オペレーター機能はサポートされていません
+* **拡張ネイティブ形式**でのみ利用可能
+  * 拡張ネイティブ形式はユーザーが管理できる設定であり、Console からいつでも変更できます: *Select a Product (PowerTrack, Replay, Search) &gt; Settings タブ &gt; Output Format (データを元の形式のままにする)*
+
+#### ポストペイロード
+
+投票付きポストには、ペイロード内の「entities.polls」オブジェクトに、次のメタデータが含まれます。
+
+* 最大 4 つまでの選択肢を含み、それぞれに番号 (1～4) と選択肢テキストを持つ「options」配列
+* 投票の終了日時
+* 投票の継続時間
+
+参考として、以下のサンプルペイロードを参照してください。
+
+<div id="sample-payload">
+  #### サンプルペイロード
+</div>
+
+以下は、投票メタデータが付加されたネイティブ形式ペイロードの抜粋です。
+
+```json
+"entities":{
+          "hashtags":[],
+          "urls":[],
+          "user_mentions":[],
+          "symbols":[],
+          "polls":[
+             {
+                "options":[
+                   {
+                      "position":1,
+                      "text":"The better answer"
+                   },
+                   {
+                      "position":2,
+                      "text":"The best answer"
+                   }
+                ],
+                "end_datetime":"Sat Feb 04 15:33:11 +0000 2017",
+                "duration_minutes":1440
+             }
+          ]
+       },
+```
+
+<div id="profile-geo">
+  ### プロフィールの地理情報
+</div>
+
+<div id="introduction">
+  #### はじめに
+</div>
+
+多くの X のユーザープロフィールには、ユーザーが提供した公開の位置情報が含まれています。このデータは `user.location` 内で通常の文字列として返されます（[User object data dictionary](/ja/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary#native-enriched-user-object) を参照）。Profile Geo Enrichment は、可能な場合に位置情報文字列をジオコーディングおよび正規化することで、`user.location` の値に関連する構造化されたジオデータを追加します。緯度/経度の座標および関連する場所のメタデータは、Enterprise API 製品においてポストのペイロードに含まれている場合にのみ、`user.derived.locations` に追加されます。このデータは [enriched native format](/ja/x-api/enterprise-gnip-2.0/fundamentals/data-dictionary) を使用しているときに利用でき、[PowerTrack ルール](/ja/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators) を組み合わせてフィルタリングできます。
+
+<Note>
+  **注:** Profile Geo Enrichment を作成するために使用されている補助的なジオデータの一部は GeoNames.org に由来し、[Creative Commons Attribution 3.0 License](https://creativecommons.org/licenses/by/3.0/us/legalcode) の下で X によって使用されています。
+</Note>
+
+Profile Geo データは、X の PowerTrack、Replay、Volume Stream、Search、および Historical PowerTrack API に含まれます。
+
+<div id="profile-geo-data">
+  #### Profile Geo データ
+</div>
+
+| Enriched native field name | Example value | Description |
+| :--- | :--- | :--- |
+| user.derived.locations.country | United States | ポストを作成したユーザーの出身国。 |
+| user.derived.locations.country&#95;code | US  | ポストを作成したユーザーの出身国に対応する、2 文字の ISO-3166 国コード。 |
+| user.derived.locations.locality | Birmingham | ポストを作成したユーザーの出身地のローカリティ（一般的には都市）。 |
+| user.derived.locations.region | Alabama | ポストを作成したユーザーの出身地のリージョン（一般的には州／都道府県）。 |
+| user.derived.locations.sub&#95;region | Jefferson County | ポストを作成したユーザーの出身地のサブリージョン（一般的には郡）。 |
+| user.derived.locations.full&#95;name | Birmingham, Alabama, United States | ポストを作成したユーザーの出身地（サブリージョンを除く）のフルネーム。 |
+| User.derived.locations.geo | See Below | ポストを作成したユーザーの出身地のうち、最も細かい粒度の位置情報に対応する座標（緯度／経度）の配列。 |
+
+Historical PowerTrack、Search、および PowerTrack API では、Profile Geo データに基づくフィルタリングが可能です。Profile Geo データに対して使用できるフィルタリング用オペレーターの詳細については、該当する製品ドキュメントを参照してください。
+
+<div id="sample-payload">
+  #### サンプルペイロード
+</div>
+
+```
+{
+    "user": {
+        "derived": {
+            "locations": \[
+                {
+                    "country": "United States",
+                    "country_code": "US",
+                    "locality": "Birmingham",
+                    "region": "Alabama",
+                    "sub_region": "Jefferson County",
+                    "full_name": "Birmingham, Alabama, United States",
+                    "geo": {
+                        "coordinates": \[
+                            -86.80249,
+                            33.52066
+                        \],
+                        "type": "point"
+                    }
+                }
+            \]
+        }
+    }
+}
+```
+
+<div id="limitations">
+  #### 制限事項
+</div>
+
+* Profile Geo エンリッチメントは、プロフィールの location 文字列で記述されている地理的な場所について、最も適切と思われる候補を特定しようとします。複数の場所が似た名前を持つ場合や、名前があいまいな場合などの要因により、結果が常に正確になるとは限りません。
+* ユーザーのプロフィールの location フィールド（actor.location）に値が指定されていない場合、分類は行いません。
+* 精度レベル: Profile Geo エンリッチメントを国レベルまたは地域レベルでしか十分な信頼度で特定できない場合、subRegion や locality などの、より細かい地理情報はペイロードから省略されます。
+* Profile Geo エンリッチメントは、エンリッチメント結果の精度レベルに対応する緯度/経度座標（単一のポイント）を提供します。これらの座標は、エンリッチメントされた場所結果の地理的中心を表します。たとえば、精度レベルが国レベルの場合、その座標はその国の地理的中心に設定されます。
+* 住所プロパティ（locality/region/country/country code）に対して提供されている PowerTrack 演算子は、多様なルールの組み合わせを可能にするため、意図的にきめ細かく設計されています。同じ名前を別の場所と共有する特定の場所をターゲットにしようとする場合は、住所ルールを組み合わせることを検討してください。たとえば、次のようにすると「San Francisco, Philippines」に対するマッチを回避できます: profile&#95;locality:&quot;San Francisco&quot; profile&#95;region:California。個々の Profile Geo フィールドをターゲットとするルールを構築する際は、粒度のレベルを上げるごとに、得られる結果がより限定されることに注意してください。都市レベルのデータを取得しようとする場合でも、その地域が都市と大きく重なっている場合は、地域ルールのみに依存した方がよいケースもあります。たとえば、スイスのチューリッヒ市は、profile&#95;region:&quot;Zurich&quot; を使うことで、周辺地域も含めて効果的にターゲットにすることができます。
+* ネイティブ Geo を持つポストとの併用: Profile Geo エンリッチメントは、ペイロード内のネイティブ geo 値とは異なる、ポストに対する代替的な種類の地理情報を提供します。これら 2 種類の地理情報は、（利用可能なジオデータに基づき）特定のエリアに関連する可能性のあるすべてのポストを取得するために組み合わせて使用できますが、概念的に同一のものではありません。

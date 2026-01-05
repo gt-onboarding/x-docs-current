@@ -1,0 +1,511 @@
+---
+title: 版本
+keywords: ["Ads API 版本", "API 版本管理", "版本历史", "API 版本", "版本更新", "Ads API 版本"]
+---
+
+如需获取 X Ads API 各历史版本的最新信息，请参阅下文。
+
+| Version | Path    | Introduction Date | Deprecated Date | End of Life Date |
+|:---------|:---------|:--------------------|:------------------|:-------------------|
+| [12.0](#) | /12/    | 2022 年 10 月 27 日   | 待定              | 待定               |
+| [11.0](https://devcommunity.x.com/t/ads-api-version-11/168814) | /11/    | 2022 年 3 月 31 日    | 待定              | 待定               |
+| [10.0](#v9) | /10/    | 2021 年 8 月 31 日    | 2022 年 3 月 31 日   | 2022 年 10 月 27 日  |
+| [9.0](#v9)  | /9/     | 2021 年 3 月 2 日      | 2021 年 8 月 31 日  | 2022 年 3 月 31 日    |
+| [8.0](#v8)  | /8/     | 2020 年 9 月 8 日  | 2021 年 3 月 2 日    | 2021 年 8 月 31 日    |
+| [7.0](#v7)  | /7/     | 2020 年 3 月 3 日      | 2020 年 9 月 1 日 | 2021 年 3 月 2 日     |
+| [6.0](#v6)  | /6/     | 2019 年 8 月 28 日    | 2020 年 3 月 3 日    | 2020 年 9 月 1 日 |
+| [5.0](#v5)  | /5/     | 2019 年 2 月 28 日  | 2019 年 8 月 28 日  | 2020 年 3 月 3 日     |
+| [4.0](#v4)  | /4/     | 2018 年 8 月 28 日    | 2019 年 2 月 28 日 | 2019 年 8 月 28 日   |
+| [3.0](#v3)  | /3/     | 2018 年 2 月 1 日   | 2018 年 8 月 28 日  | 2019 年 2 月 28 日 |
+| [2.0](#v2)  | /2/     | 2017 年 7 月 10 日      | 2018 年 2 月 1 日 | 2018 年 8 月 1 日    |
+| [1.0](#v1)  | /1/     | 2016 年 3 月 31 日     | 2017 年 7 月 7 日     | 2018 年 1 月 10 日  |
+| [0.0](#v0)  | /0/     | 2013 年 2 月 21 日   | 不适用              | 2016 年 10 月 31 日  |
+
+<div id="overview">
+  ## 概述
+</div>
+
+每个月，我们都会对 X Ads API 做出一些变更，并推出若干新功能。这些变更几乎总是向后兼容的，但我们每年确实会有少量破坏性变更。我们收到开发者的反馈，指出 Ads API 变更节奏较快，在实现新功能、处理弃用以及测试变更时，会给他们的开发周期带来挑战。我们希望改进在使用我们 Ads 平台时的开发者体验，这也是我们引入端点版本管理这一概念的原因。
+
+下面是我们所讨论的一些概念的定义：
+
+**版本（Version）**：指的是在任一 Ads API 请求的 URL 路径中出现的版本号，例如：GET /{version_number}/accounts。这种版本管理方式被称为 URI 版本管理（URI versioning）。
+
+**破坏性变更（Breaking Changes）**：破坏性变更指任何需要开发者投入资源才能维持现有功能的变更。这包括用于调查需要进行哪些变更的资源、判断哪些功能/端点将被弃用的资源，以及最终完成所有这些变更实现所需的资源。破坏性变更的示例包括：
+
+* 从 API 请求/响应中移除某个参数
+
+* 修改任意参数或端点的名称
+
+* 更改值的表示方式（preview&#95;url → card&#95;uri）
+
+* 更改端点的行为（例如，异步与同步统计 async vs sync stats）
+
+* 添加/修改可选或必填参数（例如，将 name 设为请求中的必填字段）
+
+**弃用（Deprecation）**：被弃用的版本或产品将不再提供支持，建议开发者停止使用这些 API。
+
+**下线（Sunset）**：一旦某个产品或 API 被下线，与之对应的一组端点将不再能通过 API 进行访问。
+
+<div id="versioning-strategy">
+  ## 版本策略
+</div>
+
+该策略的主要原则如下：
+
+1. 所有破坏性变更都会被打包到一个新版本中
+
+2. 每当新版本发布时，现有版本的弃用宽限期为 6 个月
+
+3. 在任意时间点，API 将同时允许来自两个版本的请求，但这两个版本中较旧的那个将处于不受支持状态
+
+4. 为了加快新产品的采用，这些新产品将以持续发布的方式推出（不受版本节奏限制）
+
+5. 所有 API 响应都将包含一个 `x-current-api-version` 字段，其值为当前 API 版本；在调用任何已弃用的 API 端点时，还会在响应中包含一个 `x-api-warn` 头。
+
+如果出现任何需要进行 API 破坏性变更的基础产品需求变更（例如弃用多个年龄区间定向），我们将提前 90 天发出通知来宣布这一破坏性变更，并且在通知发布至少 90 天之后，才会部署这一破坏性变更。
+
+<div id="v9">
+  ### v9
+</div>
+
+截至今天（2021 年 3 月 3 日），X Ads API 的 9 版（v9）现已发布。本次版本旨在提升功能对齐程度、简化广告系列创建流程，并为我们的 Cards 和 Mobile App Promotion 端点引入关键更新。
+
+与之前的版本一样，将提供为期 6 个月的过渡期，以便迁移到 v9。自 2021 年 8 月 31 日起，现有的 Ads API 8 版（v8）将不再可用。我们鼓励所有开发者尽快迁移到最新版本的 Ads API，以避免任何服务中断。
+
+<Note>
+  **Note:** 自本次发布起，Ads API 的 7 版（v7）已结束生命周期，不再可用。
+</Note>
+
+有关详细信息，请参阅[开发者论坛上的公告](https://devcommunity.x.com/t/ads-api-version-9/150316)。
+
+<div id="v8">
+  ### v8
+</div>
+
+今天（2020 年 9 月 20 日），我们推出了 X Ads API 的第 8 版，旨在引入新的 Tailored Audiences（定向受众）功能、提升与 ads.x.com 的功能一致性，并改进开发者体验。
+
+与之前的版本一样，将提供 6 个月的过渡期用于迁移到 v8。自 2021-03-02 起，Ads API 的第 7 版将不再可用。我们鼓励所有开发者尽快迁移到最新版本的 API，以避免任何服务中断。
+
+详情请参阅[开发者论坛上的公告](https://devcommunity.x.com/t/ads-api-version-8/141914)。
+
+<div id="v7">
+  ### v7
+</div>
+
+今天，也就是 2020 年 3 月 20 日，我们发布了 X Ads API 的第 7 版（Version 7），旨在提升与 [ads.x.com](http://ads.x.com/) 的功能对齐程度。
+
+与之前的[版本](https://developer.x.com/en/docs/ads/general/overview/versions)一样，将有 6 个月的过渡期用于迁移至 v7。自 2020-09-01 起，Ads API 的第 6 版将不再可用。我们鼓励所有开发者尽快迁移到最新版本的 API，以避免任何服务中断。Ads API 的第 5 版已结束生命周期，不再可用。
+
+详情请参阅[开发者论坛上的公告](https://devcommunity.x.com/t/ads-api-version-7/135093)。
+
+<div id="v6">
+  ### v6
+</div>
+
+今天（2019 年 8 月 28 日），X 正式推出 Ads API v6，本次更新重点在于提升一致性并改进开发者体验。
+
+此版本包括：用于获取帖子的全新 endpoint、推广账号的统计数据、按名称搜索实体的功能，以及当前正在处理的异步分析作业数量信息。此外，我们还对使用媒体的 endpoint 以及定向条件相关的 endpoint 进行了以一致性为重点的更新。最后，我们对部分参数名称和响应属性进行了小幅更新，并弃用了 Scoped Timeline endpoint。
+
+如需了解完整详情，请参阅[开发者论坛上的公告](https://devcommunity.x.com/t/ads-api-version-6/129060)。
+
+<div id="v5">
+  ### v5
+</div>
+
+今天（2019 年 2 月 28 日），X 推出了 Ads API v5，本次更新重点在于支持规模化使用并提升效率。
+
+此版本包含一个用于确定在给定时间范围内哪些实体处于活动状态的新 endpoint、针对媒体创意（Media Creatives，即 X Audience Platform 上的 In-stream 视频和图片）的统计数据、按 card URI 获取&#95;多个&#95; card 的能力，以及在检索定向条件和其他实体方面更高的灵活性。此外，我们修复了一些 bug，并更新了参数名称和响应属性。最后，非媒体应用 card 和 POST `accounts/:account_id/account_media` endpoint 已被弃用。
+
+与之前的版本一样，将有 6 个月的过渡期用于迁移到 v5。自 **2019-08-28** 起，Ads API 的第 4 版将不再可用。我们鼓励所有合作伙伴尽快迁移到最新版本的 API，以避免任何服务中断。*Ads API 的第 3 版已到达生命周期结束阶段，不再可用。*
+
+<div id="new">
+  #### 新增
+</div>
+
+**判断哪些实体处于活跃状态**
+
+[Active Entities](/zh/x-ads-api/analytics#active-entities-2) 端点用于指示广告实体的分析指标是否发生变化。该端点设计为与分析端点配合使用，Active Entities 通过指定实体类型和日期范围（最长 90 天）来工作，并返回一个实体 ID 数组，你的平台应基于这些 ID 请求分析数据。不在返回列表中的 ID 不应在后续的分析请求中进行查询。
+
+此端点支持以下实体类型：`CAMPAIGN`、`FUNDING_INSTRUMENT`、`LINE_ITEM`、`MEDIA_CREATIVE` 和 `PROMOTED_TWEET`。
+
+**`MEDIA_CREATIVE` 统计**
+
+Ads API 的分析端点现在为 Media Creative 实体提供指标。Media Creatives 是用于在 X Audience Platform 上投放 In-stream 广告或图片的实体。X Ads UI 会在“In-stream videos”和“Display creatives”选项卡下显示 Media Creative 指标。[同步](/zh/x-ads-api/analytics#get-stats-accounts-account-id)和[异步](/zh/x-ads-api/analytics#asynchronous-analytics)分析端点现在都支持 `MEDIA_CREATIVE` 实体枚举。
+
+**获取多个卡片**
+
+在针对通过卡片 URI 值检索单个卡片而设计的端点的 [v3 版本](https://devcommunity.x.com/t/ads-api-version-3/100732) 基础上进行了改进，现在可以使用 [GET accounts/:account&#95;id/cards/all](/zh/x-ads-api/creatives#cards-fetch) 端点获取 *多个* 卡片。现在，你无需为每个卡片单独发起请求，而是可以在单个请求中最多检索 200 个卡片。
+
+有两点需要注意：
+
+1. URL 路径现在为 `accounts/:account_id/cards/all`。（先前路径已不可用。）这样可以与[用于按 ID 检索卡片的端点](/zh/x-ads-api/creatives#cards-fetch)保持一致。
+2. 必需的请求参数现在名为 card&#95;uris（复数）。
+
+**检索方面的灵活性**
+
+[GET accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) 端点现在支持多个 line item ID。line&#95;item&#95;ids 参数最多可接受 200 个 ID，且为必填项。此前仅接受单个 line item，这使得同步变得困难。通过此更改，现在可以在更短时间内检索到更多的定向信息。
+
+以下端点现在同样支持多个 line item ID，不过对于这些端点，line&#95;item&#95;ids 参数是可选的。
+
+* [GET accounts/:account&#95;id/line&#95;item&#95;apps](https://developer.x.com/en/docs/x-ads-api/campaign-management/api-reference/line-item-apps#get-accounts-account-id-line-item-apps)
+* [GET accounts/:account&#95;id/media&#95;creatives](/zh/x-ads-api/campaign-management#get-accounts-account-id-media-creatives)
+* [GET accounts/:account&#95;id/promoted&#95;accounts](/zh/x-ads-api/campaign-management#get-accounts-account-id-promoted-accounts)
+* [GET accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions](/zh/x-ads-api/creatives#preroll-call-to-actions)
+
+<div id="changed">
+  #### 已更改
+</div>
+
+**检索草稿推广活动和广告单元**
+
+草稿推广活动和广告单元的检索方式已更新。现在，当将 with&#95;draft(boolean) 参数设置为 true 时，会&#95;同时&#95;返回草稿和非草稿实体。这与已删除实体的检索方式保持一致（即使用 with&#95;deleted）。此前，要同时获取草稿和非草稿实体，至少需要两次请求。现在，可以通过一次 API 调用完成这一操作。
+
+| **v4** | **v5** |
+| :--- | :--- | :--- |
+| `draft_only` | `with_draft` |     |
+
+**Network Activation Duration 定向**
+
+Ads API 已修复一个显示问题：在添加 Network Activation Duration 定向后，响应中的定向类型会包含 `_IN_SEC` 后缀。由于 Network Activation Duration 始终以月为单位表示，提及以秒为单位会造成困惑。此修复使表示方式保持一致并减少混淆。
+
+| **v4** | **v5** |
+| :--- | :--- | :--- |
+| `NETWORK_ACTIVATION_DURATION_IN_SEC` | `NETWORK_ACTIVATION_DURATION` |     |
+
+**总计数和游标**
+
+在 v5 中，with&#95;total&#95;count 和 cursor 是互斥的。在同一请求中同时指定这两个参数将返回 EXCLUSIVE&#95;PARAMETERS 错误码。在 v5 之前，当指定了 cursor 时，with&#95;total&#95;count 会被忽略。此更改使这种关系更加明确。
+
+<div id="removed">
+  #### 已移除
+</div>
+
+将从 Ads API 响应中移除三个字段：preview&#95;url、account&#95;id 和 parent&#95;ids。针对这三项所需的工程改动工作量极小。
+
+* 在 v4 中，我们已宣布 cards 的 preview&#95;url 响应参数始终为 null。此次迁移的最后一步是从所有 cards 响应中移除 preview&#95;url。
+* 对于以下资源，将移除 account&#95;id 响应属性，因为广告账户 ID 已经出现在 URL 中以及 request.params 中。（我们有意将资金工具排除在此列表之外，因为在可能的情况下，父 ID 应该出现在响应对象中，而账户 ID 是资金工具的父实体。）
+  * 账户媒体
+  * 应用事件提供方
+  * 应用事件标签
+  * 推广活动（Campaigns）
+  * Cards
+  * Line items
+  * 可推广用户
+  * 定向条件
+* 对于 [GET accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) 请求，我们不再返回 parent&#95;ids 字段，因为它始终是一个空数组。
+
+**非媒体应用卡片**
+
+在 v5 中，不再支持非媒体应用卡片。此前，[创建或编辑非媒体应用卡片的功能](https://devcommunity.x.com/t/deprecation-announcement-app-download-cards/87807)已被移除。现在，与此资源相关的剩余端点也将被弃用。
+
+* 注意：这 **不** 影响图片和视频应用下载卡片。
+
+**账户媒体创建**
+
+在 v5 中不再提供 POST accounts/:account&#95;id/account&#95;media 端点。此资源的其他端点 **不** 受影响。进行这一更改的原因是：在将媒体添加到 [Media Library](/zh/x-ads-api/creatives#media-library) 时，某些情况下这些资产会被&#95;自动&#95;添加为 Account Media 实体，而尝试将已存在的资产再次添加到 Account Media 资源会导致错误。此情况会在以下场景中发生。
+
+* 添加到 Media Library 的 `AMPLIFY_VIDEO` 资产会自动作为 `PREROLL` 创意类型的 Account Media 资产添加。
+* 具有特定尺寸的图片添加到 Media Library 时，会自动添加为 Account Media 资产。创意类型（例如 `INTERSTITIAL`）取决于图片尺寸。（关于尺寸，请参阅我们的 [Enumerations](/zh/x-ads-api/introduction) 页面。）
+
+<div id="v4">
+  ### v4
+</div>
+
+Ads API 的第 4 版将于今天（2018 年 8 月 28 日）上线。
+
+此版本对我们的 [Audiences](/zh/x-ads-api/audiences) 产品进行了改进，其中包括由更强大的受众处理后端驱动的新 API 接口。第 4 版还包含一组用于管理用户、账户和税务设置的端点。此外，accounts/:account&#95;id/videos 端点将被弃用。本次发布还对部分参数和响应名称做了一些小的调整。
+
+与第 3 版一样，我们提供为期 6 个月的过渡期。自 **2019-02-28** 起，Ads API 的第 3 版将不再可用。我们鼓励所有合作伙伴尽快迁移到最新版本的 API，以避免任何服务中断。有关我们的版本策略的详细信息，请参阅 [Versions](/zh/x-ads-api/introduction) 页面。
+
+<div id="new">
+  #### 新增
+</div>
+
+***Audience API***
+
+全新的 Audiences API 构建在我们新的受众处理后端之上，具备更高的稳健性和可靠性。这个新端点允许合作伙伴为单个用户提供多种用户标识符类型，这意味着我们能够利用更多信号进行匹配。新的 Audience 端点的参考文档可在[此处](/zh/x-ads-api/audiences)查阅。我们计划在今年余下时间持续发布该产品的更新和改进。
+
+由于功能冗余，以下端点在 v4 中将不再可用（它们在 v3 中仍然可用，并会在 v3 不再可用时彻底**下线**）：
+
+* TON 上传：
+  * GET accounts/:account&#95;id/tailored&#95;audience&#95;changes
+  * GET accounts/:account&#95;id/tailored&#95;audience&#95;changes/:tailored&#95;audience&#95;change&#95;id
+  * POST accounts/:account&#95;id/tailored&#95;audience&#95;changes
+  * PUT accounts/:accounti&#95;d/tailored&#95;audiences/global&#95;opt&#95;out
+* 实时受众：
+  * POST tailored&#95;audience&#95;memberships
+
+最后，`list_type` 参数将在 v4 中从&#95;所有&#95; [Tailored Audiences 端点](/zh/x-ads-api/audiences)的请求和响应中移除。
+
+***设置端点***
+
+我们现在为账户管理员提供设置和更新用户、账户以及税务设置的功能。[用户设置](/zh/x-ads-api/campaign-management#get-accounts-account-id-user-settings-user-id)对应于某个广告账户中针对用户的联系偏好设置。通过 [PUT accounts/:account&#95;id](/zh/x-ads-api/campaign-management#put-accounts-account-id) 端点，广告主现在可以更新其账户名称和所属行业类型。最后，[税务设置](/zh/x-ads-api/campaign-management#get-accounts-account-id-tax-settings)端点允许在征收增值税（VAT）的国家/地区的广告主更新信息，例如公司名称、地址、VAT 编号，以及账户是由广告主本人持有，还是由代表广告主投放广告的代理商持有。
+
+<div id="changed">
+  #### 已更改
+</div>
+
+***通用相似受众重命名***
+
+我们正在更新 [POST accounts/:account&#95;id/line&#95;items](/zh/x-ads-api/campaign-management#post-accounts-account-id-line-items) 和 [PUT accounts/:accountit/line&#95;items/:line&#95;item&#95;id](/zh/x-ads-api/campaign-management#put-accounts-account-id-line-items-line-item-id) 端点中 `lookalike_expansion` 参数的枚举值。
+
+| **v3** | **v4** |
+| :--- | :--- |
+| `NARROW` | `DEFINED` |
+| `BALANCED` | `EXPANDED` |
+
+**统一使用 `country_code`**
+
+作为在 Ads API 上推进[一致性](https://devcommunity.x.com/t/feedback-ads-api-consistency/109145)改进的一部分，我们正在将以下端点中的参数名从 `app_country_code` 重命名为 `country_code`。
+
+* [POST accounts/:account&#95;id/cards/image&#95;app&#95;download](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [PUT accounts/:account&#95;id/cards/image&#95;app&#95;download/:card&#95;id](https://developer.x.com/content/developer-twitterhttps://developer.x.com/en/docs/ads/creatives/api-reference/image-app-download#put-accounts-account-id-cards-image-app-download-card-id)
+* [POST accounts/:account&#95;id/cards/video&#95;app&#95;download](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/video-app-download#post-accounts-account-id-cards-video-app-download)
+* [PUT accounts/:account&#95;id/cards/video&#95;app&#95;download/:card&#95;id](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/video-app-download#put-accounts-account-id-cards-video-app-download-card-id)
+
+这不会影响这些参数的行为或可接受的取值，仅是名称上的更改。
+
+**`preview_url` 始终为 null**
+
+正如在 v3 公告中所承诺的那样，所有现有卡片现在都有一个 `card_uri`。因此，`preview_url` 的值将始终为 `null`。
+
+在此提醒，请使用卡片的 `card_uri` 值将其与帖子关联。参见以下示例请求。
+
+$ twurl -X POST -H ads-api.x.com &quot;/4/accounts/18ce54d4x5t/tweet?text=Version 4&amp;card&#95;uri=card://958225772740714496&quot;
+
+<div id="removed">
+  #### 已移除
+</div>
+
+**视频端点**
+
+`accounts/:account_id/videos` 端点在 v4 中将不再可用。随着 [Media Library](/zh/x-ads-api/creatives#get-accounts-account-id-media-library) 端点的引入，该端点已被取代。请参阅以下用法对比。
+
+* v3 videos 端点：`twurl -H ads-api.x.com "/3/accounts/18ce54d4x5t/videos"`
+
+* v4 中用于视频的 Media Library 端点：`twurl -H ads-api.x.com "/4/accounts/18ce54d4x5t/media_library?media_type=VIDEO"`
+
+Media Library 端点与 videos 端点在功能上完全对等，并且还支持额外的功能，例如处理图片和 GIF。我们要求合作伙伴在所有媒体管理场景中仅使用 Media Library。
+
+**帖子视图中的 `as_user_id`**
+
+[GET accounts/:account&#95;id/tweet/preview/:tweet&#95;id](/zh/x-ads-api/creatives#get-accounts-account-id-tweets) 端点上可用的 `as_user_id` 参数将不再被接受。预览将始终以帖子的作者身份呈现。
+
+<div id="v3">
+  ### v3
+</div>
+
+Ads API 的第 3 个版本于 2018 年 2 月 1 日[发布](https://devcommunity.x.com/t/ads-api-version-3/100732)。Ads API 的第 2 个版本将于 2018 年 8 月 1 日到达生命周期终点。
+
+此版本包含全新的 Audience Intelligence 产品、对 Media Library 的访问能力，以及改进后的卡片工作流。同时，我们也宣布弃用 [PUT accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) 端点。最后，第 3 个版本还包括少量参数和响应更改，以及更低的批处理大小上限。
+
+与 [第 2 个版本](https://devcommunity.x.com/t/ads-api-version-2/90360)一样，我们为合作伙伴提供 **6 个月** 的迁移期。自 **2018-08-01** 起，Ads API 的 v2 将被关闭。我们鼓励所有合作伙伴和开发者尽快迁移到 v3。
+
+**Audience Intelligence**
+
+Audience Intelligence 为特定的 X 受众提供关于与其最相关的热门话题标签（hashtags）、@handles 和事件的实时洞察。例如，输入“美国 18-34 岁男性”，你将会看到 #nintendoswitch、#cardinal 和 @ricegum 在该受众群体中处于热门趋势。
+
+Audience Intelligence 的 [端点](/zh/x-ads-api/audiences) 将提供以下功能：
+
+* 基于输入受众，获取最相关的热门话题标签、@handles 和事件。
+* 基于输入受众，获取关键人口统计信息（例如年龄、性别和家庭收入）。
+* 基于关键字，获取帖子量的时间序列数据
+
+**Media Library**
+
+[Media Library](/zh/x-ads-api/creatives#get-accounts-account-id-media-library) 提供管理广告账户下图片、GIF 和视频的能力。这些媒体对象可以用于帖子以及创建卡片。它们还可以在多个创意中复用，无需多次上传相同素材。
+
+库中的对象通过 a media&#95;key 标识。Media key 是一种字符串值，例如：13&#95;875943225764098048。 在 Ads API 中，我们正逐步转向对所有媒体使用 media key。
+
+**Improved card workflow**
+
+我们所有的卡片端点现在都支持 media key。这使得可以使用 Media Library 中的对象来创建或更新卡片。
+
+此外，我们还引入了两个用于[检索卡片详情](/zh/x-ads-api/creatives#fetching-cards)的新端点。通过指定 card&#95;uri 或 id（例如），这些端点可以用于查询用于帖子或预定发布帖子中的卡片。此前，这是无法实现的。
+
+<div id="other-changes">
+  #### 其他更改
+</div>
+
+除了这些新功能外，我们还在版本 3 中包含了以下更改。
+
+**新增**
+
+* [GET insights/keywords/search](/zh/x-ads-api/audiences) 端点的响应现在包含一个 related&#95;keywords 属性，其中包含与输入关键词相关的 30 个词条。
+
+**更改**
+
+* 定向条件批量大小上限现在为 500。
+* card&#95;uri 和 preview&#95;url 响应属性现在互斥。当卡片具有 card&#95;uri 时，preview&#95;url 将为 null；当卡片没有 card&#95;uri 时，只会返回 preview&#95;url。
+  * 自 2018-01-29 起创建的所有卡片都将具有 card&#95;uri。
+  * 到版本 4 时，所有现有卡片都将具有 card&#95;uri。
+* 不再支持 *创建* 使用 5:2 图片的卡片。虽然 *现有* 的 5:2 图片卡片仍然可以使用，但我们鼓励合作伙伴改用表现更好的 1.91:1 或 1:1 纵横比（在支持的情况下）。
+
+**移除**
+
+* [PUT accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) 端点已不再可用。我们之所以做出此更改，是因为该端点的替换（replace）行为会导致广告主困惑，并且与我们其他一次更新单个资源的 PUT 端点不一致。取而代之的是，合作伙伴应使用 [POST batch/accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#post-batch-accounts-account-id-targeting-criteria) 端点，它提供了更大的灵活性，包括能够在一次请求中同时添加和移除定向条件。
+* funding instruments 的响应中不再返回 paused 属性。相应地，请查看 entity&#95;status 响应属性来确定某个 funding instrument 是否被暂停。此外，由于 paused 和 cancelled 对应相同的取值，因此响应中也不再返回 cancelled。
+* 我们已从 [GET accounts/:account&#95;id/tweet/preview](/zh/x-ads-api/creatives#get-accounts-account-id-tweets) 端点中移除了 card&#95;id 参数。
+* 由于无法检索已删除的 Scheduled Tweets，因此不再支持 with&#95;deleted 参数。
+* 下列端点中已移除 draft&#95;only 参数，因为这些实体永远不会处于草稿状态：
+  * [GET accounts/:account&#95;id/targeting&#95;criteria](/zh/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria)
+  * [GET accounts/:account&#95;id/promoted&#95;tweets](/zh/x-ads-api/campaign-management#get-accounts-account-id-promoted-tweets)
+  * [GET accounts/:account&#95;id/promoted&#95;accounts](/zh/x-ads-api/campaign-management#get-accounts-account-id-promoted-accounts)
+  * [GET accounts/:account&#95;id/media&#95;creatives](/zh/x-ads-api/campaign-management#get-accounts-account-id-media-creatives)
+  * [GET accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions](/zh/x-ads-api/creatives#get-accounts-account-id-preroll-call-to-actions)
+
+**注意**
+
+Video Website Cards 和 Scheduled Tweets 现在都已结束 beta 阶段。有关自发布以来我们对 Scheduled Tweets 所做更改，请参阅 [此讨论帖](https://devcommunity.x.com/t/announcement-update-to-scheduled-tweets/94869)。这些更改包括支持为 Scheduled Tweets 生成 HTML [预览](https://devcommunity.x.com/t/announcement-tweet-preview-improvements/96577)。
+
+<div id="v2">
+  ### v2
+</div>
+
+Ads API 的第 2 版于 2017 年 7 月 10 日[上线](https://devcommunity.x.com/t/ads-api-version-2/90360)。Ads API 的第 1 版将于 2018 年 1 月 10 日结束生命周期。
+
+**重大变更/弃用[¶](#breaking-changes-deprecations "此标题的永久链接")**
+
+* `total_count` 现在是一个可选的响应属性。只有当 `with_total_count` 被设置为 `true` 时才会返回
+
+* 在 `line_items` 和 `campaigns` 的请求与响应对象中，`paused` 和 `draft_only` 字段被一个单一的 `entity_status` 参数所取代
+
+* `status` 参数在 [POST accounts/:account&#95;id/tweet](/zh/x-ads-api/creatives) 和 [GET accounts/:account&#95;id/tweet/preview](/zh/x-ads-api/creatives#get-accounts-account-id-tweets) 端点上被重命名为 `text`
+
+* [GET targeting&#95;criteria/locations](/zh/x-ads-api/campaign-management#get-targeting-criteria-locations) 端点的 `location_type` 枚举值现在为复数形式。`COUNTRY` 现在是 `COUNTRIES`，`REGION` 现在是 `REGIONS`，等等。唯一的例外是，在 v2 中，`CITY` 现在是 `METROS`，以更准确地反映该位置类型指的是指定市场区域（Designated Market Areas，DMA）或“大都市区”（metros）
+
+* PUT accounts/:account&#95;id/promoted&#95;tweets 端点上的 `display_properties` 属性已被移除。该值也将不再作为响应的一部分返回
+
+* 因此，现在无法再更新（PUT）promoted&#95;tweets 实体
+
+* [GET accounts/:account&#95;id/promoted&#95;tweets](/zh/x-ads-api/campaign-management#get-accounts-account-id-promoted-tweets) 端点上的 `line_item_id` 参数已被移除
+
+* 在 v2 端点上将无法再创建 5:2 比例的 Website Cards
+
+* `data_type` 响应属性将不再返回
+
+**新功能[¶](#new-features "此标题的永久链接")**
+
+1. Cards v2
+2. 草稿 campaign/line item 的创建与激活
+3. 定时发布的帖子（Scheduled Tweets）
+4. 异步作业摘要（Async Job Summaries）
+
+**Cards v2[¶](#cards-v2 "此标题的永久链接")**
+
+* 在将 card 关联到帖子时，应使用 `card_uri` 请求参数，而不是将 `preview_url` 追加到帖子文本中
+* 如果在响应中（card 创建步骤中）未返回 `card_uri` 参数，则使用 `preview_url`
+* 所有新的 card 格式都将在 API 上原生支持，并利用 `card_uri` 参数。
+
+**新 Card 格式：[¶](#new-card-formats "此标题的永久链接")**
+
+* Video Website Cards：
+
+  * [GET accounts/:account&#95;id/cards/video&#95;website](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#get-accounts-account-id-cards-video-website)
+  * [GET accounts/:account&#95;id/cards/video&#95;website/:card&#95;id](https://developer.x.comhttps://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#get-accounts-account-id-cards-video-website-card-id)
+  * [POST accounts/:account&#95;id/cards/video&#95;website](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#post-accounts-account-id-cards-video-website)
+  * [PUT accounts/:account&#95;id/cards/video&#95;website/:card&#95;id](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#put-accounts-account-id-cards-video-website-card-id)
+  * [DELETE accounts/:account&#95;id/cards/video&#95;webiste/:card&#95;id](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#delete-accounts-account-id-cards-video-website-card-id)
+
+**草稿 Campaign[¶](#draft-campaigns "此标题的永久链接")**
+
+草稿 Campaign 之前可以通过 [GET accounts/:account&#95;id/camapaigns](/zh/x-ads-api/campaign-management#get-accounts-account-id-campaigns) 端点进行查看。从 v2 开始，现在可以通过 API 创建/激活草稿 campaign。
+
+* [POST accounts/:account&#95;id/line&#95;items](/zh/x-ads-api/campaign-management#post-accounts-account-id-line-items) 和 [POST accounts/:account&#95;id/campaigns](/zh/x-ads-api/campaign-management#post-accounts-account-id-campaigns) 端点上的 `entity_status` 参数值可以设置为 `DRAFT`，以创建新的广告系列或广告单元草稿。
+* 新创建草稿所需的参数如下：
+
+| 草稿广告系列 | 草稿广告单元 |
+| :--- | :--- |
+| `funding_instrument_id` | `campaign_id` |
+| `name` | `objective` |
+| `start_time` | `product_type` |
+|     | `placements` |
+
+**注意[¶](#notes "此标题的永久链接")**
+
+* 草稿广告单元或广告系列只能将 `entity_status` 从 `DRAFT` 转换为 `PAUSED` 或 `ACTIVE`。
+* 若要激活整个广告系列（包含多个广告单元），该广告系列下的每个广告单元以及广告系列本身都必须将 `entity_status` 设置为 `ACTIVE`。
+* 若要更改任何广告系列或广告单元的 `entity_status`，请使用相应的 PUT 端点。
+
+**计划帖子[¶](#scheduled-tweets "此标题的永久链接")**
+
+* 计划帖子功能包含以下新端点：
+
+* 计划帖子：
+
+  * [GET accounts/:account&#95;id/scheduled&#95;tweets](/zh/x-ads-api/creatives#get-accounts-account-id-scheduled-tweets)
+  * [GET accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#scheduled-tweets)
+  * [POST accounts/:account&#95;id/scheduled&#95;tweets](/zh/x-ads-api/creatives#post-accounts-account-id-scheduled-tweets)
+  * [PUT accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#scheduled-tweet-management)
+  * [DELETE accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/zh/x-ads-api/creatives#scheduled-tweet-management)
+
+* 广告系列管理：
+
+  * [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/zh/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets)
+  * [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/zh/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id)
+  * [POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/zh/x-ads-api/campaign-management#post-accounts-account-id-scheduled-promoted-tweets)
+  * [DELETE accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/zh/x-ads-api/campaign-management#delete-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id)
+
+* 新创建的计划帖子可以安排在未来的任意日期。
+
+* 目前无法预览计划帖子。
+
+* 只有处于 `SCHEDULED` 状态的计划帖子才能编辑或删除。
+
+* 在到达 `scheduled_at` 日期/时间之前，计划帖子 *不会* 传播到 Enterprise Firehose 或任何其他数据 API。
+
+<div id="v1">
+  ### v1
+</div>
+
+Ads API 的第 1 版于 2016 年 3 月 31 日发布，并将于 2018 年 1 月 10 日结束其生命周期。
+
+**第 1 版中的变更：[¶](#changes-in-version-1 "Permalink to this headline")**
+
+* [版本管理支持](https://blog.x.com/2016/versioning-is-coming-to-twitter-s-ads-apis)
+* `CUSTOM` [objective](/zh/x-ads-api/campaign-management#objective-based-campaigns) 已不再受支持
+* [批量端点](/zh/x-ads-api/campaign-management#post-batch-accounts-account-id-campaigns) 现已全面开放使用
+* [触达预估变更](https://developer.x.com/en/docs/ads/campaign-management/api-reference/reach-estimate.html#get-accounts-account-id-reach-estimate):
+* 为了提供更准确的触达预估，该 endpoint 现在会考虑预算因素。以下参数现为必填项：
+  * [新增] `campaign_daily_budget_amount_local_micro`
+  * `currency`
+  * `bid`
+  * `objective`
+* 响应对象已更新，现在会为响应值返回取值范围。
+* `infinite_count` 已重命名为 `infinite_bid_count`，以避免其用途引发歧义
+* 除了 `count` 和 `infinite_bid_count` 之外，现在还会返回以下新的数据指标：
+  * `impressions`
+  * `engagements`
+  * `estimated_daily_spend_local_micro`
+* 自定义受众数据类型变更
+* 在我们所有的响应中，Tailored Audiences 的 `data_type` 已从 `tailored_audiences` 更新为 `tailored_audience`。
+* 共享定向受众现已作为*仅通过 API 提供*的测试版提供。共享定向受众允许在多个广告账户之间共用同一个受众。使用 [POST accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions](/zh/x-ads-api/audiences)（以及相关）端点来管理你希望在多个广告账户间共享的定向受众的权限。
+* 在为广告主账户收集绩效[分析](/zh/x-ads-api/analytics)数据的方式上有了显著改进：
+* 为了与我们的[最佳实践](/zh/x-ads-api/analytics#best-practices)保持一致，我们现在起只允许通过[同步统计端点](/zh/x-ads-api/analytics#get-stats-accounts-account-id)拉取最多最近 **7 天** 的数据。
+* 为简化拉取指标，我们用新的 `metric_groups` 参数替换了 `metrics` 参数。开发者只需在请求中声明希望返回哪些指标分组即可。
+  * 对于某个实体不适用的任何指标请求，都会从响应中排除，并以 `null` 值表示。 *这些指标不会计入你的分析费用上限。*
+* 响应已被**大幅简化**，现在将与我们的 UI 中展示指标的方式更加一致。
+  * 之前，我们为每个投放位置分别提供了单独的指标（搜索中的推广帖子、时间线中的推广帖子、个人资料和帖子详情中的推广帖子、X Audience Platform）。现在，我们会为每个位置返回一组标准化的指标；不再使用 `promoted_tweet_timeline_impressions`、`promoted_tweet_search_impressions`、`promoted_tweets_profile_impressions`、`promoted_tweets_tpn_impressions`，而是在你按以下任一类别请求时，将这些作为单一指标 `impressions` 提供（适用于所有相关指标）：
+  * `ALL_ON_TWITTER`
+  * `PUBLISHER_NETWORK`
+  * 当你发起请求时，你将只获得一个 `impressions` 指标，从而更容易与我们的 UI 中显示的数值进行匹配。
+  * 你必须执行两次查询才能分别获取 `ALL_ON_TWITTER` 和 `PUBLISHER_NETWORK` 的数据，因为这两者无法合并。
+* 根据开发者的反馈，[异步分析端点](/zh/x-ads-api/analytics#asynchronous-analytics) 现已可用！
+  * 一组全新的端点，用于*异步*请求统计数据，适用于你不需要立即获取的数据或历史数据提取。
+  * 使用一个新的统一端点将统计任务加入队列。我们会在资源允许的情况下处理你请求的数据。
+  * 你可以查询任务状态端点，以确定数据是否可用。
+  * 一旦数据可用，我们会提供一个取回 ID，供你下载 JSON 响应，其结构将与同步端点的响应相同。
+  * 在单个任务中最多可查询 **90 天**的数据，且最多可包含 **20 个实体**。
+* 请查看我们的 analytics v1 迁移指南，其中包含 v0 指标到 v1 指标的映射关系
+* Sandbox 改进 * 您现在可以在 Sandbox 环境中[创建多个测试广告账户](/zh/x-ads-api/campaign-management#post-accounts)。* 您现在可以在 Sandbox 环境中为测试广告账户创建多个资金工具（仅限 Sandbox 环境）。这使您能够测试我们所有类型的资金工具。此前仅提供 `CREDIT_CARD` 资金来源可用于测试。* 想要测试 beta 功能？您现在可以在 Sandbox 环境中为某个账户开启或关闭功能，以满足您的测试需求。
+
+<div id="v0">
+  ### v0
+</div>
+
+Ads API 的 v0 版本于 2013 年 2 月 21 日正式发布，并一直受支持至 2016 年 10 月 31 日。
+
+所有 v0 版本的 analytics 端点均已弃用，并将在 2016 年 10 月 31 日后被移除。这些端点在 v1 版本中已由 3 个新的 analytics 端点替代。
+
+触达预估（reach estimation）端点在 v1 版本中具有新的行为。

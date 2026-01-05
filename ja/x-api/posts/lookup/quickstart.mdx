@@ -1,0 +1,151 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["ポストルックアップ クイックスタート", "ポストルックアップ クイックスタート", "ルックアップチュートリアル", "ルックアップガイド", "GET ポスト クイックスタート", "ルックアップ例"]
+---
+
+import { Button } from "/snippets/ja/button.mdx"
+
+<div id="getting-started-with-the-posts-lookup-endpoints">
+  ## ポストルックアップエンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、Postman を使って、指定した一連のフィールドを含めてポストルックアップエンドポイントに初めてリクエストを送信する方法を説明します。
+
+さまざまなプログラミング言語で書かれたサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストの認証を行うための一連の[キーとトークン](/ja/resources/fundamentals/authentication)が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントにサインアップ](https://developer.x.com/en/portal/petition/essential/basic-info)し、承認を受けます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-get-tweets-request">
+  ### GET /tweets リクエストの作成手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ1：ツールまたはライブラリを用意する
+</div>
+
+このエンドポイントにリクエストを送信する方法はいくつかあり、さまざまなツール、コード例、ライブラリを利用できますが、ここでは手順を簡略化するために Postman を使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、以下のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Post Lookup &gt; Multiple Posts」リクエストに移動します。
+
+<div id="step-two-authenticate-your-request">
+  #### ステップ 2: リクエストを認証する
+</div>
+
+X API に適切にリクエストを送信するには、自分に権限があることを確認する必要があります。リクエストの認証には次のいずれかを使用できます。
+
+* [OAuth 2.0 アプリ専用フロー](resources/fundamentals/authentication)
+* [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication)
+* [OAuth 1.0a User Context](resources/fundamentals/authentication)
+
+ここでは説明を簡単にするため、このリクエストには OAuth 2.0 アプリ専用フローを使用します。ただし、非公開の[メトリクス](/ja/x-api/fundamentals/metrics)やポストを取得したい場合は、他のいずれかの認証方法を使用する必要があります。
+
+OAuth 2.0 アプリ専用フローを利用するには、まず Postman の右上にある環境セレクターから「X API v2」という名前の環境を選択し、「initial value」と「current value」のフィールドに、キーとトークン（特に App Access Token、別名 App-only Bearer Token）を入力します（環境のドロップダウン横にある目のアイコンをクリックして入力します）。
+
+正しく設定できていれば、これらの変数はリクエストの Authorization タブに自動的に反映されます。
+
+<div id="step-three-identify-and-specify-which-posts-you-would-like-to-retrieve">
+  #### ステップ3: 取得したいポストを特定して指定する
+</div>
+
+リクエスト内で、取得したいポスト、または複数のポストを指定する必要があります。X.com で対象のポストをクリックして開き、URL を確認することで、そのポストの ID を見つけることができます。例えば、次の URL のポスト ID は `1228393702244134912` です。
+
+`https://x.com/TwitterDev/status/1228393702244134912`
+
+Postman で「Params」タブを開き、この ID、またはカンマ区切りの複数のポスト ID の文字列を、ids パラメータの「Value」列に入力します。
+
+| Key  | Value |
+| :---- | :----- |
+| `ids` | `1228393702244134912,1227640996038684673,1199786642791452673` |
+
+***
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### ステップ4：取得したいフィールドを特定して指定する
+</div>
+
+ステップ3の後に「Send」ボタンをクリックすると、レスポンス内でデフォルトの [Post object fields](/ja/x-api/fundamentals/data-dictionary) である `id`、`text`、`edit_history_tweet_ids` が返されます。
+
+この演習では、異なるオブジェクトから追加で 3 種類のフィールドセットをリクエストします。
+
+* プライマリーユーザーオブジェクト内の追加フィールド `tweet.created_at field`
+* 返されたポストに対応する投稿者のユーザーオブジェクトのデフォルトフィールド: `id`、`name`、`username`
+* 対応するユーザーオブジェクト内の追加フィールド `user.created_at field`
+
+Postman で「Params」タブを開き、「Query Params」テーブルに次の `key:value` ペアを追加します。
+
+| Key            | Value        | Returned fields                                                       |
+| :------------- | :----------- | :-------------------------------------------------------------------- |
+| `tweet.fields` | `created_at` | `tweets.created_at`                                                   |
+| `expansions`   | `author_id`  | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields`  | `created_at` | `includes.users.created_at`                                           |
+
+「Send」ボタンの横に次の URL が表示されているはずです。
+
+```
+https://api.x.com/2/tweets?ids=1228393702244134912,1227640996038684673,1199786642791452673&tweet.fields=created_at&expansions=author_id&user.fields=created_at
+```
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### ステップ5：リクエストを送信し、レスポンスを確認する
+</div>
+
+すべての準備が整ったら、「Send」ボタンをクリックすると、次のようなレスポンスが返ってきます。
+
+```
+{
+    "data": [
+        {
+            "edit_history_tweet_ids": [
+                "1228393702244134912"
+            ],
+            "text": "開発者はバレンタインカードに何と書いたでしょうか？\n  \nwhile(true) {\n    I = Love(You);  \n}",
+            "id": "1228393702244134912",
+            "created_at": "2020-02-14T19:00:55.000Z",
+            "author_id": "2244994945"
+        },
+        {
+            "edit_history_tweet_ids": [
+                "1227640996038684673"
+            ],
+            "text": "Doctors: Googling stuff online does not make you a doctor\n\nDevelopers: https://t.co/mrju5ypPkb",
+            "id": "1227640996038684673",
+            "created_at": "2020-02-12T17:09:56.000Z",
+            "author_id": "2244994945"
+        },
+        {
+            "edit_history_tweet_ids": [
+                "1199786642791452673"
+            ],
+            "text": "C#",
+            "id": "1199786642791452673",
+            "created_at": "2019-11-27T20:26:41.000Z",
+            "author_id": "2244994945"
+        }
+    ],
+    "includes": {
+        "users": [
+            {
+                "name": "Developers",
+                "created_at": "2013-12-14T04:35:55.000Z",
+                "id": "2244994945",
+                "username": "XDevelopers"
+            }
+        ]
+    }
+}
+```

@@ -1,0 +1,941 @@
+---
+title: Conversiones móviles
+keywords: ["conversiones móviles", "seguimiento de conversiones móviles", "conversiones de aplicaciones móviles", "seguimiento de aplicaciones móviles", "seguimiento de conversiones"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="mact-overview">
+  ## Descripción general de MACT
+</div>
+
+La medición de [promoción de aplicaciones móviles](https://biz.x.com/mobile-app-promotion) en X permite a los anunciantes hacer un seguimiento del éxito de las campañas publicitarias en X diseñadas para impulsar instalaciones u otras conversiones dentro de la aplicación. Un socio de medición móvil de X permite a un anunciante gestionar qué conversiones quiere medir de las aplicaciones que está promocionando en X. Una vez que el anunciante ha configurado el tipo y las ventanas temporales de los eventos que desea registrar, el socio de medición móvil enviará todos esos eventos a X y recibirá inmediatamente datos de atribución que indican la campaña y el material creativo con los que el usuario interactuó y que impulsaron la conversión.
+
+<div id="conversion-events">
+  ### Eventos de conversión
+</div>
+
+Para reportar un [evento de conversión](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/conversion-event) a X y obtener datos de atribución, el socio debe enviar el ID de la aplicación móvil, el tipo y la marca de tiempo de la conversión, así como un valor hash del ID de publicidad/dispositivo. Proporcionar estos datos registrará el evento de conversión en la plataforma de X y también devolverá la atribución cuando corresponda. Además, el anunciante puede optar por proporcionar metadatos adicionales sobre el evento de conversión, como el valor de una compra, el ID de un producto o un método de registro.
+
+<div id="api-reference">
+  ## Referencia de la API
+</div>
+
+<div id="conversion-event">
+  ### Evento de conversión
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Ejecutar en Postman
+</Button>
+
+<div id="post-conversion_event">
+  #### POST conversion&#95;event
+</div>
+
+Registra un evento de conversión de medición en dispositivos móviles. La respuesta indicará la atribución de X o de X Audience Platform (TAP).
+
+Esto está relacionado con el endpoint [GET conversion&#95;attribution](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/conversion-attribution#get-conversion-attribution).
+
+En la respuesta se indicará atribución de X, de TAP o ninguna atribución. El nodo `twitter_attribution` siempre estará presente y tendrá un valor de `null` cuando no haya atribución de X (consulte el ejemplo de respuesta más abajo). Si se indica atribución de TAP, aparecerá un nodo `tpn_attribution` que se completará en consecuencia. Consulte la [visión general de TAP](https://developer.x.com/en/docs/x-ads-api/measurement/overview/twitter-audience-platform) para obtener más información.
+
+Hay varios parámetros opcionales disponibles para definir metadatos asociados a cada evento de conversión. Estos metadatos no tienen ningún efecto en los cálculos de atribución.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/conversion_event`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| app&#95;id  <br />*required* | El identificador único en la tienda de aplicaciones correspondiente.<br /><br />Tipo: int, string<br /><br />Ejemplo: `333903271`, `com.vine.android` |
+| conversion&#95;time  <br />*required* | La hora del evento de conversión en un formato de marca de tiempo ISO-8601, con milisegundos incluidos.<br /><br />Tipo: string<br /><br />Ejemplo: `2014-05-22T02:38:28.103Z` |
+| conversion&#95;type  <br />*required* | El tipo de evento de conversión.<br /><br />Tipo: enum<br /><br />Valores posibles: `PURCHASE`, `SIGN_UP`, `INSTALL`, `RE_ENGAGE`, `UPDATE`, `TUTORIAL_COMPLETE`, `RESERVATION`, `ADD_TO_CART`, `ADD_TO_WISHLIST`, `LOGIN`, `CHECKOUT_INITIATED`, `SEARCH`, `LEVEL_ACHIEVED`, `ACHIEVEMENT_UNLOCKED`, `CONTENT_VIEW`, `SHARE`, `INVITE`, `ADDED_PAYMENT_INFO`, `SPENT_CREDITS`, `RATED` |
+| hashed&#95;device&#95;id  <br />*required* | El IDFA o AdID con hash HMAC&#95;SHA-256.<br /><br />Tipo: string<br /><br />Ejemplo: `ABCD1234XYZ` |
+| os&#95;type  <br />*required* | El tipo de sistema operativo (OS) de la aplicación.<br /><br />Tipo: enum<br /><br />Valores posibles: `IOS`, `ANDROID` |
+| click&#95;window  <br />*optional* | La ventana de clic para este evento, en días.<br /><br />Tipo: int<br /><br />**Nota**: `click_window` debe ser mayor o igual que view&#95;through&#95;window.<br /><br />Predeterminado: `14`  <br />Valores posibles: `1`, `7`, `14`, `30` |
+| device&#95;ip&#95;address  <br />*optional* | Dirección IPv4 o IPv6 del dispositivo cuando ocurrió el evento de conversión.<br /><br />Tipo: string<br /><br />Ejemplo: `192.133.78.1` |
+| level  <br />*optional* | Un nivel asociado con este evento.<br /><br />Tipo: int<br /><br />Ejemplo: `2` |
+| non&#95;twitter&#95;engagement&#95;time  <br />*optional* | La hora de la última interacción fuera de X antes de la conversión.<br /><br />Tipo: string<br /><br />Ejemplo: `2014-05-22T02:38:28.103Z` |
+| non&#95;twitter&#95;engagement&#95;type  <br />*optional* | El tipo de interacción fuera de X antes del evento de conversión.<br /><br />Tipo: enum<br /><br />Valores posibles: `CLICK`, `VIEW` |
+| number&#95;items  <br />*optional* | Número de elementos asociados con este evento.<br /><br />Tipo: int<br /><br />Ejemplo: `2` |
+| price&#95;currency  <br />*optional* | Se espera que sea un código ISO 4217 que indique la moneda asociada con este evento.<br /><br />Tipo: string<br /><br />Ejemplos: `EUR`, `USD`, `JPY` |
+| price&#95;micro  <br />*optional* | Un importe de precio asociado con este evento en micros (unidades de una millonésima de la moneda).<br /><br />Tipo: int<br /><br />Ejemplo: `123450000` |
+| user&#95;payment&#95;info  <br />*optional* | Un valor booleano que indica si la información de pago del usuario está almacenada en la aplicación asociada con este evento.<br /><br />Tipo: bool<br /><br />Valores posibles: `true` o `false` |
+| view&#95;through&#95;window  <br />*optional* | La ventana de visualización para este evento, en días.<br /><br />**Nota**:<br /><br />`click_window` debe ser mayor o igual que view&#95;through&#95;window.<br /><br />Tipo: int<br /><br />Predeterminado: `1`  <br />Valores posibles: `0`, `1`, `7`, `14`, `30` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`https://ads-api.x.com/12/conversion_event?app_id=333903271&os_type=IOS&hashed_device_id=ABCD1234XYZ&conversion_type=INSTALL&conversion_time=2013-04-16T07:00:00.123Z&click_window=14&view_through_window=1`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "conversion_value_micro": 0,
+        "view_through_window": 1,
+        "tpn_attribution": null,
+        "conversion_time": "2017-01-21T01:14:00.602Z",
+        "click_window": 30,
+        "limit_ad_tracking": false,
+        "event_metadata": null,
+        "non_twitter_engagement_type": null,
+        "conversion_type": "INSTALL",
+        "partner_client_id": "com.appname contact id",
+        "app_id": "com.appname",
+        "hashed_device_id": "lke1GZa3AseB343ZcCQq7svfHzLfuSqyYnE+Rf49MOI=",
+        "twitter_attribution": {
+          "country_code": "US",
+          "engagement_time": "2017-01-21T01:13:00.602Z",
+          "engagement_type": "CLICK",
+          "attribution_type": "PROMOTED",
+          "promoted_properties": {
+            "campaign_id": "4ns44",
+            "line_item_id": "3x44d",
+            "publisher_app_id": "333903271"
+            "account_id":"18ce11e3egb",
+            "line_item_objective": "APP_INSTALLS",
+            "campaign_name": null
+          },
+          "tweet_id": "11434635565377600"
+        },
+        "os_type": "ANDROID",
+        "non_twitter_engagement_time": null
+      },
+      "request": {
+        "params": {
+          "version_number": "1",
+          "app_id": "com.appname",
+          "conversion_type": "INSTALL",
+          "os_type": "ANDROID",
+          "hashed_device_id": "lke1GZa3AseB343ZcCQq7svfHzLfuSqyYnE+Rf49MOI=",
+          "conversion_time": "2017-01-21T01:14:00.602Z",
+          "click_window": "30",
+          "view_through_window": "1",
+          "limit_ad_tracking": "false"
+        }
+      }
+    }
+```
+
+<div id="app-event-tags">
+  ### Etiquetas de eventos de la aplicación
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Ejecutar en Postman
+</Button>
+
+<div id="get-accountsaccount_idapp_event_tags">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;tags
+</div>
+
+Obtén los detalles de algunas o todas las etiquetas de eventos de la aplicación asociadas con la cuenta actual.
+
+Estas definen las ventanas de conversión configuradas para cada tipo de conversión en el seguimiento de conversiones en aplicaciones móviles.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto para [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;event&#95;tag&#95;ids  <br />*optional* | Limita la respuesta únicamente a las etiquetas de eventos de la aplicación deseadas, especificando una lista de identificadores separados por comas. Se pueden proporcionar hasta 200 IDs.<br /><br />Type: string<br /><br />Example: `jhp` |
+| count  <br />*optional* | Especifica la cantidad de registros que se intentará recuperar por cada solicitud.<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | Especifica un cursor para obtener la siguiente página de resultados. Consulta [Paginación](/es/x-ads-api/introduction) para obtener más información.<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| sort&#95;by  <br />*optional* | Ordena por el atributo admitido en orden ascendente o descendente. Consulta [Ordenación](/es/x-ads-api/fundamentals/sorting) para obtener más información.<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| with&#95;deleted  <br />*optional* | Incluye resultados eliminados en tu solicitud.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+| with&#95;total&#95;count  <br />*optional* | Incluye el atributo de respuesta `total_count`.<br /><br />**Nota**: Este parámetro y `cursor` son excluyentes.<br /><br />**Nota**: Las solicitudes que incluyen `total_count` tendrán límites de frecuencia más bajos, actualmente establecidos en 200 por 15 minutos.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags?app_event_tag_ids=jhp`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "request": {
+        "params": {
+          "app_event_tag_ids": [
+            "jhp"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "provider_app_event_name": null,
+          "app_store_identifier": "co.vine.android",
+          "post_view_attribution_window": 1,
+          "deep_link_scheme": "vine://",
+          "id": "jhp",
+          "retargeting_enabled": true,
+          "conversion_type": "INSTALL",
+          "created_at": "2016-12-08T07:49:58Z",
+          "post_engagement_attribution_window": 14,
+          "provider_app_event_id": null,
+          "last_tracked_at": "2021-05-22T17:00:04Z",
+          "status": "TRACKING",
+          "updated_at": "2016-12-08T23:07:54Z",
+          "os_type": "ANDROID",
+          "deleted": false
+        }
+      ]
+    }
+```
+
+<div id="get-accountsaccount_idapp_event_tagsapp_event_tag_id">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;tags/:app&#95;event&#95;tag&#95;id
+</div>
+
+Obtén una etiqueta de evento de aplicación específica asociada a la cuenta actual.
+
+Estas etiquetas definen las ventanas de conversión configuradas para cada tipo de conversión en el seguimiento de conversiones de aplicaciones móviles.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags/:app_event_tag_id`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*obligatorio* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| app&#95;event&#95;tag&#95;id  <br />*obligatorio* | Una referencia a la etiqueta de evento de la aplicación con la que operas en la solicitud.<br /><br />Tipo: string<br /><br />Ejemplo: `jhp` |
+| with&#95;deleted  <br />*opcional* | Incluye los resultados eliminados en la solicitud.<br /><br />Tipo: boolean<br /><br />Valor predeterminado: `false`  <br />Valores posibles: `true`, `false` |
+
+#### Ejemplo de solicitud
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags/jhp`
+
+#### Ejemplo de respuesta
+
+```json
+    {
+      "request": {
+        "params": {
+          "app_event_tag_id": "jhp",
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "data": {
+        "provider_app_event_name": null,
+        "app_store_identifier": "co.vine.android",
+        "post_view_attribution_window": 1,
+        "deep_link_scheme": "vine://",
+        "id": "jhp",
+        "retargeting_enabled": true,
+        "conversion_type": "INSTALL",
+        "created_at": "2016-12-08T07:49:58Z",
+        "post_engagement_attribution_window": 14,
+        "provider_app_event_id": null,
+        "last_tracked_at": "2021-05-22T17:00:04Z",
+        "status": "TRACKING",
+        "updated_at": "2016-12-08T23:07:54Z",
+        "os_type": "ANDROID",
+        "deleted": false
+      }
+    }
+```
+
+<div id="post-accountsaccount_idapp_event_tags">
+  #### POST accounts/:account&#95;id/app&#95;event&#95;tags
+</div>
+
+Crea una nueva etiqueta de evento de la aplicación asociada a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| app&#95;store&#95;identifier  <br />*required* | El identificador de la tienda de aplicaciones.<br /><br />Tipo: string<br /><br />Ejemplo: `com.twitter.android` |
+| conversion&#95;type  <br />*required* | El tipo de evento de conversión.<br /><br />Tipo: enum<br /><br />Valores posibles: `ACHIEVEMENT_UNLOCKED`, `ADDED_PAYMENT_INFO`, `ADD_TO_CART`, `ADD_TO_WISHLIST`, `CHECKOUT_INITIATED`, `CONTENT_VIEW`, `INSTALL`, `INVITE`, `LEVEL_ACHIEVED`, `LOGIN`, `PURCHASE`, `RATED`, `RESERVATION`, `RE_ENGAGE`, `SEARCH`, `SHARE`, `SIGN_UP`, `SPENT_CREDITS`, `TUTORIAL_COMPLETE`, `UPDATE` |
+| os&#95;type  <br />*required* | El tipo de sistema operativo (OS) de la aplicación.<br /><br />Tipo: enum<br /><br />Valores posibles: `IOS`, `ANDROID` |
+| provider&#95;app&#95;event&#95;id  <br />*required* | El ID de la etiqueta de conversión en el sitio del proveedor.<br /><br />Tipo: string<br /><br />Ejemplo: `provider_tag_j5394` |
+| provider&#95;app&#95;event&#95;name  <br />*required* | El nombre de la etiqueta de conversión en el sitio del proveedor.<br /><br />Tipo: string<br /><br />Ejemplo: `provider_name_a4382` |
+| deep&#95;link&#95;scheme  <br />*optional* | Especifica la URI de deep link para la aplicación asociada con esta etiqueta.<br /><br />Tipo: string<br /><br />Ejemplo: `twitter://` |
+| post&#95;engagement&#95;attribution&#95;window  <br />*optional* | La ventana de atribución posterior a la interacción para estos eventos.<br /><br />Tipo: int<br /><br />Valor predeterminado: 30  <br />Valores posibles: `1`, `7`, `14`, `30` |
+| post&#95;view&#95;attribution&#95;window  <br />*optional* | La ventana de atribución posterior a la visualización para estos eventos.<br /><br />Tipo: int<br /><br />Valor predeterminado: 1  <br />Valores posibles: `0`, `1`, `7`, `14`, `30` |
+| retargeting&#95;enabled  <br />*optional* | Especifica si debe habilitarse el retargeting para esta etiqueta de evento de aplicación.<br /><br />Tipo: boolean<br /><br />Valor predeterminado: true  <br />Valores posibles: `true`, `false` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags?app_store_identifier=com.twitter.android&os_type=ANDROID&conversion_type=PURCHASE&provider_app_event_id=abc123&provider_app_event_name=test-tag`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "provider_app_event_name": "test-tag",
+        "app_store_identifier": "com.twitter.android",
+        "post_view_attribution_window": 1,
+        "deep_link_scheme": "https://",
+        "id": "3p3t",
+        "retargeting_enabled": true,
+        "conversion_type": "PURCHASE",
+        "created_at": "2017-09-06T06:58:22Z",
+        "post_engagement_attribution_window": 30,
+        "provider_app_event_id": "abc123",
+        "updated_at": "2017-09-06T06:58:22Z",
+        "os_type": "ANDROID",
+        "deleted": false
+      },
+      "request": {
+        "params": {
+          "provider_app_event_name": "test-tag",
+          "app_store_identifier": "com.twitter.android",
+          "account_id": "18ce54d4x5t",
+          "conversion_type": "PURCHASE",
+          "provider_app_event_id": "abc123",
+          "os_type": "ANDROID"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idapp_event_tagsid">
+  #### DELETE accounts/:account&#95;id/app&#95;event&#95;tags/:id
+</div>
+
+Elimina la etiqueta de evento de aplicación especificada correspondiente a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_event_tags/:id`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta usada. Aparece en la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes a la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| id  <br />*required* | Una referencia a la etiqueta de evento de aplicación (app event tag) con la que se opera en la solicitud.<br /><br />Tipo: string<br /><br />Ejemplo: `jhp` |
+
+##### Ejemplo de petición
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/app_event_tags/jhp`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "provider_app_event_name": null,
+        "app_store_identifier": "co.vine.android",
+        "post_view_attribution_window": 1,
+        "deep_link_scheme": "vine://",
+        "id": "jhp",
+        "retargeting_enabled": true,
+        "conversion_type": "INSTALL",
+        "created_at": "2016-12-08T07:49:58Z",
+        "post_engagement_attribution_window": 14,
+        "provider_app_event_id": null,
+        "last_tracked_at": "2021-05-22T17:00:04Z",
+        "status": "TRACKING",
+        "updated_at": "2017-08-30T05:44:57Z",
+        "os_type": "ANDROID",
+        "deleted": true
+      },
+      "request": {
+        "params": {
+          "id": "jhp",
+          "account_id": "5gvk9h"
+        }
+      }
+    }
+```
+
+<div id="app-lists">
+  ### Listas de aplicaciones
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Ejecutar en Postman
+</Button>
+
+<div id="get-accountsaccount_idapp_lists">
+  #### GET accounts/:account&#95;id/app&#95;lists
+</div>
+
+Obtén detalles de algunas o de todas las listas de aplicaciones asociadas a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists`
+
+#### Parámetros
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece en la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto para [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| app&#95;list&#95;ids  <br />*optional* | Restringe la respuesta solo a las listas de aplicaciones deseadas especificando una lista de identificadores separados por comas. Se pueden proporcionar hasta 200 IDs.<br /><br />Type: string<br /><br />Example: `wm7x` |
+| count  <br />*optional* | Especifica la cantidad de registros que se intentará recuperar por cada solicitud individual.<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | Especifica un cursor para obtener la siguiente página de resultados. Consulta [Paginación](/es/x-ads-api/introduction) para más información.<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| sort&#95;by  <br />*optional* | Ordena por un atributo compatible en orden ascendente o descendente. Consulta [Ordenación](/es/x-ads-api/fundamentals/sorting) para más información.<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| with&#95;deleted  <br />*optional* | Incluye resultados eliminados en tu solicitud.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+| with&#95;total&#95;count  <br />*optional* | Incluye el atributo de respuesta `total_count`.<br /><br />**Nota**: Este parámetro y `cursor` son mutuamente excluyentes.<br /><br />**Nota**: Las solicitudes que incluyen `total_count` tendrán límites de frecuencia más bajos, actualmente establecidos en 200 cada 15 minutos.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists?app_list_ids=wm7x`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "request": {
+        "params": {
+          "app_list_ids": [
+            "wm7x"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      },
+      "next_cursor": null,
+      "data": [
+        {
+          "id": "wm7x",
+          "name": "foo @ 14026528192426843"
+        }
+      ]
+    }
+```
+
+<div id="get-accountsaccount_idapp_listsapp_list_id">
+  #### GET accounts/:account&#95;id/app&#95;lists/:app&#95;list&#95;id
+</div>
+
+Recuperar una lista de aplicaciones específica asociada a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists/:app_list_id`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*obligatorio* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| app&#95;list&#95;id  <br />*obligatorio* | Una referencia a la lista de aplicaciones con la que operas en la solicitud.<br /><br />Tipo: string<br /><br />Ejemplo: `28ukf` |
+| with&#95;deleted  <br />*opcional* | Incluir resultados eliminados en la solicitud.<br /><br />Tipo: boolean<br /><br />Valor predeterminado: `false`  <br />Valores posibles: `true`, `false` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`GET https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists/28ukf`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "name": "twitter @ 262689209670784",
+        "id": "28ukf",
+        "created_at": "2017-08-17T17:07:42Z",
+        "updated_at": "2017-08-17T17:07:42Z",
+        "deleted": false,
+        "apps": [
+          {
+            "app_store_identifier": "com.twitter.android",
+            "os_type": "Android"
+          }
+        ]
+      },
+      "request": {
+        "params": {
+          "app_list_id": "28ukf",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="post-accountsaccount_idapp_lists">
+  #### POST accounts/:account&#95;id/app&#95;lists
+</div>
+
+Crea una `app_list` asociada a la cuenta actual.
+
+Actualmente hay un límite de 100 objetos `app_list` por `account_id` y 500 aplicaciones por `app_list`.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| app&#95;store&#95;identifiers  <br />*required* | Los identificadores de la tienda de aplicaciones que se incluirán en la `app_list`.<br /><br />Tipo: string<br /><br />Ejemplo: `com.twitter.android` |
+| name  <br />*required* | El nombre que asignarás a la `app_list`.<br /><br />Tipo: string<br /><br />Ejemplo: `My First App List` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`POST https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists?name=app list&app_store_identifiers=com.twitter.android`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "name": "app list",
+        "id": "2a4um",
+        "created_at": "2017-09-06T07:17:26Z",
+        "updated_at": "2017-09-06T07:17:26Z",
+        "deleted": false,
+        "apps": [
+          {
+            "app_store_identifier": "com.twitter.android",
+            "os_type": "Android"
+          }
+        ]
+      },
+      "request": {
+        "params": {
+          "app_store_identifiers": [
+            "com.twitter.android"
+          ],
+          "name": "app list",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idapp_listsapp_list_id">
+  #### DELETE accounts/:account&#95;id/app&#95;lists/:app&#95;list&#95;id
+</div>
+
+Elimina la lista de aplicaciones especificada asociada a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/accounts/:account_id/app_lists/:app_list_id`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| app&#95;list&#95;id  <br />*required* | Una referencia a la lista de aplicaciones con la que se está operando en la solicitud.<br /><br />Tipo: string<br /><br />Ejemplo: `28ukf` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`DELETE https://ads-api.x.com/12/accounts/18ce54d4x5t/app_lists/28ukf`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "name": "twitter @ 262689209670784",
+        "id": "28ukf",
+        "created_at": "2017-08-17T17:07:42Z",
+        "updated_at": "2017-09-12T22:20:33Z",
+        "deleted": true,
+        "apps": [
+          {
+            "app_store_identifier": "com.twitter.android",
+            "os_type": "Android"
+          }
+        ]
+      },
+      "request": {
+        "params": {
+          "app_list_id": "28ukf",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="app-event-provider-configurations">
+  ### Configuraciones del proveedor de eventos de la Aplicación
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Ejecutar en Postman
+</Button>
+
+[ ❯]()
+
+<div id="get-accountsaccount_idapp_event_provider_configurations">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations[¶](#get-accounts-account-id-app-event-provider-configurations "Enlace permanente a este encabezado")
+</div>
+
+Obtén detalles de algunas o todas las configuraciones de proveedores de eventos de aplicación (configuración principal para el seguimiento de conversiones en aplicaciones móviles) asociadas con la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations`
+
+##### Parameters
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excluyendo [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| count  <br />*optional* | Especifica la cantidad de registros que se intentará recuperar por cada solicitud individual.<br /><br />Type: int<br /><br />Default: `200`  <br />Min, Max: `1`, `1000` |
+| cursor  <br />*optional* | Especifica un cursor para obtener la siguiente página de resultados. Consulta [Pagination](/es/x-ads-api/introduction) para obtener más información.<br /><br />Type: string<br /><br />Example: `8x7v00oow` |
+| ids  <br />*optional* | Limita la respuesta solo a las configuraciones deseadas especificando una lista de identificadores separados por comas. Se pueden proporcionar hasta 200 ID.<br /><br />Type: string<br /><br />Example: `25n` |
+| sort&#95;by  <br />*optional* | Ordena por un atributo admitido en orden ascendente o descendente. Consulta [Sorting](/es/x-ads-api/fundamentals/sorting) para obtener más información.<br /><br />Type: string<br /><br />Example: `created_at-asc` |
+| with&#95;deleted  <br />*optional* | Incluye resultados eliminados en tu solicitud.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+| with&#95;total&#95;count  <br />*optional* | Incluye el atributo de respuesta `total_count`.<br /><br />**Nota**: Este parámetro y `cursor` son mutuamente excluyentes.<br /><br />**Nota**: Las solicitudes que incluyan `total_count` tendrán límites de frecuencia más bajos, actualmente establecidos en 200 cada 15 minutos.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`GET https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations?ids=25n`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": [
+        {
+          "provider_name": "Answers powered by Fabric",
+          "id": "25n",
+          "provider_advertiser_id": "54ac2766f0de9e1f7a00001a",
+          "created_at": "2016-12-08T07:49:58Z",
+          "provider_advertiser_identifier": "54ac2766f0de9e1f7a00001a",
+          "updated_at": "2017-05-12T21:37:15Z",
+          "deleted": false
+        }
+      ],
+      "next_cursor": null,
+      "request": {
+        "params": {
+          "ids": [
+            "25n"
+          ],
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="get-accountsaccount_idapp_event_provider_configurationsid">
+  #### GET accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations/:id
+</div>
+
+Recupera un ID específico para las configuraciones de proveedor de eventos (configuración principal para el seguimiento de conversiones de aplicaciones móviles) asociadas a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations/:id`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta utilizada. Aparece en la ruta del recurso y, por lo general, es un parámetro obligatorio en todas las solicitudes a la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Type: string<br /><br />Example: `18ce54d4x5t` |
+| id  <br />*required* | Una referencia a la configuración del proveedor de eventos de la aplicación que se utiliza en la solicitud.<br /><br />Type: string<br /><br />Example: `25n` |
+| with&#95;deleted  <br />*optional* | Incluir resultados eliminados en la solicitud.<br /><br />Type: boolean<br /><br />Default: `false`  <br />Possible values: `true`, `false` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`GET https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations/25n`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data_type": "app_event_provider_configuration",
+      "data": {
+        "provider_name": "API McTestface",
+        "id": "25n",
+        "provider_advertiser_id": "123",
+        "created_at": "2017-03-24T22:24:56Z",
+        "provider_advertiser_identifier": "123",
+        "updated_at": "2017-03-24T22:24:56Z",
+        "deleted": false
+      },
+      "request": {
+        "params": {
+          "id": "25n",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="post-accountsaccount_idapp_event_provider_configurations">
+  ##### POST accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations
+</div>
+
+Crea una nueva configuración de proveedor de eventos de aplicación asociada a la cuenta actual. Solo se puede asociar un proveedor MACT a una cuenta publicitaria determinada.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Name | Description |
+| :--- | :--- |
+| account&#95;id  <br />*required* | El identificador de la cuenta correspondiente. Aparece en la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, a excepción de [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| provider&#95;advertiser&#95;id  <br />*required* | El identificador del anunciante en el sitio del proveedor.<br /><br />Tipo: string<br /><br />Ejemplo: `client1` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`POST https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations?provider_advertiser_id=client1`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "provider_name": "InternalTestProvider",
+        "id": "e5g",
+        "provider_advertiser_id": "client1",
+        "created_at": "2017-08-30T05:40:07Z",
+        "provider_advertiser_identifier": "client1",
+        "updated_at": "2017-09-06T06:39:03Z",
+        "deleted": false
+      },
+      "request": {
+        "params": {
+          "provider_advertiser_id": "client1",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="delete-accountsaccount_idapp_event_provider_configurationsid">
+  #### DELETE accounts/:account&#95;id/app&#95;event&#95;provider&#95;configurations/:id[¶]
+</div>
+
+Elimina la configuración de proveedor de eventos de la aplicación especificada correspondiente a la cuenta actual.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/11/accounts/:account_id/app_event_provider_configurations/:id`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| account&#95;id  <br />*obligatorio* | El identificador de la cuenta utilizada. Aparece dentro de la ruta del recurso y, por lo general, es un parámetro obligatorio para todas las solicitudes de la Advertiser API, excepto [GET accounts](/es/x-ads-api/campaign-management#accounts). La cuenta especificada debe estar asociada con el usuario autenticado.<br /><br />Tipo: string<br /><br />Ejemplo: `18ce54d4x5t` |
+| id  <br />*obligatorio* | Una referencia a la configuración del proveedor de eventos de la aplicación con la que se opera en la solicitud.<br /><br />Tipo: string<br /><br />Ejemplo: `e5g` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`DELETE https://ads-api.x.com/11/accounts/18ce54d4x5t/app_event_provider_configurations/e5g`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      "data": {
+        "provider_name": "InternalTestProvider",
+        "id": "e5g",
+        "provider_advertiser_id": "client1",
+        "created_at": "2017-08-30T05:40:07Z",
+        "provider_advertiser_identifier": "client1",
+        "updated_at": "2017-08-30T05:40:26Z",
+        "deleted": true
+      },
+      "request": {
+        "params": {
+          "id": "e5g",
+          "account_id": "18ce54d4x5t"
+        }
+      }
+    }
+```
+
+<div id="conversion-attribution">
+  ### Atribución de conversiones
+</div>
+
+<Button href="https://app.getpostman.com/run-collection/1d12b9fc623b8e149f87">
+  Ejecutar en Postman
+</Button>
+
+<div id="get-conversion_attribution">
+  #### GET conversion&#95;attribution
+</div>
+
+Consulta X para comprobar la atribución de conversiones sin registrar un evento de conversión. La respuesta indicará la atribución de X.
+
+Esto está relacionado con el endpoint [POST conversion&#95;event](https://developer.x.com/en/docs/x-ads-api/measurement/api-reference/conversion-event#post-conversion-event).
+
+En la respuesta se indicará atribución de X, de TAP o ninguna atribución. El nodo `twitter_attribution` siempre estará presente y tendrá un valor de `null` cuando no haya atribución de X, y se completará como se muestra en el ejemplo de respuesta a continuación. Si se indica atribución de TAP, habrá un nodo `tpn_attribution` presente y se completará en consecuencia. Consulta la [descripción general de TAP](https://developer.x.com/en/docs/twitter-ads-api/measurement/twitter-audience-platform/overview) para obtener más información.
+
+<div id="resource-url">
+  ##### URL del recurso
+</div>
+
+`https://ads-api.x.com/12/conversion_attribution`
+
+<div id="parameters">
+  ##### Parámetros
+</div>
+
+| Nombre | Descripción |
+| :--- | :--- |
+| app&#95;id  <br />*required* | El identificador único correspondiente en la tienda de aplicaciones.<br /><br />Tipo: int, string<br /><br />Ejemplo: `333903271`, `com.vine.android` |
+| conversion&#95;time  <br />*required* | El momento del evento de conversión en un formato de marca de tiempo ISO-8601, que incluye milisegundos.<br /><br />Tipo: string<br /><br />Ejemplo: `2014-05-22T02:38:28.103Z` |
+| conversion&#95;type  <br />*required* | El tipo de evento de conversión.<br /><br />Tipo: enum<br /><br />Valores posibles: `ACHIEVEMENT_UNLOCKED`, `ADDED_PAYMENT_INFO`, `ADD_TO_CART`, `ADD_TO_WISHLIST`, `CHECKOUT_INITIATED`, `CONTENT_VIEW`, `INSTALL`, `INVITE`, `LEVEL_ACHIEVED`, `LOGIN`, `PURCHASE`, `RATED`, `RESERVATION`, `RE_ENGAGE`, `SEARCH`, `SHARE`, `SIGN_UP`, `SPENT_CREDITS`, `TUTORIAL_COMPLETE`, `UPDATE` |
+| hashed&#95;device&#95;id  <br />*required* | El IDFA o AdID con hash HMAC&#95;SHA-256.<br /><br />Tipo: string<br /><br />Ejemplo: `ABCD1234XYZ` |
+| os&#95;type  <br />*required* | El tipo de sistema operativo de la aplicación.<br /><br />Tipo: enum<br /><br />Valores posibles: `IOS`, `ANDROID` |
+| click&#95;window  <br />*optional* | La ventana de clic para este evento en días.<br /><br />Tipo: int<br /><br />Predeterminado: `14`  <br />Valores posibles: `1`, `7`, `14`, `30` |
+| extra&#95;device&#95;ids  <br />*optional* | Un SHA256 del SHA1 del ID de dispositivo enviado en `hashed_device_id`, más cualquier ID de dispositivo adicional con hash.<br /><br />Tipo: string<br /><br />Ejemplo: `ABCD1234XYZ`, `DCBA4321XYZ` |
+| non&#95;twitter&#95;engagement&#95;time  <br />*optional* | El momento de la última interacción no proveniente de X antes de la conversión.<br /><br />Tipo: string<br /><br />Ejemplo: `2014-05-22T02:38:28.103Z` |
+| non&#95;twitter&#95;engagement&#95;type  <br />*optional* | El tipo de interacción no proveniente de X anterior al evento de conversión.<br /><br />Tipo: enum<br /><br />Valores posibles: `CLICK`, `VIEW` |
+| view&#95;through&#95;window  <br />*optional* | La ventana de visualización para este evento en días.<br /><br />Tipo: int<br /><br />Predeterminado: `1`  <br />Valores posibles: `0`, `1`, `7`, `14`, `30` |
+
+<div id="example-request">
+  ##### Ejemplo de solicitud
+</div>
+
+`GET https://ads-api.x.com/12/conversion_attribution?app_id=333903271&os_type=IOS&hashed_device_id=ABCD1234XYZ&conversion_type=INSTALL&conversion_time=2013-04-16T07:00:00.123Z&click_window=14&view_through_window=0`
+
+<div id="example-response">
+  ##### Ejemplo de respuesta
+</div>
+
+```json
+    {
+      data:{
+        "app_id":"333903271",
+        "os_type":"IOS",
+        "hashed_device_id":"ABCD1234XYZ",
+        "conversion_type":"INSTALL",
+        "partner_client_id":"123abc",
+        "conversion_time":"2013-04-16T07:00:00.123Z",
+        "click_window":14,
+        "view_through_window":0,
+        "extra_device_ids":null,
+        "twitter_attribution":{
+          "engagement_type":"VIEW",
+          "engagement_time":"2013-04-16T07:00:00.123Z",
+          "country_code":"US",
+          "tweet_id":"383034667764441088",
+          "attribution_type":"PROMOTED",
+          "promoted_properties":{
+            "campaign_id”: “54a21",
+            "campaign_name":"Vine_Contest",
+            "line_item_id":"23ab2d4"
+          }
+        }
+      },
+      "data_type":"conversion_attribution",
+      "request":{
+        "params":{
+          "app_id":"333903271",
+          "os_type":"IOS",
+          "hashed_device_id":"ABCD1234XYZ",
+          "conversion_time":"2013-04-16T07:00:00.123Z",
+          "conversion_type":"INSTALL",
+          "click_window":14,
+          "view_through_window":0
+        }
+      }
+    }
+```

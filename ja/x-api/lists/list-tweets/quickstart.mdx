@@ -1,0 +1,135 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["List ポスト クイックスタート", "List タイムライン クイックスタート", "List のポスト取得 クイックスタート", "List のポスト クイックスタート"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-list-posts-lookup-endpoint">
+  ## List Posts ルックアップエンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、Postman を使用して List Posts ルックアップエンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストの認証に使用する [キーとトークン](/ja/resources/fundamentals/authentication) 一式が必要です。これらのキーとトークンは、次の手順に従うことで生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+  * developer portal 上で [プロジェクト](/ja/resources/fundamentals/projects) を作成し、関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報を安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-list-posts-lookup-request">
+  ### List Posts ルックアップリクエストを作成する手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ1：ツールまたはライブラリを用意する
+</div>
+
+このエンドポイントにリクエストを送信するために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、「List」フォルダーに移動し、その中の「List Posts」フォルダーを選択してから、「List Posts lookup」を選択します。
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### Step two: Authenticate your request
+</div>
+
+X API へ正しくリクエストを送信するには、必要な権限があることを確認する必要があります。このエンドポイントでそれを行うには、[App only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)、または [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) のいずれかの認証方法でリクエストを認証する必要があります。
+
+簡単のために、このリクエストでは App only を利用しますが、非公開の[メトリクス](/ja/x-api/fundamentals/metrics)やポストをリクエストしたい場合は、他のいずれかの認証方法を使用する必要があります。
+
+App only を利用するには、Postman の右上にある環境ドロップダウンから “X API v2” という名前の環境を選択し、「initial value」と「current value」フィールド（環境ドロップダウン横の目のアイコンをクリック）に、キーとトークン（特に [App only Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)、別名 App only Bearer Token）を追加する必要があります。
+
+これを正しく行うと、これらの変数はリクエストの Authorization タブに自動的に取り込まれます。
+ 
+
+<div id="step-three-identify-and-specify-which-list-you-would-like-to-retrieve-posts-from">
+  #### ステップ3：ポストを取得したいリストを特定して指定する
+</div>
+
+リクエスト内で、ポストを取得したいリストを必ず指定する必要があります。リストの ID は、x.com にアクセスしてリストをクリックし、URL を確認することで見つけることができます。たとえば、次の URL のリスト ID は 84839422 です。
+
+https://x.com/i/lists/84839422
+
+ターゲット ID には、有効な任意のリスト ID を使用できます。Postman で「Params」タブに移動し、`id` パス変数の「Value」列に ID を入力します。ID の前後にスペースを含めないように注意してください。
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| id  | 84839422 (リスト ID) |
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### ステップ4: 取得したいフィールドを特定して指定する
+</div>
+
+ステップ3の後に「Send」ボタンをクリックすると、レスポンス内にデフォルトの [Post オブジェクト](/ja/x-api/fundamentals/data-dictionary#tweet)のフィールドである id と text が返されます。
+
+追加のフィールドも受け取りたい場合は、リクエスト内で tweet.fields および / または [expansion](/ja/x-api/fundamentals/expansions) パラメーターを使用して、それらのフィールドを指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 種類の追加フィールドセットをリクエストします。
+
+* プライマリの Lists オブジェクトにおける追加の created&#95;at フィールド
+
+* expansion パラメーターを使用して取得する、完全な [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user)
+
+* 関連する user オブジェクトにおける追加の user.created&#95;at フィールド
+
+Postman で「Params」タブを開き、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| tweet.fields | created&#95;at | created&#95;at |
+| expansions | author&#95;id | includes.users.id,  <br />includes.users.name,  <br />includes.users.username |
+| user.fields | created&#95;at | includes.users.created&#95;at |
+
+「Send」ボタンの横に、次のような URL が表示されているはずです。
+
+`https://api.x.com/2/lists/84839422/tweets?expansions=author_id&user.fields=created_at&max_results=1`
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### ステップ5：リクエストを送信してレスポンスを確認する
+</div>
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次に示す例のようなレスポンスが返ってきます。
+
+```
+{
+  "data": [
+    {
+      "author_id": "4172587277",
+      "id": "1458172421115101189",
+      "text": "A Alemanha registrou nesta semana um recorde de novos casos de Covid-19. Segundo o governo e especialistas em Saúde, pessoas não vacinadas são responsáveis pela situação \nhttps://t.co/4POyaPwMLu"
+    }
+  ],
+  "includes": {
+    "users": [
+      {
+        "username": "MomentsBrasil",
+        "name": "Twitter Moments Brasil",
+        "created_at": "2015-11-12T16:46:02.000Z",
+        "id": "4172587277"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 1,
+    "next_token": "7140dibdnow9c7btw3z2vwioavpvutgzrzm9icis4ndix"
+  }
+}
+```
+
+**注意:** このエンドポイントでは、指定したリストに対して最新800件までのポストを取得できます

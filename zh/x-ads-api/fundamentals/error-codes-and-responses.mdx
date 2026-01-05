@@ -1,0 +1,137 @@
+---
+title: 错误代码和响应
+keywords: ["Ads API 错误", "错误代码", "Ads API 错误处理", "错误响应", "API 错误", "错误代码"]
+---
+
+<div id="typical-response-structure">
+  ## 典型响应结构
+</div>
+
+成功响应会使用 2xx 系列 HTTP 状态码，并返回基于 JSON 的有效负载，其中包含被请求、创建、修改或删除的对象，以及服务器对你请求的解析结果说明。
+
+如果你的请求成功，你会在响应中收到一个 `request` 节点，用于回显你的请求。
+
+*示例：* [GET accounts/abcdefg/campaigns?with&#95;deleted=true](/zh/x-ads-api/campaign-management#campaigns)
+
+```json
+{
+  /* 您的响应数据... */,
+  "request": {
+    "params": {
+      "account_id": "abcdefg",
+      "with_deleted": "true"
+    }
+  }
+}
+```
+
+JSON 响应中的 `data` 字段将包含与所调用资源关联的具体对象。当响应可能包含一个或多个结果时，`data` 节点的格式将是 JSON 数组；当响应中仅可能有一个结果时，则会以 JSON 哈希返回。在某些少见情况下，你可能会看到本应返回集合的响应却返回了一个哈希映射。在这种情况下，可以假定该单个哈希映射是一个对象，其类型与 `type` 字段中指定的类型相同。
+
+<div id="error-response-structure">
+  ## 错误响应结构
+</div>
+
+错误响应会返回一个非 200 系列的 HTTP 状态码。通常会附带一个 JSON 响应，但有些错误会返回不同类型的响应体。在这些无法解析响应结构的情况下，应优先参考 HTTP 状态码本身的含义。例如，你有时可能会看到一个 HTTP 404 搭配一个 HTML 格式的响应体。在这种情况下，可以安全地假设所请求的内容无法被找到（HTTP 404 的含义是 “Not Found”）。
+
+典型的错误响应在结构上与成功响应类似。错误的具体信息会包含在响应的 `errors` 节点中。`errors/code` 节点会提供一个 CAPS&#95;CASE 格式的常量错误码，你可以在程序中使用该错误码来进行程序化决策和处理。`errors/message` 节点通常会给出一段英文的人类可读错误描述。还可能会附加其他字段，以提供关于该错误更细粒度的信息。
+
+```json
+{
+  "errors": [
+    {
+      "parameter": "start_time",
+      "details": "invalid date",
+      "code": "INVALID_PARAMETER",
+      "value": "",
+      "message": "Expected time, got \"\" for start_time"
+    }
+  ],
+  "request": {
+    "params": {
+      "account_id": "hkk5"
+    }
+  }
+}
+```
+
+在上面的示例中，向 analytics 端点发起了一个请求，但为 `start_time` 参数提供了无效的值。对于包含无效参数的请求，其 `errors/code` 为 `INVALID_PARAMETER`。
+
+| HTTP 状态码 | 错误代码 |
+| :--- | :--- |
+| 403 | `ACCOUNT_LOCKED_OUT` |
+| 404 | `ACCOUNT_MEDIA_NOT_FOUND` |
+| 403 | `ACCOUNT_NOT_FOUND` |
+| 403 | `ACTION_NOT_ALLOWED` |
+| 404 | `APP_EVENT_PROVIDER_CONFIGURATION_NOT_FOUND` |
+| 404 | `APP_EVENT_TAG_NOT_FOUND` |
+| 404 | `BEHAVIOR_OR_BEHAVIOR_EXPANDED_NOT_FOUND` |
+| 404 | `CAMPAIGN_NOT_FOUND` |
+| 408 | `CANCELLED_REQUEST` |
+| 404 | `CARD_NOT_FOUND` |
+| 403 | `CURRENT_USER_SUSPENDED` |
+| 400 | `DUPLICATE_TWEET` |
+| 400 | `EXCLUSIVE_PARAMETERS` |
+| 400 | `FEATURE_NOT_AVAILABLE` |
+| 403 | `FUNDING_INSTRUMENT_ACCESS_NOT_ALLOWED` |
+| 403 | `FUNDING_INSTRUMENT_EXCEEDS_AVAILABLE_CREDIT_LIMIT` |
+| 404 | `FUNDING_INSTRUMENT_NOT_FOUND` |
+| 403 | `GENERIC_TWEET_ERROR` |
+| 400 | `ILLEGAL_CHARACTERS` |
+| 400 | `INCLUSIVE_PARAMETERS` |
+| 500 | `INTERNAL_ERROR` |
+| 404 | `INVALID_APP_ID` |
+| 404 | `INVALID_APP_STORE` |
+| 400 | `INVALID_DENOMINATION` |
+| 400 | `INVALID_FUNDING_INSTRUMENT` |
+| 404 | `INVALID_IAB_CATEGORY` |
+| 404 | `INVALID_ID_ILLEGAL_CHARACTERS` |
+| 400 | `INVALID_IMAGE` |
+| 400 | `INVALID_MEDIA` |
+| 400 | `INVALID_MEDIA_ID` |
+| 400 | `INVALID_PARAMETER` |
+| 400 | `INVALID_PLACEMENT_TYPE` |
+| 400 | `INVALID_TAILORED_AUDIENCE_TYPE` |
+| 400 | `INVALID_TARGETING_TYPE` |
+| 400 | `INVALID_TIME_WINDOW` |
+| 400 | `INVALID_TV_SHOW_LOCATIONS` |
+| 400 | `INVALID_TWEET` |
+| 400 | `INVALID_USER` |
+| 400 | `INVALID_USER_ID` |
+| 423 | `LOCK_ACQUISITION_TIMEOUT` |
+| 404 | `LINE_ITEM_APP_NOT_FOUND` |
+| 404 | `LINE_ITEM_NOT_FOUND` |
+| 404 | `MACT_APP_NOT_FOUND` |
+| 403 | `MALWARE_STATUS` |
+| 404 | `MEDIA_CREATIVE_NOT_FOUND` |
+| 404 | `MEDIA_NOT_FOUND` |
+| 405 | `METHOD_NOT_ALLOWED` |
+| 400 | `MISSING_PARAMETER` |
+| 404 | `NO_PROVIDER_AVAILABLE_FOR_THIS_CLIENT_APPLICATION` |
+| 404 | `NOT_FOUND` |
+| 404 | `PROMOTABLE_USER_NOT_FOUND` |
+| 404 | `PROMOTED_ACCOUNT_NOT_FOUND` |
+| 404 | `PROMOTED_TWEET_NOT_FOUND` |
+| 403 | `READONLY_CLIENT_APPLICATION` |
+| 400 | `REQUEST_TOO_COMPLEX` |
+| 404 | `ROUTE_NOT_FOUND` |
+| 503 | `SERVICE_UNAVAILABLE` |
+| 503 | `OVER_CAPACITY` |
+| 400 | `SPEND_EXCEEDS_BUDGET` |
+| 404 | `TAILORED_AUDIENCE_CHANGE_FILE_NOT_FOUND` |
+| 404 | `TAILORED_AUDIENCE_NOT_FOUND` |
+| 404 | `TAILORED_AUDIENCE_OR_TAILORED_AUDIENCE_EXPANDED_NOT_FOUND` |
+| 404 | `TARGETING_CRITERION_NOT_FOUND` |
+| 400 | `TOO_MANY_CAMPAIGNS` |
+| 400 | `TOO_MANY_LINE_ITEMS` |
+| 429 | `TOO_MANY_REQUESTS` |
+| 400 | `TV_SHOW_OUTSIDE_MARKET` |
+| 400 | `TWEET_CANNOT_BE_BLANK` |
+| 403 | `TWEET_IS_SPAM` |
+| 404 | `TWEET_NOT_FOUND` |
+| 429 | `TWEET_RATE_LIMIT_EXCEEDED` |
+| 401 | `UNAUTHORIZED_ACCESS` |
+| 403 | `UNAUTHORIZED_CLIENT_APPLICATION` |
+| 400 | `UNKNOWN_CARD_TYPE` |
+| 400 | `UNKNOWN_CRITERIA_TYPE` |
+| 403 | `USER_NOT_FOUND` |
+| 404 | `WEB_EVENT_TAG_NOT_FOUND` |

@@ -1,0 +1,166 @@
+---
+title: 如何使用带 PKCE 的 OAuth 2.0 授权码流程连接端点
+sidebarTitle: OAuth 2.0 代表用户发出请求
+keywords: ["OAuth 2.0 用户访问令牌", "用户访问令牌", "OAuth 2.0 用户上下文", "用户身份验证", "OAuth 2.0 用户", "访问令牌"]
+---
+
+<div id="how-to-connect-to-endpoints-using-oauth-20-authorization-code-flow-with-pkce">
+  ### 如何使用包含 PKCE 的 OAuth 2.0 授权码流程连接到端点
+</div>
+
+<div id="how-to-connect-to-the-endpoints">
+  #### 如何连接到这些端点
+</div>
+
+为了对你的用户进行身份验证，你的应用需要实现一个授权流程。通过这个授权流程，你可以将用户引导到 X 上的授权对话框。在那里，X 的主界面会显示授权对话框，并代表你的应用处理授权。你的用户可以选择授权你的应用，或拒绝授权。用户做出选择后，X 会将用户重定向回你的应用，在那里你可以将授权码交换为访问令牌（如果用户授权了你的应用），或者处理被拒绝的情况（如果用户没有授权你的应用）。
+
+<div id="working-with-confidential-clients">
+  #### 使用机密客户端
+</div>
+
+如果你使用的是机密客户端，则需要在向令牌端点发起请求时，采用[基本认证](https://datatracker.ietf.org/doc/html/rfc2617#section-2)方案，并使用 base64 编码生成 Authorization 请求头。
+
+在凭据中，`userid` 和 `password` 以一个冒号（&quot;:&quot;）字符分隔，然后组合成一个经过 base64 编码的字符串。
+
+示例如下：
+
+`-header 'Authorization: Basic V1ROclFTMTRiVWhwTWw4M2FVNWFkVGQyTldNNk1UcGphUTotUm9LeDN4NThKQThTbTlKSXQyZm1BanEzcTVHWC1icVozdmpKeFNlR3NkbUd0WEViUA=='`
+
+如果用户代理希望发送 Client ID &quot;Aladdin&quot; 和密码 &quot;open sesame&quot;，则会使用如下请求头字段：
+
+`Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==`
+
+要创建 Basic 授权请求头，你需要对 Client ID 和 Client Secret 进行 base64 编码，这两个值可从你的应用在 [developer portal](https://developer.x.com/en/portal/dashboard) 中的 “Keys and Tokens” 页面获取。
+
+<div id="steps-to-connect-using-oauth-20">
+  #### 使用 OAuth 2.0 建立连接的步骤
+</div>
+
+**步骤 1：构建授权 URL（Authorize URL）**
+
+你的应用需要构建一个指向 X 的授权 URL，用来指明你的应用需要授权的权限范围（scopes）。例如，如果你的应用需要查询帖子、用户并管理关注关系，则应请求以下权限范围：
+
+`tweet.read%20users.read%20follows.read%20follows.write`
+
+该 URL 还将包含 `code_challenge` 和 state 参数，以及其他必需参数。在生产环境中，你应为 `code_challenge` 使用一个随机字符串。
+
+**步骤 2：GET oauth2/authorize**
+
+让用户完成身份验证，并向应用发送一个授权码。如果你已为应用启用了 OAuth 2.0，你可以在应用的“Keys and Tokens”页面中找到 Client ID。
+
+一个用于重定向用户的示例 URL 如下所示：
+
+```
+https://x.com/i/oauth2/authorize?response_type=code&client_id=M1M5R3BMVy13QmpScXkzTUt5OE46MTpjaQ&redirect_uri=https://www.example.com&scope=tweet.read%20users.read%20follows.read%20follows.write&state=state&code_challenge=challenge&code_challenge_method=plain
+```
+
+包含 offline&#95;access 的示例 URL 如下所示：
+
+```
+https://x.com/i/oauth2/authorize?response_type=code&client_id=M1M5R3BMVy13QmpScXkzTUt5OE46MTpjaQ&redirect_uri=https://www.example.com&scope=tweet.read%20users.read%20follows.read%20offline.access&state=state&code_challenge=challenge&code_challenge_method=plain
+```
+
+在成功完成认证后，`redirect_uri` 会向你的应用发送一个包含 `auth_code` 参数的请求。你的应用应当验证 `state` 参数。
+
+来自客户端重定向的示例请求如下：
+
+```
+https://www.example.com/?state=state&code=VGNibzFWSWREZm01bjN1N3dicWlNUG1oa2xRRVNNdmVHelJGY2hPWGxNd2dxOjE2MjIxNjA4MjU4MjU6MToxOmFjOjE
+```
+
+**步骤 3：POST oauth2/token - Access Token**
+
+此时，你可以使用授权码创建访问令牌和刷新令牌（仅当请求了 `offline.access` 权限范围时）。你可以向以下端点发送 POST 请求：
+
+```
+https://api.x.com/2/oauth2/token
+```
+
+你需要在请求头中传递 `Content-Type`，其值为 `application/x-www-form-urlencoded`。此外，你的请求中还应包含：`code`、`grant_type`、`client_id`、`redirect_uri`，以及 `code_verifier`。
+
+下面是一个针对公用客户端的令牌请求示例：
+
+```json
+curl --location --request POST 'https://api.x.com/2/oauth2/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'code=VGNibzFWSWREZm01bjN1N3dicWlNUG1oa2xRRVNNdmVHelJGY2hPWGxNd2dxOjE2MjIxNjA4MjU4MjU6MToxOmFjOjE' \
+--data-urlencode 'grant_type=authorization_code' \
+--data-urlencode 'client_id=rG9n6402A3dbUJKzXTNX4oWHJ' \
+--data-urlencode 'redirect_uri=https://www.example.com' \
+--data-urlencode 'code_verifier=challenge'
+```
+
+以下是一个使用机密客户端的示例：
+
+```json
+curl --location --request POST 'https://api.x.com/2/oauth2/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: Basic V1ROclFTMTRiVWhwTWw4M2FVNWFkVGQyTldNNk1UcGphUTotUm9LeDN4NThKQThTbTlKSXQyZm1BanEzcTVHWC1icVozdmpKeFNlR3NkbUd0WEViUA=='\
+--data-urlencode 'code=VGNibzFWSWREZm01bjN1N3dicWlNUG1oa2xRRVNNdmVHelJGY2hPWGxNd2dxOjE2MjIxNjA4MjU4MjU6MToxOmFjOjE' \
+--data-urlencode 'grant_type=authorization_code' \
+--data-urlencode 'redirect_uri=https://www.example.com' \
+--data-urlencode 'code_verifier=challenge'
+```
+
+**步骤 4：连接到 API**
+
+现在你已经可以使用 OAuth 2.0 连接到这些端点了。为此，你将像使用 [Bearer Token 身份验证](/zh/resources/fundamentals/authentication/oauth-2-0/application-only) 时那样向 API 发起请求。不同之处在于，你不再传递 Bearer Token，而是要使用你在上一步生成的访问令牌。作为响应，你应该会看到与你请求的端点相对应的正确响应负载（payload）。此请求对于公共和机密客户端是相同的。 
+
+你将要发起的请求示例如下：
+
+```json
+curl --location --request GET 'https://api.x.com/2/tweets?ids=1261326399320715264,1278347468690915330' \
+--header 'Authorization: Bearer Q0Mzb0VhZ0V5dmNXSTEyNER2MFNfVW50RzdXdTN6STFxQlVkTGhTc1lCdlBiOjE2MjIxNDc3NDM5MTQ6MToxOmF0OjE'
+```
+
+**步骤 5：POST oauth2/token - 刷新令牌**
+
+刷新令牌允许应用在无需再次提示用户的情况下获取新的访问令牌。你可以通过向以下端点发送 POST 请求来获取刷新令牌： [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token) 你需要在请求头中添加 `Content-Type` 为 `application/x-www-form-urlencoded`。此外，你还需要传入你的 `refresh_token`，将 `grant_type` 设置为 `refresh_token`，并指定你的 `client_id`。
+
+此请求适用于公共客户端：
+
+```json
+POST 'https://api.x.com/2/oauth2/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'refresh_token=bWRWa3gzdnk3WHRGU1o0bmRRcTJ5VUxWX1lZTDdJSUtmaWcxbTVxdEFXcW5tOjE2MjIxNDc3NDM5MTQ6MToxOnJ0OjE' \
+--data-urlencode 'grant_type=refresh_token' \
+--data-urlencode 'client_id=rG9n6402A3dbUJKzXTNX4oWHJ'
+```
+
+下面是一个面向机密客户端的示例：
+
+```json
+POST 'https://api.x.com/2/oauth2/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: Basic V1ROclFTMTRiVWhwTWw4M2FVNWFkVGQyTldNNk1UcGphUTotUm9LeDN4NThKQThTbTlKSXQyZm1BanEzcTVHWC1icVozdmpKeFNlR3NkbUd0WEViUA=='\
+--data-urlencode 'refresh_token=bWRWa3gzdnk3WHRGU1o0bmRRcTJ5VUxWX1lZTDdJSUtmaWcxbTVxdEFXcW5tOjE2MjIxNDc3NDM5MTQ6MToxOnJ0OjE'\
+--data-urlencode 'grant_type=refresh_token'
+```
+
+**步骤 6：POST oauth2/revoke - 撤销令牌**
+
+撤销令牌会使访问令牌或刷新令牌失效。这用于在客户端中启用“登出”功能，使你可以清理与授权流程关联且已不再需要的任何安全凭据。撤销令牌用于让应用撤销某个令牌，而不是撤销用户。如果应用希望以编程方式撤销授予它的访问权限，可以向以下 URL 发送 POST 请求来创建撤销令牌请求：
+
+```
+https://api.x.com/2/oauth2/revoke
+```
+
+你需要在请求头中传入 `Content-Type` 为 `application/x-www-form-urlencoded`，以及你的令牌和 `client_id`。
+
+在某些情况下，用户可能希望撤销此前授予某个应用的访问权限，可以通过访问[已连接的应用页面](https://x.com/settings/connected_apps)来撤销访问。
+
+```bash
+curl --location --request POST 'https://api.x.com/2/oauth2/revoke' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'token=Q0Mzb0VhZ0V5dmNXSTEyNER2MFNfVW50RzdXdTN6STFxQlVkTGhTc1lCdlBiOjE2MjIxNDc3NDM5MTQ6MToxOmF0OjE' \
+--data-urlencode 'client_id=rG9n6402A3dbUJKzXTNX4oWHJ'
+```
+
+此请求可用于机密客户端（confidential clients）：
+
+```bash
+curl --location --request POST 'https://api.x.com/2/oauth2/revoke' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: Basic V1ROclFTMTRiVWhwTWw4M2FVNWFkVGQyTldNNk1UcGphUTotUm9LeDN4NThKQThTbTlKSXQyZm1BanEzcTVHWC1icVozdmpKeFNlR3NkbUd0WEViUA=='\
+--data-urlencode 'token=Q0Mzb0VhZ0V5dmNXSTEyNER2MFNfVW50RzdXdTN6STFxQlVkTGhTc1lCdlBiOjE2MjIxNDc3NDM5MTQ6MToxOmF0OjE'
+```

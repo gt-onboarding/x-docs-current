@@ -1,0 +1,104 @@
+---
+title: Guía de integración
+sidebarTitle: Guía de integración
+keywords: ["list tweets integration", "list timeline integration", "list tweets guide", "list timeline setup"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+Esta página contiene información sobre varias herramientas y conceptos fundamentales que debes conocer al integrar el endpoint de consulta de Publicaciones de una Lista en tu sistema. Hemos dividido la página en un par de secciones diferentes:
+
+* [Herramientas útiles](#helpful)
+* Conceptos clave
+* [Autenticación](#authentication)
+* [Developer portal, Proyectos y Aplicaciones](#portal)
+* [Límites de frecuencia](#limits)
+* [Campos y expansiones](#fields)
+* [Paginación](#pagination)
+
+<div id="helpful-tools">
+  ### Herramientas útiles
+</div>
+
+Antes de profundizar en algunos conceptos clave que te ayudarán a integrar este endpoint, te recomendamos que te familiarices con:
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman es una excelente herramienta que puedes usar para probar un endpoint. Cada solicitud de Postman incluye todos los parámetros de ruta y de cuerpo para ayudarte a comprender rápidamente qué tienes a tu disposición. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra página [&quot;Usar Postman&quot;](/es/tutorials/postman-getting-started). 
+
+<div id="code-samples">
+  #### Ejemplos de código
+</div>
+
+¿Quieres configurar este endpoint con código en tu lenguaje de programación preferido? Disponemos de varios ejemplos de código que puedes usar como punto de partida en nuestro [repositorio de GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code).
+
+<div id="third-party-libraries">
+  #### Bibliotecas de terceros
+</div>
+
+Aprovecha una de las [bibliotecas de terceros](/es/x-api/tools-and-libraries/overview) de nuestras comunidades para empezar. Puedes encontrar una biblioteca que funcione con los endpoints de v2 buscando la etiqueta de versión adecuada.
+
+<div id="key-concepts">
+  ### Conceptos clave
+</div>
+
+<div id="authentication">
+  #### Autenticación
+</div>
+
+Todos los endpoints de X API v2 requieren que autentiques tus solicitudes con un conjunto de credenciales, también conocidas como claves y tokens. Puedes usar Contexto de usuario de OAuth 1.0a, App only o OAuth 2.0 Authorization Code with PKCE para autenticar tus solicitudes a este endpoint. 
+
+[Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication#oauth-1-0a-2), lo que significa que debes usar un conjunto de claves de API y Tokens de acceso de usuario para realizar una solicitud correcta. Los Tokens de acceso deben estar asociados con el usuario en cuyo nombre estás realizando la solicitud. Si deseas generar un conjunto de Tokens de acceso para otro usuario, ese usuario debe autorizar tu App usando el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
+
+Ten en cuenta que OAuth 1.0a puede ser difícil de usar. Si no estás familiarizado con este método de autenticación, te recomendamos que uses una [biblioteca](/es/x-api/tools-and-libraries/overview), una herramienta como Postman o que uses OAuth 2.0 o App only para autenticar tus solicitudes.
+
+[OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) permite un mayor control sobre el alcance (scope) de una aplicación y sobre los flujos de autorización en varios dispositivos. OAuth 2.0 te permite elegir scopes específicos y granulares que te otorgan permisos concretos en nombre de un usuario. 
+
+Para habilitar OAuth 2.0 en tu App, debes hacerlo en la configuración de autenticación de tu App, que se encuentra en la sección de configuración de la App en el portal para desarrolladores.
+
+[App only](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) solo requiere que incluyas un [Token de acceso App only](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) con tu solicitud. Puedes generar un Token de acceso App only directamente dentro de una aplicación de desarrollador o generar uno usando el endpoint [POST oauth2/token](/es/resources/fundamentals/authentication#post-oauth2-token).
+
+<div id="developer-portal-projects-and-developer-apps">
+  #### Portal para desarrolladores, Proyectos y aplicaciones de desarrollador
+</div>
+
+Para obtener un conjunto de credenciales de autenticación que funcionen con los endpoints de X API v2, debes [registrarte para obtener una cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info), configurar un [Proyecto](/es/resources/fundamentals/projects) dentro de esa cuenta y crear una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) dentro de ese Proyecto. Luego podrás encontrar tus claves y tokens dentro de tu aplicación de desarrollador.
+ 
+
+<div id="rate-limits">
+  #### Límites de frecuencia
+</div>
+
+Todos los días, muchos miles de desarrolladores realizan solicitudes a la X API. Para ayudar a gestionar el gran volumen de estas solicitudes, se aplican [límites de frecuencia](https://developer.x.com/x-api/fundamentals/rate-limits) a cada endpoint, lo que restringe la cantidad de solicitudes que puedes hacer en nombre de tu Aplicación o en nombre de un usuario autenticado. 
+
+Este endpoint tiene límites de frecuencia tanto a nivel de Aplicación como a nivel de usuario. El límite de frecuencia de la Aplicación significa que tú, como desarrollador, solo puedes hacer una cierta cantidad de solicitudes a este endpoint durante un periodo de tiempo determinado desde cualquier Aplicación (según se determine por el uso de la API Key y la API Secret Key, o del Bearer Token). El límite de frecuencia de usuario significa que el usuario autenticado en cuyo nombre realizas la solicitud solo puede efectuar una consulta de Publicaciones de una Lista un número determinado de veces entre todas las aplicaciones de desarrollador.
+
+La siguiente tabla muestra los límites de frecuencia para cada endpoint.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Endpoint** | **HTTP method** | **Rate limit** |
+| /2/lists/:id/tweets | GET | 900 requests per 15 minutes |
+
+Campos y expansiones
+
+El endpoint GET de X API v2 permite a los usuarios seleccionar exactamente qué datos desean que devuelva la API utilizando un conjunto de herramientas llamado `fields` y `expansions`. El parámetro `expansions` te permite expandir los objetos referenciados en el payload. Por ejemplo, consultar Publicaciones de una Lista te permite obtener las siguientes [expansions](/es/x-api/fundamentals/expansions):
+
+* `author_id`
+
+El parámetro `fields` te permite seleccionar exactamente qué [fields](/es/x-api/fundamentals/fields) dentro de los diferentes objetos de datos deseas recibir. Este endpoint entrega principalmente objetos de Publicación. De forma predeterminada, el objeto de Publicación devuelve los fields `id` y `text`. Para recibir campos adicionales como `tweet.created_at` o `tweet.lang`, tendrás que solicitarlos específicamente utilizando un parámetro fields. 
+
+Hemos añadido a nuestro [diccionario de datos de X API v2](/es/x-api/fundamentals/data-dictionary) una guía sobre cómo usar [fields y expansions](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) conjuntamente.
+
+La siguiente tabla muestra los campos y expansiones disponibles para el endpoint de consulta:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Endpoint** | **Fields** | **Expansions** |
+| /2/lists/:id/tweets | `tweet.fields`<br /><br />`user.fields` | `author_id` |
+
+Paginación
+
+La consulta de Publicaciones de una Lista puede devolver muchos datos. Para garantizar que devolvemos resultados coherentes y de alto rendimiento en todo momento, utilizamos paginación. La paginación es una característica de los endpoints de X API v2 que devuelven más resultados de los que pueden incluirse en una sola respuesta. Cuando eso sucede, los datos se devuelven en una serie de &quot;páginas&quot;. Obtén más información sobre cómo [paginar los resultados.](/es/x-api/fundamentals/pagination)

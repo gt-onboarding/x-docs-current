@@ -1,0 +1,89 @@
+---
+title: 概要
+sidebarTitle: 概要
+keywords: ["リストメンバーの移行", "リストメンバーを移行", "v1.1 から v2 へのリストメンバー移行", "リストメンバー移行ガイド", "リストメンバーの移行方法"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="comparing-x-apis-list-members-endpoints">
+  ## X API の List メンバーエンドポイントの比較
+</div>
+
+v2 の List メンバーエンドポイントグループは、標準的な v1.1 の [GET lists/members](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-members)、[GET lists/memberships](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-memberships)、[POST lists/members/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-create)、および [POST lists/members/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-destroy) エンドポイントを置き換えます。これらの List メンバーエンドポイントのいずれかを使用しているコード、アプリ、またはツールがあり、新しい X API v2 エンドポイントへの移行を検討している場合は、この一連のガイドが役立ちます。 
+
+<div id="list-members-lookup">
+  ### リストメンバーのルックアップ
+</div>
+
+v2 のリストメンバールックアップエンドポイントは、標準の [GET lists/members](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-members)、[GET lists/memberships](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-memberships) エンドポイントを置き換えます。
+
+次の表では、標準 v1.1 のリストエンドポイントと X API v2 のリストエンドポイントを比較します。
+
+**リストメンバーのルックアップ**
+
+|     |     |     |
+| :--- | :--- | :--- |
+| 説明 | 標準 v1.1 | X API v2 |
+| サポートされる HTTP メソッド | `GET` | `GET` |
+| ホストドメイン | `https://api.x.com` | `https://api.x.com` |
+| エンドポイントパス | `/1.1/lists/members.json` | `/2/lists/:id/members` |
+| [Authentication](/ja/resources/fundamentals/authentication) | OAuth 1.0a User Context<br /><br />アプリのみ | OAuth 1.0a User Context<br /><br />OAuth 2.0 Authorization Code with PKCE<br /><br />アプリのみ |
+| 既定のリクエスト[レート制限](/ja/resources/fundamentals/rate-limits) | 15分あたり 900 リクエスト (OAuth 1.0a 利用時)<br /><br />15分あたり 75 リクエスト (アプリのみ) | 15分あたり 900 リクエスト (OAuth 1.0a 利用時)<br /><br />15分あたり 900 リクエスト (OAuth 2.0 利用時)<br /><br />15分あたり 900 リクエスト (アプリのみ) |
+
+**リストメンバーシップのルックアップ**
+
+|     |     |     |
+| :--- | :--- | :--- |
+| 説明 | 標準 v1.1 | X API v2 |
+| サポートされる HTTP メソッド | `GET` | `GET` |
+| ホストドメイン | `https://api.x.com` | `https://api.x.com` |
+| エンドポイントパス | `/1.1/lists/memberships.json` | `/2/users/:id/list_memberships` |
+| [Authentication](/ja/resources/fundamentals/authentication) | OAuth 1.0a User Context<br /><br />アプリのみ | OAuth 1.0a User Context<br /><br />OAuth 2.0 Authorization Code with PKCE<br /><br />アプリのみ |
+| 既定のリクエスト[レート制限](/ja/resources/fundamentals/rate-limits) | 15分あたり 75 リクエスト (OAuth 1.0a 利用時)<br /><br />15分あたり 75 リクエスト (アプリのみ) | 15分あたり 75 リクエスト (OAuth 1.0a 利用時)<br /><br />15分あたり 75 リクエスト (OAuth 2.0 利用時)<br /><br />15分あたり 75 リクエスト (アプリのみ) |
+
+<div id="manage-list-members">
+  ### リストメンバーの管理
+</div>
+
+X API v2 のリストメンバー管理エンドポイントは、標準の [POST lists/members/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-create)、[POST lists/members/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-destroy) エンドポイントに置き換わります。
+
+次の表は、標準の v1.1 と X API v2 の List エンドポイントを比較したものです。
+
+**メンバーを追加**
+
+| 説明 | 標準 v1.1 | X API v2 |
+| :--- | :--- | :--- |
+| サポートされる HTTP メソッド | POST | POST |
+| ホストドメイン | https://api.x.com | https://api.x.com |
+| エンドポイントパス | /1.1/lists/members/create.json | /2/lists/:id/members |
+| [Authentication](/ja/resources/fundamentals/authentication) | OAuth 1.0a User Context | OAuth 1.0a User Context<br /><br />OAuth 2.0 Authorization Code with PKCE |
+| デフォルトのリクエスト[レート制限](/ja/resources/fundamentals/rate-limits) | なし | 15 分あたり 300 リクエスト（ユーザーごと） |
+
+**メンバーを削除**
+
+| 説明 | 標準 v1.1 | X API v2 |
+| :--- | :--- | :--- |
+| サポートされる HTTP メソッド | POST | DELETE |
+| ホストドメイン | https://api.x.com | https://api.x.com |
+| エンドポイントパス | /1.1/lists/members/destroy.json | /2/lists/:id/:user&#95;id |
+| [Authentication](/ja/resources/fundamentals/authentication) | OAuth 1.0a User Context | OAuth 1.0a User Context<br /><br />OAuth 2.0 Authorization Code with PKCE |
+| デフォルトのリクエスト[レート制限](/ja/resources/fundamentals/rate-limits) | なし | 15 分あたり 300 リクエスト（ユーザーごと） |
+
+X API v2 のエンドポイントにアクセスするには、[開発者アカウントに登録](https://developer.x.com/en/portal/petition/essential/basic-info)する必要があります。認証時には、[プロジェクト](/ja/resources/fundamentals/projects)内にある[開発者アプリ](/ja/resources/fundamentals/developer-apps)のキーとトークンを使用する必要があります。
+
+X API v2 エンドポイントへのアクセス方法の詳細は、[はじめに](/ja/x-api/getting-started/getting-access)ページを参照してください。
+
+<div className="flex space-x-2">
+  <Button href="/ja/x-api/lists/list-members/quickstart/overview">
+    クイックスタート
+  </Button>
+
+  <Button href="https://github.com/xdevplatform/Twitter-API-v2-sample-code">
+    サンプルコード
+  </Button>
+
+  <Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+    Postman で実行
+  </Button>
+</div>

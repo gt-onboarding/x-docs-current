@@ -1,0 +1,63 @@
+---
+title: OAuth 1.0a
+sidebarTitle: 概要
+keywords: ["OAuth 1.0a", "OAuth 1.0", "OAuth 1.0a 認証", "OAuth 1.0a User Context", "3-legged OAuth", "OAuth 1.0a フロー"]
+---
+
+import { Button } from "/snippets/ja/button.mdx";
+
+<div id="oauth-10a">
+  ## OAuth 1.0a
+</div>
+
+X 開発者プラットフォーム上の多くのエンドポイントは、OAuth 1.0a 方式を使用して、X アカウントを代表して動作したり、API リクエストを送信したりします。たとえば、X 開発者アプリを持っている場合、そのユーザーがあなたのアプリで認証を行うかぎり、任意の X アカウントを代表して API リクエストを実行できます。
+
+注意: HMAC-SHA1 やパーセントエンコーディングといった概念に慣れていない場合は、認証プロセスを大幅に簡略化してくれるいくつかの API クライアントを紹介している、以下の「useful tools」セクションを参照することをおすすめします。
+
+<div id="key-concepts">
+  ### 重要な概念
+</div>
+
+<div id="signing-a-request-with-keys-and-tokens">
+  #### キーとトークンを使ってリクエストに署名する
+</div>
+
+各 API リクエストには、生成された複数のキーとトークンを `authorization` ヘッダーで渡して署名する必要があります。まずは、[X 開発者アプリ](/ja/resources/fundamentals/developer-apps) の詳細ページで、次のような複数のキーとトークンを生成できます。
+
+|     |     |
+| :--- | :--- |
+| API キーとシークレット:<br /><br />`oauth_consumer_key`<br /><br />`oauth_consumer_secret` | これらは、API リクエストを行うときに、X の開発者アプリを表すユーザー名とパスワードのようなものだと考えてください。 |
+| アクセストークンとシークレット:<br /><br />`oauth_token`<br /><br />`oauth_token_secret` | アクセストークンとアクセストークンシークレットは、OAuth 1.0a API リクエストの認証に使用されるユーザー固有の認証情報です。これらによって、リクエストをどの X アカウントに代わって行うかが指定されます。<br /><br />自分の開発者アカウントに紐づいている X アカウントに代わってアプリがリクエストを行う場合は、[X 開発者アプリ](/ja/resources/fundamentals/developer-apps) の詳細ページから、自分用のアクセストークンとトークンシークレットを生成できます。<br /><br />別のユーザーのアクセストークンを生成したい場合は、以下の「Making requests on behalf of users（ユーザーに代わってリクエストを送信する）」を参照してください。 |
+
+<div id="making-requests-on-behalf-of-users">
+  #### ユーザーに代わってリクエストを行う
+</div>
+
+シグネチャを作成する際には、あなたが代理でリクエストを行う対象ユーザーを表す一連のアクセストークンが必要です。
+
+X 開発者アプリを所有している X アカウントを表すアクセストークンのセットは、[アプリの詳細ページ](https://developer.x.com/content/developer-twitter/en/apps)から生成できます。ただし、別の X アカウントに代わってリクエストを行いたい場合、そのアカウントの所有者は、[3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)の一環として自分のアカウントにサインインし、あなたにアクセスを付与する必要があります。このプロセスの結果として得られるのは、OAuth 1.0a リクエストを行うために使用できる、一連のアクセストークン（oauth&#95;token と oauth&#95;token&#95;secret）です。
+
+これらのキーとトークンを取得したら、自分で一から[シグネチャを作成](/ja/resources/fundamentals/authentication#creating-a-signature)することもできます。ただし、そうした作業に十分精通している場合や、OAuth 1.0a を必要とするエンドポイントに対して、以下で紹介するツールのいずれかを使ってリクエストを送る場合を除き、この方法は推奨しません。
+
+参考までに、生成されたすべてのトークンを Authorization ヘッダーに渡して署名した cURL リクエストの例を次に示します。
+
+```bash
+curl --request POST \
+  --url 'https://api.x.com/1.1/statuses/update.json?status=Hello%20world' \
+  --header 'authorization: OAuth oauth_consumer_key="CONSUMER_API_KEY", oauth_nonce="OAUTH_NONCE", oauth_signature="OAUTH_SIGNATURE", oauth_signature_method="HMAC-SHA1", oauth_timestamp="OAUTH_TIMESTAMP", oauth_token="ACCESS_TOKEN", oauth_version="1.0"' \
+```
+
+<Note>
+  **注:** ユーザーアクセストークンは機密性の高い情報であり、細心の注意を払って保護する必要があります。アクセストークンが生成されると、それが表すユーザーは、お使いのアプリがそれらを安全に管理してくれると信頼していることになります。APIキーとユーザーアクセストークンの両方のセキュリティが侵害されると、お使いのアプリを通じて機密情報やアカウント機能への不正アクセスを許してしまう可能性があります。[キーとアクセストークンの保護](/ja/resources/fundamentals/developer-apps)について、ぜひ詳しく学んでください。
+</Note>
+
+<div id="useful-tools">
+  ### 便利なツール
+</div>
+
+[リクエストに署名する](/ja/resources/fundamentals/authentication#creating-a-signature)プロセスは複雑です。認証トークンの大部分を自動的に生成してくれる API クライアントライブラリの使用を推奨します。
+
+|     |     |
+| :--- | :--- |
+| [Postman](https://www.getpostman.com/) | REST API リクエストを作成して送信できる API クライアントです。このツールの詳細については、「[Postman を使い始める](/ja/tutorials/postman-getting-started)」チュートリアルを参照してください。 |
+| [Insomnia](https://insomnia.rest/) | Insomnia は、Cookie 管理機能、環境変数、コード生成、認証機能を備えた REST API クライアントで、macOS、Windows、Linux で利用できます。 |

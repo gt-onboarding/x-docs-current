@@ -1,0 +1,32 @@
+---
+title: OAuth 2.0
+sidebarTitle: 概要
+keywords: ["OAuth 2.0", "OAuth 2.0 認証", "OAuth 2.0 PKCE", "Bearer Token", "アプリのみ認証", "OAuth 2.0 フロー", "認可コード"]
+---
+
+<div id="bearer-token-also-known-as-app-only">
+  ### Bearer Token（app-only とも呼ばれます）
+</div>
+
+OAuth 2.0 Bearer Token は、あなたの[開発者アプリ](/ja/resources/fundamentals/developer-apps)に代わってリクエストを認証します。この方法はアプリ固有であり、ユーザーは一切関与しません。主に、公開情報へ読み取り専用でアクセスする必要がある開発者によって利用されます。 
+
+この認証方法では、リクエストに Bearer Token を含める必要があります。Bearer Token は、開発者アプリの「キーとトークン」セクション内で生成できます。以下は、ダミーの Bearer Token を使用したリクエスト例です。
+
+```json
+  curl "https://api.x.com/2/tweets?ids=1261326399320715264,1278347468690915330" \
+  -H "Authorization: Bearer AAAAAAAAAAAAAAAAAAAAAFnz2wAAAAAAxTmQbp%2BIHDtAhTBbyNJon%2BA72K4%3DeIaigY0QBrv6Rp8KZQQLOTpo9ubw5Jt?WRE8avbi"
+```
+
+アプリのみ認証を使用した API 呼び出しは、エンドポイントごとに App レベルで[レート制限](/ja/resources/fundamentals/rate-limits)されます。
+
+この方法を使用するには、Bearer Token が必要です。Bearer Token は、API Key と Secret を [POST oauth2/token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-token) エンドポイントに渡して生成するか、[developer portal](/ja/resources/fundamentals/developer-portal) の App 設定内にある「keys and token」セクションで生成できます。
+
+Bearer Token を失効させたい場合は、[POST oauth2/invalidate&#95;token](/ja/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) エンドポイントを使用するか、App 設定内の「keys and tokens」セクションで Bearer Token の横にある「revoke」と表示されている箇所をクリックしてください。
+
+<div id="oauth-20-authorization-code-flow-with-pkce">
+  ### OAuth 2.0 Authorization Code Flow with PKCE
+</div>
+
+OAuth 2.0 Authorization Code Flow with PKCE を使用すると、別のユーザーの代理で認証を行う際にアプリケーションのスコープをより細かく制御でき、複数デバイス間にまたがる認可フローも改善されます。言い換えると、X 上のユーザー向けにアプリケーションを構築する開発者は、自身のアプリがユーザーからリクエストする情報をより厳密に制御できるようになり、エンドユーザーには必要なデータや情報だけを求めればよくなります。
+
+このモダンな認可プロトコルを利用すると、エンドユーザーに対して、アプリを認可してもらうための同意フローを、よりシンプルで分かりやすい形で提示できます。このフローでは、リクエストした特定のスコープだけが表示されます。これにより、データの取り扱い負荷を軽減できるだけでなく、エンドユーザーからの信頼向上にもつながる可能性があります。

@@ -1,0 +1,161 @@
+---
+title: Búsqueda de miembros de una Lista
+sidebarTitle: Búsqueda de miembros de una Lista
+keywords: ["inicio rápido búsqueda de miembros de una Lista", "búsqueda de miembros de una Lista", "inicio rápido obtener miembros de una Lista", "búsqueda de membresías de una Lista"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<Note>
+  **Ten en cuenta:** Esta guía asume que ya has completado los requisitos previos de la [descripción general de inicio rápido](/es/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group).
+</Note>
+
+<div id="steps-to-build-a-list-members-lookup-request">
+  ### Pasos para crear una solicitud de búsqueda de miembros de una Lista
+</div>
+
+**Paso uno: Elige la colección de endpoints de Lista en Postman**
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta “List” (Lista), selecciona la carpeta “List members” (Miembros de la Lista) y luego elige &quot;Members lookup&quot; (Búsqueda de miembros).
+ 
+
+**Paso dos: Identifica y especifica de qué Lista quieres recuperar miembros**
+
+Debes especificar la Lista de la que quieres recibir miembros. Puedes encontrar el ID de la Lista navegando a x.com, haciendo clic en una Lista y luego mirando la URL. Por ejemplo, el ID de la Lista en la siguiente URL es 84839422.
+
+https://x.com/i/lists/84839422
+
+El ID de destino puede ser cualquier ID de Lista válido. En Postman, ve a la pestaña &quot;Params&quot; y escribe tu ID en la columna &quot;Value&quot; de la variable de ruta id. Asegúrate de no incluir espacios antes o después de ningún ID.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 84839422 (ID de la Lista) |
+
+**Paso tres: Identifica y especifica qué campos quieres recuperar**
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás en tu respuesta los campos predeterminados del [objeto de usuario](/es/x-api/fundamentals/data-dictionary#user): id, name y username.
+
+Si deseas recibir campos adicionales más allá de id, name y username, tendrás que especificar esos campos en tu solicitud con los parámetros [field](/es/x-api/fundamentals/fields) y/o [expansion](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de diferentes objetos:
+
+* El campo adicional user.created&#95;at en los objetos de usuario principales.
+* El [objeto de Publicación](/es/x-api/fundamentals/data-dictionary#tweet) completo usando el parámetro expansion.
+* El campo adicional tweet.created&#95;at en los objetos de Publicación asociados.
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave-valor a la tabla &quot;Query Params&quot;:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| user.fields | created&#95;at | `created_at` |
+| expansions | pinned&#95;tweet&#95;id | `includes.tweets.id,  <br/>includes.tweets.text  <br/>` |
+| tweet.fields | created&#95;at | `includes.tweets.created_at` |
+
+Ahora deberías ver una URL similar junto al botón “Send”:
+
+`https://api.x.com/2/lists/84839422/members?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at`
+
+**Paso cuatro: Haz tu solicitud y revisa tu respuesta**
+
+Cuando tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar al siguiente ejemplo de respuesta:
+
+```
+{
+  "data": [
+    {
+      "pinned_tweet_id": "1353789891348475905",
+      "id": "1319036828964454402",
+      "created_at": "2020-10-21T22:04:47.000Z",
+      "name": "Birdwatch",
+      "username": "birdwatch"
+    },
+    {
+      "id": "1244731491088809984",
+      "created_at": "2020-03-30T21:02:29.000Z",
+      "name": "Twitter Tailandia",
+      "username": "TwitterThailand"
+    },
+    {
+      "id": "1194267639100723200",
+      "created_at": "2019-11-12T14:56:22.000Z",
+      "name": "Twitter Retweets",
+      "username": "TwitterRetweets"
+    },
+    {
+      "id": "1168976680867762177",
+      "created_at": "2019-09-03T19:59:02.000Z",
+      "name": "Twitter Able",
+      "username": "TwitterAble"
+    },
+    {
+      "pinned_tweet_id": "1451239134798942208",
+      "id": "1065249714214457345",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "name": "Spaces",
+      "username": "TwitterSpaces"
+    },
+    {
+      "id": "1049385226424786944",
+      "created_at": "2018-10-08T19:45:09.000Z",
+      "name": "Twitter Miami",
+      "username": "TwitterMiami"
+    },
+    {
+      "pinned_tweet_id": "1438533888498876420",
+      "id": "1004367799588880384",
+      "created_at": "2018-06-06T14:21:58.000Z",
+      "name": "Twitter México",
+      "username": "TwitterMexico"
+    },
+    {
+      "pinned_tweet_id": "1370178223846297602",
+      "id": "773578328498372608",
+      "created_at": "2016-09-07T17:47:00.000Z",
+      "name": "Twitter Together",
+      "username": "TwitterTogether"
+    },
+    {
+      "id": "766296039036948480",
+      "created_at": "2016-08-18T15:29:47.000Z",
+      "name": "Moments MENA",
+      "username": "momentsmena"
+    },
+    {
+      "id": "738118487122419712",
+      "created_at": "2016-06-01T21:22:15.000Z",
+      "name": "Twitter Asians",
+      "username": "TwitterAsians"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-01-25T19:40:36.000Z",
+        "id": "1353789891348475905",
+        "text": "¿Quieres ayudar a crear un enfoque impulsado por la comunidad para combatir la información engañosa? Únete a nosotros: regístrate en Birdwatch. \n\nhttps://t.co/FSsqNznPy1"
+      },
+      {
+        "created_at": "2021-10-21T17:29:07.000Z",
+        "id": "1451239134798942208",
+        "text": "ha llegado el momento: ahora estamos implementando la capacidad para que todos en iOS y Android puedan crear un Space\n\nsi es tu primera vez como anfitrión, ¡bienvenido! aquí tienes un recordatorio sobre cómo hacerlo https://t.co/cLH8z0bocy"
+      },
+      {
+        "created_at": "2021-09-16T16:03:00.000Z",
+        "id": "1438533888498876420",
+        "text": "Algunos le dicen amor, pero yo le digo:\n\n‌    ∧＿∧　 \n（｡･ω･｡)つ━☆・*\n⊂     　ノ 　　　・゜+.\n　しーＪ　　　°。+ *´¨)\n　　　　　 　　　☆ RECALENTADO ☆ \n#VivaMéxico"
+      },
+      {
+        "created_at": "2021-03-12T01:01:59.000Z",
+        "id": "1370178223846297602",
+        "text": "Aun así, volamos\n\n... porque sin importar cuántas veces 2020 intentó derribarnos, nos levantamos y respondimos con empatía, agilidad, innovación y liderazgo.\n\nLee más en nuestro Informe Anual 2020 de Inclusión y Diversidad #UntilWeAllBelong"
+      }
+    ]
+  },
+  "meta": {
+    "result_count": 10,
+    "next_token": "5349804505549807616"
+  }
+}
+```

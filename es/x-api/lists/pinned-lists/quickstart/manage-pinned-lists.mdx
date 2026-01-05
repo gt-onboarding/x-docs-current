@@ -1,0 +1,67 @@
+---
+title: Administrar listas fijadas
+sidebarTitle: Administrar listas fijadas
+keywords: ["guía rápida para administrar listas fijadas", "guía rápida para fijar listas", "guía rápida para desfijar listas", "gestión de listas fijadas"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<Note>
+  **Ten en cuenta:** Esta guía supone que ya completaste los requisitos previos de la [descripción general de inicio rápido](/es/x-api/lists/pinned-lists#getting-started-with-the-pinned-list-endpoint-group).
+</Note>
+
+<div id="steps-to-build-a-manage-pinned-list-request">
+  ### Pasos para crear una solicitud para administrar Listas fijadas
+</div>
+
+**Paso uno: Elige la colección de endpoints de Listas en Postman**
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta “List”, selecciona otra carpeta “Pinned Lists” y luego elige &quot;Pin a List&quot;.
+ 
+
+**Paso dos: Especifica la Lista que deseas fijar**
+
+Los endpoints para administrar Listas fijadas requieren dos IDs: uno para el usuario (el usuario autenticado que va a fijar una Lista) y otro para la Lista de destino (la Lista que se va a fijar). El ID del usuario debe corresponder al ID del usuario autenticado, lo que significa que debes pasar los tokens de acceso asociados con el user ID al autenticar tu solicitud. En este caso, puedes especificar el ID que pertenece a tu usuario. Puedes encontrar tu ID de dos maneras:
+
+1. Usando el endpoint [users lookup](/es/x-api/users/lookup/introduction) por nombre de usuario, puedes pasar un nombre de usuario y recibir el campo id.
+2. Si observas tu Token de acceso, verás que la parte numérica es tu user ID.
+
+El ID de la Lista de destino puede ser cualquier lista válida. En Postman, navega a la pestaña &quot;Params&quot; e introduce el user ID en la columna &quot;Value&quot; de la variable de ruta id. Navega a la pestaña “Body” e introduce el ID de la Lista que deseas fijar como valor para el parámetro list&#95;id. Asegúrate de no incluir espacios antes o después de ningún ID.
+
+|             |                                                |                    |
+| :---------- | :--------------------------------------------- | :----------------- |
+| **Key**     | **Value**                                      | **Parameter type** |
+| `id`        | El ID del usuario                              | path               |
+| list&#95;id | El ID de la Lista de destino que se va a fijar | body               |
+
+Ahora deberías ver una URL similar junto al botón &quot;Send&quot;:
+
+```
+      https://api.x.com/2/users/2244994945/pinned_lists
+```
+
+Paso tres: realiza la solicitud y revisa la respuesta
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar a la siguiente respuesta de ejemplo:
+
+```
+{
+  "data": {
+    "pinned": true
+  }
+}
+```
+
+Habrás fijado correctamente la Lista de destino si el objeto de respuesta devuelto contiene el valor true para la clave pinned. 
+
+Para desanclar una Lista, selecciona la solicitud “Unpin List”, que también encontrarás en la carpeta “Lists” de la colección de X API v2 cargada en Postman. Este endpoint requiere el ID del usuario autenticado y el ID de la Lista que se va a desanclar. En la pestaña “Params”, introduce el ID del usuario como valor de la columna id y el ID de la Lista que se va a desanclar como valor de la columna list&#95;id. 
+
+Si la solicitud de eliminación se completa correctamente, recibirás una respuesta similar al siguiente ejemplo:
+
+```
+{
+  "data": {
+    "pinned": false
+  }
+}
+```

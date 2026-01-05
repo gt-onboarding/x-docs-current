@@ -1,0 +1,204 @@
+---
+title: "OAuth2PKCEAuth"
+sidebarTitle: "OAuth2PKCEAuth"
+---
+
+该模块提供 OAuth2 PKCE（代码交换证明密钥）认证功能，用于安全的授权流程。包括 code verifier 生成、令牌管理以及令牌的自动刷新能力。
+
+<div id="class-xdkoauth2_authoauth2pkceauth">
+  ### `class xdk.oauth2_auth.OAuth2PKCEAuth`
+</div>
+
+X API 的 OAuth2 PKCE 身份验证。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.base_url" type="str" default="'https://api.x.com'"></ParamField>
+
+<ParamField path="path.authorization_base_url" type="str" default="'https://x.com/i'"></ParamField>
+
+<ParamField path="path.client_id" type="str or None" default="None"></ParamField>
+
+<ParamField path="path.client_secret" type="str or None" default="None"></ParamField>
+
+<ParamField path="path.redirect_uri" type="str or None" default="None"></ParamField>
+
+<ParamField path="path.token" type="Dict[str, Any] or None" default="None"></ParamField>
+
+<ParamField path="path.scope" type="str or List[str] or None" default="None"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+初始化 OAuth2 PKCE 认证。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.base_url" type="str" default="'https://api.x.com'">
+X API 令牌端点的基础 URL（默认为 [https://api.x.com](https://api.x.com)）。
+</ParamField>
+
+<ParamField path="path.authorization_base_url" type="str" default="'https://x.com/i'">
+OAuth2 授权的基础 URL（默认为 [https://x.com/i](https://x.com/i)）。
+</ParamField>
+
+<ParamField path="path.client_id" type="str or None" default="None">
+X API 的 client ID。
+</ParamField>
+
+<ParamField path="path.client_secret" type="str or None" default="None">
+X API 的 client secret。
+</ParamField>
+
+<ParamField path="path.redirect_uri" type="str or None" default="None">
+用于 OAuth2 授权的重定向 URI。
+</ParamField>
+
+<ParamField path="path.token" type="Dict[str, Any] or None" default="None">
+已有的 OAuth2 令牌字典（如果有）。
+</ParamField>
+
+<ParamField path="path.scope" type="str or List[str] or None" default="None">
+OAuth2 授权范围，可以是以空格分隔的字符串或字符串列表。
+</ParamField>
+
+<div id="exchange_code">
+  ### `exchange_code`
+</div>
+
+使用授权码换取 token（与 TypeScript API 一致）。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.code" type="str">
+回调中返回的授权码。
+</ParamField>
+
+<ParamField path="path.code_verifier" type="str or None" default="None">
+可选的 code verifier（如果未提供，则使用已存储的 code verifier）。
+</ParamField>
+
+#### 返回
+
+`Dictstr, Any`
+
+<div id="fetch_token">
+  ### `fetch_token`
+</div>
+
+使用授权响应 URL 获取令牌（传统方法，在内部使用 `exchange_code`）。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.authorization_response" type="str">
+授权完成后收到的完整回调 URL
+</ParamField>
+
+<div id="returns">
+  #### 返回值
+</div>
+
+`Dictstr, Any`
+
+<div id="get_authorization_url">
+  ### `get_authorization_url`
+</div>
+
+获取用于 OAuth 2.0 PKCE 授权流程的 URL。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.state" type="str or None" default="None">
+用于安全防护的可选 state 参数。
+</ParamField>
+
+<div id="returns">
+  #### 返回值
+</div>
+
+`str`
+
+<div id="get_code_challenge">
+  ### `get_code_challenge`
+</div>
+
+获取当前的 code challenge（用于 PKCE）。
+:returns: 当前的 code challenge；如果未设置，则为 None。
+:rtype: Optional[str]
+
+<div id="returns">
+  #### 返回值
+</div>
+
+`str | None`
+
+<div id="get_code_verifier">
+  ### `get_code_verifier`
+</div>
+
+获取当前的 code verifier（用于 PKCE）。
+:returns: 当前的 code verifier 值，如果尚未设置则为 None。
+:rtype: Optional[str]
+
+<div id="returns">
+  #### 返回值
+</div>
+
+`str | None`
+
+<div id="is_token_expired">
+  ### `is_token_expired`
+</div>
+
+检查 token 是否过期。
+:returns: 若 token 已过期则返回 True，否则返回 False。
+:rtype: bool
+
+<div id="returns">
+  #### 返回值
+</div>
+
+`bool`
+
+<div id="refresh_token">
+  ### `refresh_token`
+</div>
+
+刷新访问令牌。
+:returns: 刷新后的访问令牌字典
+:rtype: Dict[str, Any]
+
+<div id="returns">
+  #### 返回值
+</div>
+
+`Dictstr, Any`
+
+<div id="set_pkce_parameters">
+  ### `set_pkce_parameters`
+</div>
+
+手动设置 PKCE 参数。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.code_verifier" type="str">
+要使用的 code_verifier。
+</ParamField>
+
+<ParamField path="path.code_challenge" type="str or None" default="None">
+可选的 code_challenge（如果未提供，将自动生成）。
+</ParamField>

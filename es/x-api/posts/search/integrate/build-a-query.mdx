@@ -1,0 +1,265 @@
+---
+title: Crear una consulta
+sidebarTitle: Crear una consulta
+keywords: ["crear consulta", "consulta de búsqueda", "constructor de consultas", "operadores de búsqueda", "sintaxis de consulta", "crear consulta de búsqueda", "guía de consultas"]
+---
+
+<div id="building-queries-for-search-posts">
+  ## Creación de consultas para Search Posts
+</div>
+
+Los endpoints de búsqueda aceptan una única consulta mediante una solicitud GET y devuelven un conjunto de Publicaciones históricas que coinciden con la consulta. Las consultas se componen de operadores que se utilizan para hacer coincidir una variedad de atributos de las Publicaciones. 
+
+<div id="table-of-contents">
+  ### Tabla de contenidos
+</div>
+
+* [Crear una consulta](#build)
+* [Limitaciones de las consultas](#limits)
+* [Disponibilidad de operadores](#availability)
+* [Tipos de operadores: independientes y con conjunción obligatoria](#types)
+* [Operadores booleanos y agrupación](#boolean)
+* [Orden de las operaciones](#order-of-operations)
+* [Puntuación, diacríticos y sensibilidad a mayúsculas y minúsculas](#punctuation)
+* [Especificidad y eficiencia](#specificity)
+* [Comportamiento de coincidencia de las publicaciones citadas](#quote-tweets)
+* [Creación iterativa de una consulta](#iterative)
+* [Agregar una consulta a tu solicitud](#adding-a-query)
+* [Ejemplos de consultas](#examples)
+* [Lista de operadores](#list)
+
+<div id="building-a-query">
+  ### Cómo crear una consulta
+</div>
+
+<div id="query-limitations">
+  #### Limitaciones de las consultas
+</div>
+
+Tus consultas estarán limitadas según el [nivel de acceso](/es/x-api/getting-started/about-x-api) que tengas. 
+
+Si tienes acceso Basic o Pro, tu consulta puede tener hasta 512 caracteres en el endpoint de búsqueda reciente. 
+
+Si tienes acceso Pro, tu consulta puede tener hasta 1.024 caracteres en el endpoint de búsqueda en el archivo completo. 
+
+<div id="operator-availability">
+  #### Disponibilidad de operadores
+</div>
+
+Aunque la mayoría de los operadores están disponibles para cualquier desarrollador, hay varios que están reservados para ciertos niveles de acceso. Indicamos para qué nivel de acceso está disponible cada operador en la tabla de la [lista de operadores](/es/x-api/posts/search/integrate/operators) usando las siguientes etiquetas:
+
+* **Operadores básicos:** Disponibles al usar cualquier [Proyecto](/es/resources/fundamentals/projects).
+* **Operadores avanzados:** Disponibles al usar un Proyecto con un nivel de acceso determinado.
+
+<div id="operator-types-standalone-and-conjunction-required">
+  #### Tipos de operadores: independientes y que requieren conjunción
+</div>
+
+Los **operadores independientes** se pueden usar solos o junto con cualquier otro operador (incluidos aquellos que requieren conjunción).
+
+Por ejemplo, la siguiente consulta funcionará porque usa el operador `#hashtag`, que es independiente:
+
+`#xapiv2`
+
+Los operadores **que requieren conjunción** no se pueden usar por sí solos en una consulta; solo se pueden usar cuando la consulta incluye al menos un operador independiente. Esto se debe a que usar estos operadores solos sería demasiado general y coincidiría con un volumen extremadamente alto de Publicaciones.
+
+Por ejemplo, las siguientes consultas no están permitidas porque contienen solo operadores que requieren conjunción:
+
+`has:media`
+
+`has:links OR is:retweet`
+
+Si agregamos un operador independiente, como la frase `"X data"`, la consulta entonces funcionará correctamente.
+
+`"X data" has:mentions (has:media OR has:links)`
+
+<div id="boolean-operators-and-grouping">
+  #### Operadores booleanos y agrupación
+</div>
+
+Si quieres encadenar varios operadores en una sola consulta, tienes las siguientes herramientas a tu disposición:
+
+|     |     |
+| :--- | :--- |
+| **Lógica AND** | Operadores sucesivos separados por un espacio darán como resultado lógica booleana &quot;AND&quot;, lo que significa que las Publicaciones coincidirán solo si se cumplen ambas condiciones. Por ejemplo, `snow day #NoSchool` coincidirá con Publicaciones que contengan los términos snow y day y el hashtag #NoSchool. |
+| **Lógica OR** | Operadores sucesivos con OR entre ellos darán como resultado lógica OR, lo que significa que las Publicaciones coincidirán si se cumple cualquiera de las condiciones. Por ejemplo, al especificar `grumpy OR cat OR #meme` coincidirá con cualquier Publicación que contenga al menos los términos grumpy o cat, o el hashtag #meme. |
+| **Lógica NOT, negación** | Anteponer un guion (-) a una palabra clave (o a cualquier operador) la niega (NOT). Por ejemplo, `cat #meme -grumpy` coincidirá con Publicaciones que contengan el hashtag #meme y el término cat, pero solo si no contienen el término grumpy. Una cláusula de consulta habitual es `-is:retweet`, que no coincidirá con Retweets y, por lo tanto, solo coincidirá con Publicaciones originales, Publicaciones citadas y respuestas. Todos los operadores se pueden negar, pero los operadores negados no se pueden usar solos. |
+| **Agrupación** | Puedes usar paréntesis para agrupar operadores. Por ejemplo, `(grumpy cat) OR (#meme has:images)` devolverá Publicaciones que contengan los términos grumpy y cat, o bien Publicaciones con imágenes que contengan el hashtag #meme. Ten en cuenta que primero se aplican los AND y luego se aplican los OR. |
+
+**Nota sobre las negaciones**
+
+El operador `-is:nullcast` siempre debe usarse negado.
+
+Los operadores negados no se pueden usar solos.
+
+No niegues un conjunto de operadores agrupados entre paréntesis. En su lugar, niega cada operador individual. Por ejemplo, en vez de usar `skiing -(snow OR day OR noschool)`, te sugerimos usar `skiing -snow -day -noschool`. 
+
+<div id="order-of-operations">
+  #### Orden de operaciones
+</div>
+
+Al combinar la lógica AND y OR, el siguiente orden de operaciones determinará cómo se evalúa tu consulta.
+
+1. Los operadores conectados por lógica AND se combinan primero
+2. Luego, se aplican los operadores conectados con lógica OR
+
+Por ejemplo:
+
+* `apple OR iphone ipad` se evaluaría como `apple OR (iphone ipad)`
+* `ipad iphone OR android` se evaluaría como `(iphone ipad) OR android`
+
+Para eliminar cualquier ambigüedad y garantizar que tu consulta se evalúe según lo previsto, agrupa los términos con paréntesis cuando corresponda. 
+
+Por ejemplo:
+
+* `(apple OR iphone) ipad`
+* `iphone (ipad OR android)`
+
+<div id="punctuation-diacritics-and-case-sensitivity">
+  #### Puntuación, diacríticos y distinción entre mayúsculas y minúsculas
+</div>
+
+Si especificas una consulta por palabra clave o hashtag con acentos o diacríticos, coincidirá con el texto de las Publicaciones que contengan tanto el término con acentos y diacríticos como esos mismos términos con caracteres normales. Por ejemplo, las consultas con la palabra clave `Diacrítica` o el hashtag `#cumpleaños` coincidirán con *Diacrítica* o *#cumpleaños*, así como con *Diacritica* o *#cumpleanos* sin la tilde en la í ni la eñe.
+
+Los caracteres con acentos o diacríticos se tratan igual que los caracteres normales y no se tratan como límites de palabra. Por ejemplo, una consulta con la palabra clave `cumpleaños` solo coincidirá con actividades que contengan la palabra *cumpleaños* y no coincidirá con actividades que contengan *cumplea*, *cumplean* u *os*.
+
+Todos los operadores se evalúan sin distinguir entre mayúsculas y minúsculas. Por ejemplo, la consulta `cat` coincidirá con Publicaciones que contengan cualquiera de lo siguiente: *cat*, *CAT*, *Cat*.
+
+El comportamiento de coincidencia de [filtered stream](/es/x-api/posts/filtered-stream) es diferente al de Search Posts. Al [crear una regla de filtered stream](/es/x-api/posts/filtered-stream#building-rules-for-filtered-stream), ten en cuenta que las palabras clave y los hashtags que incluyen acentos y diacríticos solo coincidirán con términos que también incluyan el acento y el diacrítico, y no coincidirán con términos que utilicen caracteres normales en su lugar.
+
+Por ejemplo, las reglas de filtered stream que incluyan la palabra clave `Diacrítica` o el hashtag `#cumpleaños` solo coincidirán con los términos *Diacrítica* y *#cumpleaños*, y no coincidirán con *Diacritica* o *#cumpleanos* sin la tilde en la í ni la eñe.
+
+<div id="specificity-and-efficiency">
+  #### Especificidad y eficiencia
+</div>
+
+Cuando comiences a crear tu consulta, es importante tener en cuenta algunas cosas.
+
+* Generalmente no se recomienda utilizar operadores amplios por sí solos en tu consulta, como una sola palabra clave o un #hashtag, ya que probablemente coincidirá con un volumen enorme de Publicaciones. Crear una consulta más sólida dará como resultado un conjunto más específico de Publicaciones coincidentes y, con suerte, reducirá la cantidad de ruido en la carga útil que tendrás que revisar para encontrar información valiosa. 
+  * Por ejemplo, si tu consulta fuera solo la palabra clave `happy`, probablemente obtendrías entre 200.000 y 300.000 Publicaciones por día.
+  * Agregar más operadores condicionales reduce tus resultados de búsqueda, por ejemplo `(happy OR happiness) place_country:GB -birthday -is:retweet`
+* Escribir consultas eficientes también es beneficioso para mantenerte dentro de la restricción de longitud de caracteres de la consulta. La cantidad de caracteres incluye toda la cadena de consulta, incluidos espacios y operadores.
+  * Por ejemplo, la siguiente consulta tiene 59 caracteres: `(happy OR happiness) place_country:GB -birthday -is:retweet`
+
+<div id="quote-tweet-matching-behavior">
+  #### Comportamiento de coincidencia para Publicaciones citadas
+</div>
+
+Cuando uses los endpoints de Search Posts, los operadores no se aplicarán al contenido de la Publicación original que fue citada, sino únicamente al contenido incluido en la Publicación citada.
+
+Sin embargo, ten en cuenta que [filtered stream](/es/x-api/posts/filtered-stream) sí tendrá en cuenta tanto el contenido de la Publicación original que fue citada como el de la Publicación citada.
+
+<div id="iteratively-building-a-query">
+  #### Crear una consulta de forma iterativa
+</div>
+
+<div id="test-your-query-early-and-often">
+  ##### Prueba tu consulta temprano y con frecuencia
+</div>
+
+Lograr que una consulta devuelva los resultados &quot;correctos&quot; a la primera es poco común. Hay tanto contenido en X que puede o no ser obvio al principio, y la sintaxis de consulta descrita arriba puede ser difícil de ajustar a la búsqueda que quieres realizar. A medida que vayas creando una consulta, es importante que la pruebes periódicamente.
+
+Para esta sección, vamos a comenzar con la siguiente consulta y ajustarla en función de los resultados que obtengamos durante nuestra prueba: 
+
+`happy OR happiness`
+
+<div id="use-results-to-narrow-the-query">
+  ##### Usa los resultados para acotar la consulta
+</div>
+
+A medida que pruebes la consulta, deberías revisar las Publicaciones devueltas para ver si incluyen los datos que esperas y deseas recibir. Empezar con una consulta amplia y un superconjunto de coincidencias de Publicaciones te permite revisar los resultados y acotar la consulta para filtrar resultados no deseados.  
+
+Cuando probamos la consulta de ejemplo, notamos que estábamos recibiendo Publicaciones en una variedad de idiomas diferentes. En esta situación, queremos recibir únicamente Publicaciones que estén en inglés, así que vamos a añadir el operador `lang:`:
+
+`(happy OR happiness) lang:en`
+
+La prueba devolvió varias Publicaciones felicitando a la gente por su cumpleaños, así que vamos a añadir `-birthday` como un operador de palabra clave en negativo. También queremos recibir únicamente Publicaciones originales, así que hemos añadido el operador negado `-is:retweet`:
+
+`(happy OR happiness) lang:en -birthday -is:retweet`
+
+<div id="adjust-for-inclusion-where-needed">
+  ##### Ajustar para inclusión cuando sea necesario
+</div>
+
+Si notas que no estás recibiendo los datos que esperas y sabes que hay Publicaciones existentes que deberían devolverse, es posible que debas ampliar tu consulta eliminando operadores que puedan estar filtrando los datos que te interesan. 
+
+En nuestro ejemplo, notamos que había otras Publicaciones en nuestra cronología personal que expresaban la emoción que estamos buscando y que no se incluyeron en los resultados de prueba. Para garantizar una mayor cobertura, vamos a agregar las palabras clave `excited` y `elated`.
+
+`(happy OR happiness OR excited OR elated) lang:en -birthday -is:retweet`
+
+<div id="adjust-for-popular-trendsbursts-over-the-time-period">
+  ##### Ajustar en función de tendencias/repuntes populares durante el período de tiempo
+</div>
+
+Las tendencias van y vienen rápidamente en X. El mantenimiento de tu consulta debe ser un proceso activo. Si planeas usar una consulta durante un tiempo, te recomendamos que revises periódicamente los datos que recibes para ver si necesitas hacer algún ajuste.
+
+En nuestro ejemplo, notamos que empezamos a recibir algunas Publicaciones en las que se desea a las personas unas “felices fiestas”. Como no queremos que estas Publicaciones se incluyan en nuestros resultados, vamos a agregar la palabra clave negada `-holidays`.
+
+`(happy OR happiness OR excited OR elated) lang:en -birthday -is:retweet -holidays`
+
+<div id="adding-a-query-to-your-request">
+  ### Agregar una consulta a tu solicitud
+</div>
+
+Para agregar tu consulta a tu solicitud, debes usar el parámetro `query`. Como ocurre con cualquier parámetro de consulta, debes asegurarte de codificar la consulta para HTTP que desarrollaste.
+
+A continuación tienes un ejemplo de cómo se vería esto usando un comando cURL, con los parámetros adicionales `tweet.fields` y `max_results` incluidos. Si deseas usar este comando, asegúrate de reemplazar `$BEARER_TOKEN` con tu propio [Bearer Token](/es/resources/fundamentals/authentication#oauth-2-0):
+
+```bash
+curl https://api.x.com/2/tweets/search/recent?query=cat%20has%3Amedia%20-grumpy&tweet.fields=created_at&max_results=100 -H "Authorization: Bearer $BEARER_TOKEN"
+```
+
+<div id="query-examples">
+  ### Ejemplos de consultas
+</div>
+
+<div id="tracking-a-natural-disaster">
+  #### Seguimiento de un desastre natural
+</div>
+
+La siguiente consulta devolvió Publicaciones originales de agencias meteorológicas y estaciones de medición que hablaban sobre el huracán Harvey, que azotó Houston en 2017.
+
+A continuación se muestra cómo sería la consulta sin la codificación HTTP:
+
+`has:geo (from:NWSNHC OR from:NHC\_Atlantic OR from:NWSHouston OR from:NWSSanAntonio OR from:USGS\_TexasRain OR from:USGS_TexasFlood OR from:JeffLindner1) -is:retweet`
+
+Y a continuación se muestra cómo sería la consulta con la codificación HTTP, el parámetro de consulta y el URI de búsqueda reciente:
+
+`https://api.x.com/2/tweets/search/recent?query=-is%3Aretweet%20has%3Ageo%20(from%3ANWSNHC%20OR%20from%3ANHC\_Atlantic%20OR%20from%3ANWSHouston%20OR%20from%3ANWSSanAntonio%20OR%20from%3AUSGS\_TexasRain%20OR%20from%3AUSGS_TexasFlood%20OR%20from%3AJeffLindner1)`
+
+<div id="reviewing-the-sentiment-of-a-conversation">
+  #### Revisión del sentimiento de una conversación
+</div>
+
+La siguiente regla podría utilizarse para entender mejor el sentimiento de la conversación que se desarrolla alrededor del hashtag *#nowplaying*, pero acotada únicamente a Publicaciones realizadas dentro de Norteamérica.
+
+A continuación se muestra cómo serían las dos consultas diferentes, una para positivo y otra para negativo, sin la codificación HTTP:
+
+`#nowplaying (happy OR exciting OR excited OR favorite OR fav OR amazing OR lovely OR incredible) (place\_country:US OR place\_country:MX OR place_country:CA) -horrible -worst -sucks -bad -disappointing`
+
+`#nowplaying (horrible OR worst OR sucks OR bad OR disappointing) (place\_country:US OR place\_country:MX OR place_country:CA) -happy -exciting -excited -favorite -fav -amazing -lovely -incredible`
+
+Y aquí se muestra cómo se verían las consultas con la codificación HTTP, el parámetro de consulta y el URI de búsqueda reciente:
+
+`https://api.x.com/2/tweets/search/recent?query=%23nowplaying%20(happy%20OR%20exciting%20OR%20excited%20OR%20favorite%20OR%20fav%20OR%20amazing%20OR%20lovely%20OR%20incredible)%20(place\_country%3AUS%20OR%20place\_country%3AMX%20OR%20place_country%3ACA)%20-horrible%20-worst%20-sucks%20-bad%20-disappointing`
+
+`https://api.x.com/2/tweets/search/recent?query=%23nowplaying%20(horrible%20OR%20worst%20OR%20sucks%20OR%20bad%20OR%20disappointing)%20(place\_country%3AUS%20OR%20place\_country%3AMX%20OR%20place_country%3ACA)%20-happy%20-exciting%20-excited%20-favorite%20-fav%20-amazing%20-lovely%20-incredible`
+
+<div id="find-posts-that-relate-to-a-specific-post-annotation">
+  #### Buscar Publicaciones relacionadas con una anotación de Publicación específica
+</div>
+
+Esta regla se creó para buscar Publicaciones originales que incluyan la imagen de una mascota que no sea un gato, en las que el idioma identificado en la Publicación sea japonés. Para ello, utilizamos el operador `context:` para aprovechar la funcionalidad de [anotaciones de Publicación](/es/x-api/fundamentals/post-annotations). Primero utilizamos el endpoint de [búsqueda de Publicaciones](/es/x-api/posts/lookup/introduction) y el parámetro de campos `tweet.fields=context_annotations` para identificar qué IDs de domain.entity necesitamos usar en nuestra consulta:
+
+* Las Publicaciones relacionadas con gatos devuelven el `domain` 66 (categoría Interests and Hobbies) con la entidad 852262932607926273 (Cats).
+* Las Publicaciones relacionadas con mascotas devuelven el `domain` 65 (Interests and Hobbies Vertical) con la entidad 852262932607926273 (Pets).
+
+Así se vería la consulta sin la codificación HTTP:
+
+`context:65.852262932607926273 -context:66.852262932607926273 -is:retweet has:images lang:ja`
+
+Y así se vería la consulta con la codificación HTTP, el parámetro de consulta y el URI de búsqueda reciente:
+
+`https://api.x.com/2/tweets/search/recent?query=context%3A65.852262932607926273%20-context%3A66.852262932607926273%20-is%3Aretweet%20has%3Aimages%20lang%3Aja`
+
+Prueba la [herramienta de creación de consultas](https://developer.x.com/apitools/query?query=) para obtener ayuda adicional.

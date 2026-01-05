@@ -1,0 +1,141 @@
+---
+title: 最近搜索
+sidebarTitle: 最近搜索
+keywords: ["最近搜索", "搜索快速入门", "最近搜索教程", "搜索帖子", "最近搜索指南", "搜索示例"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-recent-search-endpoint">
+  ## 开始使用最近搜索端点
+</div>
+
+本快速入门指南将帮助你使用 Postman 向最近搜索端点发出第一个请求，并指定一组指定的字段。
+
+如果你希望查看不同语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。
+
+<Note>
+  ### **先决条件**
+
+  要完成本指南，你需要拥有一组用于对请求进行身份验证的 [keys and tokens](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些密钥和令牌：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审批。
+  * 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 并在其中创建一个关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+  * 前往你的 App 的 “Keys and tokens” 页面以生成所需凭证。请务必将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-build-a-recent-search-request">
+  ### 构建最近搜索请求的步骤
+</div>
+
+**步骤一：从工具或库入手**
+
+有多种不同的工具、代码示例和库可用于向此端点发起请求，但在这里我们将使用 Postman 工具来简化流程。
+
+要将 X API v2 Postman 集合加载到你的环境中，请点击以下按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 后，导航到 Search Posts &gt; Recent search request。
+
+**步骤二：为你的请求进行身份验证**
+
+要正确地向 X API 发起请求，你需要验证自己是否具有访问权限。对于此端点，你必须使用 [OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 或 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication) 身份验证方式之一对请求进行认证。
+
+为简化起见，我们在本示例请求中将使用 OAuth 2.0 App-Only，但如果你希望请求私有[指标](/zh/x-api/fundamentals/metrics)或私有帖子，则需要使用其他身份验证方式之一。 
+
+要使用 OAuth 2.0 App-Only，你必须将你的密钥和令牌（特别是 [App Access Token](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（也称为 App-only Bearer Token））添加到 Postman。你可以通过在 Postman 右上角选择名为 “X API v2” 的环境，然后将你的密钥和令牌添加到 &quot;initial value&quot; 和 &quot;current value&quot; 字段中来完成此操作（点击环境下拉菜单旁边的眼睛图标）。
+
+如果完成无误，这些变量将会自动填充到请求的 &quot;Authorization&quot; 选项卡中。
+ 
+
+**步骤三：创建搜索查询**
+
+每个最近搜索请求都需要一个[搜索查询](/zh/x-api/posts/search/integrate/build-a-query)。在此示例中，我们将使用一个匹配 @XDevelopers 账号发布的帖子 的查询。对于该查询，我们使用 from 运算符并将其设置为 XDevelopers（不区分大小写）：
+
+`from:XDevelopers`
+
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，并在 `ids` 参数的 &quot;Value&quot; 列中输入此 ID，或输入用逗号分隔的一串帖子 ID。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key（键）** | **Value（值）** | **Description（描述）** |
+| `query` | from:XDevelopers | 要提交到最近搜索端点的搜索查询 |
+
+**步骤四：确定并指定你希望返回的字段**
+
+如果在步骤三之后点击 &quot;Send&quot; 按钮，你将在响应中收到默认的 [Post 对象](/zh/x-api/fundamentals/data-dictionary#tweet)字段：id、text 和 `edit_history_tweet_ids`。如果你希望在 id、text 和 `edit_history_tweet_ids` 之外再接收其他字段，你必须在请求中通过 [field](/zh/x-api/fundamentals/fields) 和/或 [expansion](/zh/x-api/fundamentals/expansions) 参数来指定这些字段。
+
+在本练习中，我们将从不同对象请求四组不同的字段：
+
+1. 默认的 Post 对象字段。
+2. 主用户对象中的额外字段 tweet.created&#95;at。
+3. 返回帖子所关联作者的用户对象的默认字段。
+4. 关联用户对象中的额外字段 user.description。
+
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，并在 &quot;Query Params&quot; 表格中添加如下 key:value 对：
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key（键）** | **Value（值）** | **Returned fields（返回字段）** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `description` | `includes.users.description` |
+
+现在你应该能在 &quot;Send&quot; 按钮旁边看到如下 URL：
+
+`https://api.x.com/2/tweets/search/recent?query=from:XDevelopers&tweet.fields=created_at&expansions=author_id&user.fields=created_at`
+
+**步骤五：发送请求并查看响应**
+
+在完成所有设置后，点击“Send”按钮，你会收到如下响应：
+
+```
+{
+   "data": [
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-11T16:05:06.000Z",
+           "id": "1271111223220809728",
+           "text": "今晚收看 @jessicagarson 带我们了解如何在 R 中运行您最喜欢的 Python 包。🍿\n\n学习如何将两种强大的编程语言结合用于数据科学，并查看使用 Twitter 开发者实验室最新搜索端点的实时示例。https://t.co/v178oUZNuj"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-10T19:25:24.000Z",
+           "id": "1270799243071062016",
+           "text": "在我们致力于构建新的 Twitter API 时，我们延长了几个 Labs v1 端点的弃用时间表。了解更多 📖 https://t.co/rRWaJYJgKk"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-09T18:08:47.000Z",
+           "id": "1270417572001976322",
+           "text": "注释帮助您更多地了解推文——它们甚至可以帮助您找到感兴趣的话题。🔬\n\n在本教程中，@suhemparack 向我们展示如何使用注释 + 过滤流端点查找与 COVID-19 相关的推文。\n\n了解您也可以如何做到。⤵️\nhttps://t.co/qwVOgw0zSV"
+       }
+   ],
+   "includes": {
+       "users": [
+           {
+               "description": "Twitter #DevRel 团队的声音，也是您获取 Twitter API 更新、新闻和活动的官方来源。\n\n#BlackLivesMatter",
+               "id": "2244994945",
+               "name": "X 开发者",
+               "username": "XDevelopers"
+           }
+       ]
+   },
+   "meta": {
+       "newest_id": "1271111223220809728",
+       "oldest_id": "1270417572001976322",
+       "result_count": 3
+   }
+}
+```
+
+**后续步骤**
+
+[使用 API 参考文档自定义请求](/zh/x-api/posts/recent-search)
+
+[查看完整的查询运算符列表](/zh/x-api/posts/search/integrate/build-a-query "查看完整的查询运算符列表")
+
+[使用这些端点的示例代码](https://github.com/xdevplatform/Twitter-API-v2-sample-code "使用这些端点的示例代码")

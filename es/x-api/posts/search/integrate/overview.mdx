@@ -1,0 +1,178 @@
+---
+title: Descripción general
+sidebarTitle: Descripción general
+keywords: ["integración de búsqueda", "descripción general de búsqueda", "guía de búsqueda", "implementación de búsqueda", "integración de búsqueda de Publicaciones"]
+---
+
+<div id="how-to-integrate-with-the-search-posts-endpoints">
+  ## Cómo integrar los endpoints de búsqueda de Publicaciones
+</div>
+
+Esta página contiene información sobre varias herramientas y conceptos clave que debes conocer al integrar los endpoints de búsqueda reciente o de búsqueda en el archivo completo en tu sistema. Hemos dividido la página en las siguientes secciones:
+
+* [Herramientas útiles](#helpful-tools)
+* Conceptos clave
+  * [Autenticación](#authentication)
+
+  * [Portal para desarrolladores, Proyectos y Aplicaciones](#developer-portal)
+
+  * [Límites de frecuencia](#rate-limits)
+
+  * [Campos y expansiones](#fields-expansions)
+
+  * [Métricas](#metrics)
+
+  * [Creación de consultas de búsqueda](#queries)
+
+  * [Paginación](#pagination)
+
+  * [Límites de publicaciones](#tweet-caps) 
+
+  * [Ediciones de publicaciones](#tweet-edits) 
+
+<div id="helpful-tools">
+  ### Herramientas útiles
+</div>
+
+Antes de empezar a explorar algunos conceptos clave, te recomendamos que utilices una de las siguientes herramientas o ejemplos de código para comenzar a probar la funcionalidad de estos endpoints.
+
+<div id="code-samples">
+  #### Ejemplos de código
+</div>
+
+¿Te interesa empezar a trabajar con estos endpoints usando código en tu lenguaje de programación preferido? Tenemos varios ejemplos de código disponibles que puedes usar como punto de partida en nuestra [página de GitHub](https://github.com/xdevplatform/Twitter-API-v2-sample-code), incluidos un [cliente de Python](https://github.com/xdevplatform/search-tweets-python) y un [cliente de Ruby](https://github.com/xdevplatform/search-tweets-ruby).
+
+<div id="libraries">
+  #### Bibliotecas
+</div>
+
+Aprovecha una de las muchas [bibliotecas de terceros creadas por la comunidad](/es/x-api/tools-and-libraries/overview) para ayudarte a empezar. Puedes encontrar una biblioteca que funcione con los endpoints de v2 buscando la etiqueta de versión adecuada.
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman es una excelente herramienta que puedes usar para probar estos endpoints. Cada solicitud de Postman incluye todos los parámetros del endpoint correspondiente para ayudarte a comprender rápidamente qué tienes disponible. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra página [Usar Postman](/es/tutorials/postman-getting-started).
+ 
+
+<div id="key-concepts">
+  ### Conceptos clave
+</div>
+
+<div id="authentication">
+  #### Autenticación
+</div>
+
+Todos los endpoints de X API v2 requieren que autentiques tus solicitudes con un conjunto de credenciales, también conocidas como claves y tokens. Puedes usar Contexto de usuario de OAuth 1.0a, OAuth 2.0 solo para la aplicación u OAuth 2.0 Authorization Code with PKCE para autenticar tus solicitudes al endpoint de búsqueda reciente. Debes usar OAuth 2.0 solo para la aplicación cuando utilices el endpoint de búsqueda en el archivo completo.
+
+[OAuth 2.0 App-Only](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) solo requiere que envíes un [OAuth 2.0 App Access Token](/es/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) con tu solicitud. Puedes generar un App Access Token directamente desde una aplicación de desarrollador o generar uno usando el endpoint [POST oauth2/token](/es/resources/fundamentals/authentication#post-oauth2-token).
+
+[OAuth 1.0a User Context](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) requiere que utilices tus claves de API, los tokens de acceso de usuario y un conjunto de otros parámetros para [crear un encabezado de autorización](https://developer-staging.x.com/resources/fundamentals/authentication/authorizing-a-request), que luego enviarás con tu solicitud. Los tokens de acceso deben estar asociados con el usuario en cuyo nombre estás realizando la solicitud. Si deseas generar un conjunto de tokens de acceso para otro usuario, este debe autorizar tu aplicación usando el [flujo OAuth de tres patas](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens).
+
+Ten en cuenta que OAuth 1.0a puede ser difícil de usar. Si no estás familiarizado con este método de autenticación, te recomendamos que uses una [biblioteca](/es/x-api/tools-and-libraries/overview), utilices una herramienta como Postman o uses OAuth 2.0 para autenticar tus solicitudes. Si deseas solicitar una Publicación o métricas privadas desde estos endpoints, tendrás que usar Contexto de usuario de OAuth 1.0a u OAuth 2.0 Authorization Code with PKCE, lo que garantizará que tengas los permisos adecuados del usuario propietario de ese contenido.
+
+[OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) permite un mayor control sobre el alcance de una aplicación y los flujos de autorización en múltiples dispositivos. OAuth 2.0 te permite elegir ámbitos específicos y granulares que te otorgan permisos específicos en nombre de un usuario.
+
+Para habilitar OAuth 2.0 en tu aplicación, debes activarlo en la configuración de autenticación de tu aplicación, que se encuentra en la sección de configuración de la aplicación del portal para desarrolladores.
+
+<Note>
+  **Ten en cuenta**
+
+  Si solicitas los siguientes [campos](/es/x-api/fundamentals/fields), se requiere Contexto de usuario de OAuth 1.0a u OAuth 2.0 Authorization Code:
+
+  * tweet.fields.non&#95;public&#95;metrics
+  * tweet.fields.promoted&#95;metrics
+  * tweet.fields.organic&#95;metrics
+  * media.fields.non&#95;public&#95;metrics
+  * media.fields.promoted&#95;metrics
+  * media.fields.organic&#95;metrics
+</Note>
+
+####
+
+Portal para desarrolladores, Proyectos y aplicaciones de desarrollador
+
+Para trabajar con cualquier endpoint de X API v2, debes [registrarte para obtener una cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info), configurar un Proyecto dentro de esa cuenta y crear una aplicación de desarrollador dentro de ese Proyecto. Las claves y tokens de esa aplicación de desarrollador funcionarán con estos endpoints de búsqueda.
+
+Puedes usar las claves y tokens de un Proyecto con cualquier [nivel de acceso](/es/x-api/getting-started/about-x-api) para hacer solicitudes al endpoint de búsqueda reciente. Sin embargo, deberás usar un Proyecto con nivel de acceso Pro o Enterprise para hacer solicitudes al endpoint de búsqueda de archivo completo. Si tienes [acceso Enterprise](/es/x-api/getting-started/getting-access), tendrás acceso a funcionalidades adicionales, incluidas la disponibilidad de operadores adicionales y consultas de mayor longitud.
+ 
+
+<div id="rate-limits">
+  #### Límites de frecuencia
+</div>
+
+Cada día, muchos miles de desarrolladores realizan solicitudes a la X API. Para ayudar a gestionar el volumen, se imponen [límites de frecuencia](/es/x-api/fundamentals/rate-limits) en cada endpoint, que limitan la cantidad de solicitudes que cada desarrollador puede hacer en nombre de una aplicación o en nombre de un usuario autenticado.
+
+Se aplican diferentes límites de frecuencia para estos endpoints según el método de autenticación que se utilice. Los límites de frecuencia a nivel de aplicación se aplican a una aplicación que realiza solicitudes usando OAuth 2.0 solo para la aplicación, mientras que el límite de frecuencia a nivel de usuario se aplica a las solicitudes que se realizan en nombre del usuario específico que autoriza usando contexto de usuario de OAuth 1.0a o OAuth 2.0 Authorization Code with PKCE. Estos dos límites de frecuencia se basan en la frecuencia de solicitudes dentro de una ventana de 15 minutos.
+
+Por ejemplo, una aplicación que usa autenticación OAuth 2.0 solo para la aplicación para realizar solicitudes al endpoint de búsqueda reciente puede hacer 450 solicitudes (incluidas las solicitudes de paginación) dentro de un período de 15 minutos. Esa misma aplicación, dentro del mismo período de 15 minutos y con dos usuarios autenticados diferentes (usando contexto de usuario de OAuth 1.0a o OAuth 2.0 Authorization Code with PKCE), puede hacer hasta 180 solicitudes (incluidas las solicitudes de paginación) al endpoint de búsqueda reciente por cada usuario autenticado.
+ 
+
+<div id="fields-and-expansions">
+  #### Campos y expansiones
+</div>
+
+La X API v2 te permite seleccionar exactamente qué datos quieres que se devuelvan desde la API usando [campos](/es/x-api/fundamentals/fields) y [expansiones](/es/x-api/fundamentals/expansions). El parámetro `expansions` te permite expandir los objetos referenciados en el payload. Por ejemplo, este endpoint te permite solicitar objetos de tipo encuesta, lugar, contenido multimedia y otros objetos usando el parámetro `expansions`.
+
+Los parámetros `fields` te permiten seleccionar exactamente qué campos dentro de los diferentes objetos de datos quieres recibir. De forma predeterminada, el objeto principal de Publicación devuelto por estos endpoints incluye los campos `id` y `text` (además de `edit_history_tweet_ids` para Publicaciones creadas después de que se lanzó esa función). Para recibir campos adicionales como `author_id` o `public_metrics`, tendrás que solicitarlos específicamente utilizando los parámetros `fields`. Algunos campos importantes que quizá quieras considerar en tu integración son nuestros datos de encuestas, las [métricas](/es/x-api/fundamentals/metrics), las [anotaciones de Publicaciones](/es/x-api/fundamentals/post-annotations) y los campos de [ID de conversación](/es/x-api/fundamentals/conversation-id).
+
+Hemos añadido a nuestro [diccionario de datos de la X API v2](/es/x-api/fundamentals/data-dictionary) una guía sobre cómo [usar campos y expansiones juntos](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions).
+ 
+
+<div id="metrics">
+  #### Métricas
+</div>
+
+Los endpoints de X API v2 te permiten solicitar métricas directamente desde los objetos devueltos, siempre que incluyas los [campos](/es/x-api/fundamentals/fields) adecuados en tu solicitud.
+
+Hay algunas limitaciones con las métricas de las Publicaciones que debes tener en cuenta, específicamente relacionadas con la privacidad del usuario y los siguientes campos de la respuesta:
+
+* tweet.fields.non&#95;public&#95;metrics
+* tweet.fields.promoted&#95;metrics
+* tweet.fields.organic&#95;metrics
+* media.fields.non&#95;public&#95;metrics
+* media.fields.promoted&#95;metrics
+* media.fields.organic&#95;metrics
+
+Los campos indicados incluyen datos de métricas privadas, lo que significa que debes estar autorizado por el autor de la Publicación para recuperar estos datos en su nombre cuando uses el endpoint de búsqueda reciente, lo que implica que debes usar [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication). Dado que solo puedes usar este método de autenticación con la búsqueda reciente, no podrás recuperar estas métricas mediante el endpoint de búsqueda en el archivo completo.
+
+Por ejemplo, para recibir `non_public_metrics` de las Publicaciones del usuario con id 1234, tendrás que incluir en tu solicitud los Tokens de acceso asociados con ese usuario. Puedes hacer que los usuarios autoricen tu Aplicación y recibir un conjunto de Tokens de acceso asociados con ellos utilizando el [flujo OAuth de tres patas](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow).
+
+Todas las `non_public_metrics`, `organic_metrics` y `promoted_metrics` solo están disponibles para Publicaciones creadas en los últimos 30 días. Esto significa que, cuando solicites los campos indicados, los resultados se ajustarán automáticamente para incluir únicamente Publicaciones de los últimos 30 días.
+
+Si se solicitan estos campos indicados, solo se devolverán las Publicaciones creadas por el usuario autenticado; todas las demás Publicaciones recibirán un mensaje de error.
+ 
+
+<div id="building-search-queries">
+  #### Crear consultas de búsqueda
+</div>
+
+La característica central de estos endpoints es el uso de una única consulta de búsqueda para filtrar las Publicaciones que recibes. Estas consultas se componen de operadores que coinciden con atributos de la Publicación y del usuario, como palabras clave del mensaje, hashtags y URL. Los operadores se pueden combinar en consultas utilizando lógica booleana y paréntesis para ayudar a refinar el comportamiento de coincidencia de la consulta.
+
+Puedes usar nuestra guía sobre [cómo crear una consulta](/es/x-api/posts/search/integrate/build-a-query) para obtener más información.
+
+<div id="pagination">
+  #### Paginación
+</div>
+
+Estos endpoints utilizan paginación para que las respuestas se entreguen con rapidez. Cuando haya más resultados de los que se pueden enviar en una sola respuesta (hasta 100 Publicaciones para la búsqueda reciente y 500 para la búsqueda de archivo completo), tendrás que usar la paginación. Usa el parámetro max&#95;results para indicar cuántos resultados se devolverán por página y el parámetro pagination&#95;token para obtener la siguiente página de resultados. Puedes obtener más información consultando nuestra [guía de paginación](/es/x-api/fundamentals/pagination).
+
+<div id="post-caps">
+  #### Límites de Publicaciones
+</div>
+
+Los endpoints de Search Posts tienen un límite en la cantidad de Publicaciones que pueden devolver en un mes determinado, independientemente de la paginación.
+
+Independientemente de qué endpoint de búsqueda uses, las Publicaciones devueltas contabilizarán para los [límites de Publicaciones](/es/x-api/fundamentals/post-cap) a nivel de Proyecto. El uso se muestra en el portal para desarrolladores, y el &quot;mes&quot; comienza en el día de renovación de tu suscripción que se muestra en el [panel del portal para desarrolladores](https://developer.x.com/en/portal/dashboard).
+
+**Ediciones de Publicaciones**
+
+Las Publicaciones que se pueden editar pueden modificarse hasta cinco veces en los 30 minutos posteriores a la publicación de la Publicación original. Los endpoints de búsqueda siempre proporcionarán la versión más reciente de la Publicación. Si solo solicitas Publicaciones que se publicaron hace 30 minutos o más, siempre recibirás la versión final de la Publicación. Sin embargo, si tienes un caso de uso casi en tiempo real y estás consultando Publicaciones publicadas en los últimos treinta minutos, esas Publicaciones podrían haberse editado después de que las recibiste. Estas Publicaciones se pueden rehidratar mediante búsqueda o mediante el endpoint Post Lookup para confirmar su estado final. Para obtener más información sobre cómo funcionan las ediciones de Publicaciones, consulta la página [Fundamentos sobre las ediciones de Publicaciones](/es/x-api/fundamentals/edit-posts).  
+
+**Próximos pasos**
+
+[Haz tu primera solicitud a un endpoint de Search Posts](/es/x-api/posts/search/quickstart/recent-search)
+
+[Consulta la lista completa de parámetros, campos y más en nuestras páginas de referencia de la API](/es/x-api/posts/recent-search)
+
+[Obtén soporte o soluciona un error](https://developer.x.com/en/support/x-api)

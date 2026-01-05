@@ -1,0 +1,151 @@
+---
+title: 'Creación de una campaña DPA - Paso a paso'
+keywords: ["DPA campaign", "dynamic product ads", "DPA", "create DPA campaign", "product ads", "dynamic ads"]
+---
+
+En el siguiente ejemplo se asume que ya has instalado, configurado y autorizado tu aplicación y tu usuario usando twurl. twurl es una herramienta de línea de comandos, similar a cURL, que maneja de forma eficiente la autenticación OAuth de X. twurl es una excelente herramienta para probar y depurar rápidamente la funcionalidad de la Ads API (y la REST API). Para ver los encabezados completos de la solicitud y la respuesta, utiliza -t para trazar la llamada, lo que es aproximadamente equivalente a la opción -v de cURL.
+
+Para este ejemplo, crearemos una campaña de Dynamic Product Ads (DPA).
+
+Obtén el id de la cuenta.
+
+```bash
+twurl -H ads-api.x.com /12/accounts/
+```
+
+```json
+{
+  "request": {
+    "params": {}
+  },
+  "data": [
+    {
+      "name": "Cuenta de prueba para @AdsAPI",
+      "timezone": "America/Los_Angeles",
+      "timezone_switch_at": null,
+      "id": "xxxxxx",
+      "created_at": "2014-03-09T00:41:49Z",
+      "salt": "f9f9d5a5f23075c618da5eb1d1a9df57",
+      "updated_at": "2015-01-29T00:41:49Z",
+      "approval_status": "ACCEPTED",
+      "deleted": false
+    }
+  ],
+  "data_type": "account",
+  "total_count": 1,
+  "next_cursor": null
+}
+```
+
+Obtén el id del instrumento de financiación.
+Llama a la API GET accounts/:account&#95;id/funding&#95;instruments utilizando el id de la cuenta obtenido en el comando anterior.
+
+```bash
+twurl -H ads-api.x.com /12/accounts/xxxxxx/funding_instruments
+```
+
+```json
+{
+  "data": [
+    {
+      "cancelled": true,
+      "created_at": "2014-03-09T00:41:49Z",
+      "credit_limit_local_micro": null,
+      "currency": "USD",
+      "deleted": false,
+      "description": null,
+      "end_time": null,
+      "funded_amount_local_micro": null,
+      "id": "yyyy",
+      "type": null,
+      "updated_at": "2014-05-29T00:41:49Z"
+    }
+  ],
+  "data_type": "funding_instrument",
+  "next_cursor": null,
+  "request": {
+    "params": {
+      "account_id": "xxxxxx"
+    }
+  },
+  "total_count": 1
+}
+```
+
+
+<div id="step-1-create-campaign">
+  ## Paso 1: Crear campaña
+</div>
+
+Crea una campaña y asígnala al instrumento de financiación.
+Especifica una fecha de inicio y un presupuesto para la campaña.
+
+* Campos obligatorios: instrumento de financiación, nombre de campaña, presupuesto (total/diario), fecha de inicio e id de la cuenta de anuncios
+
+```bash
+twurl -H ads-api.x.com -d "funding_instrument_id={FUNDING_INSTRUMENT_ID}&name={CAMPAIGN_NAME}&total_budget_amount_local_micro={TOTAL_BUDGET}&daily_budget_amount_local_micro={DAILY_BUDGET}&start_time={START_TIME}" /12/accounts/{ADS_ACCOUNT_ID}/campaigns | jq
+```
+
+
+<div id="step-2-create-line-item-with-sales-objective">
+  ## Paso 2: Crear un line item con el objetivo Sales
+</div>
+
+Crea un line item asociado a la campaña.
+
+* Campos obligatorios: campaign id (del Paso 1), product type, placements, objective, goal, entity status, primary web event tag, catalog id, product set id, creative&#95;source, ads&#95;account&#95;id
+* catalog&#95;id y product&#95;set&#95;id se pueden encontrar en tu Shopping Manager
+* creative&#95;source siempre debe ser DYNAMIC&#95;PRODUCT&#95;CREATIVE
+* objective siempre debe ser WEBSITE&#95;CLICKS
+* goal siempre debe ser WEBSITE&#95;CONVERSIONS
+
+```bash
+twurl -H ads-api.x.com -d "campaign_id={CAMPAIGN_ID}&product_type={product_type}&placements={PLACEMENTS}&objective=WEBSITE_CLICKS&goal=WEBSITE_CONVERSIONS&entity_status={entity_status}&primary_web_event_tag={WEB_EVENT_TAG}&catalog_id={catalog_id}&product_set_id={product_set_id}&creative_source=DYNAMIC_PRODUCT_CREATIVE" /12/accounts/{ADS_ACCOUNT_ID}/line_items | jq
+```
+
+* Después de este paso, la campaña estará disponible para verla en el Ads Manager de X.
+
+
+<div id="step-3-create-dpa-card">
+  ## Paso 3: Crear tarjeta DPA
+</div>
+
+Crea una tarjeta DPA.
+
+* Parámetros obligatorios: id de la cuenta de anuncios y URL:
+* La URL debe comenzar con [https://twitter.com](https://twitter.com); cualquier UTM adicional se puede agregar después, como en el siguiente ejemplo:
+  * `https://twitter.com?utm_source=%7B%7Bsite_source%7D%7D`
+* Opcionalmente, puedes elegir el formato de tu tarjeta especificando creative&#95;type con uno de los siguientes valores: &quot;CAROUSEL&quot;, &quot;SINGLE&quot;, &quot;COLLECTION&quot;. Si no se especifica, tu tarjeta se creará como una tarjeta de carrusel.
+
+```bash
+twurl -X POST -H ads-api.twitter.com -A "Content-Type: application/json" "/12/accounts/{ADS_ACCOUNT_ID}/dynamic_product_cards" -d '{"url": "{URL}", "creative_type": "{CREATIVE_TYPE}"}' | jq
+```
+
+
+<div id="step-4-create-post">
+  ## Paso 4: Crear Publicación
+</div>
+
+Crea una publicación.
+
+* Parámetros obligatorios: id de la cuenta de anuncios, id de usuario, URI de la card (del Paso 3), text, name y dynamic&#95;product&#95;ad
+* dynamic&#95;product&#95;ad siempre debe configurarse en true
+
+```bash
+twurl -X POST -H "https://ads-api.twitter.com" "/12/accounts/{ADS_ACCOUNT_ID}/tweet?as_user_id={USER_ID}1&card_uri=card%3A%2F%2F{CARD_URI}&text={POST_TEXT}&name={POST_NAME}%201&dynamic_product_ad=true" | jq
+```
+
+
+<div id="step-5-associate-post-with-line-item">
+  ## Paso 5: Asociar la publicación con el elemento de línea
+</div>
+
+Asocia la publicación con el elemento de línea.
+
+* Parámetros obligatorios: ads account id, line item id (del Paso 2) y tweet id (id&#95;str del Paso 4)
+
+```bash
+twurl -X POST -H "https://ads-api.twitter.com" "/12/accounts/{ADS_ACCOUNT_ID}/promoted_tweets?line_item_id={line_item_id}&tweet_ids={tweet_id}" | jq
+```
+
+Si los anunciantes quieren ver la tarjeta en la interfaz, también estará disponible allí.

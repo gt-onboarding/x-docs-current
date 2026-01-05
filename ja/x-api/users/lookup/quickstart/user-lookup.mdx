@@ -1,0 +1,146 @@
+---
+title: ユーザー検索
+sidebarTitle: ユーザー検索
+keywords: ["ユーザー検索 クイックスタート", "ユーザー取得 クイックスタート", "ユーザー検索 チュートリアル", "ユーザー検索 ガイド", "ユーザー検索 サンプル"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-users-lookup-endpoints">
+  ## users lookup エンドポイントのはじめ方
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して、特定のフィールドを指定して users lookup エンドポイントへ最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。 
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストを認証するための一連の [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal 内で [Project](/ja/resources/fundamentals/projects) を作成し、関連付けられた [developer App](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-users-lookup-request">
+  ### Users lookup リクエストを構築する手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ1: まずツールまたはライブラリを用意する
+</div>
+
+このエンドポイントにリクエストを送信するために利用できるツールやコード例、ライブラリはいくつかありますが、ここでは手順を簡単にするために Postman を使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、GET /users/by エンドポイントに移動してください。
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### ステップ 2: リクエストを認証する
+</div>
+
+X API に正しくリクエストを送信するには、その操作を行う権限があることを確認する必要があります。そのために、このエンドポイントでは、[App only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token)、[OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)、または [OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) のいずれかの認証方法でリクエストを認証する必要があります。
+
+説明を簡単にするため、このリクエストでは App only を使用します。ただし、非公開の[メトリクス](/ja/x-api/fundamentals/metrics)やユーザー情報を取得したい場合は、他のいずれかの認証方法を使用する必要があります。 
+
+App only を利用するには、Postman にキーとトークン、特に [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（App only Bearer Token とも呼ばれます）を追加する必要があります。これを行うには、Postman 右上の環境ドロップダウンから「X API v2」という名前の環境を選択し、「initial value」と「current value」フィールドにキーとトークンを追加します（環境ドロップダウンの横にある目のアイコンをクリックします）。
+
+正しく設定できていれば、これらの変数はリクエストの Authorization タブに自動的に反映されます。
+ 
+
+<div id="step-three-identify-and-specify-which-users-you-would-like-to-retrieve">
+  #### ステップ3：取得したいユーザーを特定して指定する
+</div>
+
+リクエストの中で、取得したいユーザー、または複数のユーザーを必ず指定する必要があります。使用するユーザーエンドポイントに応じて、ユーザー ID か username のいずれかを渡すことができます。このセクションでは、1回のリクエストで複数の username を渡すことができる [GET /users/by エンドポイント](/ja/x-api/users/user-lookup-by-usernames) を使用し（[single-ID](/ja/x-api/users/user-lookup-by-id)、[multi-ID](/ja/x-api/users/user-lookup-by-ids)、[single-username](/ja/x-api/users/user-lookup-by-username) エンドポイントとは異なり）、`usernames` クエリパラメータを使って username のセットを渡します。
+
+Username は、アカウントのプロフィールの URL 内で確認できるアカウントハンドルのことです。たとえば、次のアカウントの username は XDevelopers です。
+
+`https://x.com/XDevelopers`
+
+Postman で「Params」タブに移動し、この username、またはカンマ区切りの複数の username の文字列を、`username` パラメータの「Value」列に入力します。このとき、username とカンマの間にスペースを含めないようにしてください。 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `username` | XDeveloeprs,API,adsapi |
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### ステップ4：取得したいフィールドを識別して指定する
+</div>
+
+ステップ3の後に「Send」ボタンをクリックすると、レスポンスとしてデフォルトの [user object](/ja/x-api/fundamentals/data-dictionary#user) フィールド（id、name、username）が返されます。
+
+id、name、username 以外のフィールドも取得したい場合は、リクエストで [field](/ja/x-api/fundamentals/fields) および / または [expansion](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドを明示的に指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 つの追加フィールドセットをリクエストします。
+
+1. プライマリ user オブジェクトにおける追加の user.created&#95;at フィールド。
+2. 返されたユーザーに関連付けられた、ピン留めされたポストオブジェクトのデフォルトフィールド：id と text。
+3. 関連付けられたポストオブジェクトにおける追加の tweet.created&#95;at フィールド。
+    
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|                |              |                             |
+| :------------- | :----------- | :-------------------------- |
+| **Key**        | **Value**    | **Returned fields**         |
+| `user.fields`  | `created_at` | `user.created_at`           |
+| `expansions`   | `author_id`  | tweet.id, tweet.text        |
+| `tweet.fields` | `created_at` | `includes.users.created_at` |
+
+これで、「Send」ボタンの横に次の URL が表示されているはずです。
+
+```
+      https://api.x.com/2/users/by?usernames=twitterdev,twitterapi,adsapi&user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=author_id,created_at
+```
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### ステップ5：リクエストを送信してレスポンスを確認する
+</div>
+
+すべての準備が整ったら、「Send」ボタンをクリックすると、次のようなレスポンスが返ってきます。
+
+```
+{
+  "data": [
+    {
+      "created_at": "2013-12-14T04:35:55.000Z",
+      "id": "2244994945",
+      "name": "Twitter Dev",
+      "pinned_tweet_id": "1255542774432063488",
+      "username": "TwitterDev"
+    },
+    {
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "name": "Twitter API",
+      "username": "TwitterAPI"
+    },
+    {
+      "created_at": "2013-02-27T20:01:12.000Z",
+      "id": "1225933934",
+      "name": "Twitter Ads API",
+      "username": "AdsAPI"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "author_id": "2244994945",
+        "created_at": "2020-04-29T17:01:38.000Z",
+        "id": "1255542774432063488",
+        "text": "これらの前例のない時代において、Twitterで起こっていることは、世界がパンデミックをよりよく理解し、対応するのに役立ちます。\n\n資格のある開発者と研究者がリアルタイムで公開会話を研究できるように、無料のCOVID-19ストリームエンドポイントを開始します。https://t.co/BPqMcQzhId"
+      }
+    ]
+  }
+}
+```

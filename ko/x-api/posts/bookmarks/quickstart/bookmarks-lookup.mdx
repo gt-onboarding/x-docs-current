@@ -1,0 +1,117 @@
+---
+title: 북마크 조회
+sidebarTitle: 북마크 조회
+keywords: ["북마크 조회 빠른 시작", "북마크 조회 빠른 시작", "북마크 조회 튜토리얼", "북마크 조회 가이드"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-bookmarks-lookup-endpoint">
+  ### Bookmarks 조회 엔드포인트 시작하기
+</div>
+
+이 빠른 시작 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용해 Bookmarks 조회 엔드포인트에 첫 요청을 보내는 방법을 안내합니다.
+
+여러 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 저장소를 방문하세요.
+
+<div id="prerequisites">
+  #### 사전 준비 사항
+</div>
+
+이 가이드를 완료하려면 요청을 인증하기 위한 [키와 토큰](/ko/resources/fundamentals/authentication) 이 필요합니다. 다음 단계를 따라 이러한 키와 토큰을 생성하세요:
+
+* [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하여 승인을 받으세요.
+* developer portal에서 [Project](/ko/resources/fundamentals/projects)를 생성하고 연결된 [developer App](/ko/resources/fundamentals/developer-apps)을 만드세요.
+* App의 “Keys and tokens” 페이지로 이동하여 필요한 자격 증명을 생성하세요. 모든 자격 증명을 안전한 위치에 보관하세요.
+
+<div id="steps-to-build-a-bookmarks-lookup-request">
+  #### Bookmarks 조회 요청 구성 단계
+</div>
+
+**1단계: 도구 또는 라이브러리 선택**
+
+이 엔드포인트에 요청을 보내기 위해 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 과정을 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 불러오려면 다음 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 불러온 후, “Bookmarks” 폴더로 이동해 “Bookmarks lookup”을 선택합니다.
+
+**2단계: 요청 인증**
+
+이 엔드포인트에 성공적으로 요청을 보내려면 [OAuth 2.0 Authorization Code Flow with PKCE](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3)를 사용해야 합니다. Postman 내에서 액세스 토큰을 생성할 수 있습니다. 
+
+“Authorization” 탭으로 이동해 “OAuth 2.0”을 선택합니다.
+
+이 탭에서 다음 단계를 따르세요:
+
+1. 토큰 이름을 지정합니다.
+
+2. Grant Type으로 Authorization Code (with PKCE)를 선택합니다.
+
+3. 다음 파라미터를 업데이트합니다:
+
+   **Callback URL** - [https://www.example.com](https://www.example.com/)
+
+   이는 developer portal의 인증 설정 페이지에서 설정한 callback URL과 일치해야 합니다.
+
+   **Auth URL** - [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize)
+
+   **Access Token URL** - [https://api.x.com/2/oauth2/token](https://api.x.com/2/oauth2/token)
+
+   **Client ID** - developer portal에서 OAuth 2.0 client ID를 복사하여 붙여넣습니다.
+
+   **Client Secret** - developer portal에서 OAuth 2.0 client secret을 복사하여 붙여넣습니다. 이는 비공개 client인 앱 타입을 사용하는 경우에만 필요합니다.
+
+4. scope를 다음 값들로 설정합니다: post.read users.read bookmark.read
+
+5. state 필드에 “State”라고 입력합니다.
+
+6. “Generate Token”을 클릭합니다.
+
+7. 저장 아이콘을 눌러 폴더 변경 사항을 저장합니다.
+
+X에 로그인되어 있지 않다는 메시지가 표시될 수 있습니다. 이 오류가 발생하면, Postman 내에서 게시물을 작성하려는 X 계정으로 로그인해야 합니다.
+
+**3단계: 사용자 지정**
+
+이 엔드포인트에서는 응답에서 팔로워를 수신하려는 대상의 사용자 ID를 지정해야 합니다. 예를 들어, @XDevelopers의 사용자 ID는 2244994945입니다. Postman에서 “Params” 탭으로 이동해 id 파라미터의 값으로 본인 또는 인증된 사용자의 ID를 입력합니다.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**4단계: 요청 전송 및 응답 확인**
+
+모든 설정을 완료했다면 &quot;Send&quot; 버튼을 클릭하면, 아래 예시 응답과 유사한 응답을 받게 됩니다:
+
+```
+{
+   "data": [
+       {
+           "id": "1501258597237342208",
+           "text": "🗣 X API를 사용하여 커뮤니티와 공유하고 싶은 프로젝트를 만드셨나요? 여러분의 이야기를 듣고 싶습니다. 프로젝트를 공유해 주세요!"
+       },
+       {
+           "id": "1501258542258348032",
+           "text": "🧰🛠 이것은 개발자 혁신이 Twitter를 더 나은 곳으로 만드는 한 가지 방법일 뿐입니다. 개발자 커뮤니티가 구축한 다른 바로 사용 가능한 도구들은 여기 Twitter Toolbox에서 찾을 수 있습니다 ⬇️ https://t.co/rK0X30JSYU"
+       },
+       {
+           "id": "1501257716941000709",
+           "text": "📣오늘은 중요한 날입니다! \n@Jigsaw와 함께 이 새로운 도구를 출시하게 되었습니다. 이번 협력을 통해 NGO와 비영리 단체는 그들이 지원하는 커뮤니티의 필요와 선호도를 반영하여 사람들이 Twitter에서 안전하게 지낼 수 있도록 돕는 도구를 구축할 수 있습니다. 자세히 알아보기 ⬇️ https://t.co/MmznmgxoWT"
+       },
+       {
+           "id": "1501686770810900485",
+           "text": "내일 타임라인 맞춤 설정과 개발자를 위한 작동 방식에 대한 대화를 계속하기 위해 함께해 주세요. 그리고 다음 주에 예정된 더 많은 Spaces를 기대해 주세요. 👀 https://t.co/P4JTc14mdC"
+       },
+       {
+           "id": "1501596763194593285",
+           "text": "개발자 혁신은 위기 상황을 포함하여 항상 중요합니다. 사람들을 연결하고, 안전하게 보호하거나, 세상과 정보를 공유하는 데 도움이 되는 도구를 구축하고 있다면, 저희가 지원하겠습니다—이 트윗에 답글을 달아 앱에 대해 자세히 알려주세요."
+       }
+   ]
+}
+```

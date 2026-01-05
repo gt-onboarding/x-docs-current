@@ -1,0 +1,64 @@
+---
+title: ミュートの管理
+sidebarTitle: ミュートの管理
+keywords: ["ミュート管理 マイグレーション", "v1.1 から v2 へのミュート管理", "ミュート管理のマイグレーション", "Standard から v2 へのミュート管理", "ミュートのマイグレーション"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="manage-mutes-standard-v11-compared-to-x-api-v2">
+  ### ミュートの管理：Standard v1.1 と X API v2 の比較
+</div>
+
+Standard v1.1 の [POST mutes/users/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/post-mutes-users-create) エンドポイントと [POST mutes/users/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/post-mutes-users-destroy) エンドポイントを使用している場合、このガイドでは、Standard v1.1 と X API v2 のミュート管理エンドポイントの共通点と相違点を理解できるように解説します。
+
+* **類似点**
+  * OAuth 1.0a User Context
+* **相違点**
+  * エンドポイント URL
+  * アプリとプロジェクトの要件
+  * HTTP メソッド
+  * リクエストパラメータ
+     
+
+<div id="similarities">
+  #### 類似点
+</div>
+
+**OAuth 1.0a User Context 認証方式**
+
+どちらのエンドポイントのバージョンも [OAuth 1.0a User Context](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication) をサポートしています。したがって、以前に標準 v1.1 のミュート管理エンドポイントのいずれかを使用していた場合は、X API v2 のエンドポイントに移行しても、同じ認証方式を引き続き使用できます。
+
+<div id="differences">
+  #### 違い
+</div>
+
+**エンドポイント URL**
+
+* Standard v1.1 エンドポイント:
+  * POST https://api.x.com/1.1/mutes/users/create.json
+    (ユーザーをミュートする)
+  * POST https://api.x.com/1.1/mutes/users/destroy.json
+    (ユーザーのミュートを解除する)
+* X API v2 エンドポイント:
+  * POST https://api.x.com/2/users/:id/muting
+    (ユーザーをミュートする)
+  * DELETE https://api.x.com/2/users/:source&#95;user&#95;id/muting/:target&#95;user&#95;id
+    (ユーザーのミュートを解除する) 
+
+**アプリとプロジェクトの要件**
+
+X API v2 エンドポイントでは、リクエストを認証する際に、[Project](/ja/resources/fundamentals/projects) に関連付けられた [developer App](/ja/resources/fundamentals/developer-apps) の認証情報を使用する必要があります。すべての X API v1.1 エンドポイントは、プロジェクトに関連付けられていない単独のアプリ、またはプロジェクトに関連付けられたアプリのいずれの認証情報も使用できます。
+
+**リクエストパラメータ**
+
+次の Standard v1.1 リクエストパラメータには、X API v2 での対応があります。
+
+| Standard v1.1 | X API v2 |
+| :--- | :--- |
+| user&#95;id | target&#95;user&#95;id |
+| screen&#95;name | 対応なし |
+
+Standard v1.1 のパラメータはクエリパラメータとして渡されるのに対し、X API v2 のパラメータは、POST エンドポイントではボディパラメータとして、DELETE エンドポイントではパスパラメータとして渡される点に注意してください。
+
+また、Standard v1.1 エンドポイントを使用する場合、対象ユーザーをミュートするユーザーの id は不要です。これは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) で渡されるアクセストークンから、どのユーザーがミュート／ミュート解除を行っているかが推論されるためです。 

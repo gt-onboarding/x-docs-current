@@ -1,0 +1,115 @@
+---
+title: 快速入门
+sidebarTitle: 快速入门
+keywords: ["Spaces 搜索快速入门", "搜索 Spaces 快速入门", "Spaces 搜索教程", "Spaces 搜索指南"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-search-spaces-endpoint">
+  ## 开始使用 search Spaces 端点
+</div>
+
+本快速入门指南将帮助你使用 Postman 向 search Spaces 端点发出你的第一个请求，并包含一组指定的字段。
+
+如果你希望查看不同编程语言的示例代码，请访问我们的 [X API v2 sample code GitHub repository](https://github.com/xdevplatform/Twitter-API-v2-sample-code)。
+
+<Note>
+  **前提条件**
+
+  要完成本指南，你需要准备一组用于对请求进行身份验证的 [keys and tokens](/zh/resources/fundamentals/authentication)。你可以按照以下步骤生成这些 keys and tokens：
+
+  * [注册开发者账号](https://developer.x.com/en/apply-for-access) 并通过审批。
+  * 在开发者门户中创建一个 [Project](/zh/resources/fundamentals/projects) 和关联的 [developer App](/zh/resources/fundamentals/developer-apps)。
+  * 前往你的 App 的“Keys and tokens”页面生成所需的凭证。请务必将所有凭证保存在安全的位置。
+</Note>
+
+<div id="steps-to-build-a-search-spaces-request">
+  ### 构建搜索 Spaces 请求的步骤
+</div>
+
+**步骤一：先选择一个工具或库**
+
+你可以使用多种不同的工具、代码示例和库向此端点发起请求，但为了简化流程，我们将在这里使用 Postman 工具。
+
+要将 X API v2 的 Postman 集合加载到你的环境中，请点击下面的按钮：
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  将 X API v2 添加到 Postman
+</Button>
+
+在你将 X API v2 集合加载到 Postman 之后，导航到 Spaces 文件夹并找到 &quot;Search Spaces&quot; 请求。
+ 
+
+**步骤二：为你的请求进行认证**
+
+要正确地向 X API 发起请求，你需要验证你是否拥有访问权限。为此，此端点要求你使用 [OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) 或 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) 这两种认证方式之一对你的请求进行认证。
+
+为了简单起见，我们将在此请求中使用 OAuth 2.0 App-Only，但如果你希望请求私有 [metrics](/zh/x-api/fundamentals/metrics) 或来自私密用户的 Spaces，则需要使用其他认证方式之一。 
+
+要使用 OAuth 2.0 App-Only，你必须将你的密钥和令牌（特别是 [App Access Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)（也称为 App-only Bearer Token））添加到 Postman。你可以在 Postman 右上角选择名为 “X API v2” 的环境，然后将你的密钥和令牌添加到 &quot;initial value&quot; 和 &quot;current value&quot; 字段中（通过点击环境下拉菜单旁边的眼睛图标完成）。
+
+如果你已正确完成上述操作，这些变量会自动填充到请求的 Authorization 选项卡中。
+ 
+
+**步骤三：创建搜索查询**
+
+此端点接受文本作为搜索查询。与其他搜索端点不同，它不支持运算符、分组和逻辑运算符。在本练习中，我们将使用 “hello” 作为简单查询。
+
+在 Postman 中，导航到 &quot;Params&quot; 选项卡，在 id 参数的 &quot;Value&quot; 列中输入此用户 ID。
+
+|         |           |
+| :------ | :-------- |
+| **Key** | **Value** |
+| query   | hello     |
+
+**步骤四：确定并指定你想要检索的字段**
+
+如果你在步骤三之后点击 &quot;Send&quot; 按钮，你会在响应中收到 Spaces 的 ID 以及其状态，这是默认情况下唯一返回的 Space 对象字段。
+
+如果你希望接收更多字段，就必须在请求中通过 space.fields 或 expansions 参数显式指定它们。
+
+在本练习中，我们将从不同对象中请求三组额外字段：
+
+* 主 Spaces 对象中的额外 title 字段。
+* 指定 creator ID 的完整用户对象。
+* 关联用户对象中的额外 user.created&#95;at 字段。
+
+在 Postman 中，导航到 “Params” 选项卡，并在 “Query Params” 表中添加如下键值对：
+
+|              |                |                                                                 |
+| :----------- | :------------- | :-------------------------------------------------------------- |
+| **Key**      | **Value**      | **Returned fields**                                             |
+| space.fields | title          | creator&#95;id                                                  |
+| expansions   | creator&#95;id | includes.users.id, includes.users.name, includes.users.username |
+| user.fields  | created&#95;at | includes.users.created&#95;at                                   |
+
+现在你应该会在 “Send” 按钮旁边看到如下 URL：
+
+[https://api.x.com/2/spaces/search?query=hello&amp;space.fields=creator&#95;id&amp;expansions=creator&#95;id&amp;user.fields=created&#95;at](https://api.x.com/2/spaces/search?query=hello\&space.fields=creator\\_id\&expansions=creator\\_id\&user.fields=created_at)
+
+**步骤五：发送请求并查看响应**
+
+在完成所有设置后，点击 “Send” 按钮，你将会收到如下响应：
+
+```{
+   "data": [
+    {
+        "creator_id": "2244994945",
+        "id": "1zqKVXPQhvZJB",
+        "title": "Hello world 👋",
+        "state": "Running"
+   },
+   "includes": {
+       "users": [
+           {
+               "created_at": "2013-12-14T04:35:55.000Z",
+               "name": "Twitter Dev",
+               "id": "2244994945",
+               "username": "TwitterDev"
+           }
+       ]
+   }
+]
+}
+```

@@ -1,0 +1,67 @@
+---
+title: 고정 리스트 관리
+sidebarTitle: 고정 리스트 관리
+keywords: ["고정 리스트 관리 빠른 시작", "리스트 고정 빠른 시작", "리스트 고정 해제 빠른 시작", "고정 리스트 관리"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<Note>
+  **주의:** 이 가이드는 [빠른 시작 개요](/ko/x-api/lists/pinned-lists#getting-started-with-the-pinned-list-endpoint-group)에서 설명한 사전 준비 단계를 모두 마쳤다고 가정합니다.
+</Note>
+
+<div id="steps-to-build-a-manage-pinned-list-request">
+  ### 고정 리스트 관리 요청을 구성하는 단계
+</div>
+
+**1단계: Postman에서 List 엔드포인트 컬렉션 선택**
+
+Postman에 X API v2 컬렉션을 불러온 다음, “List” 폴더로 이동해 “Pinned Lists” 폴더를 선택하고, &quot;Pin a List&quot;를 선택합니다.
+ 
+
+**2단계: 고정할 리스트 지정**
+
+고정 리스트를 관리하는 엔드포인트에는 두 개의 ID가 필요합니다. 하나는 사용자 ID(리스트를 고정할 인증된 사용자에 대한 ID)이고, 다른 하나는 대상 리스트 ID(고정할 리스트에 대한 ID)입니다. 사용자 ID는 인증을 수행하는 사용자의 ID와 일치해야 하므로, 요청을 인증할 때 해당 사용자 ID와 연결된 액세스 토큰을 전달해야 합니다. 이 경우, 본인의 사용자 ID를 지정할 수 있습니다. ID는 다음 두 가지 방법으로 확인할 수 있습니다.
+
+1. [users lookup](/ko/x-api/users/lookup/introduction) by username 엔드포인트를 사용하여 username(사용자 이름)을 전달하면 `id` 필드를 받을 수 있습니다.
+2. 액세스 토큰을 확인해 보면, 숫자 부분이 사용자 ID입니다.
+
+대상 리스트 ID는 유효한 어떤 리스트든 사용할 수 있습니다. Postman에서 &quot;Params&quot; 탭으로 이동하여, id 경로 변수의 &quot;Value&quot; 열에 사용자 ID를 입력합니다. 그런 다음 “Body” 탭으로 이동하여 고정하려는 리스트의 ID를 list&#95;id 매개변수의 값으로 입력합니다. 어떤 ID에도 앞뒤로 공백이 포함되지 않도록 주의하세요.
+
+|             |                |                    |
+| :---------- | :------------- | :----------------- |
+| **Key**     | **Value**      | **Parameter type** |
+| `id`        | 사용자 ID         | path               |
+| list&#95;id | 고정할 대상 리스트의 ID | body               |
+
+이제 &quot;Send&quot; 버튼 옆에 이와 유사한 URL이 표시되어야 합니다.
+
+```
+      https://api.x.com/2/users/2244994945/pinned_lists
+```
+
+3단계: 요청을 보내고 응답을 검토하기
+
+모든 설정을 마쳤다면 &quot;Send&quot; 버튼을 클릭하세요. 그러면 다음 예시와 유사한 응답을 받게 됩니다:
+
+```
+{
+  "data": {
+    "pinned": true
+  }
+}
+```
+
+반환된 응답 객체에 `pinned` 키의 값이 true로 포함되어 있다면 대상 리스트가 성공적으로 고정된 것입니다. 
+
+리스트의 고정을 해제하려면 Postman에 로드된 X API v2 컬렉션의 “Lists” 폴더에 있는 “Unpin List” 요청을 선택합니다. 이 엔드포인트에는 인증된 사용자 ID와 고정을 해제할 리스트의 ID가 필요합니다. “Params” 탭에서 `id` 열의 값으로 사용자 ID를 입력하고, `list_id` 열의 값으로 고정을 해제할 리스트의 ID를 입력합니다. 
+
+삭제 요청이 성공적으로 처리되면 다음 예시와 유사한 응답을 받게 됩니다:
+
+```
+{
+  "data": {
+    "pinned": false
+  }
+}
+```

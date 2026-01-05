@@ -1,0 +1,786 @@
+---
+title: Usage API
+description: "Usage API は、Enterprise アカウントで利用する各種プロダクトのアクティビティ消費状況へのプログラムによるアクセスと可視化を提供する、無料で利用できる REST API です。"
+sidebarTitle: Usage API
+keywords: ["Usage API", "enterprise usage API", "利用状況トラッキング", "消費状況トラッキング", "Enterprise 利用状況", "API 利用状況 Enterprise"]
+---
+
+<div id="usage-api-twitter-api">
+  ## 利用状況 API | Twitter API
+</div>
+
+<div id="overview">
+  ### 概要
+</div>
+
+`Enterprise`
+
+これは、ご利用のアカウント配下にあるさまざまな API の利用状況を監視および管理するうえで、最も重要で、かつ&#95;最良の&#95;ツールです。
+
+**重要な免責事項：**
+
+Usage API から返される利用状況の件数は、トライアルやその他の請求調整により、請求書に記載される件数と一致しない場合があります。すべての数値は、特定の 1 日（UTC）内に消費されたアクティビティを重複排除した結果に基づいています。
+
+<div id="features">
+  #### 機能
+</div>
+
+* console.gnip.com の UI で参照できる使用状況データをプログラムから取得
+* ストリームレベルの使用状況データ - プロダクトレベルに加えて、dev や prod などストリームレベルでの使用状況データを提供
+* よりきめ細かく説明的なデータ - 検索の「requests」は Full-Archive と 30-Day Search の各プロダクトごとに内訳を提供
+* Historical PowerTrack の「days」と「jobs」 
+
+<div id="supported-apis">
+  ### 対応している API
+</div>
+
+Usage API が現在サポートしている API は次のとおりです。
+
+* PowerTrack API `enterprise`
+* 30-Day Search API `enterprise`
+* Full-Archive Search API `enterprise`
+* Historical PowerTrack `enterprise`
+
+<div id="limitations">
+  ### 制限事項
+</div>
+
+* Usage API を使用すると、2018 年 5 月 1 日以降の利用状況データにアクセスできます。2019 年 7 月 1 日以降は、Usage API を使用して、**直近 13 か月分の暦月** の利用状況データにアクセスできます
+
+* fromDate と toDate で定義される **3 か月間の期間** ごとに利用状況データにアクセスできます
+
+以下にリクエストとレスポンスの例を示します：
+
+```bash
+curl -u<username>:<password> \
+"https://gnip-api.x.com/metrics/usage/accounts/<account-name>.json?bucket=month"
+```
+
+```json
+{
+  "account": {
+    "name": "accountnamehere"
+  },
+  "publishers": [
+    {
+      "type": "twitter",
+      "used": [
+        {
+          "timePeriod": "201805010000",
+          "activities": 1235,
+          "searchRequests30Day": 3,
+          "searchRequestsFullArchive": 19,
+          "historicalPowertrackDays": 0,
+          "historicalPowertrackJobs": 0
+        },
+        {
+          "timePeriod": "201806010000",
+          "activities": 23467,
+          "searchRequests30Day": 0,
+          "searchRequestsFullArchive": 66,
+          "historicalPowertrackDays": 0,
+          "historicalPowertrackJobs": 0
+        },
+        {
+          "timePeriod": "201807010000",
+          "activities": 431,
+          "searchRequests30Day": 11,
+          "searchRequestsFullArchive": 4,
+          "historicalPowertrackDays": 0,
+          "historicalPowertrackJobs": 0
+        }
+      ],
+      "projected": {
+        "timePeriod": "201807010000",
+        "activities": 803,
+        "searchRequests30Day": 20,
+        "searchRequestsFullArchive": 7,
+        "historicalPowertrackDays": 0,
+        "historicalPowertrackJobs": 0
+      },
+      "products": [
+        {
+          "type": "Historical PowerTrack サブスクリプション",
+          "used": [
+            {
+              "timePeriod": "201805010000",
+              "activities": 0,
+              "days": 0,
+              "jobs": 0
+            },
+            {
+              "timePeriod": "201806010000",
+              "activities": 0,
+              "days": 0,
+              "jobs": 0
+            },
+            {
+              "timePeriod": "201807010000",
+              "activities": 0,
+              "days": 0,
+              "jobs": 0
+            }
+          ],
+          "projected": {
+            "timePeriod": "201807010000",
+            "activities": 0,
+            "days": 0,
+            "jobs": 0
+          }
+        },
+        {
+          "type": "PowerTrack",
+          "used": [
+            {
+              "timePeriod": "201805010000",
+              "activities": 267
+            },
+            {
+              "timePeriod": "201806010000",
+              "activities": 3
+            },
+            {
+              "timePeriod": "201807010000",
+              "activities": 32
+            }
+          ],
+          "projected": {
+            "timePeriod": "201807010000",
+            "activities": 59
+          },
+          "endpoints": [
+            {
+              "type": "PowerTrack 2.0",
+              "label": "actformat",
+              "used": [
+                {
+                  "timePeriod": "201805010000",
+                  "activities": 0
+                },
+                {
+                  "timePeriod": "201806010000",
+                  "activities": 0
+                },
+                {
+                  "timePeriod": "201807010000",
+                  "activities": 0
+                }
+              ],
+              "projected": {
+                "timePeriod": "201807010000",
+                "activities": 0
+              }
+            },
+              {
+              "type": "PowerTrack Replay 2.0",
+              "label": "ogformat",
+              "used": [
+                {
+                  "timePeriod": "201805010000",
+                  "activities": 0
+                },
+                {
+                  "timePeriod": "201806010000",
+                  "activities": 0
+                },
+                {
+                  "timePeriod": "201807010000",
+                  "activities": 0
+                }
+              ],
+              "projected": {
+                "timePeriod": "201807010000",
+                "activities": 0
+              }
+            }
+          ]
+        },
+        {
+          "type": "Search API（30日間）2.0",
+          "used": [
+            {
+              "timePeriod": "201805010000",
+              "activities": 10,
+              "searchRequests30Day": 3
+            },
+            {
+              "timePeriod": "201806010000",
+              "activities": 0,
+              "searchRequests30Day": 0
+            },
+            {
+              "timePeriod": "201807010000",
+              "activities": 23,
+              "searchRequests30Day": 11
+            }
+          ],
+          "projected": {
+            "timePeriod": "201807010000",
+            "activities": 42,
+            "searchRequests30Day": 20
+          },
+          "endpoints": [
+            {
+              "type": "Search API（30日間）2.0",
+              "label": "ogformat",
+              "used": [
+                {
+                  "timePeriod": "201805010000",
+                  "activities": 10,
+                  "searchRequests30Day": 3
+                },
+                {
+                  "timePeriod": "201806010000",
+                  "activities": 0,
+                  "searchRequests30Day": 0
+                },
+                {
+                  "timePeriod": "201807010000",
+                  "activities": 21,
+                  "searchRequests30Day": 10
+                }
+              ],
+              "projected": {
+                "timePeriod": "201807010000",
+                "activities": 39,
+                "searchRequests30Day": 18
+              }
+            }
+          ]
+        },
+        {
+          "type": "Search API（全期間アーカイブ）",
+          "used": [
+            {
+              "timePeriod": "201805010000",
+              "activities": 961,
+              "searchRequestsFullArchive": 19
+            },
+            {
+              "timePeriod": "201806010000",
+              "activities": 23466,
+              "searchRequestsFullArchive": 66
+            },
+            {
+              "timePeriod": "201807010000",
+              "activities": 379,
+              "searchRequestsFullArchive": 4
+            }
+          ],
+          "projected": {
+            "timePeriod": "201807010000",
+            "activities": 706,
+            "searchRequestsFullArchive": 7
+          },
+          "endpoints": [
+            {
+              "type": "Search API（全期間アーカイブ）",
+              "label": "actformat",
+              "used": [
+                {
+                  "timePeriod": "201805010000",
+                  "activities": 1,
+                  "searchRequestsFullArchive": 3
+                },
+                {
+                  "timePeriod": "201806010000",
+                  "activities": 0,
+                  "searchRequestsFullArchive": 0
+                },
+                {
+                  "timePeriod": "201807010000",
+                  "activities": 2,
+                  "searchRequestsFullArchive": 1
+                }
+              ],
+              "projected": {
+                "timePeriod": "201807010000",
+                "activities": 3,
+                "searchRequestsFullArchive": 1
+              }
+            },
+            {
+              "type": "Search API（全期間アーカイブ）",
+              "label": "ogformat",
+              "used": [
+                {
+                  "timePeriod": "201805010000",
+                  "activities": 961,
+                  "searchRequestsFullArchive": 16
+                },
+                {
+                  "timePeriod": "201806010000",
+                  "activities": 23466,
+                  "searchRequestsFullArchive": 66
+                },
+                {
+                  "timePeriod": "201807010000",
+                  "activities": 379,
+                  "searchRequestsFullArchive": 3
+                }
+              ],
+              "projected": {
+                "timePeriod": "201807010000",
+                "activities": 706,
+                "searchRequestsFullArchive": 5
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "bucket": "month",
+  "fromDate": "201805010000",
+  "toDate": "201808010000"
+}
+```
+
+<div id="sample-payload">
+  ### ペイロードのサンプル
+</div>
+
+以下はペイロードの例です。
+
+```bash
+{
+  "account": {
+    "name": "gnip-username"
+  },
+  "bucket": "month",
+  "publishers": [
+    {
+      "type": "automattic",
+      "使用実績": [
+        {
+          "アクティビティ件数": 0,
+          "期間": "201603010000"
+        }
+      ],
+      "予測値": {
+        "アクティビティ件数": 0,
+        "期間": "201603010000"
+      },
+      "products": [
+        {
+          "type": "PowerTrack",
+          "使用実績": [
+            {
+              "期間": "201603010000",
+              "アクティビティ件数": 0
+            }
+          ],
+          "予測値": {
+            "期間": "201603010000",
+            "アクティビティ件数": 0
+          },
+          "endpoints": [
+            {
+              "type": "PowerTrack",
+              "label": "dev",
+              "使用実績": [
+                {
+                  "期間": "201603010000",
+                  "アクティビティ件数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201603010000",
+                "アクティビティ件数": 0
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "twitter",
+      "使用実績": [
+        {
+          "アクティビティ件数": 84,
+          "30日間検索リクエスト数": 4,
+          "全期間アーカイブ検索リクエスト数": 0,
+          "過去PowerTrack日数": 0,
+          "過去PowerTrackジョブ数": 0,
+          "期間": "201603010000"
+        }
+      ],
+      "予測値": {
+        "アクティビティ件数": 0,
+        "30日間検索リクエスト数": 0,
+        "全期間アーカイブ検索リクエスト数": 0,
+        "過去PowerTrack日数": 0,
+        "過去PowerTrackジョブ数": 0,
+        "期間": "201601010000"
+      },
+      "products": [
+        {
+          "type": "Historical PowerTrack 2.0",
+          "使用実績": [
+            {
+              "期間": "201511010000",
+              "アクティビティ件数": 11884,
+              "日数": 5,
+              "ジョブ数": 5
+            },
+            {
+              "期間": "201512010000",
+              "アクティビティ件数": 0,
+              "日数": 0,
+              "ジョブ数": 0
+            },
+            {
+              "期間": "201601010000",
+              "アクティビティ件数": 0,
+              "日数": 0,
+              "ジョブ数": 0
+            }
+          ]
+        },
+        {
+          "type": "PowerTrack",
+          "使用実績": [
+            {
+              "期間": "201511010000",
+              "アクティビティ件数": 0
+            },
+            {
+              "期間": "201512010000",
+              "アクティビティ件数": 27456
+            },
+            {
+              "期間": "201601010000",
+              "アクティビティ件数": 0
+            }
+          ],
+          "予測値": {
+            "期間": "201601010000",
+            "アクティビティ件数": 0
+          },
+          "endpoints": [
+            {
+              "type": "PowerTrack",
+              "label": "devel",
+              "使用実績": [
+                {
+                  "期間": "201511010000",
+                  "アクティビティ件数": 0
+                },
+                {
+                  "期間": "201512010000",
+                  "アクティビティ件数": 2930
+                },
+                {
+                  "期間": "201601010000",
+                  "アクティビティ件数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201601010000",
+                "アクティビティ件数": 0
+              }
+            },
+            {
+              "type": "PowerTrack 2.0",
+              "label": "devel-v2",
+              "使用実績": [
+                {
+                  "期間": "201511010000",
+                  "アクティビティ件数": 0
+                },
+                {
+                  "期間": "201512010000",
+                  "アクティビティ件数": 24542
+                },
+                {
+                  "期間": "201601010000",
+                  "アクティビティ件数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201601010000",
+                "アクティビティ件数": 0
+              }
+            },
+            {
+              "type": "PowerTrack 2.0",
+              "label": "devel-v2-1",
+              "使用実績": [
+                {
+                  "期間": "201511010000",
+                  "アクティビティ件数": 0
+                },
+                {
+                  "期間": "201512010000",
+                  "アクティビティ件数": 0
+                },
+                {
+                  "期間": "201601010000",
+                  "アクティビティ件数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201601010000",
+                "アクティビティ件数": 0
+              }
+            }
+          ]
+        },
+        {
+          "type": "Search API",
+          "使用実績": [
+            {
+              "期間": "201511010000",
+              "アクティビティ件数": 0,
+              "30日間検索リクエスト数": 0
+            },
+            {
+              "期間": "201512010000",
+              "アクティビティ件数": 0,
+              "30日間検索リクエスト数": 0
+            },
+            {
+              "期間": "201601010000",
+              "アクティビティ件数": 0,
+              "30日間検索リクエスト数": 0
+            }
+          ],
+          "予測値": {
+            "期間": "201601010000",
+            "アクティビティ件数": 0,
+            "30日間検索リクエスト数": 0
+          },
+          "endpoints": [
+            {
+              "type": "Search API",
+              "label": "devel",
+              "使用実績": [
+                {
+                  "期間": "201511010000",
+                  "アクティビティ件数": 0,
+                  "30日間検索リクエスト数": 0
+                },
+                {
+                  "期間": "201512010000",
+                  "アクティビティ件数": 0,
+                  "30日間検索リクエスト数": 0
+                },
+                {
+                  "期間": "201601010000",
+                  "アクティビティ件数": 0,
+                  "30日間検索リクエスト数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201601010000",
+                "アクティビティ件数": 0,
+                "30日間検索リクエスト数": 0
+              }
+            }
+          ]
+        },
+        {
+          "type": "Search API (30-Day)",
+          "使用実績": [
+            {
+              "期間": "201511010000",
+              "アクティビティ件数": 0,
+              "30日間検索リクエスト数": 0
+            },
+            {
+              "期間": "201512010000",
+              "アクティビティ件数": 0,
+              "30日間検索リクエスト数": 0
+            },
+            {
+              "期間": "201601010000",
+              "アクティビティ件数": 0,
+              "30日間検索リクエスト数": 0
+            }
+          ],
+          "予測値": {
+            "期間": "201601010000",
+            "アクティビティ件数": 0,
+            "30日間検索リクエスト数": 0
+          },
+          "endpoints": [
+            {
+              "type": "Search API (30-Day)",
+              "label": "devel",
+              "使用実績": [
+                {
+                  "期間": "201511010000",
+                  "アクティビティ件数": 0,
+                  "30日間検索リクエスト数": 0
+                },
+                {
+                  "期間": "201512010000",
+                  "アクティビティ件数": 0,
+                  "30日間検索リクエスト数": 0
+                },
+                {
+                  "期間": "201601010000",
+                  "アクティビティ件数": 0,
+                  "30日間検索リクエスト数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201601010000",
+                "アクティビティ件数": 0,
+                "30日間検索リクエスト数": 0
+              }
+            }
+          ]
+        },
+        {
+          "type": "Search API (Full-Archive)",
+          "使用実績": [
+            {
+              "期間": "201511010000",
+              "アクティビティ件数": 0,
+              "全期間アーカイブ検索リクエスト数": 0
+            },
+            {
+              "期間": "201512010000",
+              "アクティビティ件数": 0,
+              "全期間アーカイブ検索リクエスト数": 0
+            },
+            {
+              "期間": "201601010000",
+              "アクティビティ件数": 0,
+              "全期間アーカイブ検索リクエスト数": 0
+            }
+          ],
+          "予測値": {
+            "期間": "201601010000",
+            "アクティビティ件数": 0,
+            "全期間アーカイブ検索リクエスト数": 0
+          },
+          "endpoints": [
+            {
+              "type": "Search API (Full-Archive)",
+              "label": "devel",
+              "使用実績": [
+                {
+                  "期間": "201511010000",
+                  "アクティビティ件数": 0,
+                  "全期間アーカイブ検索リクエスト数": 0
+                },
+                {
+                  "期間": "201512010000",
+                  "アクティビティ件数": 0,
+                  "全期間アーカイブ検索リクエスト数": 0
+                },
+                {
+                  "期間": "201601010000",
+                  "アクティビティ件数": 0,
+                  "全期間アーカイブ検索リクエスト数": 0
+                }
+              ],
+              "予測値": {
+                "期間": "201601010000",
+                "アクティビティ件数": 0,
+                "全期間アーカイブ検索リクエスト数": 0
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+<div id="api-reference">
+  ## API リファレンス
+</div>
+
+<div id="get-usage">
+  ### get-usage
+</div>
+
+<div id="methods">
+  #### **Methods**
+</div>
+
+| Method | Description |
+| :--- | :--- |
+| [GET /metrics/usage/accounts/{ACCOUNT_NAME}.json](#GETData) | 使用状況データの取得 |
+
+ここで:
+
+* :account&#95;name は、console.gnip.com に表示される、アカウントに関連付けられた名前（大文字・小文字を区別）です
+
+<div id="authentication-and-rate-limit">
+  #### **認証とレート制限**
+</div>
+
+<div id="authentication">
+  ##### **認証**
+</div>
+
+Usage API へのすべてのリクエストには HTTP Basic Authentication が必要です。console.gnip.com へのログインや任意の Gnip ストリームへの接続に使用している、アカウントに紐づく有効なメールアドレスとパスワードの組み合わせのいずれかを、認証情報として使用してください。
+
+<div id="rate-limit">
+  ##### **レート制限**
+</div>
+
+Usage API では、1 分あたり最大 2 件のリクエストというレート制限が適用されます。
+
+<div id="best-practices-limitations">
+  #### **ベストプラクティスと制限事項**
+</div>
+
+<div id="data-availability">
+  ##### **データの利用可能性**
+</div>
+
+利用状況データは、データが処理された直近の完全な時間帯（UTC）までに取得された、重複排除済みのアクティビティに基づいています。通常、データは分単位まで処理および更新されますが、Gnip がシステムをデプロイしている場合は例外となります。
+
+* Usage API を使用すると、2018 年 5 月 1 日以降の利用状況データにアクセスできます。2019 年 7 月 1 日以降は、Usage API を使用して、**直近 13 か月間のカレンダー月**の利用状況データにアクセスできます。 
+
+* fromDate と toDate で定義される **3 か月間ごとの期間** で、利用状況データにアクセスできます。
+
+<div id="requesting-and-receiving-data">
+  #### **データのリクエストと受信**
+</div>
+
+Usage API は、アカウントの API エンドポイントに対して HTTP Basic 認証情報付きの HTTP GET リクエストを送信することで動作します。
+
+<div id="get-request">
+  ##### GET リクエスト：
+</div>
+
+ユーザーの認証情報とアカウント名を使用して、以下のエンドポイントに GET リクエストを送信します。
+
+https://gnip-api.x.com/metrics/usage/accounts/:account&#95;name.json
+
+**追加パラメータ**
+
+|     |     |
+| :--- | :--- |
+| bucket | 任意。利用状況データが提供される時間単位です。利用状況データは日次または月次の粒度で返すことができます。  <br />  <br />bucket を指定せずにリクエストした場合、月次の粒度で返されます。  <br />  <br />指定可能な値: &#39;month&#39; または &#39;day&#39; |
+| fromDate (YYYYMMDDHHMM) | 任意。利用状況データは 2018 年 5 月 1 日以降のもののみ利用可能です。利用状況データが提供される最も古い UTC タイムスタンプです。タイムスタンプは日単位の粒度で、指定した日付を含みます（例: 201805010000 は 05/01 日を含みます）。時間および分の粒度で &#39;0000&#39; 以外の値を含むリクエストは、デフォルトで &#39;0000&#39; に設定されます。  <br />  <br />fromDate または toDate を指定せずに行われたリクエストでは、当月分の利用状況データを月次で返し、さらに過去 2 か月分の履歴参照を含みます。  <br />  <br />**注意:** 2019 年 6 月 1 日以降、過去 13 か月分のカレンダー月単位の利用状況データにアクセスできます。たとえば、10 月 10 日の場合、前年の 9 月 1 日まで遡って利用状況データにアクセスできます。  <br />**例:** 201810010000 は、2018 年 10 月 1 日以降（10 月 1 日を含む）のデータを返します。 |
+| toDate (YYYYMMDDHHMM) | 任意。利用状況データが提供される最新の UTC タイムスタンプです。タイムスタンプは日単位の粒度で、終端の日付を含みません（例: 201703020000 には 03/02 日のデータは含まれません）。toDate に現在の日付または未来の日付が指定された場合、利用状況データは最後の完全な日（UTC）まで返されます。時間および分の粒度で &#39;0000&#39; 以外の値を含むリクエストは、デフォルトで &#39;0000&#39; に設定されます。  <br />  <br />toDate を指定しないリクエストでは、次の bucket（bucket=day の場合は翌日、bucket=month の場合は翌月）がデフォルトになります。fromDate と toDate の両方を指定せずに行われたリクエストは、デフォルトで bucket=month となり、当月と直近 2 か月分のデータを表示します。  <br />  <br />**例:** 201703050000 は、2017 年 3 月 5 日までのデータを返しますが、3 月 5 日分のデータは含みません。 |
+
+**GET リクエスト例**
+
+このリクエストは、2017 年 3 月 1 日から 2017 年 3 月 5 日までの月次粒度のデータを返しますが、2017 年 3 月 5 日のデータは含みません。
+
+curl -u &quot;https://gnip-api.x.com/metrics/usage/accounts/:account&#95;name.json?bucket=month&amp;fromdate=201403010000&amp;toDate=201403150000&quot;
+
+<div id="data-format">
+  #### **データ形式**
+</div>
+
+以下の表では、Usage API から返される利用状況データのルートレベルのデータ構造について説明します。複数レベルのサブフィールドを持つフィールドについては、用意されたリンクをクリックしてサブフィールドの詳細を表示してください。
+
+Usage API の完全なペイロードサンプルを確認したい場合は、[このページ](/ja/x-api/usage/introduction)を参照してください。
+
+|     |     |
+| :--- | :--- |
+| **account** | 利用状況データがリクエストされたアカウントを表すオブジェクト。 |
+| **bucket** | 利用状況データが提供される時間単位。&#39;day&#39; または &#39;month&#39; のいずれか。 |
+| **fromDate** | 取得したい利用状況データの最も古い UTC タイムスタンプ（含む）。 |
+| **toDate** | 取得したい利用状況データの最も新しい UTC タイムスタンプ（含まない）。 |
+| **publishers** | Used、projected、products の 3 つの主要なオブジェクトを含みます。 |

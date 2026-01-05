@@ -1,0 +1,61 @@
+---
+title: v2 Account Activity API 移行ガイド
+keywords: ["Account Activity API 移行", "AAA 移行", "v2 移行", "API 移行ガイド", "v2 への移行", "Account Activity API v2"]
+---
+
+このガイドでは、従来の Enterprise Account Activity API から v2 Account Activity API への移行方法について説明します。基本的な機能は同じですが、エンドポイントの構造と認証方式は X API v2 と整合させるために更新されています。
+
+<div id="summary-of-changes">
+  ### 変更点の概要
+</div>
+
+* **API フォーマット**: エンドポイントは /1.1/account\_activity/ ではなく /2/account\_activity/ ベースパスを使用します。  
+* **Webhook 管理**: webhook の作成、一覧取得、検証 (CRC)、削除は [V2 Webhooks API](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py) で管理されます。  
+* **認証**: V2 エンドポイントでは次のいずれかが必要です:  
+  * ユーザー単位の操作 (例: ユーザーの購読) には **OAuthUser** (3-legged OAuth)。  
+  * アプリ単位の操作 (例: 購読の一覧取得/削除) には **OAuth2 App Only** (Bearer Token)。  
+  * V1.1 では要件がさまざまで、多くの場合 OAuth 1.0a が使用されていました。  
+* **エンドポイントの対応関係**:
+
+| V1.1 Endpoint | V2 Equivalent / Action | Notes |
+| ----- | ----- | ----- |
+| POST /1.1/account\_activity/webhooks.json?url=\<URL\> | POST /2/webhooks | [Docs](https://docs.x.com/x-api/webhooks/introduction)。OAuth2AppOnly が必要です。 |
+| GET /1.1/account\_activity/webhooks.json | GET /2/webhooks | [Docs](https://docs.x.com/x-api/webhooks/introduction)。OAuth2AppOnly が必要です。 |
+| PUT /1.1/account\_activity/webhooks/:webhook\_id.json | PUT /2/webhooks/:webhook\_id | CRC をトリガーします。[Docs](https://docs.x.com/x-api/webhooks/introduction)。OAuth2AppOnly が必要です。 |
+| DELETE /1.1/account\_activity/webhooks/:webhook\_id.json | DELETE /2/webhooks/:webhook\_id | [Docs](https://docs.x.com/x-api/webhooks/introduction)。OAuth2AppOnly が必要です。 |
+| POST /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all.json | POST /2/account\_activity/webhooks/:webhook\_id/subscriptions/all | OAuthUser が必要です。 |
+| GET /1.1/account\_activity/subscriptions/count.json | GET /2/account\_activity/subscriptions/count | OAuth2AppOnly が必要です。 |
+| GET /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all.json | GET /2/account\_activity/webhooks/:webhook\_id/subscriptions/all | OAuthUser が必要です。 |
+| GET /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all/list.json | GET /2/account\_activity/webhooks/:webhook\_id/subscriptions/all/list | OAuth2AppOnly が必要です。 |
+| DELETE /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/:user\_id/all | DELETE /2/account\_activity/webhooks/:webhook\_id/subscriptions/:user\_id/all | OAuth2AppOnly が必要です。 |
+| DELETE /1.1/account\_activity/webhooks/:webhook\_id/subscriptions/all | Deprecated / No Direct Equivalent | 個別削除を使用するか、DELETE /2/webhooks/:webhook\_id によって webhook を削除してください。 |
+
+* **レスポンス形式**: AAAPI のドキュメントで、成功時およびエラー時のレスポンス構造を確認してください。
+
+移行時には、新しいベースパスを使用するようコードを更新し、認証フローを調整し、[V2 Webhooks API](https://docs.x.com/x-api/webhooks/introduction) を使用して webhook を管理してください。
+
+<div id="how-to-migrate">
+  ### 移行方法
+</div>
+
+* **パッケージを選択する**:  
+  * Account Activity API へのアクセス用に Enterprise または Pro パッケージを選択し、以下を考慮します:  
+    * 必要な webhook の数。  
+    * 現在および将来のサブスクリプション数または認可ユーザー数。  
+    * X クライアントアプリケーションの数。  
+    * 希望するサポートレベル（フォーラム vs. マネージド Enterprise の 1 対 1 サポート）。  
+    * 料金の詳細（Enterprise については営業担当にお問い合わせください）。  
+* **認証を OAuth 2.0 に更新する**:  
+  * X アプリに「Read, Write, and Access Direct Messages」の権限があることを確認します。  
+  * v2 エンドポイント用に OAuth 2.0 へ更新します。スコープが変更された場合は、ユーザーによる再承認を行ってください。  
+  * developer portal を使用して次を管理します:  
+    * OAuth 2.0 アクセストークン。  
+    * Client ID と Client Secret。  
+* **Webhook を確認または再設定する**:  
+  * 既存の webhook URL を使用するか、新しいものを設定します（例: https://your\_domain.com/webhook/twitter）。  
+  * [V2 Webhooks API documentation](https://docs.x.com/x-api/webhooks/introduction) に従って、webhook を登録および管理します。  
+* **サンプルアプリ：**  
+  * [Simple webhook server](https://github.com/m-rosinsky/XWebhookTest/blob/main/app.py)  
+    * CRC チェックに応答し、POST イベントを受け入れる方法を示す単一の Python スクリプトです。  
+  * [Account Activity API sample dashboard](https://github.com/xdevplatform/account-activity-dashboard-enterprise/tree/master)  
+    * [bun.sh](http://bun.sh) で実装された Web アプリで、webhook やサブスクリプションの管理、およびアプリ内でのライブイベントの受信が可能です。

@@ -1,0 +1,21 @@
+---
+title: IDs de X
+icon: id-card-clip
+keywords: ["IDs de X", "IDs de Twitter", "ID de usuario", "ID de publicación", "ID Snowflake", "enteros de 64 bits", "formato de ID", "cadena de ID", "identificadores únicos"]
+---
+
+Cada objeto en X —una publicación, un Mensaje Directo, un usuario, una Lista, etc.— tiene un ID único.
+
+Al principio de la plataforma, estos IDs eran números lo suficientemente pequeños como para poder generarse de forma secuencial. Con el tiempo, para adaptarse al crecimiento, los IDs pasaron de ser de 32 bits a 64 bits. Hoy en día, los IDs de X son enteros sin signo únicos de 64 bits, que se basan en el tiempo en lugar de ser secuenciales. El ID completo se compone de una marca de tiempo, un número de trabajador y un número de secuencia. X desarrolló un servicio interno llamado &quot;Snowflake&quot; para generar estos IDs de forma consistente ([puedes leer más sobre esto en el blog de X](https://blog.x.com/engineering/en_us/a/2010/announcing-snowflake.html)).
+
+Números de hasta 64 bits pueden causar problemas con lenguajes de programación que representan enteros con menos de 64 bits. Un ejemplo de esto es JavaScript, donde los enteros están limitados a 53 bits de tamaño. Para proporcionar una solución alternativa a esto, en los diseños originales de la X API (v1/1.1), los valores de ID se devolvían en dos formatos: tanto en formato de entero como de cadena.
+
+```json
+{"id": 10765432100123456789, "id_str": "10765432100123456789"}
+```
+
+Si ejecutas el comando `(10765432100123456789).toString()` en la consola de JavaScript de un navegador, el resultado será `"10765432100123458000`: el número entero de 64 bits pierde precisión como resultado de la conversión (a esto a veces se le llama &quot;munging&quot;: un cambio destructivo en un dato).
+
+En las X API hasta la versión 1.1, siempre debes usar la representación en forma de cadena del número para evitar perder precisión.
+
+En las versiones más recientes de la API, todos los valores enteros grandes se representan como cadenas de forma predeterminada.

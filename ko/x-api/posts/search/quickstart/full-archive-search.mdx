@@ -1,0 +1,151 @@
+---
+title: 전체 아카이브 검색
+sidebarTitle: 전체 아카이브 검색
+keywords: ["전체 아카이브 검색", "아카이브 검색 빠른 시작", "과거 데이터 검색", "전체 아카이브 튜토리얼", "아카이브 검색 가이드"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-the-full-archive-search-endpoint">
+  ## 전체 아카이브 검색 엔드포인트 시작하기
+</div>
+
+이 빠른 시작 가이드는 Postman을 사용하여 지정된 필드 세트와 함께 전체 아카이브 검색 엔드포인트에 첫 요청을 보내는 방법을 설명합니다.
+
+여러 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 저장소를 방문하세요. 
+
+<Note>
+  ### 사전 준비 사항
+
+  전체 아카이브 검색 엔드포인트는 현재 Pro 및 Enterprise 액세스를 보유한 경우에만 사용할 수 있습니다. 이 엔드포인트를 사용하려면 Pro 액세스로 업그레이드하거나 [Enterprise 액세스 수준을 신청](https://docs.google.com/forms/d/e/1FAIpQLScO3bczKWO2jFHyVZJUSEGfdyfFaqt2MvmOfl_aJp0KxMqtDA/viewform)해야 합니다.
+
+  액세스 승인을 받는 것 외에도, 요청을 인증하기 위해 [키와 토큰](/ko/resources/fundamentals/authentication) 세트가 필요합니다. 다음 단계를 따라 이 키와 토큰을 생성할 수 있습니다.
+
+  * developer portal에서 Enterprise 또는 Pro 액세스가 있는 [프로젝트](/ko/resources/fundamentals/projects)로 이동하고, 해당 프로젝트에 연결된 [개발자 앱](/ko/resources/fundamentals/developer-apps)이 있는지 확인합니다.
+
+  * 앱의 “Keys and tokens” 페이지로 이동하여 필요한 자격 증명을 생성합니다. 모든 자격 증명을 안전한 위치에 저장했는지 확인하세요.
+</Note>
+
+<div id="steps-to-build-a-full-archive-search-request">
+  ### 전체 아카이브 검색 요청을 작성하는 단계
+</div>
+
+**1단계: 도구 또는 라이브러리 선택**
+
+이 엔드포인트에 요청을 보내기 위해 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 과정을 단순화하기 위해 Postman 도구를 사용합니다.
+
+X API v2 Postman 컬렉션을 환경에 불러오려면 다음 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 불러온 후, Search Posts &gt; Full-archive search 요청으로 이동합니다.
+
+**2단계: 요청 인증**
+
+X API에 정상적으로 요청을 보내려면, 권한이 있는지 확인해야 합니다. 이 엔드포인트의 경우, [OAuth 2.0 App-Only](/ko/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 인증 방식을 사용해 요청을 인증해야 합니다.
+
+Postman에 키와 토큰, 특히 [App Access Token](/ko/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (App-only Bearer Token이라고도 함)을 추가해야 합니다. Postman 우측 상단에서 “X API v2”라는 이름의 환경을 선택한 다음, 환경 드롭다운 옆의 눈 아이콘을 클릭해 &quot;initial value&quot; 및 &quot;current value&quot; 필드에 키와 토큰을 추가하면 됩니다.
+
+이 변수가 올바르게 설정되었다면, 요청의 Authorization 탭에 자동으로 적용됩니다.
+ 
+
+**3단계: 검색 쿼리 생성**
+
+각 전체 아카이브 검색 요청에는 하나의 검색 쿼리가 필요합니다. 이 예제에서는 @XDevelopers 계정이 게시한 게시물과 일치하는 쿼리를 사용할 것입니다. 이 쿼리에서는 from 연산자를 사용하고 값을 XDevelopers로 설정합니다(대소문자 구분 없음).
+
+`from:XDevelopers`
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 뒤, 이 ID 또는 쉼표로 구분된 게시물 ID 문자열을 `ids` 파라미터의 &quot;Value&quot; 열에 입력합니다.
+ 
+
+| Key | Value | Description |
+| :--- | :--- | :--- |
+| `query` | `from:XDevelopers` | 전체 아카이브 검색 엔드포인트에 제출할 검색 쿼리 |
+
+**4단계: 조회할 필드를 식별하고 지정**
+
+3단계 이후 &quot;Send&quot; 버튼을 클릭하면, 응답에서 기본 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet) 필드인 `id`, `text`, `edit_history_tweet_ids`를 받게 됩니다. 편집 기능이 지원되기 이전의 게시물에 대해서는 `edit_history_tweet_ids` 필드가 제공되지 않습니다. 이 필드에 대해서는 과거 기록 백필이 수행되지 않았습니다. 
+
+기본 필드 외에 추가 필드를 받고 싶다면, 요청에 [field](/ko/x-api/fundamentals/fields) 및/또는 [expansion](/ko/x-api/fundamentals/expansions) 파라미터를 사용해 해당 필드를 명시해야 합니다.
+
+이 연습에서는 서로 다른 오브젝트에서 네 가지 다른 필드 세트를 요청합니다:
+
+1. 기본 Post object 필드
+2. 기본 사용자 오브젝트에 대한 추가 tweet.created&#95;at 필드
+3. 반환된 게시물에 대한 작성자의 [user object](/ko/x-api/fundamentals/data-dictionary#user) 기본 필드
+4. 연결된 사용자 오브젝트의 추가 user.description 필드
+    
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 뒤, &quot;Query Params&quot; 테이블에 다음 key:value 쌍을 추가합니다:
+
+| Key | Value | Returned fields |
+| :--- | :--- | :--- |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | includes.users.id, includes.users.name, includes.users.username |
+| user.fields | description | includes.users.description |
+
+이제 &quot;Send&quot; 버튼 옆에 다음 URL이 표시되는 것을 볼 수 있습니다:
+
+`https://api.x.com/2/tweets/search/all?query=from:XDevelopers&tweet.fields=created_at&expansions=author_id&user.fields=created_at`
+
+<Note>
+  **주의 사항**
+
+  기본적으로 가장 최근 게시물 10개만 반환됩니다. 요청당 10개보다 많은 게시물을 받고 싶다면 max&#95;results 파라미터를 사용해 요청당 최대 500개의 게시물까지 설정할 수 있습니다. 마찬가지로 기본적으로 지난 30일 이내의 게시물만 반환됩니다. 30일보다 더 이전의 게시물을 가져오려면, API 호출에서 start&#95;time 및 end&#95;time 파라미터를 사용할 수 있습니다.
+</Note>
+
+**5단계: 요청을 보내고 응답을 검토합니다**
+
+모든 설정이 완료되면 “Send” 버튼을 눌러 아래와 유사한 응답을 받게 됩니다:
+
+```
+{
+   "data": [
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-11T16:05:06.000Z",
+           "id": "1271111223220809728",
+           "text": "오늘 밤 @jessicagarson이 R에서 좋아하는 Python 패키지를 실행하는 방법을 안내하는 것을 시청하세요. 🍿\n\n데이터 과학을 위한 두 가지 강력한 프로그래밍 언어를 함께 사용하는 방법을 배우고, Twitter의 Developer Labs에서 최근 검색 엔드포인트를 사용하는 실시간 예제를 확인하세요. https://t.co/v178oUZNuj"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-10T19:25:24.000Z",
+           "id": "1270799243071062016",
+           "text": "As we work towards building the new Twitter API, we’ve extended the deprecation timeline for several Labs v1 endpoints. Learn more 📖 https://t.co/rRWaJYJgKk"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-09T18:08:47.000Z",
+           "id": "1270417572001976322",
+           "text": "Annotations help you learn more about a Tweet — they can even help you find topics of interest. 🔬\n\nIn this tutorial, @suhemparack shows us how find Tweets related to COVID-19 using annotations + the filtered stream endpoint.\n\nLearn how you can, too. ⤵️\nhttps://t.co/qwVOgw0zSV"
+       }
+   ],
+   "includes": {
+       "users": [
+           {
+               "description": "The voice of Twitter's #DevRel team, and your official source for updates, news, & events about Twitter's API. \n\n#BlackLivesMatter",
+               "id": "2244994945",
+               "name": "Twitter Dev",
+               "username": "TwitterDev"
+           }
+       ]
+   },
+   "meta": {
+       "newest_id": "1271111223220809728",
+       "oldest_id": "1270417572001976322",
+       "result_count": 3
+   }
+}
+```
+
+이 예제에서는 매우 간단한 쿼리를 사용했습니다. 보다 자세한 안내가 필요하다면 아래에 나열된 자료를 참고하세요. 
+
+**다음 단계**
+
+[API Reference를 참고하여 요청을 사용자 지정하기](/ko/x-api/posts/full-archive-search)
+
+[쿼리 연산자 전체 목록 확인하기](/ko/x-api/posts/search/integrate/build-a-query "쿼리 연산자 전체 목록 확인하기")
+
+[이 엔드포인트용 샘플 코드 사용하기](https://github.com/xdevplatform/Twitter-API-v2-sample-code "이 엔드포인트용 샘플 코드 사용하기")

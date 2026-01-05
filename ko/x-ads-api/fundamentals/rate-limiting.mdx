@@ -1,0 +1,81 @@
+---
+title: 요청 한도
+keywords: ["Ads API 요청 한도", "요청 한도 적용", "Ads API throttling", "요청 한도", "요청 제한", "Ads API 제한"]
+---
+
+Advertiser API에는 다음 문서에 설명된 REST API v1.1과 유사한 방식의 요청 한도가 적용됩니다: [REST API Rate Limiting in v1.1](https://developer.x.com/content/developer-twitter/en/docs/basics/rate-limits). REST API v1.1과는 달리, 엔드포인트별 한도를 프로그램을 통해 조회할 수 있는 인덱스는 제공되지 않습니다. 엔드포인트별 요청 한도와 재설정 윈도우는 HTTP 응답 헤더를 통해 전달됩니다. Ads API의 모든 요청 한도에는 OAuth 1.0A가 사용됩니다.
+
+<div id="user-level-and-ad-account-level-limits">
+  ## 사용자 수준 및 광고 계정 수준 한도
+</div>
+
+요청 한도에는 사용자 토큰 수준과 광고 계정 수준의 두 가지 유형이 있습니다. 일부 엔드포인트는 광고 계정 수준 요청 한도를 사용하도록 설정되어 있습니다. 사용자 토큰은 Ads API를 인증하고 호출할 때 사용하는 [OAuth 액세스 토큰](/ko/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)입니다. 각 사용자 토큰은 하나 이상의 광고 계정에 접근할 수 있습니다.
+
+개발자는 응답 헤더에 광고 계정 수준 요청 한도가 포함되어 있는 경우 해당 한도를 사용하고, 광고 계정 한도가 제공되지 않을 때에만 사용자 수준 한도를 사용해야 합니다.
+
+사용자 수준 요청 한도는 다음 헤더를 통해 표현됩니다: **x-rate-limit-limit**, **x-rate-limit-remaining**, **x-rate-limit-reset**
+
+광고 계정 요청 한도가 활성화된 엔드포인트의 경우, 요청 한도는 다음 헤더를 통해 표현됩니다: **x-account-rate-limit-limit**, **x-account-rate-limit-remaining**, **x-account-rate-limit-reset**.
+
+광고 계정 수준 요청 한도는 GET 엔드포인트에만 제공되며, 단일 사용자 토큰이 여러 광고 계정에 접근하는 경우 애플리케이션이 개체 데이터(예: 캠페인 또는 라인 아이템 객체)를 동기화할 수 있도록 하기 위한 것입니다. 쓰기 작업이 동일한 광고 계정 수준 요청 한도를 사용한다고 보장할 수는 없습니다.
+
+광고 계정 수준 요청 한도가 적용되는 엔드포인트의 경우, 사용자 수준 요청 한도는 애플리케이션 전체에 대한 전역 쿼터를 나타내는 높은 값으로 설정됩니다. 광고 계정 수준 요청 한도를 사용할 수 있을 때에는 요청량을 제어할 때 이를 우선적으로 사용해야 합니다.
+
+<div id="best-practices">
+  ## 모범 사례
+</div>
+
+1. 데이터베이스에 마지막 동기화 시점을 타임스탬프로 저장해 두고, 가능한 경우 데이터를 요청할 때 `sort_by=updated_at-desc` 옵션을 사용하여 마지막 동기화 시점보다 오래된 데이터에 도달하면 동기화 프로세스를 중단할 수 있도록 하십시오. 이렇게 하면 동일한 데이터를 반복해서 동기화하는 것을 방지할 수 있습니다.
+
+2. 하나의 요청에서 여러 엔터티를 요청하십시오: 일부 엔드포인트는 쉼표로 구분된 값 목록을 지정하여 유사한 데이터를 여러 개 가져올 수 있도록 합니다. 이렇게 하면 전체 호출 횟수를 줄일 수 있으며, 그에 따라 rate limit 한도를 더 효율적으로 사용할 수 있습니다.
+
+3. 요청에서 최대 &quot;count&quot;를 사용하십시오: [GET accounts/:account&#95;id/targeting&#95;criteria](/ko/x-ads-api/campaign-management#targeting-criteria)와 같은 일부 엔드포인트는 기본값인 200개가 아닌 1000개의 오브젝트를 반환하도록 최대 count 값으로 호출할 것을 강력히 권장합니다.
+
+<div id="analytics-syncing">
+  ## 애널리틱스 동기화
+</div>
+
+애널리틱스 엔드포인트의 요청 한도에 대한 자세한 내용은 [애널리틱스 요청 한도 가이드](/ko/x-ads-api/analytics#best-practices)를 참고하세요.
+
+<div id="faqs">
+  ## 자주 묻는 질문
+</div>
+
+*특정 광고 계정이나 당사 애플리케이션의 요청 한도를 늘릴 수 있나요?*
+
+일반적으로 요청 한도는 개별 광고 계정이나 애플리케이션별로 별도로 상향할 수 없으며, 가장 큰 규모의 광고 계정도 지원할 수 있도록 설정되어 있습니다. 우선 이 문서에 나와 있는 모범 사례를 적용해 주시기 바라며, 그 이후에도 요청 한도가 여전히 확장 또는 비즈니스 목표 달성에 영향을 미친다면, 해당 사용 사례와 관련된 요청 내용과 함께 자세한 정보를 준비하여 X Ads API 담당자에게 문의해 주시기 바랍니다.
+
+<div id="scopes-of-rate-limiting">
+  ## 요율 제한 범위
+</div>
+
+<div id="scopes-for-this-doc">
+  ### 이 문서에서 사용하는 범위
+</div>
+
+* Category: 해당 카테고리에 속하는 모든 엔드포인트는 하나의 할당된 윈도(요청 제한 윈도) 내에서 같은 제한을 공유합니다.
+* Endpoint: 각 엔드포인트는 윈도마다 고유하게 할당된 별도의 제한을 가집니다.
+
+<div id="ads-api-rate-limit-chart">
+  ## Ads API 요청 한도 표
+</div>
+
+<div id="ads-api-rate-limits">
+  ### Ads API 요청 한도
+</div>
+
+| Endpoint 유형 | Endpoint 또는 카테고리 기준 범위 | 1분 시간 창 기준 요청 한도 |
+| :--- | :--- | :--- |
+| 쓰기 요청 (POST, PUT, DELETE) | 카테고리 | 450 |
+| 오디언스 | Endpoint | 1500 |
+
+| Endpoint 유형 | Endpoint 또는 카테고리 기준 범위 | 15분 시간 창 기준 요청 한도 |
+| :--- | :--- | :--- |
+| 애널리틱스(동기식) | 카테고리 | 250 |
+| Core Entity 조회 (라인 아이템, 캠페인 등)<br /><br />기타 계정 조회 (:account&#95;id가 포함된 기타 GET endpoint) | Endpoint (광고 계정 수준)<br /><br />Endpoint (부분 광고 계정 수준) | 10,000<br /><br />2000 |
+| 타게팅 기준 (아래 항목 외) | 카테고리 | 400 |
+| 타게팅 기준 (tv&#95;markets, tv&#95;shows) | Endpoint | 2000 |
+| 오디언스 인사이트 | 카테고리 | 400 |
+| 키워드 인사이트 | 카테고리 | 500 |
+| 글로벌 조회 (:account&#95;id가 없는 GET endpoint) | Endpoint | 5   |
+| 전환 | Endpoint | 60,000 |

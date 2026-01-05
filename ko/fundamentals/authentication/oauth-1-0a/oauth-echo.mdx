@@ -1,0 +1,47 @@
+---
+title: OAuth Echo
+sidebarTitle: OAuth Echo
+keywords: ["OAuth Echo", "OAuth Echo 테스트", "OAuth 검증", "에코 테스트", "OAuth 1.0a Echo", "OAuth 검증"]
+---
+
+import { Button } from "/snippets/ko/button.mdx";
+
+
+<div id="oauth-echo">
+  ### OAuth Echo
+</div>
+
+OAuth Echo는 API와 상호작용하면서 제3자에게 OAuth 인가를 안전하게 위임하는 수단입니다.
+
+이 상호작용에는 네 개의 주체가 관여합니다:
+
+* **사용자(User)**: 특정 인가된 X 애플리케이션을 통해 X를 사용하고 있는 주체
+* **Consumer**: 제3자 미디어 제공자(예: 사진 공유 사이트)와 상호작용을 시도하는 X 애플리케이션
+* **Delegator**: 제3자 미디어 제공자
+* **Service Provider**: 즉, X 자체
+     
+
+본질적으로는, 애플리케이션과 사용자를 대신해 Delegator가 X API로 보낼 요청을 준비하는 것입니다. 원래라면 서명된 OAuth 요청으로 들어갈 내용을 HTTP 헤더에 담아 두고, Delegator가 중간 작업을 완료한 뒤 그 요청을 X로 전송하도록 요청합니다.
+
+예를 들어, 사용자가 사진을 업로드하고 싶어 한다고 가정해 보겠습니다. Consumer는 Delegator에 대해 POST 요청으로 업로드를 호출합니다. 이 POST에는 이미지를 포함해야 할 뿐만 아니라, HTTP 헤더에 다음 두 가지 추가 항목도 포함해야 합니다:
+
+* `x-auth-service-provider` — 실질적으로, 신원 위임이 전송되어야 하는 영역(realm)을 나타냅니다. X의 경우, 이를 https://api.x.com/1.1/account/verify_credentials.json 로 설정합니다. iOS5 기반 X 통합에서는 이 URL에 추가 `application_id` 파라미터를 포함하며, 이 파라미터 역시 `x-verify-credentials-authorization` 에 사용되는 `oauth_signature` 계산에 사용됩니다.
+* `x-verify-credentials-authorization` — Consumer는 OAuth를 사용해 HTTP 헤더에서 https://api.x.com/1.1/account/verify_credentials.json 를 호출할 수 있도록 필요한 모든 OAuth 파라미터를 생성해야 합니다(예: `OAuth oauth_consumer_key=”...”, oauth_token=”...”, oauth_signature_method=”...”, oauth_signature=”...”, oauth_timestamp=”...”, oauth_nonce=”...”, oauth_version=”...”` 와 같은 형식).
+
+전체 트랜잭션이 `oauth_timestamp` 가 여전히 유효한 시간 안에 이뤄져야 한다는 점을 유의하십시오.
+
+또는, 이 두 파라미터를 헤더로 보내는 대신 POST 본문에 `x_auth_service_provider` 와 `x_verify_credentials_authorization` 로 전송할 수도 있습니다. 이 경우, OAuth 서명 베이스 문자열에 이 파라미터들을 이스케이프해 포함해야 한다는 점을 기억하십시오. 이는 다른 요청에서 파라미터를 인코딩하는 방식과 유사합니다. 가능한 한 작업을 분리하기 위해 HTTP 헤더를 사용하는 것이 가장 좋습니다.
+
+이 시점에서 Delegator의 목표는 미디어를 저장하기 전에 사용자가 자신이 주장하는 사람인지 검증하는 것입니다. Delegator가 업로드 메서드를 통해 위의 모든 데이터를 수신하면, 이미지를 임시로 저장한 다음 `x-auth-service-provider` 헤더에 지정된 엔드포인트(이 경우 https://api.x.com/1.1/account/verify_credentials.json)를, Consumer가 `x-verify-credentials-authorization` 헤더에서 제공한 것과 동일한 OAuth 인증 헤더를 사용해 호출하도록 구성해야 합니다.
+ 
+
+<div id="oauth-echo-best-practices">
+  #### OAuth Echo 모범 사례
+</div>
+
+조회 시에는 하드코딩된 값이 아니라 `x-auth-service-provider`에서 제공하는 URL을 사용하세요. 예를 들어 Apple iOS는 모든 OAuth 요청에 추가적인 application_id 파라미터를 추가하며, OAuth Echo의 각 단계에서 이 파라미터가 유지되도록 해야 합니다.
+
+OAuth 인가 부분에서는 `x-verify-credentials-authorization`에 있는 헤더 값을 가져와, 서비스 제공자 호출 시 별도의 Authorization 헤더에 넣어야 합니다. 추가로, `x-auth-service-provider`의 값이 예상한 값이 맞는지 확인하세요.
+
+* Service Provider가 HTTP 200을 반환하면 성공한 것입니다. Delegator는 이미지를 영구적으로 저장하고, URL을 생성한 뒤 이를 반환해야 합니다.
+* Service Provider가 HTTP 200을 반환하지 않으면 이미지를 폐기하고, Consumer에게 오류를 반환해야 합니다.

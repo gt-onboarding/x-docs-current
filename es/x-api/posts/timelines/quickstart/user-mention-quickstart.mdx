@@ -1,0 +1,196 @@
+---
+title: Menciones de usuario
+sidebarTitle: Menciones de usuario
+keywords: ["menciones de usuario", "cronología de menciones", "inicio rápido de menciones", "tutorial de menciones", "cronología de menciones", "obtener menciones"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-user-post-and-mention-timeline-endpoints">
+  ## Introducción a los endpoints de timeline de Publicaciones de usuario y menciones
+</div>
+
+Esta guía de inicio rápido te ayudará a hacer tu primera solicitud al endpoint de timeline de Publicaciones de usuario con un conjunto de campos especificados usando [Postman](/es/tutorials/postman-getting-started).
+
+Si deseas ver código de ejemplo en diferentes lenguajes, visita nuestro repositorio de [código de ejemplo de X API v2](https://github.com/xdevplatform/Twitter-API-v2-sample-code) en GitHub. 
+
+<Note>
+  **Requisitos previos**
+
+  Para completar esta guía, necesitarás contar con un conjunto de [claves y tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y recibe la aprobación.
+  * Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Ve a la página “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+**Pasos para crear una solicitud de timeline**
+
+*En este ejemplo, haremos una solicitud al endpoint de timeline de Publicaciones de usuario por ID, pero puedes aplicar lo que aprendas en este inicio rápido también a solicitudes de timelines de menciones de usuario.* 
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para hacer una solicitud a este endpoint, pero aquí vamos a usar la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas cargada la colección de X API v2 en Postman, navega a la carpeta timeline y busca la solicitud &quot;User Post timeline by ID&quot;.
+ 
+
+**Paso dos: Autentica tu solicitud**
+
+Para hacer correctamente una solicitud a X API, debes verificar que tienes permiso. Para hacerlo con este endpoint, debes autenticar tu solicitud con uno de estos métodos de autenticación: [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), [OAuth 2.0 Authorization Code with PKCE](/es/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) o [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication).
+
+Para simplificar, usaremos OAuth 2.0 solo para la aplicación en esta solicitud, pero deberás utilizar uno de los otros métodos de autenticación si quieres solicitar [métricas](/es/x-api/fundamentals/metrics) privadas o Publicaciones. 
+
+Debes agregar tus claves y tokens, específicamente el [App Access Token](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (también conocido como el Bearer Token solo para la aplicación) en Postman. Puedes hacerlo seleccionando el entorno llamado “X API v2” en la esquina superior derecha de Postman y añadiendo tus claves y tokens en los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el ícono de ojo junto al menú desplegable de entornos).
+
+Esta variable se insertará automáticamente en la pestaña de autorización de la solicitud si lo has configurado correctamente.
+ 
+
+**Paso tres: Identifica y especifica de qué usuario quieres recuperar Publicaciones**
+
+Debes especificar un usuario del que quieras recuperar Publicaciones recientes dentro de la solicitud. En este ejemplo, pasaremos un único id de usuario.
+
+Los id de usuario son simplemente el valor numérico que representa el nombre de usuario de una cuenta y que puedes encontrar en la URL del perfil de la cuenta. Por ejemplo, el nombre de usuario de la siguiente cuenta es `XDevelopers`.
+
+`https://x.com/XDevelopers`
+
+Para convertir este nombre de usuario en el id de usuario, deberás usar el [endpoint de users lookup](/es/x-api/users/lookup/introduction) con el nombre de usuario y encontrar el id de usuario numérico en el payload. En el caso de @XDevelopers, el id de usuario es 2244994945.
+
+En Postman, ve a la pestaña &quot;Params&quot; e introduce este id de usuario en la columna &quot;Value&quot; del parámetro id.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**Paso cuatro: Identifica y especifica qué campos quieres recuperar**
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás en tu respuesta los campos predeterminados del [Post object](/es/x-api/fundamentals/data-dictionary#tweet): id y text.
+
+Si quieres recibir campos adicionales además de id y text, tendrás que especificar esos campos en tu solicitud con los parámetros [fields](/es/x-api/fundamentals/fields) y/o [expansions](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos tres conjuntos adicionales de campos de distintos objetos:
+
+1. El campo adicional tweet.created&#95;at en los objetos de usuario principales.
+
+2. Los campos predeterminados del objeto de usuario de los autores asociados para las Publicaciones devueltas: id, name y username
+
+3. El campo adicional user.created&#95;at en los objetos de usuario asociados.
+    
+
+En Postman, dirígete a la pestaña &quot;Params&quot; y agrega el siguiente par clave:valor a la tabla &quot;Query Params&quot;:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Campos devueltos** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `created_at` | `includes.users.created_at` |
+| max&#95;results | 5   |     |
+
+Ahora deberías ver la siguiente URL junto al botón &quot;Send&quot;:
+
+`https://api.x.com/2/users/:id/tweets?tweet.fields=created_at&expansions=author_id&user.fields=created_at&max_results=5`
+
+<Info>
+  **Please note:**
+
+  **Ten en cuenta lo siguiente:**
+
+  In Postman, the path parameter :id in the URL field will **not** automatically update to the value that you enter into the `id` params field, which is why the above URL includes `:id` and not 2244994945.
+
+  En Postman, el parámetro de ruta :id en el campo de URL **no** se actualizará automáticamente al valor que ingreses en el campo de parámetros `id`, por lo que la URL anterior incluye `:id` y no 2244994945.
+</Info>
+
+**Step five: Make your request and review your response**
+
+**Paso cinco: realiza tu solicitud y revisa tu respuesta**
+
+Once you have everything set up, hit the &quot;Send&quot; button and you will receive the following response:
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás la siguiente respuesta:
+
+```{
+    "data": [
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-09-03T17:31:39.000Z",
+            "id": "1301573587187331074",
+            "text": "A partir de hoy, puedes ver tu uso mensual de Publicaciones para la API v2 en el portal para desarrolladores. ✨📊\n\nEsto registra cuántas Publicaciones has recibido del flujo filtrado y la búsqueda reciente. Obtén más información aquí: https://t.co/nfJHkFRQcZ https://t.co/vFXmoj3qaA"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-09-03T15:43:00.000Z",
+            "id": "1301546240887398401",
+            "text": "RT @snowman: So, we built a live golf leaderboard on the X API with Python, Flask, Postgres, and Heroku.\n\nSend a 'leaderboard' Direct…"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-09-01T20:07:50.000Z",
+            "id": "1300888112948752389",
+            "text": "⛳ Why do golfers carry an extra shirt? In case they get a hole in one.\n\nNow that we have your attention, learn how @snowman and @johnd built a real-time golf leaderboard using the #TwitterAPI. 📖\n\nhttps://t.co/rRKeKmaRrN"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-08-28T23:14:22.000Z",
+            "id": "1299485505478963200",
+            "text": "RT @jessicagarson: Posted my first tutorial on @ThePracticalDev on using v2 of the Twitter API! You will learn how to explore a user’s Twee…"
+        },
+        {
+            "author_id": "2244994945",
+            "created_at": "2020-08-21T19:10:05.000Z",
+            "id": "1296887316556980230",
+            "text": "See how @PennMedCDH are using Twitter data to understand the COVID-19 health crisis 📊\n\nhttps://t.co/1tdA8uDWes"
+        }
+    ],
+    "includes": {
+        "users": [
+            {
+                "created_at": "2013-12-14T04:35:55.000Z",
+                "id": "2244994945",
+                "name": "Twitter Dev",
+                "username": "TwitterDev"
+            }
+        ]
+    },
+    "meta": {
+        "newest_id": "1301573587187331074",
+        "next_token": "t3buvdr5pujq9g7bggsnf3ep2ha28",
+        "oldest_id": "1296887316556980230",
+        "previous_token": "t3equkmcd2zffvags2nkj0nhlrn78",
+        "result_count": 5
+    }
+}
+```
+
+**Paso seis: pagina tus resultados**
+
+En la respuesta anterior, encontrarás un objeto de metadatos al final que incluye los siguientes campos:
+
+* oldest&#95;id
+* newest&#95;id
+* results&#95;count
+* next&#95;token
+* previous&#95;token
+
+En el paso cuatro, pasamos un valor de max&#95;results de 5, lo que significa que cada página solo incluirá hasta cinco resultados. Para acceder a las páginas adicionales de datos, tomaremos el valor del campo next&#95;token de nuestros últimos resultados y añadiremos esa cadena como valor del parámetro pagination&#95;token en la pestaña Params de Postman, manteniendo todo lo demás igual. 
+
+|                    |                               |
+| :----------------- | :---------------------------- |
+| **Key**            | **Value**                     |
+| `pagination_token` | t3buvdr5pujq9g7bggsnf3ep2ha28 |
+
+Una vez que todo esté configurado, puedes hacer clic en «Send» de nuevo y deberías recibir la siguiente página de resultados. 
+
+Hemos preparado una guía sobre [paginación](/es/x-api/fundamentals/pagination) para explicar este concepto con más detalle. 
+
+**Próximos pasos**
+[Personaliza tu solicitud usando la Referencia de la API](/es/x-api/posts/timelines#api-reference-index)
+
+[Pide ayuda a la comunidad](https://devcommunity.x.com "Reach out to the community for help")

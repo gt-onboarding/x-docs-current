@@ -1,0 +1,105 @@
+---
+title: リツイートの管理
+sidebarTitle: リツイートの管理
+keywords: ["リツイートの管理", "ポストをリツイートする", "リツイートを取り消す", "リツイート クイックスタート", "リツイート チュートリアル", "リツイート ガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-retweets-endpoints">
+  ### manage Retweets エンドポイントの利用を始める
+</div>
+
+このクイックスタートでは、Postman を使って manage Retweets エンドポイントに最初のリクエストを送信するまでの手順を説明します。
+
+さまざまな言語のサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリを参照してください。 
+
+<div id="prerequisites">
+  #### 前提条件
+</div>
+
+このガイドを完了するには、リクエストを認証するための [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+* [開発者アカウントに登録](https://developer.x.com/en/apply-for-access)し、承認を受けてください。
+* developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+* 開発者アプリの「Keys and tokens」ページに移動し、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+
+<div id="steps-to-build-a-manage-retweets-request">
+  #### Retweets 管理リクエストを構築する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントへリクエストを送信する方法として、いくつかの異なるツール、コード例、ライブラリを利用できますが、ここでは手順を簡単にするために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「Retweets」フォルダーに移動し、「Retweet a Post」を選択します。
+ 
+
+Step two: Authenticate your request
+
+X API に正しくリクエストを行うには、その操作を行う権限があることを確認する必要があります。このエンドポイントでそれを行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使ってリクエストを認証する必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+Postman に、キーとトークン、具体的には API Key、API Secret Key、OAuth 1.0a ユーザー Access Token、OAuth 1.0a ユーザー Access Token Secret を追加しなければなりません。これは、Postman の右上で「X API v2」という名前の環境を選択し、環境ドロップダウン横の目のアイコンをクリックして「initial value」と「current value」フィールドにキーとトークンを追加することで行えます。
+
+正しく設定されていれば、これらの変数はリクエストの Authorization タブに自動的に読み込まれます。
+
+**ステップ 3: リツイートするポストを指定する**
+
+Retweets 管理エンドポイントでは 2 つの ID が必要です。1 つはリツイートまたはリツイートの取り消しを行うユーザーの ID、もう 1 つはポストの id です。
+
+ユーザーの ID は認証に使用しているユーザーの ID と一致している必要があります。つまり、リクエストを認証する際に、そのユーザー ID に紐付く [Access Tokens](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を渡す必要があります。この場合、自分自身のユーザー ID を指定できます。自分の ID は次の 2 つの方法で確認できます。
+
+1. [user lookup by username](/ja/x-api/users/user-lookup-by-username) エンドポイントを使用してユーザー名を渡すと、id フィールドを受け取ることができます。 
+2. Access Token を見ると、数値の部分が自分のユーザー ID になっています。
+    
+
+また、リツイートしたいポストも指定する必要があります。X.com 上でポストをクリックし、その URL を見ることでポスト ID を確認できます。たとえば、次の URL のポスト ID は 1228393702244134912 です。
+
+[https://x.com/TwitterDev/status/1228393702244134912](https://x.com/TwitterDev/status/1228393702244134912)
+
+Postman で「Params」タブに移動し、id パス変数の「Value」列に自分の ID を入力します。次に、リツイートしたいポストの ID を tweet&#95;id パラメータの値として入力します。いずれの ID の前後にもスペースを含めないようにしてください。
+
+|              |                   |
+| :----------- | :---------------- |
+| **Key**      | **Value**         |
+| `id`         | (あなたのユーザー ID)     |
+| tweet&#95;id | (リツイートしたいポストの ID) |
+
+「Send」ボタンをクリックすると、関係性のステータスを含むレスポンスオブジェクトが返されます。
+
+* &quot;retweeted&quot;: true が返ってきた場合、その id のユーザーは tweet&#95;id を正常にリツイートしています。
+   
+
+**ステップ 4: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンを押すと次のようなレスポンスが返されます。
+
+```
+{
+    "data": {
+        "retweeted": true
+    }
+}
+```
+
+`"retweeted": true` が返ってきた場合は、`tweet_id` のポストが正常にリポストされています。
+
+同じユーザーによるリポストを取り消したい場合は、Postman に読み込んだ X API v2 コレクション内の「Retweets」フォルダーにある「Undo a Retweet」という名前のリクエストを使用できます。`id` にはあなたのユーザー ID を、`source_tweet_id` にはリポストを取り消したいポストの ID を指定します。これは JSON ボディとして追加する必要はないため、`id` および `source_tweet_id` のクエリパラメーターを必ず追加してください。 
+
+リポストの取り消しが成功すると、次の例と同様のレスポンスが返されます。
+
+```
+{
+  "data": {
+    "retweeted": false
+  }
+}
+```

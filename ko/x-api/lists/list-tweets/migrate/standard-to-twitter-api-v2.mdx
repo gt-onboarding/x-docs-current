@@ -1,0 +1,120 @@
+---
+title: v1에서 v2로
+sidebarTitle: v1에서 v2로
+keywords: ["v1.1에서 v2로 마이그레이션", "리스트 트윗 마이그레이션", "리스트 트윗 마이그레이션 수행", "Standard에서 v2 리스트 트윗으로", "v1에서 v2 리스트 트윗으로", "마이그레이션 가이드"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="list-posts-lookup-standard-v11-compared-to-x-api-v2">
+  ### 리스트 게시물 조회: Standard v1.1과 X API v2 비교
+</div>
+
+Standard v1.1 [GET lists/statuses](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-statuses) 엔드포인트를 사용해 왔다면, 이 가이드는 Standard v1.1과 X API v2 엔드포인트 간의 공통점과 차이점을 이해하는 데 도움이 되도록 작성되었습니다.
+
+* **유사점**
+  * 인증 방식
+  * 요청 한도
+* **차이점**
+  * 엔드포인트 URL
+  * 앱 및 프로젝트 요구 사항
+  * 요청당 반환되는 데이터 객체 수 한도
+  * 응답 데이터 형식
+  * 요청 매개변수
+
+<div id="similarities">
+  #### 유사점
+</div>
+
+**인증**
+
+두 엔드포인트 버전 모두 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication#oauth-2-0)를 지원합니다. 따라서 이전에 표준 v1.1 List Posts 조회 엔드포인트 중 하나를 사용했다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다.
+
+사용 중인 인증 라이브러리/패키지에 따라, 앱 전용 인증(App only authentication)이 시작하기에 가장 간편한 방법일 가능성이 높으며, 간단한 요청 헤더 설정만으로 사용할 수 있습니다. 앱 전용 액세스 토큰을 생성하는 방법은 [이 App only 가이드](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)를 참고하세요.
+
+**요청 한도**
+
+|     |     |
+| :--- | :--- |
+| **Standard v1.1** | **X API v2** |
+| /1.1/lists/statuses.json<br /><br />OAuth 1.0a 사용자 컨텍스트 기준 15분당 900회 요청<br /><br />앱 전용 인증 기준 15분당 900회 요청 | /2/lists/:id/tweets<br /><br />OAuth 1.0a 사용자 컨텍스트 기준 15분당 900회 요청<br /><br />OAuth 2.0 Authorization Code with PKCE 기준 15분당 900회 요청<br /><br />앱 전용 인증 기준 15분당 900회 요청 |
+
+<div id="differences">
+  #### 차이점
+</div>
+
+**엔드포인트 URL**
+
+* Standard v1.1 엔드포인트:
+  * GET https://api.x.com/1.1/lists/statuses.json
+    (지정된 리스트에서 트윗 조회)
+* X API v2 엔드포인트:
+  * GET https://api.x.com/2/lists/:id/tweets
+    (지정된 리스트에서 트윗 조회)
+
+**앱 및 프로젝트 요구 사항**
+
+X API v2 엔드포인트를 사용하려면 요청을 인증할 때 [개발자 앱](/ko/resources/fundamentals/developer-apps)과 연결된 [프로젝트](/ko/resources/fundamentals/projects)의 자격 증명을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 독립 실행형 앱이나 프로젝트와 연결된 앱의 자격 증명을 사용할 수 있습니다.
+
+**요청당 데이터 객체 제한**
+
+standard v1.1 /lists/statuses 엔드포인트는 요청당 최대 5000개의 게시물을 반환할 수 있습니다. 새로운 v2 엔드포인트는 요청당 최대 100개의 게시물을 반환할 수 있습니다. 기본적으로 100개의 사용자 객체가 반환되며, 결과 개수를 변경하려면 1–100 사이 숫자를 값으로 갖는 max&#95;results= 쿼리 매개변수를 전달해야 합니다. 그런 다음 응답 페이로드에 반환된 next&#95;token 값을 다음 요청에서 pagination&#95;token 쿼리 매개변수로 전달할 수 있습니다.
+
+**응답 데이터 형식**
+
+standard v1.1과 X API v2 엔드포인트 버전 간의 가장 큰 차이점 중 하나는, 페이로드에 어떤 필드를 반환할지 선택하는 방식입니다.
+
+standard 엔드포인트에서는 많은 응답 필드를 기본적으로 받고, 이후 매개변수를 사용해 페이로드에 추가로 반환되어야 하는 필드나 필드 집합을 지정할 수 있습니다.
+
+X API v2 버전은 기본적으로 게시물 id와 text 필드만 제공합니다. 추가 필드나 객체를 요청하려면 [fields](/ko/x-api/fundamentals/fields) 및 [expansions](/ko/x-api/fundamentals/expansions) 매개변수를 사용해야 합니다. 이 엔드포인트에서 요청한 모든 게시물 필드는 기본 게시물 객체로 반환됩니다. 확장된 객체 필드는 응답 내 includes 객체로 반환됩니다. 이후 기본 객체의 ID와 확장된 객체의 ID를 일치시켜, 확장된 객체를 기본 게시물 객체와 다시 매칭할 수 있습니다. 
+
+다음은 가능한 게시물 필드와 expansions의 예시입니다:
+
+* attachments
+
+* author&#95;id
+
+* context&#95;annotations
+
+* created&#95;at
+
+* geo
+
+* lang
+
+|     |     |
+| :--- | :--- |
+| **엔드포인트** | **expansion** |
+| /2/lists/:id/tweets | author&#95;id |
+
+각 가이드에서 이러한 새로운 매개변수에 대해 더 자세히 살펴보거나, [fields 및 expansions 사용 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 가이드를 참고하는 것을 권장합니다. 
+
+또한 standard v1.1 필드를 새로운 v2 필드에 매핑하는 데 도움을 줄 [데이터 형식 마이그레이션 가이드](/ko/x-api/migrate/data-format-migration)도 제공합니다. 이 가이드에서는 특정 필드를 반환하기 위해 v2 요청과 함께 전달해야 하는 구체적인 expansion 및 field 매개변수도 안내합니다. 
+
+특정 필드를 요청하는 방식의 변경 외에도, X API v2는 [게시물](/ko/x-api/fundamentals/data-dictionary#tweet) 및 [사용자](/ko/x-api/fundamentals/data-dictionary#user) 객체를 포함하여 API에서 반환되는 객체에 대해 새로운 JSON 설계를 도입합니다.
+
+* JSON 루트 레벨에서 standard 엔드포인트는 **statuses** 배열로 게시물 객체를 반환하는 반면, X API v2는 **data** 배열로 반환합니다. 
+
+* 리트윗 및 인용 &quot;statuses&quot;를 참조하는 대신, X API v2 JSON은 리트윗 및 인용 트윗을 참조합니다. **contributors** 및 **user.translator&#95;type**과 같은 많은 레거시 및 사용 중단 필드는 제거됩니다. 
+
+* 게시물 객체의 **favorites**와 사용자 객체의 **favourites**를 모두 사용하는 대신, X API v2는 **like**라는 용어를 사용합니다.
+
+* X는 값이 없는 JSON 값(예: **null**)은 페이로드에 기록하지 않는 규칙을 채택하고 있습니다. 게시물 및 사용자 속성은 null이 아닌 값을 가진 경우에만 포함됩니다.
+   
+
+**요청 매개변수**
+
+다음 standard v1.1 요청 매개변수는 X API v2에서 대응하는 항목이 있습니다:
+
+|     |     |
+| :--- | :--- |
+| Standard v1.1 | X API v2 |
+| list&#95;id | id  |
+| slug | 해당 없음 |
+| owner&#95;screen&#95;name | 해당 없음 |
+| owner&#95;id | expansions 매개변수에 author&#95;id 값을 설정하여 요청 |
+| since&#95;id | 해당 없음 |
+| max&#95;id | 해당 없음 |
+| include&#95;entities | tweet.fields 매개변수에 entities 값을 설정하여 요청 |
+| include&#95;rts | 해당 없음 |
+| count | max&#95;results |

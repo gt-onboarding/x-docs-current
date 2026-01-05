@@ -1,0 +1,70 @@
+---
+title: 管理列表成员
+sidebarTitle: 管理列表成员
+keywords: ["管理列表成员快速入门", "添加列表成员快速入门", "移除列表成员快速入门", "列表成员管理"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="manage-list-members-quick-start-guide">
+  ### 管理列表成员快速入门指南
+</div>
+
+<Note>
+  **请注意：** 本指南假定你已经完成了[快速入门概览](/zh/x-api/lists/list-members#getting-started-with-the-list-members-endpoint-group)中的前提条件。
+</Note>
+
+<div id="steps-to-build-a-manage-list-member-request">
+  ### 构建「管理 List 成员」请求的步骤
+</div>
+
+<div id="step-one-choose-the-list-endpoint-collection-from-postman">
+  #### 第一步：在 Postman 中选择 List 端点集合
+</div>
+
+在 Postman 中加载 X API v2 集合后，进入“List”文件夹，选择其中的“List members”文件夹，然后选择“Add a member”。
+ 
+
+<div id="step-two-specify-the-user-to-add">
+  #### 第二步：指定要添加的用户
+</div>
+
+Manage List member 端点需要两个 ID：List 的 ID 和要添加的用户的 ID。你可以使用 [users lookup](/zh/x-api/users/lookup/introduction) 查找用户的 ID，并传入用户名以获取返回对象中的 id 字段。
+
+目标 ID 可以是任何有效的用户 ID。在 Postman 中，切换到 &quot;Params&quot; 选项卡，在 id 路径变量的 &quot;Value&quot; 列中输入你的 List ID。然后切换到 “Body” 选项卡，将你希望添加的用户的 ID 作为 user&#95;id 参数的值。请务必不要在任何 ID 前后包含空格。
+
+|             |                  |                    |
+| :---------- | :--------------- | :----------------- |
+| **Key**     | **Value**        | **Parameter type** |
+| `id`        | List ID          | path               |
+| user&#95;id | 你希望添加为成员的目标用户 ID | body               |
+
+现在你应该会在 &quot;Send&quot; 按钮旁边看到类似如下的 URL：
+
+`https://api.x.com/2/lists/1441162269824405510/members`
+
+第三步：发起请求并查看响应
+
+在完成所有设置之后，点击 &quot;Send&quot; 按钮，你会收到与以下示例响应类似的返回结果：
+
+```
+{
+  "data": {
+    "is_member": true
+  }
+}
+```
+
+如果返回的响应对象中 `is&#95;member` 键的值为 true，则表示你已成功将该用户添加为该列表成员。 
+
+要从列表中移除成员，请在已加载到 Postman 中的 X API v2 集合的 “Lists” 文件夹中选择 “Remove a member” 请求。此端点需要该列表的 ID，以及你希望移除的成员的用户 ID。在 “Params” 选项卡中，将该列表的 ID 填入 `id` 列，将要移除的用户 ID 填入 `user&#95;id` 列。 
+
+当删除请求成功后，你会收到类似于以下示例的响应：
+
+```
+{
+  "data": {
+    "is_member": false
+  }
+}
+```

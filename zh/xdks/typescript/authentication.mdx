@@ -1,0 +1,227 @@
+---
+title: "身份验证"
+sidebarTitle: "身份验证"
+---
+
+TypeScript SDK 支持多种身份验证方式，以适用于不同的用例。
+
+<div id="bearer-token-app-only-auth">
+  ## Bearer Token（仅应用认证）
+</div>
+
+适用于只读操作和访问公共数据：
+
+<CodeGroup dropdown>
+
+```typescript quickstart.ts theme={null}
+import { 
+  Client, 
+  type ClientConfig,
+  type Users
+} from '@xdevplatform/xdk';
+
+const config: ClientConfig = { bearerToken: 'your-bearer-token' };
+
+const client: Client = new Client(config);
+
+async function main(): Promise<void> {
+  const userResponse: Users.GetByUsernameResponse = await client.users.getByUsername('XDevelopers');
+  const username: string = userResponse.data?.username!;
+  console.log(username);
+}
+
+main();
+```
+
+```javascript quickstart.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const userResponse = await client.users.getByUsername('XDevelopers');
+const username = userResponse.data.username;
+console.log(username);
+```
+
+</CodeGroup>
+
+<div id="oauth-10a-user-context">
+  ## OAuth 1.0a（用户上下文）
+</div>
+
+适用于旧版应用或特定使用场景：
+
+<CodeGroup dropdown>
+
+```typescript oauth1.ts theme={null}
+import { 
+  Client, 
+  OAuth1,
+  type OAuth1Config,
+  type ClientConfig,
+  type Users
+} from '@xdevplatform/xdk';
+
+const oauth1Config: OAuth1Config = {
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  accessToken: 'user-access-token',
+  accessTokenSecret: 'user-access-token-secret'
+};
+
+const oauth1: OAuth1 = new OAuth1(oauth1Config);
+
+const config: ClientConfig = {
+  oauth1: oauth1,
+};
+
+const client: Client = new Client(config);
+
+async function main(): Promise<void> {
+  const response: Users.GetMeResponse = await client.users.getMe();
+
+  const me = response.data;
+  console.log(me);
+}
+
+main();
+
+```
+
+```javascript oauth1.js theme={null}
+import { Client, OAuth1 } from '@xdevplatform/xdk';
+
+const oauth1 = new OAuth1({
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  accessToken: 'user-access-token',
+  accessTokenSecret: 'user-access-token-secret'
+});
+
+const client = new Client({ oauth1: oauth1 });
+
+const response = await client.users.getMe();
+const me = response.data;
+console.log(me);
+
+```
+
+</CodeGroup>
+
+<div id="oauth-20-user-context">
+  ## OAuth 2.0（用户上下文）
+</div>
+
+适用于用户级操作：
+
+<CodeGroup dropdown>
+
+```typescript oauth2.ts theme={null}
+import { 
+  Client, 
+  OAuth2,
+  generateCodeVerifier,
+  generateCodeChallenge,
+  type OAuth2Config,
+  type ClientConfig,
+  type OAuth2Token
+} from '@xdevplatform/xdk';
+
+(async (): Promise<void> => {
+  const oauth2Config: OAuth2Config = {
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'https://example.com',
+    scope: ['tweet.read', 'users.read', 'offline.access'],
+  };
+
+  const oauth2: OAuth2 = new OAuth2(oauth2Config);
+
+  const state: string = 'example-state';
+  const codeVerifier: string = generateCodeVerifier();
+  const codeChallenge: string = await generateCodeChallenge(codeVerifier);
+  
+  oauth2.setPkceParameters(codeVerifier, codeChallenge);
+  
+  const authUrl: string = await oauth2.getAuthorizationUrl(state);
+
+  // 用户访问 authUrl 并授权该应用
+  // 授权完成后，用户会被重定向回带有 code 参数的回调 URL
+  // 从回调 URL 中提取 code（例如，从查询参数中）
+  const authCode: string = 'code-from-callback-url'; // 替换为 OAuth 回调中实际返回的 code
+
+  const tokens: OAuth2Token = await oauth2.exchangeCode(authCode, codeVerifier);
+
+  const config: ClientConfig = {
+    accessToken: tokens.access_token,
+  };
+
+  const client: Client = new Client(config);
+});
+
+```
+
+```javascript oauth2.js theme={null}
+import { Client, OAuth2, generateCodeVerifier, generateCodeChallenge } from '@xdevplatform/xdk';
+
+(async () => {
+  const oauth2 = new OAuth2({
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'https://example.com',
+    scope: ['tweet.read', 'users.read', 'offline.access'],
+  });
+
+  const state = 'example-state';
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  oauth2.setPkceParameters(codeVerifier, codeChallenge);
+  const authUrl = await oauth2.getAuthorizationUrl(state);
+
+  // 用户访问 authUrl 并授权该应用
+  // 授权完成后，用户会被重定向回带有 code 参数的回调 URL
+  // 从回调 URL 中提取 code（例如，从查询参数中）
+  const authCode = 'code-from-callback-url'; // 替换为 OAuth 回调中实际返回的 code
+
+  const tokens = await oauth2.exchangeCode(authCode, codeVerifier);
+
+  const client = new Client({ accessToken: tokens.access_token });
+
+  const response = await client.users.getMe();
+  const me = response.data;
+  console.log(me);
+});
+```
+
+</CodeGroup>
+
+<div id="environment-variables">
+  ## 环境变量
+</div>
+
+将敏感凭证存储在环境变量中：
+
+```bash
+# .env
+X_API_BEARER_TOKEN=your-bearer-token
+X_API_CLIENT_ID=your-client-id
+X_API_CLIENT_SECRET=your-client-secret
+```
+
+<CodeGroup dropdown>
+  ```typescript env.ts theme={null}
+  import { Client } from '@xdevplatform/xdk';
+
+  const client = new Client({ bearerToken: process.env.X_API_BEARER_TOKEN });
+  ```
+
+  ```javascript env.js theme={null}
+  import { Client } from '@xdevplatform/xdk';
+
+  const client = new Client({ bearerToken: process.env.X_API_BEARER_TOKEN });
+  ```
+</CodeGroup>
+
+<Info>
+  若要查看使用 JavaScript/TypeScript XDK 的详细代码示例，请访问我们的 [代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/javascript)。
+</Info>

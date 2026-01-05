@@ -1,0 +1,123 @@
+---
+title: 流式传输
+sidebarTitle: 流式传输
+---
+
+X API 通过诸如 [Filtered Stream Endpoint](https://docs.x.com/x-api/posts/filtered-stream/introduction) 这样的端点来支持实时数据，在匹配的帖子产生时实时推送。为此需要建立一个持久的 HTTP 连接。
+
+<div id="setup-and-basic-streaming">
+  ## 设置与基础流式处理
+</div>
+
+<div id="synchronous">
+  ### 同步
+</div>
+
+```python
+from xdk import Client
+# 初始化 client
+client = Client(bearer_token="your_bearer_token")
+# 流式传输帖子（请确保已先设置规则）
+for post_response in client.stream.posts():
+    data = post_response.model_dump() if hasattr(post_response, 'model_dump') else dict(post_response)
+    if 'data' in data and data['data']:
+        tweet = data['data']
+        post_text = tweet.get('text', '') if isinstance(tweet, dict) else (tweet.text if hasattr(tweet, 'text') else '')
+        print(f"Post: {post_text}")
+```
+
+
+<div id="async">
+  ### 异步
+</div>
+
+```python
+import asyncio
+from asyncio import Queue
+import threading
+from xdk import Client
+async def stream_posts_async(client: Client):
+    queue = Queue()
+    loop = asyncio.get_event_loop()
+    stop = threading.Event()
+    def run_stream():
+        for post in client.stream.posts():
+            if stop.is_set():
+                break
+            asyncio.run_coroutine_threadsafe(queue.put(post), loop)
+        asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+    threading.Thread(target=run_stream, daemon=True).start()
+    while True:
+        post = await queue.get()
+        if post is None:
+            break
+        data = post.model_dump()
+        if 'data' in data and data['data']:
+            print(f"帖子: {data['data'].get('text', '')}")
+    stop.set()
+async def main():
+    client = Client(bearer_token="your_bearer_token")
+    await stream_posts_async(client)
+asyncio.run(main())
+```
+
+
+<div id="rule-management">
+  ## 规则管理
+</div>
+
+规则用于定义你要获取的特定数据的过滤条件（例如关键词、用户等）。你可以通过[本指南](https://docs.x.com/x-api/posts/filtered-stream/integrate/build-a-rule)了解更多关于如何构建规则。
+**添加规则**：
+
+```python
+from xdk.stream.models import UpdateRulesRequest
+# 添加一条规则
+add_rules = {
+    "add": [
+        {"value": "from:xdevelopers", "tag": "official_updates"}
+    ]
+}
+request_body = UpdateRulesRequest(**add_rules)
+response = client.stream.update_rules(body=request_body)
+```
+
+**删除规则**：
+
+```python
+from xdk.stream.models import UpdateRulesRequest
+delete_rules = {
+    "delete": {
+        "ids": ["rule_id_1", "rule_id_2"]
+    }
+}
+request_body = UpdateRulesRequest(**delete_rules)
+response = client.stream.update_rules(body=request_body)
+```
+
+**规则清单**:
+
+```python
+# get_rules returns an Iterator, so iterate over it
+for page in client.stream.get_rules():
+    if page.data:
+        for rule in page.data:
+            # 访问规则属性 - Pydantic 模型支持属性访问和字典访问两种方式
+            rule_id = rule.id if hasattr(rule, 'id') else rule.get('id', '')
+            rule_value = rule.value if hasattr(rule, 'value') else rule.get('value', '')
+            rule_tag = rule.tag if hasattr(rule, 'tag') else rule.get('tag', '')
+            print(f"ID: {rule_id}, Value: {rule_value}, Tag: {rule_tag}")
+    break  # Remove break to get all pages
+```
+
+有关规则语法的完整说明，请参阅 [X Streaming Rules 文档](https://developer.x.com/en/docs/twitter-api/tweets/filtered-stream/integrate/build-a-rule)。
+
+
+<div id="troubleshooting">
+  ## 故障排除
+</div>
+
+- **403 Forbidden**：身份验证无效或权限不足。
+- **420 Enhance Your Calm**：触发了速率限制；请等待后重试。
+- **No Data**：使用 `get_rules()` 检查规则；确保存在匹配的帖子。
+有关使用 Python XDK 的详细代码示例，请查看我们的[代码示例 GitHub 仓库](https://github.com/xdevplatform/samples/tree/main/python)。
+有关更多示例和 API 参考，请参阅内联文档字符串（例如 `help(client.tweets.search_recent)`）或源码中的生成存根。通过 [GitHub 仓库](https://github.com/xdevplatform/xdk/tree/main/xdk/python) 提交反馈。

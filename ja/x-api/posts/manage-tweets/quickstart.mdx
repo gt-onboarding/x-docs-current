@@ -1,0 +1,99 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["ポスト管理クイックスタート", "ポスト投稿クイックスタート", "ポスト作成チュートリアル", "ポスト作成ガイド", "ポスト投稿例"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+## ポスト管理エンドポイントの始め方**
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使ってポスト管理エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+<Info>
+  **前提条件**
+
+  このガイドを完了するには、リクエストの認証に使用する [キーとトークン](/ja/resources/fundamentals/authentication) のセットが必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントにサインアップ](https://developer.x.com/en/apply-for-access) し、承認を受けてください。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Info>
+
+<div id="steps-to-building-manage-posts-requests">
+  ### manage Posts リクエストを構築する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントにリクエストを送信するために使用できるツール、コードサンプル、ライブラリはいくつかありますが、ここではプロセスを簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、「Manage Posts」フォルダへ移動し、「Create a Post」を選択します。
+ 
+
+**ステップ 2: リクエストを認証する**
+
+X API に正しくリクエストを送信するには、その操作を行う権限があることを確認する必要があります。manage Posts エンドポイントでこれを行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) か [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使用してリクエストを認証する必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+Postman に、キーとトークン（具体的には API Key、API Secret Key、OAuth 1.0a user Access Token、OAuth 1.0a user Access Token Secret）を追加する必要があります。これは、Postman の右上にある「X API v2」という名前の環境を選択し、その環境ドロップダウンの横にある目のアイコンをクリックして、「initial value」と「current value」のフィールドにキーとトークンを追加することで行えます。
+
+正しく設定できていれば、これらの変数はリクエストの「Authorization」タブに自動的に取り込まれます。
+
+**ステップ 3: ポストのテキストを指定する**
+
+このエンドポイントで新しいポストを作成する場合、ポストのテキストまたはメディアが必須のボディパラメーターです。
+
+Postman で「Body」タブに移動し、`text` パラメーターの値としてポストのテキストを入力します。さらに、投票、特定のポスト ID への返信、返信設定の追加などのパラメーターを追加したい場合は、ここで指定できます。利用可能な項目の詳細については、[API リファレンスガイド](/ja/x-api/posts/manage-tweets/introduction)を参照してください。
+
+|         |              |                    |
+| :------ | :----------- | :----------------- |
+| **Key** | **Value**    | **Parameter type** |
+| `text`  | Hello world! | body               |
+
+**ステップ 4: 取得したいフィールドを特定して指定する**
+
+すべての設定が完了したら、「Send」ボタンを押すと、次のサンプルレスポンスに類似したレスポンスが返されます。
+
+```
+{
+  "data": {
+    "id": "1445880548472328192",
+    "text": "Hello world!"
+  }
+}
+```
+
+返されたレスポンスオブジェクトにポストの `id` と `text` が含まれていれば、ポストは正常に作成されています。
+ 
+
+**ステップ5：ポストを削除する**
+
+ポストを削除するには、Postman に読み込んだ X API v2 コレクションの「Manage Posts」フォルダー内にある「Delete a Post」リクエストを選択します。このエンドポイントには、削除したいポストの ID が必要です。その後、「Params」タブで、削除したいポストの ID を `id` 列の値として入力します。 
+
+削除リクエストが成功すると、次の例のようなレスポンスが返されます。
+
+```
+{
+   "data": {
+       "deleted" : true
+   }
+}
+```
+
+**次のステップ**
+
+[API リファレンス](/ja/x-api/posts/manage-tweets#manage-tweets-api-reference-index)
+
+[サポートを利用する](https://developer.x.com/en/support/x-api)
+
+[サンプルコード](https://github.com/xdevplatform/Twitter-API-v2-sample-code "サンプルコード")

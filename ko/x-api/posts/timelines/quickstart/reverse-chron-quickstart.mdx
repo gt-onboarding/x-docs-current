@@ -1,0 +1,183 @@
+---
+title: 최신순
+sidebarTitle: 최신순
+keywords: ["home timeline", "reverse chronological", "home timeline quickstart", "timeline quickstart", "home timeline tutorial"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="getting-started-with-reverse-chronological-home-timeline">
+  ## 역순(최신순) 홈 타임라인 시작하기
+</div>
+
+이 빠른 시작 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용하여 지정된 필드 집합과 함께 타임라인 엔드포인트 중 하나로 처음 요청을 보내는 방법을 안내합니다.
+
+여러 언어로 된 샘플 코드를 보고 싶다면, [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 리포지토리를 방문하세요. 
+
+<Note>
+  **사전 준비 사항**
+
+  이 가이드를 완료하려면, 요청을 인증하는 데 필요한 [키와 토큰](/ko/resources/fundamentals/authentication) 세트가 있어야 합니다. 다음 단계를 따라 이 키와 토큰을 생성할 수 있습니다.
+
+  * [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하고 승인을 받습니다.
+  * developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성합니다.
+  * App의 “Keys and tokens” 페이지로 이동하여 필요한 자격 증명(credentials)을 생성합니다. 모든 자격 증명은 안전한 위치에 보관하세요.
+</Note>
+
+**역순(최신순) 홈 타임라인 요청 빌드 단계**
+
+*이 예제에서는 user Post timeline by ID 엔드포인트에 요청을 보내지만, 여기에서 학습한 내용을 user mention timelines 요청에도 동일하게 적용할 수 있습니다.* 
+
+**1단계: 도구 또는 라이브러리 선택하기**
+
+이 엔드포인트로 요청을 보내는 데 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 프로세스를 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+환경에 X API v2 Postman 컬렉션을 불러오려면 아래 버튼을 클릭하세요.
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 불러온 후, &quot;Timelines&quot; 폴더로 이동하여 &quot;Reverse chronological home timeline&quot; 요청을 찾습니다.
+
+**2단계: 요청 인증하기**
+
+X API에 정상적으로 요청을 보내려면, 권한이 있는지 확인해야 합니다. 이 엔드포인트에서는 [OAuth 2.0 Authorization Code with PKCE](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-3) 또는 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 인증 방법 중 하나로 요청을 인증해야 합니다. 
+
+Postman에 자신의 키와 토큰을 추가해야 합니다. Postman 우측 상단에서 “X API v2”라는 이름의 환경을 선택한 다음, 환경 드롭다운 옆의 눈 아이콘을 클릭하여 &quot;initial value&quot; 및 &quot;current value&quot; 필드에 키와 토큰을 추가하면 됩니다.
+
+설정을 올바르게 했다면, 이 변수 값들은 요청의 Authorization 탭으로 자동으로 불러와집니다.
+
+**3단계: 홈 타임라인을 가져오려는 사용자 식별 및 지정하기**
+
+요청에서 최근 게시물을 가져오려는 사용자를 지정해야 합니다. 이 예제에서는 단일 user ID를 전달합니다.
+
+User ID는 계정의 프로필 URL에서 찾을 수 있는, 계정 핸들을 나타내는 숫자 값입니다. 예를 들어, 다음 계정의 username은 `XDevelopers`입니다.
+
+`https://x.com/XDevelopers`
+
+이 username을 user ID로 변환하려면, [users lookup endpoint](/ko/x-api/users/lookup/introduction)를 username과 함께 사용하여 페이로드에서 숫자 user ID를 찾아야 합니다. @XDevelopers의 경우 user ID는 2244994945입니다.
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 후, 이 user ID를 id 파라미터의 &quot;Value&quot; 열에 입력합니다.
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | 2244994945 |
+
+**4단계: 가져오려는 필드 식별 및 지정하기**
+
+3단계 이후에 &quot;Send&quot; 버튼을 클릭하면, 응답에서 기본 [Post object](/ko/x-api/fundamentals/data-dictionary#tweet) 필드인 id, text, edit&#95;history&#95;tweet&#95;ids를 받게 됩니다.
+
+추가 필드를 받고 싶다면, 요청에서 [field](/ko/x-api/fundamentals/fields) 및/또는 [expansion](/ko/x-api/fundamentals/expansions) 파라미터로 해당 필드를 지정해야 합니다.
+
+이 연습에서는 서로 다른 오브젝트에서 세 가지의 추가 필드 세트를 요청해 보겠습니다.
+
+1. 기본 사용자 객체에 추가되는 `tweet.created_at` 필드
+
+2. 반환된 게시물 작성자의 사용자 객체에 포함되는 기본 필드: id, name, username
+
+3. 연관된 사용자 객체에 추가되는 `user.created_at` 필드
+    
+
+Postman에서 &quot;Params&quot; 탭으로 이동한 다음, &quot;Query Params&quot; 표에 아래와 같은 key:value 쌍을 추가합니다:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `created_at` | `includes.users.created_at` |
+| max&#95;results | 5   |     |
+
+이제 &quot;Send&quot; 버튼 옆에 다음 URL이 표시되어야 합니다:
+
+`https://api.x.com/2/users/:id/timelines/reverse_chronological?tweet.fields=created_at&expansions=author_id&user.fields=created_at&max_results=5`
+
+<Info>
+  **유의하세요:**
+
+  Postman에서는 URL 필드의 경로 파라미터 `:id`가 `id` params 필드에 입력한 값으로 자동으로 업데이트되지 않습니다. 따라서 위 URL에는 2244994945 대신 `:id`가 포함되어 있습니다.
+</Info>
+
+**5단계: 요청 보내기 및 응답 검토**
+
+모든 설정이 완료되면 &quot;Send&quot; 버튼을 눌러 다음과 같은 응답을 받습니다:
+
+```{
+	"data": [
+		{
+			"created_at": "2022-05-12T17:00:00.000Z",
+			"text": "오늘은 Twitter API로 개발하는 개발자들이 개발자를 위해 만든 기술 비디오 시리즈인 Devs in the Details의 출시일입니다. 🚀\n\n이번 첫 에피소드에서 @jessicagarson이 @FactualCat을 어떻게 만들었는지 안내합니다 #WelcomeToOurTechTalk\n⬇️\n\nhttps://t.co/nGa8JTQVBJ",
+			"author_id": "2244994945",
+			"id": "1524796546306478083"
+		},
+		{
+			"created_at": "2022-05-11T19:16:40.000Z",
+			"text": "📢 Join @jessicagarson @alanbenlee and @i_am_daniele tomorrow, May 12  | 5:30 ET / 2:30pm PT as they discuss the future of bots https://t.co/sQ2bIO1fz6",
+			"author_id": "2244994945",
+			"id": "1524468552404668416"
+		},
+		{
+			"created_at": "2022-05-09T20:12:01.000Z",
+			"text": "Do you make bots with the Twitter API? 🤖\n\nJoin @jessicagarson @alanbenlee and @iamdaniele on Thursday, May 12  | 5:30 ET / 2:30pm PT as they discuss the future of bots and answer any questions you might have. 🎙📆⬇️\n\nhttps://t.co/2uVt7hCcdG",
+			"author_id": "2244994945",
+			"id": "1523757705436958720"
+		},
+		{
+			"created_at": "2022-05-06T18:19:54.000Z",
+			"text": "If you’d like to apply, or would like to nominate someone else for the program, please feel free to fill out the following form:\n\nhttps://t.co/LUuWj24HLu",
+			"author_id": "2244994945",
+			"id": "1522642324781633536"
+		},
+		{
+			"created_at": "2022-05-06T18:19:53.000Z",
+			"text": "We’ve gone into more detail on each Insider in our forum post. \n\nJoin us in congratulating the new additions! 🥳\n\nhttps://t.co/0r5maYEjPJ",
+			"author_id": "2244994945",
+			"id": "1522642323535847424"
+		}
+	],
+	"includes": {
+		"users": [
+			{
+				"created_at": "2013-12-14T04:35:55.000Z",
+				"name": "Twitter Dev",
+				"username": "TwitterDev",
+				"id": "2244994945"
+			}
+		]
+	},
+	"meta": {
+		"result_count": 5,
+		"newest_id": "1524796546306478083",
+		"oldest_id": "1522642323535847424",
+		"next_token": "7140dibdnow9c7btw421dyz6jism75z99gyxd8egarsc4"
+	}
+}
+```
+
+**6단계: 결과 페이지네이션하기**
+
+이전 응답의 하단에는 다음과 같은 필드를 포함하는 meta 데이터 객체가 있습니다:
+
+* oldest&#95;id
+* newest&#95;id
+* results&#95;count
+* next&#95;token
+* previous&#95;token
+
+4단계에서 max&#95;results 값을 5로 전달했는데, 이는 각 페이지에 최대 5개의 결과만 포함된다는 의미입니다. 추가 데이터 페이지에 액세스하려면 마지막 결과의 next&#95;token 필드 값을 가져와 해당 문자열을 Postman의 Params 페이지에서 pagination&#95;token 매개변수의 값으로 추가하고, 나머지 설정은 그대로 둡니다. 
+
+|                    |                               |
+| :----------------- | :---------------------------- |
+| **Key**            | **Value**                     |
+| `pagination_token` | t3buvdr5pujq9g7bggsnf3ep2ha28 |
+
+이렇게 모두 설정한 후 다시 &quot;Send&quot;를 클릭하면 다음 페이지의 결과를 받을 수 있습니다. 
+
+이 개념을 더 자세히 설명하기 위해 [페이지네이션](/ko/x-api/fundamentals/pagination)에 대한 가이드를 준비해 두었습니다.
+
+**다음 단계**
+[API Reference를 사용해 요청을 맞춤 설정하세요](/ko/x-api/posts/timelines#api-reference-index)
+
+[도움이 필요하면 커뮤니티에 문의하세요](https://devcommunity.x.com "도움이 필요하면 커뮤니티에 문의하세요")

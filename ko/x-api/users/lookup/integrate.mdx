@@ -1,0 +1,114 @@
+---
+title: 통합 가이드
+sidebarTitle: 통합 가이드
+keywords: ["사용자 조회 통합", "사용자 통합 가이드", "사용자 조회 설정", "사용자 통합", "사용자 조회 구현"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+이 페이지에서는 시스템에 users lookup 엔드포인트를 통합할 때 알아두어야 할 여러 도구와 핵심 개념을 설명합니다. 이 내용은 다음과 같은 몇 개의 섹션으로 나누어져 있습니다:
+
+* [유용한 도구](#helpful)
+* 주요 개념
+* [인증](#authentication)
+* [developer portal, Projects 및 앱](#portal)
+* [요청 한도](#limits)
+* [필드와 expansions](#fields)
+* [예외 사례](#edge)
+
+<div id="helpful-tools">
+  ### 유용한 도구
+</div>
+
+이 엔드포인트를 통합하는 데 도움이 될 몇 가지 핵심 개념을 살펴보기 전에, 먼저 다음 도구들에 익숙해질 것을 권장합니다:
+
+<div id="postman">
+  #### Postman
+</div>
+
+Postman은 엔드포인트를 테스트하는 데 사용할 수 있는 매우 유용한 도구입니다. 각 Postman 요청에는 사용할 수 있는 기능을 빠르게 파악하는 데 도움이 되도록 모든 경로 및 본문 매개변수가 포함되어 있습니다. Postman 컬렉션에 대해 더 알아보려면 [&quot;Postman 사용하기&quot;](/ko/tutorials/postman-getting-started) 페이지를 방문하세요. 
+
+<div id="code-samples">
+  #### 코드 샘플
+</div>
+
+선호하는 프로그래밍 언어로 이 엔드포인트를 코드와 함께 사용해 보고 싶으신가요? 시작점으로 활용할 수 있는 여러 가지 코드 샘플을 [GitHub 페이지](https://github.com/xdevplatform/Twitter-API-v2-sample-code)에서 제공하고 있습니다.
+
+<div id="third-party-libraries">
+  #### 서드파티 라이브러리
+</div>
+
+커뮤니티에서 제공하는 [서드파티 라이브러리](/ko/x-api/tools-and-libraries/overview)를 활용해 시작해 보세요. 적절한 버전 태그를 확인해 v2 엔드포인트와 호환되는 라이브러리를 찾을 수 있습니다.
+
+<div id="key-concepts">
+  ### 핵심 개념
+</div>
+
+<div id="authentication">
+  #### 인증
+</div>
+
+모든 X API v2 엔드포인트에 대한 요청은 키와 토큰으로도 알려진 일련의 자격 증명을 사용해 [인증](/ko/resources/fundamentals/authentication)되어야 합니다. 이 엔드포인트에 대한 요청을 인증할 때는 OAuth 1.0a 사용자 컨텍스트, App only, 또는 OAuth 2.0 Authorization Code with PKCE 중 하나를 사용할 수 있습니다. 
+
+[OAuth 1.0a User Context](/ko/resources/fundamentals/authentication#oauth-1-0a-2)를 사용할 경우, API 키, 사용자 액세스 토큰, 그리고 몇 가지 추가 파라미터를 활용해 [authorization 헤더를 생성](/ko/resources/fundamentals/authentication#authorizing-a-request)한 뒤, 이를 요청에 함께 전달해야 합니다. 액세스 토큰은 요청을 대신 수행하려는 사용자 계정과 연결되어 있어야 합니다. 다른 사용자를 위한 액세스 토큰 세트를 생성하려면, 해당 사용자가 [3-legged OAuth 플로우](https://developer-staging.x.com/resources/fundamentals/authentication/obtaining-user-access-tokens)를 사용해 귀하의 App을 승인해야 합니다. 
+
+OAuth 1.0a는 사용하기 까다로울 수 있다는 점에 유의하세요. 이 인증 방식에 익숙하지 않다면, [라이브러리](/ko/x-api/tools-and-libraries/overview)를 사용하거나 Postman 같은 도구를 사용하거나, OAuth 2.0을 사용해 요청을 인증할 것을 권장합니다. 이 엔드포인트에서 게시물 또는 비공개 메트릭을 요청하려는 경우, OAuth 1.0a User Context 또는 OAuth 2.0 Authorization Code with PKCE 중 하나를 사용해야 하며, 이를 통해 해당 콘텐츠를 소유한 사용자로부터 적절한 권한을 확보하게 됩니다.
+ 
+
+[App only](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)의 경우, 요청과 함께 [App only Access Token](/ko/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)만 전달하면 됩니다. App only Access Token은 developer App 내에서 직접 생성하거나, [POST oauth2/token](/ko/resources/fundamentals/authentication#post-oauth2-token) 엔드포인트를 사용해 생성할 수 있습니다.
+
+[OAuth 2.0 Authorization Code with PKCE](/ko/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)는 애플리케이션의 스코프와 여러 디바이스에 걸친 인가 플로우를 보다 세밀하게 제어할 수 있도록 해 줍니다. OAuth 2.0을 사용하면, 사용자 대신 가질 수 있는 권한을 정의하는 세부적인 스코프를 직접 선택할 수 있습니다. 
+
+App에서 OAuth 2.0을 활성화하려면, developer portal의 App 설정 섹션에 있는 App 인증 설정에서 이를 활성화해야 합니다.
+
+**참고**
+
+다음 필드를 요청하는 경우, OAuth 1.0a User Context 또는 OAuth 2.0 Authorization Code가 필요합니다: 
+
+* tweet.fields.non&#95;public&#95;metrics
+* tweet.fields.promoted&#95;metrics
+* tweet.fields.organic&#95;metrics
+
+<div id="developer-portal-projects-and-developer-apps">
+  #### developer portal, 프로젝트, 그리고 개발자 앱
+</div>
+
+X API v2 엔드포인트에서 사용할 수 있는 인증 자격 증명 세트를 얻으려면, 먼저 [개발자 계정에 가입](https://developer.x.com/en/portal/petition/essential/basic-info)하고 해당 계정 안에 [프로젝트](/ko/resources/fundamentals/projects)를 설정한 뒤, 그 프로젝트 내에 [개발자 앱](/ko/resources/fundamentals/developer-apps)을 생성해야 합니다. 그런 다음 개발자 앱에서 키와 토큰을 확인할 수 있습니다. 
+ 
+
+<div id="rate-limits">
+  #### 요청 한도
+</div>
+
+매일 수많은 개발자가 X API에 요청을 보냅니다. 이러한 요청의 방대한 양을 관리하기 위해 각 endpoint에는 [요청 한도](/ko/x-api/fundamentals/rate-limits)가 설정되어 있으며, 이는 앱 또는 인증된 사용자를 대신해 보낼 수 있는 요청 수를 제한합니다. 
+
+User lookup endpoint에는 앱 수준과 사용자 수준 두 가지 요청 한도가 적용됩니다. 그러나 인증된 사용자 lookup endpoint에는 사용자 수준 요청 한도만 적용됩니다.
+
+앱 수준 요청 한도는 개발자인 여러분이, 특정 기간 동안 사용하는 App(여러분이 사용하고 있는 키와 토큰으로 식별됨)을 통해 이 endpoint로 보낼 수 있는 요청 수가 제한된다는 의미입니다. 사용자 수준 요청 한도는 여러분이 요청을 보내는 대상인 인증된 사용자가, 모든 개발자 앱을 통틀어 수행할 수 있는 요청 횟수가 제한된다는 의미입니다.
+
+아래 표는 각 endpoint의 요청 한도를 보여줍니다.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Endpoint** | **HTTP method** | **요청 한도 / 레벨** |
+| /2/users | GET | 15분당 900회 요청 / App 및 User |
+| /2/users/:id | GET | 15분당 900회 요청 / App 및 User |
+| /2/users/by | GET | 15분당 900회 요청 / App 및 User |
+| /2/users/by/username/:username | GET | 15분당 900회 요청 / App 및 User |
+| /2/users/me | GET | 15분당 75회 요청 / User |
+
+<div id="fields-and-expansions">
+  #### fields와 expansions
+</div>
+
+X API v2를 사용하면 `fields`와 `expansions`라는 파라미터 집합을 통해 API에서 어떤 데이터를 반환받을지 정확히 선택할 수 있습니다. `expansions` 파라미터를 사용하면 페이로드에서 참조되는 객체를 확장할 수 있습니다. 예를 들어, 이 엔드포인트에서는 `pinned_tweet_id` expansion을 사용할 수 있습니다.
+
+`fields` 파라미터를 사용하면 서로 다른 데이터 객체 내에서 어떤 [fields](/ko/x-api/fundamentals/fields)를 받을지 정확히 선택할 수 있습니다. 이 엔드포인트들은 주로 사용자 객체를 반환합니다. 기본적으로 user 객체는 `id`, `name`, `username` 필드를 반환합니다. `user.created_at` 또는 `user.location`과 같은 추가 필드를 받으려면 `fields` 파라미터를 사용해 해당 필드를 명시적으로 요청해야 합니다. 통합 시 사용을 고려해 볼 만한 중요한 필드로는 게시물 투표 데이터, 메트릭, 주석(annotations), 대화 ID(conversation ID) 필드 등이 있습니다.
+
+[X API v2 데이터 사전](/ko/x-api/fundamentals/data-dictionary)에 [fields와 expansions를 사용하는 방법](/ko/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions)에 대한 가이드를 추가했습니다.
+
+<div id="edge-cases">
+  #### 엣지 케이스
+</div>
+
+* 리트윗의 게시물 텍스트가 잘리는 문제가 있습니다. 단기적인 임시 해결책은 참조된 게시물을 확장(expand)한 뒤, expansion 결과에서 전체 텍스트를 가져오는 것입니다. 이는 버그이며, 향후 수정할 예정입니다.

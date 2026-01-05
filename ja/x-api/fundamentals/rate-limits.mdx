@@ -1,0 +1,869 @@
+---
+title: レート制限
+keywords: ["レート制限", "API のレート制限", "リクエスト制限", "レートリミット処理", "スロットリング", "15 分ウィンドウ", "レート制限エラー"]
+---
+
+毎日、何千人もの開発者が X API にリクエストを送信しています。これらのリクエストの膨大な量を管理するため、送信できるリクエスト数には制限が設けられています。こうした制限により、開発者コミュニティが利用している信頼性が高くスケーラブルな API を提供できています。
+
+許可されるリクエストの最大数は、時間間隔に基づいています。通常は、特定の期間、つまり一定時間の「ウィンドウ」を基準とします。最も一般的な間隔は 15 分です。たとえば、15 分あたり 900 リクエストの制限があるエンドポイントでは、任意の 15 分間に最大 900 回のリクエストを送信できます。
+
+レート制限は認証方法によって異なります。たとえば、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) を使用している場合、各ユーザーの [アクセストークン](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) セットごとに、一定期間ごとのレート制限が個別に適用されます。一方、[OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication#oauth-2-0) を使用している場合は、アプリごとに独立した期間あたりの制限が適用されます。これらの制限を超過すると、エラーが返されます。
+
+<div id="table-of-contents">
+  ## 目次
+</div>
+
+* [X API v2 のレート制限](#v2-limits)
+* [X API Enterprise のレート制限](#v2-limits-enterprise)
+* [レート制限と認証方式](#auth)
+* [HTTP ヘッダーとレスポンスコード](#headers-and-codes)
+* [レート制限からの回復](#recovering)
+* [レート制限を回避するためのヒント](#tips)
+
+<div id="x-api-v2-rate-limits">
+  ## X API v2 のレート制限
+</div>
+
+次の表では、各 X API の有料プランのレート制限を一覧しています。これらの制限は、[developer portal](/ja/resources/fundamentals/developer-portal) の Products セクションでも確認できます。
+
+<table class="rate-limit-table">
+  <thead>
+    <tr>
+      <th>エンドポイント</th>
+      <th>Pro 上限 <button data-feather-tooltip-target="" tabindex="0" aria-label="詳細を表示" class="IconButton IconButton--infoIcon IconButton--small index__lightThemeColor--1bIsd" type="button"><span aria-hidden="true" class="Icon Icon--info" /></button></th>
+      <th>Basic 上限 <button data-feather-tooltip-target="" tabindex="0" aria-label="詳細を表示" class="IconButton IconButton--infoIcon IconButton--small index__lightThemeColor--1bIsd" type="button"><span aria-hidden="true" class="Icon Icon--info" /></button></th>
+      <th>Free 上限 <button data-feather-tooltip-target="" tabindex="0" aria-label="詳細を表示" class="IconButton IconButton--infoIcon IconButton--small index__lightThemeColor--1bIsd" type="button"><span aria-hidden="true" class="Icon Icon--info" /></button></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td colspan="4"><strong>ポスト</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/post-delete-by-post-id">DELETE /2/tweets/:id</a></td>
+      <td data-label="Pro の上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の上限">17 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />17 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/posts/causes-the-user-in-the-path-to-unlike-the-specified-post">DELETE /2/users/:id/likes/:tweet&#95;id</a></td>
+      <td data-label="Pro Limit">50 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic Limit">100 リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free Limit">1 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/causes-the-user-in-the-path-to-unretweet-the-specified-post">DELETE /2/users/:id/retweets/:tweet&#95;id</a></td>
+      <td data-label="Pro 制限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/post-lookup-by-post-ids">GET /2/tweets</a></td>
+      <td data-label="Pro の上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />450 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/post-lookup-by-post-id">GET /2/tweets/:id</a></td>
+      <td data-label="Pro 上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />450 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic 上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/returns-user-objects-that-have-liked-the-provided-post-id">GET /2/tweets/:id/liking&#95;users</a></td>
+      <td data-label="Pro 制限">75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/retrieve-posts-that-quote-a-post">GET /2/tweets/:id/quote&#95;tweets</a></td>
+      <td data-label="Pro 制限">15 分あたり 75 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 分あたり 75 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 制限">15 分あたり 5 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 分あたり 5 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 制限">15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/returns-user-objects-that-have-retweeted-the-provided-post-id">GET /2/tweets/:id/retweeted&#95;by</a></td>
+      <td data-label="Pro 上限">75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/full-archive-search-counts">GET /2/tweets/counts/all</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Basic の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/recent-search-counts">GET /2/tweets/counts/recent</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/full-archive-search-counts">GET /2/tweets/search/all</a></td>
+      <td data-label="Pro 上限">1 リクエスト/秒<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト/秒<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Basic 上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/recent-search-counts">GET /2/tweets/search/recent</a></td>
+      <td data-label="Pro 上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />450 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic 上限">60 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />60 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/filtered-stream">GET /2/tweets/search/stream</a></td>
+      <td data-label="Pro の上限">50 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+
+      <td data-label="Basic の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/rules-lookup">GET /2/tweets/search/stream/rules</a></td>
+      <td data-label="Pro の上限">450 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごとに</strong></td>
+
+      <td data-label="Basic の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/returns-post-objects-liked-by-the-provided-user-id">GET /2/users/:id/liked&#95;tweets</a></td>
+      <td data-label="Pro 制限">75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/user-mention-timeline-by-user-id">GET /2/users/:id/mentions</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />450 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">10 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/user-home-timeline-by-user-id">GET /2/users/:id/timelines/reverse&#95;chronological</a></td>
+      <td data-label="Pro 制限">180 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/user-posts-timeline-by-user-id">GET /2/users/:id/tweets</a></td>
+      <td data-label="Pro の上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1500 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />10 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/returns-repost-of-user">GET /2/users/reposts&#95;of&#95;me</a></td>
+      <td data-label="Pro の上限">75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/creation-of-a-post">POST /2/tweets</a></td>
+      <td data-label="Pro 上限">100 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーあたり</strong><br />10000 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリあたり</strong></td>
+      <td data-label="Basic 上限">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーあたり</strong><br />1667 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリあたり</strong></td>
+      <td data-label="Free 上限">17 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーあたり</strong><br />17 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリあたり</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/adddelete-rules">POST /2/tweets/search/stream/rules</a></td>
+      <td data-label="Pro の上限">15 分あたり 100 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Basic の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/causes-the-user-in-the-path-to-like-the-specified-post">POST /2/users/:id/likes</a></td>
+      <td data-label="Pro 上限">1000 リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 上限">200 リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/causes-the-user-in-the-path-to-repost-the-specified-post">POST /2/users/:id/retweets</a></td>
+      <td data-label="Pro の上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/hide-replies">PUT /2/tweets/:tweet&#95;id/hidden</a></td>
+      <td data-label="Pro 制限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>ユーザー</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/users/unfollow-user">DELETE /2/users/:source&#95;user&#95;id/following/:target&#95;user&#95;id</a></td>
+      <td data-label="Pro Limit">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic Limit">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free Limit">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/unmute-user-by-user-id">DELETE /2/users/:source&#95;user&#95;id/muting/:target&#95;user&#95;id</a></td>
+      <td data-label="Pro 制限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/user-lookup-by-ids">GET /2/users</a></td>
+      <td data-label="Pro 上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic 上限">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />500 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/user-lookup-by-id">GET /2/users/:id</a></td>
+      <td data-label="Pro 上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />500 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/returns-user-objects-that-are-blocked-by-provided-user-id">GET /2/users/:id/blocking</a></td>
+      <td data-label="Pro のレート上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic のレート上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free のレート上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/returns-user-objects-that-are-muted-by-the-provided-user-id">GET /2/users/:id/muting</a></td>
+      <td data-label="Pro の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/users/user-lookup-by-usernames">GET /2/users/by</a></td>
+      <td data-label="Pro Limit">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic Limit">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />500 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free Limit">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/user-lookup-by-username">GET /2/users/by/username/:username</a></td>
+      <td data-label="Pro の上限">900リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300リクエスト / 15分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">100リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />500リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">3リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />3リクエスト / 15分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/user-lookup-me">GET /2/users/me</a></td>
+      <td data-label="Pro の制限">75リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の制限">250リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の制限">25リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/user-search">GET /2/users/search</a></td>
+      <td data-label="Pro 上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Basic 上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+
+      <td data-label="Free 上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/follow-user">POST /2/users/:id/following</a></td>
+      <td data-label="Pro 上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/users/mute-user-by-user-id">POST /2/users/:id/muting</a></td>
+      <td data-label="Pro Limit">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic Limit">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free Limit">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Spaces</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/spaces/space-lookup-up-space-ids">GET /2/spaces</a></td>
+      <td data-label="Pro 上限">15 分あたり 300 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 分あたり 300 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">15 分あたり 5 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 分あたり 25 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/spaces/space-lookup-by-space-id">GET /2/spaces/:id</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/spaces/retrieve-the-list-of-users-who-purchased-a-ticket-to-the-given-space">GET /2/spaces/:id/buyers</a></td>
+      <td data-label="Pro 制限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/spaces/retrieve-posts-from-a-space">GET /2/spaces/:id/tweets</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/spaces/space-lookup-by-their-creators">GET /2/spaces/by/creator&#95;ids</a></td>
+      <td data-label="Pro 上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 秒<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 秒<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 秒<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/spaces/search-for-spaces">GET /2/spaces/search</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>ダイレクトメッセージ</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/delete-dm">DELETE /2/dm&#95;events/:id</a></td>
+      <td data-label="Pro 上限">1500 リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />4000 リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">200 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />2500 リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Free 上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/get-dm-events-for-a-dm-conversation">GET /2/dm&#95;conversations/:dm&#95;conversation&#95;id/dm&#95;events</a></td>
+      <td data-label="Pro の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/get-dm-events-for-a-dm-conversation">GET /2/dm&#95;conversations/with/:participant&#95;id/dm&#95;events</a></td>
+      <td data-label="Pro の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/get-recent-dm-events">GET /2/dm&#95;events</a></td>
+      <td data-label="Pro の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong></td>
+      <td data-label="Basic の上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong></td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/get-dm-events-by-id">GET /2/dm&#95;events/:id</a></td>
+      <td data-label="Pro の制限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の制限">5 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+
+      <td data-label="Free の制限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/create-a-new-dm-conversation">POST /2/dm&#95;conversations</a></td>
+      <td data-label="Pro の上限">15 回のリクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1440 回のリクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">1 回のリクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 回のリクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/send-a-new-message-to-a-dm-conversation">POST /2/dm&#95;conversations/:dm&#95;conversation&#95;id/messages</a></td>
+      <td data-label="Pro の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1440 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/direct-messages/send-a-new-message-to-a-user">POST /2/dm&#95;conversations/with/:participant&#95;id/messages</a></td>
+      <td data-label="Pro 制限">24 時間につき 1440 件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />24 時間につき 1440 件のリクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 制限">24 時間につき 1 件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />24 時間につき 1 件のリクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Free 制限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>リスト</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/delete-list">DELETE /2/lists/:id</a></td>
+      <td data-label="Pro の制限">15分あたり 300件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の制限">15分あたり 5件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の制限">15分あたり 1件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/remove-a-list-member">DELETE /2/lists/:id/members/:user&#95;id</a></td>
+      <td data-label="Pro 上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/unfollow-a-list">DELETE /2/users/:id/followed&#95;lists/:list&#95;id</a></td>
+      <td data-label="Pro の上限">15 分あたり 50 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">15 分あたり 5 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の上限">15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/unpin-a-list">DELETE /2/users/:id/pinned&#95;lists/:list&#95;id</a></td>
+      <td data-label="Pro 上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/list-lookup-by-list-id">GET /2/lists/:id</a></td>
+      <td data-label="Pro の上限">75 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />75 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />5 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/users/returns-user-objects-that-are-members-of-a-list-by-the-provided-list-id">GET /2/lists/:id/members</a></td>
+      <td data-label="Pro 上限">900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />900 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/list-posts-timeline-by-list-id">GET /2/lists/:id/tweets</a></td>
+      <td data-label="Pro の上限">15分あたり 900 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15分あたり 900 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">15分あたり 5 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15分あたり 25 リクエスト<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/get-a-users-list-memberships">GET /2/users/:id/list&#95;memberships</a></td>
+      <td data-label="Pro 上限">75 requests / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />75 requests / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">5 requests / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 requests / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">1 requests / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 requests / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/get-a-users-owned-lists">GET /2/users/:id/owned&#95;lists</a></td>
+      <td data-label="Pro レート制限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic レート制限">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />500 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free レート制限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/get-a-users-pinned-lists">GET /2/users/:id/pinned&#95;lists</a></td>
+      <td data-label="Pro の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">100 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />500 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/create-list">POST /2/lists</a></td>
+      <td data-label="Pro 制限">300リクエスト / 15分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">100リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">1リクエスト / 24時間<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/add-a-list-member">POST /2/lists/:id/members</a></td>
+      <td data-label="Pro 上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/lists/follow-a-list">POST /2/users/:id/followed&#95;lists</a></td>
+      <td data-label="Pro Limit">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic Limit">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free Limit">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/pin-a-list">POST /2/users/:id/pinned&#95;lists</a></td>
+      <td data-label="Pro 制限">50 リクエスト / 15 分あたり<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">5 リクエスト / 15 分あたり<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">1 リクエスト / 15 分あたり<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/lists/update-list">PUT /2/lists/:id</a></td>
+      <td data-label="Pro の上限">15分あたり300リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic の上限">15分あたり5リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free の上限">15分あたり1リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>ブックマーク</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/bookmarks/remove-a-bookmarked-post">DELETE /2/users/:id/bookmarks/:tweet&#95;id</a></td>
+      <td data-label="Pro 制限">15分あたり50件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">15分あたり5件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">15分あたり1件のリクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/bookmarks/bookmarks-by-user">GET /2/users/:id/bookmarks</a></td>
+      <td data-label="Pro 上限">180 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 上限">10 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/bookmarks/introduction">GET /2/users/:id/bookmarks/folders</a></td>
+      <td data-label="Pro のレート制限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic のレート制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free のレート制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/posts/bookmarks/introduction">GET /2/users/:id/bookmarks/folders/:folder&#95;id</a></td>
+      <td data-label="Pro の上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic の上限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/bookmarks/add-post-to-bookmarks">POST /2/users/:id/bookmarks</a></td>
+      <td data-label="Pro 制限">15 分あたり 50 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Basic 制限">15 分あたり 5 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+      <td data-label="Free 制限">15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>コンプライアンス</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/compliance/list-compliance-jobs">GET /2/compliance/jobs</a></td>
+      <td data-label="Pro レート制限">150 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic レート制限">5 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free レート制限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/compliance/get-compliance-job">GET /2/compliance/jobs/:job&#95;id</a></td>
+      <td data-label="Pro Limit">150件のリクエスト / 15分<br /><strong class="index__tenPx--K47R6">各アプリごと</strong></td>
+      <td data-label="Basic Limit">5件のリクエスト / 15分<br /><strong class="index__tenPx--K47R6">各アプリごと</strong></td>
+      <td data-label="Free Limit">1件のリクエスト / 15分<br /><strong class="index__tenPx--K47R6">各アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/compliance/create-compliance-job">POST /2/compliance/jobs</a></td>
+      <td data-label="Pro の上限">150 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>使用方法</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/usage/post-usage">GET /2/usage/tweets</a></td>
+      <td data-label="Pro 上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic 上限">50 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free 上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>トレンド</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/trends/trends">GET /2/trends/by/woeid/:id</a></td>
+      <td data-label="Pro の上限">75 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">15 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+
+      <td data-label="Free の上限">
+        <div>
+          <svg class="lucide lucide-x" fill="none" height="24" stroke="red" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+            <line x1="18" x2="6" y1="6" y2="18" />
+
+            <line x1="6" x2="18" y1="6" y2="18" />
+          </svg>
+        </div>
+      </td>
+    </tr>
+
+    <tr>
+      <td data-label="Endpoint"><a href="/ja/x-api/trends/introduction">GET /2/users/personalized&#95;trends</a></td>
+      <td data-label="Pro Limit">10 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />200 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic Limit">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />20 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free Limit">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 24 時間<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>コミュニティ</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/communities/lookup/introduction">GET /2/communities/:id</a></td>
+      <td data-label="Pro の上限">300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />300 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Basic の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />25 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+      <td data-label="Free の上限">1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">ユーザーごと</strong><br />1 リクエスト / 15 分<br /><strong class="index__tenPx--K47R6">アプリごと</strong></td>
+    </tr>
+
+    <tr>
+      <td data-label="エンドポイント"><a href="/ja/x-api/communities/search/introduction">GET /2/communities/search</a></td>
+      <td data-label="Pro 上限">15 分あたり 300 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />15 分あたり 300 リクエスト<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Basic 上限">15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />15 分あたり 25 リクエスト<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+      <td data-label="Free 上限">15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">ユーザー単位</strong><br />15 分あたり 1 リクエスト<br /><strong class="index__tenPx--K47R6">アプリ単位</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<div id="rate-limits-and-authentication-method">
+  ## レート制限と認証方法
+</div>
+
+レート制限は、開発者アプリ レベルとユーザーのアクセストークン レベルの両方に設定されています。
+
+* **[OAuth 2.0 Bearer Token](/ja/resources/fundamentals/authentication/oauth-2-0/application-only): アプリのレート制限**\
+  この方法では、開発者アプリを代表して一定数のリクエストを行うことができます。この認証方法を使用する場合、制限は Bearer Token を用いて行われるリクエストによって決まります。
+  * 例: 15 分ごとの上限が 450 リクエストの場合、その 15 分間にアプリを代表して 450 件のリクエストを行うことができます。
+
+* **[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens): ユーザーのレート制限**\
+  この方法では、ユーザーのアクセストークンによって識別される X ユーザーを代表してリクエストを行うことができます。たとえば、ポストから非公開メトリクスを取得する場合は、そのユーザー向けに [3-legged OAuth フロー](/ja/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) を使用して生成されたユーザーアクセストークンで認証します。
+  * 例: ユーザーごとに 15 分あたり 900 リクエストの上限がある場合、その 15 分間にユーザーごとに最大 900 件のリクエストを行うことができます。
+
+...
+
+<div id="http-headers-and-response-codes">
+  ## HTTP ヘッダーとレスポンスコード
+</div>
+
+最新のリクエストに基づいて、指定されたレート制限の中でアプリケーションの現在の状況を把握するために HTTP ヘッダーを使用します。
+
+* `x-rate-limit-limit`: エンドポイントのレート制限の上限
+* `x-rate-limit-remaining`: 15 分間の時間枠で残っているリクエスト数
+* `x-rate-limit-reset`: レート制限がリセットされるまでの残り時間（UTC エポック秒）
+
+<div id="error-responses">
+  ### エラー応答
+</div>
+
+アプリケーションがエンドポイントのレート制限を超えた場合、API はレスポンス本文内に次のエラーメッセージを含む [HTTP 429 “Too Many Requests”](http://tools.ietf.org/html/rfc6585) レスポンスを返します。
+
+```json
+{ "errors": [ { "code": 88, "message": "Rate limit exceeded" } ] }
+```
+
+<div id="recovering-from-a-rate-limit">
+  ## レート制限からの復旧
+</div>
+
+これらのレート制限を超過すると、エンドポイントから 429「Too Many Requests」エラーが返されます。後述のとおり、レート制限エラーが発生した場合のベストプラクティスは、制限がいつリセットされるかを示す HTTP ヘッダーを確認し、それまでリクエストを一時停止することです。<br />「Too Many Requests」またはレート制限エラーが発生した場合は、リクエストの送信頻度を下げる必要があります。レート制限エラーに達したら、レート制限がいつリセットされるかを把握するために `x-rate-limit-reset:` HTTP ヘッダーを確認できます。<br /><br />もう 1 つの一般的なパターンは指数バックオフに基づくもので、リクエスト間の時間を小さく（数秒など）始め、再試行のたびに 2 倍にしていく方法です。これは、リクエストが成功するか、あるいはリクエスト間の時間が妥当な最大値（数分など）に達するまで続けます。<br /><br />理想的には、クライアント側が既存のレート制限を把握しており、現在超過しているウィンドウが期限切れになるまでリクエストを一時停止できる状態であることが望まれます。15 分の制限を超えた場合は、1～2 分待ってから再試行するのが妥当です。<br /><br />リクエスト数に対するこれらの制限に加えて、Standard Basic アクセスレベルでは、recent search および filtered stream エンドポイントから、月あたり最大 500,000 件のポストを取得できます。ポスト数の月次上限を超過した場合は、アプリ側で通知を出し、利用開始日（課金サイクル開始日）を把握したうえで、その日までリクエストを控えるほうが理にかなっています。
+
+<div id="tips-to-avoid-being-rate-limited">
+  ### レート制限を回避するためのヒント
+</div>
+
+以下のヒントは、防御的なコードを書くことでレート制限を受ける可能性を減らすのに役立ちます。レート制限が存在することを踏まえると、特に結果の鮮度に関しては、提供することが事実上不可能なアプリケーション機能もあります。アプリケーションの目的がリアルタイムな情報の提供である場合は、filtered stream エンドポイントや sampled stream エンドポイントの利用を検討してください。
+
+<div id="caching">
+  #### キャッシュ
+</div>
+
+頻繁に利用することが想定される場合は、API レスポンスを保存して再利用してください。ページ読み込みのたびに API を呼び出すのではなく、レスポンスをローカルにキャッシュしましょう。
+
+<div id="prioritize-active-users">
+  #### アクティブなユーザーを優先する
+</div>
+
+サイトで多数の X ユーザーを管理している場合（たとえば、現在のステータスや X の利用状況に関する統計情報を取得している場合）、最近そのサイトにサインインしたユーザーに対してのみデータをリクエストすることを検討してください。
+
+<div id="adapt-to-the-search-results">
+  #### 検索結果に応じて調整する
+</div>
+
+アプリケーションで多数の検索語句を監視している場合、結果が返ってこない検索については、結果がある検索よりも問い合わせ頻度を下げてください。バックオフを行うことで、人気のある検索クエリについては最新の状態を保ちつつ、めったに変化しないクエリに対して不要なリクエストを行わずに済みます。あるいは、filtered stream エンドポイントを使用し、検索クエリでフィルタリングすることも検討してください。
+
+<div id="denylist">
+  #### 拒否リスト
+</div>
+
+アプリケーションがレート制限を乱用した場合、そのアプリは拒否リストに追加されます。拒否リストに入ったアプリは、X API からレスポンスを受け取ることができません。あなた、またはあなたのアプリケーションが拒否リストに入っており、誤りだと思われる場合は、[Platform Support forms](https://support.x.com/forms/platform) からサポートを依頼できます。次の情報を含めてください。
+
+1. あなたのアプリケーションが拒否リストに入ったと考える理由を説明してください。
+2. すでにレート制限を受けていない場合は、どのように問題を解決したかを詳細に記述してください。

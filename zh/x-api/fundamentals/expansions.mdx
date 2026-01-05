@@ -1,0 +1,198 @@
+---
+title: 扩展字段
+keywords: ["扩展字段", "展开对象", "对象扩展", "嵌套对象", "相关对象", "展开用户", "展开媒体", "展开帖子"]
+---
+
+借助扩展字段，开发者可以展开在负载中被引用的对象。可被展开的对象通过 ID 引用。例如，[Posts 查询](/zh/x-api/posts/lookup/introduction) 的负载中返回的 `referenced_tweets.id` 和 `author_id` 字段可以展开为完整对象。如果你想请求发布该帖子的用户相关字段，或包含在该帖子中的媒体、投票或地点的相关字段，则需要在请求中传递相应的扩展字段查询参数，才能在响应中收到这些数据。目前，返回 Posts、Users、Lists、Spaces 和 Direct Message 事件对象的 v2 端点都支持扩展字段（见下方示例）。
+
+当你在请求中包含某个扩展字段时，我们会在同一响应中包含该展开对象的默认字段。这有助于在同一响应中返回更多数据，而无需单独发起请求。如果你想请求与已展开对象相关的其他[字段](/zh/x-api/fundamentals/fields)，可以在请求中包含与该已展开对象对应的字段参数，并提供一个以逗号分隔的字段列表，用于指定希望在响应中接收的字段。请注意，字段在返回时的顺序不一定与在查询中请求时的顺序相同。
+
+下面的 Post 负载中包含了可进一步展开的相关对象的引用 ID，包括发布该帖子的 `author_id`、一个*被引用*帖子的 `id`，以及媒体附件的 `media_key`。
+
+```json
+{
+    "data": {
+        "attachments": {
+            "media_keys": ["16_1211797899316740096"]
+        },
+        "author_id": "2244994945",
+        "id": "1212092628029698048",
+        "referenced_tweets": [
+            {
+                "type": "replied_to",
+                "id": "1212092627178287104"
+            }
+        ],
+        "text": "我们相信我们API的最佳未来版本将与您一起构建。祝所有在Twitter平台上构建的人又一个美好的一年。我们迫不及待地想在新的一年里继续与您合作。https://t.co/yvxdK6aOo2"
+    }
+}
+```
+
+<div id="available-expansions-for-post-payloads">
+  ### 可用于帖子负载的扩展字段
+</div>
+
+| Expansion                      | Description                                                                        |
+|:--------------------------------|:------------------------------------------------------------------------------------|
+| `author_id`                    | 返回一个用户对象，表示该帖子的作者                               |
+| `referenced_tweets.id`         | 返回一个帖子对象，即此帖子所引用的帖子（可以是转帖、引用帖子或回复） |
+| `edit_history_tweet_ids`       | 返回属于某个帖子编辑历史的帖子对象                        |
+| `in_reply_to_user_id`          | 返回一个用户对象，表示当前请求的帖子所回复的作者 |
+| `attachments.media_keys`       | 返回一个媒体对象，表示帖子中包含的图片、视频和 GIF  |
+| `attachments.poll_ids`         | 返回一个投票对象，其中包含帖子中所含投票的元数据        |
+| `geo.place_id`                 | 返回一个地点对象，其中包含帖子中被标记位置的元数据     |
+| `entities.mentions.username`   | 返回一个用户对象，表示帖子中被提及的用户                          |
+| `referenced_tweets.id.author_id` | 返回一个用户对象，表示被引用帖子的作者                      |
+
+<div id="available-expansion-for-user-payloads">
+  ### 用户有效负载可用扩展项
+</div>
+
+| 扩展字段          | 说明                                               |
+|:--------------------|:-----------------------------------------------------------|
+| `pinned_tweet_id`  | 返回一个 Post 对象，表示固定在用户个人主页顶部的帖子 |
+
+<div id="available-expansions-for-direct-message-event-payloads">
+  ### 可用于私信事件负载的扩展字段
+</div>
+
+| Expansion                | Description                                                              |
+|:--------------------------|:--------------------------------------------------------------------------|
+| `attachments.media_keys` | 返回附加到一条私信的媒体对象             |
+| `referenced_tweets.id`   | 返回在一条私信中被引用的帖子对象            |
+| `sender_id`              | 返回表示私信作者（即邀请参与者加入会话的用户）的用户对象 |
+| `participant_ids`        | 返回表示加入或离开会话的会话参与者的用户对象 |
+
+<div id="available-expansions-for-spaces-payloads">
+  ### Space 负载中可用的扩展字段
+</div>
+
+| Expansion          | Description                                               |
+|:--------------------|:-----------------------------------------------------------|
+| `invited_user_ids` | 返回表示被邀请账号的 User 对象 |
+| `speaker_ids`      | 返回表示在 Space 中发言账号的 User 对象 |
+| `creator_id`       | 返回表示创建该 Space 的账号的 User 对象 |
+| `host_ids`         | 返回表示被设置为主持人的账号的 User 对象 |
+| `topics_ids`       | 返回由创建者设置的主题描述 |
+
+<div id="available-expansion-for-lists-payloads">
+  ### 列表负载中可用的扩展项
+</div>
+
+| 扩展项   | 说明                                                    |
+|:-------------|:----------------------------------------------------------------|
+| `owner_id`  | 返回一个 User 对象，表示创建并维护该列表的账号 |
+
+<div id="expanding-the-media-object">
+  ## 扩展 Media 对象
+</div>
+
+在下面的请求中，我们请求返回 `geo.place_id` 扩展，以便在默认帖子字段的基础上额外包含该信息：
+
+**示例请求**
+
+```
+{`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+```
+
+**示例响应**
+
+```
+{`{
+  "data": {
+      "geo": {
+          "place_id": "01a9a39529b27f36"
+      },
+      "id": "ID",
+      "text": "Test"
+  },
+  "includes": {
+      "places": [
+          {
+              "full_name": "Manhattan, NY",
+              "id": "01a9a39529b27f36"
+          }
+      ]
+  }
+}`}
+
+```
+
+<div id="expanding-the-poll-object">
+  ## 扩展 Poll 对象
+</div>
+
+在下面的请求中，我们通过指定 `attachments.poll_ids` 扩展字段，使其在默认帖子字段的基础上额外返回这些内容：
+
+**示例请求**
+
+<CodeBlock language="bash">
+  {`curl 'https://api.x.com/2/tweets/1199786642791452673?expansions=attachments.poll_ids' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+</CodeBlock>
+
+**示例响应**
+
+```
+{`{
+  "data": {
+      "attachments": {
+          "poll_ids": ["1199786642468413448"]
+      },
+      "id": "1199786642791452673",
+      "text": "C#"
+  },
+  "includes": {
+      "polls": [
+          {
+              "id": "1199786642468413448",
+              "options": [
+                  {
+                      "position": 1,
+                      "label": "“C Sharp”",
+                      "votes": 795
+                  },
+                  {
+                      "position": 2,
+                      "label": "“C Hashtag”",
+                      "votes": 156
+                  }
+              ]
+          }
+      ]
+  }
+}`}
+```
+
+<div id="expanding-the-place-object">
+  ## 扩展 Place 对象
+</div>
+
+在以下请求中，我们请求 `geo.place_id` 扩展字段，以便与默认帖子字段一同返回：
+
+**示例请求**
+
+<CodeBlock language="bash">
+  {`curl 'https://api.x.com/2/tweets/:ID?expansions=geo.place_id' --header 'Authorization: Bearer $ACCESS_TOKEN'`}
+</CodeBlock>
+
+**示例响应**
+
+```s
+{`{
+  "data": {
+      "geo": {
+          "place_id": "01a9a39529b27f36"
+      },
+      "id": "ID",
+      "text": "Test"
+  },
+  "includes": {
+      "places": [
+          {
+              "full_name": "Manhattan, NY",
+              "id": "01a9a39529b27f36"
+          }
+      ]
+  }
+}`}
+```

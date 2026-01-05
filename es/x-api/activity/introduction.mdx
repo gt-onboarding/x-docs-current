@@ -1,0 +1,143 @@
+---
+title: "Introducción"
+sidebarTitle: "Introducción"
+keywords: ["API de actividad","X Activity API","eventos de actividad","actualizaciones de perfil","actividad de usuario","eventos en tiempo real","flujo de actividad"]
+---
+
+El grupo de endpoints de X Activity API (XAA) permite a los desarrolladores acceder a los eventos de actividad que ocurren en la plataforma X.
+
+Un desarrollador puede suscribirse a los eventos que le interesen, como `ProfileBioUpdate`, `ProfilePictureUpdate`, etc., y filtrar por la id de usuario cuyos eventos desea. Los eventos que coincidan para esa id de usuario se entregarán a tu aplicación con una latencia inferior a un segundo.
+
+<Warning>
+  X Activity API está disponible en una beta abierta. Mientras esté en beta abierta, ten en cuenta que puede haber posibles errores, cambios incompatibles o funciones incompletas.
+
+  Tus comentarios son inestimables: informa de los problemas a través de nuestros [foros de la comunidad para desarrolladores](https://devcommunity.x.com/).
+</Warning>
+
+<div id="delivery-mechanisms">
+  ## Mecanismos de entrega
+</div>
+
+La X Activity API admite actualmente los siguientes mecanismos de entrega para enviar eventos a tu aplicación:
+
+* Stream HTTP persistente
+* [Webhook](/es/x-api/webhooks/introduction)
+
+<div id="supported-event-types">
+  ## Tipos de eventos compatibles
+</div>
+
+Actualmente, la X Activity API es compatible con los siguientes tipos de eventos, organizados por categoría:
+
+<div id="profile-events">
+  ### Eventos de perfil
+</div>
+
+Los eventos de perfil se generan cuando un usuario realiza cambios en la información de su perfil.
+
+| Nombre del evento            | Descripción                                              | Filtros  |
+| ---------------------------- | -------------------------------------------------------- | -------- |
+| `profile.update.bio`           | Se genera cuando un usuario actualiza la biografía de su perfil         | `user_id` |
+| `profile.update.profile_picture`       | Se genera cuando un usuario actualiza la foto de perfil     | `user_id` |
+| `profile.update.banner_picture`        | Se genera cuando un usuario actualiza el banner de su perfil      | `user_id` |
+| `profile.update.geo`           | Se genera cuando un usuario actualiza la ubicación de su perfil    | `user_id` |
+| `profile.update.url`           | Se genera cuando un usuario actualiza la URL del sitio web de su perfil | `user_id` |
+| `profile.update.screenname`    | Se genera cuando un usuario actualiza su nombre para mostrar        | `user_id` |
+| `profile.update.verified_badge` | Se genera cuando un usuario actualiza su insignia de verificación      | `user_id` |
+
+<div id="follow-events">
+  ### Eventos de seguimiento
+</div>
+
+Los eventos de seguimiento se activan cuando un usuario sigue o deja de seguir a otro usuario.
+
+| Nombre del evento | Descripción                                   | Filtros  |
+| ----------------- | --------------------------------------------- | -------- |
+| `follow.follow`   | Se genera cuando un usuario sigue a otro usuario        | `user_id` |
+| `follow.unfollow` | Se genera cuando un usuario deja de seguir a otro usuario | `user_id` |
+
+<Note>
+  **Solo Enterprise:** Los eventos de seguimiento solo están disponibles actualmente para cuentas seleccionadas de nivel Enterprise y Partner.
+</Note>
+
+<div id="news-events">
+  ### Eventos de noticias
+</div>
+
+Los eventos de noticias proporcionan actualizaciones sobre temas y titulares de noticias seleccionados por Grok.
+
+| Event Name | Description                                         | Filters   |
+| ---------- | --------------------------------------------------- | --------- |
+| `news.new`  | Noticias y titulares nuevos seleccionados por Grok | `keyword` |
+
+<Note>
+  **Solo para Enterprise:** Los eventos de noticias solo están disponibles actualmente para cuentas seleccionadas de nivel Enterprise y Partner.
+</Note>
+
+En futuras versiones, XAA se ampliará para admitir tipos de eventos adicionales, incluidas interacciones sociales, interacción con el contenido, funciones de monetización y más. Continuaremos actualizando nuestra documentación cuando haya nuevos tipos de eventos disponibles.
+
+<Note>
+  **Nota:** XAA no entrega publicaciones. Para la entrega de publicaciones en tiempo real, consulta nuestro endpoint [Filtered Stream](/es/x-api/posts/filtered-stream/introduction), que permite a los desarrolladores filtrar y transmitir publicaciones en tiempo real.
+</Note>
+
+<div id="event-privacy-and-authentication">
+  ## Privacidad de eventos y autenticación
+</div>
+
+La X Activity API distingue entre **eventos públicos** y **eventos privados**, del mismo modo que la aplicación X, como se explica a continuación.
+
+<div id="public-events">
+  ### Eventos públicos
+</div>
+
+Los eventos públicos son actividades que una cuenta de usuario pública realiza públicamente y que son visibles para todos los usuarios de X. Estos eventos son visibles para todos los usuarios de la plataforma X y no requieren autenticación OAuth por parte del usuario para poder verlos.
+
+**Eventos públicos actuales:**
+
+* Actualizaciones de perfil (biografía, imagen, banner, ubicación, URL, cambios de nombre de usuario)
+
+Para estos eventos públicos, puedes crear suscripciones especificando el id de usuario en tu filtro y recibirlos a través de XAA.
+
+<div id="private-events">
+  ### Eventos privados
+</div>
+
+Los eventos privados son actividades que requieren el consentimiento explícito del usuario mediante la autenticación con OAuth. Un usuario debe autenticarse en X y otorgar permiso explícito a una aplicación de desarrollador para acceder a estos eventos.
+
+**Requisitos de autenticación para eventos privados:**
+
+* El usuario debe autenticar tu aplicación mediante OAuth 2.0
+* Tu aplicación debe obtener los `scopes` de OAuth apropiados
+* El usuario debe otorgar explícitamente permiso para que tu aplicación acceda a estos eventos
+* Las suscripciones a eventos privados solo pueden crearse para usuarios que hayan autorizado tu aplicación
+
+<div id="subscription-limits">
+  ## Límites de suscripción
+</div>
+
+La X Activity API presenta diferentes límites de suscripción según el nivel de tu cuenta:
+
+| Nivel del paquete | Suscripciones máximas |
+| ----------------- | --------------------- |
+| Free              | No disponible         |
+| Basic             | 50                    |
+| Pro               | 2500                  |
+| Enterprise        | 50,000                |
+| Partner           | 100,000               |
+
+<Note>
+  **Configuración de la cuenta**
+
+  Para acceder a estos endpoints, necesitas:
+
+  * Una [cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info) aprobada.
+  * Autenticarte usando las claves y tokens de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que se encuentre dentro de un [Proyecto](/es/resources/fundamentals/projects).
+
+  Obtén más información sobre cómo obtener acceso a los endpoints de X API v2 en nuestra [guía de introducción](/es/x-api/getting-started/getting-access).
+</Note>
+
+<div className="flex">
+  <Button href="/es/x-api/posts/filtered-stream/quickstart">
+    Inicio rápido
+  </Button>
+</div>

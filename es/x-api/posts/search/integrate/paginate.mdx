@@ -1,0 +1,130 @@
+---
+title: Paginación
+sidebarTitle: Paginación
+keywords: ["paginación de búsqueda", "guía de paginación", "recorrer los resultados", "tokens de paginación", "paginación de búsqueda", "siguiente token"]
+---
+
+<div id="recent-search-pagination">
+  ### Paginación en búsquedas recientes
+</div>
+
+<div id="introduction">
+  #### Introducción
+</div>
+
+Las consultas de búsqueda normalmente coinciden con más Publicaciones de las que se pueden devolver en una sola respuesta de la API. Cuando eso sucede, los datos se devuelven en una serie de &quot;páginas&quot;. La paginación se refiere a los métodos para solicitar todas las páginas con el fin de recuperar el conjunto completo de datos.
+
+Aquí se presentan detalles fundamentales sobre la paginación en búsquedas recientes:
+
+* Los endpoints de búsqueda reciente responderán a una consulta con al menos una página y proporcionarán un next&#95;token en su respuesta JSON si hay páginas adicionales disponibles. Para seguir recibiendo Publicaciones que coincidan con la consulta, este proceso se puede repetir hasta que no se incluya ningún token en la respuesta.
+
+* El next&#95;token no caduca. Varias solicitudes que utilicen el mismo valor de next&#95;token recibirán los mismos resultados, independientemente de cuándo se haga la solicitud.
+
+* Las Publicaciones se entregan en orden cronológico inverso, en la zona horaria UTC. Esto es cierto dentro de páginas individuales, así como entre varias páginas: 
+  * La primera Publicación en la primera respuesta será la más reciente que coincida con tu consulta.
+  * La última Publicación en la última respuesta será la más antigua que coincida con tu consulta.
+
+* El parámetro de solicitud max&#95;results te permite configurar el número de Publicaciones devueltas por respuesta. De forma predeterminada es de 10 Publicaciones y tiene un máximo de 100. 
+
+* Toda implementación de paginación implicará extraer los next&#95;tokens del payload de la respuesta e incluirlos en la solicitud de búsqueda de la &quot;página siguiente&quot;. Consulta más abajo para obtener más detalles sobre cómo construir estas solicitudes de &quot;página siguiente&quot;.
+   
+
+El endpoint de búsqueda reciente se diseñó para admitir dos patrones de uso fundamentales:
+
+* **Obtener datos históricos** - Solicitar Publicaciones que coincidan dentro de un período de tiempo de interés. Normalmente son solicitudes únicas en apoyo de investigaciones históricas. Las solicitudes de búsqueda pueden basarse en los parámetros de solicitud start&#95;time y end&#95;time. El endpoint de búsqueda reciente responde con Publicaciones entregadas en orden cronológico inverso, comenzando por la Publicación más reciente que coincida. 
+
+* **Polling** - Solicitar Publicaciones que coincidan y que se hayan publicado desde la última Publicación recibida. Estos casos de uso suelen tener un enfoque casi en tiempo real y se caracterizan por solicitudes frecuentes que &quot;escuchan&quot; nuevas Publicaciones de interés. El endpoint de búsqueda reciente proporciona el parámetro de solicitud since&#95;id para admitir el patrón de &quot;polling&quot;. Para ayudar a navegar por los id de Publicaciones, también está disponible el parámetro de solicitud until&#95;id.
+   
+
+A continuación, hablaremos del modo histórico. Este es el modo predeterminado del endpoint de búsqueda reciente e ilustra los fundamentos de la paginación. Después trataremos ejemplos de casos de uso de polling. Cuando el polling provoca paginación, hay un paso adicional para gestionar las solicitudes de búsqueda.
+ 
+
+<div id="retrieving-historical-data">
+  #### Recuperar datos históricos
+</div>
+
+Esta sección describe cómo puedes recuperar Publicaciones de un período de interés (actualmente limitado a los últimos siete días) utilizando los parámetros de solicitud start&#95;time y end&#95;time. Las solicitudes históricas suelen ser solicitudes únicas que se usan para la investigación y el análisis. 
+
+Realizar solicitudes para un período de tiempo es el modo predeterminado del endpoint de búsqueda reciente. Si una solicitud de búsqueda no especifica un parámetro de solicitud start&#95;time, end&#95;time o since&#95;id, el end&#95;time tendrá como valor predeterminado &quot;now&quot; (en realidad, 30 segundos antes del momento de la consulta) y el start&#95;time tendrá como valor predeterminado siete días atrás.
+
+El endpoint responderá con la primera &#39;página&#39; de Publicaciones en orden cronológico inverso, comenzando por la Publicación más reciente. La carga JSON de la respuesta también incluirá un next&#95;token si hay páginas adicionales de datos. Para recopilar el conjunto completo de Publicaciones que coinciden con la búsqueda, independientemente del número de páginas, se realizan solicitudes hasta que ya no se proporcione ningún next&#95;token. 
+
+Por ejemplo, aquí tienes una solicitud inicial de Publicaciones con la palabra clave snow de la última semana:
+
+[https://api.x.com/2/tweets/search/recent?query=snow](https://api.x.com/2/tweets/search/recent?query=snow)
+
+La respuesta incluye las 10 Publicaciones más recientes, junto con estos atributos &quot;meta&quot; en la respuesta JSON:
+
+```
+"meta": {
+        "newest_id": "1204860593741553664",
+        "oldest_id": "1204860580630278147",
+        "next_token": "b26v89c19zqg8o3fobd8v73egzbdt3qao235oql",
+        "result_count": 10
+    }
+```
+
+Para obtener las siguientes 10 Publicaciones, este next&#95;token se agrega a la solicitud original. La solicitud sería:
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;next&#95;token=b26v89c19zqg8o3fobd8v73egzbdt3qao235oql](https://api.x.com/2/tweets/search/recent?query=snow\&next_token=b26v89c19zqg8o3fobd8v73egzbdt3qao235oql)
+
+El proceso de buscar un next&#95;token e incluirlo en una solicitud posterior se puede repetir hasta que se recopilen todas (o una cierta cantidad de) las Publicaciones, o hasta que se haya realizado un número específico de solicitudes. Si la fidelidad de los datos (recopilar todas las coincidencias de tu consulta) es clave para tu caso de uso, un sencillo diseño de &quot;repetir hasta que request.next&#95;token sea null&quot; será suficiente.
+
+<div id="polling-and-listening-use-cases">
+  #### Casos de uso de sondeo y escucha
+</div>
+
+Esta sección explica cómo puedes recuperar Publicaciones recientes sondeando el endpoint de búsqueda reciente con el parámetro de solicitud since&#95;id. 
+
+En los casos de uso de sondeo, las consultas del tipo «¿hay nuevas Publicaciones de interés?» se realizan de forma continua y frecuente. A diferencia de los casos de uso históricos, que basan las solicitudes en el tiempo, los casos de uso de sondeo normalmente basan las solicitudes en los ID de Publicación.
+
+El elemento central del patrón de uso de sondeo es que cada nueva Publicación tiene un [ID único](/es/resources/fundamentals/x-ids) que se genera en la plataforma X, generalmente en orden ascendente. Si una Publicación tiene un ID menor que otra, significa que se publicó antes.
+
+El endpoint de búsqueda reciente permite navegar por el archivo de Publicaciones mediante el ID de Publicación. Las respuestas del endpoint incluyen los ID de Publicación oldest&#95;id y newest&#95;id. En el modo de sondeo, las solicitudes se realizan con since&#95;id establecido en el ID más grande/más reciente recibido hasta el momento. 
+
+Por ejemplo, supongamos que se hace una consulta de nuevas Publicaciones sobre la nieve cada cinco minutos, y la última Publicación que recibimos tenía un ID de Publicación de 10000. Cuando llega el momento de sondear, la solicitud sería:
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;since&#95;id=10000](https://api.x.com/2/tweets/search/recent?query=snow\&since_id=10000)
+
+A continuación, supongamos que se publicaron siete Publicaciones desde nuestra última solicitud. Como todas caben en una sola «página» de datos, no hay next&#95;token. La respuesta proporciona el ID de Publicación de la Publicación más reciente (la más nueva):
+
+```
+"meta": {
+        "newest_id": "12000",
+        "oldest_id": "10005",
+        "result_count": 7
+    }
+```
+
+Para hacer la siguiente consulta de sondeo, se utiliza este valor de newest&#95;id para establecer el siguiente parámetro since&#95;id:
+
+`https://api.x.com/2/tweets/search/recent?query=snow&since_id=12000`
+
+Cuando hay más datos disponibles y se proporcionan next tokens, solo se necesita el valor newest&#95;id de la primera página de resultados. Cada página de datos incluirá valores newest&#95;id y oldest&#95;id, pero el valor proporcionado en la primera página es el único que se necesita para la siguiente solicitud de sondeo programada de forma regular. Por lo tanto, si estás implementando un diseño de sondeo o buscando Publicaciones por rango de ID, la lógica de paginación es ligeramente más complicada. 
+
+Ahora supongamos que hay 18 Publicaciones adicionales que coinciden. El endpoint respondería con esta respuesta inicial, con una página completa de datos y un next&#95;token para solicitar la siguiente página de datos de este período de cinco minutos. También incluiría el ID de la Publicación más reciente necesario para el siguiente intervalo de sondeo dentro de cinco minutos.
+
+```
+"meta": {
+        "newest_id": "13800",
+        "oldest_id": "12500",
+        "next_token": "fnsih9chihsnkjbvkjbsc",
+        "result_count": 10
+    }
+```
+
+Para recopilar todos los datos que coincidan en este período de cinco minutos, pasa el next&#95;token en tu siguiente solicitud, junto con el mismo valor de since&#95;id que en la solicitud anterior.
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;since&#95;id=12000&amp;next&#95;token=fnsih9chihsnkjbvkjbsc](https://api.x.com/2/tweets/search/recent?query=snow\&since\\_id=12000\&next\\_token=fnsih9chihsnkjbvkjbsc)
+
+```
+"meta": {
+        "newest_id": "12300",
+        "oldest_id": "12010",
+        "result_count": 8
+    }
+```
+
+Esta segunda respuesta proporciona las ocho Publicaciones restantes y no incluye ningún next&#95;token. Ten en cuenta que no actualizamos nuestro valor de newest&#95;id (12300) y, en su lugar, basamos nuestra siguiente solicitud con since&#95;id en el valor de newest&#95;id de la primera respuesta:
+
+[https://api.x.com/2/tweets/search/recent?query=snow&amp;since&#95;id=13800](https://api.x.com/2/tweets/search/recent?query=snow\&since_id=13800)

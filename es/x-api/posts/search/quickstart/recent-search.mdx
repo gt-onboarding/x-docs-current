@@ -1,0 +1,141 @@
+---
+title: "Búsqueda reciente"
+sidebarTitle: "Búsqueda reciente"
+keywords: ["búsqueda reciente", "inicio rápido de búsqueda", "tutorial de búsqueda reciente", "buscar publicaciones", "guía de búsqueda reciente", "ejemplo de búsqueda"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-recent-search-endpoint">
+  ## Introducción al endpoint de búsqueda reciente
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud al endpoint de búsqueda reciente con un conjunto de campos específicos usando Postman.
+
+Si deseas ver código de ejemplo en diferentes lenguajes, visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code). 
+
+<Note>
+  ### **Requisitos previos**
+
+  Para completar esta guía, necesitarás un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y obtén la aprobación.
+  * Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Navega a la página “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-build-a-recent-search-request">
+  ### Pasos para crear una solicitud de búsqueda reciente
+</div>
+
+**Paso uno: Comienza con una herramienta o biblioteca**
+
+Hay varias herramientas, ejemplos de código y bibliotecas que puedes usar para hacer una solicitud a este endpoint, pero aquí usaremos la herramienta Postman para simplificar el proceso.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a Search Posts &gt; Recent search request.
+
+**Paso dos: Autentica tu solicitud**
+
+Para realizar correctamente una solicitud a la X API, debes verificar que tienes permiso. Para hacer esto con este endpoint, debes autenticar tu solicitud con uno de los siguientes métodos de autenticación: [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) o [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication).
+
+Para simplificar, utilizaremos OAuth 2.0 solo para la aplicación con esta solicitud, pero deberás usar uno de los otros métodos de autenticación si quieres solicitar [métricas](/es/x-api/fundamentals/metrics) o Publicaciones privadas. 
+
+Para utilizar OAuth 2.0 solo para la aplicación, debes agregar tus claves y tokens, específicamente el [Token de acceso de la Aplicación](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) (también conocido como el Bearer Token solo para la Aplicación) en Postman. Puedes hacerlo seleccionando el entorno llamado &quot;X API v2&quot; en la esquina superior derecha de Postman y agregando tus claves y tokens en los campos &quot;initial value&quot; y &quot;current value&quot; (haciendo clic en el ícono de ojo junto al menú desplegable de entornos).
+
+Estas variables se insertarán automáticamente en la pestaña de autorización de la solicitud si lo has hecho correctamente.
+ 
+
+**Paso tres: Crea una consulta de búsqueda**
+
+Cada búsqueda reciente requiere una única [consulta de búsqueda](/es/x-api/posts/search/integrate/build-a-query). Para este ejemplo, usaremos una consulta que coincida con las Publicaciones de la cuenta @XDevelopers. Para esta consulta usamos el operador from y lo establecemos en XDevelopers (no distingue entre mayúsculas y minúsculas):
+
+`from:XDevelopers`
+
+En Postman, navega a la pestaña &quot;Params&quot; e introduce este ID, o una cadena de IDs de Publicaciones separadas por comas, en la columna &quot;Value&quot; del parámetro `ids`.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| `query` | from:XDevelopers | Consulta de búsqueda que se enviará al endpoint de búsqueda reciente |
+
+**Paso cuatro: Identifica y especifica qué campos quieres recuperar**
+
+Si haces clic en el botón &quot;Send&quot; después del paso tres, recibirás en tu respuesta los campos predeterminados del [objeto Post](/es/x-api/fundamentals/data-dictionary#tweet): id, text y `edit_history_tweet_ids`. Si deseas recibir campos adicionales además de id, text y `edit_history_tweet_ids`, deberás especificar esos campos en tu solicitud con los parámetros [field](/es/x-api/fundamentals/fields) y/o [expansion](/es/x-api/fundamentals/expansions).
+
+Para este ejercicio, solicitaremos cuatro conjuntos diferentes de campos de distintos objetos:
+
+1. Los campos predeterminados del objeto Post.
+2. El campo adicional tweet.created&#95;at en los objetos de usuario principales.
+3. Los campos predeterminados del objeto de usuario de los autores asociados para las Publicaciones devueltas.
+4. El campo adicional user.description en los objetos de usuario asociados.
+
+En Postman, navega a la pestaña &quot;Params&quot; y agrega el siguiente par clave-valor a la tabla &quot;Query Params&quot;:
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Returned fields** |
+| `tweet.fields` | `created_at` | `tweets.created_at` |
+| `expansions` | `author_id` | `includes.users.id`, `includes.users.name`, `includes.users.username` |
+| `user.fields` | `description` | `includes.users.description` |
+
+Ahora deberías ver la siguiente URL junto al botón &quot;Send&quot;:
+
+`https://api.x.com/2/tweets/search/recent?query=from:XDevelopers&tweet.fields=created_at&expansions=author_id&user.fields=created_at`
+
+**Paso cinco: realiza la solicitud y revisa la respuesta**
+
+Una vez que tengas todo listo, haz clic en el botón &quot;Send&quot; y recibirás la siguiente respuesta:
+
+```
+{
+   "data": [
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-11T16:05:06.000Z",
+           "id": "1271111223220809728",
+           "text": "Sintoniza esta noche y observa cómo @jessicagarson nos guía en la ejecución de tu paquete favorito de Python en R. 🍿\n\nAprende cómo usar dos poderosos lenguajes de programación para ciencia de datos juntos, y ve un ejemplo en vivo que utiliza el endpoint de búsqueda reciente de Twitter's Developer Labs. https://t.co/v178oUZNuj"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-10T19:25:24.000Z",
+           "id": "1270799243071062016",
+           "text": "As we work towards building the new Twitter API, we’ve extended the deprecation timeline for several Labs v1 endpoints. Learn more 📖 https://t.co/rRWaJYJgKk"
+       },
+       {
+           "author_id": "2244994945",
+           "created_at": "2020-06-09T18:08:47.000Z",
+           "id": "1270417572001976322",
+           "text": "Annotations help you learn more about a Tweet — they can even help you find topics of interest. 🔬\n\nIn this tutorial, @suhemparack shows us how find Tweets related to COVID-19 using annotations + the filtered stream endpoint.\n\nLearn how you can, too. ⤵️\nhttps://t.co/qwVOgw0zSV"
+       }
+   ],
+   "includes": {
+       "users": [
+           {
+               "description": "The voice of Twitter's #DevRel team, and your official source for updates, news, & events about Twitter's API. \n\n#BlackLivesMatter",
+               "id": "2244994945",
+               "name": "X Developers",
+               "username": "XDevelopers"
+           }
+       ]
+   },
+   "meta": {
+       "newest_id": "1271111223220809728",
+       "oldest_id": "1270417572001976322",
+       "result_count": 3
+   }
+}
+```
+
+**Próximos pasos**
+
+[Personaliza tu solicitud usando la Referencia de la API](/es/x-api/posts/recent-search)
+
+[Consulta la lista completa de operadores de consulta](/es/x-api/posts/search/integrate/build-a-query "Consulta la lista completa de operadores de consulta")
+
+[Usa código de ejemplo para estos endpoints](https://github.com/xdevplatform/Twitter-API-v2-sample-code "Usa código de ejemplo para estos endpoints")

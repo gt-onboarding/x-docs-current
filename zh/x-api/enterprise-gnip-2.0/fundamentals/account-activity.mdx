@@ -1,0 +1,2425 @@
+---
+title: "Account Activity API：Enterprise"
+keywords: ["enterprise Account Activity API", "enterprise AAA", "Account Activity enterprise", "enterprise webhooks", "enterprise activity"]
+---
+
+<Note>
+  此端点已更新，现已包含帖子编辑相关的元数据。你可以在 [“Edit Posts” 基础知识页面](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)了解这些元数据的详细信息。 
+
+  此端点通常与 Direct Messages 端点配合使用。我们已经发布了新的 [v2 Direct Messages 端点](/zh/x-api/direct-messages/manage/introduction)。请注意，Enterprise 和 Premium Account Activity API 支持 v2 一对一消息，但尚不支持群组会话。   
+</Note>
+
+概览
+
+`Enterprise`
+
+Account Activity API 使你能够通过 webhooks 订阅与用户账号相关的实时活动。也就是说，你可以通过单一连接，从一个或多个你拥有或订阅的账号接收实时帖子、Direct Messages 以及其他账号事件。
+
+对于在你的 webhook 注册中的每个用户订阅，你都会收到下列所有相关活动：
+
+| 活动类型 |     |
+| :--- | :--- |
+| * 帖子（由用户发布）  <br />    <br />* 帖子删除（由用户执行）<br />* @ 提及（提及该用户）<br />* 回复（发给用户或由用户发送）<br />* 转发（由用户转发或转发该用户的帖子）<br />* 引用帖子（由用户引用或引用该用户的帖子）<br />* 对被引用帖子的转发（由用户转发或转发引用该用户的帖子）<br />* 点赞（由用户点赞或点赞该用户的帖子）<br />* 关注（由用户关注或关注该用户）  <br />    <br />* 取消关注（由用户执行） | * 屏蔽（由用户执行）<br />* 取消屏蔽（由用户执行）<br />* 静音（由用户执行）<br />* 取消静音（由用户执行）<br />* Direct Messages 已发送（由用户发送）<br />* Direct Messages 已接收（由用户接收）<br />* 正在输入指示器（发送给用户）<br />* 已读回执（发送给用户）<br />* 撤销订阅（由用户执行） |
+
+**请注意** - 我们不会通过 Account Activity API 投递首页时间线数据。请使用 [GET statuses/home&#95;timeline](https://developer.x.com/en/docs/x-api/v1/tweets/timelines/overview) 来获取这些数据。
+ 
+
+<div id="video-series">
+  #### 视频系列
+</div>
+
+观看我们的[四部分视频系列](https://www.youtube.com/watch?v=otPxejFhyy8\&index=0\&list=PLFKjcMIU2WshGG6Yj940XM7Z6BFs1zfBg)，快速掌握 Account Activity API！
+
+<iframe src="https://platform.x.com/embed/Tweet.html?dnt=false&embedId=twitter-widget-0&features=eyJ0ZndfdGltZWxpbmVfbGlzdCI6eyJidWNrZXQiOltdLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X2ZvbGxvd2VyX2NvdW50X3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9iYWNrZW5kIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19yZWZzcmNfc2Vzc2lvbiI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfZm9zbnJfc29mdF9pbnRlcnZlbnRpb25zX2VuYWJsZWQiOnsiYnVja2V0Ijoib24iLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X21peGVkX21lZGlhXzE1ODk3Ijp7ImJ1Y2tldCI6InRyZWF0bWVudCIsInZlcnNpb24iOm51bGx9LCJ0ZndfZXhwZXJpbWVudHNfY29va2llX2V4cGlyYXRpb24iOnsiYnVja2V0IjoxMjA5NjAwLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X3Nob3dfYmlyZHdhdGNoX3Bpdm90c19lbmFibGVkIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19kdXBsaWNhdGVfc2NyaWJlc190b19zZXR0aW5ncyI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdXNlX3Byb2ZpbGVfaW1hZ2Vfc2hhcGVfZW5hYmxlZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdmlkZW9faGxzX2R5bmFtaWNfbWFuaWZlc3RzXzE1MDgyIjp7ImJ1Y2tldCI6InRydWVfYml0cmF0ZSIsInZlcnNpb24iOm51bGx9LCJ0ZndfbGVnYWN5X3RpbWVsaW5lX3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9mcm9udGVuZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9fQ%3D%3D&frame=false&hideCard=false&hideThread=false&id=996790447048613888&lang=en&origin=https%3A%2F%2Fdeveloper.x.com%2Fen%2Fdocs%2Fx-api%2Fenterprise%2Faccount-activity-api%2Foverview&sessionId=81f4a0339cbd7bd77b669faa00bd3a7224bc4418&theme=light&widgetsVersion=2615f7e52b7e0%3A1702314776716&width=550px" height="400px" />
+
+<div id="feature-summary">
+  ### 功能概览
+</div>
+
+| 等级 | 价格 | 唯一订阅数 | Webhook 数量 | 可靠性和活动恢复 |
+| :--- | :--- | :--- | :--- | :--- |
+| Enterprise | [联系销售](/zh/x-api/enterprise-gnip-2.0/enterprise-gnip) | 最多 500+ | 3+  | [重试](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)和 [回放](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) |
+
+* 有问题？遇到错误？
+  * 请阅读我们的[常见问题](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions)或[错误排查指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions)。
+
+* 查看我们的示例代码：
+  * [Enterprise Account Activity API 仪表盘](https://github.com/xdevplatform/account-activity-dashboard-enterprise)，一个基于 Account Activity API Enterprise 等级的 Node Web 应用，用于展示 webhook 事件，并包含 [回放](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) 功能。
+  * [SnowBot 聊天机器人](https://github.com/xdevplatform/SnowBotDev)，一个基于 Enterprise Account Activity 和 Direct Message API 构建的 Ruby Web 应用。
+
+<div id="manage-webhooks-and-subscribed-users">
+  ## 管理 webhooks 和已订阅用户
+</div>
+
+**⏱ 阅读时间 10 分钟**
+
+Enterprise Account Activity API 会在与你的服务订阅的 X 账号相关的事件发生时，通过 webhook 向你提供 JSON 格式的消息。X 会将这些活动发送到你注册的 webhook。按照以下步骤，你将学习如何管理 webhooks 和已订阅用户。
+
+你将学习如何注册、查看和移除 webhooks 以及已订阅用户。我们会使用简单的 cURL 命令向各个 API 端点发起请求。cURL 是一个使用 URL 语法来发送或获取请求的命令行工具。
+
+你需要：
+
+* 一个已注册的 X 应用 - *[在此注册](https://developer.x.com/content/developer-twitter/en/apps)*
+* 一个 Bearer Token - *[了解更多](/zh/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)*
+* 一个可以通过 Challenge-Response Check (CRC) 的 webhook - *[了解更多](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks)*
+* 一个 Enterprise 账号 - *[在此申请](https://developer.x.com/en/products/x-api/enterprise)*
+
+*在开始之前，我们建议你先查看我们的 [GitHub 仓库](https://github.com/xdevplatform/account-activity-dashboard)，其中提供了一个示例 Web 应用和辅助脚本，帮助你开始使用 X 的 Account Activity API*
+
+<div id="managing-a-webhook">
+  #### 管理 webhook：
+</div>
+
+使用 webhook 可以让你通过单个连接订阅与某个用户账号相关的实时活动。 
+
+<Tabs>
+  <Tab title="添加 webhook">
+    我们先为给定的应用上下文注册一个新的 webhook URL。
+
+    在保存之前，该 URL 将通过 CRC 请求进行验证。注册 webhook 之后，请务必记录 webhook ID，因为你稍后会用到它。
+
+    在对以下内容做出相应替换后，将下面的 cURL 请求复制到命令行中执行：
+
+    * **URL** `<URL>` 例如：`https://yourdomain.com/webhooks/twitter/`
+
+    * **Consumer key** `<CONSUMER_KEY>` 例如：`xvz1evFS4wEEPTGEFPHBog`
+
+    * **Access token** `<ACCESS_TOKEN>` 例如：  `370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```
+      curl --request POST --url 'https://api.x.com/1.1/account_activity/webhooks.json?url=<URL>' --header 'authorization: OAuth oauth_consumer_key="<CONSUMER_KEY>", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="<ACCESS_TOKEN>", oauth_version="1.0"'
+      ```
+  </Tab>
+
+  <Tab title="查看 webhook">
+    我们将运行以下命令，来获取给定应用下所有已注册的 webhook URL 及其状态。
+
+    在对以下内容做出相应替换后，将下面的 cURL 请求复制到命令行中执行：
+
+    * **Bearer token** `<BEARER_TOKEN>` 例如：`AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+      ```curl --request GET --url https://api.x.com/1.1/account_activity/webhooks.json --header 'authorization: Bearer <BEARER_TOKEN>'
+      ```
+  </Tab>
+
+  <Tab title="移除 webhook">
+    若要从指定应用的配置中移除某个 webhook，在对以下内容做出相应替换后，将下面的 cURL 请求复制到命令行中执行：
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例如：`1234567890`
+
+    * **Consumer key** `<CONSUMER_KEY>` 例如：`xvz1evFS4wEEPTGEFPHBog`
+
+    * **Access token** `<ACCESS_TOKEN>` 例如：  `370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```curl --request DELETE --url https://api.x.com/1.1/account_activity/webhooks/<:WEBHOOK_ID>.json --header 'authorization: OAuth oauth_consumer_key="<CONSUMER_KEY>", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="<ACCESS_TOKEN>", oauth_version="1.0"'
+      ```
+  </Tab>
+</Tabs>
+
+<div id="managing-subscribed-users">
+  #### 管理已订阅用户：
+</div>
+
+注册 Webhook 之后，你可以向 Account Activity API 添加已订阅用户，以开始接收其账号活动。
+
+<Tabs>
+  <Tab title="添加订阅">
+    我们先从为用户添加订阅开始，这样你就能接收所有事件类型。
+
+    在进行以下修改后，将下面的 cURL 请求复制到命令行中执行：
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例如：`1234567890`
+
+    * **Consumer key 名称** `<CONSUMER_KEY>` 例如：`xvz1evFS4wEEPTGEFPHBog`
+
+    * **订阅用户的访问令牌** `<SUBSCRIBING_USER'S_ACCESS_TOKEN>` 例如：`370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```
+      curl --request POST --url https://api.x.com/1.1/account_activity/webhooks/<:WEBHOOK_ID>/subscriptions/all.json --header 'authorization: OAuth oauth_consumer_key="<CONSUMER_KEY>", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="<SUBSCRIBING_USER'S_ACCESS_TOKEN>", oauth_version="1.0"'
+      ```
+  </Tab>
+
+  <Tab title="查看订阅">
+    若要查看指定 webhook 的所有活动类型订阅列表，在进行以下修改后，将下面的 cURL 请求复制到命令行中执行：
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例如：`1234567890`
+
+    * **Bearer Token** `<BEARER_TOKEN>` 例如：`AAAAAAAAAAAA0%2EUifi76ZC9Ub0wn...`
+
+      ```
+      curl --request GET --url https://api.x.com/1.1/account_activity/webhooks/<:WEBHOOK_ID>/subscriptions/all/list.json --header 'authorization: Bearer <BEARER_TOKEN>'
+      ```
+  </Tab>
+
+  <Tab title="移除订阅">
+    停用后，请求用户的所有事件将不再发送到该 webhook URL。
+
+    若要在给定的用户上下文和应用中停用该订阅，在进行以下修改后，将下面的 cURL 请求复制到命令行中执行：
+
+    * **Webhook ID** `<:WEBHOOK_ID>` 例如：`1234567890`
+
+    * **Consumer key** `<CONSUMER_KEY>` 例如：`xvz1evFS4wEEPTGEFPHBog`
+
+    * **订阅用户的访问令牌** `<SUBSCRIBING_USER'S_ACCESS_TOKEN>` 例如：`370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb`
+
+      ```
+      curl --request DELETE --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID/subscriptions/all.json --header 'authorization: OAuth oauth_consumer_key="CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="SUBSCRIBED_USER'S_ACCESS_TOKEN", oauth_version="1.0"'
+      ```
+  </Tab>
+</Tabs>
+
+做得很好！现在你应该已经能够管理你的 Webhook 和已订阅用户了。
+
+<div id="referenced-articles">
+  #### 参考文章
+</div>
+
+* [Challenge-Response 检查（CRC）概览](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks)
+* [Account Activity 数据类型](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-data-object-structure)
+* [管理 Webhook 和订阅](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#managing-webhooks-and-subscriptions)
+
+<div id="a-video-walkthrough-of-the-account-activity-api">
+  ## Account Activity API 视频演示
+</div>
+
+在本视频中，您将了解 Account Activity API 的 Premium 和 Enterprise 级别所提供的功能。
+
+在观看完本视频后，您将了解以下功能：
+
+* 注册 webhook
+* 添加用户订阅
+* 移除用户订阅
+* 接收账户活动
+* 回放账户活动
+
+<iframe src="https://platform.x.com/embed/Tweet.html?dnt=false&embedId=twitter-widget-0&features=eyJ0ZndfdGltZWxpbmVfbGlzdCI6eyJidWNrZXQiOltdLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X2ZvbGxvd2VyX2NvdW50X3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9iYWNrZW5kIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19yZWZzcmNfc2Vzc2lvbiI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfZm9zbnJfc29mdF9pbnRlcnZlbnRpb25zX2VuYWJsZWQiOnsiYnVja2V0Ijoib24iLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X21peGVkX21lZGlhXzE1ODk3Ijp7ImJ1Y2tldCI6InRyZWF0bWVudCIsInZlcnNpb24iOm51bGx9LCJ0ZndfZXhwZXJpbWVudHNfY29va2llX2V4cGlyYXRpb24iOnsiYnVja2V0IjoxMjA5NjAwLCJ2ZXJzaW9uIjpudWxsfSwidGZ3X3Nob3dfYmlyZHdhdGNoX3Bpdm90c19lbmFibGVkIjp7ImJ1Y2tldCI6Im9uIiwidmVyc2lvbiI6bnVsbH0sInRmd19kdXBsaWNhdGVfc2NyaWJlc190b19zZXR0aW5ncyI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdXNlX3Byb2ZpbGVfaW1hZ2Vfc2hhcGVfZW5hYmxlZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9LCJ0ZndfdmlkZW9faGxzX2R5bmFtaWNfbWFuaWZlc3RzXzE1MDgyIjp7ImJ1Y2tldCI6InRydWVfYml0cmF0ZSIsInZlcnNpb24iOm51bGx9LCJ0ZndfbGVnYWN5X3RpbWVsaW5lX3N1bnNldCI6eyJidWNrZXQiOnRydWUsInZlcnNpb24iOm51bGx9LCJ0ZndfdHdlZXRfZWRpdF9mcm9udGVuZCI6eyJidWNrZXQiOiJvbiIsInZlcnNpb24iOm51bGx9fQ%3D%3D&frame=false&hideCard=false&hideThread=false&id=1204084171334832128&lang=en&origin=https%3A%2F%2Fdeveloper.x.com%2Fen%2Fdocs%2Fx-api%2Fenterprise%2Faccount-activity-api%2Fquick-start%2Fa-visual-walkthrough-of-the-account-activity-api&sessionId=b5b8e259a4c6287be2413de9059093170036fb30&theme=light&widgetsVersion=2615f7e52b7e0%3A1702314776716&width=550px" />
+
+* 有问题？遇到错误？
+  * 阅读我们的[常见问题](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions)或[错误排查指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#frequently-asked-questions)。
+
+* 查看我们的示例代码：
+  * [Enterprise Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard-enterprise)，一个 Node.js Web 应用，使用 Account Activity API 的 Enterprise 级别来展示 webhook 事件，并提供 [Replay](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) 功能。
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev)，一个基于 Enterprise Account Activity 和 Direct Message API 构建的 Ruby Web 应用。
+
+**Enterprise**
+
+<div id="getting-started-with-webhooks">
+  ## 使用 webhooks 入门
+</div>
+
+Account Activity API 是一个基于 webhook 的 API，它会将账户事件发送到你自行开发、部署并托管的 Web 应用。
+
+在你的事件消费应用开始接收 webhook 事件之前，有若干基础“管线”细节需要先处理。如下所述，你需要创建一个 X 应用、获取 Account Activity API 的访问权限，并开发一个用于消费 webhook 事件的 Web 应用。 
+
+<div id="1-create-a-x-app">
+  ### 1. 创建一个 X 应用。
+</div>
+
+* 使用已获批准的开发者账号在 [developer portal](/zh/resources/fundamentals/developer-portal) 中创建一个 [X app](/zh/resources/fundamentals/developer-apps)。如果你是代表公司创建应用，建议使用公司的 X 账号来创建该应用。要申请开发者账号，请[点击这里](/zh/resources/fundamentals/developer-apps)。
+* 在应用页面的 [permissions](/zh/resources/fundamentals/developer-apps#oauth-1-0a-app-permissions) 选项卡中启用“Read, Write and Access direct messages”。
+* 在“Keys and Access Tokens”选项卡中，记下你的应用的 Consumer Key (API Key) 和 Consumer Token (API Secret)。
+* 在同一选项卡中，为你的应用生成 [Access Token and Access Token Secret](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)。你需要这些访问令牌来注册你的 webhook URL，X 会向该 URL 发送账号事件。
+* 如果你不熟悉 [X Sign-in](/zh/resources/fundamentals/authentication#log-in-with-x) 以及用户上下文在 X API 中的工作方式，请查看 [Obtaining Access Tokens](https://dev.x.com/webhooks/access-tokens)。当你添加需要接收事件的账号时，你将使用该账号的访问令牌为其创建订阅。
+* 记录下你的应用的数字 ID，该 ID 可以在 [developer portal](/zh/resources/fundamentals/developer-portal) 的 [&quot;Apps&quot;](/zh/resources/fundamentals/developer-apps) 页面中看到。当你申请 Account Activity API 访问权限时，则需要该 App ID。
+   
+
+<div id="2-get-account-activity-api-access">
+  ### 2. 获取 Account Activity API 访问权限
+</div>
+
+创建 X 应用之后，下一步是申请 Account Activity API 的访问权限。 
+
+Account Activity API 仅面向 Enterprise 提供，因此你需要通过下面的链接提交申请。
+
+<Button href="https://developer.x.com/en/enterprise-application.html">
+  申请 Enterprise 访问权限
+</Button>
+
+<div id="3-develop-webhook-consumer-app">
+  ### 3. 开发 webhook 消费端应用
+</div>
+
+在你获得 Account Activity API 访问权限之后，你需要开发、部署并托管一个用于接收 X webhook 事件的 web 应用。 
+
+* 创建一个带有 URL 的 web 应用，将其用作 webhook 来接收事件。这是在你的服务器上部署的端点，用于监听传入的 X webhook 事件。 
+  * URI *path* 完全由你决定。下面示例是有效的：https://mydomain.com&#95;/service/listen&#95;
+
+  * 如果你要从多种来源接收 webhooks，一个常见的模式是：https://mydomain.com/webhook/twitter
+
+  * 注意，指定的 URL 不能包含端口号（https://mydomain.com:5000/NoWorkie）。
+
+* 正如我们的 [保护 Webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks) 指南中所述，首要步骤是编写代码来接收 X 的 Challenge Response Check（CRC）GET 请求，并返回格式正确的 JSON 响应。 
+
+* 注册你的 webhook URL。你需要向 /webhooks.json?url= 端点发起 POST 请求。当你发起该请求时，X 会向你的 web 应用发送 CRC 请求。当 webhook 成功注册后，响应中会包含一个 webhook id。稍后在向 Account Activity API 发起某些请求时需要使用这个 webhook id。 
+
+* X 会将账户 webhook 事件发送到你注册的 URL。请确保你的 web 应用支持处理传入事件的 POST 请求。这些事件将使用 JSON 编码。示例 webhook JSON 负载请参见 [此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-data-object-structure)。
+
+* 当你的 web 应用就绪后，下一步是添加需要接收活动的账户。在添加（或删除）账户时，你需要发起引用该账户 id 的 POST 请求。更多信息请参阅我们的[添加订阅指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#managing-webhooks-and-subscriptions)。
+
+<div id="4-validate-setup">
+  ### 4. 验证设置
+</div>
+
+* 要验证你的应用和 webhook 是否配置正确，请给你的应用已订阅的某个 X 账号发布的帖子点一次赞（favorite）。对于你所订阅的账号每收到的一个点赞，你都应通过对你的 webhook URL 发起的 POST 请求收到一条 `favorite_events`。
+* 请注意，在添加订阅后，事件开始被投递可能最多需要 10 秒。
+
+**重要说明**
+
+* 在注册你的 webhook URL 时，你的 Web 应用必须使用其 consumer token 和 secret *以及应用所有者的用户访问令牌和 secret* 进行身份验证。 
+
+* 所有传入的 Direct Messages 都会通过 webhooks 投递。所有通过 [POST direct&#95;messages/events/new (message&#95;create)](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) 发送的 Direct Messages 也会通过 webhooks 投递。这样可以让你的 Web 应用获知经由不同客户端发送的 Direct Messages。
+
+* 请注意，每个 webhook 事件都包含一个 for&#95;user&#95;id 用户 ID，用于指示该事件是针对哪个订阅投递的。
+
+* 如果有两个用户在同一个会话中使用你的 Web 应用收发 Direct Messages，你的 webhook 将收到两条重复事件（每个用户一条）。你的 Web 应用应该考虑到这一点。 
+
+* 如果你有多个 Web 应用共享同一个 webhook URL，且同一用户映射到了每个应用，则相同的事件会多次发送到你的 webhook（每个 Web 应用各一次）。
+
+* 在某些情况下，你的 webhook 可能会收到重复事件。你的 webhook 应用应具备容错能力，并根据事件 ID 进行去重。
+
+* 不要期望 Quick Reply 响应会直接紧跟在请求之后。用户可以选择忽略 Quick Reply 请求，并通过传统 Direct Message 进行回复。用户也可能对其在消息线程中先前未回复的请求提供 Quick Reply 响应。
+
+* 参见示例代码：
+  * [Enterprise Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard-enterprise)，一个使用 Account Activity API Enterprise 等级并展示 webhook 事件的 Node Web 应用，包含 [Replay](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api) 功能。
+
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev)，一个基于 Account Activity 和 Direct Message APIs 构建的 Ruby Web 应用。该代码库包含一个 [script](https://github.com/xdevplatform/SnowBotDev/wiki/Account-Activity-API-setup-script) 脚本，可帮助设置 Account Activity API webhooks。
+
+<div id="securing-webhooks">
+  ## 保护 webhook 安全
+</div>
+
+X 基于 webhook 的 API 提供两种方法，帮助你验证 webhook 服务器的安全性：
+
+1. 挑战-响应检查使 X 能够确认接收 webhook 事件的 Web 应用的所有权。 
+2. 每个 POST 请求中的签名请求头使你能够确认传入的 webhook 确实来自 X。
+    
+
+<div id="challenge-response-checks">
+  ### 挑战-响应检查
+</div>
+
+为了验证你既是应用所有者也是 webhook URL 的所有者，X 会执行一次 Challenge-Response Check（CRC，挑战-响应检查），不要将其与循环冗余校验混淆。当发送 CRC 时，X 会向你的 Web 应用程序发送一个带有 *`crc_token`* 参数的 GET 请求。收到该请求后，你的 Web 应用程序需要基于 *`crc_token`* 参数和你的应用的 Consumer Secret（如下所示）生成一个加密的 `response_token`。`response_token` 必须按 JSON 格式进行编码（见下方示例），并在三秒内返回。成功后，会返回一个 webhook `id`。 
+
+在你注册 webhook URL 时会发送 CRC，因此实现 CRC 响应代码是首要的基础步骤。一旦你的 webhook 建立，X 将从上次成功收到响应的时间起，大约每 24 小时触发一次 CRC。你的应用也可以在需要时，通过使用 webhook `id` 发起一个 PUT 请求来触发 CRC。在你开发 webhook 应用、部署新代码并重启服务之后，触发 CRC 非常有用。 
+
+应当预期每个传入的 CRC 请求的 *`crc_token`* 都会发生变化，并且在计算中应将其作为消息内容使用，将你的 Consumer Secret 作为密钥。
+
+如果在 3 秒内未返回响应，或响应无效，那么将不再向已注册的 webhook 发送事件。
+
+<div id="the-crc-request-will-occur">
+  #### CRC 请求将在以下情况下触发：
+</div>
+
+* 当注册 webhook URL 时。
+* 大约每隔 *一小时* 验证一次你的 webhook URL。
+* 你可以通过发起 PUT 请求手动触发 CRC。在开发 webhook 客户端时，你应当在开发 CRC 响应的同时规划如何手动触发 CRC。 
+   
+
+<div id="response-requirements">
+  #### 响应要求：
+</div>
+
+* 使用 `crc_token` 和应用的 Consumer Secret 生成的、经 base64 编码的 HMAC-SHA-256 哈希值
+* 有效的 response&#95;token，且为 JSON 格式。
+* 延迟小于 3 秒。
+* HTTP 200 响应状态码。
+   
+
+<div id="language-specific-hmac-libraries">
+  #### 各语言的 HMAC 库：
+</div>
+
+* [Java/Scala](https://docs.oracle.com/javase/8/docs/api/index.html?javax/crypto/Mac.html)
+* [Ruby](http://ruby-doc.org/stdlib-2.1.0/libdoc/openssl/rdoc/OpenSSL/HMAC.html)
+* [Node.js](https://nodejs.org/api/crypto.html#crypto_class_hmac)
+* [Python](https://docs.python.org/2/library/hmac.html)
+
+<div id="example-response-token-generation-in-python">
+  #### 使用 Python 生成响应令牌的示例：
+</div>
+
+以下示例在一个 Python 2.7 的 Flask Web 应用中定义了一个路由，用于正确处理挑战响应检查（challenge response check）。
+
+```
+import base64
+import hashlib
+import hmac
+import json
+
+
+\# 为 GET 请求定义路由
+@app.route('/webhooks/twitter', methods=\['GET'\])
+def webhook_challenge():
+
+  # 根据传入的令牌和您的消费者密钥创建 HMAC SHA-256 哈希值
+  sha256\_hash\_digest = hmac.new(TWITTER\_CONSUMER\_SECRET, msg=request.args.get('crc_token'), digestmod=hashlib.sha256).digest()
+
+  # 使用 base64 编码的哈希值构造响应数据
+  response = {
+    'response\_token': 'sha256=' + base64.b64encode(sha256\_hash_digest)
+  }
+
+  # 返回格式正确的 JSON 响应
+  return json.dumps(response)
+```
+
+<div id="example-json-response">
+  #### 示例 JSON 响应：
+</div>
+
+按上文定义好路由后，当你在浏览器中访问 [https://your-app-domain/webhooks/twitter?crc&#95;token=foo](https://your-app-domain/webhooks/twitter?crc_token=foo) 时，你的 Web 应用应返回类似于下面的响应。
+
+```
+{
+  "response_token": "sha256=x0mYd8hz2goCTfcNAaMqENy2BFgJJfJOb4PdvTffpwg="
+}
+```
+
+<div id="other-examples">
+  #### 其他示例：
+</div>
+
+* [此处](https://github.com/xdevplatform/account-activity-dashboard/blob/master/helpers/security.js) 是一个使用 Node/JS 编写的 CRC 响应方法示例。
+* [此处](https://github.com/xdevplatform/SnowBotDev/blob/master/app/controllers/snow_bot_dev_app.rb) 是一个使用 Ruby 编写的 CRC 响应方法示例（参见其中的 *generate&#95;crc&#95;response* 方法以及用于接收 CRC 事件的 /GET 路由）。
+
+<div id="optional-signature-header-validation">
+  ### 可选的签名请求头验证
+</div>
+
+当接收来自 X 的 POST 请求、发送 GET 请求创建 webhook，或发送 GET 请求执行手动 CRC 时，会在请求头中以 x-twitter-webhooks-signature 传递一个哈希签名。该签名可用于验证数据来源确实为 X。POST 请求的哈希签名以 sha256= 开头，表示使用 HMAC SHA-256 对你的 X 应用 Consumer Secret 和有效负载进行加密。GET 请求的哈希基于查询参数字符串 crc&#95;token=$token&amp;nonce=$nonce 计算得出。 
+
+**验证请求的步骤**
+
+1. 使用你的 consumer secret 和传入的有效负载正文创建一个哈希值。
+2. 将生成的哈希与 base64 编码的 x-twitter-webhooks-signature 值进行比较。使用类似 [compare&#95;digest](https://docs.python.org/2/library/hmac.html) 的方法以降低遭受计时攻击的风险。
+
+<div id="additional-security-guidelines">
+  ### 其他安全指南
+</div>
+
+以下是你在为 Web 应用进行安全防护时需要额外考虑的安全指南。未实施这些指南不会阻止你的 webhook 正常运行，但 X 信息安全团队强烈建议你采取这些措施。如果你对下面的建议不太熟悉，请咨询你的服务器管理员。
+
+<div id="x-aggregate-network-blocks">
+  #### X 汇总网段
+</div>
+
+为了进一步提高安全性，建议将以下汇总网段添加到允许列表中：
+
+* 199.59.148.0/22
+
+* 199.16.156.0/22
+
+* 192.133.77.0/26
+
+* 64.63.15.0/24
+
+* 64.63.31.0/24
+
+* 64.63.47.0/24
+
+* 202.160.128.0/24
+
+* 202.160.129.0/24
+
+* 202.160.130.0/24
+
+<div id="recommended-server-configurations">
+  #### 推荐的服务器配置
+</div>
+
+* 在 [ssllabs.com](http://ssllabs.com/) 测试中获得 “A” 评级
+* **启用 TLS 1.2**
+* 启用前向保密性（Forward Secrecy）
+* 关闭 SSLv2
+* 关闭 SSLv3（由于 POODLE 漏洞）
+* 关闭 TLS 1.0
+* 关闭 TLS 1.1
+* 关闭 TLS 压缩（TLS Compression）
+* 如不轮换会话票据密钥，请关闭 Session Tickets。
+* 在 SSL 配置中将 “ssl&#95;prefer&#95;server&#95;ciphers” 或 “SSLHonorCipherOrder” 选项设置为 “on”。
+* 确保密码套件列表为当前推荐的现代列表，例如：
+  `ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES128-SHA256:AES128-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA:ECDHE-RSA-DES-CBC3-SHA:DES-CBC3-SHA`
+
+<div id="managing-webhooks-and-subscriptions">
+  ## 管理 Webhook 和订阅
+</div>
+
+<div id="creating-changing-webhooks">
+  ### 创建和更改 webhook
+</div>
+
+要更改 webhook URL，必须先删除现有的 webhook，然后创建一个新的。请注意，这样做之后，你需要将用户订阅重新添加到新的 webhook 中。
+
+<div id="webhook-configuration-management-endpoints">
+  #### Webhook 配置管理端点：
+</div>
+
+|     |     |
+| :--- | :--- |
+| **方法** | Enterprise |
+| 注册 webhook URL / 生成 webhook&#95;id | [POST webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) |
+| 返回所有 webhook URL 及其状态 | [GET webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |
+| 删除应用当前的 webhook 配置 | [DELETE webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) |
+| 手动触发一次 CRC 请求 | [PUT webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) |
+
+<div id="why-cant-i-just-update-the-webhook-url">
+  #### 为什么我不能直接更新 webhook URL？
+</div>
+
+为什么 webhook 配置是不可更改的？X 非常重视安全性。如果你的 webhook URL 被更改，就有可能意味着你的应用的 consumer key 和 consumer secret 已经泄露。通过要求你创建一个新的 webhook 配置，你也必须为用户的事件重新创建订阅。这个过程需要使用恶意第三方不太可能持有的访问令牌。这样一来，其他第三方获取你的用户隐私信息的可能性就会降低。
+ 
+
+<div id="adding-removing-user-subscriptions">
+  ### 添加和移除用户订阅
+</div>
+
+Enterprise 级别支持成千上万的订阅。如果你已经有客户经理，如有任何疑问，请联系他们。要申请 Enterprise API 访问权限，请 [点击这里](https://developer.x.com/en/products/x-api/enterprise)。 
+
+<div id="subscription-management-endpoints">
+  #### 订阅管理端点
+</div>
+
+|     |     |
+| :--- | :--- |
+| 方法 | Enterprise |
+| 添加新的用户订阅 | [POST webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) |
+| 获取用户订阅 | [GET webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) |
+| 返回所有当前激活订阅的列表 | [GET webhooks/:webhook&#95;id/subscriptions/all/list](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |
+| 使用仅应用（App-only）OAuth 停用用户订阅 | [DELETE webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |
+
+Account Activity API：Enterprise
+
+<Note>
+  **请注意**： 
+
+  在你开始使用该 API 之前，X 需要先为你的开发者应用启用对 Account Activity API 的访问权限。为此，请务必将你打算用于身份验证的 App ID 提供给你的客户经理或技术支持团队。
+</Note>
+
+[Account Activity API](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity) 由一组端点组成，这些端点允许你创建和管理用户订阅，并通过单一连接接收所有已订阅账户的实时账户活动。 
+
+Account Activity API 提供两种身份验证方法（[OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 和 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)）。你应当使用哪种身份验证方法取决于你正在调用的端点。
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **Description** | **Endpoint ** | OAuth 1.0a  <br />(user context) | OAuth 2.0 Bearer Token (application-only) |
+| 在给定应用上下文中注册新的 webhook URL | [POST account&#95;activity/webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks) | ✓   |     |
+| 返回给定应用的所有 URL 及其状态 | [GET account&#95;activity/webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |     | ✓   |
+| 为给定 webhook 的 URL 触发质询响应检查（CRC） | [PUT account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) | ✓   |     |
+| 将应用订阅到某个用户的账号事件 | [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 返回当前处于活动状态的订阅数量 | [GET account&#95;activity/subscriptions/count](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |     | ✓   |
+| 检查某个 webhook 配置是否已订阅某个用户的事件 | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 返回当前处于活动状态的订阅列表 | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all-list) |     | ✓   |
+| 删除一个 webhook | [DELETE account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) | ✓   |     |
+| [DEPRECATED] 停用给定用户上下文和应用的订阅 | [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) | ✓ * |     |
+| 使用仅应用程序 OAuth 停用订阅 | [DELETE /account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |     | ✓   |
+| 将活动重新发送到 webhook | [POST /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#replay-api) |     | ✓   |
+
+*&#95; 要进行身份验证，需要订阅用户的访问令牌。 &#95;
+
+对于那些需要 OAuth 1.0a 用户上下文身份验证的端点，你需要提供以下凭证来对请求进行身份验证： 
+
+* Consumer Keys（API Key 和 Secret）
+* Access Tokens（访问令牌和 Secret）
+
+对于下面这三个端点，你是在应用的上下文中执行写操作（不涉及任何 X 用户）。因此，你需要提供的 Access Tokens 是属于你的开发者应用的访问令牌。你可以在 [developer portal](https://developer.x.com/en/portal/projects-and-apps) 中应用的 “Keys and tokens” 选项卡下直接生成这些访问令牌。  
+
+* [POST account&#95;activity/webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks)：为给定的应用上下文注册一个新的 webhook URL
+* [PUT account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id)：对给定 webhook 的 URL 触发一次挑战-响应检查（CRC）
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id)：删除一个 webhook
+
+另一方面，对于下面三个端点，你通过发起的请求将允许你的应用代表某个 X 用户访问受保护的数据（例如私信）。因此，你必须提供属于相关订阅用户的访问令牌。所需的访问令牌可以使用三方 OAuth 流程获取（参见 [OAuth 1.0a: how to obtain a user’s Access Tokens](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)）。这些端点在上表中用星号（*）标出。
+
+* [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all)：为应用订阅某个用户账号的事件
+* [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all)：检查某个 webhook 配置是否已订阅某个用户的事件
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated)：为指定的用户上下文和应用停用订阅 [已弃用]
+
+<Note>
+  **请注意**： 
+
+  确保你的开发者应用已启用 “Read, Write, and Direct Messages”。你可以在开发者账号的 [Projects &amp; Apps 区域](https://developer.x.com/en/portal/projects-and-apps)中，在所选开发者应用的 “App permissions” 下更改此设置。更改权限设置后，你需要重新生成应用凭证。
+</Note>
+
+包含所有可用于 Account Activity API 的端点列表（包括相关说明以及带有身份验证实现示例的 cURL 请求示例），可以在 [API 参考文档](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index)中找到。
+
+如需更多信息，请查看 XDev 提供的[示例 Web 应用和辅助脚本](https://github.com/xdevplatform/account-activity-dashboard-enterprise)，以便开始使用 Enterprise Account Activity API。
+
+<Note>
+  **请注意**： 
+
+  在你开始使用该 API 之前，X 需要为你的开发者应用启用对 Account Activity API 的访问权限。为此，请务必将你计划用于身份验证的 App ID 提供给你的客户经理或技术支持团队。
+</Note>
+
+[Account Activity API](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity) 由一组端点组成，这些端点允许你创建和管理用户订阅，通过单一连接实时接收所有已订阅账号的账号活动。 
+
+Account Activity API 提供两种身份验证方法（[OAuth 1.0a](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 和 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#oauth-2-0)）。你应当使用哪种身份验证方法，取决于你正在使用的具体端点。
+
+|     |     |     |     |
+| :--- | :--- | :--- | :--- |
+| **说明** | **端点** | OAuth 1.0a  <br />（用户上下文） | OAuth 2.0 Bearer Token（仅应用） |
+| 为指定应用上下文注册一个新的 webhook URL | [POST account&#95;activity/webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks) | ✓   |     |
+| 返回指定应用的所有 URL 及其状态 | [GET account&#95;activity/webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |     | ✓   |
+| 为给定 webhook 的 URL 触发一次质询响应检查（CRC） | [PUT account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) | ✓   |     |
+| 将应用订阅到某个用户账号的事件 | [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 返回当前处于活动状态的订阅数量 | [GET account&#95;activity/subscriptions/count](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |     | ✓   |
+| 检查某个 webhook 配置是否已订阅某个用户的事件 | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) | ✓ * |     |
+| 返回当前处于活动状态的订阅列表 | [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all-list) |     | ✓   |
+| 删除一个 webhook | [DELETE account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) | ✓   |     |
+| [DEPRECATED] 为给定的用户上下文和应用停用订阅 | [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) | ✓ * |     |
+| 使用仅应用 OAuth 停用订阅 | [DELETE /account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |     | ✓   |
+| 将活动重新发送到某个 webhook | [POST /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#replay-api) |     | ✓   |
+
+*&#95; 身份验证需要使用订阅用户的访问令牌。&#95;
+
+对于那些需要 OAuth 1.0a 用户上下文身份验证的端点，你需要提供以下凭证来对请求进行身份验证： 
+
+* Consumer Keys（API Key 和 Secret）
+* Access Tokens（Access Token 和 Secret）
+
+对于下面这三个端点，你是在应用上下文中执行写操作（不涉及任何 X 用户）。因此，你需要提供的 Access Tokens 是属于你的开发者应用的那些。你可以直接在 [developer portal](https://developer.x.com/en/portal/projects-and-apps) 中你的应用的 “Keys and tokens” 选项卡下生成这些令牌。  
+
+* [POST account&#95;activity/webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks)：为指定的应用上下文注册一个新的 webhook URL
+* [PUT account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id)：为给定 webhook 的 URL 触发一次质询响应检查（CRC）
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id)：删除一个 webhook
+
+另一方面，对于下面这三个端点，你发起的是一种请求，允许你的应用代表某个 X 用户访问受保护的数据（例如私信）。因此，你必须提供属于该订阅用户的 Access Tokens。所需的 Access Tokens 可以通过三方 OAuth 流程获取（参见 [OAuth 1.0a: how to obtain a user’s Access Tokens](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)）。这些端点在上表中用星号（*）标出。
+
+* [POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all)：将应用订阅到用户账号事件
+* [GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all)：检查某个 webhook 配置是否已订阅用户事件
+* [DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated)：停用针对所提供用户上下文和应用的订阅 [已弃用]
+
+<Note>
+  **请注意**： 
+
+  请确保你的开发者应用已启用 “Read, Write, and Direct Messages”。你可以在开发者账号的 [Projects &amp; Apps 部分](https://developer.x.com/en/portal/projects-and-apps)中，在所选开发者应用的 “App permissions” 下更改此设置。更改权限设置后，你需要重新生成应用凭据。
+</Note>
+
+你可以在 [API 参考文档](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index) 中找到 Account Activity API 提供的所有端点列表，包括相关描述以及带有认证实现示例的 cURL 请求示例。
+
+如需更多信息，可以查看 XDev 的 [示例 Web 应用和辅助脚本](https://github.com/xdevplatform/account-activity-dashboard-enterprise)，以开始使用 Enterprise Account Activity API。
+
+<div id="retries">
+  ## 重试
+</div>
+
+`Enterprise`
+
+Account Activity API 的 Enterprise 级别有一个优势，就是为 webhook 事件提供重试机制。如果未收到表示“成功”的 200 HTTP 响应码，X 服务器将启动重试机制，在五分钟内最多重新发送该 webhook 事件三次。此 webhook 事件重试服务有助于在发生网络问题，以及在客户端服务中断或发布部署期间，提升可靠性并实现事件恢复。
+ 
+
+<div id="what-are-retries">
+  ### 什么是重试？
+</div>
+
+当客户端的 Web 应用没有针对某个账户活动 webhook 事件返回“成功”的 200 响应时，Account Activity API 会提供重试功能。当客户端没有确认成功接收到某个事件时，X 会认为该事件未被接收。如果收到的是非 200 响应，或者在三秒内没有收到响应，或者根本没有收到任何响应，我们会重试该请求，并将该请求保持打开三秒。这意味着，在两次尝试中，你总共有大约五秒时间来响应，以接收我们尝试发送到你的 webhook URL 的活动。如果你的服务器没有响应或返回了临时错误，我们会在五分钟内持续重试。总共会有三次重试尝试来完成验证。这提供了冗余和保障，以确保你能接收到所有 webhook 事件。请注意，启用了重试的订阅，其 webhook 上所有已订阅用户的任何/所有活动都会收到被重试的事件。
+
+如果你在这八次尝试内没有完成验证，该活动将不再通过 Account Activity API 提供。 
+
+<div id="retry-timeline">
+  ### 重试时间线
+</div>
+
+Account Activity API 会在五分钟内最多重试三次，直到收到 200 响应。有关更多详细信息，请参阅下表。大约五分钟之后，该活动将无法通过 Account Activity API 重新发送。此时需要使用其他 X 端点来收集遗漏的数据。例如，可以使用 [search APIs](/zh/x-api/enterprise-gnip-2.0/fundamentals/search-api) 来检索相关的帖子、转帖、引用帖子、提及和回复。丢失的私信可以通过 [此端点](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) 进行检索。
+
+<div id="retries-timeline">
+  #### 重试时间线
+</div>
+
+|     |
+| :--- |
+| 活动创建后，Account Activity API 会向 webhook URL 发送 POST 请求，并在三秒后超时。 |
+| 在上一次超时结束后三秒，Account Activity API 再次向 webhook URL 发送 POST 请求，并在三秒后超时。 |
+| 在上一次超时结束后 27 秒，Account Activity API 再次向 webhook URL 发送 POST 请求，并在三秒后超时。 |
+| 在上一次超时结束后 242 秒，Account Activity API 再次向 webhook URL 发送 POST 请求，并在三秒后超时。 |
+| 此后，Account Activity API 将停止尝试发送 POST。Client 必须使用 X 的其他接口来恢复数据。 |
+
+<div id="account-activity-data-object-structure">
+  ## Account Activity 数据对象结构
+</div>
+
+| Object | Details |
+| :--- | :--- |
+| for&#95;user&#95;id | 标识与该事件相关联的订阅用户。 |
+| is&#95;blocked&#95;by | （条件字段）仅当其他用户提及你订阅的用户时才会显示。仅在帖子提及事件中且为 true 时才会包含。 |
+| source | 执行动作的用户。例如，进行关注、拉黑或静音操作的用户即为源用户。 |
+| target | 动作所针对的用户。例如，被关注、被拉黑或被静音的用户即为目标用户。 |
+
+**可用活动**
+
+| Message Type | Details |
+| :--- | :--- |
+| [tweet&#95;create&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#tweet-create-events-posts-retweets-replies-quotetweets) | 当由订阅用户发起或针对订阅用户执行以下任一操作时产生的帖子状态负载：发帖、转发、回复、@ 提及、引用帖子、对引用帖子的转发。 |
+| [favorite&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#favorite-events) | 包含用户和目标的收藏（点赞）事件状态。 |
+| [follow&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#follow-events) | 包含用户和目标的关注事件。 |
+| [unfollow&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#unfollow-events) | 包含用户和目标的取消关注事件。 |
+| [block&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#block-events) | 包含用户和目标的拉黑事件。 |
+| [unblock&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#unblock-events) | 包含用户和目标的取消拉黑事件。 |
+| [mute&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#mute-events) | 包含用户和目标的静音事件。 |
+| [unmute&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#unmute-events) | 包含用户和目标的取消静音事件。 |
+| [user&#95;event](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#user-event) | 当用户移除应用授权且订阅被自动删除时发送的撤销事件。 |
+| [direct&#95;message&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-events) | 当私信被发送或接收时，包含用户和目标的私信状态。 |
+| [direct&#95;message&#95;indicate&#95;typing&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-indicate-typing-events) | 包含用户和目标的私信“正在输入”事件。 |
+| [direct&#95;message&#95;mark&#95;read&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-mark-read-events) | 包含用户和目标的私信已读事件。 |
+| [tweet&#95;delete&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#tweet-delete-events) | 已删除帖子的通知，有助于更轻松地维护合规性。 |
+
+**负载示例**
+
+请参阅下方针对上表中每个 Account Activity 事件的负载示例。
+
+<div id="tweet_create_events-posts-retweets-replies-quotetweets">
+  #### tweet&#95;create&#95;events（帖子、转帖、回复、引用转帖）
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"tweet_create_events": [
+	  {
+		<Tweet Object>
+	  }
+	]
+}
+```
+
+<div id="tweet_create_events-mentions">
+  #### tweet&#95;create&#95;events (@提及)
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"user_has_blocked": "false",
+	"tweet_create_events": [
+	  {
+		<Tweet Object>
+	  }
+	]
+}
+```
+
+<div id="favorite_events">
+  #### favorite&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"favorite_events": [{
+		"id": "a7ba59eab0bfcba386f7acedac279542",
+		"created_at": "Mon Mar 26 16:33:26 +0000 2018",
+		"timestamp_ms": 1522082006140,
+		"favorited_status": {
+			<Tweet Object>
+		},
+		"user": {
+			<User Object>
+		}
+	}]
+}
+```
+
+<div id="follow_events">
+  #### follow&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"follow_events": [{
+			"type": "follow",
+			"created_timestamp": "1517588749178",
+			"target": {
+				<User Object >
+			},
+			"source": {
+				< User Object >
+			}
+		]
+	}
+}
+```
+
+<div id="unfollow_events">
+  #### unfollow&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"follow_events": [{
+			"type": "unfollow",
+			"created_timestamp": "1517588749178",
+			"target": {
+				<User Object >
+			},
+			"source": {
+				< User Object >
+			}
+		]
+	}
+}
+```
+
+<div id="block_events">
+  #### block&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"block_events": [{
+		"type": "block",
+		"created_timestamp": "1518127020304",
+		"source": {
+			<User Object>
+		},
+		"target": {
+			<User Object>
+		}
+	}]
+}
+```
+
+<div id="unblock_events">
+  #### unblock&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"block_events": [{
+		"type": "unblock",
+		"created_timestamp": "1518127020304",
+		"source": {
+			<User Object>
+		},
+		"target": {
+			<User Object>
+		}
+	}]
+}
+```
+
+<div id="mute_events">
+  #### mute&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"mute_events": [
+		{
+			"type": "mute",
+		  	"created_timestamp": "1518127020304",
+			"source": {
+				<User Object>
+			},
+			"target": {
+				<User Object>
+			}
+		}
+	]
+}
+```
+
+<div id="unmute_events">
+  #### unmute&#95;events
+</div>
+
+```
+{
+	"for_user_id": "2244994945",
+	"mute_events": [
+		{
+			"type": "unmute",
+		  	"created_timestamp": "1518127020304",
+			"source": {
+				<User Object>
+			},
+			"target": {
+				<User Object>
+			}
+		}
+	]
+}
+```
+
+<div id="user_event">
+  #### user&#95;event
+</div>
+
+```
+{
+	"user_event": {
+		"revoke": {
+			"date_time": "2018-05-24T09:48:12+00:00",
+			"target": {
+				"app_id": "13090192"
+			},
+			"source": {
+				"user_id": "63046977"
+			}
+		}
+	}
+}
+```
+
+<div id="direct_message_events">
+  #### direct&#95;message&#95;events
+</div>
+
+```
+{
+  	"for_user_id": "4337869213",
+	"direct_message_events": [{
+		"type": "message_create",
+		"id": "954491830116155396",
+		"created_timestamp": "1516403560557",
+		"message_create": {
+			"target": {
+				"recipient_id": "4337869213"
+			},
+			"sender_id": "3001969357",
+			"source_app_id": "13090192",
+			"message_data": {
+				"text": "你好世界！",
+				"entities": {
+					"hashtags": [],
+					"symbols": [],
+					"user_mentions": [],
+					"urls": []
+				}
+			}
+		}
+	}],
+	"apps": {
+		"13090192": {
+			"id": "13090192",
+			"name": "FuriousCamperTestApp1",
+			"url": "https://x.com/furiouscamper"
+		},
+		"users": {},
+		"3001969357": {
+			"id": "3001969357",
+			"created_timestamp": "1422556069340",
+			"name": "Jordan Brinks",
+			"screen_name": "furiouscamper",
+			"location": "Boulder, CO",
+			"description": "Alter Ego - X PE opinions-are-my-own",
+			"url": "https://t.co/SnxaA15ZuY",
+			"protected": false,
+			"verified": false,
+			"followers_count": 22,
+			"friends_count": 45,
+			"statuses_count": 494,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/851526626785480705/cW4WTi7C_normal.jpg"
+		},
+		"4337869213": {
+			"id": "4337869213",
+			"created_timestamp": "1448312972328",
+			"name": "Harrison Test",
+			"screen_name": "Harris_0ff",
+			"location": "Burlington, MA",
+			"protected": false,
+			"verified": false,
+			"followers_count": 8,
+			"friends_count": 8,
+			"profile_image_url": "null",
+			"statuses_count": 240,
+			"profile_image_url_https": "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"
+		}
+	}
+}
+```
+
+<div id="direct_message_indicate_typing_events">
+  #### direct&#95;message&#95;indicate&#95;typing&#95;events
+</div>
+
+```
+{
+	"for_user_id": "4337869213",
+	"direct_message_indicate_typing_events": [{
+		"created_timestamp": "1518127183443",
+		"sender_id": "3284025577",
+		"target": {
+			"recipient_id": "3001969357"
+		}
+	}],
+	"users": {
+		"3001969357": {
+			"id": "3001969357",
+			"created_timestamp": "1422556069340",
+			"name": "Jordan Brinks",
+			"screen_name": "furiouscamper",
+			"location": "Boulder, CO",
+			"description": "Alter Ego - X PE opinions-are-my-own",
+			"url": "https://t.co/SnxaA15ZuY",
+			"protected": false,
+			"verified": false,
+			"followers_count": 23,
+			"friends_count": 47,
+			"statuses_count": 509,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/851526626785480705/cW4WTi7C_normal.jpg"
+		},
+		"3284025577": {
+			"id": "3284025577",
+			"created_timestamp": "1437281176085",
+			"name": "Bogus Bogart",
+			"screen_name": "bogusbogart",
+			"protected": true,
+			"verified": false,
+			"followers_count": 1,
+			"friends_count": 4,
+			"statuses_count": 35,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/763383202857779200/ndvZ96mE_normal.jpg"
+		}
+	}
+}
+```
+
+<div id="direct_message_mark_read_events">
+  #### direct&#95;message&#95;mark&#95;read&#95;events
+</div>
+
+```
+{
+	"for_user_id": "4337869213",
+	"direct_message_mark_read_events": [{
+		"created_timestamp": "1518452444662",
+		"sender_id": "199566737",
+		"target": {
+			"recipient_id": "3001969357"
+		},
+		"last_read_event_id": "963085315333238788"
+	}],
+	"users": {
+		"199566737": {
+			"id": "199566737",
+			"created_timestamp": "1286429788000",
+			"name": "Le Braat",
+			"screen_name": "LeBraat",
+			"location": "Denver, CO",
+			"description": "data by day @X, design by dusk",
+			"protected": false,
+			"verified": false,
+			"followers_count": 299,
+			"friends_count": 336,
+			"statuses_count": 752,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/936652894371119105/YHEozVAg_normal.jpg"
+		},
+		"3001969357": {
+			"id": "3001969357",
+			"created_timestamp": "1422556069340",
+			"name": "Jordan Brinks",
+			"screen_name": "furiouscamper",
+			"location": "Boulder, CO",
+			"description": "Alter Ego - X PE opinions-are-my-own",
+			"url": "https://t.co/SnxaA15ZuY",
+			"protected": false,
+			"verified": false,
+			"followers_count": 23,
+			"friends_count": 48,
+			"statuses_count": 510,
+			"profile_image_url": "null",
+			"profile_image_url_https": "https://pbs.twimg.com/profile_images/851526626785480705/cW4WTi7C_normal.jpg"
+		}
+	}
+}
+```
+
+<div id="tweet_delete_events">
+  #### tweet&#95;delete&#95;events
+</div>
+
+```
+{
+    "for_user_id": "930524282358325248",
+    "tweet_delete_events": [
+{
+        "status": {
+            "id": "1045405559317569537",
+            "user_id": "930524282358325248"
+        },
+        "timestamp_ms": "1432228155593"
+    }
+   ]
+}
+```
+
+<div id="account-activity-replay-api">
+  ## Account Activity Replay API
+</div>
+
+`Enterprise`
+
+Account Activity Replay API 是一款数据恢复工具，允许你检索最早可追溯到五天前的事件。它应在你的 [webhook](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) 服务器错过事件时用于恢复数据——无论是因为断开连接的时间超过了[重试时间窗口](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)，还是在需要几天时间才能将系统恢复到正常状态的灾难恢复场景中。
+
+Account Activity Replay API 是为任何在一段时间内未能接收[活动](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity)的场景而开发的。它会将活动发送到与你最初实时投递活动时使用的 webhook 相同的那个 webhook。该产品是一个恢复工具，而不是用来补历史数据的工具，这意味着只有在此前曾尝试向你投递某个事件的前提下，该事件才会被重放。Account Activity Replay API 无法投递订阅创建时间之前时间段内的事件。
+
+<div id="using-account-activity-replay-api">
+  ### 使用 Account Activity Replay API
+</div>
+
+如果你的帐号已配置 Replay 功能，你可以以与调用 Account Activity API 类似的方式发起请求。需要特别注意的是，你的请求必须指定一个 webhook id 参数，用于表明你希望重放哪个 webhook 的活动。换句话说，Replay 请求会让 Account Activity Replay API 根据 webhook id 和 application id，在指定的开始日期时间与结束日期时间之间检索事件。
+
+请注意，时间必须使用 UTC。这些活动会以最高每秒 2,500 个事件的速率，发送到与该 id 关联的已注册 webhook。还要注意，同一时间每个 webhook 只能运行一个 Replay 任务，但该 webhook 上在所指定日期/时间范围内处于活动状态的所有订阅都会被重放。
+
+事件从指定时间段中第一（最早）分钟开始投递，并按时间顺序持续进行（尽可能按时间顺序），直到最后一分钟的事件被投递完成。此时，Replay 会向该 webhook 发送一个[任务完成事件](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#job-completed-successfully-message)。由于我们按时间顺序投递活动，如果在开始时间附近几乎没有匹配结果，那么在第一个结果被投递之前，很可能会有一段等待时间。
+
+<div id="limitations">
+  ### 限制
+</div>
+
+Replay 旨在作为一种工具，帮助你轻松恢复最早可追溯到五天前的活动，但它不会返回订阅创建时间之前的事件。比如，如果你在三天前添加了一个新的订阅，并运行了一个时间窗口覆盖从今天起向前推五天的 Replay 任务，你只会收到该新订阅这三天内处于活动状态时产生的数据。
+
+<div id="data-availability-and-types">
+  ### 数据可用性和类型
+</div>
+
+通过 Account Activity Replay API 返回的活动数据，在请求发起后可用时间为 5 天，新产生的数据通常会在某个活动被创建后大约 10 分钟变为可用。你可以在请求中使用 from&#95;date 和 to&#95;date 参数，在这 5 天的时间窗口内指定一个时间范围发起请求。最初在获得 Replay 访问权限之前已被投递的事件无法被重放。比如，如果你的账户在 2019 年 6 月 1 日 UTC 时间下午 3:30 获准访问 Account Activity Replay API，则你将无法使用 Replay 检索该日期和时间之前的任何事件。
+
+继续查看 [Account Activity Replay API 参考](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated)
+
+<div id="migration-introduction">
+  ## 迁移简介
+</div>
+
+**我们已于 2018 年下线了 Site Streams、User Streams，以及 Account Activity API 的标准 beta 版本（仅限私信 DM Only）。如果你之前在使用这些产品，请务必迁移到 Account Activity API 的 premium 或 Enterprise 版本。**
+
+**我们也已下线旧版的私信（Direct Message）端点。如果你之前在使用这些端点，请务必迁移到新的 DM 端点，或者迁移到 Account Activity API 的 premium 或 Enterprise 版本。**
+
+**请查看[此公告](https://devcommunity.x.com/t/details-and-what-to-expect-from-the-api-deprecations-this-week-on-august-16-2018/110746)了解详细信息。**
+
+以下端点将受到这些变更的影响：
+
+* User Streams
+* Site Streams
+* GET direct&#95;messages
+* GET direct&#95;messages/sent
+* GET direct&#95;messages/show
+* POST direct&#95;messages/new
+* POST direct&#95;messages/destroy
+   
+
+我们提供了新的端点和服务，能够提供类似的访问方式，并且在私信（Direct Messages）方面增加了一些新功能：
+
+* Account Activity API 的 [enterprise](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) 和 [premium](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index) 版本
+* [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events)
+* [GET direct&#95;messages/events/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event)
+* [POST direct&#95;messages/events/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event)
+* [POST direct&#95;messages/events/destroy](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/delete-message-event)
+
+为了帮助你顺利迁移到这些新的端点和服务，我们提供了两份迁移指南：
+
+* [Account Activity API 迁移指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#migration-guide-moving-from-user-streams-site-streams-to-account-activity-api)，适用于从 User Streams 和 Site Streams 迁移到我们新的基于 webhooks 的服务的用户
+* [私信（Direct Message）迁移指南](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/guides/direct-message-migration)，适用于在不同私信 REST 端点之间迁移的用户
+   
+
+此外，我们还提供了一套关于 Account Activity API 以及如何入门的[视频系列](https://www.youtube.com/playlist?list=PLFKjcMIU2WshGG6Yj940XM7Z6BFs1zfBg)。
+
+最后，我们还提供了代码示例，帮助你进一步理解并快速上手：
+
+* [Account Activity Dashboard](https://github.com/xdevplatform/Account-Activity-dashboard) 是一个示例 Node.js web 应用，包含用于开始使用 Account Activity API 的辅助脚本。
+* [SnowBot](https://github.com/xdevplatform/SnowBotDev) 是一个使用 Account Activity API 和 REST 私信端点的示例聊天机器人。它使用 Ruby 编写，基于 Sinatra web 应用框架，并部署在 Heroku 上。
+
+<div id="migration-guide-moving-from-user-streamssite-streams-to-account-activity-api">
+  ## 迁移指南：从 User Streams/Site Streams 迁移到 Account Activity API
+</div>
+
+**自 2018 年 8 月 23 日起，我们已停止提供 Site Streams 和 User Streams 服务。请务必迁移到 Account Activity API。**
+
+**请查看[此公告](https://devcommunity.x.com/t/details-and-what-to-expect-from-the-api-deprecations-this-week-on-august-16-2018/110746)以了解更多信息。**
+
+本指南旨在帮助您从旧版 User Streams 和 Site Streams API 迁移到它们的替代方案 Account Activity API。下文将提供变更概要、新功能列表，以及关键差异和注意事项，以帮助您顺利完成迁移。关于从基础 DM 端点迁移的指导，请参阅[私信（Direct Message）迁移指南](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/guides/direct-message-migration)。
+
+<div id="summary-of-changes">
+  ### 更改摘要
+</div>
+
+与通过 User Streams 和 Site Streams 等流式连接不同，Account Activity API 将通过 webhooks 向已认证并已订阅的帐号投递事件。
+
+<div id="deprecated-apis">
+  #### 已弃用的 API
+</div>
+
+GET user
+
+GET site（包括控制流：GET site/c/:stream&#95;id、GET site/c/:stream&#95;id/info.json、GET site/c/:stream&#95;id/friends/ids.json、POST site/c/:stream&#95;id/add&#95;user.json、POST /site/c/:stream&#95;id/remove&#95;user.json）
+
+<div id="replacement-apis">
+  #### 替代 API
+</div>
+
+[Enterprise Account Activity API - 全部活动](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api)
+
+<div id="differences-migration-considerations">
+  ### 差异与迁移注意事项
+</div>
+
+**API 格式：** 新的 Account Activity API 的工作方式与 User Streams 和 Site Streams 不同。你需要修改你的 Web 应用，以通过 webhooks 接收数据。你可以在[此处](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks)找到有关 webhooks 的更多信息。
+
+**可用数据：** 你会注意到的另一个关键差异与传递的数据有关。X 将不再发送来自你在 X 上关注的账号的事件（也就是你的主页时间线）。这是有意为之的更改，我们也不打算在今后对其进行调整。
+
+**可靠性：** 与流式传输不同，webhooks 可以对投递进行确认，并为未成功到达 webhook URL 的 POST 活动提供重试选项。这样可以更好地确保应用接收到所有相关活动，即使期间存在短暂的断连或停机。
+
+### 新功能
+
+Account Activity API 提供了许多新功能，其中最显著的一点是现在通过 webhooks 而不是流式传输来传递数据。与流式传输相比，webhooks 具有许多优势，其中最突出的是速度和可靠性。API 会在有新的 JSON 事件时将数据以事件形式发送给你，你不再需要维护活动的连接或轮询该端点。这样可以减少对冗余机制的需求，并整体提升效率。有关 webhooks 的更多信息，请参阅 [技术文档](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks)。
+
+<div id="managing-user-subscriptions">
+  ### 管理用户订阅
+</div>
+
+Account Activity API 允许在单个已注册的 webhook 上设置多个订阅。这样可以将多个用户的订阅活动通过 webhook 投递到同一位置，其架构类似于 Site Streams。这意味着，你可以在独立于 webhook 连接的前提下，单独跟踪订阅本身及其与订阅配额相关的情况。这也使得你可以从仅有一个或少量订阅，扩展到针对单个 webhook 的成千上万个订阅。
+
+<div id="how-to-migrate">
+  ### **如何迁移**
+</div>
+
+<div id="follow-the-steps-below-to-easily-migrate-from-the-site-streams-api-to-the-account-activity-api">
+  ### **按照以下步骤，轻松从 Site Streams API 迁移到 Account Activity API**
+</div>
+
+**步骤 1：选择套餐**
+
+根据你当前使用 User Streams 或 Site Streams 的方式，你应考虑迁移到 Account Activity API 的 Enterprise 版本或 Premium 版本。请考虑你当前所支持的应用数量或已授权用户数量，并根据所需的数据量和可靠性进行合理匹配。在选择最适合你需求的套餐时，值得考虑的因素包括：
+
+* 所需 webhook 的数量
+* 你的应用当前/预计管理的订阅数/已授权用户数
+* 当前的 X 客户端应用数量
+* 你期望从 X 获得的支持级别（论坛支持或托管式 Enterprise 级一对一支持）
+* 各套餐的价格
+
+**步骤 2：在开发者门户中检查你的 X 应用设置**
+
+当前用于 User Streams 或 Site Streams 的 [X app](/zh/resources/fundamentals/developer-apps) 会在其所有者的 [developer portal](/zh/resources/fundamentals/developer-portal) 中列出。该 X app 也可以用于 Account Activity API，以保留该应用的已授权用户。你也可以创建一个新的应用，并在需要时让用户为这个新应用重新授权。如果你是代表某个企业创建新应用，建议使用企业的 X @handle 账号来创建该应用。
+
+* 在你的 X app 页面上的 [permissions](/zh/resources/fundamentals/developer-apps#app-permissions) 选项卡中启用 “Read, Write and Access direct messages”。
+  *请注意，更改这些设置不会追溯生效，任何已授权用户都会保留其在授权时的权限设置。如果某个用户尚未授予你读、写和私信访问权限，你需要让该用户重新授权你的应用。
+* 如果你不熟悉 [X Sign-in](/zh/resources/fundamentals/authentication#log-in-with-x) 以及用户上下文在 X API 中的工作方式，请查看 [Obtaining Access Tokens](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks)。
+* 在 “Keys and Tokens” 选项卡底部为 X app 所有者生成访问令牌，并在同一选项卡中记录你的 Consumer Key、Consumer Secret、Access Token 和 Access Token Secret。你在使用 API 时需要这些信息。
+* 使用你的 Consumer Key 和 Consumer Secret 为 [application-only](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) API 方法生成一个 Bearer Token。
+
+**步骤 3：设置并配置你的 Webhook**
+
+* 创建一个带有端点的 Web 应用，将其作为 webhook 来接收事件（例如：https://your&#95;domain.com/webhook/twitter 或 https://webhooks.your&#95;domain.com）。
+
+* 在创建 webhook 时使用你的 Consumer Key、Consumer Secret、Access Token 和 Access Token Secret。请注意，你的端点必须返回一个 JSON 响应，其中包含一个 response&#95;token，该值是使用 crc&#95;token 和你的应用 Consumer Secret 创建的、经 HMAC SHA-256 计算后再进行 base64 编码的哈希值。
+
+* 查阅 [Securing Webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks) 文档，特别注意 Challenge Response Check (CRC) 的要求。
+
+* 确保你的 webhook 支持用于接收事件的 POST 请求和用于 CRC 的 GET 请求。
+
+* 确保你的 webhook 延迟较低（对 POST 请求的响应时间小于 3 秒）
+
+**步骤 4：验证你的 Webhook 设置**
+
+* Webhook API 将通过两种方式保护你的 webhook：
+
+               - 要求执行挑战响应检查，以验证 webhook 所有者即为 Web 应用所有者。
+
+               - 在每个发往你的 Web 应用的 POST 请求中包含签名头，以供你验证请求来源。
+
+* 为了验证你既是 Web 应用的所有者，又是 webhook URL 的所有者，X 会执行一次 Challenge Response Check (CRC)，这与循环冗余校验并非同一概念。
+* 一条带有名为 crc&#95;token 的参数的 GET 请求会被发送到你的 webhook URL。你的端点必须返回一个 JSON 响应，其中包含一个 response&#95;token，该值是使用 crc&#95;token 和你的应用 Consumer Secret 创建的、经 HMAC SHA-256 计算后再进行 base64 编码的哈希值。
+* 你应当预期每次收到 CRC 请求时，crc&#95;token 都会变化。crc&#95;token 应作为计算中的消息内容，而你的 Consumer Secret 则作为密钥。
+* 如果响应无效，系统将停止向该已注册 webhook 发送事件。
+
+**步骤 5：为每个 User Stream 或 Site Streams 的已授权用户创建订阅**
+
+从 User Streams 迁移到 Account Activity API：
+
+* 获取 User Streams 上你当前用户订阅的列表
+* 使用以下请求设置新的 Account Activity API 订阅：  *POST account&#95;activity/all/:env&#95;name/subscriptions*
+* 使用以下请求确认你的 Account Activity API 订阅：  &#95;GET account&#95;activity/all/:env&#95;name/subscriptions/list
+   &#95;
+
+从 Site Streams 迁移到 Account Activity API（使用控制流）：
+
+* 使用以下请求获取 Site Streams 上你当前订阅的列表：  *GET /1.1/site/c/:stream&#95;id/info.json*
+* 使用以下请求设置新的 Account Activity API 订阅：  *POST account&#95;activity/all/:env&#95;name/subscriptions*
+* 使用以下请求确认你的 Account Activity API 订阅：  &#95;GET account&#95;activity/all/:env&#95;name/subscriptions/list
+   &#95;
+
+注册 Webhook 并创建订阅（不是从 Site Streams 或 User Streams 迁移）
+
+* 使用 [POST webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) 在应用中注册你的 webhook URL，并获取一个 webhook&#95;id。
+* 使用返回的 webhook&#95;id，通过 [POST webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) 添加用户订阅。
+
+<div id="the-account-activity-dashboard-sample-account-activity-api-application">
+  ### Account Activity Dashboard（Account Activity API 示例应用）
+</div>
+
+我们创建了一个示例应用，帮助你更高效地测试 Account Activity API：   
+
+* 在[这里](https://github.com/xdevplatform/Account-Activity-dashboard)下载 Account Activity Dashboard 示例应用（基于 Node.js）
+* 按照 README 中的说明安装并启动该应用
+* 应用启动后，你可以使用 UI 轻松设置 webhook 并创建新的订阅
+
+<div id="available-activities">
+  ### 可用活动
+</div>
+
+| 消息类型 | 详情 |
+| :--- | :--- |
+| [tweet&#95;create&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#tweet-create-events-posts-retweets-replies-quotetweets) | 当订阅用户发起或收到以下任一操作时的帖子状态负载：发帖、转发（Retweets）、回复（Replies）、@ 提及（@mentions）、引用帖子（QuoteTweets） |
+| [favorite&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#favorite-events) | 包含用户和目标用户信息的收藏（点赞）事件状态。 |
+| [follow&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#follow-events) | 包含用户和目标用户信息的关注事件。 |
+| [block&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#block-events) | 包含用户和目标用户信息的拉黑事件。 |
+| [mute&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#mute-events) | 包含用户和目标用户信息的静音事件。 |
+| [direct&#95;message&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-events) | 包含用户和目标用户信息的私信状态。 |
+| [direct&#95;message&#95;indicate&#95;typing&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-indicate-typing-events) | 包含用户和目标用户信息的私信“正在输入”事件。 |
+| [direct&#95;message&#95;mark&#95;read&#95;events](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#direct-message-mark-read-events) | 包含用户和目标用户信息的私信已读事件。 |
+
+<div id="deprecated-streaming-message-types">
+  ### 已弃用的流式消息类型
+</div>
+
+|     |     |
+| :--- | :--- |
+| 空行 | 在 Account Activity API 中将不再发送空行，因为在 User Streams 和 Site Streams 中，空行曾被用作保活（keep-alive）消息。 |
+| 限制通知 | 限制通知将不再发送到指定的 webhook。相反，用户可以调用 API 来获取当前可用 handle 的使用情况。此信息将在未来的某个时间点在开发者门户中提供。 |
+| 断开连接消息 | 断开连接通知将不再是必需的，因为 webhooks 不依赖活动连接。 |
+| 停滞警告 | 停滞警告将不再是必需的，因为 webhooks 不依赖能够处理大量传入消息的活动连接。 |
+| 好友列表 | 好友列表将不再被主动发送。现在会提供一个 REST 端点来获取此信息。 |
+
+<div id="deprecated-event-types">
+  ### 已弃用的事件类型
+</div>
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| **描述** | **事件名称** | **来源** | **目标** | **目标对象** |
+| 用户删除一条帖子 | delete | 当前用户 | 当前用户 | Post |
+| 已关注的用户删除一条帖子 | delete | 已关注用户 | 已关注用户 | Post |
+| 用户取消收藏一条帖子 | unfavorite | 当前用户 | 帖子作者 | Post |
+| 用户的帖子被取消收藏 | unfavorite | 取消收藏的用户 | 当前用户 | Post |
+| 用户取消关注某人 | unfollow | 当前用户 | 被关注的用户 | Null |
+| 用户创建一个列表 | list&#95;created | 当前用户 | 当前用户 | 列表 |
+| 用户删除一个列表 | list&#95;destroyed | 当前用户 | 当前用户 | 列表 |
+| 用户编辑一个列表 | list&#95;updated | 当前用户 | 当前用户 | 列表 |
+| 用户将某人添加到列表 | list&#95;member&#95;added | 当前用户 | 被添加用户 | 列表 |
+| 用户被添加到列表中 | list&#95;member&#95;added | 执行添加操作的用户 | 当前用户 | 列表 |
+| 用户将某人从列表中移除 | list&#95;member&#95;removed | 当前用户 | 被移除用户 | 列表 |
+| 用户被从列表中移除 | list&#95;member&#95;removed | 执行移除操作的用户 | 当前用户 | 列表 |
+| 用户订阅一个列表 | list&#95;user&#95;subscribed | 当前用户 | 列表所有者 | 列表 |
+| 用户的列表被订阅 | list&#95;user&#95;subscribed | 订阅该列表的用户 | 当前用户 | 列表 |
+| 用户取消订阅一个列表 | list&#95;user&#95;unsubscribed | 当前用户 | 列表所有者 | 列表 |
+| 用户的列表被取消订阅 | list&#95;user&#95;unsubscribed | 取消订阅该列表的用户 | 当前用户 | 列表 |
+| 用户更新其个人资料 | user&#95;update | 当前用户 | 当前用户 | Null |
+| 用户更新其受保护状态 | user&#95;update | 当前用户 | 当前用户 | Null |
+
+<div id="direct-message-migration-guide">
+  ## 私信迁移指南
+</div>
+
+**自 2018 年 9 月 17 日起，我们已停用旧版私信（Direct Message）端点。
+如果你之前一直在使用这些端点，请务必迁移到新的私信端点或 Account Activity API。**
+
+**请查阅[此公告](https://devcommunity.x.com//t/details-and-what-to-expect-from-the-api-deprecations-this-week-on-august-16-2018/110746)以了解更多信息。**
+
+本指南旨在帮助你从旧版私信 REST API 迁移到已结束测试阶段的增强版替代接口。下文提供了变更摘要、新功能列表，以及有助于完成迁移的关键差异和注意事项。新的私信端点目前已向所有开发者开放。关于从 User Streams 或 Site Streams 迁移的指导，请参阅[迁移到 Account Activity API 的指南](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#migration-guide-moving-from-user-streams-site-streams-to-account-activity-api)。
+
+* [变更摘要](#summary)
+* [新功能](#features)
+* [发送私信](#sending)
+* [接收私信](#receiving)
+* [删除私信](#deleting)
+
+<div id="summary-of-changes">
+  ### 更改摘要
+</div>
+
+如果你仍在使用以下 DM 端点，则必须迁移到新的端点。 
+
+| 已弃用的端点 | 对应的新端点 |
+| :--- | :--- |
+| [POST direct&#95;messages/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) | [POST direct&#95;messages/events/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) |
+| [GET direct&#95;messages/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) | [GET direct&#95;messages/events/show](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) |
+| [GET direct&#95;messages](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) | [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) |
+| [GET direct&#95;messages/sent](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) | [GET direct&#95;messages/events/list](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) |
+| [POST direct&#95;messages/destroy](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/delete-message-event) | [DELETE direct&#95;messages/events/destroy](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/delete-message-event "GET direct_messages/events/list") |
+
+<div id="new-features">
+  ### 新增功能
+</div>
+
+新的私信（Direct Message）API 端点支持多项新功能，并提升了对历史私信记录的访问能力。新增功能包括：
+
+* 支持媒体附件（图片、GIF 和视频）。
+* 可以通过预先定义的选项列表引导用户进行结构化回复。
+* 最多可访问过去 30 天的私信记录。
+
+有关新的 Direct Message 功能的完整列表以及其他新的 API 端点，请参阅[技术文档](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/overview)。
+ 
+
+<div id="differences-migration-considerations">
+  ### 差异与迁移注意事项
+</div>
+
+新的 API 端点与之前的对应端点在行为上有很大不同。仅更新端点 URL 会导致你的应用程序报错。在为迁移更新应用程序时，请注意以下几点。
+
+<div id="new-direct-message-object">
+  #### 新的私信对象
+</div>
+
+你很可能首先会注意到私信对象的新结构。引入这种新的 Message Create 对象结构，是为了支持诸如 [快速回复](https://developer.x.com/en/docs/x-api/v1/direct-messages/quick-replies/overview) 和 [附件](https://developer.x.com/en/docs/x-api/v1/direct-messages/message-attachments/overview) 等新功能。新的对象还包含了一个更精简的用户对象。你的应用程序需要进行更新，以便在解析该对象以及在数据模型或存储中适配这一新的对象结构。关于各个属性的说明，请参阅 [Message Create 对象的完整文档](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/guides/message-create-object)。
+
+**Message Create 对象示例**
+
+```json
+{
+      "type": "message_create",
+      "id": "1234858592",
+      "created_timestamp": "1392078023603",
+      "initiated_via": {
+        "tweet_id": "123456",
+        "welcome_message_id": "456789"
+      },
+      "message_create": {
+        "target": {
+          "recipient_id": "1234858592"
+        },
+        "sender_id": "3805104374",
+        "source_app_id": "268278",
+        "message_data": {
+          "text": "Blue Bird",
+          "entities": {
+            "hashtags": [],
+            "symbols": [],
+            "urls": [],
+            "user_mentions": [],
+          },
+          "quick_reply_response": {
+            "type": "options",
+            "metadata": "external_id_2"
+          },
+          "attachment": {
+            "type": "media",
+            "media": {
+             ...
+            }
+          }
+        }
+      }
+```
+
+<div id="summary">
+  #### 摘要
+</div>
+
+* 全新的私信对象结构。
+* 精简的用户对象。
+* 新增信息（快速回复结果、附件等）。
+
+<div id="sending-direct-messages">
+  ### 发送私信
+</div>
+
+[POST direct&#95;messages/events/new](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/new-event) 是用于发送私信的直接替代端点。该端点最明显的变化在于，现在所有信息都作为 JSON 放在 POST 请求体中传递，而不是通过单独的 POST 参数发送。
+
+**Twurl 请求示例**
+
+```bash
+twurl -A 'Content-type: application/json' -X POST /1.1/direct\_messages/events/new.json -d '{"event": {"type": "message\_create", "message\_create": {"target": {"recipient\_id": "4534871"}, "message_data": {"text": "Hello World!"}}}}'
+```
+
+请注意，在上述请求中，`Content-Type` 被设置为 `application/json`，而不是 `application/x-www-form-urlencoded`。另外，如果你正在构造 OAuth 1.0a 签名，需要注意 JSON 请求体不会包含在签名生成过程中。大多数 OAuth 库已经考虑到了这一点。如果你在使用 [twurl](https://github.com/twitter/twurl)，请确保所使用的版本至少为 0.9.3。
+
+<div id="summary">
+  #### 摘要
+</div>
+
+* 消息在 JSON POST 请求主体中定义
+* 必须将 Content-Type 头设置为 application/json
+* 生成 OAuth 签名时不会包含 JSON 请求主体
+   
+
+<div id="retrieving-direct-messages">
+  ### 检索私信
+</div>
+
+现在可以通过单个 API 端点来检索历史私信：[`GET direct_messages/events/list`](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events)。这个新端点的主要差异在于，它现在会按时间倒序同时返回已发送和已接收的消息，这有助于你更轻松地重建一段会话。但如果你只想获取已发送或已接收的消息，则需要在客户端通过查看 `sender_id` 属性，对响应结果进行后处理。
+
+分页现在是基于游标值，而不是某条私信的 ID。每个响应都会返回一个游标属性。[`GET direct_messages/events/list`](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/list-events) 将返回最多过去 30 天内的消息，而不管这 30 天内存在多少条消息。当不再返回游标时，表示已没有更多可返回的消息。使用 [`GET direct_messages/events/show`](https://developer.x.com/en/docs/x-api/v1/direct-messages/sending-and-receiving/api-reference/get-event) 访问单条私信的方法保持不变，不过如前所述，返回的私信对象结构已发生变化。
+
+最后，实时访问私信现在将通过 webhook 配合 [Account Activity API](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity) 来实现。关于从 User Streams 或 Site Streams 迁移的相关指导，请参阅 Account Activity API 迁移指南以获取更多信息。
+
+<div id="summary">
+  #### 摘要
+</div>
+
+* 发送和接收的私信现在由同一个端点返回。
+* 最多可返回最近 30 天内的私信。
+* 支持基于游标的分页。
+* 通过 webhook 实时访问私信。
+
+<div id="deleting-direct-messages">
+  ### 删除私信
+</div>
+
+现在可以使用 DELETE direct&#95;messages/events/destroy 删除私信。接口基本保持不变，仍然需要提供要删除的消息 ID。主要区别在于，该端点现在需要使用 DELETE 请求，而不是 POST 请求。
+
+已删除私信在官方 X 客户端中的呈现方式保持不变。私信只会从所提供用户上下文对应的界面中移除，会话中的其他成员仍然可以访问该私信。
+
+<div id="summary">
+  #### 摘要
+</div>
+
+* 删除一条私信（Direct Message）需要提供该消息的 id。
+* 新端点需要使用 DELETE 请求。
+* 已删除私信在官方 X 客户端中的显示方式保持不变。
+
+**关于迁移到新的私信（Direct Message）端点有疑问？\
+**请在开发者社区论坛 [devcommunity.com](https://devcommunity.x.com/) 上提出你的问题。
+
+<div id="frequently-asked-questions">
+  ## 常见问题
+</div>
+
+<div id="general">
+  ### 常规
+</div>
+
+**使用 Account Activity API 有哪些优势？**
+
+Account Activity API 使用 webhooks，这意味着与流式 API 不同，我们不需要你保持一个打开的连接来向你发送信息。Webhooks 也不同于 REST API，因为你不必每 15 分钟轮询我们数百次来获取你关心的数据。这样可以在用户和你的应用之间提高效率，因为数据会在事件发生时立即被推送。
+
+Account Activity API 具有以下优势：
+
+1. **速度**：我们以 X 的实时速度向你传递数据。
+2. **简洁性**：我们通过单一的 webhook 连接向你传递一个账号的所有事件。API 中传递的活动包括帖子、@ 提及、回复、转发、引用帖子、对引用帖子的转发、收藏、已发送私信、已接收私信、关注、拉黑、静音。 
+3. **可扩展性**：对于你管理的账号，你可以接收其所有活动，而不会受到任何速率限制或事件上限的约束。
+
+Account Activity API 提供 Premium sandbox、付费 Premium 和 Enterprise 方案，因此当你因为合规需求或额外功能需要更多账号时，可以按需扩展。
+
+要开始使用，请从 [GitHub](https://github.com/xdevplatform/account-activity-dashboard) 下载示例代码片段。
+ 
+
+**我如何确定哪个产品层级最适合我？**
+
+请阅读我们的 [Account Activity API 概览](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity) 页面，了解 Premium 选项与 Enterprise 选项之间的差异。 
+ 
+
+**Premium 环境和 Enterprise webhook 有什么区别？**
+
+没有区别。每个 Premium 环境都会有自己的 webhook&#95;id。
+ 
+
+**我需要为 Account Activity API 准备开发、预发布和生产环境，这可能吗？**
+
+可以！在 Account Activity API 的付费层级（付费 Premium 和 Enterprise）中，你可以通过 API 方法为每个环境注册多个 webhook URL，并分别管理订阅。此外，可以将多个客户端应用添加到允许列表（allowlist）中，以便为你当前已授权的用户保留授权。
+
+ 
+
+**你们是否有关于如何配置 Account Activity API 的分步指南？**
+
+事实上，有的！
+
+* 如果你刚刚开始使用，我们建议你先访问我们的[使用 webhooks 入门](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks)指南
+
+* 按照我们由 X Dev 支持的脚本进行操作： 
+  * [Account Activity API dashboard](https://github.com/xdevplatform/account-activity-dashboard)，一个用于展示 webhook 事件的 Node Web 应用程序。
+  * [SnowBot chatbot](https://github.com/xdevplatform/SnowBotDev)，一个基于 Account Activity 和 Direct Message API 构建的 Ruby Web 应用程序。该代码库包含一个[脚本](https://github.com/xdevplatform/SnowBotDev/wiki/Account-Activity-API-setup-script)，用于帮助你配置 Account Activity API webhooks。
+     
+
+**如果我们的系统在一段时间内宕机，有办法恢复数据吗？**
+
+在 Account Activity API 的付费层级（付费 Premium 和 Enterprise）中，我们的系统会在四小时内[重试](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)多次向你发送活动数据。如果你的系统在这四小时内都没有响应，那么该活动将丢失，你需要在 7 天内使用其他 REST 端点来恢复数据。
+
+我们建议你将不同的 webhooks 或环境用作冗余工具，例如使用 [Account Activity Replay API](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-replay-api)，以确保当你的某个系统宕机时不会错过任何活动。
+ 
+
+**使用 Account Activity API 需要哪种身份验证方式？**
+
+Account Activity API 所需的授权方式会在各个方法的[API 参考页面](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#account-activity-api-reference-index)中进行说明。如果你刚开始接触 X 身份验证，我们建议你先阅读[这一部分](/zh/resources/fundamentals/authentication)。
+
+**什么是质询-响应检查（CRC，challenge-response check）？**
+
+Account Activity API 质询响应（CRC）检查是一项安全功能，用于确保 Account Activity API 的活动被发送给正确的开发者。开发者也可以利用它来确保自己接收到的数据来自 X。自上次验证 webhook URL 起，X 会每 24 小时自动向你的 webhook URL 发送一次 CRC。你的系统必须在 3 秒内返回有效响应才能保持验证状态。 
+
+请访问我们的页面[保护 webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#securing-webhooks)以获取更多详情。
+ 
+
+**有哪些情况会立刻使我的 webhook URL 失效？**
+
+如果发生以下任一情况，我们会立即将你的 webhook 标记为无效：
+
+* 服务器在响应 CRC 时返回了错误的 token。在这种情况下，我们的系统不会[重试](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)向你发送活动。
+* webhook URL 配置了错误的证书。在这种情况下，我们的系统不会[重试](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#retries)向你发送活动。
+* 你的服务器返回了非 2XX、非 4XXX、非 5XXX 的响应状态码。
+* 你声明使用 gzip，但实际并未发送 gzip。
+* 你没有声明使用 gzip，但在响应中实际发送了 gzip。
+   
+
+**如果我订阅了相互互动的用户，会收到重复的活动吗？**
+
+会的。如果你的 web 应用对用户 A 和用户 B 都有有效的订阅，并且用户 A 在一条帖子中提及了用户 B，那么会向已注册的 webhook 发送两个 POST 活动。每个活动都会带有一个 `"for_user_id"` 指示器，用来表明该活动属于哪个订阅。
+ 
+
+**当我为我的 webhook 创建订阅时，能否将以下端点中的 `/all/` 部分替换为其他 account activity 数据对象，以限制 API 投递的活动类型？**`POST https://api.x.com/1.1/account_activity/all/:env_name/subscriptions.json`
+
+不能，目前这是不可能的。就目前而言，我们只提供 `/all/` 这一种产品。
+ 
+
+**有没有办法在不向用户请求 Direct Messages 权限的情况下使用 Account Activity API？**
+
+目前，Direct Messages 权限是必需的，因为对该 API 来说，没有办法“过滤掉” Direct Messages 活动。
+ 
+
+**Account Activity API 是否有免费版本？**
+
+有的，我们提供 sandbox 版本作为免费层级。我们的 sandbox 选项仅限单个 webhook，且最多允许 15 个订阅。你可以在[我们的文档](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity)中阅读更多有关 sandbox 选项的内容。 
+
+**是否可以使用 Account Activity API 获取对提及已订阅用户的帖子所进行的转发？**
+
+很遗憾，这不在该 API 所投递的活动范围之内。对此，我们建议改用 Streaming API。 
+ 
+
+**tweet&#95;create&#95;event 可能代表哪些活动类型？**
+
+在以下情况下会发送 tweet&#95;create&#95;event 负载（payload）：
+
+如果订阅用户执行了以下任一操作：
+
+* 创建帖子
+* 转发
+* 回复帖子
+
+如果其他用户：
+
+* @提及*订阅用户
+* 引用订阅用户创建的帖子
+
+*注意：Account Activity API 只会在订阅用户会从 X 收到通知并且可以公开看到该事件时投递事件。这意味着，如果被提及账号（@userA）关注了受保护账号（@userB），那么 UserA 会收到 UserB 提及他们的通知。如果 UserA 未关注 UserB（且未被 UserB 批准），UserA 将不会收到通知，因此如果 @userA 有订阅，就不会通过 AAA 发送 tweet&#95;create&#95;event。
+
+**如果被屏蔽的用户提及了我已订阅的用户，我如何识别这种情况？**
+
+你会在 JSON 响应的顶层看到一个布尔字段 `user_has_blocked`，其值为“true”或“false”。该字段只会在帖子提及中暴露。 
+
+Enterprise
+
+**如何将我的应用添加到允许列表，或检查我的应用是否已在允许列表中？**
+
+要管理你已添加到 Enterprise API 访问允许列表中的 [X apps](/zh/resources/fundamentals/developer-apps)，请联系你的客户经理并提供你的 App ID。你可以通过前往 [developer portal](/zh/resources/fundamentals/developer-portal) 中的 [&quot;Apps&quot;](/zh/resources/fundamentals/developer-apps) 页面来找到你的 App ID。
+ 
+
+**如果我有三个 webhook 的访问权限，我是否可以为每个已注册为 Enterprise 使用的应用分别使用三个 webhook？**
+
+webhook 限制是设置在账户级别，而不是应用级别。如果你具有三个 webhook 的访问权限，并且有两个已注册为 Enterprise 使用的应用，你可以在一个应用上使用两个 webhook，在另一个应用上使用第三个 webhook，但不能在每个应用上都使用三个 webhook。 
+
+**我能否指定要通过 Account Activity Replay API 重新投递的事件类型？**
+
+无法指定要重放的事件类型。所有在指定日期和时间窗口内投递的事件都会被重放。 
+
+**如果我的应用未能接收某个 Account Activity Replay API 事件，是否会进行重试？**
+
+不会，不会进行任何重试。如果应用未能接收由 Account Activity Replay API 发送的事件，可以为同一时间段再次提交 Replay 作业，以尝试重新投递任何遗漏的 Replay 事件。 
+
+**当我收到部分成功的完成事件时，该怎么做？**
+
+我们建议记录已接收事件的时间戳，并为遗漏的事件再次请求一个 Replay 作业。 
+
+**我一次可以运行多少个 Account Activity Replay API 作业？**
+
+每个 webhook 一次只能运行一个 Account Activity Replay API 作业。 
+
+**当 Account Activity Replay API 向我的 webhook 投递事件时，我如何将其与实时生产事件区分开来？**
+
+由于 Account Activity Replay API 始终会投递过去的事件，因此可以根据事件的时间戳将其与实时生产事件区分开来。 
+
+**我可以多快开始使用 Account Activity Replay API 来重新投递我的应用丢失或遗漏的活动？**
+
+活动在创建后大约 10 分钟后即可用于重新投递。 
+
+<div id="error-troubleshooting-guide">
+  ### 错误排查指南
+</div>
+
+<div id="code-32">
+  #### 代码 32
+</div>
+
+此错误通常意味着你在请求、请求头、授权信息或指定的 URL 中有某些内容格式不正确。它不是 Account Activity API 错误，而是授权错误，X 没有获得正确的 OAuth 配置或 URL。
+
+* **Enterprise** - 请确保你使用的 consumer key 和访问令牌属于已注册可使用 Enterprise 产品的 [X 应用](/zh/resources/fundamentals/developer-apps)。如果你没有 consumer key 和访问令牌，或需要将 X 应用添加到 allowlist，请联系你的客户经理。 
+
+* 如果在用户上下文下进行认证，请确保你已使用正确的 `oauth nonce`、`oauth_signature` 和 `oauth_timestamp` [正确授权你的请求](/zh/resources/fundamentals/authentication#authorizing-a-request)。
+
+* 确保你的访问令牌具有正确的权限级别。
+  * 当你在 [app dashboard](/zh/resources/fundamentals/developer-apps) 的 “Keys and tokens” 选项卡中时，请确认你的访问令牌具有 “Read, write, and direct messages” [权限级别](/zh/resources/fundamentals/developer-apps#app-permissions)。 
+  * 如果令牌的权限级别低于此级别，请转到 “Permissions” 选项卡，将访问权限调整为 “Read, write, and direct messages”，然后在 “Keys and tokens” 选项卡中重新生成访问令牌和密钥。
+
+* 确保你的 URL 格式正确。
+  * 请注意，`:env_name` 区分大小写。
+     
+
+<div id="code-200-forbidden">
+  #### 代码 200 - 禁止访问
+</div>
+
+* **Premium** - 在尝试向 API 发起请求之前，请确保你已拥有经批准的[开发者账号](/zh/resources/fundamentals/developer-portal)。你还必须在请求中使用正确的 :env&#95;name，可以在 [dev environments](/zh/resources/fundamentals/developer-portal) 页面进行设置。
+
+* **Enterprise** - 请确保你的客户经理已为你开通 Account Activity API 的访问权限。
+
+* 请确保你已正确配置 URI。如果在请求中输入了错误的 URI，也会触发此错误。
+   
+
+<div id="code-214-webhook-url-does-not-meet-the-requirements">
+  #### 代码 214 - Webhook URL 不符合要求。
+</div>
+
+* 请确保你使用的是 HTTPS。
+* 你的 webhook URL 可能存在格式错误。
+* 请参阅 [Getting started with webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#getting-started-with-webhooks) 页面中的 [Develop webhook consumer app](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#3-develop-webhook-consumer-app) 部分，了解如何设置你的 webhook URL 的更多信息。
+   
+
+<div id="code-214-high-latency-on-crc-get-request-your-webhook-should-respond-in-less-than-3-seconds">
+  #### 代码 214 - CRC GET 请求延迟过高。你的 webhook 应在 3 秒内完成响应。
+</div>
+
+* 这表示你的服务器响应较慢。请确保你在 3 秒内对 CRC 请求做出响应。
+   
+
+<div id="code-214-non-200-response-code-during-crc-get-request-ie-404-500-etc">
+  #### Code 214 - 在 CRC GET 请求期间收到非 200 响应状态码（例如 404、500 等）。
+</div>
+
+* 您的服务器已宕机。请确保服务器正常运行。
+   
+
+<div id="code-214-too-many-resources-already-created">
+  #### 代码 214 - 已创建的资源过多。
+</div>
+
+* **Enterprise** - 已经使用完所有的 webhook。请针对每个已注册的应用使用 [GET webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) 端点，以确定 webhook 的分布情况。 
+
+<div id="code-261-application-cannot-perform-write-actions">
+  #### Code 261 - 应用无法执行写入操作。
+</div>
+
+* 你通过 API 使用的应用，其访问令牌和访问令牌密钥未设置为合适的[权限级别](/zh/resources/fundamentals/developer-apps#app-permissions)。请前往 [X 应用](/zh/resources/fundamentals/developer-apps) 控制面板中的“Keys and tokens”选项卡，检查分配给你的访问令牌和访问令牌密钥的权限级别。如果其设置为“Read, write and Direct Messages”以外的任何其他选项，则需要在“Permission”选项卡下调整设置，并重新生成访问令牌和访问令牌密钥以应用新的设置。
+* 或者，你正在尝试使用仅应用方式的认证（app-only authentication）来注册 webhook，而这是不受支持的。请改为按照 [Enterprise Account Activity API](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks) 中注册 webhook 的 API 参考部分所述，使用用户上下文进行认证。
+
+<div id="account-activity-api-reference-index">
+  ## Account Activity API 参考索引
+</div>
+
+|     |     |
+| :--- | :--- |
+| **Purpose** | Enterprise |
+| 注册 webhook URL / 生成 webhook&#95;id | [POST  <br />webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#enterprise-account-activity-api) |
+| 返回所有 webhook URL 及其状态 | [GET  <br />webhooks](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks) |
+| 手动触发一次质询响应（challenge response）检查 | [PUT  <br />webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#put-account-activity-webhooks-webhook-id) |
+| 将应用订阅某个账号的事件 | [POST  <br />webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#post-account-activity-webhooks-webhook-id-subscriptions-all) |
+| 返回当前处于活动状态的订阅数量 | [GET  <br />subscriptions/count](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |
+| 检查某个 webhook 是否已订阅某个账号 | [GET  <br />webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-webhooks-webhook-id-subscriptions-all) |
+| 返回当前处于活动状态的订阅列表 | [GET  <br />webhooks/:webhook&#95;id/subscriptions/all/list](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#get-account-activity-subscriptions-count) |
+| 删除该 webhook | [DELETE  <br />webhooks/:webhook&#95;id](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id) |
+| 使用 3-legged OAuth 停用订阅（已弃用） | [DELETE  <br />webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) |
+| 使用仅应用程序 OAuth 停用订阅 | [DELETE  <br />webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json) |
+| 将活动重新投递到某个 webhook | [POST  <br />replay/webhooks/:webhook&#95;id/subscriptions/all](/zh/x-api/enterprise-gnip-2.0/fundamentals/account-activity#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated) |
+
+<div id="enterprise-account-activity-api">
+  ### Enterprise 账户活动 API
+</div>
+
+<div id="post-account_activitywebhooks">
+  #### POST account&#95;activity/webhooks[](#post-account-activity-webhooks "Permalink to this headline")
+</div>
+
+为指定的应用上下文注册一个新的 webhook URL。该 URL 在保存之前会通过 CRC 请求进行验证。如果验证失败，将向请求方返回详细的错误信息。
+
+允许的 webhook 数量由计费套餐决定。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要身份验证 | 是（用户上下文 - 所有 consumer 令牌和访问令牌） |
+| 受速率限制 | 是 |
+| 每 15 分钟窗口的请求数（用户身份验证） | 15  |
+| 是否支持帖子编辑 | 所有帖子对象都会包含描述该帖子编辑历史的编辑元数据。有关更多详细信息，请参阅[“帖子编辑”基础知识](/zh/x-api/enterprise-gnip-2.0/fundamentals/edit-tweets)页面。 |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| url (required) | 用于回调端点的编码后 URL。 |
+
+<div id="example-request">
+  ### 示例请求[](#example-request "此标题的固定链接")
+</div>
+
+$ curl --request POST
+--url &#39;https://api.x.com/1.1/account&#95;activity/webhooks.json?url=https%3A%2F%2Fyour&#95;domain.com%2Fwebhooks%2Ftwitter%2F0&#39;
+--header &#39;authorization: OAuth oauth&#95;consumer&#95;key=&quot;CONSUMER&#95;KEY&quot;, oauth&#95;nonce=&quot;GENERATED&quot;, oauth&#95;signature=&quot;GENERATED&quot;, oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;GENERATED&quot;, oauth&#95;token=&quot;ACCESS&#95;TOKEN&quot;, oauth&#95;version=&quot;1.0&quot;&#39;
+
+<div id="http-responses">
+  ### HTTP Responses[](#http-responses "此标题的永久链接")
+</div>
+
+| HTTP Code | Message |
+| :--- | :--- |
+| 200 | Webhook URL 已注册到所提供的应用程序 |
+| 403 | 你的请求中存在错误。请参阅下文的错误消息部分。 |
+
+<div id="example-response-success">
+  ### 成功的示例响应[](#example-response-success "Permalink to this headline")
+</div>
+
+```json
+_HTTP 200_
+
+    {
+      "id": "1234567890",
+      "url": "https://your_domain.com/webhook/twitter/0",
+      "valid": true,
+      "created_at": "2016-06-02T23:54:02Z"
+    }
+```
+
+<div id="error-messages">
+  ### 错误消息[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message                                   |
+| :--- | :---------------------------------------- |
+| 214  | Webhook URL 不符合要求。                        |
+| 214  | 已创建的资源过多。                                 |
+| 214  | Webhook URL 不符合要求。CRC 令牌无效或 JSON 响应格式无效。  |
+| 214  | CRC GET 请求延迟过高。你的 webhook 应在 3 秒内完成响应。    |
+| 214  | CRC GET 请求期间返回非 200 的响应状态码（例如 404、500 等）。 |
+
+*HTTP 403*
+
+```json
+    {
+      "errors": [
+        {
+          "code": 214,
+          "message": "Too many resources already created."
+        }
+      ]
+    }
+```
+
+<div id="get-account_activitywebhooks">
+  #### GET account&#95;activity/webhooks[](#get-account-activity-webhooks "Permalink to this headline")
+</div>
+
+返回指定应用的所有 URL 及其状态。
+
+如果某个 URL 未通过每日验证，我们会将其标记为无效。要重新启用该 URL，请调用 update 端点。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 是否需要认证 | 是（仅应用级 - Bearer Token） |
+| 是否受速率限制 | 是 |
+| 请求数 / 15 分钟窗口（应用级认证） | 15  |
+
+### 示例请求[](#example-request "Permalink to this headline")
+
+```bash
+    $ curl --request GET
+     --url https://api.x.com/1.1/account_activity/webhooks.json
+     --header 'authorization: Bearer TOKEN'
+```
+
+<div id="example-response">
+  ### 示例响应[](#example-response "Permalink to this headline")
+</div>
+
+*HTTP 200 OK*
+
+```json
+    [
+      {
+        "id": "1234567890",
+        "url": "https://your_domain.com/webhook/twitter/0",
+        "valid": true,
+        "created_at": "2016-06-02T23:54:02Z"
+      }
+      {
+        "id": "2468013579",
+        "url": "https://your_domain2.com/webhook/twitter/0",
+        "valid": true,
+        "created_at": "2016-06-04T22:31:29Z"
+      }
+    ]
+```
+
+### 错误信息[](#error-messages "Permalink to this headline")
+
+| 代码 | 错误信息 |
+| :--- | :--- |
+| 99  | 您无权访问此资源。 |
+
+<div id="put-account_activitywebhookswebhook_id">
+  #### PUT account&#95;activity/webhooks/:webhook&#95;id[](#put-account-activity-webhooks-webhook-id "Permalink to this headline")
+</div>
+
+会对指定 webhook 的 URL 触发 CRC（挑战响应检查）。如果检查成功，将返回 204 状态码，并通过将其状态设置为 `valid` 来重新启用该 webhook。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要身份验证 | 是（用户上下文 - 所有 consumer token 和访问令牌（Access Token）） |
+| 速率限制 | 是 |
+| 请求数 / 每 15 分钟时间窗口（用户身份验证） | 15  |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (必填) | Webhook ID，在资源路径中定义。 |
+
+### 示例请求[](#example-request "Permalink to this headline")
+
+```json
+    $ curl --request PUT
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID.json
+     --header 'authorization: OAuth oauth_consumer_key="CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+<div id="response">
+  ### 响应[](#response "Permalink to this headline")
+</div>
+
+*HTTP 204 OK*
+
+```
+    { }
+```
+
+<div id="error-messages">
+  ### 错误消息[](#error-messages "Permalink to this headline")
+</div>
+
+| Code | Message |
+| :--- | :--- |
+| 34  | Webhook 不存在，或与其他 X 应用相关联。 |
+| 214 | Webhook URL 不符合要求。 |
+| 214 | Webhook URL 不符合要求。CRC 令牌无效或 JSON 响应格式无效。 |
+| 214 | CRC GET 请求延迟过高。你的 Webhook 应在 3 秒内完成响应。 |
+| 214 | CRC GET 请求期间返回了非 200 的响应状态码（例如 404、500 等）。 |
+
+<div id="post-account_activitywebhookswebhook_idsubscriptionsall">
+  #### POST account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all[](#post-account-activity-webhooks-webhook-id-subscriptions-all "Permalink to this headline")
+</div>
+
+将指定应用订阅到指定用户上下文中所有消息类型的全部事件。激活后，发起请求用户的所有事件都会通过 POST 请求发送到该应用的 webhook。
+
+当前可用的订阅数量会根据你的账户配置受到限制。如果你需要增加订阅数量，请联系你的客户经理。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要认证 | 是（3-legged OAuth - 已加入白名单的 consumer key 和订阅用户的访问令牌） |
+| 受速率限制 | 是 |
+| 每 15 分钟窗口内的请求数（用户认证） | 500 |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id（必填） | Webhook 的 id，在资源路径中定义。 |
+
+### 示例请求[](#example-request "Permalink to this headline")
+
+```bash
+    $ curl --request POST
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID/subscriptions/all.json
+     --header 'authorization: OAuth oauth_consumer_key="WHITELISTED_CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="SUBSCRIBING_USER'S_ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+### 成功示例响应[](#example-response-success "Permalink to this headline")
+
+*HTTP 204 NO CONTENT*
+
+```
+    {}
+```
+
+### 错误信息[](#error-messages "Permalink to this headline")
+
+| 代码 | 错误信息 |
+| :--- | :--- |
+| 34  | Webhook 不存在，或与其他 X 应用关联。 |
+| 348 | 客户端应用无权访问该用户的 webhook 订阅。 |
+
+<div id="get-account_activitysubscriptionscount">
+  #### GET account&#95;activity/subscriptions/count[](#get-account-activity-subscriptions-count "固定链接到此标题")
+</div>
+
+返回当前在你的帐户上处于活动状态的订阅数量。请注意，/count 端点需要 application-only OAuth，因此你应当使用 Bearer Token 发起请求，而不是使用用户上下文。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/subscriptions/count.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | HTTP 响应代码 |
+| 需要身份验证 | 是（仅限应用级 - Bearer Token） |
+| 有速率限制 | 是 |
+| 每 15 分钟窗口的请求数（应用身份验证） | 15  |
+
+<div id="http-response-codes">
+  ### HTTP 响应代码[](#http-response-codes "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| Code | Message |
+| 200 | 成功。将返回所请求 webhook 的订阅数。 |
+| 401 | 您的应用没有权限查看指定 webhook 的订阅。 |
+
+### 示例请求[](#example-request "Permalink to this headline")
+
+```bash
+    $ curl --request GET
+     --url https://api.x.com/1.1/account_activity/subscriptions/count.json
+     --header 'authorization: Bearer TOKEN'
+```
+
+### 示例响应 - 成功[](#example-response-success "该标题的永久链接")
+
+*HTTP 200*
+
+```bash
+    {
+      "account_name":"my-account",
+      "subscriptions_count_all":"1",
+      "subscriptions_count_direct_messages":"0",
+      "provisioned_count":"50"
+    }
+```
+
+<div id="error-messages">
+  ### 错误消息[](#error-messages "Permalink to this headline")
+</div>
+
+| 代码 | 消息        |
+| :- | :-------- |
+| 32 | 无法验证您的身份。 |
+
+*HTTP 401*
+
+```abash
+    {
+      "errors": [
+        {
+           "code": 32,
+          "message": "Could not authenticate you."
+        }
+      ]
+    }
+```
+
+<div id="get-account_activitywebhookswebhook_idsubscriptionsall">
+  #### GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all[](#get-account-activity-webhooks-webhook-id-subscriptions-all "Permalink to this headline")
+</div>
+
+用于判断某个 webhook 配置是否已订阅指定用户的事件。如果在指定应用下，所提供的用户上下文存在一个活动订阅，则返回 204 OK。若返回码不是 204，则表示该用户没有活动订阅。详情请参阅下文的 HTTP 响应代码与错误信息说明。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all.json`
+
+### 资源信息[](#resource-information "此标题的永久链接")
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要身份验证 | 是（三方 OAuth 认证 - 已列入白名单的 consumer key 和订阅用户的访问令牌） |
+| 受速率限制 | 是 |
+| 每 15 分钟窗口的请求数（用户身份验证） | 500 |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook ID，在资源路径中定义。 |
+
+### 示例请求[](#example-request "指向此标题的永久链接")
+
+$ curl --request GET
+--url https://api.x.com/1.1/account&#95;activity/webhooks/:WEBHOOK&#95;ID/subscriptions/all.json
+--header &#39;authorization: OAuth oauth&#95;consumer&#95;key=&quot;WHITELISTED&#95;CONSUMER&#95;KEY&quot;, oauth&#95;nonce=&quot;GENERATED&quot;, oauth&#95;signature=&quot;GENERATED&quot;, oauth&#95;signature&#95;method=&quot;HMAC-SHA1&quot;, oauth&#95;timestamp=&quot;GENERATED&quot;, oauth&#95;token=&quot;SUBSCRIBING&#95;USER&#39;S&#95;ACCESS&#95;TOKEN&quot;, oauth&#95;version=&quot;1.0&quot;&#39;
+
+### 示例响应 - 成功[](#example-response-success "Permalink to this headline")
+
+*HTTP 204 无内容*
+
+```
+    { }
+```
+
+<div id="get-account_activitywebhookswebhook_idsubscriptionsalllist">
+  #### GET account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all/list[](#get-account-activity-webhooks-webhook-id-subscriptions-all-list "固定链接到此标题")
+</div>
+
+返回指定 webhook 当前 All Activity 类型订阅的列表。请注意，/list 端点需要仅应用程序 OAuth（app-only OAuth），因此请求应使用 Bearer Token，而不是基于用户上下文的认证。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all/list.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | HTTP 响应代码 |
+| 需要身份验证 | 是（仅应用级 - Bearer Token） |
+| 受速率限制 | 是 |
+| 每 15 分钟窗口内的请求数（应用级认证） | 50  |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook ID。在资源路径中定义。 |
+
+### HTTP 状态码[](#http-response-codes "Permalink to this headline")
+
+| Code | Message |
+| :--- | :--- |
+| 200 | 成功。将返回所请求 webhook 的订阅列表。 |
+| 401 | 您的应用没有权限查看指定 webhook 的订阅。 |
+
+### 示例请求[](#example-request "此标题的永久链接")
+
+$ curl --request GET
+--url https://api.x.com/1.1/account&#95;activity/webhooks/:WEBHOOK&#95;ID/subscriptions/all/list.json
+--header &#39;authorization: Bearer TOKEN&#39;
+
+### 示例响应 - 成功[](#example-response-success "Permalink to this headline")
+
+*HTTP 200*
+
+```bash
+    {
+      "webhook_id": "1234567890",
+      "webhook_url": "https://your_domain.com/webhook/twitter/0",
+      "application_id": "11231812",
+      "subscriptions": [{
+        "user_id": "20212306"
+      }]
+    }
+```
+
+### 错误信息[](#error-messages "此标题的永久链接")
+
+| 代码 | 错误信息      |
+| :- | :-------- |
+| 32 | 无法验证您的身份。 |
+
+*HTTP 401*
+
+```bash
+    {
+      "errors": [
+        {
+           "code": 32,
+          "message": "Could not authenticate you."
+        }
+      ]
+    }
+```
+
+<div id="delete-account_activitywebhookswebhook_id">
+  #### DELETE account&#95;activity/webhooks/:webhook&#95;id[](#delete-account-activity-webhooks-webhook-id "Permalink to this headline")
+</div>
+
+从指定应用的配置中移除该 webhook。可以通过调用 GET /1.1/account&#95;activity/webhooks 来获取该 webhook 的 ID。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要身份验证 | 是（用户上下文 - 所有 consumer 和 访问令牌） |
+| 受速率限制 | 是 |
+| 请求数 / 每 15 分钟窗口（用户身份验证） | 15  |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id (required) | Webhook 的 id。在资源路径中定义。 |
+
+### 示例请求[](#example-request "Permalink to this headline")
+
+```bash
+    $ curl --request DELETE
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID.json
+     --header 'authorization: OAuth oauth_consumer_key="CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+### 响应[](#response "此标题的永久链接")
+
+*HTTP 204 OK*
+
+```
+    { }
+```
+
+<div id="delete-account_activitywebhookswebhook_idsubscriptionsall-deprecated">
+  #### DELETE account&#95;activity/webhooks/:webhook&#95;id/subscriptions/all（已弃用）[](#delete-account-activity-webhooks-webhook-id-subscriptions-all-deprecated- "Permalink to this headline")
+</div>
+
+停用指定用户上下文和应用的订阅。停用后，请求用户的所有事件将不再发送到该 webhook URL。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/all.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要身份验证 | 是（3-legged OAuth - 已加入白名单的 consumer key 和已订阅用户的访问令牌） |
+| 受速率限制 | 是 |
+| 每 15 分钟时间窗口内的请求数（用户认证） | 500 |
+
+<div id="parameters">
+  ### 参数[](#parameters "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| webhook&#95;id（必填） | Webhook ID，在资源路径中定义。 |
+
+### 示例请求[](#example-request "本标题的永久链接")
+
+```bash
+    $ curl --request DELETE
+     --url https://api.x.com/1.1/account_activity/webhooks/:WEBHOOK_ID/subscriptions/all.json
+     --header 'authorization: OAuth oauth_consumer_key="WHITELISTED_CONSUMER_KEY", oauth_nonce="GENERATED", oauth_signature="GENERATED", oauth_signature_method="HMAC-SHA1", oauth_timestamp="GENERATED", oauth_token="SUBSCRIBED_USER'S_ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+示例请求
+
+```
+    { }
+```
+
+<div id="delete-account_activitywebhookswebhook_idsubscriptionsuser_idalljson">
+  #### DELETE /account&#95;activity/webhooks/:webhook&#95;id/subscriptions/:user&#95;id/all.json[](#delete-account-activity-webhooks-webhook-id-subscriptions-user-id-all-json "Permalink to this headline")
+</div>
+
+停用指定 webhook 和用户 id 的订阅。停用后，请求方用户的所有事件将不再发送到该 webhook URL。请注意，此端点需要仅应用级 OAuth 认证，因此请求应使用 Bearer Token，而不是基于用户上下文的授权方式。
+
+<div id="resource-url">
+  ### 资源 URL[](#resource-url "Permalink to this headline")
+</div>
+
+`https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/:user_id/all.json`
+
+<div id="resource-information">
+  ### 资源信息[](#resource-information "Permalink to this headline")
+</div>
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要身份验证 | 是（仅限应用级 - Bearer Token） |
+| 受速率限制 | 是 |
+| 每 15 分钟内的请求数上限 | 500 |
+
+### 示例请求[](#example-request "Permalink to this headline")
+
+```bash
+    $ curl --request DELETE
+     --url https://api.x.com/1.1/account_activity/webhooks/:webhook_id/subscriptions/:user_id/all.json
+     --header 'authorization: Bearer TOKEN'
+```
+
+### 响应[](#response "该标题的永久链接")
+
+*HTTP 204 NO CONTENT*
+
+### 错误信息[](#error-messages "Permalink to this headline")
+
+| 代码 | 消息 |
+| :--- | :--- |
+| 404 | 抱歉，该页面不存在。- 这通常发生在指定的用户 id 并未真正订阅时。 |
+
+<div id="replay-api">
+  ### Replay API
+</div>
+
+**POST /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json [¶](#post-1-1-account-activity-replay-webhooks-webhook-id-subscriptions-all-json- "Permalink to this headline")**
+
+提交请求，从请求中指定的日期和时间窗口内，检索过去最多五天内所有订阅所产生的活动。如果你的 webhook 具有有效的用户订阅，你也会同时实时接收这些事件。注意：在投递回放事件之前，我们会执行 CRC。
+
+|     |     |
+| :--- | :--- |
+| **Request Method** | HTTP POST |
+| **URL** | /1.1/account&#95;activity/replay/webhooks/:webhook&#95;id/subscriptions/all.json?from&#95;date=yyyymmddhhmm&amp;to&#95;date=yyyymmddhhmm |
+| **Response Format** | JSON |
+| **Requires Authentication** | 是（仅应用级 - Bearer Token） |
+| **Rate Limit** | 每 15 分钟 5 次请求。目前对可请求的回放作业数量没有上限。 |
+| **from&#95;date** | 提供事件的最早（起始）UTC 时间戳，必须为“yyyymmddhhmm”格式。时间戳以分钟为粒度，并且是包含性的（即 12:00 包含第 00 分钟）。有效时间必须是最近 5 天内的 UTC 时间，且不晚于当前时间点之前 31 分钟。建议将 from&#95;date 和 to&#95;date 之间的时间范围控制在约 2 小时内。 |
+| **to&#95;date** | 提供事件的最晚（结束）UTC 时间戳，必须为“yyyymmddhhmm”格式。时间戳以分钟为粒度，并且是不包含性的（即 12:30 不包含该小时的第 30 分钟）。有效时间必须是最近 5 天内的 UTC 时间，且不晚于当前时间点之前 10 分钟。 |
+
+<div id="responses">
+  #### 响应
+</div>
+
+API 可能返回以下响应。大多数错误码会在响应体中附带一个包含更多详细信息的字符串。对于非 200 响应，你应先解决错误然后重试。
+
+| Status | Text | Error Code | Description | Message |
+| :--- | :--- | :--- | :--- | :--- |
+| 202 | Accepted | N/A | 请求已成功，活动数据将会被发送。 | N/A |
+| 400 | Bad Request | 214 | Webhook 已被标记为无效。 | Webhook 被标记为无效，需要进行 CRC 检查。 |
+| 400 | Bad Request | 357 | 缺少查询参数。 | : queryParam 是必需的。 |
+| 400 | Bad Request | 358 | 路由或查询参数格式错误。 | 无法解析参数。 |
+| 400 | Bad Request | 360 | 路由参数为负数。 | webhook&#95;id: [] 不大于或等于 0。 |
+| 400 | Bad Request | 368 | from&#95;date 或 to&#95;date 不是过去的时间。 | : [&lt;field&#95;value&gt;] 不是过去的时间。 |
+| 400 | Bad Request | 356 | from&#95;date 必须早于 to&#95;date。 | from&#95;date 必须早于 to&#95;date。 |
+| 400 | Bad Request | 356 | from&#95;date 必须在过去 5 天内。 | from&#95;date 必须在过去 5 天内。 |
+| 401 | Unauthorized | 32  | 由于提供了 3-legged 认证导致 HTTP 认证失败。 | 无效的认证方法。请使用仅应用（application-only）认证。 |
+| 401 | Unauthorized | 61  | 客户端无权请求此方法。 | 客户端无权请求此方法。 |
+| 403 | Forbidden | 200 | 客户端没有启用 Replay 的 Enterprise 账户。 | 需要具有启用 Replay 的 Account Activity API Enterprise 账户。请确认你拥有 Enterprise 账户并且已启用 Replay。 |
+| 404 | Not Found | 34  | 不存在的 webhook&#95;id；webhook&#95;id 与 application&#95;id 不匹配。 | Webhook 不存在，或与其他 X 应用相关联。 |
+| 409 | Conflict | 355 | 当前已有请求在处理中，必须等待其完成后才能发起新的请求。 | 此 webhook 已有一个 Replay 任务在进行中。 |
+| 429 | Too Many Requests | 88  | 速率受限（达到每个时间段请求数量的上限）。 | 请求过多。请降低你的 API 请求频率。 |
+| 500 | Internal Server Error | 0   | 内部服务器错误。 | 内部服务器错误。 |
+| 503 | Service Unavailable | 67  | X 上的一个或多个依赖服务不可用。 | X 服务器错误。请使用指数退避模式重试。 |
+
+<div id="job-completed-successfully-message">
+  #### &quot;Job completed successfully” message
+</div>
+
+当你的作业成功完成后，Account Activity Replay API 会发送如下作业完成事件。一旦你收到此事件，表示该作业已运行结束，即可提交另一个作业。
+
+```json
+{
+  "replay\_job\_status": {
+    "webhook_id": "1234577122340233217",
+    "job_state": "Complete",
+    "job\_state\_description": "Job completed successfully"
+    "job_id": "1095098195724558337"
+  }
+}
+```
+
+<div id="job-failed-to-complete-message">
+  #### &quot;作业未能完成&quot; 消息
+</div>
+
+如果你的作业未能成功完成，我们会返回以下消息，提示你重试 Replay 作业。一旦你收到此事件，即表示该作业已运行结束，你可以提交另一项作业。
+
+```json
+{
+  "replay\_job\_status": {
+    "webhook_id": "123451374207332352",
+    "job_state": "Incomplete",
+    "job\_state\_description": "任务未能传递所有事件，请重试您的重放任务",
+    "job_id": "1093226942650736640"
+  }
+}
+```
+
+<div id="example-curl-request">
+  #### curl 请求示例
+</div>
+
+```bash
+    curl --request POST  --url 'https://api.x.com/1.1/account_activity/replay/webhooks/:webhook_id/subscriptions/all.json?from_date=yyyymmddhhmm&to_date=yyyymmddhhmm'
+    --header 'authorization: Bearer TOKEN'
+```
+
+#### 示例响应
+
+HTTP 202
+
+```bash
+{
+  "job_id": "1234567890",
+  "created_at": "2016-06-02T23:54:02Z"
+}
+```

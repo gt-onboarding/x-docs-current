@@ -1,0 +1,143 @@
+---
+title: "概要"
+sidebarTitle: "概要"
+keywords: ["activity API","X Activity API","activity events","profile updates","user activity","real-time events","activity stream"]
+---
+
+X Activity API (XAA) のエンドポイント群を使用すると、開発者は X プラットフォーム上で発生しているアクティビティイベントを取得できます。
+
+開発者は、`ProfileBioUpdate` や `ProfilePictureUpdate` など、関心のあるイベントを購読し、対象とするユーザーの User ID でイベントをフィルタリングできます。その User ID に一致するイベントは、サブ秒レイテンシでアプリに配信されます。
+
+<Warning>
+  X Activity API はオープンベータとして提供されています。オープンベータ期間中は、不具合や破壊的変更、不完全な機能が含まれる可能性があることにご留意ください。
+
+  皆さまからのフィードバックは非常に重要です。[開発者コミュニティフォーラム](https://devcommunity.x.com/) から問題を報告してください。
+</Warning>
+
+<div id="delivery-mechanisms">
+  ## 配信方法
+</div>
+
+X Activity API では現在、イベントをアプリに配信するために、次の配信方法をサポートしています。
+
+* 永続的 HTTP ストリーム
+* [Webhook](/ja/x-api/webhooks/introduction)
+
+<div id="supported-event-types">
+  ## サポートされているイベントタイプ
+</div>
+
+現在、X Activity API は、次のイベントタイプをカテゴリ別にサポートしています。
+
+<div id="profile-events">
+  ### プロフィールイベント
+</div>
+
+プロフィールイベントは、ユーザーがプロフィール情報を変更したときにトリガーされます。
+
+| Event Name                   | Description                                         | Filters   |
+| ---------------------------- | --------------------------------------------------- | --------- |
+| `profile.update.bio`           | ユーザーがプロフィールの自己紹介文を更新したときにトリガーされます         | `user_id` |
+| `profile.update.profile_picture`       | ユーザーがプロフィール画像を更新したときにトリガーされます     | `user_id` |
+| `profile.update.banner_picture`        | ユーザーがプロフィールバナーを更新したときにトリガーされます      | `user_id` |
+| `profile.update.geo`           | ユーザーがプロフィールの位置情報を更新したときにトリガーされます    | `user_id` |
+| `profile.update.url`           | ユーザーがプロフィールのウェブサイトURLを更新したときにトリガーされます | `user_id` |
+| `profile.update.screenname`    | ユーザーが表示名を更新したときにトリガーされます        | `user_id` |
+| `profile.update.verified_badge` | ユーザーが認証バッジを更新したときにトリガーされます      | `user_id` |
+
+<div id="follow-events">
+  ### フォローイベント
+</div>
+
+フォローイベントは、あるユーザーが別のユーザーをフォローまたはフォロー解除したときにトリガーされます。
+
+| イベント名 | 説明                                   | フィルター |
+| ---------- | -------------------------------------- | ---------- |
+| `follow.follow`  | ユーザーが別のユーザーをフォローしたときに発生します | `user_id` |
+| `follow.unfollow`  | ユーザーが別のユーザーのフォローを解除したときに発生します | `user_id` |
+
+<Note>
+  **Enterprise 限定:** フォローイベントは現在、一部の Enterprise および Partner ティアのアカウントでのみ利用可能です。
+</Note>
+
+<div id="news-events">
+  ### ニュースイベント
+</div>
+
+ニュースイベントは、Grok によってキュレーションされたニューストピックや見出しに関する更新情報を提供します。
+
+| Event Name | Description                           | Filters   |
+| ---------- | ------------------------------------- | --------- |
+| `news.new`  | Grok によってキュレーションされた新しいニュースと見出し | `keyword` |
+
+<Note>
+  **Enterprise 限定:** ニュースイベントは、現在一部の Enterprise および Partner ティアのアカウントでのみ利用可能です。
+</Note>
+
+今後のリリースでは、XAA はソーシャルインタラクション、コンテンツエンゲージメント、収益化機能などを含む、追加のイベントタイプをサポートするよう拡張される予定です。新しいイベントタイプが利用可能になり次第、本ドキュメントは随時更新されます。
+
+<Note>
+  **注意:** XAA はポストを配信しません。ポストをリアルタイムに配信するには、開発者がポストをフィルタリングしてリアルタイムでストリーミングできる [Filtered Stream](/ja/x-api/posts/filtered-stream/introduction) エンドポイントを参照してください。
+</Note>
+
+<div id="event-privacy-and-authentication">
+  ## イベントのプライバシーと認証
+</div>
+
+X Activity API では、以下で説明するように X アプリと同様に、**公開イベント** と **非公開イベント** を区別します。
+
+<div id="public-events">
+  ### 公開イベント
+</div>
+
+公開イベントは、公開設定のユーザーアカウントが公開の場で行うアクティビティであり、すべての X ユーザーに表示されます。これらのイベントは X プラットフォーム上のすべてのユーザーから閲覧でき、閲覧のためにユーザーによる OAuth 認証は不要です。
+
+**現在の公開イベント:**
+
+* プロフィールの更新（自己紹介、画像、バナー、位置情報、URL、ユーザー名の変更）
+
+これらの公開イベントについては、フィルターでユーザー id を指定することでサブスクリプションを作成し、XAA 経由で受信できます。
+
+<div id="private-events">
+  ### プライベートイベント
+</div>
+
+プライベートイベントは、OAuth 認証を通じてユーザーの明示的な同意が必要となるアクティビティです。ユーザーは X を介して認証を行い、開発者アプリがこれらのイベントにアクセスすることを明示的に許可する必要があります。
+
+**プライベートイベントに関する認証要件:**
+
+* ユーザーが OAuth 2.0 を通じてアプリケーションを認証していること
+* アプリケーションが適切な OAuth スコープを取得していること
+* ユーザーがアプリに対し、これらのイベントへのアクセスを明示的に許可していること
+* プライベートイベントのサブスクリプションは、アプリケーションを承認したユーザーに対してのみ作成できます
+
+<div id="subscription-limits">
+  ## サブスクリプション上限
+</div>
+
+X Activity API のサブスクリプション上限は、アカウントのティアごとに異なります。
+
+| パッケージティア | 最大サブスクリプション数 |
+| ------------ | --------------------- |
+| Free         | 利用不可              |
+| Basic        | 50                    |
+| Pro          | 2500                  |
+| Enterprise   | 50,000                |
+| Partner      | 100,000               |
+
+<Note>
+  **アカウントの設定**
+
+  これらのエンドポイントにアクセスするには、以下が必要です。
+
+  * 承認済みの[開発者アカウント](https://developer.x.com/en/portal/petition/essential/basic-info)。
+  * [プロジェクト](/ja/resources/fundamentals/projects)内にある[開発者アプリ](/ja/resources/fundamentals/developer-apps)のキーとトークンを使用した認証。
+
+  X API v2 エンドポイントへのアクセス方法については、[はじめにガイド](/ja/x-api/getting-started/getting-access)を参照してください。
+</Note>
+
+<div className="flex">
+  <Button href="/ja/x-api/posts/filtered-stream/quickstart">
+    クイックスタート
+  </Button>
+</div>

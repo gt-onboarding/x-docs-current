@@ -1,0 +1,133 @@
+---
+title: v1 a v2
+sidebarTitle: v1 a v2
+keywords: ["migración de v1.1 a v2", "migración de consulta de Lista", "migrar consulta de Lista", "consulta de Lista estándar a v2", "consulta de Lista de v1 a v2", "guía de migración"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="list-lookup-standard-v11-compared-to-x-api-v2">
+  ### Consulta de Listas: estándar v1.1 frente a X API v2
+</div>
+
+Si has estado trabajando con los endpoints estándar de v1.1 [GET lists/show](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-show) y [GET lists/ownerships](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/get-lists-ownerships), el objetivo de esta guía es ayudarte a entender las similitudes y diferencias entre los endpoints estándar de v1.1 y los endpoints de consulta de Listas de X API v2.
+
+* **Similitudes**
+  * Métodos de autenticación
+  * Límites de frecuencia
+* **Diferencias**
+  * URL de los endpoints
+  * Requisitos de la Aplicación y del Proyecto
+  * Límites de objetos de datos por solicitud
+  * Formatos de datos de respuesta
+  * Parámetros de la solicitud
+
+<div id="similarities">
+  #### Similitudes
+</div>
+
+**Autenticación**
+
+Ambas versiones del endpoint admiten tanto [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication#oauth-1-0a-2) como [solo App](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token). Por lo tanto, si anteriormente usabas uno de los endpoints estándar de búsqueda de List v1.1, puedes seguir utilizando el mismo método de autenticación si migras a la versión de X API v2.
+
+Según la biblioteca o paquete de autenticación que elijas, la autenticación solo App probablemente sea la forma más sencilla de comenzar y se puede configurar con un encabezado de solicitud simple. Para aprender a generar un Token de acceso solo App, consulta [esta guía de solo App](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token).
+
+**Límites de frecuencia**
+
+|     |     |
+| :--- | :--- |
+| **Estándar v1.1** | **X API v2** |
+| /1.1/lists/show.json<br /><br />75 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />75 solicitudes por ventana de 15 minutos con solo App | /2/lists/:id<br /><br />75 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />75 solicitudes por ventana de 15 minutos con OAuth 2.0 Authorization Code con PKCE |
+| /1.1/lists/ownerships.json<br /><br />15 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />15 solicitudes por ventana de 15 minutos con solo App | /2/users/:id/owned&#95;lists<br /><br />15 solicitudes por ventana de 15 minutos con Contexto de usuario de OAuth 1.0a<br /><br />15 solicitudes por ventana de 15 minutos con OAuth 2.0 Authorization Code con PKCE<br /><br />15 solicitudes por ventana de 15 minutos con solo App |
+
+<div id="differences">
+  #### Diferencias
+</div>
+
+**URLs de endpoint**
+
+* Endpoints estándar v1.1:
+  * GET https://api.x.com/1.1/lists/show.json
+    (Consulta una Lista específica)
+  * GET https://api.x.com/1.1/lists/ownerships.json
+    (Consulta Listas propiedad de un usuario específico)
+* Endpoint de X API v2:
+  * GET https://api.x.com/2/lists/:id
+    (Consulta una Lista específica)
+
+  * GET https://api.x.com/2/users/:id/owned&#95;lists
+    (Consulta Listas propiedad de un usuario específico)
+
+**Requisitos de Aplicación y Proyecto**
+
+Los endpoints de X API v2 requieren que utilices credenciales de una [developer App](/es/resources/fundamentals/developer-apps) que esté asociada a un [Project](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de Aplicaciones independientes o de Aplicaciones asociadas a un Proyecto.
+
+**Límites de objetos de datos por solicitud**
+
+El endpoint estándar v1.1 /lists/ownerships te permite devolver hasta 1000 Listas por solicitud. Los nuevos endpoints v2 te permiten devolver hasta 100 Listas por solicitud. De forma predeterminada, se devolverán 100 objetos de usuario; para cambiar la cantidad de resultados tendrás que pasar un parámetro de consulta max&#95;results= con un número entre 1 y 100; luego puedes pasar el next&#95;token devuelto en la carga de respuesta al parámetro de consulta pagination&#95;token en tu siguiente solicitud.
+
+**Formato de los datos de respuesta**
+
+Una de las mayores diferencias entre las versiones de endpoints estándar v1.1 y X API v2 es cómo seleccionas qué campos se devuelven en tu carga útil.
+
+Para los endpoints estándar, recibes muchos de los campos de la respuesta de forma predeterminada y luego tienes la opción de usar parámetros para identificar qué campos adicionales o conjuntos de campos deben devolverse en la carga útil.
+
+La versión de X API v2 solo entrega de forma predeterminada los campos id y name de la Lista. Para solicitar cualquier campo u objeto adicional, tendrás que usar los parámetros [fields](/es/x-api/fundamentals/fields) y [expansions](/es/x-api/fundamentals/expansions). Cualquier campo de Lista que solicites desde este endpoint se devolverá en el objeto Lista principal. Cualquier objeto y campos de Publicación o usuario ampliados se devolverán en un objeto includes dentro de tu respuesta. A continuación, puedes asociar cualquier objeto ampliado de nuevo al objeto Lista haciendo coincidir los IDs ubicados tanto en el usuario como en el objeto de Publicación ampliado. 
+
+Aquí tienes ejemplos de posibles campos de Lista y expansiones:
+
+* created&#95;at
+
+* follower&#95;count
+
+* member&#95;count
+
+* owner&#95;id
+
+* description
+
+* private
+
+|     |     |
+| :--- | :--- |
+| **Endpoint** | **Expansión** |
+| /2/lists/:id | owner&#95;id |
+| /2/users/:id/owned&#95;lists | owner&#95;id |
+
+Te recomendamos leer más sobre estos nuevos parámetros en sus respectivas guías o consultando nuestra guía sobre [cómo usar fields y expansions](/es/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions). 
+
+También hemos elaborado una [guía de migración de formato de datos](/es/x-api/migrate/data-format-migration) que puede ayudarte a mapear campos estándar v1.1 con los nuevos campos v2. Esta guía también te proporcionará la expansión específica y el parámetro de campo que tendrás que pasar con tu solicitud v2 para devolver campos específicos. 
+
+Además de los cambios en cómo solicitas ciertos campos, X API v2 también introduce nuevos diseños JSON para los objetos devueltos por las APIs, incluidos los objetos de [Post](/es/x-api/fundamentals/data-dictionary#tweet) y [user](/es/x-api/fundamentals/data-dictionary#user).
+
+* En el nivel raíz de JSON, los endpoints estándar devuelven objetos de Publicación en un array statuses, mientras que X API v2 devuelve un array data. 
+
+* En lugar de hacer referencia a &quot;statuses&quot; retuiteados y citados, el JSON de X API v2 hace referencia a Publicaciones retuiteadas y citadas. Muchos campos heredados y obsoletos, como contributors y user.translator&#95;type, se están eliminando. 
+
+* En lugar de usar tanto favorites (en el objeto de Publicación) como favourites (en el objeto de usuario), X API v2 usa el término like. 
+
+* X está adoptando la convención de que los valores JSON sin valor (por ejemplo, null) no se escriben en la carga útil. Los atributos de Publicación y usuario solo se incluyen si tienen valores distintos de null.
+
+**Parámetros de solicitud**
+
+Los siguientes parámetros de solicitud estándar v1.1 tienen equivalentes en X API v2:
+
+**Búsqueda de Lista por ID**
+
+|     |     |
+| :--- | :--- |
+| **Estándar v1.1** | **X API v2** |
+| list&#95;id | id  |
+| slug | Sin equivalente |
+| owner&#95;screen&#95;name | Sin equivalente |
+| owner&#95;id | Se solicita con el parámetro expansions/fields |
+
+**Búsqueda de Listas propiedad del usuario**
+
+|     |     |
+| :--- | :--- |
+| **Standard v1.1** | **X API v2** |
+| user&#95;id | id  |
+| screen&#95;name | Sin equivalente |
+| count | max&#95;results |
+| cursor | pagination&#95;token |

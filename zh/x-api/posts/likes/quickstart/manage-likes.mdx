@@ -1,0 +1,92 @@
+---
+title: 管理点赞
+sidebarTitle: 管理点赞
+keywords: ["管理点赞", "给帖子点赞", "取消点赞", "点赞快速入门", "点赞教程", "点赞指南"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="getting-started-with-the-manage-likes-endpoints">
+  ### 开始使用管理点赞端点
+</div>
+
+本快速入门指南将帮助你使用 [Postman](/zh/tutorials/postman-getting-started) 向管理点赞端点发送你的第一个请求。
+
+如果你希望查看不同编程语言的示例代码，请访问我们的 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 仓库。 
+
+<div id="prerequisites">
+  #### 先决条件
+</div>
+
+要完成本指南，你需要一组[密钥和令牌](/zh/resources/fundamentals/authentication)，可以按照以下步骤生成：
+
+1. [申请开发者账号](https://developer.x.com/en/apply-for-access)并通过审核。
+
+2. 在开发者门户中创建一个[项目](/zh/resources/fundamentals/projects)以及一个关联的[开发者应用](/zh/resources/fundamentals/developer-apps)。
+
+3. 进入你的应用的“Keys and tokens”页面，并将你的 API Keys、Access Tokens 和 Bearer Token 保存到密码管理器中。
+
+<div id="steps-to-build-a-manage-likes-request">
+  #### 构建管理点赞请求的步骤
+</div>
+
+**步骤一：从一个工具或库开始**
+
+有多种不同的工具、代码示例和库可以用来向此端点发起请求，但在这里我们将使用 Postman 工具来简化流程。
+
+要将 X API v2 的 Postman 集合加载到你的环境中，请点击以下按钮：
+
+[![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/m1_vnext/carat.svg)<br />将 X API v2 添加到 Postman](https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400)
+
+在你将 X API v2 集合加载到 Postman 之后，导航到“Likes”文件夹，并选择“Like a Post”。
+
+**步骤二：为请求进行身份验证**
+
+要向此端点发出成功的请求，你需要使用 [OAuth 1.0a User Context](/zh/resources/fundamentals/authentication)。为此，你必须在 Postman 中选择名为“X API v2”的环境，并在 initial value 和 current value 字段中添加以下变量（密钥和令牌）及其值：
+
+* consumer&#95;key：你的 API Key
+* consumer&#95;secret：你的 API Key Secret
+* access&#95;token：你的 Access Token
+* token&#95;secret：你的 Access Token Secret
+   
+
+**步骤三：指定你要点赞的 Post**
+
+管理点赞端点需要两个 ID：一个是用户 ID（希望点赞帖子的用户），另一个是表示该用户尝试点赞或取消点赞的 Post ID。 
+
+用户的 ID 必须与用于身份验证的用户 ID 相对应，这意味着在为请求进行身份验证时，你必须传递与该用户 ID 关联的[访问令牌](/zh/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow)。在这种情况下，你可以指定你自己的用户 ID。你可以通过两种方式找到你的 ID：
+
+1. 使用 [user lookup by username](/zh/x-api/users/user-lookup-by-id) 端点，你可以传入一个用户名并在响应中获得 id 字段。 
+2. 查看你的 Access Token，你会发现其中的数字部分就是你的用户 ID。
+    
+
+你还必须指定一个你想要点赞的 Post。你可以通过访问 x.com，点击某条帖子，然后查看其 URL 来找到该 Post 的 ID。例如，下面这个 URL 的 Post ID 是 1228393702244134912。
+
+[https://x.com/TwitterDev/status/1228393702244134912](https://x.com/TwitterDev/status/1228393702244134912)
+
+在 Postman 中，导航到 “Params” 选项卡，在 id 路径变量的 “Value” 列中输入你的 ID。然后导航到 “Body” 选项卡，将你希望点赞的 Post 的 ID 作为 tweet&#95;id 参数的值。请务必不要在任何 ID 的前后包含空格。
+
+|              |                   |
+| :----------- | :---------------- |
+| **Key**      | **Value**         |
+| `id`         | （你的用户 ID）         |
+| tweet&#95;id | （你想点赞的 Post 的 ID） |
+
+如果你点击 “Send” 按钮，你将收到一个包含关系状态的响应对象：
+
+* 如果你收到 &quot;liked&quot;: true，则说明该 id 已成功点赞该 tweet&#95;id。
+   
+
+**步骤四：发出请求并查看响应**
+
+完成所有设置后，点击 “Send” 按钮，你将会收到如下响应：
+
+```
+{
+    "data": {
+        "liked": true
+    }
+}
+```
+
+如果你希望取消点赞同一个帖子，可以使用名为 “Unlike a Post” 的请求，它也位于 Postman 中 X API v2 集合的 “Likes” 文件夹内。`id` 和 `tweet_id` 的用法应与前一个示例相同。要取消点赞一个帖子，你不需要在 JSON body 中添加内容，因此需要确保为 `id` 和 `tweet_id` 添加相应的查询参数（query params）。

@@ -1,0 +1,71 @@
+---
+title: 리스트 멤버 관리
+sidebarTitle: 리스트 멤버 관리
+keywords: ["리스트 멤버 관리 마이그레이션", "v1.1에서 v2로의 리스트 멤버 관리", "리스트 멤버 관리 마이그레이션", "Standard에서 v2로의 리스트 멤버 마이그레이션", "리스트 멤버 마이그레이션"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="manage-list-members-standard-v11-compared-to-x-api-v2">
+  ### 리스트 멤버 관리: Standard v1.1과 X API v2 비교
+</div>
+
+Standard v1.1 [POST lists/members/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-create) 및 [POST lists/members/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/create-manage-lists/api-reference/post-lists-members-destroy) 엔드포인트를 사용해 왔다면, 이 가이드는 Standard v1.1과 X API v2의 리스트 멤버 관리 엔드포인트 간 유사점과 차이점을 이해하는 데 도움이 되도록 작성되었습니다.
+
+* **유사점**
+  * 인증
+* **차이점**
+  * 엔드포인트 URL
+  * 앱 및 프로젝트 요건
+  * HTTP 메서드
+  * 요청 한도
+  * 요청 파라미터
+
+<div id="similarities">
+  #### 유사점
+</div>
+
+**인증**
+
+두 버전의 엔드포인트는 모두 [OAuth 1.0a 사용자 컨텍스트](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication)를 지원합니다. 따라서 이전에 standard v1.1 List 멤버 관리 엔드포인트 중 하나를 사용해 왔다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다.
+
+<div id="differences">
+  #### 차이점
+</div>
+
+**엔드포인트 URL**
+
+* Standard v1.1 엔드포인트:
+  * POST https://api.x.com/1.1/lists/members/create.json
+    (지정된 리스트에 멤버를 추가합니다)
+  * POST https://api.x.com/1.1/lists/members/destroy.json
+    (지정된 리스트에서 멤버를 제거합니다)
+* X API v2 엔드포인트:
+  * POST https://api.x.com/2/lists/:id/members
+    (지정된 리스트에 멤버를 추가합니다)
+
+  * DELETE https://api.x.com/2/lists/:id/members/:user&#95;id
+    (지정된 리스트에서 멤버를 제거합니다)
+
+**요청 한도**
+
+| **Standard v1.1** | **X API v2** |
+| :--- | :--- |
+| /1.1/lists/members/create.json<br /><br />없음 | /2/lists/:id/members<br /><br />OAuth 1.0a 사용자 컨텍스트 기준 15분당 최대 300회 요청<br /><br />OAuth 2.0 Authorization Code with PKCE 기준 15분당 최대 300회 요청 |
+| /1.1/lists/members/destroy.json<br /><br />없음 | /2/lists/:id/members/:user&#95;id<br /><br />OAuth 1.0a 사용자 컨텍스트 기준 15분당 최대 300회 요청<br /><br />OAuth 2.0 Authorization Code with PKCE 기준 15분당 최대 300회 요청 |
+
+**앱 및 프로젝트 요구 사항**
+
+X API v2 엔드포인트를 사용하려면, 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps)에 연결된 [Project](/ko/resources/fundamentals/projects)의 자격 증명을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 독립 실행형 앱 또는 프로젝트와 연결된 앱의 자격 증명을 사용할 수 있습니다.
+
+**요청 매개변수**
+
+다음 Standard v1.1 요청 매개변수는 X API v2에서 다음과 같이 대응됩니다:
+
+| **Standard v1.1** | **X API v2** |
+| :--- | :--- |
+| list&#95;id | id  |
+| slug | 해당 없음 |
+| screen&#95;name | 해당 없음 |
+| owner&#95;screen&#95;name | 해당 없음 |
+| owner&#95;id | 해당 없음 |

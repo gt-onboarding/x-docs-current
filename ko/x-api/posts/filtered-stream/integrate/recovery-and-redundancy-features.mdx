@@ -1,0 +1,48 @@
+---
+title: 복구 및 이중화
+sidebarTitle: 복구 및 이중화
+keywords: ["복구", "이중화", "스트림 복구", "재연결", "내결함성", "스트림 이중화", "오류 복구"]
+---
+
+<div id="introduction">
+  #### Introduction
+</div>
+
+스트리밍 데이터를 처리할 때는 연결 시간을 최대화하고, 매칭된 모든 데이터를 수신하는 것이 가장 기본적인 목표입니다. 이를 위해서는 중복(이중화) 연결을 활용하고, 연결 해제를 자동으로 감지하여 빠르게 재연결하며, 손실된 데이터를 복구하기 위한 계획을 갖추는 것이 중요합니다.
+
+이 통합 가이드에서는 중복 연결, 백필(backfill), 복구(recovery) 등 다양한 복구 및 이중화 기능에 대해 설명합니다.
+ 
+
+**Redundant connections**
+
+중복 연결은 단순히 filtered stream 에 두 개 이상의 동시 연결을 설정할 수 있게 해 줍니다. 이는 두 개의 별도 컨슈머를 사용해 동일한 스트림에 연결하고, 두 연결을 통해 동일한 데이터를 수신함으로써 이중화를 제공합니다. 따라서 하나의 스트림이 끊기거나 애플리케이션의 기본 서버에 장애가 발생하는 등의 상황에서, 앱은 즉시 전환할 수 있는 핫 페일오버를 갖추게 됩니다.
+
+현재 filtered stream 은 Enterprise 액세스가 있는 프로젝트에만 최대 두 개의 중복 연결을 허용합니다. 중복 스트림을 사용하려면 기본 연결에 사용한 것과 동일한 URL 에 단순히 다시 연결하면 됩니다. 스트림 데이터는 두 연결 모두를 통해 전송됩니다.
+
+<div id="recovering-missed-data-after-a-disconnection-backfill">
+  #### 연결 끊김 이후 누락된 데이터 복구: 백필(Backfill)
+</div>
+
+연결 끊김을 감지한 후에는 시스템이 스트림에 자동으로 다시 연결할 수 있어야 합니다. 가능하다면 적절한 복구 기능을 사용해 데이터를 백필할 수 있도록, 시스템이 연결이 끊겨 있었던 시간이 얼마나 되었는지도 기록해야 합니다. 
+
+Enterprise 액세스가 있는 프로젝트를 사용 중이고, 연결 끊김이 5분 이하였던 것으로 확인되면 `backfill_minutes` 백필 파라미터를 사용할 수 있습니다. 이 파라미터를 [GET /tweets/search/stream](/ko/x-api/posts/filtered-stream#get-2-tweets-search-stream) 요청에 함께 전달하면, 지난 1분에서 5분 사이에 여러분의 규칙과 일치하는 게시물을 받게 됩니다. 일반적으로 새로 일치한 게시물보다 이러한 과거 게시물을 먼저 전달하며, 게시물을 중복 제거하지도 않습니다. 즉, 90초 동안 연결이 끊겼지만 2분치 백필 데이터를 요청한 경우, 30초 분량의 중복 게시물을 받게 되며, 여러분의 시스템은 이를 허용할 수 있어야 합니다. 아래는 백필 파라미터를 사용한 요청 예시입니다:
+
+`curl 'https://api.x.com/2/tweets/search/stream?backfill_minutes=5' -H "Authorization: Bearer $ACCESS_TOKEN"`
+
+Enterprise 액세스가 없거나, 연결 끊김 시간이 5분을 초과한 것으로 확인된 경우, 누락된 데이터를 요청하기 위해 [recent search endpoint](/ko/x-api/posts/search/introduction) 또는 Recovery 기능을 사용할 수 있습니다. 다만, 검색용 게시물 엔드포인트에는 sample:, bio:, bio&#95;name:, bio&#95;location: 연산자가 포함되어 있지 않으며, keyword 및 #hashtag 연산자에서 악센트와 발음 구별 기호를 사용할 때 일치 동작에 일부 차이가 있습니다. 이러한 차이로 인해, 필터링 스트림 엔드포인트를 통해 수신되었을 수 있는 모든 게시물을 완전히 복구하지 못할 수도 있습니다. 
+
+**연결 끊김 이후 누락된 데이터 복구: Recovery**
+
+Enterprise 액세스가 있는 프로젝트를 사용하는 경우, 5분 백필 윈도우 내에 재연결할 수 없을 때 Recovery 기능을 사용하여 지난 24시간 이내의 누락된 데이터를 복구할 수 있습니다.
+
+스트리밍 Recovery 기능을 사용하면 최대 24시간에 이르는 확장된 백필 윈도우를 사용할 수 있습니다. Recovery는 누락된 데이터가 발생한 기간을 ‘재생(replay)’할 수 있도록 해 줍니다. Recovery 스트림은 `start_time` 및 `end_time` 요청 파라미터를 사용해 연결 요청을 보낼 때 시작됩니다. 연결이 완료되면 Recovery는 지정된 기간의 데이터를 다시 스트리밍한 후 연결을 끊습니다.  
+
+동시에 Recovery로 최대 2개의 요청을 보낼 수 있으며, 즉 “두 개의 recovery 작업”을 수행할 수 있습니다. Recovery는 시작 시간과 종료 시간이 정의된다는 점을 제외하면 기술적으로 백필과 동일한 방식으로 동작합니다. 하나의 Recovery 기간은 단일 시간 구간에 대해 수행됩니다.
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Name** | **Type** | **Description** |
+| start&#95;time | date (ISO 8601) | YYYY-MM-DDTHH:mm:ssZ (ISO 8601/RFC 3339).<br /><br />복구를 시작할 시점을 나타내는 UTC 기준 날짜입니다. |
+| end&#95;time | date (ISO 8601) | YYYY-MM-DDTHH:mm:ssZ (ISO 8601/RFC 3339).<br /><br />복구를 종료할 시점을 나타내는 UTC 기준 날짜입니다. |
+
+요청 URL 예시: [https://api.x.com/2/tweets/search/stream?start&#95;time=2022-07-12T15:10:00Z&amp;end&#95;time=2022-07-12T15:20:00Z](https://api.x.com/2/tweets/search/stream?start_time=1985-04-12T23:20:50.52Z\&end_time=1985-04-13T00:20:50.52Z)

@@ -1,0 +1,98 @@
+---
+title: 静音查询
+sidebarTitle: 静音查询
+keywords: ["静音查询迁移", "v1.1 到 v2 静音查询", "迁移静音查询", "标准版到 v2 静音", "静音迁移"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+<div id="mutes-lookup-standard-v11-compared-to-x-api-v2">
+  ### 静音查询：标准 v1.1 与 X API v2 对比
+</div>
+
+如果你一直在使用标准 v1.1 的 [GET mutes/users/ids](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-ids) 和 [GET mutes/users/list](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/get-mutes-users-list) 端点，本指南旨在帮助你了解标准 v1.1 与 X API v2 中静音查询端点之间的相同点和差异。
+
+* **相似点**
+  * 身份验证
+* **差异**
+  * 端点 URL
+  * 每次请求的用户数量上限
+  * 应用和项目要求
+  * 响应数据格式
+  * 请求参数
+
+<div id="similarities">
+  #### 相似点
+</div>
+
+**身份验证**
+
+标准 v1.1 和 X API v2 的静音（mutes）查询端点都使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2)。因此，如果你之前使用的是标准 v1.1 的某个静音查询端点，那么在迁移到 X API v2 版本时，可以继续使用相同的身份验证方法。 
+
+<div id="differences">
+  #### 差异
+</div>
+
+**Endpoint URL**
+
+* 标准 v1.1 endpoint：
+  * GET https://api.x.com/1.1/mutes/users/ids.json
+    （指定用户已静音的用户 ID 列表）
+  * GET https://api.x.com/1.1/mutes/users/lists.json
+    （被指定用户静音的用户列表）
+* X API v2 endpoint：
+  * GET https://api.x.com/2/users/:id/muting
+    （被指定用户 ID 静音的用户列表）
+     
+
+**每个请求的用户数量限制**
+
+标准 v1.1 endpoint 每个请求最多可返回 5000 个用户。新的 v2 endpoint 每个请求最多可返回 1000 个用户。要返回完整的 1000 个用户，你需要在查询参数中传入 max&#95;results=1000；然后可以将响应负载中返回的 next&#95;token 作为 pagination&#95;token 查询参数传入下一次请求。 
+
+**应用和项目要求**
+
+在对请求进行身份验证时，X API v2 endpoint 要求你使用某个与 [Project](/zh/resources/fundamentals/developer-apps) 关联的 [developer App](/zh/resources/fundamentals/developer-apps) 的凭证。所有 X API v1.1 endpoint 都可以使用独立 App 或与项目关联的 App 的凭证。
+
+**响应数据格式**
+
+标准 v1.1 与 X API v2 版本 endpoint 之间最大的差异之一，是你如何选择要在负载中返回哪些字段。
+
+对于标准 endpoint，你默认会收到许多响应字段，然后可以选择使用参数来指定应该在负载中返回哪些字段或字段集合。
+
+X API v2 版本默认只返回用户的 id、name 和 username 字段。若要请求任何额外的字段或对象，你需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数。从此 endpoint 请求的任何用户字段都会返回在主用户对象中。任何被扩展的 Post 对象及其字段都会作为 includes 对象返回在响应中。然后你可以通过匹配用户对象和被扩展 Post 对象中出现的 ID，将任何扩展对象匹配回用户对象。 
+
+我们鼓励你在各自的指南中进一步了解这些新参数，或者阅读我们的[如何使用 fields 和 expansions](/zh/x-api/fundamentals/data-dictionary#how-to-use-fields-and-expansions) 指南。 
+
+我们还整理了一份 [数据格式迁移指南](/zh/x-api/migrate/data-format-migration#migrating-from-standard-v1-1s-data-format-to-v2)，帮助你将标准 v1.1 字段映射到较新的 v2 字段。该指南还会为你提供在 v2 请求中需要传入的具体 expansion 和 field 参数，以便返回特定字段。 
+ 
+
+除更改如何请求某些字段之外，X API v2 还为 API 返回的对象引入了新的 JSON 设计，包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象。
+
+* 在 JSON 根级别，标准 endpoint 将 Post 对象返回在一个 statuses 数组中，而 X API v2 则返回在一个 data 数组中。 
+* 不再引用被转发和被引用的“statuses”，X API v2 JSON 改为引用被转发和被引用的帖子（Tweets）。许多旧版和已弃用字段（例如 contributors 和 user.translator&#95;type）将被移除。 
+* 不再同时使用 favorites（位于 Post 对象中）和 favourites（位于 user 对象中），X API v2 统一使用术语 like。 
+* X 采用的约定是：对于没有值的 JSON 字段（例如 `null`），不会写入到负载中。只有当 Post 和 user 属性具有非空值时才会被包含。 
+   
+
+我们还在 [Post 对象](/zh/x-api/fundamentals/data-dictionary#tweet) 中引入了一组新字段，包括：
+
+* 一个 [conversation&#95;id](/zh/x-api/fundamentals/conversation-id) 字段
+* 两个新的 [annotations](/zh/x-api/fundamentals/post-annotations) 字段，包括 context 和 entities
+* 若干新的 [metrics](/zh/x-api/fundamentals/metrics) 字段 
+* 一个新的 reply&#95;setting 字段，用于表明哪些用户可以回复某条 Post
+
+**请求参数**
+
+以下标准 v1.1 请求参数在 X API v2 中有对应项：
+
+| **标准** | **X API v2** |
+| :--- | :--- |
+| stringify&#95;ids | 无对应参数 |
+| cursor | pagination&#95;token |
+| skip&#95;status | 无对应参数 |
+
+还有一组标准 v1.1 的 Mutes 查找请求参数在 X API v2 中**不**受支持：
+
+| 标准 | 说明 |
+| :--- | :--- |
+| include&#95;entities | 此参数用于从帖子负载中移除 entities 节点。它已被新增的字段和扩展字段功能所取代。 |

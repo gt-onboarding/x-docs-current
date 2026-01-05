@@ -1,0 +1,180 @@
+---
+title: 概览
+sidebarTitle: 概览
+keywords: ["post lookup 迁移", "lookup 迁移", "v1.1 到 v2 lookup", "lookup 迁移指南", "迁移 lookup"]
+---
+
+<div id="comparing-x-apis-posts-lookup-endpoints">
+  ## 比较 X API 的 Posts 查询端点
+</div>
+
+v2 Posts 查询端点取代了标准的 v1.1 [GET statuses/lookup](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) 和 [GET statuses/show](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-show-id) 端点。本指南面向正从这些旧版本迁移到 X API v2 的开发者。
+
+***
+
+<div id="endpoint-comparison-table">
+  ## 端点对比表
+</div>
+
+| 描述 | Standard v1.1 | X API v2 |
+|:-------------|:---------------|:----------|
+| **支持的 HTTP 方法** | `GET` | `GET` |
+| **主机域名** | `https://api.x.com` | `https://api.x.com` |
+| **端点路径** | `/1.1/statuses/show.json`, `/1.1/statuses/lookup.json` | `/2/tweets` |
+| **[身份验证](resources/fundamentals/authentication)** | OAuth 1.0a 用户上下文 | OAuth 1.0a 用户上下文、OAuth 2.0 应用仅模式、OAuth 2.0 Authorization Code with PKCE |
+| **帖子 [JSON 格式](/zh/x-api/fundamentals/data-dictionary)** | Standard v1.1 格式 | [X API v2 格式](/zh/x-api/fundamentals/data-dictionary)，由 `fields` 和 `expansions` 参数决定（与 v1.1 不向后兼容） |
+| **支持选择特定的 [fields](/zh/x-api/fundamentals/data-dictionary)** |  | ✔ |
+| **支持 [annotations](/zh/x-api/fundamentals/post-annotations) 字段** |  | ✔ |
+| **支持 [metrics](/zh/x-api/fundamentals/metrics) 字段** |  | ✔ |
+| **支持 `conversation_id` 字段** |  | ✔ |
+| **提供帖子编辑历史记录** | ✔ | ✔ |
+| **需要使用来自与 [项目](resources/fundamentals/projects) 关联的 [开发者应用](/zh/resources/fundamentals/developer-apps) 的凭证** |  | ✔ |
+
+***
+
+<div id="standard-v11-compared-to-x-api-v2">
+  ## 标准 v1.1 与 X API v2 的比较
+</div>
+
+如果你一直在使用标准 v1.1 中的 GET statuses/show 和 GET statuses/lookup 端点，本指南将帮助你了解标准 v1.1 与 X API v2 帖子查询端点之间的相同点和差异。
+
+你可能也会对我们的[可视化数据格式迁移工具](/zh/x-api/migrate/data-format-migration)感兴趣，它可以帮助你快速查看[X API v1.1 数据格式](/zh/x-api/fundamentals/data-dictionary)和[X API v2 格式](/zh/x-api/fundamentals/data-dictionary)之间的差异。
+
+* **相似之处**
+  * OAuth 1.0a 用户上下文
+  * 每次请求的帖子数量限制
+  * 对帖子编辑历史和元数据的支持
+
+* **差异**
+  * 端点 URL
+  * 应用和项目要求
+  * 响应数据格式
+  * 请求参数
+
+<div id="similarities">
+  ### 相同点
+</div>
+
+<div id="oauth-10a-user-context-authentication-method">
+  #### OAuth 1.0a 用户上下文认证方法
+</div>
+
+标准端点支持 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)，而新的 X API v2 帖子查找端点同时支持 OAuth 1.0a 用户上下文和 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication)。因此，如果你之前使用的是标准 v1.1 帖子查找端点，那么在迁移到 X API v2 版本时，可以继续使用相同的认证方式。
+
+应用仅模式认证通常是最简单的入门方式。要了解如何生成应用访问令牌，请参阅 [这篇 OAuth 2.0 应用仅模式指南](/zh/resources/fundamentals/authentication)。
+
+<div id="posts-per-request-limits">
+  #### 每次请求的帖子数量限制
+</div>
+
+v1.1 的 [GET statuses/lookup](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/get-statuses-lookup) 端点允许你在每次请求中最多指定 100 条帖子。这同样适用于 GET /tweets 端点。若要指定完整的 100 条帖子，请将 `ids` 作为查询参数使用，并提供一个以逗号分隔的[帖子 ID](/zh/resources/fundamentals/x-ids) 列表。
+
+**对帖子编辑历史和元数据的支持**
+
+这两个版本都提供了用于描述编辑历史的元数据。请参阅 Post 查找 API 参考以及[编辑帖子基础知识页面](/zh/x-api/fundamentals/edit-posts)以获取更多详细信息。
+
+<div id="differences">
+  ### 不同之处
+</div>
+
+<div id="endpoint-urls">
+  #### 端点 URL
+</div>
+
+* **标准 v1.1 端点：**
+  * `https://api.x.com/1.1/statuses/show`
+  * `https://api.x.com/1.1/statuses/lookup`
+
+* **X API v2 端点：**
+  * `https://api.x.com/2/tweets`
+  * `https://api.x.com/2/tweets/:id`
+
+<div id="app-and-project-requirements">
+  #### 应用和项目要求
+</div>
+
+X API v2 端点在进行身份验证时，需要使用隶属于[项目](/zh/resources/fundamentals/projects)的[开发者应用](/zh/resources/fundamentals/developer-apps)的凭证。X API v1.1 端点则可以使用来自独立应用，或与项目关联的应用的凭证。
+
+<div id="response-data-format">
+  #### 响应数据格式
+</div>
+
+标准 v1.1 与 X API v2 端点版本之间的一个重要差异在于如何在响应负载中选择字段。
+
+对于标准端点，许多响应字段会默认返回，并可以通过参数来指定额外字段。
+
+然而，X API v2 默认只返回帖子 `id` 和 `text` 字段。其他字段和对象需要使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数来请求。扩展得到的字段会作为响应中的 `includes` 对象返回，你可以通过匹配 ID 将其与主帖子对象进行关联。
+
+要了解更多关于使用字段和扩展字段的信息，请参阅[如何使用字段和扩展字段的指南](/zh/x-api/fundamentals/data-dictionary)。[数据格式迁移指南](/zh/x-api/fundamentals/fields) 还将标准 v1.1 字段映射到更新的 v2 字段。
+
+此外，X API v2 为对象（包括帖子和 [user](/zh/x-api/fundamentals/fields) 对象）引入了新的 JSON 设计：
+
+* 标准端点在 `statuses` 数组中返回帖子对象，而 X API v2 使用 `data` 数组。
+* 在 X API v2 中，转发和引用帖子取代了 “statuses” 这一术语。
+* 新术语（例如 `like`）取代了 `favorites` 和 `favourites` 等术语。
+* 在 X API v2 的负载中，不会包含没有值的属性（例如 `null`）。
+
+X API v2 中的帖子对象包含新的字段，例如：
+
+* `conversation_id`
+* 两个新的 [annotations](/zh/x-api/fundamentals/post-annotations) 字段（`context` 和 `entities`）
+* 新的 [metrics](/zh/x-api/fundamentals/metrics) 字段
+* `reply_setting` 字段，用于显示谁可以回复某条帖子
+
+<div id="request-parameters">
+  #### 请求参数
+</div>
+
+以下标准 v1.1 请求参数在 X API v2 中有对应项：
+
+| 标准参数 | X API v2 |
+|:----------|:----------|
+| `id`     | `ids`    |
+
+某些标准 v1.1 参数在 X API v2 中**不**受支持：
+
+| 标准参数            | 说明                                                                                                                      |
+|:---------------------|:------------------------------------------------------------------------------------------------------------------------------|
+| `tweet_mode`        | 已由 `fields` 和 `expansions` 功能取代。                                                                             |
+| `trim_user`         | 已由 `fields` 和 `expansions` 取代。对于用户数据，请使用 `author_id` 扩展字段和 `user.fields`。                               |
+| `include_my_retweet`| 为经身份验证用户转发的帖子提供源帖子的 ID。                                          |
+| `include_entities`  | 使用 `fields` 和 `expansions` 控制响应中的实体（entities）。                                                               |
+| `include_ext_alt_text` | 如果存在替代文本（alt text），则在媒体实体中添加 `ext_alt_text` 字段。                                                         |
+| `include_card_uri`  | 在附加了广告卡片时添加 `card_uri`。                                                                               |
+| `map`               | 在 X API v2 中，对于不可用的帖子，返回该帖子的 ID 和错误消息，而不是像 v1.1 中那样返回被置空的字段。            |
+
+<div id="curl-requests">
+  ### cURL 请求
+</div>
+
+以下 cURL 请求展示了标准 v1.1 端点及其在 v2 中的对应端点。将请求头中的 `ACCESS_TOKEN` 替换为你的应用访问令牌。对于 v2 端点，该令牌必须是某个 [developer App](/zh/resources/fundamentals/developer-apps/overview) 在某个 [Project](/zh/resources/fundamentals/projects) 中的访问令牌。
+
+v1.1 的响应载荷与 v2 的会有所不同。在 v2 中，你可以使用 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions) 参数请求不同的字段。
+
+**标准 v1.1 `GET statuses/lookup` 和 v2 `GET /tweets` 端点**
+
+```bash
+curl --request GET \
+  --url 'https://api.x.com/1.1/statuses/lookup.json?id=1460323737035677698%2C1460323743339741184' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+```
+  curl --request GET \
+  --url 'https://api.x.com/2/tweets?ids=1460323737035677698%2C1460323743339741184&tweet.fields=created_at&expansions=author_id&user.fields=created_at' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+**标准 v1.1 `GET statuses/show/:id` 和 v2 `GET /tweets/:id` 端点**
+
+```
+curl --request GET \
+  --url 'https://api.x.com/1.1/statuses/show.json?id=1460323737035677698' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```
+
+```
+curl --request GET \
+  --url 'https://api.x.com/2/tweets/1460323737035677698?tweet.fields=created_at&expansions=author_id&user.fields=created_at' \
+  --header 'Authorization: Bearer $ACCESS_TOKEN'
+```

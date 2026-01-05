@@ -1,0 +1,64 @@
+---
+title: 뮤트 관리
+sidebarTitle: 뮤트 관리
+keywords: ["뮤트 관리 마이그레이션", "v1.1에서 v2로 뮤트 관리 마이그레이션", "뮤트 관리 마이그레이션", "Standard v1.1에서 v2로 뮤트 마이그레이션", "뮤트 마이그레이션"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+<div id="manage-mutes-standard-v11-compared-to-x-api-v2">
+  ### 음소거 관리: standard v1.1과 X API v2 비교
+</div>
+
+standard v1.1 [POST mutes/users/create](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/post-mutes-users-create) 및 [POST mutes/users/destroy](https://developer.x.com/en/docs/twitter-api/v1/accounts-and-users/mute-block-report-users/api-reference/post-mutes-users-destroy) 엔드포인트를 사용해 왔다면, 이 가이드는 standard v1.1과 X API v2의 음소거 관리 엔드포인트 간 유사점과 차이점을 이해하는 데 도움이 되도록 작성되었습니다.
+
+* **유사점**
+  * OAuth 1.0a 사용자 컨텍스트
+* **차이점**
+  * 엔드포인트 URL
+  * 앱 및 프로젝트 요구 사항
+  * HTTP 메서드
+  * 요청 매개변수
+     
+
+<div id="similarities">
+  #### 유사점
+</div>
+
+**OAuth 1.0a 사용자 컨텍스트 인증 방식**
+
+두 엔드포인트 버전 모두 [OAuth 1.0a 사용자 컨텍스트](https://developer.x.com/content/developer-twitter/resources/fundamentals/authentication)를 지원합니다. 따라서 이전에 표준 v1.1 mute 관리 엔드포인트 중 하나를 사용하고 있었다면, X API v2 버전으로 마이그레이션하더라도 동일한 인증 방식을 계속 사용할 수 있습니다.
+
+<div id="differences">
+  #### 차이점
+</div>
+
+**엔드포인트 URL**
+
+* Standard v1.1 엔드포인트:
+  * POST https://api.x.com/1.1/mutes/users/create.json
+    (사용자 뮤트)
+  * POST https://api.x.com/1.1/mutes/users/destroy.json
+    (사용자 뮤트 해제)
+* X API v2 엔드포인트:
+  * POST https://api.x.com/2/users/:id/muting
+    (사용자 뮤트)
+  * DELETE https://api.x.com/2/users/:source&#95;user&#95;id/muting/:target&#95;user&#95;id
+    (사용자 뮤트 해제) 
+
+**앱 및 프로젝트 요구 사항**
+
+X API v2 엔드포인트를 사용하려면 요청을 인증할 때 [developer App](/ko/resources/fundamentals/developer-apps) 중 해당 [Project](/ko/resources/fundamentals/projects)에 연결된 앱의 자격 증명을 사용해야 합니다. 모든 X API v1.1 엔드포인트는 독립 실행형 앱이나 프로젝트에 연결된 앱의 자격 증명을 모두 사용할 수 있습니다.
+
+**요청 매개변수**
+
+다음 Standard v1.1 요청 매개변수는 X API v2에서 각각에 해당하는 매개변수가 있습니다.
+
+| Standard v1.1 | X API v2 |
+| :--- | :--- |
+| user&#95;id | target&#95;user&#95;id |
+| screen&#95;name | 해당 없음 |
+
+Standard v1.1 매개변수는 쿼리 매개변수로 전달되는 반면, X API v2 매개변수는 요청 본문(body) 매개변수(POST 엔드포인트의 경우) 또는 경로(path) 매개변수(DELETE 엔드포인트의 경우)로 전달된다는 점에 유의하세요.
+
+또한, Standard v1.1 엔드포인트를 사용할 때는 대상 사용자를 뮤트하는 사용자의 id가 필요하지 않습니다. 이는 [OAuth 1.0a 사용자 컨텍스트](/ko/resources/fundamentals/authentication)를 통해 전달되는 액세스 토큰으로 어떤 사용자가 뮤트/뮤트 해제를 수행했는지 유추할 수 있기 때문입니다. 

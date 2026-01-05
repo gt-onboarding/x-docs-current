@@ -1,0 +1,92 @@
+---
+title: 点赞查询
+sidebarTitle: 点赞查询
+keywords: ["点赞查询迁移", "v1.1 到 v2 点赞查询", "迁移点赞查询", "标准版到 v2 点赞", "点赞迁移"]
+---
+
+<div id="likes-lookup-standard-v11-compared-to-x-api-v2">
+  ### 点赞查询：标准 v1.1 与 X API v2 的比较
+</div>
+
+如果你一直在使用标准 v1.1 的 [GET favorites/list](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-favorites-list) 端点，本指南旨在帮助你理解标准 v1.1 与 X API v2 点赞查询端点之间的相似点和差异。
+
+在 v2 中，我们还引入了一个新的 liked users 端点，它允许你获取某条帖子点赞用户的信息。
+
+* **相似点**
+  * 身份验证
+  * 速率限制
+* **差异**
+  * 端点 URL
+
+  * 请求限制
+
+  * 应用和项目要求
+
+  * 请求参数
+
+  * 新的 JSON 格式
+
+<div id="similarities">
+  #### 相似点
+</div>
+
+**身份验证**
+
+标准 v1.1 和 X API v2 的点赞查询端点都使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication#oauth-1-0a-2) 或 [OAuth 2.0 Bearer Token](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。因此，如果你之前使用的是标准 v1.1 的 [GET favorites/list 端点](https://developer.x.com/en/docs/x-api/v1/tweets/post-and-engage/api-reference/get-favorites-list)，在迁移到 X API v2 版本时，可以继续使用相同的身份验证方法。 
+
+根据你所使用的身份验证库或包，Bearer Token 身份验证通常是最容易上手的方式，只需在请求头中进行简单设置即可。要了解如何生成 Bearer Token，请参阅 [OAuth 2.0 Bearer Token 指南](/zh/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)。 
+ 
+
+**速率限制**
+
+标准 v1.1 的 GET favorites/list 端点对每个用户的速率限制为每 15 分钟 75 次请求。v2 中对应的 liked Posts 端点也有相同的速率限制。不过，这个 v2 端点还额外增加了一个针对每个应用的速率限制：每 15 分钟 75 次请求。
+
+<div id="differences">
+  #### 差异
+</div>
+
+**Endpoint URL**
+
+* 标准 v1.1 endpoint：
+  * GET https://api.x.com/1.1/favorites/list.json
+    （指定用户点赞过的帖子列表）
+  * v1.1 中没有与 v2 liking users endpoint 等价的接口
+* X API v2 endpoint：
+  * GET https://api.x.com/2/users/:id/liked&#95;tweets
+    （指定用户 ID 点赞的帖子列表）
+  * GET https://api.x.com/2/tweets/:id/liking&#95;users
+    （点赞了指定帖子 ID 的用户列表）
+
+**请求限制**
+
+v2 liked Posts endpoint 允许你在每个请求中获取 5 到 100 条帖子，但你可以使用分页 token 获取某条帖子的全部点赞。v1.1 的 GET favorites/list endpoint 也允许你拉取帖子的所有点赞，但每个请求可以拉取 20 到 200 条帖子。
+
+对于 v2 liking users endpoint，你在每条帖子上最多可以获取 100 个点赞用户。
+ 
+
+**应用和项目要求**
+
+在对请求进行认证时，X API v2 endpoint 要求你使用某个[开发者应用](/zh/resources/fundamentals/developer-apps)的凭证，该应用需关联到一个[项目](/zh/resources/fundamentals/developer-apps)。所有 X API v1.1 endpoint 都可以使用独立应用或与项目关联的应用中的凭证。
+
+**请求参数**
+
+下面的标准 v1.1 endpoint 支持两个查询参数（user&#95;id 或 screen&#95;name）。X API v2 只接受数值型的用户 ID，并且必须作为 endpoint 路径的一部分传入。
+
+标准 v1.1 与 X API v2 版本的 endpoint 之间最大的区别之一，是你如何选择响应负载中返回哪些字段。对于标准 endpoint，可以使用多个参数来指定哪些字段或字段集会在负载中返回，而 X API v2 版本将这些不同的参数简化为 [fields](/zh/x-api/fundamentals/fields) 和 [expansions](/zh/x-api/fundamentals/expansions)。
+ 
+
+**新的 JSON 格式**
+
+X API v2 为 API 返回的对象（包括 [Post](/zh/x-api/fundamentals/data-dictionary#tweet) 和 [user](/zh/x-api/fundamentals/data-dictionary#user) 对象）引入了新的 JSON 设计。
+
+* 在 JSON 根级别，标准 endpoint 将用户对象返回在 statuses 数组中，而 X API v2 则在 data 数组中返回。 
+* X API v2 JSON 不再引用转发和引用的“statuses”，而是引用转发和引用的 Tweets。许多传统和已废弃字段（例如 contributors 和 user.translator&#95;type）正在被移除。 
+* X API v2 不再同时使用 favorites（Post 对象中）和 favourites（user 对象中），而统一使用 like 这一术语。 
+* X 采用这样的约定：没有值的 JSON 字段（例如 null）不会写入负载。Post 和 user 属性只有在值非 null 时才会被包含。
+   
+
+除了对新 JSON 格式所做的更改之外，我们还在 Post 对象中加入了一组新的字段，包括以下内容：
+
+* [conversation&#95;id](/zh/x-api/fundamentals/conversation-id)
+* 两个新的 [Post annotations](/zh/x-api/fundamentals/post-annotations) 字段，包括 context 和 entities
+* 多个新的 [metrics](/zh/x-api/fundamentals/metrics) 字段 

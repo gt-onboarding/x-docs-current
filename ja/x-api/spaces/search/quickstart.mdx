@@ -1,0 +1,115 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["spaces search quickstart", "search spaces quickstart", "spaces search tutorial", "spaces search guide"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-search-spaces-endpoint">
+  ## search Spaces エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、Postman を使って、指定した一連のフィールドを含む最初のリクエストを search Spaces エンドポイントに送信する方法を説明します。
+
+さまざまなプログラミング言語でのサンプルコードを確認したい場合は、[X API v2 sample code GitHub repository](https://github.com/xdevplatform/Twitter-API-v2-sample-code) を参照してください。
+
+<Note>
+  **前提条件**
+
+  このガイドを完了するには、リクエストを認証するための一連の [キーとトークン](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access)し、承認を受けてください。
+  * developer portal 内で [プロジェクト](/ja/resources/fundamentals/projects) を作成し、関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-search-spaces-request">
+  ### Spaces 検索リクエストを構築する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントにリクエストを送信するために使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡単にするために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、Spaces フォルダに移動し、「Search Spaces」リクエストを探します。
+ 
+
+**ステップ 2: リクエストを認証する**
+
+X API へ正しくリクエストを送信するには、自分に権限があることを確認する必要があります。そのために、このエンドポイントでは [OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only) または [OAuth 2.0 Authorization Code with PKCE](/ja/resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかの認証方法でリクエストを認証する必要があります。
+
+簡単にするため、ここではこのリクエストに OAuth 2.0 アプリ専用フローを使用しますが、非公開の[メトリクス](/ja/x-api/fundamentals/metrics) や非公開ユーザーの Spaces をリクエストしたい場合は、他の認証方法のいずれかを使用する必要があります。 
+
+OAuth 2.0 アプリ専用フローを利用するには、特に [App Access Token](/ja/resources/fundamentals/authentication#bearer-token-also-known-as-app-only)（App-only Bearer Token とも呼ばれます）を含むキーとトークンを Postman に追加する必要があります。これは、Postman の右上の「X API v2」という名前の環境を選択し、環境ドロップダウンの横にある目のアイコンをクリックして、「initial value」と「current value」フィールドにキーとトークンを追加することで行えます。
+
+正しく設定されていれば、これらの変数はリクエストの「Authorization」タブに自動的に反映されます。
+ 
+
+**ステップ 3: 検索クエリを作成する**
+
+このエンドポイントは、検索クエリとしてテキストを受け取ります。他の検索エンドポイントとは異なり、オペレーター、グルーピング、論理演算子は受け付けません。この演習では、シンプルなクエリとして「hello」を使用します。
+
+Postman で「Params」タブに移動し、id パラメータの「Value」列にこのユーザー ID を入力します。
+
+|         |           |
+| :------ | :-------- |
+| **Key** | **Value** |
+| query   | hello     |
+
+**ステップ 4: 取得したいフィールドを特定して指定する**
+
+ステップ 3 の後に「Send」ボタンをクリックすると、Spaces の ID とその状態が返されます。これらは、レスポンスでデフォルトで返される唯一の Space オブジェクトのフィールドです。
+
+追加のフィールドを受け取りたい場合は、space.fields または expansions パラメータを使って、リクエスト内でそれらを指定する必要があります。
+
+この演習では、異なるオブジェクトから 3 つの追加フィールドセットをリクエストします。
+
+* 主な Spaces オブジェクトにおける追加の title フィールド
+* 指定した creator ID に対応するユーザーオブジェクト全体
+* 関連するユーザーオブジェクトにおける追加の user.created&#95;at フィールド
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次の key:value ペアを追加します。
+
+|              |                |                                                                 |
+| :----------- | :------------- | :-------------------------------------------------------------- |
+| **Key**      | **Value**      | **Returned fields**                                             |
+| space.fields | title          | creator&#95;id                                                  |
+| expansions   | creator&#95;id | includes.users.id, includes.users.name, includes.users.username |
+| user.fields  | created&#95;at | includes.users.created&#95;at                                   |
+
+「Send」ボタンの横に、次の URL が表示されているはずです。
+
+[https://api.x.com/2/spaces/search?query=hello&amp;space.fields=creator&#95;id&amp;expansions=creator&#95;id&amp;user.fields=created&#95;at](https://api.x.com/2/spaces/search?query=hello\&space.fields=creator\\_id\&expansions=creator\\_id\&user.fields=created_at)
+
+**ステップ 5: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次のレスポンスが返されます。
+
+```{
+   "data": [
+    {
+        "creator_id": "2244994945",
+        "id": "1zqKVXPQhvZJB",
+        "title": "Hello world 👋",
+        "state": "Running"
+   },
+   "includes": {
+       "users": [
+           {
+               "created_at": "2013-12-14T04:35:55.000Z",
+               "name": "Twitter Dev",
+               "id": "2244994945",
+               "username": "TwitterDev"
+           }
+       ]
+   }
+]
+}
+```

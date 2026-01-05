@@ -1,0 +1,99 @@
+---
+title: 빠른 시작
+sidebarTitle: 빠른 시작
+keywords: ["트윗 관리 빠른 시작", "트윗 게시 빠른 시작", "트윗 작성 튜토리얼", "트윗 작성 가이드", "트윗 게시 예제"]
+---
+
+import { Button } from '/snippets/ko/button.mdx';
+
+## 게시물 관리 엔드포인트 사용 시작하기**
+
+이 빠른 시작 가이드는 [Postman](/ko/tutorials/postman-getting-started)을 사용해 게시물 관리 엔드포인트에 대한 첫 요청을 보내는 방법을 안내합니다.
+
+여러 언어로 된 샘플 코드를 보고 싶다면 [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub 리포지토리를 방문하세요.
+
+<Info>
+  **사전 준비 사항**
+
+  이 가이드를 완료하려면 요청을 인증하는 데 사용할 [keys and tokens](/ko/resources/fundamentals/authentication)이 필요합니다. 다음 단계를 따라 이러한 키와 토큰을 생성할 수 있습니다:
+
+  * [개발자 계정에 가입](https://developer.x.com/en/apply-for-access)하고 승인을 받습니다.
+  * developer portal에서 [Project](/ko/resources/fundamentals/projects)와 연결된 [developer App](/ko/resources/fundamentals/developer-apps)을 생성합니다.
+  * App의 “Keys and tokens” 페이지로 이동해 필요한 자격 증명을 생성합니다. 생성한 모든 자격 증명은 안전한 위치에 저장해야 합니다.
+</Info>
+
+<div id="steps-to-building-manage-posts-requests">
+  ### manage Posts 요청 생성 단계
+</div>
+
+**1단계: 도구 또는 라이브러리 선택**
+
+이 endpoint에 요청을 보내기 위해 사용할 수 있는 도구, 코드 예제, 라이브러리가 여러 가지 있지만, 여기서는 과정을 단순화하기 위해 Postman 도구를 사용하겠습니다.
+
+X API v2 Postman 컬렉션을 환경에 불러오려면 다음 버튼을 클릭하세요:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2를 Postman에 추가
+</Button>
+
+Postman에 X API v2 컬렉션을 불러온 후, “Manage Posts” 폴더로 이동하여 “Create a Post”를 선택합니다.
+ 
+
+**2단계: 요청 인증**
+
+X API에 올바르게 요청을 보내려면, 해당 요청을 수행할 권한이 있는지 확인해야 합니다. manage Posts endpoint에서 이를 수행하려면 [OAuth 1.0a User Context](/ko/resources/fundamentals/authentication) 또는 [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2)를 사용하여 요청을 인증해야 합니다.
+
+이 예제에서는 OAuth 1.0a User Context를 사용하겠습니다.
+
+Postman에 키와 토큰(특히 API Key, API Secret Key, OAuth 1.0a 사용자 Access Token, OAuth 1.0a 사용자 Access Token Secret)을 추가해야 합니다. 이를 위해 Postman 오른쪽 상단에서 “X API v2”라는 이름의 Environment를 선택한 다음, 환경 드롭다운 옆의 눈 모양 아이콘을 클릭해 &quot;initial value&quot; 및 &quot;current value&quot; 필드에 키와 토큰을 추가합니다.
+
+올바르게 설정했다면, 이 변수들은 요청의 Authorization 탭에 자동으로 반영됩니다.
+
+**3단계: 게시물 텍스트 지정**
+
+이 endpoint로 새 게시물을 만들 때는, 게시물의 텍스트(text)나 미디어가 필수 body 파라미터입니다.
+
+Postman에서 “Body” 탭으로 이동한 뒤, `text` 파라미터의 값으로 게시물의 텍스트를 입력합니다. 추가로, 투표(poll), 특정 Post ID에 대한 답글, 답글 설정(reply settings)과 같은 항목에 대한 파라미터를 추가하려면 이곳에서 함께 설정할 수 있습니다. 사용 가능한 항목에 대한 자세한 내용은 [API reference 가이드](/ko/x-api/posts/manage-tweets/introduction)를 참고하세요.
+
+|         |              |                    |
+| :------ | :----------- | :----------------- |
+| **Key** | **Value**    | **Parameter type** |
+| `text`  | Hello world! | body               |
+
+**4단계: 조회하려는 필드 식별 및 지정**
+
+모든 설정을 완료했다면 &quot;Send&quot; 버튼을 누르세요. 그러면 다음 예시 응답과 유사한 응답을 받게 됩니다:
+
+```
+{
+  "data": {
+    "id": "1445880548472328192",
+    "text": "Hello world!"
+  }
+}
+```
+
+반환된 response 객체에 게시물의 `id`와 `text`가 포함되어 있다면 게시물이 성공적으로 생성된 것입니다.
+ 
+
+**5단계: 게시물 삭제**
+
+게시물을 삭제하려면 Postman에 로드된 X API v2 컬렉션의 “Manage Posts” 폴더에 있는 “Delete a Post” 요청을 선택합니다. 이 엔드포인트는 삭제하려는 게시물의 ID를 필요로 합니다. 그런 다음 “Params” 탭에서 삭제하려는 게시물의 ID를 `id` 열의 값으로 입력합니다. 
+
+삭제 요청이 성공하면 다음 예시와 유사한 응답을 받게 됩니다:
+
+```
+{
+   "data": {
+       "deleted" : true
+   }
+}
+```
+
+**다음 단계**
+
+[API 레퍼런스](/ko/x-api/posts/manage-tweets#manage-tweets-api-reference-index)
+
+[지원 받기](https://developer.x.com/en/support/x-api)
+
+[샘플 코드](https://github.com/xdevplatform/Twitter-API-v2-sample-code "Sample code")

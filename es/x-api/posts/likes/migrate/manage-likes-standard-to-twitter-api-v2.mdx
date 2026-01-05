@@ -1,0 +1,60 @@
+---
+title: Gestionar Me gusta
+sidebarTitle: Gestionar Me gusta
+keywords: ["migración de la gestión de Me gusta", "gestión de Me gusta de v1.1 a v2", "migrar la gestión de Me gusta", "Me gusta estándar a v2", "migración de Me gusta"]
+---
+
+<div id="manage-likes-standard-v11-compared-to-x-api-v2">
+  ### Gestionar Me gusta: estándar v1.1 en comparación con X API v2
+</div>
+
+Si has estado utilizando los endpoints estándar v1.1 [POST favorites/create](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-favorites-create) y [POST favorites/destroy](https://developer.x.com/en/docs/twitter-api/v1/tweets/post-and-engage/api-reference/post-favorites-destroy), el objetivo de esta guía es ayudarte a comprender las similitudes y diferencias entre los endpoints de gestión de Me gusta de la versión estándar v1.1 y de X API v2.
+
+* **Similitudes**
+  * Contexto de usuario de OAuth 1.0a
+* **Diferencias**
+  * URLs de los endpoints y métodos HTTP
+  * Requisitos de la aplicación y el proyecto
+  * Parámetros de la solicitud
+
+<div id="similarities">
+  #### Similitudes
+</div>
+
+**Método de autenticación con contexto de usuario de OAuth 1.0a**
+
+Ambas versiones del endpoint son compatibles con [OAuth 1.0a User Context](/es/resources/fundamentals/authentication#oauth-1-0a-2). Por lo tanto, si antes utilizabas uno de los endpoints estándar de v1.1 para administrar Me gusta, puedes seguir utilizando el mismo método de autenticación si migras a la versión de X API v2.
+
+<div id="differences">
+  #### Diferencias
+</div>
+
+**URLs de endpoints y métodos HTTP**
+
+* Endpoints estándar v1.1:
+  * POST https://api.x.com/1.1/favorites/create.json
+    (indicar Me gusta en una Publicación)
+  * POST https://api.x.com/1.1/favorites/destroy.json
+    (quitar Me gusta de una Publicación)
+* Endpoint de X API v2:
+  * POST https://api.x.com/2/tweets/:id/likes
+    (indicar Me gusta en una Publicación)
+  * DELETE https://api.x.com/2/tweets/:id/likes/:tweet&#95;id
+    (quitar Me gusta de una Publicación) 
+
+**Requisitos de aplicación y Proyecto**
+
+Los endpoints de X API v2 requieren que uses credenciales de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que esté asociada a un [Proyecto](/es/resources/fundamentals/projects) al autenticar tus solicitudes. Todos los endpoints de X API v1.1 pueden usar credenciales de aplicaciones independientes o de aplicaciones asociadas a un Proyecto.
+
+**Parámetros de la solicitud**
+
+Los siguientes parámetros de solicitud estándar de v1.1 tienen equivalentes en X API v2:
+
+| v1.1 estándar | X API v2 |
+| :--- | :--- |
+| id  | id  |
+| includes&#95;entities | Sin equivalente |
+
+Ten en cuenta que los parámetros de v1.1 estándar se pasan como parámetros de consulta, mientras que los parámetros de X API v2 se pasan como parámetros en el cuerpo para el endpoint POST o como parámetros de ruta para el endpoint DELETE.
+
+Además, no se requiere el id del usuario que indica Me gusta en una Publicación cuando se usan los endpoints v1.1 estándar, ya que los [Tokens de acceso](/es/resources/fundamentals/authentication#obtaining-access-tokens-using-3-legged-oauth-flow) enviados con el [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication) permiten deducir qué usuario inicia la acción de indicar o quitar Me gusta. 

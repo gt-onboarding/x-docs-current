@@ -1,0 +1,336 @@
+---
+title: OAuth API 参考文档索引
+sidebarTitle: API 参考文档
+keywords: ["OAuth API reference", "authentication API", "OAuth endpoints", "auth endpoints", "OAuth reference", "API reference"]
+---
+
+<div id="oauth-10a">
+  ### OAuth 1.0a
+</div>
+
+|     |     |
+| :--- | :--- |
+| **用途** | 方法 |
+| 三方 OAuth 流程的第 1 步以及 Sign in with X  <br />允许客户端应用获取 OAuth Request Token，以请求用户授权。 | [POST oauth/request&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-request-token) |
+| 三方 OAuth 流程的第 2 步以及 Sign in with X  <br />允许客户端应用使用 OAuth Request Token 来请求用户授权。 | [GET oauth/authenticate](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authenticate) |
+| 三方 OAuth 流程的第 2 步以及 Sign in with X  <br />允许客户端应用使用 OAuth Request Token 来请求用户授权。 | [GET oauth/authorize](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authorize) |
+| 三方 OAuth 流程的第 3 步以及 Sign in with X  <br />允许客户端应用将 OAuth Request Token 交换为 OAuth Access Token。 | [POST oauth/access&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-access-token) |
+| 允许已注册的应用撤销已签发的 OAuth Access Token。 | [POST oauth/invalidate&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-invalidate-token) |
+
+<div id="oauth-20-bearer-token">
+  ### OAuth 2.0 Bearer Token
+</div>
+
+|     |     |
+| :--- | :--- |
+| **用途** | 方法 |
+| 允许已注册的应用生成 OAuth 2 应用专用 Bearer Token，可在无用户上下文的情况下代表应用发起 API 请求。 | [POST oauth2/token](/zh/resources/fundamentals/authentication/api-reference#post-oauth2-token) |
+| 允许已注册的应用撤销已颁发的 OAuth 2 应用专用 Bearer Token。 | [POST oauth2/invalidate&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth2-invalidate-token) |
+
+<div id="post-oauthrequest_token">
+  ### POST oauth/request&#95;token
+</div>
+
+允许 Consumer 应用获取一个 OAuth Request Token，以请求用户授权。此方法实现了 [OAuth 1.0 认证流程](http://oauth.net/core/1.0/#anchor9)中的 [第 6.1 节](https://oauth.net/core/1.0/#auth_step1)。
+
+**在所有 OAuth 授权步骤中，你都必须使用 HTTPS。**
+
+**使用说明：** `oauth_nonce` 仅接受 ASCII 值。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/request_token`
+
+**资源信息[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 是否需要认证？ | 否 |
+| 是否有速率限制？ | 是 |
+
+**参数[](#parameters "Permalink to this headline")**
+
+| 名称 | 是否必填 | 描述 | 示例 |
+| :--- | :--- | :--- | :--- |
+| oauth&#95;callback | 必填 | 为符合 OAuth 1.0a 要求，此参数是**必填**的。你在此处指定的值将作为用户在批准你的应用访问其账户后重定向到的 URL。将其设置为 `oob` 可启用带外 PIN 模式。这也是你在桌面/移动应用中指定自定义回调的方式。无论是否已预先注册回调，都应始终在此步骤发送 `oauth_callback`。<br /><br />我们要求，任何与此端点一起使用的回调 URL 都必须先在 developer.x.com 上该应用的设置中进行配置* | `http://themattharris.local/auth.php` `twitterclient://callback` |
+| x&#95;auth&#95;access&#95;type | 可选 | 覆盖应用对用户账户请求的访问级别。支持的值为 `read` 或 `write`。此参数旨在允许开发者注册一个读/写应用，但在合适的情况下仅请求只读访问。 |     |
+
+在[此页面](/zh/resources/fundamentals/developer-apps#callback-urls)了解更多关于如何批准你的回调 URL 的信息。
+
+**请注意** - 如果你已经在 developer.x.com 上登录了你的 X 账号，你可以通过 [X 应用控制面板](https://developer.x.com/en/apps)查看和编辑你现有的 [X 应用](/zh/resources/fundamentals/developer-apps)。
+
+**示例请求[](#example-request "Permalink to this headline")**
+
+请求 URL：`POST https://api.x.com/oauth/request_token`
+
+请求 POST 正文：*N/A*
+
+授权头：`OAuth oauth_nonce="K7ny27JTpKVsTgdyLdDfmQQWVLERj2zAK5BslRsqyw", oauth_callback="http%3A%2F%2Fmyapp.com%3A3005%2Ftwitter%2Fprocess_callback", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1300228849", oauth_consumer_key="OqEqJeafRSF11jBMStrZz", oauth_signature="Pc%2BMLdv028fxCErFyi8KXFM%2BddU%3D", oauth_version="1.0"`
+
+响应：`oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik&oauth_token_secret=Kd75W4OQfb2oJTV0vzGzeXftVAwgMnEK9MumzYcM&oauth_callback_confirmed=true`
+
+<div id="get-oauthauthorize">
+  ### GET oauth/authorize
+</div>
+
+允许 Consumer 应用使用 OAuth 请求 Token 来请求用户授权。此方法对应 [OAuth 1.0 认证流程](http://oauth.net/core/1.0/#anchor9)的[第 6.2 节](http://oauth.net/core/1.0/#auth_step2)。桌面应用必须使用此方法（且不能使用 [GET oauth / authenticate](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authenticate)）。
+
+**使用说明：** `oauth_callback` 永远不会传递给此方法，请改为将其提供给 [POST oauth / request&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-request-token)。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/authorize`
+
+**资源信息[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 是否需要认证？ | 是 |
+| 是否受限流？ | 是 |
+
+**参数[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| 名称 | 是否必需 | 描述 | 默认值 | 示例 |
+| force&#95;login | 可选 | 强制用户输入其凭证，以确保授权的是正确的用户账号。 |     |     |
+| screen&#95;name | 可选 | 使用给定值预填 OAuth 登录界面中的用户名输入框。 |     |     |
+
+**请求示例[](#example-request "Permalink to this headline")**
+
+在浏览器中将用户重定向到 `oauth/authorize` 步骤，并包含 oauth&#95;token 参数：
+`https://api.x.com/oauth/authorize?oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik`
+
+<div id="get-oauthauthenticate">
+  ### GET oauth/authenticate
+</div>
+
+允许 Consumer 应用使用 OAuth `request_token` 来请求用户授权。
+
+对于使用回调认证流程的应用，此方法替代了 [OAuth 1.0 认证流程](http://oauth.net/core/1.0/#anchor9)中的 [第 6.2 节](http://oauth.net/core/1.0/#auth_step2)。除非将 `force_login` 参数设置为 `true`，否则该方法会将当前登录用户作为访问授权所使用的账户。
+
+此方法与 [GET oauth / authorize](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authorize) 的不同在于，如果用户已经授予应用权限，则会在无需用户重新批准应用的情况下直接进行重定向。要实现此行为，你必须在[应用记录](https://developer.x.com/apps)中启用 *Use Sign in with X* 设置。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/authenticate`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| Response formats | JSON |
+| Requires authentication? | Yes |
+| Rate limited? | Yes |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| Name | Required | Description | Default Value | Example |
+| force&#95;login | optional | 强制用户输入其凭证，以确保授权的是正确的用户账户。 |     | *true* |
+| screen&#95;name | optional | 预填充 OAuth 登录界面的用户名输入框为给定的值。 |     |     |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+在网页浏览器中将用户引导至 `oauth/authenticate` 步骤，并包含 oauth&#95;token 参数：
+`https://api.x.com/oauth/authenticate?oauth_token=Z6eEdO8MOmk394WozF5oKyuAv855l4Mlqo7hhlSLik`
+
+<div id="post-oauthaccess_token">
+  ### POST oauth/access&#95;token
+</div>
+
+允许 Consumer 应用将 OAuth Request Token 交换为 OAuth Access Token。此方法完成了 [OAuth 1.0 认证流程](http://oauth.net/core/1.0/#anchor9)的[第 6.3 节](http://oauth.net/core/1.0/#auth_step3)。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth/access_token`
+
+**资源信息[](#resource-information "Permalink to this headline")**
+
+|     |     |
+| :--- | :--- |
+| 响应格式 | JSON |
+| 需要认证？ | 是 |
+| 受频率限制？ | 是 |
+
+**参数[](#parameters "Permalink to this headline")**
+
+|     |     |     |     |     |
+| :--- | :--- | :--- | :--- | :--- |
+| 名称 | 必填 | 描述 | 默认值 | 示例 |
+| oauth&#95;token | 必填 | 这里的 oauth&#95;token 必须与 request&#95;token 步骤中返回的 oauth&#95;token 相同。 |     |     |
+| oauth&#95;verifier | 必填 | 如果使用 OAuth 网页流程，将此参数设置为回调 URL 中返回的 *oauth&#95;verifier* 的值。如果使用带外 OAuth（out-of-band），将此值设置为 PIN 码。为了符合 OAuth 1.0a，此参数是**必填**的。平台会严格执行 OAuth 1.0a 规范，未使用 *oauth&#95;verifier* 的应用将无法完成 OAuth 流程。 |     |     |
+
+**请求示例[](#example-request "Permalink to this headline")**
+
+`POST https://api.x.com/oauth/access_token?oauth_token=qLBVyoAAAAAAx72QAAATZxQWU6P&oauth_verifier=ghLM8lYmAxDbaqL912RZSRjCCEXKDIzx`
+
+基于 PIN 的请求：`POST https://api.x.com/oauth/access_token?oauth_token=9Npq8AAAAAAAx72QBRABZ4DAfY9&oauth_verifier=4868795`
+
+**响应示例[](#example-response "Permalink to this headline")**
+
+`oauth_token=6253282-eWudHldSbIaelX7swmsiHImEL4KinwaGloHANdrY&oauth_token_secret=2EEfA6BG5ly3sR3XjE0IBSnlQu4ZrUzPiYTmrkVU&user_id=6253282&screen_name=xapi`
+
+<div id="post-oauthinvalidate_token">
+  ### POST oauth/invalidate&#95;token
+</div>
+
+允许已注册应用通过提供其客户端凭证来撤销已签发的 OAuth access&#95;token。一旦某个 access&#95;token 被作废，后续新创建时将生成不同的访问令牌，且不再允许继续使用已作废的令牌。
+
+**资源 URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/1.1/oauth/invalidate_token`
+
+**资源信息[](#resource-information "Permalink to this headline")**
+
+|          |                          |
+| :------- | :----------------------- |
+| 返回格式     | JSON                     |
+| 是否需要认证？  | 是 - 需要包含你希望作废的访问令牌的用户上下文 |
+| 是否有速率限制？ | 是                        |
+
+**示例请求[](#example-request "Permalink to this headline")**
+
+```bash
+        curl --request POST
+          --url 'https://api.x.com/1.1/oauth/invalidate_token.json'
+          --header 'authorization: OAuth oauth_consumer_key="CLIENT_KEY",
+         oauth_nonce="AUTO_GENERATED_NONCE", oauth_signature="AUTO_GENERATED_SIGNATURE",
+         oauth_signature_method="HMAC-SHA1", oauth_timestamp="AUTO_GENERATED_TIMESTAMP",
+         oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+**示例响应[](#example-response "Permalink to this headline")**
+
+```bash
+        HTTP/1.1 200 OK
+        Content-Type: application/json; charset=utf-8
+        Content-Length: 127
+        ...
+
+        {"access_token":"ACCESS_TOKEN"}
+```
+
+**令牌失效后的错误响应示例[](#example-error-response-after-token-has-been-invalidated "此标题的永久链接")**
+
+```bash
+        HTTP/1.1 401 Authorization Required
+        ...
+
+        {"errors": [{
+          "code": 89,
+          "message": "Invalid or expired token."}
+        ]}
+```
+
+<div id="post-oauth2token">
+  ### POST oauth2/token
+</div>
+
+允许已注册的应用获取 OAuth 2 Bearer Token，可用于在无用户上下文的情况下，以应用自身身份发起 API 请求。这称为[仅应用认证（Application-only authentication）](/zh/resources/fundamentals/authentication/oauth-2-0/application-only)。
+
+可使用 oauth2/invalidate&#95;token 使 Bearer Token 失效。一旦 Bearer Token 被使失效，重新创建将得到一个不同的 Bearer Token，且先前令牌将不再被允许使用。
+
+同一应用在任意时刻只能存在一个有效的 Bearer Token，多次调用该方法将在其被使失效前返回相同的已存在令牌。
+
+成功的响应会返回一个描述所授予 Bearer Token 的 JSON 结构。
+
+通过此方法获取的令牌应当被缓存。如果请求过于频繁，将返回带有代码 99 的 HTTP 403 拒绝请求。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth2/token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|                          |                                                         |
+| :----------------------- | :------------------------------------------------------ |
+| Response formats         | JSON                                                    |
+| Requires authentication? | 是 - 使用 Basic auth，将你的 API key 作为用户名、API key secret 作为密码 |
+| Rate limited?            | 是                                                       |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+|                |          |                                                                                                                                                                 |               |                          |
+| :------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------ | :----------------------- |
+| Name           | Required | Description                                                                                                                                                     | Default Value | Example                  |
+| grant&#95;type | required | 指定应用请求的授权类型。目前仅允许使用 *client&#95;credentials*。更多信息参见[仅应用认证（Application-Only Authentication）](/zh/resources/fundamentals/authentication/oauth-2-0/application-only)。 |               | *client&#95;credentials* |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+```bash
+    POST /oauth2/token HTTP/1.1
+    Host: api.x.com
+    User-Agent: My X App v1.0.23
+    Authorization: Basic eHZ6MWV2R ... o4OERSZHlPZw==
+    Content-Type: application/x-www-form-urlencoded;charset=UTF-8
+    Content-Length: 29
+    Accept-Encoding: gzip
+
+    grant_type=client_credentials
+```
+
+**示例响应：**
+
+```bash
+    HTTP/1.1 200 OK
+    Status: 200 OK
+    Content-Type: application/json; charset=utf-8
+    ...
+    Content-Encoding: gzip
+    Content-Length: 140
+
+    {"token_type":"bearer","access_token":"AAAA%2FAAA%3DAAAAAAAA"}
+```
+
+<div id="post-oauth2invalidate_token">
+  ### POST oauth2/invalidate&#95;token
+</div>
+
+允许已注册的应用通过提供其客户端凭证来撤销已签发的 OAuth 2.0 Bearer Token。一旦某个 Bearer Token 被作废，之后新创建时将会返回一个不同的 Bearer Token，而已作废的令牌将不能再被使用。
+
+成功的响应会返回一个 JSON 结构，用于描述被撤销的 Bearer Token。
+
+**Resource URL[](#resource-url "Permalink to this headline")**
+
+`https://api.x.com/oauth2/invalidate_token`
+
+**Resource Information[](#resource-information "Permalink to this headline")**
+
+|                          |                                                                                                                                                  |
+| :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Response formats         | JSON                                                                                                                                             |
+| Requires authentication? | Yes - 使用应用的 consumer API key 以及应用所有者的 access token 和 access token secret，通过 [OAuth 1.0a](/zh/resources/fundamentals/authentication/oauth-1-0a) 进行认证 |
+| Rate limited?            | Yes                                                                                                                                              |
+
+**Parameters[](#parameters "Permalink to this headline")**
+
+| Name             | Required | Description          |
+| :--------------- | :------- | :------------------- |
+| access&#95;token | required | 要作废的 Bearer Token 的值 |
+
+**Example request[](#example-request "Permalink to this headline")**
+
+```
+        curl --request POST
+          --url 'https://api.x.com/oauth2/invalidate_token?access_token=AAAA%2FAAA%3DAAAAAAAA'
+          --header 'authorization: OAuth oauth_consumer_key="CLIENT_KEY",
+         oauth_nonce="AUTO_GENERATED_NONCE", oauth_signature="AUTO_GENERATED_SIGNATURE",
+         oauth_signature_method="HMAC-SHA1", oauth_timestamp="AUTO_GENERATED_TIMESTAMP",
+         oauth_token="ACCESS_TOKEN", oauth_version="1.0"'
+```
+
+**响应示例[](#example-response "Permalink to this headline")**
+
+```
+         Status: 200 OK
+         Content-Type: application/json; charset=utf-8
+         Content-Length: 135
+         ...
+       {
+        "access_token": "AAAA%2FAAA%3DAAAAAAAA"
+        }
+```

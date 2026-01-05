@@ -1,0 +1,189 @@
+---
+title: "streaming"
+sidebarTitle: "streaming"
+---
+
+Utilidades de streaming sólidas para el SDK de la X API.
+
+Este módulo proporciona manejo de conexiones de streaming con reconexión automática,
+backoff exponencial y gestión de errores completa. Los clientes pueden consumir
+endpoints de streaming sin preocuparse por la gestión de las conexiones: el SDK
+gestiona toda la recuperación automáticamente.
+
+<div id="class-xdkstreamingstreamconfig">
+  ### `class xdk.streaming.StreamConfig`
+</div>
+
+Configuración de conexiones de streaming con lógica de reintentos.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.max_retries" type="int" default="10"></ParamField>
+
+<ParamField path="path.initial_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.max_backoff" type="float" default="64.0"></ParamField>
+
+<ParamField path="path.backoff_multiplier" type="float" default="2.0"></ParamField>
+
+<ParamField path="path.jitter" type="bool" default="True"></ParamField>
+
+<ParamField path="path.timeout" type="float or None" default="None"></ParamField>
+
+<ParamField path="path.chunk_size" type="int" default="1024"></ParamField>
+
+<ParamField path="path.on_connect" type="Callable[[], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_disconnect" type="Callable[[Exception or None], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_reconnect" type="Callable[[int, float], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_error" type="Callable[[[StreamError"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.max_retries" type="int" default="10"></ParamField>
+
+<ParamField path="path.initial_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.max_backoff" type="float" default="64.0"></ParamField>
+
+<ParamField path="path.backoff_multiplier" type="float" default="2.0"></ParamField>
+
+<ParamField path="path.jitter" type="bool" default="True"></ParamField>
+
+<ParamField path="path.timeout" type="float or None" default="None"></ParamField>
+
+<ParamField path="path.chunk_size" type="int" default="1024"></ParamField>
+
+<ParamField path="path.on_connect" type="Callable[[], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_disconnect" type="Callable[[Exception or None], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_reconnect" type="Callable[[int, float], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_error" type="Callable[[[StreamError"></ParamField>
+
+<div id="on_error-callablestreamerror">
+  ### `on_error : Callable[[[StreamError]`
+</div>
+
+<div id="exception-xdkstreamingstreamerror">
+  ### `exception xdk.streaming.StreamError`
+</div>
+
+Excepción lanzada para errores de streaming clasificados.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.message" type="str"></ParamField>
+
+<ParamField path="path.error_type" type="StreamErrorType"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.message" type="str"></ParamField>
+
+<ParamField path="path.error_type" type="StreamErrorType"></ParamField>
+
+<div id="class-xdkstreamingstreamerrortype">
+  ### `class xdk.streaming.StreamErrorType`
+</div>
+
+Clasificación de errores de streaming para tomar decisiones de reintento.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.value" type="Any"></ParamField>
+
+<div id="class-xdkstreamingstreamstate">
+  ### `class xdk.streaming.StreamState`
+</div>
+
+Estado interno de una conexión de streaming.
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.retry_count" type="int" default="0"></ParamField>
+
+<ParamField path="path.current_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.is_connected" type="bool" default="False"></ParamField>
+
+<ParamField path="path.total_items_received" type="int" default="0"></ParamField>
+
+<ParamField path="path.last_error" type="StreamError"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.retry_count" type="int" default="0"></ParamField>
+
+<ParamField path="path.current_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.is_connected" type="bool" default="False"></ParamField>
+
+<ParamField path="path.total_items_received" type="int" default="0"></ParamField>
+
+<ParamField path="path.last_error" type="StreamError"></ParamField>
+
+<div id="last_error-streamerror">
+  ### `last_error : [StreamError]`
+</div>
+
+<div id="xdkstreamingstream_with_retry">
+  ### `xdk.streaming.stream_with_retry`
+</div>
+
+Transmite datos desde un endpoint con reconexión automática y backoff exponencial.
+Esta función gestiona toda la conexión, incluyendo:
+
+- Reconexión automática ante desconexiones
+- Backoff exponencial con jitter para los retrasos de reintento
+- Clasificación de errores como reintentables vs. fatales
+- Callbacks de ciclo de vida para supervisar el estado de la conexión
+
+<div id="parameters">
+  #### Parámetros
+</div>
+
+<ParamField path="path.session" type="Session">
+La sesión de requests que se utilizará para las llamadas HTTP.
+</ParamField>
+
+<ParamField path="path.method" type="str">
+Método HTTP (normalmente «get»).
+</ParamField>
+
+<ParamField path="path.url" type="str">
+La URL completa desde la que se hará streaming.
+</ParamField>
+
+<ParamField path="path.config" type="StreamConfig">
+StreamConfig con la configuración de reintentos y callbacks.
+</ParamField>

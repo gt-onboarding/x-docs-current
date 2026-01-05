@@ -1,0 +1,167 @@
+---
+title: 서명 생성하기
+sidebarTitle: 서명 생성하기
+keywords: ["OAuth 서명", "서명 생성", "OAuth 1.0a 서명", "HMAC 서명", "서명 생성 과정", "OAuth 서명 처리"]
+---
+
+import { Button } from "/snippets/ko/button.mdx";
+
+<div id="creating-a-signature">
+  ### 서명 생성하기
+</div>
+
+이 페이지에서는 HTTP 요청에 대해 OAuth 1.0a HMAC-SHA1 서명을 생성하는 방법을 설명합니다. 이 서명은 [요청 승인하기](/ko/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request)에 설명된 대로, 승인된 요청의 일부로 X API에 전달하는 데 사용할 수 있습니다.
+
+서명 방법을 설명하기 위해 사용하는 요청은 [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json)으로 보내는 POST 요청입니다. 원본(raw) 요청은 다음과 같습니다:
+
+```
+POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
+Accept: */*
+Connection: close
+User-Agent: OAuth gem v0.4.4
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 76
+Host: api.x.com
+
+status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
+```
+
+**요청 메서드와 URL 수집하기**
+
+서명을 생성하려면 먼저 요청의 HTTP 메서드와 URL을 파악해야 합니다. 이 두 값은 요청을 생성할 때 이미 알 수 있는 값이므로 쉽게 가져올 수 있습니다.
+
+X API 요청의 요청 메서드는 거의 항상 GET 또는 POST입니다.
+
+|             |      |
+| :---------- | :--- |
+| HTTP Method | POST |
+
+기본 URL은 요청이 전송되는 URL에서 쿼리 문자열이나 해시 파라미터를 제외한 값입니다. 여기서는 올바른 프로토콜을 사용하는 것이 중요하므로, URL의 `https://` 부분이 API로 실제 전송되는 요청과 일치하는지 확인해야 합니다.
+
+|          |                                                                                          |
+| :------- | :--------------------------------------------------------------------------------------- |
+| Base URL | [https://api.x.com/1.1/statuses/update.json](https://api.x.com/1.1/statuses/update.json) |
+
+<div id="collecting-parameters">
+  #### 매개변수 수집
+</div>
+
+다음으로, 요청에 포함된 모든 매개변수를 수집합니다. 이러한 추가 매개변수는 두 위치에 있을 수 있습니다. 하나는 URL(쿼리 문자열의 일부)이고, 다른 하나는 요청 본문입니다. 샘플 요청에는 이 두 위치 각각에 하나씩 매개변수가 포함되어 있습니다:
+
+```
+POST /1.1/statuses/update.json?include_entities=true HTTP/1.1
+Accept: */*
+Connection: close
+User-Agent: OAuth gem v0.4.4
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 76
+Host: api.x.com
+
+status=Hello%20Ladies%20%2b%20Gentlemen%2c%20a%20signed%20OAuth%20request%21
+```
+
+HTTP 요청에는 URL 인코딩된 파라미터가 있지만, 서명을 만들 때는 인코딩되기 전의 원본 값을 수집해야 합니다. 요청 파라미터 외에도 모든 `oauth_*` 파라미터가 서명에 포함되어야 하므로, 이들도 함께 수집합니다. 다음은 [요청 승인](/ko/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request)에서 사용된 파라미터입니다:
+
+|                                |                                                    |
+| :----------------------------- | :------------------------------------------------- |
+| status                         | Hello Ladies + Gentlemen, a signed OAuth request!  |
+| include&#95;entities           | true                                               |
+| oauth&#95;consumer&#95;key     | xvz1evFS4wEEPTGEFPHBog                             |
+| oauth&#95;nonce                | kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg         |
+| oauth&#95;signature&#95;method | HMAC-SHA1                                          |
+| oauth&#95;timestamp            | 1318622958                                         |
+| oauth&#95;token                | 370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb |
+| oauth&#95;version              | 1.0                                                |
+
+이 값들은 나중에 사용할 단일 문자열로 인코딩되어야 합니다. 이 문자열을 만드는 과정은 매우 구체적입니다:
+
+1. 서명에 포함될 모든 key와 value에 대해 [퍼센트 인코딩(percent encode)](/ko/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)을 수행합니다.
+2. 인코딩된 key를 기준으로 파라미터 목록을 알파벳 순으로 정렬합니다 [[1]](/ko/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature) [[2]](/ko/resources/fundamentals/authentication/oauth-1-0a/creating-a-signature).
+3. 각 key/value 쌍에 대해 다음을 수행합니다:
+4. 인코딩된 key를 출력 문자열에 추가합니다.
+5. `=` 문자를 출력 문자열에 추가합니다.
+6. 인코딩된 value를 출력 문자열에 추가합니다.
+7. 남은 key/value 쌍이 더 있다면, `&amp;` 문자를 출력 문자열에 추가합니다.
+    
+
+[1] OAuth 사양에서는 사전식(lexicographical) 정렬을 지시하는데, 이는 많은 라이브러리에서 기본 알파벳 정렬 방식입니다.
+
+[2] 인코딩된 key가 동일한 두 파라미터가 있는 경우, OAuth 사양에서는 value를 기준으로 정렬을 계속하라고 규정합니다. 그러나 X는 API 요청에서 중복 key를 허용하지 않습니다.
+ 
+
+**파라미터 문자열(parameter string)**
+
+위에서 수집한 파라미터에 대해 이 단계를 반복하면, 다음과 같은 *파라미터 문자열*이 생성됩니다:
+
+| status                   | Hello Ladies + Gentlemen, a signed OAuth request!  |
+| :----------------------- | :------------------------------------------------- |
+| `include_entities`       | true                                               |
+| `oauth_consumer_key`     | xvz1evFS4wEEPTGEFPHBog                             |
+| `oauth_nonce`            | kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg         |
+| `oauth_signature_method` | HMAC-SHA1                                          |
+| `oauth_timestamp`        | 1318622958                                         |
+| `oauth_token`            | 370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb |
+| `oauth_version`          | 1.0                                                |
+
+<div id="creating-the-signature-base-string">
+  #### 시그니처 베이스 문자열 생성
+</div>
+
+지금까지 수집한 세 개의 값은 하나의 문자열로 결합해야 하며, 이 문자열로부터 시그니처가 생성됩니다. OAuth 사양에서는 이를 **시그니처 베이스 문자열(signature base string)**이라고 합니다.
+
+HTTP 메서드, 기본 URL, 그리고 매개변수 문자열을 하나의 문자열로 인코딩하려면 다음과 같이 합니다:
+
+1. HTTP 메서드를 대문자로 변환하고, 출력 문자열을 이 값으로 설정합니다.
+2. 출력 문자열에 ‘&amp;’ 문자를 추가합니다.
+3. URL을 [퍼센트 인코딩](/ko/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)하고, 이를 출력 문자열에 추가합니다.
+4. 출력 문자열에 ‘&amp;’ 문자를 추가합니다.
+5. 매개변수 문자열을 [퍼센트 인코딩](/ko/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters)하고, 이를 출력 문자열에 추가합니다.
+    
+
+이렇게 하면 다음과 같은 *시그니처 베이스 문자열*이 생성됩니다:
+
+```
+POST&https%3A%2F%2Fapi.x.com%2F1.1%2Fstatuses%2Fupdate.json&include_entities%3Dtrue%26oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521
+```
+
+매개변수 문자열이 퍼센트 인코딩되었는지 확인하십시오. 시그니처 베이스 문자열에는 앰퍼샌드 ‘&amp;’ 문자가 정확히 2개만 포함되어야 합니다. 매개변수 문자열에 있는 퍼센트 ‘%’ 문자는 시그니처 베이스 문자열에서 %25로 인코딩되어야 합니다.
+
+<div id="getting-a-signing-key">
+  #### 서명 키 가져오기
+</div>
+
+수집해야 하는 마지막 데이터 항목은 요청을 보내는 [X 앱](/ko/resources/fundamentals/developer-apps)을 식별하는 비밀 값과, 해당 요청이 대리로 수행되는 사용자를 식별하는 비밀 값입니다. 이러한 값은 매우 민감하므로 절대로 다른 사람과 공유해서는 안 된다는 점이 매우 중요합니다.
+
+X에서 앱을 식별하는 값은 **consumer secret**이라고 하며, [developer portal](/ko/resources/fundamentals/developer-portal)의 [앱 세부 정보 페이지](/ko/resources/fundamentals/developer-apps)에서 확인할 수 있습니다. 이 값은 X 앱이 보내는 모든 요청에서 동일합니다.
+
+|     |     |
+| :--- | :--- |
+| Consumer secret | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw |
+
+애플리케이션이 대리로 동작하는 계정을 식별하는 값은 **OAuth token secret**이라고 합니다. 이 값은 여러 가지 방법으로 얻을 수 있으며, 이러한 방법은 모두 [obtaining access tokens](/ko/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)에 설명되어 있습니다.
+
+|     |     |
+| :--- | :--- |
+| OAuth token secret | LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
+
+다시 한 번, 이러한 값은 애플리케이션 전용으로 비공개로 유지하는 것이 매우 중요합니다. 값이 유출되었다고 생각되면 토큰을 재생성해야 합니다(이 페이지의 토큰은 실제 요청에는 사용할 수 없도록 무효 처리되어 있습니다).
+
+이 두 값을 결합하여 서명을 생성하는 데 사용할 **signing key**를 만들어야 합니다. 서명 키(signing key)는 단순히 [퍼센트 인코딩된](/ko/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) token secret입니다.
+
+[request token](/ko/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens)을 얻을 때와 같이 token secret을 아직 알 수 없는 플로가 있다는 점에 유의하세요. 이 경우 서명 키는 [퍼센트 인코딩된](/ko/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) **consumer secret** 뒤에 앰퍼샌드 문자 ‘&amp;’를 이어 붙인 문자열로 구성해야 합니다.
+
+|     |     |
+| :--- | :--- |
+| Signing key | kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw&amp;LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE |
+
+<div id="calculating-the-signature">
+  #### 서명 계산하기
+</div>
+
+마지막으로, signature base string과 signing key를 HMAC-SHA1 해시 알고리즘에 전달하여 서명을 계산합니다. 알고리즘의 자세한 내용은 `hash_hmac` 함수에 설명되어 있습니다.
+
+HMAC 서명 함수의 출력은 바이너리 문자열입니다. 이 값은 서명 문자열을 생성하기 위해 base64로 인코딩해야 합니다. 예를 들어, 이 페이지에서 제공된 base string과 signing key를 사용했을 때의 출력은 `2E CF 77 84 98 99 6D 0D DA 90 5D C7 17 7C 75 07 3F 3F CD 4E` 입니다. 이 값을 base64로 변환하면 이 요청에 대한 OAuth 서명이 됩니다:
+
+|     |     |
+| :--- | :--- |
+| OAuth signature | Ls93hJiZbQ3akF3HF3x1Bz8/zU4= |

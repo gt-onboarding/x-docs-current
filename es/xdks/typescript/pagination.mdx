@@ -1,0 +1,175 @@
+---
+title: "Paginación"
+sidebarTitle: "Paginación"
+---
+
+El SDK proporciona utilidades de paginación genéricas que puedes usar con cualquier endpoint que devuelva respuestas paginadas. Los métodos devuelven respuestas simples; luego las envuelves con un paginador.
+
+<div id="basic-pagination">
+  ### Paginación básica
+</div>
+
+<CodeGroup dropdown>
+
+```typescript quick-start.ts theme={null}
+import { Client, UserPaginator, PaginatedResponse, Schemas } from '@xdevplatform/xdk';
+
+const client: Client = new Client({ bearerToken: 'your-bearer-token' });
+
+// Encapsula cualquier endpoint de lista con la tipificación adecuada
+const followers: UserPaginator = new UserPaginator(
+  async (token?: string): Promise<PaginatedResponse<Schemas.User>> => {
+    const res = await client.users.getFollowers('<userId>', {
+      maxResults: 100,
+      paginationToken: token,
+      userFields: ['id','name','username'],
+    });
+    return { 
+      data: res.data ?? [], 
+      meta: res.meta, 
+      includes: res.includes, 
+      errors: res.errors 
+    };
+  }
+);
+```
+
+```javascript quick-start.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+import { UserPaginator } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const followers = new UserPaginator(async (token) => {
+  const res = await client.users.getFollowers('<userId>', {
+    maxResults: 100,
+    paginationToken: token,
+    userFields: ['id','name','username'],
+  });
+  return { data: res.data ?? [], meta: res.meta, includes: res.includes, errors: res.errors };
+});
+```
+
+</CodeGroup>
+
+<div id="manual-paging">
+  ### Paginación manual
+</div>
+
+<CodeGroup>
+
+```typescript manual.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+await followers.fetchNext();          // primera página
+while (!followers.done) {
+  await followers.fetchNext();        // páginas posteriores
+}
+
+const userCount: number = followers.users.length;  // todos los usuarios recuperados
+const firstUser: Schemas.User | undefined = followers.users[0];
+const nextToken: string | undefined = followers.meta?.next_token;
+```
+
+```javascript manual.js theme={null}
+await followers.fetchNext();
+while (!followers.done) await followers.fetchNext();
+console.log(followers.items.length);
+```
+
+</CodeGroup>
+
+<div id="async-iteration">
+  ### Iteración asíncrona
+</div>
+
+<CodeGroup>
+
+```typescript async.ts theme={null}
+import { Schemas } from '@xdevplatform/xdk';
+
+for await (const user of followers) {
+  const typedUser: Schemas.User = user;
+  console.log(typedUser.username);  // acceso con tipado completo
+}
+```
+
+```javascript async.js theme={null}
+for await (const user of followers) {
+  console.log(user.username);
+}
+```
+
+</CodeGroup>
+
+<div id="next-page-as-a-new-instance">
+  ### Siguiente página como nueva instancia
+</div>
+
+<CodeGroup>
+
+```typescript next.ts theme={null}
+import { UserPaginator } from '@xdevplatform/xdk';
+
+await followers.fetchNext();
+if (!followers.done) {
+  const page2: UserPaginator = await followers.next(); // paginador independiente que comienza en la siguiente página
+  await page2.fetchNext();
+  console.log(page2.users.length);  // elementos de la segunda página
+}
+```
+
+```javascript next.js theme={null}
+await followers.fetchNext();
+if (!followers.done) {
+  const page2 = await followers.next();
+  await page2.fetchNext();
+}
+```
+
+</CodeGroup>
+
+<div id="error-handling-and-rate-limits">
+  ### Manejo de errores y límites de frecuencia
+</div>
+
+<CodeGroup>
+
+```typescript errors.ts theme={null}
+import { UserPaginator, Schemas } from '@xdevplatform/xdk';
+
+try {
+  for await (const item of followers) {
+    const user: Schemas.User = item;
+    // procesar usuario...
+  }
+} catch (err: unknown) {
+  if (followers.rateLimited) {
+    console.error('Límite de frecuencia alcanzado, se requiere backoff');
+    // aplicar backoff / reintentar más tarde
+  } else {
+    console.error('Error de paginación:', err);
+    throw err;
+  }
+}
+```
+
+```javascript errors.js theme={null}
+try {
+  for await (const item of followers) {
+    // ...
+  }
+} catch (err) {
+  if (followers.rateLimited) {
+    // aplicar backoff / reintentar más tarde
+  } else {
+    throw err;
+  }
+}
+```
+
+</CodeGroup>
+
+<Info>
+Para ejemplos de código detallados usando el XDK de JavaScript/TypeScript, consulta nuestro [repositorio de ejemplos en GitHub](https://github.com/xdevplatform/samples/tree/main/javascript).
+</Info>

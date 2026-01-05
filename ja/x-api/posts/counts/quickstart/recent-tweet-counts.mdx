@@ -1,0 +1,132 @@
+---
+title: 最近のポストを検索
+sidebarTitle: 最近のポストを検索
+keywords: ["最近のポスト件数クイックスタート", "最近の件数クイックスタート", "ポスト件数クイックスタート", "件数クイックスタート", "最近の検索件数"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-recent-post-counts-endpoint">
+  ### 最近のポスト件数エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、HTTP リクエストを送信できるグラフィカルツールである Postman を使って、最近のポスト件数エンドポイントへ最初のリクエストを送信する方法を説明します。
+
+さまざまなプログラミング言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) GitHub リポジトリをご覧ください。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストを認証するための一連の [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順に従って生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-recent-post-counts-request">
+  #### 最近のポスト件数リクエストを作成する手順
+</div>
+
+**ステップ 1: ツールまたはライブラリを用意する**
+
+このエンドポイントへのリクエストを行う方法として使用できるツール、コード例、ライブラリはいくつかありますが、このセクションではプロセスを簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、Post counts &gt; Recent Post counts リクエストに移動します。
+
+**ステップ 2: リクエストを認証する**
+
+X API に正しくリクエストするには、自分に権限があることを検証する必要があります。このエンドポイントでそれを行うには、[OAuth 2.0 App-Only](/ja/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) 認証方式を使ってリクエストを認証しなければなりません。
+
+Postman に、特に [App Access Token](/ja/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token)（App-only Bearer Token とも呼ばれます）を含むキーとトークンを追加する必要があります。これは、Postman の右上にある「X API v2」という名前の environment を選択し、environment ドロップダウンの横にある目のアイコンをクリックして、「initial value」と「current value」のフィールドにキーとトークンを追加することで行えます。
+
+正しく設定されていれば、この変数はリクエストの Authorization タブに自動的に反映されます。
+ 
+
+**ステップ 3: クエリを作成する**
+
+各最近のポスト件数リクエストには、1 つの[query](/ja/x-api/posts/counts/integrate/build-a-query) が必要です。この例では、@XDevelopers アカウントによって投稿されたポストにマッチするクエリを使用します。このクエリでは from: オペレーターを使用し、XDevelopers（大文字小文字は区別しない）を指定します。
+
+`from:XDevelopers`
+
+Postman で「Params」タブに移動し、この ID、またはカンマ区切りのポスト ID の文字列を、`ids` パラメーターの「Value」列に入力します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| `query` | from:XDevelopers | 最近のポスト件数エンドポイントに送信するクエリ |
+
+**ステップ 4（任意）: リクエストの粒度を指定する**
+
+ステップ 3 の後に「Send」ボタンをクリックすると、直近 7 日間について 1 時間ごとのデフォルトの最近のポスト件数が取得されます。直近のポスト件数を 1 日ごとに取得したい場合は、granularity パラメーターに day という値を追加する必要があります。
+
+Postman で「Params」タブに移動し、granularity パラメーターの「Value」列に day と入力します。
+
+|     |     |     |
+| :--- | :--- | :--- |
+| **Key** | **Value** | **Description** |
+| granularity | day | ポスト件数結果の粒度。指定可能な値は day、hour、minute です |
+
+これで「Send」ボタンの横に、次の URL が表示されているはずです。
+
+`https://api.x.com/2/tweets/counts/recent?query=from%3AXDevelopers&granularity=day`
+
+**ステップ 5: リクエストを送信し、レスポンスを確認する**
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次のようなレスポンスが返されます。
+
+```
+{
+   "data": [
+       {
+           "end": "2021-06-16T00:00:00.000Z",
+           "start": "2021-06-15T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-06-17T00:00:00.000Z",
+           "start": "2021-06-16T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-06-18T00:00:00.000Z",
+           "start": "2021-06-17T00:00:00.000Z",
+           "tweet_count": 2
+       },
+       {
+           "end": "2021-06-19T00:00:00.000Z",
+           "start": "2021-06-18T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-06-20T00:00:00.000Z",
+           "start": "2021-06-19T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-06-21T00:00:00.000Z",
+           "start": "2021-06-20T00:00:00.000Z",
+           "tweet_count": 0
+       },
+       {
+           "end": "2021-06-22T00:00:00.000Z",
+           "start": "2021-06-21T00:00:00.000Z",
+           "tweet_count": 1
+       },
+       {
+           "end": "2021-06-23T00:00:00.000Z",
+           "start": "2021-06-22T00:00:00.000Z",
+           "tweet_count": 2
+       }
+   ],
+   "meta": {
+       "total_tweet_count": 6
+   }
+}
+```

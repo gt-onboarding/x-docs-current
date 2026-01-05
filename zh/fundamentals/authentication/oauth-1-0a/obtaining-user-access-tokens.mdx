@@ -1,0 +1,166 @@
+---
+title: 使用三方 OAuth 流程获取访问令牌
+sidebarTitle: 用户访问令牌（三方 OAuth 流程）
+keywords: ["三方 OAuth", "用户访问令牌", "OAuth 流程", "获取访问令牌", "OAuth 1.0a 流程", "生成访问令牌"]
+---
+
+import { Button } from "/snippets/zh/button.mdx";
+
+<div id="obtaining-access-tokens-using-3-legged-oauth-flow">
+  ### 使用三方 OAuth 流程获取访问令牌
+</div>
+
+要代表其他用户执行操作，你需要获取他们的访问令牌。访问令牌指明了该请求是代表哪个 X 账号发起的，因此在你获取这些令牌之前，他们需要先授予你访问权限。这些令牌本身不会过期，但用户可以随时撤销。
+
+X 允许你通过三方 OAuth 流程获取用户访问令牌。该流程通过将用户重定向到 X 并让他们授权你的应用，使你的应用可以获取一个**访问令牌**和访问令牌密钥。此流程与[实现 Log in with X](/zh/resources/fundamentals/authentication/guides/log-in-with-x)中描述的流程几乎完全相同，但有两点不同：
+
+* 使用 [GET oauth/authorize](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authorize) 端点替代 [GET oauth/authenticate](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authenticate)。
+* 即使之前已经授予过访问权限，系统也**始终**会提示用户授权你的应用访问。
+
+在开始之前，你需要检查[应用](/zh/resources/fundamentals/developer-apps)的权限，并了解 consumer key 和回调 URL。如果你没有回调 URL 或公开可访问的 UI，可以考虑使用[基于 PIN 的授权](/zh/resources/fundamentals/authentication/oauth-1-0a/pin-based-oauth)，该方式适用于无法访问或嵌入网页浏览器以在授权后重定向用户的应用。
+
+三方 OAuth 登录交互的可能状态在下图的流程图中进行了说明：
+
+![](https://cdn.cms-twdigitalassets.com/content/dam/developer-twitter/docs/obtaining-access-tokens.png.twimg.1920.png)
+
+<div id="overview-of-the-process">
+  #### 流程概览
+</div>
+
+从整体上看，3-legged OAuth 流程将会：
+
+1. 为客户端应用创建一个请求，以获取 request token（请求令牌）。
+2. 让用户完成认证，并将 request token 发送回客户端应用。
+3. 将 request token 转换为可用的用户访问令牌（user access token）。
+
+**术语说明**
+
+在以下指南中，你可能会看到不同术语指代同一事物。
+
+**客户端凭证（Client credentials）：**
+
+* App Key === API Key === Consumer API Key === Consumer Key === Customer Key === `oauth_consumer_key`
+* App Key Secret === API Secret Key === Consumer Secret === Consumer Key === Customer Key === `oauth_consumer_secret`
+* Callback URL === `oauth_callback`
+   
+
+**临时凭证（Temporary credentials）：**
+
+* Request Token === `oauth_token`
+* Request Token Secret === `oauth_token_secret`
+* oauth&#95;verifier
+   
+
+**令牌凭证（Token credentials）：**
+
+* Access token === Token === 最终生成的 `oauth_token`
+* Access token secret === Token Secret === 最终生成的 `oauth_token_secret`
+
+<div id="walkthrough-steps">
+  #### 演练步骤
+</div>
+
+**步骤 1： [POST oauth/request&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-request-token)**
+
+为客户端应用创建一个请求，以获取 request token（请求令牌）。
+
+此请求中唯一的特有参数是 oauth&#95;callback，它必须是你希望用户在完成步骤 2 后被重定向到的那个 URL 的 [URL 编码](/zh/resources/fundamentals/authentication/oauth-1-0a/percent-encoding-parameters) 版本。其余参数由 OAuth 签名过程添加。
+
+请注意——你在 [POST oauth/request&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-request-token) 端点中使用的任何回调 URL，都必须在开发者门户中你的 [developer App](/zh/resources/fundamentals/developer-apps) 的应用详情页面设置中进行配置。
+ 
+
+**请求包含：**
+
+`oauth_callback="https%3A%2F%2FyourCallbackUrl.com"`
+
+`oauth_consumer_key="cChZNFj6T5R0TigYB9yd1w" `
+
+你的应用应检查响应的 HTTP 状态码。任何非 200 的值都表示失败。响应主体会包含 `oauth_token`、`oauth_token_secret` 和 `oauth_callback_confirmed` 参数。你的应用应验证 `oauth_callback_confirmed` 为 true，并将另外两个值存储起来，用于后续步骤。
+ 
+
+**响应包含**
+
+`oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
+
+`oauth_token_secret=veNRnAWe6inFuo8o2u8SLLZLjolYDmDP7SzL0YfYI`
+
+`oauth_callback_confirmed=true`
+
+**步骤 2： [GET oauth/authorize](/zh/resources/fundamentals/authentication/api-reference#get-oauth-authorize)**
+
+让用户完成身份验证，并向客户端应用返回 request token。
+ 
+
+**将用户重定向到的示例 URL：**
+
+`https://api.x.com/oauth/authorize?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
+
+在成功完成身份验证后，你的 `callback_url` 将收到一个请求，其中包含 `oauth_token` 和 `oauth_verifier` 参数。你的应用应验证该 token 与步骤 1 中收到的 request token 是否匹配。
+ 
+
+**来自客户端重定向的请求：**
+
+`https://yourCallbackUrl.com?oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0&oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY`
+
+**步骤 3： [POST oauth/access&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-access-token)**
+
+将 request token 转换为可用的 access token（访问令牌）。
+
+要将 request token 转换为可用的 access token，你的应用必须向 [POST oauth/access&#95;token](/zh/resources/fundamentals/authentication/api-reference#post-oauth-access-token) 端点发起请求，其中包含在步骤 2 中获得的 `oauth_verifier` 值。request token 也会通过请求头中的 `oauth_token` 字段传递，但这将由签名过程自动添加。
+ 
+
+**请求包含：**
+
+`POST /oauth/access_token`
+
+`oauth_consumer_key=cChZNFj6T5R0TigYB9yd1w`
+
+`oauth_token=NPcudxy0yU5T3tBzho7iCotZ3cnetKwcTIRlX0iwRl0`
+
+`oauth_verifier=uw7NjWHT6OJ1MpJOXsHfNxoAhPKpgI8BlYDhxEjIBY`
+
+成功的响应会包含 `oauth_token` 和 `oauth_token_secret` 参数。应存储该 token 和 token secret，并在之后向 X API 发送已认证请求时使用。要确定用户的身份，请使用 [GET account/verify&#95;credentials](/zh/resources/fundamentals/authentication/api-reference)。
+ 
+
+**响应包含：**
+
+`oauth_token=7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4`
+
+`oauth_token_secret=PbKfYqSryyeKDWz4ebtY3o5ogNLG11WJuZBc9fQrQo`
+
+**用于需要 OAuth 1.0a（应用-用户）认证的请求中使用这些凭证**
+
+现在你已经获取了用户访问令牌，可以使用这些令牌访问某些 API，例如通过 [POST statuses/update](/zh/x-api/posts/manage-tweets/introduction) 代表用户创建帖子。
+ 
+
+**请求包括：**
+
+`POST statuses/update.json`
+
+`oauth_consumer_key=cChZNFj6T5R0TigYB9yd1w`
+
+`oauth_token=7588892-kagSNqWge8gB1WwE3plnFsJHAZVfxWD7Vb57p0b4`
+
+<div id="sample-use-case">
+  #### 示例用例
+</div>
+
+标准流程基于 Web，并使用三方（3-legged）OAuth 授权流程。这里展示的截图来自一个示例，你可以在 [https://github.com/xdevplatform/twauth-web](https://github.com/xdevplatform/twauth-web) 查看其源码。
+
+在应用的某个时刻，你需要重定向到 X，以便为你的应用授权。
+
+<Frame>
+  <img src="/images/twauth-web-2.png" alt="" />
+</Frame>
+
+当你携带 request token 重定向到 X 时，系统会提示用户为你的应用授权。
+
+<Frame>
+  <img src="/images/twauth-web-3.png" alt="" />
+</Frame>
+
+在用户为你的应用授权后，用户会被重定向到你在生成 request token 时所提供的回调 URL。你将借此获取该用户的永久访问令牌，并将其本地存储。
+
+<Frame>
+  <img src="/images/twauth-web-4.png" alt="" />
+</Frame>

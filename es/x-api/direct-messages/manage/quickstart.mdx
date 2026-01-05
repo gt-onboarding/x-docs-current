@@ -1,0 +1,151 @@
+---
+title: Inicio rápido
+sidebarTitle: Inicio rápido
+keywords: ["inicio rápido para gestionar mensajes directos", "inicio rápido para gestionar DMs", "inicio rápido para enviar DMs", "inicio rápido de administración de DMs"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+<div id="getting-started-with-the-manage-direct-message-endpoints">
+  ## Introducción al uso de los endpoints para gestionar Mensajes Directos
+</div>
+
+Esta guía de inicio rápido te ayudará a realizar tu primera solicitud a los endpoints de Mensajes Directos usando Postman, una herramienta para gestionar y realizar solicitudes HTTP. Para obtener más información sobre nuestras colecciones de Postman, visita nuestra guía [Uso de Postman](/es/tutorials/postman-getting-started).
+
+Visita nuestro repositorio de GitHub [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) si quieres consultar ejemplos basados en Python. Además, los [kits de desarrollo de software (SDKs) de la plataforma para desarrolladores de X](/es/x-api/tools-and-libraries/sdks) oficiales se actualizarán para ofrecer compatibilidad con estos endpoints de Mensajes Directos.  
+
+<Note>
+  **Requisitos previos**
+
+  Para completar esta guía, necesitarás un conjunto de [keys and tokens](/es/resources/fundamentals/authentication) para autenticar tu solicitud. Puedes generar estas claves y tokens siguiendo estos pasos:
+
+  * [Regístrate para obtener una cuenta de desarrollador](https://developer.x.com/en/apply-for-access) y espera la aprobación.
+  * Crea un [Proyecto](/es/resources/fundamentals/projects) y una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) asociada en el portal para desarrolladores.
+  * Ve a la página “Keys and tokens” de tu App para generar las credenciales necesarias. Asegúrate de guardar todas las credenciales en un lugar seguro.
+</Note>
+
+<div id="steps-to-building-manage-direct-message-requests">
+  ### Pasos para crear solicitudes de administración de Mensajes Directos
+</div>
+
+En este ejemplo, en una sola solicitud, crearemos una nueva conversación de grupo y añadiremos nuestro primer mensaje a esa conversación. Luego añadiremos un segundo mensaje a la conversación creada.
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### Paso uno: Comienza con una herramienta o biblioteca
+</div>
+
+Para comenzar a trabajar con los endpoints para administrar Mensajes Directos, vamos a usar la herramienta Postman para simplificar el proceso. Se utilizará una colección de ejemplo de solicitudes de X API v2, creada por XDev, para explorar seis endpoints usados para crear nuevos Mensajes Directos y para listar eventos de conversaciones de Mensajes Directos.
+
+Aunque la mayor parte de la colección ya viene preconfigurada, hay algunos detalles que tendrás que proporcionar y que se basan en la Aplicación de X creada para alojar estas solicitudes de API. Primero, carguemos/actualicemos la colección.
+
+Para cargar la colección de Postman de X API v2 en tu entorno, haz clic en el siguiente botón:
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Agregar X API v2 a Postman
+</Button>
+
+Una vez que tengas la colección de X API v2 cargada en Postman, navega a la carpeta “Manage Direct Messages”. La pestaña &quot;Authorization&quot; de esta carpeta se ha rellenado previamente cuando ha sido posible, y puedes actualizar algunas configuraciones para compartir los detalles de autenticación de tu Aplicación de X. Esta carpeta también contiene tres endpoints para crear nuevos Mensajes Directos. Ten en cuenta que también hay una carpeta &quot;Direct Message lookup&quot; con tres endpoints disponibles para recuperar eventos de conversaciones de Mensajes Directos, incluidos el envío y la recepción de mensajes, y cuándo los participantes de la conversación se unen y se van. 
+
+Dado que crear conversaciones de grupo es una nueva y atractiva característica de X API v2, este ejemplo se centrará en ello. Trabajaremos con el ejemplo &quot;New group DM and conversation&quot;. Usaremos esta solicitud para crear una conversación de grupo de Mensajes Directos.
+
+El siguiente paso es autenticarse con el endpoint.
+
+**Paso dos: autentica tu solicitud**
+
+Para realizar correctamente una solicitud a X API, debes verificar que tienes permiso para hacerlo. Para realizar correctamente una solicitud a este endpoint, utilizaremos [OAuth 2.0 Authorization Code Flow with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2). Puedes generar un token de acceso dentro de Postman. 
+
+Con Postman puedes configurar el método de autenticación a nivel de carpeta o a nivel de solicitud. Aquí configuraremos los detalles de autenticación a nivel de carpeta.
+
+Navega a la carpeta &quot;Manage Direct Messages&quot;, selecciona la pestaña &quot;Authorization&quot; y confirma que &quot;Type&quot; esté configurado como “OAuth 2.0” y que &quot;Add auth data to&quot; esté configurado como &quot;Request Headers&quot;. En la sección &quot;Current Token&quot;, asegúrate de que &quot;header Prefix&quot; esté configurado como Bearer.  
+
+Para configurar y generar un nuevo token:
+
+1. Crea un &quot;Token Name&quot;, como &quot;Manage DMs&quot;.
+
+2. Confirma que **Grant Type** esté configurado como Authorization Code (with PKCE).
+
+3. Configura tu **Callback URL**. Deberás actualizar tu Callback URL para que coincida exactamente con la Callback URL asociada a tu Aplicación en el [v2 Dev Portal](https://developer.x.com/en/portal/dashboard). Con la Aplicación de X usada en este ejemplo, la Callback URL está configurada como - [*https://www.example.com*.](https://www.example.com/) (Ten en cuenta que, dado que esto debe coincidir exactamente, [*https://example.com*](https://example.com) no funcionaría). 
+
+4. Confirma que **Auth URL** esté configurada como [https://x.com/i/oauth2/authorize](https://x.com/i/oauth2/authorize).
+
+5. Confirma que **Access Token URL** esté configurada como [https://api.x.com/2/oauth2/token.](https://api.x.com/2/oauth2/token) **Client ID** - Copia y pega el OAuth 2.0 client ID desde el portal para desarrolladores\
+   **Client Secret** - Solo necesitarás esto si estás usando un tipo de App que sea un confidential client. Si es así, copia y pega el OAuth 2.0 Client Secret desde el portal para desarrolladores. 
+
+6. Confirma que **Scope** esté configurado como dm.read, dm.write, tweet.read y users.read.
+
+7. Confirma que **State** esté configurado como “state”.
+
+8. Confirma que **Client Authentication** esté configurado como Send as Basic Auth header.
+
+9. Haz clic donde dice **Get New Access Token** y haz clic en &quot;Authorize app&quot; como parte del proceso de &quot;Sign-in with X&quot;.
+
+10. Haz clic en el botón &quot;Proceed&quot; y luego en &quot;Use Token&quot; para generar un token. 
+
+11. Haz clic en el botón &quot;Save&quot; para guardar estos detalles de configuración.
+
+Es posible que recibas un mensaje indicando que no has iniciado sesión en X. Si recibes este error, tendrás que iniciar sesión en la cuenta de X con la que intentas publicar desde Postman.
+
+Ahora que estos detalles de OAuth 2.0 se han configurado a nivel de carpeta, navega a cada uno de los ejemplos y a su pestaña &quot;Authorization&quot; y confirma que tienen su Type configurado como &quot;Inherit auth from parent&quot;. 
+
+Ten en cuenta que este token de acceso caducará pronto y tendrás que regenerarlo haciendo clic en el botón &quot;Get New Access Token&quot;. Al hacer clic en él se activará el proceso &quot;Sign-in with X&quot; y se generará un nuevo token para realizar solicitudes.
+
+<div id="step-three-specify-the-direct-message-conversation-participants-and-message-contents">
+  #### Paso tres: Especifica los participantes de la conversación de Mensajes Directos y el contenido del mensaje
+</div>
+
+Ve a la pestaña “Body” y actualiza el objeto JSON de ejemplo. Establece el atributo participant&#95;ids con las cuentas a las que quieres enviar el Mensaje Directo.
+
+`{
+   "message": {"text": "Hola, solo para ustedes dos; esta es una nueva conversación de grupo."},
+   "participant_ids": ["944480690","906948460078698496"],
+   "conversation_type": "Group"
+}`
+
+<div id="step-four-make-your-request-and-review-the-response">
+  #### Paso cuatro: Realiza tu solicitud y revisa la respuesta
+</div>
+
+Una vez que tengas todo configurado, haz clic en el botón &quot;Send&quot; y recibirás una respuesta similar al ejemplo que aparece a continuación. Recuerda que, si tu token ha caducado desde que lo creaste más arriba, puedes volver a la pestaña Authorization de la carpeta y hacer clic en &quot;Get New Access Token&quot; para generar un token nuevo.
+
+```
+{
+   "data": {
+       "dm_conversation_id": "1582103724607971328",
+       "dm_event_id": "1582103724607971332"
+   }
+}
+```
+
+If the returned response &quot;data&quot; object contains a dm&#95;conversation&#95;id and a dm&#95;event&#95;id, you have successfully created a new Direct Message conversation. To start looking up events associated with this conversation, head over to the Direct Message lookup Quick start guide.
+
+<div id="step-five-add-another-message-to-that-group-conversation">
+  #### Paso cinco: agrega otro mensaje a esa conversación de grupo
+</div>
+
+Ahora selecciona el ejemplo &quot;Add DM to conversation&quot; y selecciona la pestaña &quot;Params&quot;. En &quot;Path Variables&quot;, actualiza el dm&#95;conversation&#95;id con el ID de la conversación que creaste antes.
+
+|                            |                     |
+| :------------------------- | :------------------ |
+| **Key**                    | **Value**           |
+| dm&#95;conversation&#95;id | 1582103724607971328 |
+
+Con este ID de conversación, la ruta de la solicitud será: [https://api.x.com/2/dm&#95;conversations/1582103724607971328/messages](https://api.x.com/2/dm_conversations/1582103724607971328/messages)
+
+Además, actualiza la pestaña &quot;Body&quot; con el JSON de la solicitud que contenga el texto del mensaje que quieres enviar:
+
+```
+{
+   "text": "Adding a new message to our group conversation..."
+}
+```
+
+Una vez que tengas todo configurado, haz clic en el botón «Send» y recibirás una respuesta similar al siguiente ejemplo:
+
+```
+{
+   "data": {
+       "dm_conversation_id": "1582103724607971328",
+       "dm_event_id": "1582106224379559940"
+   }
+}
+```

@@ -1,0 +1,227 @@
+---
+title: "Autenticación"
+sidebarTitle: "Autenticación"
+---
+
+El SDK de TypeScript admite varios métodos de autenticación para distintos casos de uso.
+
+<div id="bearer-token-app-only-auth">
+  ## Bearer Token (Autenticación solo de aplicación)
+</div>
+
+Para operaciones de solo lectura y acceso a datos públicos:
+
+<CodeGroup dropdown>
+
+```typescript quickstart.ts theme={null}
+import { 
+  Client, 
+  type ClientConfig,
+  type Users
+} from '@xdevplatform/xdk';
+
+const config: ClientConfig = { bearerToken: 'your-bearer-token' };
+
+const client: Client = new Client(config);
+
+async function main(): Promise<void> {
+  const userResponse: Users.GetByUsernameResponse = await client.users.getByUsername('XDevelopers');
+  const username: string = userResponse.data?.username!;
+  console.log(username);
+}
+
+main();
+```
+
+```javascript quickstart.js theme={null}
+import { Client } from '@xdevplatform/xdk';
+
+const client = new Client({ bearerToken: 'your-bearer-token' });
+
+const userResponse = await client.users.getByUsername('XDevelopers');
+const username = userResponse.data.username;
+console.log(username);
+```
+
+</CodeGroup>
+
+<div id="oauth-10a-user-context">
+  ## OAuth 1.0a (Contexto de usuario)
+</div>
+
+Para aplicaciones heredadas o casos de uso específicos:
+
+<CodeGroup dropdown>
+
+```typescript oauth1.ts theme={null}
+import { 
+  Client, 
+  OAuth1,
+  type OAuth1Config,
+  type ClientConfig,
+  type Users
+} from '@xdevplatform/xdk';
+
+const oauth1Config: OAuth1Config = {
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  accessToken: 'user-access-token',
+  accessTokenSecret: 'user-access-token-secret'
+};
+
+const oauth1: OAuth1 = new OAuth1(oauth1Config);
+
+const config: ClientConfig = {
+  oauth1: oauth1,
+};
+
+const client: Client = new Client(config);
+
+async function main(): Promise<void> {
+  const response: Users.GetMeResponse = await client.users.getMe();
+
+  const me = response.data;
+  console.log(me);
+}
+
+main();
+
+```
+
+```javascript oauth1.js theme={null}
+import { Client, OAuth1 } from '@xdevplatform/xdk';
+
+const oauth1 = new OAuth1({
+  apiKey: 'your-api-key',
+  apiSecret: 'your-api-secret',
+  accessToken: 'user-access-token',
+  accessTokenSecret: 'user-access-token-secret'
+});
+
+const client = new Client({ oauth1: oauth1 });
+
+const response = await client.users.getMe();
+const me = response.data;
+console.log(me);
+
+```
+
+</CodeGroup>
+
+<div id="oauth-20-user-context">
+  ## OAuth 2.0 (contexto de usuario)
+</div>
+
+Para operaciones específicas de usuarios:
+
+<CodeGroup dropdown>
+
+```typescript oauth2.ts theme={null}
+import { 
+  Client, 
+  OAuth2,
+  generateCodeVerifier,
+  generateCodeChallenge,
+  type OAuth2Config,
+  type ClientConfig,
+  type OAuth2Token
+} from '@xdevplatform/xdk';
+
+(async (): Promise<void> => {
+  const oauth2Config: OAuth2Config = {
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'https://example.com',
+    scope: ['tweet.read', 'users.read', 'offline.access'],
+  };
+
+  const oauth2: OAuth2 = new OAuth2(oauth2Config);
+
+  const state: string = 'example-state';
+  const codeVerifier: string = generateCodeVerifier();
+  const codeChallenge: string = await generateCodeChallenge(codeVerifier);
+  
+  oauth2.setPkceParameters(codeVerifier, codeChallenge);
+  
+  const authUrl: string = await oauth2.getAuthorizationUrl(state);
+
+  // El usuario visita authUrl y autoriza la aplicación
+  // Después de la autorización, el usuario es redirigido de vuelta con un parámetro code
+  // Extrae el código de la URL de callback (por ejemplo, de los parámetros de consulta)
+  const authCode: string = 'code-from-callback-url'; // Sustituye esto por el código real del callback de OAuth
+
+  const tokens: OAuth2Token = await oauth2.exchangeCode(authCode, codeVerifier);
+
+  const config: ClientConfig = {
+    accessToken: tokens.access_token,
+  };
+
+  const client: Client = new Client(config);
+});
+
+```
+
+```javascript oauth2.js theme={null}
+import { Client, OAuth2, generateCodeVerifier, generateCodeChallenge } from '@xdevplatform/xdk';
+
+(async () => {
+  const oauth2 = new OAuth2({
+    clientId: 'your-client-id',
+    clientSecret: 'your-client-secret',
+    redirectUri: 'https://example.com',
+    scope: ['tweet.read', 'users.read', 'offline.access'],
+  });
+
+  const state = 'example-state';
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
+  oauth2.setPkceParameters(codeVerifier, codeChallenge);
+  const authUrl = await oauth2.getAuthorizationUrl(state);
+
+  // El usuario visita authUrl y autoriza la aplicación
+  // Después de la autorización, el usuario es redirigido de vuelta con un parámetro code
+  // Extrae el código de la URL de callback (por ejemplo, de los parámetros de consulta)
+  const authCode = 'code-from-callback-url'; // Sustituye esto por el código real del callback de OAuth
+
+  const tokens = await oauth2.exchangeCode(authCode, codeVerifier);
+
+  const client = new Client({ accessToken: tokens.access_token });
+
+  const response = await client.users.getMe();
+  const me = response.data;
+  console.log(me);
+});
+```
+
+</CodeGroup>
+
+<div id="environment-variables">
+  ## Variables de entorno
+</div>
+
+Almacena las credenciales confidenciales en variables de entorno:
+
+```bash
+# .env
+X_API_BEARER_TOKEN=your-bearer-token
+X_API_CLIENT_ID=your-client-id
+X_API_CLIENT_SECRET=your-client-secret
+```
+
+<CodeGroup dropdown>
+  ```typescript env.ts theme={null}
+  import { Client } from '@xdevplatform/xdk';
+
+  const client = new Client({ bearerToken: process.env.X_API_BEARER_TOKEN });
+  ```
+
+  ```javascript env.js theme={null}
+  import { Client } from '@xdevplatform/xdk';
+
+  const client = new Client({ bearerToken: process.env.X_API_BEARER_TOKEN });
+  ```
+</CodeGroup>
+
+<Info>
+  Para ver ejemplos de código detallados que usan el XDK de JavaScript/TypeScript, visita nuestro [repositorio de ejemplos de código en GitHub](https://github.com/xdevplatform/samples/tree/main/javascript).
+</Info>

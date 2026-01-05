@@ -1,0 +1,107 @@
+---
+title: Introducción
+sidebarTitle: Introducción
+keywords: ["búsqueda de publicaciones", "búsqueda de publicaciones", "búsqueda reciente", "búsqueda en el archivo completo", "búsqueda de publicaciones", "API de búsqueda", "consultas de búsqueda", "operadores de búsqueda", "búsqueda histórica"]
+---
+
+import { Button } from '/snippets/es/button.mdx';
+
+Buscar Publicaciones es una función importante que se utiliza para mostrar conversaciones en X sobre un tema o evento específico. Aunque esta funcionalidad está presente en X, estos endpoints proporcionan mayor flexibilidad y potencia al filtrar e ingerir Publicaciones, de modo que puedas encontrar datos relevantes para tu investigación con mayor facilidad; crear aplicaciones de “escucha” casi en tiempo real; o, en general, explorar, analizar y/o actuar sobre Publicaciones relacionadas con un tema de interés. 
+
+Ofrecemos dos endpoints que te permiten buscar Publicaciones: búsqueda reciente y búsqueda en el archivo completo. Ambos endpoints REST comparten un diseño y características comunes, incluida la utilización de una única consulta de búsqueda para filtrar Publicaciones en torno a un tema específico. Estas consultas de búsqueda se crean con un conjunto de operadores que hacen coincidencias con atributos de la Publicación y del usuario, como palabras clave del mensaje, hashtags y URL. Los operadores se pueden combinar en consultas con lógica booleana y paréntesis para ayudar a refinar el comportamiento de coincidencia de las consultas. 
+
+Tanto el endpoint de búsqueda reciente como el de búsqueda en el archivo completo proporcionan metadatos de edición de la Publicación. Todos los objetos de Publicaciones creadas desde el 29 de septiembre de 2022 incluyen metadatos de edición de la Publicación, incluso si la Publicación nunca se editó. Cada vez que se edita una Publicación, se crea un nuevo ID de la Publicación. El historial de edición de una Publicación se documenta mediante un array de ID de Publicaciones, comenzando por el ID original.
+
+Estos endpoints siempre devolverán la edición más reciente, junto con cualquier historial de edición. Cualquier Publicación recopilada después de su ventana de edición de 30 minutos representará su versión final. Para obtener más información sobre los metadatos de Edit Post, consulta la página de [fundamentos de Edit Posts](/es/x-api/fundamentals/edit-posts).
+
+Una vez que hayas configurado tu consulta y empieces a recibir Publicaciones, estos endpoints permiten navegar por los resultados tanto por rangos de tiempo como por rangos de ID de Publicaciones. Esto está diseñado para admitir dos casos de uso comunes: 
+
+* **Obtener datos históricos**: Las solicitudes corresponden a un período de interés, sin centrarse en la naturaleza en tiempo real de los datos. Se realiza una única solicitud y todos los datos coincidentes se entregan mediante paginación según sea necesario. Este es el modo predeterminado para Search Posts.
+* **Polling** o **escucha**: Las solicitudes se realizan en un modo de “¿hay nuevas Publicaciones desde mi última solicitud?”. Las solicitudes se realizan de forma continua y, por lo general, existe un caso de uso centrado en la “escucha” casi en tiempo real de Publicaciones de interés.
+
+Muchos operadores y límites de consulta son exclusivos de [Enterprise access](/es/x-api/getting-started/about-x-api), lo que significa que debes usar claves y tokens de una Aplicación dentro de un [Proyecto](/es/resources/fundamentals/projects) con Enterprise access para utilizar la funcionalidad adicional. Puedes obtener más información sobre esto en las secciones de endpoints que aparecen a continuación.
+
+Las Publicaciones devueltas tanto por los endpoints de búsqueda reciente como por los de búsqueda en el archivo completo contribuyen al [límite de Publicaciones](/es/x-api/fundamentals/post-cap) mensual.
+
+**Configuración de la cuenta**
+
+Para acceder a estos endpoints, necesitarás:
+
+* Una [cuenta de desarrollador](https://developer.x.com/en/portal/petition/essential/basic-info) aprobada.
+* Autenticarte usando las claves y tokens de una [aplicación de desarrollador](/es/resources/fundamentals/developer-apps) que se encuentre dentro de un [Proyecto](/es/resources/fundamentals/projects). 
+
+Obtén más información sobre cómo acceder a los endpoints de X API v2 en nuestra [guía de primeros pasos](/es/x-api/getting-started/getting-access).
+
+<div id="recent-search">
+  ## Búsqueda reciente
+</div>
+
+El endpoint de búsqueda reciente te permite acceder de forma programática a Publicaciones públicas filtradas de la última semana, y está disponible para todos los desarrolladores que tienen una cuenta de desarrollador y utilizan claves y tokens de una [Aplicación](/es/resources/fundamentals/developer-apps) dentro de un [Proyecto](/es/resources/fundamentals/projects).
+
+Puedes autenticar tus solicitudes con [Contexto de usuario de OAuth 1.0a](/es/resources/fundamentals/authentication), [OAuth 2.0 solo para la aplicación](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token) o [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2). Sin embargo, si quieres recibir métricas privadas o un desglose de métricas orgánicas y promocionadas dentro de tus resultados de Publicaciones, tendrás que usar Contexto de usuario de OAuth 1.0a u OAuth 2.0 Authorization Code with PKCE y enviar tokens de acceso de usuario que estén asociados con el usuario que publicó el contenido en cuestión. 
+
+Este endpoint puede entregar hasta 100 Publicaciones por solicitud en orden cronológico inverso, y se proporcionan tokens de [paginación](/es/x-api/posts/search/integrate/paginate) para recorrer grandes conjuntos de Publicaciones coincidentes. 
+
+Cuando uses un Proyecto con acceso regular, puedes usar el conjunto básico de [operadores](/es/x-api/posts/search/integrate/build-a-query) y hacer consultas de hasta 512 caracteres. Cuando uses un Proyecto con acceso Enterprise, tendrás acceso a operadores adicionales. Los Proyectos con acceso Enterprise pueden hacer consultas de hasta 4096 caracteres.
+
+Obtén más información sobre los [niveles de acceso](/es/x-api/getting-started/about-x-api).
+
+<div id="full-archive-search">
+  ## Búsqueda en el archivo completo
+</div>
+
+El endpoint de búsqueda en el archivo completo de la v2 solo está disponible para Proyectos con acceso [Pro](/es/x-api/getting-started/about-x-api "Pro") y acceso [Enterprise](/es/x-api/getting-started/about-x-api). El endpoint te permite acceder de forma programática a Publicaciones públicas del archivo completo, que se remonta a la primera Publicación de marzo de 2006, en función de tu consulta de búsqueda.
+
+Puedes autenticar tus solicitudes a este endpoint usando [OAuth 2.0 App-Only](/es/resources/fundamentals/authentication#app-only-authentication-and-oauth-2-0-bearer-token), y el [App Access Token](/es/resources/fundamentals/authentication#using-and-generating-an-app-only-bearer-token) debe provenir de una App que forme parte de un Proyecto que tenga acceso Pro o Enterprise. Dado que no puedes realizar solicitudes en nombre de otros usuarios (Contexto de usuario de OAuth 1.0a u OAuth 2.0 Authorization Code with PKCE) con este endpoint, no podrás obtener [métricas](/es/x-api/fundamentals/metrics) privadas. 
+
+Este endpoint puede entregar hasta 500 Publicaciones por solicitud en orden cronológico inverso, y se proporcionan tokens de [paginación](/es/x-api/posts/search/integrate/paginate) para recorrer grandes conjuntos de Publicaciones coincidentes.
+
+**Nota:** Si solicitas [annotations](/es/x-api/fundamentals/post-annotations) mediante el parámetro tweet.fields, el parámetro max&#95;results está actualmente limitado a un valor máximo de 100. Esto puede cambiar en el futuro, pero ten en cuenta esta limitación.
+
+Dado que este endpoint solo está disponible para quienes han sido aprobados para acceso Pro y Enterprise, tienes acceso al conjunto completo de [operators](/es/x-api/posts/search/integrate/build-a-query) de búsqueda y puedes realizar consultas de hasta 1024 caracteres.
+
+<Button href="/es/x-api/posts/search/quickstart/full-archive-search">
+  Inicio rápido
+</Button>
+
+<br />
+
+<Button href="https://github.com/xdevplatform/Twitter-API-v2-sample-code">
+  Código de ejemplo
+</Button>
+
+<br />
+
+<Button href="https://github.com/xdevplatform/search-tweets-python">
+  Cliente de Python para búsqueda de Publicaciones
+</Button>
+
+<br />
+
+<Button href="https://github.com/xdevplatform/search-tweets-ruby">
+  Cliente de Ruby para búsqueda de Publicaciones
+</Button>
+
+<br />
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  Ejecutar en Postman
+</Button>
+
+<br />
+
+<Button href="https://developer.x.com/apitools/api?endpoint=/2/tweets/search/recent&method=get">
+  Probar con API Explorer
+</Button>
+
+<br />
+
+<br />
+
+**Recursos de soporte**
+
+[Aprende a usar Postman para hacer solicitudes](/es/tutorials/postman-getting-started)
+
+[Soluciona un error](https://developer.x.com/en/support/x-api)
+
+[Visita la página de referencia de la API](/es/x-api/posts/recent-search)

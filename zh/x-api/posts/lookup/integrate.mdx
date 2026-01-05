@@ -1,0 +1,117 @@
+---
+title: 集成指南
+sidebarTitle: 集成指南
+keywords: ["帖子查询集成", "查询集成指南", "查询实现", "查询设置", "Tweet 查询集成"]
+---
+
+import { Button } from "/snippets/zh/button.mdx"
+
+本页面介绍了一些工具和关键概念，帮助你将帖子查询端点集成到你的系统中。我们将本页面内容划分为以下几个部分：
+
+* [实用工具](#helpful)
+* 关键概念
+  * [身份验证](#authentication)
+  * [开发者门户、项目和应用](#portal)
+  * [速率限制](#limits)
+  * [字段和扩展字段](#fields)
+  * [帖子编辑](#edits)
+  * [边界情况](#edge)
+
+<div id="helpful-tools">
+  ## 实用工具
+</div>
+
+在深入了解一些关键概念之前，我们建议你先熟悉以下工具：
+
+**Postman**\
+Postman 是一款非常出色的工具，可用于测试端点，包括所有路径参数和请求体参数，帮助你了解有哪些可用功能。查看我们的 [Postman 入门指南](/zh/tutorials/postman-getting-started) 以了解更多信息。
+
+**代码示例**\
+在我们的 [GitHub 页面](https://github.com/xdevplatform/Twitter-API-v2-sample-code)中查找你常用编程语言的代码示例。
+
+**第三方库**\
+使用社区开发的、与 v2 端点兼容的[第三方库](/zh/resources/tools-and-libraries)。
+
+<div id="key-concepts">
+  ## 关键概念
+</div>
+
+<div id="authentication">
+  ### 认证
+</div>
+
+所有 X API v2 端点都要求经过认证的请求。你可以通过以下任一方式完成认证：
+
+* 使用 [OAuth 1.0a 用户上下文](/zh/resources/fundamentals/authentication)，通过 API Keys、访问令牌以及其他参数来[创建授权头](/zh/resources/fundamentals/authentication#authorizing-a-request)。
+* 使用 [OAuth 2.0 应用仅模式](/zh/resources/fundamentals/authentication#oauth-2-0)，在请求中携带 [App Access Token](/zh/resources/fundamentals/authentication)。
+* 使用 [OAuth 2.0 Authorization Code with PKCE](/zh/resources/fundamentals/authentication)，以便对应用作用域和多设备授权进行更精细的控制。
+
+<Note>
+  OAuth 1.0a 的实现可能较为复杂。如果你不熟悉它，可以考虑在发起请求时使用 [library](/zh/resources/tools-and-libraries) 或 OAuth 2.0。对于私有指标或帖子数据，请使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE。
+</Note>
+
+<Tip>
+  **请注意**
+
+  > 如果你请求以下字段，则必须使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code：
+  >
+  > * `tweet.fields.non_public_metrics`
+  > * `tweet.fields.promoted_metrics`
+  > * `tweet.fields.organic_metrics`
+  > * `media.fields.non_public_metrics`
+  > * `media.fields.promoted_metrics`
+  > * `media.fields.organic_metrics`
+</Tip>
+
+<div id="developer-portal-projects-and-apps">
+  ### 开发者门户、项目和应用
+</div>
+
+要获取 X API v2 的凭证，你需要：
+
+1. 一个已获批准的[开发者账号](/zh/resources/fundamentals/developer-portal)。
+2. 该开发者账号下的一个[项目](/zh/resources/fundamentals/projects)。
+3. 该项目内的一个[开发者应用](/zh/resources/fundamentals/developer-apps)，其中可以找到密钥和令牌。
+
+<div id="rate-limits">
+  ### 速率限制
+</div>
+
+为管理请求量，X API 请求会受到[速率限制](/zh/resources/fundamentals/rate-limits)的约束。限制同时适用于应用级和用户级：
+
+* **应用级**：限制任一应用在每个时间周期内可发出的请求数量。
+* **用户级**：限制已认证用户在不同开发者应用之间执行帖子查询的频率。
+
+<div id="fields-and-expansions">
+  ### 字段和扩展字段
+</div>
+
+X API v2 允许使用 `fields` 和 `expansions` 选择特定的数据字段：
+
+* **扩展字段（Expansions）**：用于获取附加的相关对象。支持的扩展字段包括：
+  * `edit_history_tweet_ids`
+  * `attachments.poll_ids`
+  * `attachments.media_keys`
+  * `author_id`
+  * `entities.mentions.username`
+  * `geo.place_id`
+  * `in_reply_to_user_id`
+  * `referenced_tweets.id`
+  * `referenced_tweets.id.author_id`
+
+* **字段（Fields）**：用于指定在对象中要返回的额外数据字段。Post 对象默认返回 `id`、`text` 和 `edit_history_tweet_ids`。其他选项（例如 `tweet.created_at` 和 `tweet.entities`）必须显式请求。
+
+更多信息，请参阅 [X API v2 数据字典](/zh/x-api/fundamentals/data-dictionary)中的字段和扩展字段指南。
+
+<div id="post-edits">
+  ### 帖子编辑
+</div>
+
+符合条件的帖子可以在发布后 30 分钟内最多编辑五次。Posts 查找端点始终返回帖子最新版本。对于准实时的用例，请注意这一时间窗口。要了解更多详情，请参阅[帖子编辑基础](/zh/x-api/fundamentals/edit-posts)。
+
+<div id="edge-cases">
+  ### 特殊情况
+</div>
+
+* **Promoted metrics**：为未推广的帖子请求推广指标时，将返回空响应。
+* **Truncated text**：对于转发帖子，帖子文本会被截断。要获取完整文本，请展开被引用的帖子。

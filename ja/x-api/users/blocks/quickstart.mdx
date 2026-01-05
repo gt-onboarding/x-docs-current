@@ -1,0 +1,167 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["ブロック クイックスタート", "ユーザーをブロックするクイックスタート", "ブロックのチュートリアル", "ブロックガイド", "ブロック クイックスタートガイド"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-blocks-lookup-endpoint">
+  ## blocks lookup エンドポイントの利用を開始する
+</div>
+
+このクイックスタートガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使用して blocks lookup エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、[X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) の GitHub リポジトリをご覧ください。
+
+<Note>
+  ### 前提条件
+
+  このガイドを完了するには、リクエストを認証するための一式の [キーとトークン](/ja/resources/fundamentals/authentication) が必要です。以下の手順に従って、これらのキーとトークンを生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal で [プロジェクト](/ja/resources/fundamentals/projects) と、それに関連付けられた [開発者アプリ](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-blocks-lookup-request">
+  ### blocks lookup リクエストの作成手順
+</div>
+
+<div id="step-one-start-with-a-tool-or-library">
+  #### ステップ1：ツールまたはライブラリを用意する
+</div>
+
+このエンドポイントへのリクエストを送信するために利用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman を使用します。
+
+X API v2 の Postman コレクションを環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションが読み込まれたら、「Blocks」フォルダーに移動し、「Blocks Lookup」を選択します。
+ 
+
+<div id="step-two-authenticate-your-request">
+  #### ステップ 2: リクエストを認証する
+</div>
+
+X API に正しくリクエストを送信するには、その操作を行う権限があることを確認する必要があります。このエンドポイントでは、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) か [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使ってリクエストの認証を行う必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+Postman にキーとトークン、具体的には API Key、API Secret Key、OAuth 1.0a user Access Token、OAuth 1.0a user Access Token Secret を追加する必要があります。Postman の右上隅で「X API v2」という名前の environment を選択し、その environment ドロップダウンの横にある目のアイコンをクリックして、&quot;initial value&quot; と &quot;current value&quot; のフィールドにキーとトークンを追加することで設定できます。
+
+正しく設定できていれば、これらの変数はリクエストの Authorization タブに自動的に反映されます。
+ 
+
+<div id="step-three-specify-a-user">
+  #### ステップ3：ユーザーを指定する
+</div>
+
+このエンドポイントでは、自分がブロックしているユーザーを確認するために、自分のユーザーID、または認証されたユーザーのユーザーIDを指定する必要があります。
+
+Postman で「Params」タブに移動し、このユーザーIDを id パス変数の「Value」列（セクションの一番下）に入力します。その際、ユーザー名の前後にスペースを含めないようにしてください。
+ 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| `id` | （あなたのユーザーID） |
+| max&#95;results | 5   |
+
+<div id="step-four-identify-and-specify-which-fields-you-would-like-to-retrieve">
+  #### ステップ4：取得したいフィールドを特定して指定する
+</div>
+
+ステップ3の後に「Send」ボタンをクリックすると、レスポンスにはデフォルトの [user オブジェクト](/ja/x-api/fundamentals/data-dictionary#user) のフィールドである id、name、username が返されます。
+
+id、name、username 以外の追加フィールドを受け取りたい場合は、リクエスト内で [fields](/ja/x-api/fundamentals/fields) パラメータおよび/または [expansions](/ja/x-api/fundamentals/expansions) パラメータを使って、それらのフィールドを指定する必要があります。
+
+この演習では、異なるオブジェクトから成る 3 つの追加のフィールドセットをリクエストします。
+
+1. プライマリ user オブジェクトにおける追加の user.created&#95;at フィールド。
+2. 返されたユーザーに関連付けられたピン留めされたポスト（pinned Posts）オブジェクトのデフォルトフィールド：id と text。
+3. 関連するポスト（Post）オブジェクトにおける追加の tweet.created&#95;at フィールド。
+
+Postman で「Params」タブに移動し、「Query Params」テーブルに次のキーと値のペアを追加します。
+
+|              |                         |                                |
+| :----------- | :---------------------- | :----------------------------- |
+| **Key**      | **Value**               | **Returned fields**            |
+| user.fields  | created&#95;at          | user.created&#95;at            |
+| expansions   | pinned&#95;tweet&#95;id | tweet.id, tweet.text           |
+| tweet.fields | created&#95;at          | includes.tweets.created&#95;at |
+
+これで、「Send」ボタンの横に表示される URL は、TwitterDev のものではなく、あなた自身のユーザー ID を含む類似の URL になっているはずです。
+
+```
+      https://api.x.com/2/users/2244994945/blocking?user.fields=created_at&expansions=pinned_tweet_id&tweet.fields=created_at
+```
+
+<div id="step-five-make-your-request-and-review-your-response">
+  #### ステップ5: リクエストを送信し、レスポンスを確認する
+</div>
+
+すべての設定が完了したら、「Send」ボタンをクリックすると、次の例のようなレスポンスが返ってきます。
+
+```
+    {
+  "data": [
+    {
+      "created_at": "2008-12-04T18:51:57.000Z",
+      "id": "17874544",
+      "username": "TwitterSupport",
+      "name": "Twitter Support"
+    },
+    {
+      "created_at": "2007-02-20T14:35:54.000Z",
+      "id": "783214",
+      "username": "Twitter",
+      "name": "Twitter"
+    },
+    {
+      "pinned_tweet_id": "1389270063807598594",
+      "created_at": "2018-11-21T14:24:58.000Z",
+      "id": "1065249714214457345",
+      "username": "TwitterSpaces",
+      "name": "Spaces"
+    },
+    {
+      "pinned_tweet_id": "1293595870563381249",
+      "created_at": "2007-05-23T06:01:13.000Z",
+      "id": "6253282",
+      "username": "XAPI",
+      "name": "X API"
+    }
+  ],
+  "includes": {
+    "tweets": [
+      {
+        "created_at": "2021-05-03T17:26:09.000Z",
+        "id": "1389270063807598594",
+        "text": "現在、600人以上のフォロワーを持つすべてのユーザーがスペースをホストできます。\n\n私たちが学んだことに基づくと、これらのアカウントは既存のオーディエンスがあるため、ホスティングで良い体験を得る可能性が高いです。スペースを作成する機能をすべての人に提供する前に、いくつかのことに焦点を当てています。🧵"
+      },
+      {
+        "created_at": "2020-08-12T17:11:04.000Z",
+        "id": "1293595870563381249",
+        "text": "X API v2: Early Access released\n\nToday we announced Early Access to the first endpoints of the new Twitter API!\n\n#TwitterAPI #EarlyAccess #VersionBump https://t.co/g7v3aeIbtQ"
+      }
+    ]
+  }
+```
+
+<div id="step-six-paginate-through-your-results">
+  #### ステップ6: 結果をページングする
+</div>
+
+レスポンスの末尾に `meta` オブジェクトがあることに気付くかもしれません。`next_token` を受け取っている場合、これは取得可能な別のページの結果が存在することを示しています。次のページの結果を取得するには、`next_token` フィールドの値を取り出し、追加の `pagination_token` パラメータの値としてリクエストに指定します。
+ 
+
+|     |     |
+| :--- | :--- |
+| **Key** | **Value** |
+| pagination&#95;token | 1D3PU6DRII9HEZZZ |
+
+この追加パラメータを付けてリクエストを送信すると、ステップ3で `max_results` を 5 に指定したため、次の5件の結果が後続のペイロードで返されます。すべての結果が返されるまでこの処理を繰り返すことができますが、`max_results` パラメータを使用して1回のリクエストで最大1000人のユーザーまで取得することもできるため、それほど頻繁にページングを行う必要はありません。

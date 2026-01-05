@@ -1,0 +1,507 @@
+---
+title: バージョン
+keywords: ["Ads API バージョン", "API バージョニング", "バージョン履歴", "API バージョン", "バージョン更新", "Ads API バージョン"]
+---
+
+X Ads API の過去バージョンに関する最新情報は、以下を参照してください。
+
+| Version | Path    | Introduction Date | Deprecated Date | End of Life Date |
+|:---------|:---------|:--------------------|:------------------|:-------------------|
+| [12.0](#) | /12/    | 2022年10月27日   | 未定              | 未定               |
+| [11.0](https://devcommunity.x.com/t/ads-api-version-11/168814) | /11/    | 2022年3月31日    | 未定              | 未定               |
+| [10.0](#v9) | /10/    | 2021年8月31日    | 2022年3月31日   | 2022年10月27日  |
+| [9.0](#v9)  | /9/     | 2021年3月2日      | 2021年8月31日  | 2022年3月31日    |
+| [8.0](#v8)  | /8/     | 2020年9月8日  | 2021年3月2日    | 2021年8月31日    |
+| [7.0](#v7)  | /7/     | 2020年3月3日      | 2020年9月1日 | 2021年3月2日     |
+| [6.0](#v6)  | /6/     | 2019年8月28日    | 2020年3月3日    | 2020年9月1日 |
+| [5.0](#v5)  | /5/     | 2019年2月28日  | 2019年8月28日  | 2020年3月3日     |
+| [4.0](#v4)  | /4/     | 2018年8月28日    | 2019年2月28日 | 2019年8月28日   |
+| [3.0](#v3)  | /3/     | 2018年2月1日   | 2018年8月28日  | 2019年2月28日 |
+| [2.0](#v2)  | /2/     | 2017年7月10日      | 2018年2月1日 | 2018年8月1日    |
+| [1.0](#v1)  | /1/     | 2016年3月31日     | 2017年7月7日     | 2018年1月10日  |
+| [0.0](#v0)  | /0/     | 2013年2月21日   | 該当なし              | 2016年10月31日  |
+
+<div id="overview">
+  ## 概要
+</div>
+
+毎月、X Ads API に変更を加え、複数の新機能をリリースしています。これらの変更はほとんど常に後方互換性がありますが、年間でいくつかの破壊的変更が発生する傾向があります。Ads API における変更ペースの速さが、新機能の実装、廃止予定機能への対応、変更点のテストといった開発サイクルに与える影響について、開発者の皆様からフィードバックを受けてきました。私たちは Ads プラットフォームを利用する開発者のエクスペリエンスを向上させたいと考えており、そのためにエンドポイントのバージョン管理という概念を導入しました。
+
+以下は、本文中で使用するいくつかの概念の定義です。
+
+**Version（バージョン）**: Ads API リクエストの URL パス内に含まれるバージョン番号を指します。たとえば、GET /{version_number}/accounts のような形式です。この方式のバージョン管理は URI ベースのバージョン管理（URI versioning）と呼ばれます。
+
+**Breaking Changes（破壊的変更）**: 破壊的変更とは、既存の機能を維持するために開発者リソースを必要とするあらゆる変更を指します。ここには、必要な変更内容の調査、廃止予定となる機能やエンドポイントの特定、それらすべての変更の最終的な実装に要するリソースが含まれます。破壊的変更の例としては、次のようなものがあります。
+
+* API リクエストまたはレスポンスからパラメータを削除する
+
+* 任意のパラメータやエンドポイントの名前を変更する
+
+* 値の表現方法を変更する（preview&#95;url → card&#95;uri）
+
+* エンドポイントの挙動を変更する（例: 非同期 vs 同期の統計）
+
+* 任意または必須パラメータを追加・変更する（例: リクエスト内で name を必須フィールドにする）
+
+**Deprecation（非推奨化）**: 非推奨となったバージョンやプロダクトはサポート対象外となり、開発者はこれらの API の利用を中止することが推奨されます。
+
+**Sunset（サンセット）**: プロダクトや API がサンセットされると、そのプロダクトに対応するエンドポイント群は API 経由でアクセスできなくなります。
+
+<div id="versioning-strategy">
+  ## バージョニング戦略
+</div>
+
+この戦略の主な原則は次のとおりです。
+
+1. すべての破壊的変更は新しいバージョンにまとめて含める
+
+2. 新しいバージョンがアナウンスされた場合、既存バージョンの非推奨期間は 6 か月とする
+
+3. 任意の時点で、API は同時に 2 つのバージョンからのリクエストを受け付けるが、そのうち古い方のバージョンはサポート対象外となる
+
+4. 新しいプロダクトの早期採用を促進するため、新しいプロダクトはバージョニングの定期リリースとは別に、随時リリースされる
+
+5. すべての API レスポンスには、API の現在のバージョンが設定された `x-current-api-version` が含まれ、さらに非推奨の API エンドポイントを呼び出した場合は `x-api-warn` ヘッダーも含まれる。
+
+API の破壊的変更を必要とするような、プロダクト要件の本質的な変更（例: 複数の年齢バケットターゲティングの非推奨化）が発生する場合には、この破壊的変更をアナウンスする 90 日前通知を送信し、通知の公開から少なくとも 90 日が経過した後に、その破壊的変更をデプロイします。
+
+<div id="v9">
+  ### v9
+</div>
+
+本日 2021年3月3日、X Ads API バージョン 9（v9）が公開されました。このリリースは、機能の同等性を高め、キャンペーン作成を容易にし、Cards および Mobile App Promotion エンドポイント向けの重要な更新を導入することを目的としています。
+
+これまでのバージョンと同様に、v9 への移行のための 6 か月間の移行期間が設けられます。2021年8月31日をもって、既存の Ads API バージョン 8（v8）は利用できなくなります。サービス中断を避けるため、すべての開発者の方に、できるだけ早く Ads API の最新バージョンへ移行することを推奨します。
+
+<Note>
+  **注記:** 本リリースをもって、Ads API バージョン 7（v7）はサポート終了となり、利用できなくなりました。
+</Note>
+
+詳細については、[Developer Forum のアナウンス](https://devcommunity.x.com/t/ads-api-version-9/150316)をご覧ください。
+
+<div id="v8">
+  ### v8
+</div>
+
+本日 2020 年 9 月 20 日、Tailored Audiences の新機能を導入し、ads.x.com との機能差を縮小し、開発者エクスペリエンスを向上させることを目的とした X Ads API バージョン 8 の提供を開始します。
+
+これまでのバージョンと同様に、v8 への移行のために 6 か月間の移行期間があります。2021 年 3 月 2 日をもって Ads API バージョン 7 は利用できなくなります。サービス中断を回避するため、すべての開発者の皆様には、できるだけ早く最新バージョンの API へ移行されることを推奨します。
+
+詳細については、[開発者フォーラムでのお知らせ](https://devcommunity.x.com/t/ads-api-version-8/141914)をご覧ください。
+
+<div id="v7">
+  ### v7
+</div>
+
+本日 2020 年 3 月 20 日、[ads.x.com](http://ads.x.com/) との機能の同等性を高めることを目的とした X Ads API のバージョン 7 をリリースしました。
+
+これまでの[バージョン](https://developer.x.com/en/docs/ads/general/overview/versions)と同様に、v7 への移行のために 6 か月間の移行期間が設けられます。2020 年 9 月 1 日以降、Ads API のバージョン 6 は利用できなくなります。サービス中断を回避するため、すべての開発者の方に対し、できるだけ早く最新バージョンの API へ移行されることを推奨します。Ads API のバージョン 5 はすでにサポート終了となっており、利用できません。
+
+詳細については、[開発者フォーラムでのお知らせ](https://devcommunity.x.com/t/ads-api-version-7/135093)をご参照ください。
+
+<div id="v6">
+  ### v6
+</div>
+
+本日2019年8月28日、X は一貫性の確保と開発者エクスペリエンスの向上に重点を置いた Ads API v6 をリリースしました。
+
+このリリースには、ポストの取得用の新しいエンドポイント、プロモアカウントの統計情報、名前でエンティティを検索する機能、現在処理中の非同期アナリティクスジョブの件数に関する情報が含まれます。さらに、メディアを使用するエンドポイントおよびターゲティング条件のエンドポイントに対して、一貫性を重視した更新を行いました。最後に、一部のパラメータ名とレスポンス属性を軽微に更新し、Scoped Timeline エンドポイントを非推奨としました。
+
+詳細については、[Developer Forum 上のアナウンス](https://devcommunity.x.com/t/ads-api-version-6/129060)を参照してください。
+
+<div id="v5">
+  ### v5
+</div>
+
+本日 2019 年 2 月 28 日、X は Ads API v5 をリリースしました。このバージョンでは、スケールと効率性の向上に焦点を当てたアップデートを提供します。
+
+このリリースには、指定した期間中にどのエンティティがアクティブだったかを判定するための新しいエンドポイント、Media Creatives（すなわち X Audience Platform 上のインストリーム動画および画像）の統計、カード URI による *複数* のカードの取得機能、ターゲティング条件およびその他のエンティティの取得に関する柔軟性の向上が含まれます。加えて、いくつかのバグ修正と、パラメータ名およびレスポンス属性の更新を行いました。最後に、メディア以外のアプリカードと、POST `accounts/:account_id/account_media` エンドポイントは非推奨となりました。
+
+これまでのバージョンと同様に、v5 への移行には 6 か月の移行期間を設けています。**2019-08-28** 以降、Ads API のバージョン 4 は利用できなくなります。サービス中断を避けるため、すべてのパートナーには、可能な限り早期に最新バージョンの API へ移行していただくことを推奨します。*Ads API バージョン 3 はサポート終了となっており、すでに利用できません。*
+
+<div id="new">
+  #### 新機能
+</div>
+
+**どのエンティティがアクティブかの判定**
+
+[Active Entities](/ja/x-ads-api/analytics#active-entities-2) エンドポイントは、広告エンティティのアナリティクス・メトリクスが変更されたかどうかを示します。アナリティクスエンドポイントと組み合わせて使用することを想定しており、エンティティ種別と日付範囲（最大 90 日）を指定することで、ご利用のプラットフォームがアナリティクスをリクエストすべきエンティティ ID の配列を返します。返されなかった ID については、その後のアナリティクスリクエストでクエリすべきではありません。
+
+このエンドポイントは、次のエンティティ種別をサポートします：`CAMPAIGN`、`FUNDING_INSTRUMENT`、`LINE_ITEM`、`MEDIA_CREATIVE`、`PROMOTED_TWEET`。
+
+**`MEDIA_CREATIVE` の統計**
+
+Ads API のアナリティクスエンドポイントで、Media Creative エンティティ向けのメトリクスが提供されるようになりました。Media Creative は、インストリーム広告や X Audience Platform 上の画像がどのようにプロモーションされるかを表すエンティティです。X Ads UI では、「In-stream videos」タブおよび「Display creatives」タブの下に Media Creative のメトリクスが表示されます。[同期](/ja/x-ads-api/analytics#get-stats-accounts-account-id) および [非同期](/ja/x-ads-api/analytics#asynchronous-analytics) のいずれのアナリティクスエンドポイントも、`MEDIA_CREATIVE` エンティティ enum をサポートするようになりました。
+
+**複数カードの取得**
+
+カード URI 値で単一のカードを取得するために設計されたエンドポイントの [v3 リリース](https://devcommunity.x.com/t/ads-api-version-3/100732) からの改善として、[GET accounts/:account&#95;id/cards/all](/ja/x-ads-api/creatives#cards-fetch) エンドポイントを使用して *複数* のカードを取得できるようになりました。これにより、カードごとにリクエストを行う代わりに、1 回のリクエストで最大 200 件のカードを取得できます。
+
+次の 2 点に注意してください。
+
+1. URL パスは `accounts/:account_id/cards/all` になりました。（以前のパスは利用できません。）これは、ID でカードを取得するために設計された [エンドポイント](/ja/x-ads-api/creatives#cards-fetch) との一貫性を保つためです。
+2. 必須のリクエストパラメータ名は、card&#95;uris（複数形）になりました。
+
+**取得方法の柔軟性向上**
+
+[GET accounts/:account&#95;id/targeting&#95;criteria](/ja/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) エンドポイントが、複数の line item ID をサポートするようになりました。最大 200 個の ID を受け付ける line&#95;item&#95;ids パラメータが必須です。以前は単一の line item のみが受け付けられていたため、同期が困難でした。この変更により、より多くのターゲティングをより短時間で取得できるようになりました。
+
+以下のエンドポイントも複数の line item ID をサポートするようになりましたが、これらでは line&#95;item&#95;ids パラメータは任意です。
+
+* [GET accounts/:account&#95;id/line&#95;item&#95;apps](https://developer.x.com/en/docs/x-ads-api/campaign-management/api-reference/line-item-apps#get-accounts-account-id-line-item-apps)
+* [GET accounts/:account&#95;id/media&#95;creatives](/ja/x-ads-api/campaign-management#get-accounts-account-id-media-creatives)
+* [GET accounts/:account&#95;id/promoted&#95;accounts](/ja/x-ads-api/campaign-management#get-accounts-account-id-promoted-accounts)
+* [GET accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions](/ja/x-ads-api/creatives#preroll-call-to-actions)
+
+<div id="changed">
+  #### Changed
+</div>
+
+**ドラフトキャンペーンとラインアイテムの取得**
+
+ドラフトキャンペーンとラインアイテムの取得方法が更新されました。現在では、`with_draft(boolean)` パラメータを `true` に設定すると、ドラフトと非ドラフトの両方のエンティティが返されます。これは削除済みエンティティの取得方法（`with_deleted` を使用）と一貫しています。以前は、ドラフトと非ドラフトの両方のエンティティを取得するには少なくとも 2 回のリクエストが必要でしたが、現在は 1 回の API 呼び出しで行えます。
+
+| **v4** | **v5** |
+| :--- | :--- | :--- |
+| `draft_only` | `with_draft` |     |
+
+**Network activation duration targeting**
+
+Ads API は、Network Activation Duration ターゲティングを追加した後、レスポンス内のターゲティングタイプに `_IN_SEC` サフィックスが含まれてしまう表示上の問題を解消しました。Network Activation Duration は常に月単位で表現されるため、秒を示す参照が含まれていると混乱を招いていました。この修正により表現が一貫し、混乱が軽減されます。
+
+| **v4** | **v5** |
+| :--- | :--- | :--- |
+| `NETWORK_ACTIVATION_DURATION_IN_SEC` | `NETWORK_ACTIVATION_DURATION` |     |
+
+**Total counts と cursor**
+
+v5 では、`with_total_count` と `cursor` は排他的です。両方を同じリクエストで指定すると、`EXCLUSIVE_PARAMETERS` エラーコードが返されます。v5 以前では、`cursor` が指定されている場合、`with_total_count` は無視されていました。この変更により、両者の関係性が明示的になりました。
+
+<div id="removed">
+  #### 削除された項目
+</div>
+
+Ads API のレスポンスから、preview&#95;url、account&#95;id、parent&#95;ids の 3 つのフィールドが削除されます。これら 3 つへの対応に必要なエンジニアリング工数は最小限です。
+
+* v4 では、カード用の preview&#95;url レスポンスパラメータは常に null であると告知されていました。このマイグレーションの最終ステップとして、すべてのカードのレスポンスから preview&#95;url を削除します。
+* 以下のリソースについては、広告アカウント ID が URL と request.params の両方にすでに含まれているため、account&#95;id レスポンス属性が削除されます。（この一覧からファンディングインストルメントを意図的に除外しているのは、可能な場合には親 ID をレスポンスオブジェクトに含めるべきであり、アカウント ID がファンディングインストルメントの親エンティティであるためです。）
+  * アカウントメディア
+  * アプリイベントプロバイダー
+  * アプリイベントタグ
+  * キャンペーン
+  * カード
+  * ラインアイテム
+  * プロモート可能なユーザー
+  * ターゲティング条件
+* [GET accounts/:account&#95;id/targeting&#95;criteria](/ja/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) リクエストでは、常に空配列であったため parent&#95;ids フィールドは返されなくなります。
+
+**非メディア App カード**
+
+v5 では、非メディア App カードはサポートされなくなりました。[以前](https://devcommunity.x.com/t/deprecation-announcement-app-download-cards/87807)、非メディア App カードを作成または編集する機能は削除されていました。今回、このリソース用の残りのエンドポイントが非推奨となります。
+
+* 注: これは画像および動画の App ダウンロードカードには影響しません。
+
+**アカウントメディアの作成**
+
+POST accounts/:account&#95;id/account&#95;media エンドポイントは、v5 では利用できなくなりました。このリソースに対する他のエンドポイントには&#95;影響しません&#95;。この変更の理由は、[Media Library](/ja/x-ads-api/creatives#media-library) にメディアを追加する際、これらのアセットが自動的にアカウントメディアエンティティとして追加される場合があり、すでに存在するアセットをアカウントメディアリソースに追加しようとするとエラーになるためです。これは次のケースで発生します。
+
+* Media Library に追加された `AMPLIFY_VIDEO` アセットは、自動的に `PREROLL` クリエイティブタイプのアカウントメディアアセットとして追加されます。
+* 特定の寸法の画像を Media Library に追加すると、自動的にアカウントメディアアセットとして追加されます。クリエイティブタイプ（例: `INTERSTITIAL`）は画像の寸法によって決まります。（寸法については、[Enumerations](/ja/x-ads-api/introduction) ページを参照してください。）
+
+<div id="v4">
+  ### v4
+</div>
+
+Ads API のバージョン 4 は、本日 2018 年 8 月 28 日にリリースされます。
+
+このリリースでは、より堅牢なオーディエンス処理バックエンドを利用した新しい API インターフェースを含め、[Audiences](/ja/x-ads-api/audiences) プロダクトが改善されています。バージョン 4 には、ユーザー、アカウント、および税務設定を管理するための一連のエンドポイントも含まれます。加えて、accounts/:account&#95;id/videos エンドポイントは非推奨となります。このリリースには、パラメーターおよびレスポンス名の一部に対する軽微な変更も含まれます。
+
+バージョン 3 と同様に、6 か月間の移行期間を提供します。**2019-02-28** 以降、Ads API のバージョン 3 は利用できなくなります。サービス中断を回避するため、すべてのパートナーに対し、可能な限り早く最新バージョンの API へ移行することを推奨します。バージョニング戦略の詳細については、[Versions](/ja/x-ads-api/introduction) ページを参照してください。
+
+#### 新規
+
+***Audience API***
+
+新しい Audiences API は、堅牢性と信頼性が強化された新しいオーディエンス処理バックエンド上に構築されています。この新しいエンドポイントにより、パートナーは 1 人のユーザーに対して複数種類のユーザー識別子を提供できるようになり、これによりマッチングのために追加のシグナルを活用できるようになります。新しい Audience エンドポイントのリファレンスドキュメントは[こちら](/ja/x-ads-api/audiences)にあります。このプロダクトについては、本年残りの期間を通じて引き続きアップデートと改善をリリースしていく予定です。
+
+以下のエンドポイントは、機能が重複しているため v4 では利用できなくなります（v3 では引き続き動作し、v3 が利用できなくなった時点で完全に**廃止**されます）。
+
+* TON Upload:
+  * GET accounts/:account&#95;id/tailored&#95;audience&#95;changes
+  * GET accounts/:account&#95;id/tailored&#95;audience&#95;changes/:tailored&#95;audience&#95;change&#95;id
+  * POST accounts/:account&#95;id/tailored&#95;audience&#95;changes
+  * PUT accounts/:accounti&#95;d/tailored&#95;audiences/global&#95;opt&#95;out
+* Real Time Audiences:
+  * POST tailored&#95;audience&#95;memberships
+
+最後に、`list_type` パラメータは、バージョン 4 では *すべての* [Tailored Audiences エンドポイント](/ja/x-ads-api/audiences) のリクエストおよびレスポンスから削除されます。
+
+***設定エンドポイント***
+
+アカウント管理者がユーザー設定、アカウント設定、および税務設定を構成および更新できるようになりました。[User settings](/ja/x-ads-api/campaign-management#get-accounts-account-id-user-settings-user-id) は、特定の広告アカウントに対するユーザー固有の連絡先設定に対応しています。[PUT accounts/:account&#95;id](/ja/x-ads-api/campaign-management#put-accounts-account-id) エンドポイントを使用すると、広告主はアカウント名および業種を更新できるようになりました。最後に、[tax settings](/ja/x-ads-api/campaign-management#get-accounts-account-id-tax-settings) エンドポイントでは、付加価値税（VAT）が課税される国の広告主が、会社名、住所、VAT ID、アカウントが広告主本人所有か、広告主に代わって広告出稿を行う代理店所有かといった情報を更新できます。
+
+<div id="changed">
+  #### Changed
+</div>
+
+***Universal Lookalike の名称変更***
+
+[POST accounts/:account&#95;id/line&#95;items](/ja/x-ads-api/campaign-management#post-accounts-account-id-line-items) エンドポイントと [PUT accounts/:accountit/line&#95;items/:line&#95;item&#95;id](/ja/x-ads-api/campaign-management#put-accounts-account-id-line-items-line-item-id) エンドポイントにおいて、`lookalike_expansion` パラメータの enum 値を更新します。
+
+| **v3** | **v4** |
+| :--- | :--- |
+| `NARROW` | `DEFINED` |
+| `BALANCED` | `EXPANDED` |
+
+**すべての箇所で `country_code` を使用**
+
+Ads API の[一貫性](https://devcommunity.x.com/t/feedback-ads-api-consistency/109145)向上の一環として、以下のエンドポイントにおけるパラメータ名を `app_country_code` から `country_code` に変更します。
+
+* [POST accounts/:account&#95;id/cards/image&#95;app&#95;download](https://devcommunity.x.com/t/ads-api-version-11/168814)
+* [PUT accounts/:account&#95;id/cards/image&#95;app&#95;download/:card&#95;id](https://developer.x.com/content/developer-twitterhttps://developer.x.com/en/docs/ads/creatives/api-reference/image-app-download#put-accounts-account-id-cards-image-app-download-card-id)
+* [POST accounts/:account&#95;id/cards/video&#95;app&#95;download](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/video-app-download#post-accounts-account-id-cards-video-app-download)
+* [PUT accounts/:account&#95;id/cards/video&#95;app&#95;download/:card&#95;id](https://developer.x.com/content/developer-twitter/en/docs/ads/creatives/api-reference/video-app-download#put-accounts-account-id-cards-video-app-download-card-id)
+
+これはこれらのパラメータの動作や受け付ける値には影響せず、名前の変更のみです。
+
+**`preview_url` は常に null**
+
+v3 の告知でお伝えしたとおり、既存のすべてのカードには `card_uri` が付与されています。その結果、`preview_url` の値は常に `null` になります。
+
+念のためのリマインドとして、カードをポストに関連付ける際は、その `card_uri` の値を使用します。以下のリクエスト例を参照してください。
+
+$ twurl -X POST -H ads-api.x.com &quot;/4/accounts/18ce54d4x5t/tweet?text=Version 4&amp;card&#95;uri=card://958225772740714496&quot;
+
+#### 削除項目
+
+**Video エンドポイント**
+
+accounts/:account&#95;id/videos エンドポイントは v4 では利用できなくなります。このエンドポイントは [Media Library](/ja/x-ads-api/creatives#get-accounts-account-id-media-library) エンドポイントの導入により廃止されました。以下の利用方法の比較を参照してください。
+
+* v3 videos エンドポイント: `twurl -H ads-api.x.com "/3/accounts/18ce54d4x5t/videos"`
+
+* v4 の動画向け Media Library エンドポイント: `twurl -H ads-api.x.com "/4/accounts/18ce54d4x5t/media_library?media_type=VIDEO"`
+
+Media Library エンドポイントは videos エンドポイントと機能的に同等であり、画像や GIF の取り扱いなど、追加機能もサポートしています。パートナーの皆様には、あらゆるメディア管理において Media Library のみを使用するようお願いしています。
+
+**ポスト表示における `as_user_id`**
+
+[GET accounts/:account&#95;id/tweet/preview/:tweet&#95;id](/ja/x-ads-api/creatives#get-accounts-account-id-tweets) エンドポイントで利用可能だった `as_user_id` パラメータは、今後は受け付けられません。プレビューは常にポストの投稿者として表示されます。
+
+<div id="v3">
+  ### v3
+</div>
+
+Ads API のバージョン 3 は、2018 年 2 月 1 日に [ローンチ](https://devcommunity.x.com/t/ads-api-version-3/100732) されました。Ads API のバージョン 2 は、2018 年 8 月 1 日にサポート終了（EOL）を迎えます。
+
+このリリースには、新しい Audience Intelligence 製品、Media Library へのアクセス、カードワークフローの改善が含まれます。また、[PUT accounts/:account&#95;id/targeting&#95;criteria](/ja/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) エンドポイントの廃止も発表しています。最後に、バージョン 3 では、いくつかの軽微なパラメータおよびレスポンスの変更と、バッチサイズ上限の引き下げが行われています。
+
+[バージョン 2](https://devcommunity.x.com/t/ads-api-version-2/90360) のときと同様に、パートナーには移行期間として **6 か月** を設けています。**2018-08-01** に Ads API の v2 は停止されます。すべてのパートナーや開発者の皆さまには、できるだけ早く v3 へ移行することを推奨します。
+
+**Audience Intelligence**
+
+Audience Intelligence は、特定の X オーディエンスに最も関連性の高い上位のハッシュタグ、@ハンドル、およびイベントについて、リアルタイムのインサイトを提供します。たとえば「米国在住の男性 18–34 歳」と入力すると、このオーディエンスの間で #nintendoswitch、#cardinal、@ricegum がトレンドになっていることが分かります。
+
+Audience Intelligence の [endpoints](/ja/x-ads-api/audiences) は、次の機能を提供します。
+
+* 入力オーディエンスを指定して、そのオーディエンスに関連性の高い上位のハッシュタグ、@ハンドル、およびイベントを取得します。
+* 入力オーディエンスを指定して、主要なデモグラフィック情報（年齢、性別、世帯収入など）を取得します。
+* キーワードを指定して、ポスト数の時系列データを取得します。
+
+**Media Library**
+
+[Media Library](/ja/x-ads-api/creatives#get-accounts-account-id-media-library) は、広告アカウント向けに画像、GIF、動画を管理する機能を提供します。これらのメディアオブジェクトはポストやカードの作成に利用できます。また、複数のクリエイティブで再利用できるため、同じアセットを何度もアップロードする必要がなくなります。
+
+ライブラリ内のオブジェクトは media&#95;key で識別されます。media&#95;key は、たとえば 13&#95;875943225764098048 のような形式の文字列です。Ads API では、すべてのメディアで media&#95;key を使用する方向に移行しています。
+
+**カードワークフローの改善**
+
+すべてのカードエンドポイントが media&#95;key をサポートするようになりました。これにより、Media Library 内のオブジェクトを使用してカードを作成または更新できるようになります。
+
+さらに、[カード詳細の取得](/ja/x-ads-api/creatives#fetching-cards) のための 2 つの新しいエンドポイントを導入しました。これらのエンドポイントは、たとえば card&#95;uri または id を指定して、ポストや予約済みポストで使用されているカードを検索するために利用できます。これは以前は不可能でした。
+
+<div id="other-changes">
+  #### その他の変更
+</div>
+
+これらの新機能に加えて、バージョン 3 には次の変更が含まれます。
+
+**新規**
+
+* [GET insights/keywords/search](/ja/x-ads-api/audiences) エンドポイントのレスポンスに、入力したキーワードに関連する 30 個の語を含む `related_keywords` 属性が追加されました。
+
+**変更**
+
+* ターゲティング条件バッチの最大サイズが 500 になりました。
+* `card_uri` と `preview_url` レスポンス属性は、互いに排他的になりました。カードに `card_uri` がある場合、`preview_url` は `null` になります。カードに `card_uri` がない場合は、`preview_url` のみが返されます。
+  * 2018-01-29 以降に作成されたすべてのカードには `card_uri` が設定されます。
+  * バージョン 4 の時点までに、既存のすべてのカードに `card_uri` が設定されます。
+* 5:2 画像を使用したカードを新規に *作成* することはできなくなりました。*既存の* 5:2 画像ベースのカードは引き続き機能しますが、パートナーの皆様には、（サポートされている場合）パフォーマンスの高い 1.91:1 または 1:1 のアスペクト比に切り替えることを推奨します。
+
+**削除**
+
+* [PUT accounts/:account&#95;id/targeting&#95;criteria](/ja/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria) エンドポイントは利用できなくなりました。この変更を行ったのは、このエンドポイントの置換動作が広告主に混乱を招き、また 1 回に 1 リソースのみを更新する他の PUT エンドポイントとの一貫性がなかったためです。代わりに、[POST batch/accounts/:account&#95;id/targeting&#95;criteria](/ja/x-ads-api/campaign-management#post-batch-accounts-account-id-targeting-criteria) エンドポイントを使用してください。このエンドポイントは、1 回のリクエストでターゲティングの追加と削除を両方行えるなど、より高い柔軟性を提供します。
+* `paused` レスポンス属性は、資金決済手段には返されなくなりました。代わりに、その資金決済手段が一時停止されているかどうかを判断するには、`entity_status` レスポンス属性を参照してください。加えて、`paused` と `cancelled` は同じ値に対応するため、`cancelled` もレスポンスには返されなくなりました。
+* [GET accounts/:account&#95;id/tweet/preview](/ja/x-ads-api/creatives#get-accounts-account-id-tweets) エンドポイントから、`card_id` パラメータを削除しました。
+* 削除された予約済みポストを取得することはできないため、`with_deleted` パラメータはサポートされなくなりました。
+* 次のエンドポイントから `draft_only` パラメータを削除しました。これらのエンティティは下書き状態になることがないためです。
+  * [GET accounts/:account&#95;id/targeting&#95;criteria](/ja/x-ads-api/campaign-management#get-accounts-account-id-targeting-criteria)
+  * [GET accounts/:account&#95;id/promoted&#95;tweets](/ja/x-ads-api/campaign-management#get-accounts-account-id-promoted-tweets)
+  * [GET accounts/:account&#95;id/promoted&#95;accounts](/ja/x-ads-api/campaign-management#get-accounts-account-id-promoted-accounts)
+  * [GET accounts/:account&#95;id/media&#95;creatives](/ja/x-ads-api/campaign-management#get-accounts-account-id-media-creatives)
+  * [GET accounts/:account&#95;id/preroll&#95;call&#95;to&#95;actions](/ja/x-ads-api/creatives#get-accounts-account-id-preroll-call-to-actions)
+
+**注記**
+
+Video Website Card と予約済みポストは、いずれもベータ版ではなくなりました。ローンチ以降に予約済みポストに対して行った変更については、[このスレッド](https://devcommunity.x.com/t/announcement-update-to-scheduled-tweets/94869) を参照してください。ここには、予約済みポスト向けに HTML [プレビュー](https://devcommunity.x.com/t/announcement-tweet-preview-improvements/96577) を生成できるようになったことも含まれます。
+
+<div id="v2">
+  ### v2
+</div>
+
+Ads API バージョン 2 は、2017 年 7 月 10 日に[リリースされました](https://devcommunity.x.com/t/ads-api-version-2/90360)。Ads API バージョン 1 は、2018 年 1 月 10 日に提供終了となります。
+
+**非互換の変更 / 廃止事項[¶](#breaking-changes-deprecations "この見出しへのパーマリンク")**
+
+* `total_count` は、レスポンス属性として任意になりました。`with_total_count` が `true` に設定されている場合にのみ利用可能です
+
+* `line_items` および `campaigns` のリクエストおよびレスポンスオブジェクトにある `paused` および `draft_only` フィールドは、単一の `entity_status` パラメータに置き換えられました
+
+* [POST accounts/:account&#95;id/tweet](/ja/x-ads-api/creatives) と [GET accounts/:account&#95;id/tweet/preview](/ja/x-ads-api/creatives#get-accounts-account-id-tweets) エンドポイントでは、`status` パラメータ名が `text` に変更されました
+
+* [GET targeting&#95;criteria/locations](/ja/x-ads-api/campaign-management#get-targeting-criteria-locations) エンドポイントの `location_type` 列挙値は複数形になりました。`COUNTRY` は `COUNTRIES`、`REGION` は `REGIONS` などになります。1 つだけ例外があり、v2 では `CITY` が `METROS` になりました。これは、ロケーションタイプが Designated Marker Areas (DMA) または「メトロ」を指すことを正しく反映するためです。
+
+* PUT accounts/:account&#95;id/promoted&#95;tweets エンドポイントでの `display_properties` は廃止されました。この値はレスポンスの一部としても返されなくなります
+
+* 前述のポイントの結果として、promoted&#95;tweets エンティティを更新 (PUT) することはできなくなりました
+
+* [GET accounts/:account&#95;id/promoted&#95;tweets](/ja/x-ads-api/campaign-management#get-accounts-account-id-promoted-tweets) エンドポイントの `line_item_id` パラメータは削除されました
+
+* v2 エンドポイントでは、5:2 Website Card を新規作成することはできなくなります
+
+* `data_type` レスポンス属性は返されなくなりました
+
+**新機能[¶](#new-features "この見出しへのパーマリンク")**
+
+1. Cards v2
+2. ドラフトキャンペーン / ラインアイテムの作成と有効化
+3. 予約ポスト
+4. 非同期ジョブのサマリー
+
+**Cards v2[¶](#cards-v2 "この見出しへのパーマリンク")**
+
+* カードをポストに関連付ける際、ポストテキストに `preview_url` を付加するのではなく、`card_uri` リクエストパラメータを使用する必要があります
+* カード作成ステップのレスポンスで `card_uri` パラメータが返されない場合は、`preview_url` を使用してください
+* すべての新しいカードフォーマットは、`card_uri` パラメータを活用して API 上でネイティブに利用可能になります。
+
+**新しいカードフォーマット:[¶](#new-card-formats "この見出しへのパーマリンク")**
+
+* ビデオ Website Card:
+
+  * [GET accounts/:account&#95;id/cards/video&#95;website](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#get-accounts-account-id-cards-video-website)
+  * [GET accounts/:account&#95;id/cards/video&#95;website/:card&#95;id](https://developer.x.comhttps://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#get-accounts-account-id-cards-video-website-card-id)
+  * [POST accounts/:account&#95;id/cards/video&#95;website](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#post-accounts-account-id-cards-video-website)
+  * [PUT accounts/:account&#95;id/cards/video&#95;website/:card&#95;id](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#put-accounts-account-id-cards-video-website-card-id)
+  * [DELETE accounts/:account&#95;id/cards/video&#95;webiste/:card&#95;id](https://developer.x.com/en/docs/ads/creatives/api-reference/video-website.html#delete-accounts-account-id-cards-video-website-card-id)
+
+**ドラフトキャンペーン[¶](#draft-campaigns "この見出しへのパーマリンク")**
+
+Draft Campaigns（ドラフトキャンペーン）は、[GET accounts/:account&#95;id/camapaigns](/ja/x-ads-api/campaign-management#get-accounts-account-id-campaigns) エンドポイントを通じて閲覧可能でした。v2 では、API 経由でドラフトキャンペーンを作成 / 有効化できるようになりました。
+
+* [POST accounts/:account&#95;id/line&#95;items](/ja/x-ads-api/campaign-management#post-accounts-account-id-line-items) および [POST accounts/:account&#95;id/campaigns](/ja/x-ads-api/campaign-management#post-accounts-account-id-campaigns) エンドポイントの `entity_status` パラメータ値を `DRAFT` に設定することで、新しいドラフトキャンペーンまたはラインアイテムを作成できます。
+* 新規ドラフトに必要なパラメータのセット:
+
+| ドラフトキャンペーン | ドラフトラインアイテム |
+| :--- | :--- |
+| `funding_instrument_id` | `campaign_id` |
+| `name` | `objective` |
+| `start_time` | `product_type` |
+|     | `placements` |
+
+**Notes[¶](#notes "Permalink to this headline")**
+
+* ドラフトのラインアイテムまたはキャンペーンは、`entity_status` を `DRAFT` から `PAUSED` または `ACTIVE` にのみ変更できます。
+* 複数のラインアイテムを含むキャンペーン全体を有効化するには、キャンペーン配下の各ラインアイテムとキャンペーン自体の `entity_status` を `ACTIVE` に設定する必要があります。
+* 任意のキャンペーンまたはラインアイテムの `entity_status` を変更するには、対応する PUT エンドポイントを使用します。
+
+**Scheduled Tweets[¶](#scheduled-tweets "Permalink to this headline")**
+
+* スケジュール済みポストに関する新しいエンドポイントは、以下のとおりです。
+
+* スケジュール済みポスト:
+
+  * [GET accounts/:account&#95;id/scheduled&#95;tweets](/ja/x-ads-api/creatives#get-accounts-account-id-scheduled-tweets)
+  * [GET accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#scheduled-tweets)
+  * [POST accounts/:account&#95;id/scheduled&#95;tweets](/ja/x-ads-api/creatives#post-accounts-account-id-scheduled-tweets)
+  * [PUT accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#scheduled-tweet-management)
+  * [DELETE accounts/:account&#95;id/scheduled&#95;tweets/:scheduled&#95;tweet&#95;id](/ja/x-ads-api/creatives#scheduled-tweet-management)
+
+* キャンペーン管理:
+
+  * [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/ja/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets)
+  * [GET accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/ja/x-ads-api/campaign-management#get-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id)
+  * [POST accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets](/ja/x-ads-api/campaign-management#post-accounts-account-id-scheduled-promoted-tweets)
+  * [DELETE accounts/:account&#95;id/scheduled&#95;promoted&#95;tweets/:scheduled&#95;promoted&#95;tweet&#95;id](/ja/x-ads-api/campaign-management#delete-accounts-account-id-scheduled-promoted-tweets-scheduled-promoted-tweet-id)
+
+* 新しくスケジュールされたポストは、将来の任意の日付にスケジュールできます。
+
+* 現在、スケジュール済みポストをプレビューする機能はありません。
+
+* `SCHEDULED` 状態のスケジュール済みポストのみ編集・削除できます。
+
+* スケジュール済みポストは、`scheduled_at` の日時までは Enterprise Firehose やその他のデータ API には伝播されません。
+
+<div id="v1">
+  ### v1
+</div>
+
+Ads API のバージョン 1 は 2016 年 3 月 31 日に公開され、2018 年 1 月 10 日に提供終了となります。
+
+**バージョン 1 の変更点:[¶](#changes-in-version-1 "Permalink to this headline")**
+
+* [バージョニング対応](https://blog.x.com/2016/versioning-is-coming-to-twitter-s-ads-apis)
+* `CUSTOM` [objective](/ja/x-ads-api/campaign-management#objective-based-campaigns) はサポート対象外となりました
+* [バッチエンドポイント](/ja/x-ads-api/campaign-management#post-batch-accounts-account-id-campaigns) の一般提供が開始されました
+* [リーチ推定の変更点](https://developer.x.com/en/docs/ads/campaign-management/api-reference/reach-estimate.html#get-accounts-account-id-reach-estimate):
+* より正確なリーチ推定を行うため、このエンドポイントは予算を考慮するようになりました。次のパラメータが新たに必須になりました。
+  * [新規] `campaign_daily_budget_amount_local_micro`
+  * `currency`
+  * `bid`
+  * `objective`
+* レスポンスオブジェクトの形式が変更され、レスポンス値の範囲が返されるようになりました。
+* `infinite_count` は、その用途に関する混乱を避けるため、`infinite_bid_count` に名称変更されました
+* `count` と `infinite_bid_count` に加えて、次の新しいデータポイントも返されます。
+  * `impressions`
+  * `engagements`
+  * `estimated_daily_spend_local_micro`
+* テイラードオーディエンスのデータ型の変更
+* Tailored Audiences の `data_type` は、すべてのレスポンスで `tailored_audiences` から `tailored_audience` に変更されました。
+* 共有 Tailored Audiences が *API 限定* のベータ版として利用可能になりました。共有 Tailored Audiences を使用すると、1 つのオーディエンスを複数の広告アカウント間で利用できます。複数の広告アカウント間で共有したい Tailored Audience の権限を管理するには、[POST accounts/:account&#95;id/tailored&#95;audiences/:tailored&#95;audience&#95;id/permissions](/ja/x-ads-api/audiences)（および関連するエンドポイント）を使用してください。
+* 広告主アカウントに関するパフォーマンス[アナリティクス](/ja/x-ads-api/analytics)の収集方法が大幅に改善されました。
+* [X Ads API のベストプラクティス](/ja/x-ads-api/analytics#best-practices)に沿うため、今後は[同期統計エンドポイント](/ja/x-ads-api/analytics#get-stats-accounts-account-id)で取得可能な期間を最大 **7 日分**までに制限します。
+* メトリクスの取得を簡略化するために、`metrics` パラメータは新しい `metric_groups` パラメータに置き換えられました。開発者は、特定のリクエストに対して返してほしいメトリクスグループを指定してリクエストする必要があります。
+  * あるエンティティに対して有効でないメトリクスをリクエストした場合、それらはレスポンスから除外され、`null` 値として表現されます。 *これらのメトリクスは、アナリティクスのコスト上限にはカウントされません。*
+* レスポンスは**大幅に簡素化**され、メトリクスが当社のUI上でどのように表示されているかと、これまで以上に近い形で整合するようになりました。
+  * 以前は配置場所ごと（検索の Promoted Tweets、タイムラインの Promoted Tweets、プロフィール &amp; Tweet 詳細の Promoted Tweets、X Audience Platform）に個別のメトリクスを公開していました。今後は、それぞれに対して標準化されたメトリクスセットを返します。つまり、`promoted_tweet_timeline_impressions`、`promoted_tweet_search_impressions`、`promoted_tweets_profile_impressions`、`promoted_tweets_tpn_impressions` を返す代わりに、以下のいずれかのカテゴリでリクエストされた際に、単一のメトリクス `impressions` として公開されます（これはすべてのメトリクスに適用されます）。
+  * `ALL_ON_TWITTER`
+  * `PUBLISHER_NETWORK`
+  * リクエストを行うと、UI 上の値と一致させやすくするために、単一の `impressions` メトリクスが返されます。
+  * `ALL_ON_TWITTER` と `PUBLISHER_NETWORK` の両方のデータを取得するには、2 回クエリを実行する必要があります。これらは 1 回のクエリには結合できません。
+* 開発者のみなさまから寄せられたフィードバックを受けて、[非同期統計エンドポイント](/ja/x-ads-api/analytics#asynchronous-analytics) が利用可能になりました。
+  * 必要なデータをすぐに取得する必要がない場合や過去データの取得のために、統計データを*非同期で*リクエストするための新しいエンドポイント群です。
+  * 新しい 1 つのエンドポイントを使って統計ジョブをキューに投入します。利用可能なリソースに応じて、リクエストされたデータを取得します。
+  * データが利用可能かどうかを確認するために、ジョブステータス用エンドポイントを問い合わせることができます。
+  * データが利用可能になると、同期エンドポイントのレスポンスを反映した JSON レスポンスをダウンロードするための受け取り用 ID を提供します。
+  * 1 つのジョブで、最大**90 日分**のデータを、最大**20 個のエンティティ**に対してクエリできます。
+* analytics v1 への移行ガイドをご覧ください。v0 メトリクスと v1 メトリクスの対応関係を示したマッピングも掲載しています
+* Sandbox の改善点 * Sandbox 環境で[複数のテスト広告アカウントを作成](/ja/x-ads-api/campaign-management#post-accounts)できるようになりました。 * Sandbox 環境内のテスト広告アカウントに対して、複数の資金管理手段（funding instrument）を作成できるようになりました。これにより、すべての資金管理手段タイプでテストできるようになります。これまでは、テストに利用できる資金源は `CREDIT_CARD` のみでした。 * ベータ機能をテストしたい場合は、Sandbox 環境においてアカウント単位で機能をオン／オフできるようになり、ニーズに応じたテストが可能です。
+
+<div id="v0">
+  ### v0
+</div>
+
+Ads API のバージョン 0 は 2013 年 2 月 21 日に正式リリースされ、2016 年 10 月 31 日までサポートされていました。
+
+バージョン 0 のすべての Analytics エンドポイントは非推奨となっており、2016 年 10 月 31 日以降は存在しなくなります。これらのエンドポイントは、バージョン 1 の 3 つの Analytics エンドポイントに置き換えられました。
+
+reach estimation エンドポイントは、バージョン 1 で新しい動作仕様になっています。

@@ -1,0 +1,97 @@
+---
+title: クイックスタート
+sidebarTitle: クイックスタート
+keywords: ["manage lists quickstart", "list management quickstart", "create list quickstart", "list quickstart tutorial"]
+---
+
+import { Button } from '/snippets/ja/button.mdx';
+
+<div id="getting-started-with-the-manage-lists-endpoint-group">
+  ## List 管理エンドポイントグループの利用を始める
+</div>
+
+このクイックガイドでは、[Postman](/ja/tutorials/postman-getting-started) を使って、List 管理エンドポイントへの最初のリクエストを送信する方法を説明します。
+
+さまざまな言語でのサンプルコードを確認したい場合は、GitHub の [X API v2 sample code](https://github.com/xdevplatform/Twitter-API-v2-sample-code) リポジトリをご覧ください。 
+
+**注:** この例では *Create a List* エンドポイントへのリクエストを送信しますが、このクイックスタートで学ぶ内容は、他の List 管理エンドポイントへのリクエストにも同様に適用できます。
+
+<Note>
+  **前提条件**
+
+  このガイドを完了するには、リクエストを認証するための一連の [keys and tokens](/ja/resources/fundamentals/authentication) が必要です。これらのキーとトークンは、次の手順で生成できます。
+
+  * [開発者アカウントに登録](https://developer.x.com/en/apply-for-access) し、承認を受けます。
+  * developer portal 上で、[Project](/ja/resources/fundamentals/projects) と、それに関連付けられた [developer App](/ja/resources/fundamentals/developer-apps) を作成します。
+  * アプリの「Keys and tokens」ページに移動して、必要な認証情報を生成します。すべての認証情報は安全な場所に保存してください。
+</Note>
+
+<div id="steps-to-build-a-manage-list-request">
+  ### Manage List リクエストを構築する手順
+</div>
+
+**ステップ 1：ツールまたはライブラリを用意する**
+
+このエンドポイントへリクエストを送信する方法として使用できるツール、コード例、ライブラリはいくつかありますが、ここでは手順を簡略化するために Postman ツールを使用します。
+
+X API v2 の Postman コレクションをご利用の環境に読み込むには、次のボタンをクリックしてください。
+
+<Button href="https://app.getpostman.com/run-collection/9956214-784efcda-ed4c-4491-a4c0-a26470a67400">
+  X API v2 を Postman に追加
+</Button>
+
+Postman に X API v2 コレクションを読み込んだら、「List」フォルダに移動し、「Manage List」フォルダを選択してから、&quot;Create a List&quot; を選択します。
+
+**ステップ 2：リクエストを認証する**
+
+X API に正しくリクエストを送信するには、その権限があることを確認する必要があります。Manage List エンドポイントでこれを行うには、[OAuth 1.0a User Context](/ja/resources/fundamentals/authentication) または [OAuth 2.0 Authorization Code with PKCE](resources/fundamentals/authentication#oauth-2-0-authorization-code-flow-with-pkce-2) のいずれかを使用してリクエストを認証する必要があります。
+
+この例では、OAuth 1.0a User Context を使用します。
+
+Postman にキーとトークン（具体的には API Key、API Secret Key、OAuth 1.0a ユーザー Access Token、OAuth 1.0a ユーザー Access Token Secret）を追加する必要があります。これは、Postman の右上にある「X API v2」という名前の環境を選択し、「initial value」と「current value」フィールドにキーとトークンを追加することで行えます（環境ドロップダウンの横にある目のアイコンをクリックします）。
+
+正しく設定できていれば、これらの変数はリクエストの「Authorization」タブに自動的に取り込まれます。
+ 
+**ステップ 3：新しい List の名前を指定する**
+
+このエンドポイントで新しい List を作成する際には、List の名前が必須のリクエストボディパラメータになります。任意で、説明文を指定したり、その List を非公開にするかどうかも指定できます。
+
+Postman で「Body」タブに移動し、name パラメータの値として List の名前を入力します。さらに、List に説明文を追加したい場合は、name と同様の方法で description というキーを追加し、その値として List の説明文を入力します。List を非公開にする場合も同じパターンに従いますが、このパラメータには true または false の値のみが受け付けられます。 
+
+|             |                    |                    |
+| :---------- | :----------------- | :----------------- |
+| **Key**     | **Value**          | **Parameter type** |
+| `name`      | リストの名前（必須）         | body               |
+| description | リストの説明（任意）         | body               |
+| private     | true または false（任意） | body               |
+
+これで、&quot;Send&quot; ボタンの横に、次のような URL が表示されているはずです。
+
+`https://api.x.com/2/lists`
+
+ステップ 4：リクエストを送信し、レスポンスを確認する
+
+すべての設定が完了したら、&quot;Send&quot; ボタンをクリックしてください。すると、次のサンプルレスポンスと同様のレスポンスが返されます。
+
+```
+{
+  "data": {
+    "id": "1441162269824405510",
+    "name": "New list created from Postman"
+  }
+}
+```
+
+返されたレスポンスオブジェクトに `id` とリスト名が含まれていれば、リストの作成は成功しています。 
+
+リストを削除するには、Postman に読み込まれている X API v2 コレクションの「Lists」フォルダー内にある「Delete a List」リクエストを選択します。このエンドポイントでは、削除するリストの ID を指定する必要があります。「Params」タブで、削除したいリストの ID を `id` 列の値として入力します。 
+
+削除リクエストが成功すると、次の例のようなレスポンスが返されます。
+
+```
+{
+  "data": {
+    "deleted": true
+  }
+}
+```

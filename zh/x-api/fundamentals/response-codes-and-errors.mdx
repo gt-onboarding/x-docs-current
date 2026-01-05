@@ -1,0 +1,209 @@
+---
+title: 响应状态码和错误
+sidebarTitle: 响应状态码
+keywords: ["响应状态码", "错误码", "HTTP 状态码", "API 错误", "错误处理", "调试", "错误消息", "状态码"]
+---
+
+import { Button } from '/snippets/zh/button.mdx';
+
+X API 提供以下响应和错误代码，帮助你在出现问题时理解并即时调试。你可以使用下方的调试指南和错误索引获取更多上下文信息。
+
+成功的响应会返回 200 系列的 HTTP 状态码，以及一个基于 JSON 的负载，其中包含你请求的对象（被检索、创建、修改或删除的对象），以及服务器对你请求的处理结果。
+
+错误响应会返回非 200 系列的 HTTP 状态码。不同的错误状态码表示导致错误的不同原因。X API 会尽可能为每个请求返回合适的 [HTTP 状态码](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)。
+
+<div id="x-api-v2-http-status-codes">
+  ## X API v2 HTTP 状态码
+</div>
+
+| Code | Text                  | Description                                                                                                                                              | Troubleshooting tips                                                                              |
+| :--- | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| 200  | OK                    | 请求已成功完成。                                                                                                                                                 |                                                                                                   |
+| 400  | Bad Request           | 请求无效或无法被处理。附带的错误消息会进一步解释原因。缺少认证信息或包含无效查询参数的请求被视为无效，并会返回此响应。                                                                                              | 仔细检查你的 JSON 查询格式。例如，如果你的规则包含与精确匹配或其他运算符关联的双引号字符，你可能需要使用反斜杠对它们进行转义，以便将其与 JSON 格式本身的结构区分开来。         |
+| 401  | Unauthorized          | 请求在认证时出现问题。这可能是因为认证凭证缺失或不正确。在其他未明确定义的情况下也可能返回此状态码。                                                                                                       | 检查你是否使用了正确的[认证方式](https://docs.x.com/resources/fundamentals/authentication/overview)，并确认你的凭证是否正确。 |
+| 403  | Forbidden             | 服务器理解该请求，但请求被拒绝或不允许访问。附带的错误消息将解释原因。                                                                                                                      | 检查你的开发者账号是否拥有你要调用的端点的访问权限。你可能还需要将你的应用加入白名单（例如 Engagement API 或 Ads API），或者注册以获取访问权限。              |
+| 404  | Not Found             | 请求的 URI 无效，或者请求的资源（例如用户）不存在。                                                                                                                             | 检查你是否使用了有效的参数以及与你正在使用的端点相对应的正确 URI。                                                               |
+| 409  | Connection Exception  | 在尝试连接到没有规则的 filtered stream 时返回。                                                                                                                         | 检查你在要连接的流上是否至少创建了一条规则。Filtered stream 只会返回匹配某个活动规则的帖子。如果没有规则，流将不会返回任何帖子。                          |
+| 429  | Too Many Requests     | 当由于应用的[速率限制](/zh/resources/fundamentals/rate-limits)或 [Post cap](/zh/x-api/fundamentals/post-cap) 已耗尽而无法处理请求时返回。参见[速率限制](/zh/resources/fundamentals/rate-limits)。 | 检查你正在使用的端点在给定时间段内允许的请求数。等待该时间段重置。适当拉开请求间隔，避免触发速率限制，或者升级到下一档可用的数据套餐。                               |
+| 500  | Internal Server Error | 出现了故障。通常是临时错误，例如在高负载情况下，或某个端点暂时出现问题时。                                                                                                                    | 检查 X API 的[状态页](/zh/status)或[开发者社区论坛](https://devcommunity.x.com/)，查看其他人是否遇到类似问题，或者稍后再试。             |
+| 501  | Unimplemented         | X API 不支持此端点，因而无法完成请求。                                                                                                                                   |                                                                                                   |
+| 503  | Service Unavailable   | X 服务器正在运行，但当前因请求过多而过载。请稍后再试。                                                                                                                             | 检查 X API 的[状态页](/zh/status)或[开发者社区论坛](https://devcommunity.x.com/)，查看其他人是否遇到类似问题，或者稍后再试。             |
+
+当请求过程中发生错误时，响应体中会返回关于该错误的详细信息，以帮助你诊断问题。`type` 字段是一个 URI，用于指示问题的性质，而其他字段会提供该问题的详细信息。在这些响应体中，`type`、`title` 和 `detail` 字段总是会被返回（见下表）。任何其他字段（如下面示例中的字段）会根据错误类型的不同而变化。
+
+```json
+{
+  "client_id": "101010101",
+  "required_enrollment": "Standard Basic",
+  "registration_url": "https://developer.twitter.com/en/account",
+  "title": "Client Forbidden",
+  "detail": "此请求必须使用已批准且已注册所请求端点的开发者账号进行。访问我们的文档以了解更多信息。",
+  "reason": "client-not-enrolled",
+  "type": "https://api.x.com/2/problems/client-forbidden"
+}
+```
+
+<div id="partial-errors">
+  ## 部分错误
+</div>
+
+在某些情况下，你可能会在返回 200 状态码的响应中看到上文所述的错误。在这些情况下，端点按设计会返回它能够返回的数据，同时提供关于无法返回内容的详细错误信息。
+
+例如，[Posts 查询端点](/zh/x-api/posts/lookup/introduction) 允许一个 X [开发者应用](/zh/resources/fundamentals/developer-apps#overview) 请求多个 id。如果这些帖子中有一部分可用，但其中一条已被删除，那么可用的帖子会在响应的 `data` 字段中返回。响应负载中还会返回一个额外的 `errors` 字段，用于指明哪些被请求的帖子无法返回。该字段使用的格式与整个请求的错误相同，从而便于诊断问题。
+
+<div id="error-information">
+  ### 错误信息
+</div>
+
+每种问题类型都说明所遇到问题的性质。你可能遇到的所有问题的完整列表也可以在我们的 [API 规范](https://api.x.com/2/openapi.json) 中找到。
+
+X API 会尝试为每个请求返回适当的 [HTTP 状态码](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)。
+
+| 标题 | 类型 | 描述 |
+| :--- | :--- | :--- |
+| 通用问题 | `about:blank` | 一个通用问题，除了 HTTP 状态码提供的信息之外，没有其他附加信息。 |
+| 无效请求问题 | `https://api.X.com/2/problems/invalid-request` | 表示该请求无效的问题。如果你的请求包含 POST 请求体，请确保其内容是有效的 JSON，并且与 [OpenAPI 规范](https://api.x.com/2/openapi.json) 相匹配。 |
+| 资源未找到问题 | `https://api.X.com/2/problems/resource-not-found` | 表示给定的帖子、用户等不存在的问题。 |
+| 资源未授权问题 | `https://api.X.com/2/problems/not-authorized-for-resource` | 表示你无权查看特定帖子、用户等的问题。 |
+| 客户端被禁止问题 | `https://api.X.com/2/problems/client-forbidden` | 表示你的客户端被禁止发出此请求的问题。 |
+| 不允许的资源问题 | `https://api.X.com/2/problems/disallowed-resource` | 表示所请求的资源违反了本 API 准则的问题。 |
+| 不支持的身份验证问题 | `https://api.X.com/2/problems/unsupported-authentication` | 表示所使用的身份验证方式不受支持的问题。 |
+| 用量上限问题 | `https://api.X.com/2/problems/usage-capped` | 表示已超出使用上限的问题。 |
+| 连接异常问题 | `https://api.X.com/2/problems/streaming-connection` | 表示连接存在问题的问题。 |
+| 客户端断开连接问题 | `https://api.X.com/2/problems/client-disconnected` | 你的客户端已断开连接。 |
+| 运维断开连接问题 | `https://api.X.com/2/problems/operational-disconnect` | 由于运维原因，你已被断开连接。 |
+| 规则上限问题 | `https://api.X.com/2/problems/rule-cap` | 你已超出规则的最大数量。 |
+| 规则长度问题 | `https://api.X.com/2/problems/rule-length` | 你已超出基于访问级别的查询或规则允许的最大字符数。参见[访问级别](/zh/x-api/getting-started/about-x-api#x-api-access-levels-and-versions)。 |
+| 无效规则问题 | `https://api.X.com/2/problems/invalid-rules` | 你提交的规则无效。 |
+| 重复规则问题 | `https://api.X.com/2/problems/duplicate-rules` | 你提交的规则是重复的。 |
+
+<div id="troubleshooting-tips">
+  ## 故障排查提示
+</div>
+
+<Accordion title="调试你的代码">
+  在构建应用时，偶尔遇到错误或意外问题是很正常的。下面是一些你可以用来调试代码的建议：
+
+  首先将问题拆分成更小的部分，以确定问题出在何处。比如，如果你正在集成一个 REST 或流式 endpoint，问题可能出在以下任意一项：
+
+  * 该 endpoint 需要正确的[认证](/zh/resources/fundamentals/authentication/overview)。
+  * 该 endpoint 需要有效的参数和请求头。任何过滤规则都需使用正确的运算符和合适的[语法](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries)构建。
+  * 该 endpoint 的 URI 必须正确，并且对于 REST endpoint，必须使用正确的 HTTP 方法。
+  * 你尝试访问的 数据 或资源对你不可访问（例如，私有数据仅对已认证用户可用）。
+  * 你当前的数据套餐只允许访问特定 endpoint，并具有特定的速率限制。前往你的[开发者门户](https://developer.x.com/en/portal/products)查看详情。
+  * 你的代码使用了第三方库来在代码中集成该 endpoint。
+  * 你的代码需要能够成功解析该 endpoint 的响应。
+
+  阅读随附的错误信息，这通常能较好地指示问题所在。使用[错误和响应代码部分](#x-api-http-status-codes)中的表格，获取针对每个错误代码的排查建议。
+
+  对于 REST endpoint，你可以使用 [Postman](https://www.postman.com/) 或 [Insomnia](https://insomnia.rest/) 这类 REST 客户端来验证上述步骤 (1) 到 (5)（参阅我们的「[Postman 入门](/zh/tutorials/postman-getting-started)」指南）。如果使用 REST 客户端的请求返回 200 成功状态码，你就可以认为问题出在你的代码或你所使用的库上，而不是在 endpoint 请求本身。
+
+  对于流式 endpoint，你可以使用 cURL（一个使用 URL 语法进行请求发送与获取的命令行工具）来检查问题是出在对 endpoint 的请求上（上述步骤 (1) 到 (5)），还是出在你的代码本身（上述步骤 (6) 到 (7)）。
+</Accordion>
+
+<Accordion title="认证问题">
+  * 检查你是否使用了该 endpoint 所需的正确[认证方式](/zh/resources/fundamentals/authentication/overview)。你可以在该 endpoint 的 API 参考页面中确认这一点。
+  * 检查你的认证凭证是否正确。你可以在开发者门户的 [Apps 区域](https://developer.x.com/en/portal/projects-and-apps)（“Details” 下）查看或重新生成你的 App 密钥和令牌。
+  * 检查你是否已使用 `oauth_nonce`、`oauth_signature` 和 `oauth_timestamp` 正确[为 OAuth 1.0a 请求授权](/zh/resources/fundamentals/authentication/oauth-1-0a/authorizing-a-request)。
+  * 如果问题仍然存在，考虑使用 OAuth 库、[Postman](https://www.postman.com/) 或 [Insomnia](https://insomnia.rest/) 等 REST 客户端，或者使用 [xurl](https://github.com/xdevplatform/xurl)。
+
+  查阅我们的[认证指南](/zh/resources/fundamentals/authentication/overview)，以获取关于上述所有内容的更多信息。
+</Accordion>
+
+<Accordion title="速率限制和帖子上限问题">
+  当你触及某个端点的速率限制，或触及帖子上限时，可能会返回 429 错误。
+
+  如果返回了特定的 “Too many requests” 错误，说明你触及了该端点的速率限制。换句话说，你已超过在指定时间段内该端点允许的最大请求数。
+
+  请注意，速率限制是按应用和用户两个级别分别设定的。
+
+  * **X 应用级别** 表示在使用 OAuth 2.0 应用仅模式时允许的请求数量，此时速率限制是针对整个应用在全局范围内确定的。例如，如果某个方法在每个速率限制窗口内允许 15 次请求，那么它就允许你代表你的 X 应用在每个窗口内发出 15 次请求。该限制与用户级别的限制完全独立计算。有关更多信息，请参阅我们的 [OAuth 2.0 App-Only](/zh/resources/fundamentals/authentication/oauth-2-0/application-only) 指南。
+  * **用户上下文级别** 表示在使用 OAuth 1.0a 用户上下文或 OAuth 2.0 Authorization Code with PKCE 时，每个用户访问令牌可以发出的请求数。例如，如果某个方法在每个速率限制窗口内允许 15 次请求，那么它会允许每个窗口、每个用户访问令牌发出 15 次请求。请参阅我们的指南，了解如何通过 [OAuth 1.0a](/zh/resources/fundamentals/authentication/oauth-1-0a/obtaining-user-access-tokens) 和 [OAuth 2.0](/zh/resources/fundamentals/authentication/oauth-2-0/user-access-token) 获取用户的访问令牌。
+
+  请先检查你正在使用的端点的速率限制。你可以在该端点的 API 参考页面以及新的开发者门户仪表板中找到此信息。
+
+  查看我们的文档以获取有关速率限制的更多信息，包括如何使用 HTTP 头来跟踪你的应用在给定速率限制下所处的位置、如何从 429 速率限制错误代码中恢复，以及如何从一开始就避免触发速率限制的建议：
+
+  * [v2 端点的速率限制](/zh/x-api/fundamentals/rate-limits)
+
+  如果你收到了特定的 “Usage cap exceeded: Monthly product cap” 错误，这意味着你在当前访问级别下已经触及帖子上限。我们的文档页面中提供了关于这些[帖子上限](/zh/x-api/fundamentals/post-cap) 的详细说明。
+</Accordion>
+
+<Accordion title="缺失帖子问题">
+  如果你原本预期某条帖子会被返回，但端点没有返回它，请按照以下步骤操作。
+
+  * 检查你的规则，确保你使用了正确的[运算符](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#enterprise-operators)和[语法](/zh/x-api/enterprise-gnip-2.0/fundamentals/rules-filtering#building-rules-and-queries)。将规则拆分为更小的子句，以确保你使用了正确的语法。
+  * 如果发送该帖子的账号在创建帖子时是[受保护的](https://help.twitter.com/en/safety-and-security/public-and-protected-tweets)，则该帖子不会被返回——即使在向端点发出请求时该账号已经是公开的。通常你可以使用 [X 高级搜索](https://x.com/search-advanced) 来检查：如果某条帖子无法通过 X 高级搜索功能检索到，你应当假定该帖子不会被端点返回。
+
+  下面的步骤仅适用于流式端点：
+
+  * 在帖子发送时，你是否已连接到流？请记住，帖子对象中提供的时间戳表示的是 UTC 时间。如果在帖子发送时你经历了断开连接，请查看可用于回填任何遗漏数据的[恢复与冗余功能](/zh/x-api/posts/filtered-stream/integrate/recovery-and-redundancy-features#recovery-and-redundancy)。
+  * 在帖子发送时，你的规则是否已生效？请记住，帖子对象中提供的时间戳表示的是 UTC 时间。
+</Accordion>
+
+<Accordion title="缓冲区已满导致的断开连接问题">
+  当你的流无法跟上我们传输数据的速度，并且你的应用从流中消费数据的速度不够快时，你可能会收到以下错误之一：
+
+  ```
+  This stream has been disconnected because your client was unable to keep up with us.
+  ```
+
+  ```
+  This stream has been disconnected for operational reasons.
+  ```
+
+  我们允许数据传输在一段时间内有一定延迟，并且在我们这端为每个流设置了一个临时缓冲区空间；但如果你仍然无法追上，我们会发起断开连接，以便你可以在当前时间点重新连接。请注意，这可能会导致数据丢失（对于在缓冲区已满断开连接时仍位于缓冲区中的数据）。
+
+  这些问题可能在数据出现大规模流量激增时发生。通常，我们建议使用一个独立于处理流程的缓冲流程来快速消费数据。
+
+  如果你是使用 v1.1 端点的 Enterprise 客户，你可以在我们的相关文章中了解更多关于如何优化你的应用以防止此类断开连接的信息，这些文章包括关于[连接](/zh/x-api/enterprise-gnip-2.0/powertrack-api#disconnections-explained)的说明，以及关于消费流式数据的[此处](https://developer.x.com/en/docs/tutorials/consuming-streaming-data)和[此处](/zh/x-api/enterprise-gnip-2.0/powertrack-api#planning-for-high-volume-social-data-events)。
+
+  有多种工具可用于在发生断开连接时检索错过的帖子，包括下面列出的一些工具。请注意，以下工具仅适用于具有 Enterprise 级访问权限的 v1.1 端点。
+
+  * [**Redundant Connections**](/zh/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - 使用多个连接，从多台服务器消费流，以防止在某个连接断开时遗漏数据。
+  * [**Replay**](/zh/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - 使用单独的流，从最近 5 天内恢复数据。
+  * [**Backfill**](/zh/x-api/enterprise-gnip-2.0/powertrack-api#recovery-and-redundancy-features) - 在 5 分钟内重新连接，并从上次中断的位置继续。
+  * **Historical PowerTrack** - 从整个 X 存档中恢复数据。
+</Accordion>
+
+<div id="get-help">
+  ## 获取帮助
+</div>
+
+X 社区论坛可供你就 X 开发者平台提出技术问题。这里是一个讨论论坛，你可以在其中看到其他开发者提出的问题，以及关于使用 X API 的各类主题的技术信息。
+
+我们鼓励你通过回答问题并参与论坛中的讨论来加入交流。X 员工也会在论坛中提供支持。
+
+<Button href="https://devcommunity.x.com/">
+  X 社区论坛
+</Button>
+
+<div id="before-you-post-a-question">
+  ### 发布问题之前
+</div>
+
+* 在 X 开发者文档中查找与你的问题相关的信息
+* 在社区论坛中搜索其他开发者提出的类似问题
+* 查看社区论坛使用指南
+
+<div id="when-you-post-a-question-make-sure-to-include-the-following-information">
+  ### 当你发布问题时，请确保包含以下信息
+</div>
+
+* 问题描述
+* 发起的 API 调用（如果可能，请包含请求头信息）
+* X 返回的响应（包括任何错误消息）
+* 你原本预期收到的结果
+* 为排查问题已采取的步骤列表
+* 复现该问题所需的步骤列表
+* 如适用，问题发生的时间范围
+* 如适用，应用 ID、Post ID 等
+* 任何相关的代码示例或截图
+
+请在每个帖子中只包含一个主题或问题。
+
+如果你有功能请求或反馈，请通过 [X Developer Platform Feedback Form](https://t.co/devfeedback) 提交。
+
+对于与政策相关的问题（例如应用被暂停），请联系 [Policy support](https://help.twitter.com/forms/platform)。
+
+对于与 X 相关的问题（例如登录或账户支持），请使用 [X Help Desk](https://help.twitter.com/en/contact-us)。

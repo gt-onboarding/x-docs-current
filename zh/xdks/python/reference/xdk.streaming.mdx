@@ -1,0 +1,186 @@
+---
+title: "streaming"
+sidebarTitle: "streaming"
+---
+
+适用于 X API SDK 的健壮流式处理工具。
+
+此模块提供带有自动重连、指数退避和全面错误处理的流式连接管理功能。客户端可以在无需关心连接管理的情况下使用流式端点——SDK 会自动处理所有恢复过程。
+
+<div id="class-xdkstreamingstreamconfig">
+  ### `class xdk.streaming.StreamConfig`
+</div>
+
+用于配置支持重试机制的流式连接。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.max_retries" type="int" default="10"></ParamField>
+
+<ParamField path="path.initial_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.max_backoff" type="float" default="64.0"></ParamField>
+
+<ParamField path="path.backoff_multiplier" type="float" default="2.0"></ParamField>
+
+<ParamField path="path.jitter" type="bool" default="True"></ParamField>
+
+<ParamField path="path.timeout" type="float or None" default="None"></ParamField>
+
+<ParamField path="path.chunk_size" type="int" default="1024"></ParamField>
+
+<ParamField path="path.on_connect" type="Callable[[], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_disconnect" type="Callable[[Exception or None], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_reconnect" type="Callable[[int, float], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_error" type="Callable[[[StreamError"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.max_retries" type="int" default="10"></ParamField>
+
+<ParamField path="path.initial_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.max_backoff" type="float" default="64.0"></ParamField>
+
+<ParamField path="path.backoff_multiplier" type="float" default="2.0"></ParamField>
+
+<ParamField path="path.jitter" type="bool" default="True"></ParamField>
+
+<ParamField path="path.timeout" type="float or None" default="None"></ParamField>
+
+<ParamField path="path.chunk_size" type="int" default="1024"></ParamField>
+
+<ParamField path="path.on_connect" type="Callable[[], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_disconnect" type="Callable[[Exception or None], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_reconnect" type="Callable[[int, float], None] or None" default="None"></ParamField>
+
+<ParamField path="path.on_error" type="Callable[[[StreamError"></ParamField>
+
+<div id="on_error-callablestreamerror">
+  ### `on_error : Callable[[[StreamError]`
+</div>
+
+<div id="exception-xdkstreamingstreamerror">
+  ### `exception xdk.streaming.StreamError`
+</div>
+
+针对带有分类信息的流式错误而引发的异常。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.message" type="str"></ParamField>
+
+<ParamField path="path.error_type" type="StreamErrorType"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.message" type="str"></ParamField>
+
+<ParamField path="path.error_type" type="StreamErrorType"></ParamField>
+
+<div id="class-xdkstreamingstreamerrortype">
+  ### `class xdk.streaming.StreamErrorType`
+</div>
+
+对流式错误进行分类，以便进行重试决策。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.value" type="Any"></ParamField>
+
+<div id="class-xdkstreamingstreamstate">
+  ### `class xdk.streaming.StreamState`
+</div>
+
+用于流连接的内部状态。
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.retry_count" type="int" default="0"></ParamField>
+
+<ParamField path="path.current_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.is_connected" type="bool" default="False"></ParamField>
+
+<ParamField path="path.total_items_received" type="int" default="0"></ParamField>
+
+<ParamField path="path.last_error" type="StreamError"></ParamField>
+
+<div id="__init__">
+  ### `__init__`
+</div>
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.retry_count" type="int" default="0"></ParamField>
+
+<ParamField path="path.current_backoff" type="float" default="1.0"></ParamField>
+
+<ParamField path="path.is_connected" type="bool" default="False"></ParamField>
+
+<ParamField path="path.total_items_received" type="int" default="0"></ParamField>
+
+<ParamField path="path.last_error" type="StreamError"></ParamField>
+
+<div id="last_error-streamerror">
+  ### `last_error : [StreamError]`
+</div>
+
+<div id="xdkstreamingstream_with_retry">
+  ### `xdk.streaming.stream_with_retry`
+</div>
+
+从端点以流式方式获取数据，并自动处理重连和指数退避。
+该函数负责所有连接管理，包括：
+
+- 断开连接时自动重连
+- 带抖动的指数退避机制，用于控制重试延迟
+- 将错误分类为可重试错误与致命错误
+- 用于监控连接状态的生命周期回调
+
+<div id="parameters">
+  #### 参数
+</div>
+
+<ParamField path="path.session" type="Session">
+用于执行 HTTP 请求的 Session。
+</ParamField>
+
+<ParamField path="path.method" type="str">
+HTTP 方法（通常为“GET”）。
+</ParamField>
+
+<ParamField path="path.url" type="str">
+用于进行流式传输的完整 URL。
+</ParamField>
+
+<ParamField path="path.config" type="StreamConfig">
+包含重试和回调设置的 StreamConfig。
+</ParamField>

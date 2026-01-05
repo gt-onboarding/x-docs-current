@@ -1,0 +1,94 @@
+---
+title: Contar caracteres al redactar publicaciones
+sidebarTitle: Recuento de caracteres
+icon: text-size
+keywords: ["recuento de caracteres", "longitud de la publicación", "280 caracteres", "límites de caracteres", "Unicode", "caracteres emoji", "caracteres CJK", "longitud de la URL", "redacción de publicaciones", "twitter-text", "codificación de caracteres", "UTF-8"]
+---
+
+Esta página describe cómo se tratan los caracteres al redactar publicaciones y en la X API. Para obtener más información sobre la implementación, X proporciona la biblioteca de código abierto [twitter-text](http://github.com/twitter/twitter-text), disponible en [GitHub](https://github.com/twitter).
+
+<div id="background">
+  ## Antecedentes
+</div>
+
+X comenzó como un servicio de mensajes de texto SMS. Esto limitaba la longitud original de la Publicación a 140 caracteres (en parte debido al límite de 160 caracteres de los SMS, con 20 caracteres reservados para comandos y nombres de usuario). Con el tiempo, a medida que X evolucionó, la longitud máxima de la Publicación aumentó a 280 caracteres: sigue siendo breve y concisa, pero permite una mayor expresión.
+
+<div id="definition-of-a-character">
+  ## Definición de un carácter
+</div>
+
+En la mayoría de los casos, el contenido de texto de una Publicación puede contener hasta 280 caracteres o glifos de [Unicode](https://unicode.org/). Algunos glifos contarán como más de un carácter.
+
+Nos referimos a la cantidad de caracteres que cuenta un glifo como su peso. La definición exacta de qué caracteres tienen un peso mayor que un carácter se encuentra en el [archivo de configuración](https://github.com/twitter/twitter-text/tree/master/config) de la [biblioteca de análisis de Publicaciones twitter-text](https://github.com/twitter/twitter-text).
+
+La versión actual del archivo de configuración define un peso predeterminado de dos caracteres y cuatro rangos de [puntos de código Unicode](https://unicode.org/charts/About.html) que tienen un peso distinto. Actualmente, los puntos de código en estos rangos se cuentan todos como un solo carácter.
+
+* El primer rango abarca caracteres en las páginas de códigos Latin-1 (U+0000 - U+10FF).
+* El segundo rango corresponde a puntuación general hasta, e incluido, el Zero Width Joiner (usado para combinar emoji y otros glifos) (U+2000-U+200D).
+* El tercer rango corresponde a puntuación general, excluyendo U+200E y U+200F, que son marcas de dirección de Unicode (U+2010-U+201F).
+* El último rango abarca comillas (U+2032-U+2037).
+
+Ejemplos de texto de Publicaciones y de longitudes calculadas por la biblioteca twitter-text se pueden encontrar en el archivo de configuración de pruebas [validate.yml](https://github.com/twitter/twitter-text/blob/master/conformance/validate.yml) de la biblioteca.
+
+**Ejemplos**
+
+| Carácter mostrado | Longitud | Descripción | Secuencia Unicode |
+|:---------------------|:--------|:-------------|:------------------|
+| a | 1 | Letra latina minúscula a | U+0061 |
+| á | 1 | Letra latina minúscula a con acento agudo | U+00E1 |
+| ӑ | 1 | Letra cirílica minúscula a con breve | U+04D1 |
+| Ồ | 1 | Letra latina minúscula o con circunflejo y acento agudo | U+1ED2 |
+
+<div id="emojis">
+  ## Emojis
+</div>
+
+Los emoji compatibles con [twemoji](https://twemoji.x.com/) siempre se contabilizan como dos caracteres, independientemente de los modificadores combinados. Esto incluye los emoji que han sido modificados por el [tono de piel Fitzpatrick](https://emojipedia.org/modifiers/) o por [modificadores de género](https://blog.emojipedia.org/unicode-and-the-emoji-gender-gap/), incluso si están compuestos por un número significativamente mayor de puntos de código Unicode. El peso de los emoji se define mediante una expresión regular en twitter-text que busca secuencias de emoji estándar combinados con uno o más Unicode Zero Width Joiners (U+200D).
+
+**Ejemplos**
+
+| Emoji mostrado | Longitud | Descripción | Secuencia Unicode |
+|:-----------------|:--------|:-------------|:------------------|
+| 👾 | 2 | Longitud predeterminada de un emoji conocido | -- |
+| 🙋🏽 | 2 | Emoji con modificador de tono de piel | 🙋 U+1F64B, 🏽 U+1F3FD |
+| 👨‍🎤 | 2 | Secuencia de emoji que usa un glifo combinado (zero-width joiner) | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [🎤 U+1F3A4](https://emojipedia.org/emoji/%F0%9F%8E%A4/) |
+| 👨‍👩‍👧‍👦 | 2 | Secuencia de emoji que usa múltiples glifos combinados (zero-width joiners) | [👨 U+1F468](https://emojipedia.org/emoji/%F0%9F%91%A8/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👩 U+1F469](https://emojipedia.org/emoji/%F0%9F%91%A9/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👧 U+1F467](https://emojipedia.org/emoji/%F0%9F%91%A7/), [U+200D](https://emojipedia.org/emoji/%E2%80%8D/), [👦 U+1F466](https://emojipedia.org/emoji/%F0%9F%91%A6/) |
+
+<div id="chinese-japanese-korean-glyphs">
+  ## Glifos chinos/japoneses/coreanos
+</div>
+
+Los glifos utilizados en los idiomas CJK (chino/japonés/coreano) también se cuentan como dos caracteres. Por lo tanto, una Publicación compuesta únicamente de texto CJK solo puede tener un máximo de 140 glifos de este tipo.
+
+<div id="entity-objects">
+  ## Objetos de entidad
+</div>
+
+Las Publicaciones pueden contener [Entity Objects](/es/x-api/fundamentals/data-dictionary), algunos de los cuales afectan a la longitud de una Publicación.
+
+URLs: [Todas las URL se convierten en enlaces t.co](https://developer.x.com/content/developer-twitter/en/docs/basics/tco). Esto significa que la longitud de una URL está definida por el parámetro `transformedURLLength` en el [archivo de configuración de twitter-text](https://github.com/twitter/twitter-text/tree/master/config). La longitud actual de una URL en una Publicación es de 23 caracteres, incluso si la longitud de la URL normalmente fuera menor.
+
+Respuestas: los nombres de usuario que se autocompletan con @ al inicio de una Publicación de respuesta no cuentan para el límite de caracteres. Las nuevas Publicaciones que no son respuestas y comienzan con una @mención sí cuentan, al igual que las @menciones añadidas explícitamente por el usuario en el cuerpo de la Publicación.
+
+Contenido multimedia: el contenido multimedia adjunto a una Publicación, representado como una URL pic.x.com si se publica desde un cliente oficial, cuenta como 0 caracteres.
+
+Para obtener más información sobre los Entity Objects, consulta la [documentación para desarrolladores](/es/x-api/fundamentals/data-dictionary).
+
+<div id="x-character-encoding">
+  ## Codificación de caracteres de X
+</div>
+
+Los endpoints de la X API solo aceptan texto codificado en UTF-8. Todas las demás codificaciones deben convertirse a UTF-8 antes de enviar el texto a la API.
+
+X cuenta la longitud de una Publicación usando la versión del texto en Normalization Form C (NFC).
+
+Como ejemplo: la palabra &quot;café&quot;. Hay dos secuencias de bytes que visualmente se ven y se leen igual, pero usan un número diferente de bytes:
+
+|     | | |
+|:-----|:---|:---|
+| café | 0x63 0x61 0x66 0xC3 0xA9 | Usando el carácter &quot;é&quot;, el &quot;carácter compuesto&quot;. |
+| café | 0x63 0x61 0x66 0x65 0xCC 0x81 | Usando el diacrítico combinante, que se superpone a la &quot;e&quot; |
+
+Normalization Form C prioriza el uso de un carácter totalmente combinado (0xC3 0xA9 del ejemplo de café) frente a la versión en forma extendida (0x65 0xCC 0x81).
+
+X cuenta el número de puntos de código en el texto, en lugar de los bytes en UTF-8. El 0xC3 0xA9 del ejemplo de café es un punto de código (U+00E9) que se codifica como dos bytes en UTF-8, mientras que 0x65 0xCC 0x81 son dos puntos de código codificados como tres bytes.

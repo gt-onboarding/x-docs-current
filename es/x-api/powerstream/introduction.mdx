@@ -1,0 +1,398 @@
+---
+title: Introducción
+sidebarTitle: Introducción
+keywords: ["powerstream", "powerstream API", "real-time streaming", "streaming rules", "filtered stream", "enterprise streaming", "GNIP powerstream"]
+---
+
+Powerstream es nuestra API de streaming en tiempo real más rápida para acceder a datos públicos de X. De forma similar a la API heredada GNIP Powetrack, utiliza reglas para filtrar Publicaciones según palabras clave, operadores y metadatos. Una vez que se establece una conexión HTTP persistente con el endpoint de Powerstream, puedes empezar a recibir Publicaciones que coincidan casi en tiempo real.
+
+Actualmente, Powerstream admite hasta 1.000 reglas y cada regla puede tener hasta 2048 caracteres.
+
+<div id="key-features">
+  ## Funcionalidades principales:
+</div>
+
+* **Entrega de datos en tiempo real**: Obtén datos que coincidan con tus reglas en tiempo casi real.
+* **Filtrado preciso**: Filtra exactamente los datos que estás buscando utilizando consultas booleanas con operadores.
+* **Entrega**: Respuesta JSON mediante transferencia fragmentada (chunked transfer encoding) en HTTP/1.1.
+* **Compatibilidad con centro de datos local**:  Obtén publicaciones solo del centro de datos local para reducir la latencia, evitando el retraso por replicación.
+
+<Note>
+  La API Powerstream es una oferta premium disponible en planes Enterprise seleccionados.
+
+  Si estás interesado en acceder a Powerstream o en obtener más información sobre nuestras ofertas Enterprise, ponte en contacto con nuestro equipo de ventas enviando el [Formulario de solicitud de Enterprise](/es/forms/enterprise-api-interest).
+  Estaremos encantados de analizar cómo Powerstream puede satisfacer tus necesidades.
+</Note>
+
+<div id="authentication">
+  ## Autenticación
+</div>
+
+Los endpoints de la API de Powerstream utilizan OAuth 2.0 con Bearer Token. Incluye el token en el encabezado `Authorization: Bearer <token>` y podrás empezar a usar estos endpoints.
+
+<div id="quick-start">
+  ## Inicio rápido
+</div>
+
+Esta sección muestra cómo comenzar rápidamente con los endpoints de PowerStream usando Python con la biblioteca `requests`. Instálala con `pip install requests`. Todos los ejemplos usan autenticación OAuth 2.0 Bearer Token. Reemplaza `YOUR_BEARER_TOKEN` con tu token real (almacénalo de forma segura, por ejemplo, mediante `os.getenv('BEARER_TOKEN')`).
+
+Cubriremos cada endpoint con fragmentos de código. Supón que tienes estas importaciones al inicio:
+
+```python
+import requests
+import json
+import time
+import sys
+import os  # Para variables de entorno
+```
+
+<div id="setup">
+  ### Configuración
+</div>
+
+```python
+bearer_token = os.getenv('BEARER_TOKEN') or "YOUR_BEARER_TOKEN"  # Usa variable de entorno por seguridad
+base_url = "https://api.x.com/2/powerstream"
+rules_url = f"{base_url}/rules"  # Para la gestión de reglas
+headers = {
+   "Authorization": f"Bearer {bearer_token}",
+   "Content-Type": "application/json"
+}
+```
+
+<div id="1-create-rules-post-rules">
+  ### 1. Crea reglas (POST /rules)
+</div>
+
+Agrega reglas para filtrar tu flujo.
+
+```python
+data = {
+   "rules": [
+       {
+           "value": "(cat OR dog) lang:en -is:retweet",
+           "tag": "pet-monitor"
+       },
+       # Añade más reglas según sea necesario (hasta 100)
+   ]
+}
+
+response = requests.post(rules_url, headers=headers, json=data)
+if response.status_code == 201:
+   rules_added = response.json().get("data", {}).get("rules", [])
+   print("Rules added:")
+   for rule in rules_added:
+       print(f"ID: {rule['id']}, Value: {rule['value']}, Tag: {rule.get('tag', 'N/A')}")
+else:
+   print(f"Error {response.status_code}: {response.text}")
+```
+
+<div id="2-delete-rules-post-rules">
+  ### 2. Eliminar reglas (POST /rules)
+</div>
+
+Elimina reglas por id (recomendado) o por valor.
+
+```python
+data = {
+   "rules": [
+       {
+           "value": "(cat OR dog) lang:en -is:retweet",
+           "tag": "pet-monitor"
+       },
+       # Agregue más reglas según sea necesario (hasta 100)
+   ]
+}
+
+response = requests.delete(rules_url, headers=headers, json=data)
+if response.status_code == 200:
+   deleted = response.json().get("data", {})
+   print(f"Deleted count: {deleted.get('deleted', 'N/A')}")
+   if 'not_deleted' in deleted:
+       print("Not deleted:", deleted['not_deleted'])
+else:
+   print(f"Error {response.status_code}: {response.text}")
+```
+
+**Consejo**: Para eliminar todas las reglas, primero recupéralas con GET, extrae sus id y luego elimínalas en lote.
+
+<div id="3-get-rules-get-rules">
+  ### 3. Obtener reglas (GET /rules)
+</div>
+
+Obtén todas las reglas activas.
+
+```python
+response = requests.get(rules_url, headers=headers)
+if response.status_code == 200:
+   rules = response.json().get("data", {}).get("rules", [])
+   if rules:
+       print("Active rules:")
+       for rule in rules:
+           print(f"ID: {rule['id']}, Value: {rule['value']}, Tag: {rule.get('tag', 'N/A')}")
+   else:
+       print("No active rules.")
+else:
+   print(f"Error {response.status_code}: {response.text}")
+```
+
+<div id="4-powerstream-get-stream">
+  ### 4. PowerStream (GET /stream)
+</div>
+
+Conéctate al stream para recibir Publicaciones en tiempo real. Usa `stream=True` para leer línea por línea. Implementa lógica de reconexión para mejorar la resiliencia.
+
+```python
+stream_url = base_url
+
+def main():
+   while True:
+       response = requests.request("GET", stream_url, headers=headers, stream=True)
+       print(response.status_code)
+       for response_line in response.iter_lines():
+           if response_line:
+               json_response = json.loads(response_line)
+               print(json.dumps(json_response, indent=4, sort_keys=True))
+               if response.status_code != 200:
+                   print(response.headers)
+                   raise Exception(
+                       "Request returned an error: {} {}".format(
+                           response.status_code, response.text
+                       )
+                   )
+```
+
+<div id="local-datacenter-support">
+  #### Compatibilidad con centro de datos local
+</div>
+
+Para optimizar la latencia, Powerstream ofrece una opción para recuperar únicamente las publicaciones que se originaron o se crearon en el centro de datos local donde se establece la conexión. Esto evita la latencia de replicación, lo que da como resultado una entrega más rápida en comparación con las publicaciones de otros centros de datos. Para habilitarlo, agrega el parámetro de consulta `?localDcOnly=true` al endpoint de stream (por ejemplo, `/2/powerstream?localDcOnly=true`). El centro de datos al que estás conectado se indicará tanto en la carga útil de datos inicial del stream como en un encabezado HTTP de la respuesta.
+
+Para usarlo en código:
+
+```python
+# Solo para el centro de datos local:
+stream_url = "https://api.x.com/2/powerstream?localDcOnly=true"
+```
+
+Si el parámetro `localDcOnly` está habilitado, cuando el stream se conecte por primera vez, incluirá las siguientes cabeceras de respuesta, que indican qué centro de datos local se está utilizando:
+
+```bash
+'x-powerstream-datacenter': 'atla',
+'x-powerstream-localdconly': 'true'
+```
+
+Además, también enviará un payload inicial que especifica el centro de datos:
+
+```bash
+{
+    "type": "connection_metadata",
+    "datacenter": "atla",
+    "timestamp": 1762557264155
+}
+```
+
+<Note>
+  **Consejo:** Para optimizar la latencia, configura conexiones desde distintas ubicaciones geográficas (por ejemplo, una cerca de Atlanta en la Costa Este de EE. UU. y otra cerca de Portland en la Costa Oeste de EE. UU.), habilitando `localDcOnly=true` en cada una de ellas. Esto proporciona acceso más rápido a las Publicaciones de cada centro de datos correspondiente. Agrega los flujos en tu extremo para combinar los datos de distintos centros de datos.
+</Note>
+
+<div id="operators">
+  ## Operadores
+</div>
+
+Para definir reglas para el filtrado, puedes usar palabras clave y operadores. Consulta la lista de operadores disponibles a continuación.
+
+<div id="field-based-operators">
+  ### Operadores por campo
+</div>
+
+<div id="user-operators">
+  #### Operadores de usuario
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `from:` | Coincide con publicaciones de un usuario específico | `from:xdevelopers` o `from:123456` |
+| `to:` | Coincide con publicaciones dirigidas a un usuario específico | `to:jvaleski` |
+| `retweets_of:` | Coincide con reposts de un usuario específico | `retweets_of:xdevelopers` |
+
+<div id="content-operators">
+  #### Operadores de contenido
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `contains:` | Coincide con publicaciones que contienen texto o palabras clave específicos | `contains:hello` o `contains:-2345.432` |
+| `url_contains:` | Coincide con publicaciones con direcciones URL que contienen texto específico | `url_contains:"com/willplayforfood"` |
+| `lang:` | Coincide con publicaciones en idiomas específicos | `lang:en` |
+
+<div id="entity-operators">
+  #### Operadores de entidades
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `has:` | Busca publicaciones que contienen entidades específicas (Opciones: mentions, geo, links, media, lang, symbols, images, videos) | `has:images`, `has:geo`, `has:mentions` |
+| `is:` | Busca publicaciones de tipos específicos o con propiedades específicas (Opciones: retweet, reply) | `is:retweet`, `is:reply` |
+
+<div id="location-operators">
+  #### Operadores de ubicación
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `place:` | Coincide con publicaciones de lugares o ubicaciones específicos | `place:"Belmont Central"`, `place:02763fa2a7611cf3` |
+| `bounding_box:` | Coincide con publicaciones dentro de un recuadro geográfico delimitado | `bounding_box:[-112.424083 42.355283 -112.409111 42.792311]` |
+| `point_radius:` | Coincide con publicaciones dentro de un radio alrededor de un punto | `point_radius:[-111.464973 46.371179 25mi]`, `point_radius:[-111.464973 46.371179 15km]` |
+
+<div id="advancedcontent-operators">
+  #### Operadores avanzados/de contenido
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `bio:` | Coincide con publicaciones de usuarios cuya biografía contiene contenido específico (usa coincidencia de frases) | N/D |
+| `bio_name:` | Coincide con publicaciones de usuarios que tienen un nombre específico en la biografía (usa coincidencia de frases) | N/D |
+
+<div id="additional-operators">
+  #### Operadores adicionales
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `retweets_of_status_id:` | Coincide con los reposts de publicaciones específicas | `retweets_of_status_id:1234567890123456789` |
+| `in_reply_to_status_id:` | Coincide con las respuestas a publicaciones específicas | `in_reply_to_status_id:1234567890123456789` |
+
+<div id="non-field-operators">
+  ### Operadores sin campo
+</div>
+
+<div id="special-syntax-operators">
+  #### Operadores de sintaxis especial
+</div>
+
+| Operador | Resumen | Ejemplo |
+|----------|---------|---------|
+| `@` | Operador de mención | `@username` |
+| Phrase matching | Busca coincidencias de frases exactas | `"exact phrase"` |
+
+<div id="logical-operators">
+  #### Operadores lógicos
+</div>
+
+| Operator | Summary | Example |
+|----------|---------|---------|
+| `OR` | OR lógico entre expresiones | `x OR facebook` |
+| Space/AND | AND lógico entre expresiones | `x facebook` (ambos términos deben estar presentes) |
+| `()` | Agrupación de expresiones complejas | `(x OR facebook) iphone` |
+| `-` | Negación/exclusión | `x -facebook` (x pero no facebook) |
+
+<div id="responses">
+  ## Respuestas
+</div>
+
+La carga útil de la API de Powestream tiene el mismo formato que la API heredada de GNIP Powertrack. Un ejemplo de respuesta JSON es el siguiente:
+
+```json
+[
+   {
+       "created_at": "Tue Mar 21 20:50:14 +0000 2006",
+       "id": 20,
+       "id_str": "20",
+       "text": "just setting up my twttr",
+       "truncated": false,
+       "entities": {
+           "hashtags": [],
+           "symbols": [],
+           "user_mentions": [],
+           "urls": []
+       },
+       "source": "<a href=\"http://x.com\" rel=\"nofollow\">X Web Client</a>",
+       "in_reply_to_status_id": null,
+       "in_reply_to_status_id_str": null,
+       "in_reply_to_user_id": null,
+       "in_reply_to_user_id_str": null,
+       "in_reply_to_screen_name": null,
+       "user": {
+           "id": 12,
+           "id_str": "12",
+           "name": "jack",
+           "screen_name": "jack",
+           "location": "",
+           "description": "no state is the best state",
+           "url": "https://t.co/ZEpOg6rn5L",
+           "entities": {
+               "url": {
+                   "urls": [
+                       {
+                           "url": "https://t.co/ZEpOg6rn5L",
+                           "expanded_url": "http://primal.net/jack",
+                           "display_url": "primal.net/jack",
+                           "indices": [
+                               0,
+                               23
+                           ]
+                       }
+                   ]
+               },
+               "description": {
+                   "urls": []
+               }
+           },
+           "protected": false,
+           "followers_count": 6427829,
+           "friends_count": 3,
+           "listed_count": 32968,
+           "created_at": "Tue Mar 21 20:50:14 +0000 2006",
+           "favourites_count": 36306,
+           "utc_offset": null,
+           "time_zone": null,
+           "geo_enabled": true,
+           "verified": false,
+           "statuses_count": 30134,
+           "lang": null,
+           "contributors_enabled": false,
+           "is_translator": false,
+           "is_translation_enabled": false,
+           "profile_background_color": "EBEBEB",
+           "profile_background_image_url": "http://abs.twimg.com/images/themes/theme7/bg.gif",
+           "profile_background_image_url_https": "https://abs.twimg.com/images/themes/theme7/bg.gif",
+           "profile_background_tile": false,
+           "profile_image_url": "http://pbs.twimg.com/profile_images/1661201415899951105/azNjKOSH_normal.jpg",
+           "profile_image_url_https": "https://pbs.twimg.com/profile_images/1661201415899951105/azNjKOSH_normal.jpg",
+           "profile_banner_url": "https://pbs.twimg.com/profile_banners/12/1742427520",
+           "profile_link_color": "990000",
+           "profile_sidebar_border_color": "DFDFDF",
+           "profile_sidebar_fill_color": "F3F3F3",
+           "profile_text_color": "333333",
+           "profile_use_background_image": true,
+           "has_extended_profile": true,
+           "default_profile": false,
+           "default_profile_image": false,
+           "following": null,
+           "follow_request_sent": null,
+           "notifications": null,
+           "translator_type": "regular",
+           "withheld_in_countries": []
+       },
+       "geo": null,
+       "coordinates": null,
+       "place": null,
+       "contributors": null,
+       "is_quote_status": false,
+       "retweet_count": 122086,
+       "favorite_count": 263321,
+       "favorited": false,
+       "retweeted": false,
+       "lang": "en"
+   }
+]
+```
+
+<div id="limits-best-practices">
+  ## Límites y buenas prácticas
+</div>
+
+* Límites de frecuencia: 50 solicitudes cada 24 h para la gestión de reglas; sin límite en los flujos de datos (pero se aplican límites de conexión).
+* Reconexión: Backoff exponencial en caso de desconexión.
+* Supervisión: Utiliza los encabezados `Connection: keep-alive`.
